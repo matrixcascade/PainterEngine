@@ -1,3 +1,3 @@
 # PainterEngine
-<div align=center>![Image text](https://raw.githubusercontent.com/matrixcascade/PainterEngine/master/logo/foxlogo.png)
+![Image text](https://raw.githubusercontent.com/matrixcascade/PainterEngine/master/logo/foxlogo.png)
 
