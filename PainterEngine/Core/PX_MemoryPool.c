@@ -501,7 +501,12 @@ px_uint MP_Size(px_memorypool *Pool,px_void *pAddress)
 	}
 	TempPointer=(px_uchar *)pAddress-sizeof(MemoryNode);
 	TempNode=(MemoryNode *)TempPointer;
+#ifdef PX_DEBUG_MODE
+return ((px_char *)(TempNode->EndAddr)-(px_char *)(TempNode->StartAddr))+1-sizeof(MP_Append_data);
+#else
 	return ((px_char *)(TempNode->EndAddr)-(px_char *)(TempNode->StartAddr))+1;
+#endif
+	
 }
 
 px_void MP_Reset(px_memorypool *Pool)

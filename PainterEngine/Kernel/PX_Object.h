@@ -200,12 +200,21 @@ typedef struct
 	px_texture Texture;
 }PX_Object_StaticImage;
 
+
+#define PX_OBJECT_PUSHBUTTON_ROUNDRADIUS 8.0f
 typedef enum
 {
 	PX_OBJECT_BUTTON_STATE_ONCURSOR,
 	PX_OBJECT_BUTTON_STATE_ONPUSH,
 	PX_OBJECT_BUTTON_STATE_NORMAL,
 }PX_Object_PUSHBUTTON_STATE;
+
+
+typedef enum
+{
+	PX_OBJECT_PUSHBUTTON_STYLE_RECT,
+	PX_OBJECT_PUSHBUTTON_STYLE_ROUNDRECT,
+}PX_OBJECT_PUSHBUTTON_STYLE;
 
 typedef struct 
 {
@@ -218,6 +227,8 @@ typedef struct
 	px_color PushColor;
 	px_char *Text;
 	px_texture *Texture;
+	px_float roundradius;
+	PX_OBJECT_PUSHBUTTON_STYLE style;
 	PX_Object_PUSHBUTTON_STATE state;
 }PX_Object_PushButton;
 

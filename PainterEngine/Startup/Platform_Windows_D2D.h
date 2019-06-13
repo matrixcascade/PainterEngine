@@ -2,22 +2,6 @@
 #define PLATFORM_WINDOWS
 
 #include <Windows.h>
-#include <d3d9.h>
-#include <d3dx9.h>
-#include <dxfile.h>
-#include <d3d9types.h>
-#include <dxfile.h>
-#include <d3d9types.h>
-#include <stdio.h>
-#include <dinput.h>
-#include <MMSystem.h>
-
-#pragma comment(lib,"d3dx9.lib")
-#pragma comment(lib,"d3d9.lib")
-#pragma comment(lib,"WINMM.LIB")
-#pragma comment(lib,"DXGUID.LIB")
-#pragma comment(lib,"dsound.lib")
-#pragma comment(lib,"dinput8.lib")
 
 #define PX_DIK_ESCAPE          0x01
 #define PX_DIK_1               0x02
@@ -164,18 +148,20 @@
 #define PX_DIK_MAIL            0xEC    /* Mail */
 #define PX_DIK_MEDIASELECT     0xED    /* Media Select */
 
-BOOL PX_CreateWindow( int Width,int Height,char *name,BOOL bfullScreen);
-HWND PX_GetWindowHwnd();
-VOID PX_SystemReadDeviceState();
-BOOL PX_SystemLoop();
-BOOL PX_SystemRender(void *raw,int width,int hight);
-BOOL PX_SystemisAvtivated();
-BOOL PX_KeyboardDown(unsigned char X );
-char *PX_KeyboardString();
-char *PX_DragfileString();
-BOOL PX_MouseLButtonDown();
-BOOL PX_MouseRButtonDown();
-BOOL PX_MouseMButtonDown();
-POINT PX_MousePosition();
-BOOL PX_KeyDown(char key);
+extern  BOOL PX_CreateWindow( int Width,int Height,char *name,BOOL bfullScreen);
+extern  HWND PX_GetWindowHwnd();
+extern  VOID PX_SystemReadDeviceState();
+extern  BOOL PX_SystemLoop();
+extern  BOOL PX_SystemRender(void *raw,int width,int height);
+extern  BOOL PX_SystemisAvtivated();
+extern  BOOL PX_KeyboardDown(unsigned char X );
+extern  char *PX_KeyboardString();
+extern  char *PX_DragfileString();
+extern  BOOL PX_MouseLButtonDown();
+extern  BOOL PX_MouseRButtonDown();
+extern  BOOL PX_MouseMButtonDown();
+extern  POINT PX_MousePosition();
+extern  BOOL PX_KeyDown(char key);
+
+
 #endif

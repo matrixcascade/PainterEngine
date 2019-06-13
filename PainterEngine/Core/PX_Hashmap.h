@@ -41,4 +41,4 @@ px_void PX_MapFree(px_map * m);
 px_int PX_MapGetSize(px_map * m);
 
 
-#endif PX_HASHMAP_H__
+#endif

@@ -1,6 +1,6 @@
 #ifndef __PX_LEXER_H
 #define __PX_LEXER_H
-#include "../core/PX_Core.h"
+#include "../Core/PX_Core.h"
 
 #define  PX_LEXER_CA_COMMENT_MAX_COUNT    32
 #define  PX_LEXER_CA_SPACER_MAX_COUNT	 32

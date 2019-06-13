@@ -2322,3 +2322,270 @@ px_void PX_GeoDrawSector(px_surface *psurface, px_int x,px_int y,px_int Radius_o
 	}
 }
 
+px_void PX_GeoDrawSolidRoundRect(px_surface *psurface, px_int left, px_int top, px_int right, px_int bottom,px_float roundRaduis,px_color color)
+{
+	px_int y,x,Height,Width;
+	px_float r_x,r_y,dis;
+	px_int drawWidth;
+	px_int drawHeight;
+	px_color drawColor;
+	if(color._argb.a==0)
+	{
+		return;
+	}
+
+	if (left>right)
+	{
+		Height=left;
+		left=right;
+		right=Height;
+	}
+	if (top>bottom)
+	{
+		Height=top;
+		top=bottom;
+		bottom=Height;
+	}
+	Height=(bottom-top)+1;
+	Width=(right-left)+1;
+
+	r_y=roundRaduis;
+	r_x=roundRaduis;
+	for (y=0;y<(px_int)roundRaduis;y++)
+	{
+		if (Height&1)
+		{
+			if (y>Height/2)
+			{
+				break;
+			}
+		}
+		else
+		{
+			if (y>Height/2-1)
+			{
+				break;
+			}
+		}
+		
+		x=(px_int)roundRaduis-(px_int)(PX_sqrt(roundRaduis*roundRaduis-(roundRaduis-y-1)*(roundRaduis-y-1)))-1;
+		if(x<0) x=0;
+		for (;x<(px_int)roundRaduis;x++)
+		{
+			if (Width&1)
+			{
+				if (x>Width/2)
+				{
+					break;
+				}
+			}
+			else
+			{
+				if (x>Width/2-1)
+				{
+					break;
+				}
+			}
+
+			if (x>Width/2)
+			{
+				break;
+			}
+
+			dis=PX_sqrt((x-r_x)*(x-r_x)+(y-r_y)*(y-r_y));
+			if (dis<roundRaduis+0.5f)
+			{
+				drawColor=color;
+
+				if (dis>roundRaduis)
+					drawColor._argb.a=(px_uchar)(color._argb.a*(dis-roundRaduis+0.5f));
+
+				PX_SurfaceDrawPixel(psurface,left+x,top+y,drawColor);
+
+				if(2*x<Width-1)
+ 				{
+					PX_SurfaceDrawPixel(psurface,left+Width-x-1,top+y,drawColor);
+					if (2*y<Height-1)
+					{
+						PX_SurfaceDrawPixel(psurface,left+x,top+Height-1-y,drawColor);
+						PX_SurfaceDrawPixel(psurface,left+Width-x-1,top+Height-1-y,drawColor);
+					}
+				}
+				else
+				{
+					PX_SurfaceDrawPixel(psurface,left+x,top+Height-1-y,drawColor);
+				}
+ 				
+			}
+		}
+		
+	}
+	
+	if ((px_int)roundRaduis>Height/2)
+	{
+		drawHeight=(px_int)roundRaduis-Height/2;
+	}
+	else
+	{
+		drawHeight=(px_int)roundRaduis;
+	}
+
+
+	if (Width>2*(px_int)roundRaduis)
+	{
+		drawWidth=Width-2*(px_int)roundRaduis;
+
+		if(drawWidth>0&&drawHeight>0)
+		{
+		PX_GeoDrawRect(psurface,left+(px_int)roundRaduis,top,left+(px_int)roundRaduis+drawWidth-1,top+drawHeight-1,color);
+		PX_GeoDrawRect(psurface,left+(px_int)roundRaduis,bottom-drawHeight+1,left+(px_int)roundRaduis+drawWidth-1,bottom,color);
+		}
+	}
+
+	if(Height>2*(px_int)roundRaduis)
+		PX_GeoDrawRect(psurface,left,top+(px_int)roundRaduis,right,bottom-(px_int)roundRaduis,color);
+		
+}
+
+px_void PX_GeoDrawRoundRect(px_surface *psurface, px_int left, px_int top, px_int right, px_int bottom,px_float roundRaduis,px_float linewidth,px_color color)
+{
+	px_int y,x,Height,Width;
+	px_float r_x,r_y,dis;
+	px_int drawWidth;
+	px_int drawHeight;
+	px_int drawlinewidth_int;
+	px_color drawColor;
+	if(color._argb.a==0)
+	{
+		return;
+	}
+
+	if (left>right)
+	{
+		Height=left;
+		left=right;
+		right=Height;
+	}
+	if (top>bottom)
+	{
+		Height=top;
+		top=bottom;
+		bottom=Height;
+	}
+	Height=(bottom-top)+1;
+	Width=(right-left)+1;
+
+	r_y=roundRaduis;
+	r_x=roundRaduis;
+	for (y=0;y<(px_int)roundRaduis;y++)
+	{
+		if (Height&1)
+		{
+			if (y>Height/2)
+			{
+				break;
+			}
+		}
+		else
+		{
+			if (y>Height/2-1)
+			{
+				break;
+			}
+		}
+
+		x=(px_int)roundRaduis-(px_int)(PX_sqrt(roundRaduis*roundRaduis-(roundRaduis-y-1)*(roundRaduis-y-1)))-1;
+		if(x<0)x=0;
+		for (;x<(px_int)roundRaduis;x++)
+		{
+			if (Width&1)
+			{
+				if (x>Width/2)
+				{
+					break;
+				}
+			}
+			else
+			{
+				if (x>Width/2-1)
+				{
+					break;
+				}
+			}
+
+			if (x>Width/2)
+			{
+				break;
+			}
+
+			dis=PX_sqrt((x-r_x)*(x-r_x)+(y-r_y)*(y-r_y));
+			if (dis<roundRaduis+0.5f&&dis>roundRaduis-linewidth-0.5f)
+			{
+				drawColor=color;
+
+				if (dis>roundRaduis)
+					drawColor._argb.a=(px_uchar)(color._argb.a*(dis-roundRaduis+0.5f));
+
+				if (dis<roundRaduis-linewidth+0.5f)
+					drawColor._argb.a=(px_uchar)(color._argb.a*(1.0f-(roundRaduis-linewidth+0.5f-dis)));
+
+				PX_SurfaceDrawPixel(psurface,left+x,top+y,drawColor);
+
+				if(2*x<Width-1)
+				{
+					PX_SurfaceDrawPixel(psurface,left+Width-x-1,top+y,drawColor);
+					if (2*y<Height-1)
+					{
+						PX_SurfaceDrawPixel(psurface,left+x,top+Height-1-y,drawColor);
+						PX_SurfaceDrawPixel(psurface,left+Width-x-1,top+Height-1-y,drawColor);
+					}
+				}
+				else
+				{
+					PX_SurfaceDrawPixel(psurface,left+x,top+Height-1-y,drawColor);
+				}
+
+			}
+		}
+
+	}
+
+	if (linewidth<1.0f)
+	{
+		drawlinewidth_int=1;
+	}
+	else
+	{
+		drawlinewidth_int=(px_int)linewidth;
+	}
+
+	if ((px_int)roundRaduis>Height/2)
+	{
+		drawHeight=(px_int)roundRaduis-Height/2;
+	}
+	else
+	{
+		drawHeight=(px_int)roundRaduis;
+	}
+	if (drawHeight>linewidth)
+	{
+		drawHeight=drawlinewidth_int;
+	}
+	
+	if (Width>2*(px_int)roundRaduis)
+	{
+		drawWidth=Width-2*(px_int)roundRaduis;
+		if(drawWidth>0&&drawHeight>0)
+		{
+			PX_GeoDrawRect(psurface,left+(px_int)roundRaduis,top,left+(px_int)roundRaduis+drawWidth-1,top+drawHeight-1,color);
+			PX_GeoDrawRect(psurface,left+(px_int)roundRaduis,bottom-drawHeight+1,left+(px_int)roundRaduis+drawWidth-1,bottom,color);
+		}
+	}
+
+ 	if(Height>2*(px_int)roundRaduis)
+ 	{
+		PX_GeoDrawRect(psurface,left,top+(px_int)roundRaduis,left+drawlinewidth_int-1,bottom-(px_int)roundRaduis,color);
+		PX_GeoDrawRect(psurface,right-drawlinewidth_int+1,top+(px_int)roundRaduis,right,bottom-(px_int)roundRaduis,color);
+	}
+}
+

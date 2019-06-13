@@ -1,6 +1,22 @@
 
-#include "Platform_Windows_D2D.h"
+#include <d2d1.h>
+#include <d2d1helper.h>
+#pragma comment(lib,"d2d1.lib")
 
+extern "C" BOOL PX_CreateWindow( int Width,int Height,char *name,BOOL bfullScreen);
+extern "C" HWND PX_GetWindowHwnd();
+extern "C" VOID PX_SystemReadDeviceState();
+extern "C" BOOL PX_SystemLoop();
+extern "C" BOOL PX_SystemRender(void *raw,int width,int height);
+extern "C" BOOL PX_SystemisAvtivated();
+extern "C" BOOL PX_KeyboardDown(unsigned char X );
+extern "C" char *PX_KeyboardString();
+extern "C" char *PX_DragfileString();
+extern "C" BOOL PX_MouseLButtonDown();
+extern "C" BOOL PX_MouseRButtonDown();
+extern "C" BOOL PX_MouseMButtonDown();
+extern "C" POINT PX_MousePosition();
+extern "C" BOOL PX_KeyDown(char key);
 
 #define         WIN_MAX_INPUT_STRING_LEN   64
 #define         WIN_MAX_INPUT_SPECKEY_LEN  0xff
