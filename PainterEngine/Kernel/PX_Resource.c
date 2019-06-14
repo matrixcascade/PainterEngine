@@ -8,7 +8,7 @@ px_bool PX_ResourceLibraryInit(px_memorypool *mp,PX_ResourceLibrary *lib)
 	return PX_TRUE;
 }
 
-px_bool PX_ResourceLibraryLoad(px_memorypool *mptemp,PX_ResourceLibrary *lib,PX_RESOURCE_TYPE type,px_byte *data,px_uint datasize,px_char *key)
+px_bool PX_ResourceLibraryLoad(PX_ResourceLibrary *lib,PX_RESOURCE_TYPE type,px_byte *data,px_uint datasize,px_char *key)
 {
 	PX_Resource res;
 	res.Type=type;
@@ -31,6 +31,7 @@ px_bool PX_ResourceLibraryLoad(px_memorypool *mptemp,PX_ResourceLibrary *lib,PX_
 			return PX_FALSE;
 		break;
 	case PX_RESOURCE_TYPE_SCRIPT:
+		/*
 		if (data[0]!='P'||data[1]!='A'||data[2]!='S'||data[3]!='M')
 		{
 			PX_SCRIPT_LIBRARY compilelib;
@@ -89,6 +90,7 @@ px_bool PX_ResourceLibraryLoad(px_memorypool *mptemp,PX_ResourceLibrary *lib,PX_
 			MP_Reset(mptemp);
 		}
 		else
+		*/
 		if(!PX_ScriptVM_InstanceInit(&res.Script,lib->mp,data,datasize))
 			return PX_FALSE;
 		break;

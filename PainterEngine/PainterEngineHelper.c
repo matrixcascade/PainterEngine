@@ -22,17 +22,25 @@ px_byte		main_wavebuffer[MAIN_WAVEBUFFER_BLOCK_LEN*MAIN_WAVEBUFFER_BLOCK_COUNT]=
 //////////////////////////////////////////////////////////////////////////
 //Painter Engine runtime
 px_surface		main_DrawSurface;
-px_surface		*main_pSurface;
 PX_Runtime		main_runtime;
 PX_Object		*main_root;
 PX_Console      main_console;
 
 px_dword		main_time=0;
 px_dword        main_renderElpased=0;
-
 px_void PX_Clear(px_color clr)
 {
-	PX_SurfaceClear(main_pSurface,0,0,main_pSurface->width-1,main_pSurface->height-1,clr);
+	PX_SurfaceClear(&main_DrawSurface,0,0,main_DrawSurface.width-1,main_DrawSurface.height-1,clr);
+}
+
+px_void PX_ShowConsole()
+{
+	PX_ConsoleShow(&main_console,PX_TRUE);
+}
+
+px_void PX_HideConsole()
+{
+	PX_ConsoleShow(&main_console,PX_FALSE);
 }
 
 px_bool PX_Loop()
@@ -48,7 +56,7 @@ px_bool PX_Loop()
 
 	if(main_renderElpased>1000/MAIN_RENDER_FPS)
 	{
-		main_renderElpased=0;
+		
 		PX_SystemReadDeviceState();
 		if(PX_SystemisAvtivated())
 		{
@@ -71,7 +79,10 @@ px_bool PX_Loop()
 					e.Param_uint[0]=mousePosition.x;
 					e.Param_uint[1]=mousePosition.y;
 					main_MouseLastPosition=mousePosition;
-					PX_ObjectPostEvent(main_root,e);
+					if(main_console.show)
+						PX_ConsolePostEvent(&main_console,e);
+					else
+						PX_ObjectPostEvent(main_root,e);
 				}
 			}
 
@@ -83,7 +94,10 @@ px_bool PX_Loop()
 					e.Event=PX_OBJECT_EVENT_CURSORDOWN;
 					e.Param_uint[0]=mousePosition.x;
 					e.Param_uint[1]=mousePosition.y;
-					PX_ObjectPostEvent(main_root,e);
+					if(main_console.show)
+						PX_ConsolePostEvent(&main_console,e);
+					else
+						PX_ObjectPostEvent(main_root,e);
 				}
 				main_MouseLDown=PX_TRUE;
 			}
@@ -94,7 +108,10 @@ px_bool PX_Loop()
 					e.Event=PX_OBJECT_EVENT_CURSORUP;
 					e.Param_uint[0]=mousePosition.x;
 					e.Param_uint[1]=mousePosition.y;
-					PX_ObjectPostEvent(main_root,e);
+					if(main_console.show)
+						PX_ConsolePostEvent(&main_console,e);
+					else
+						PX_ObjectPostEvent(main_root,e);
 				}
 				main_MouseLDown=PX_FALSE;
 			}
@@ -104,7 +121,10 @@ px_bool PX_Loop()
 			{
 				e.Event=PX_OBJECT_EVENT_STRING;
 				e.user=keyBoardString;
-				PX_ObjectPostEvent(main_root,e);
+				if(main_console.show)
+					PX_ConsolePostEvent(&main_console,e);
+				else
+					PX_ObjectPostEvent(main_root,e);
 			}
 
 			for (i=0;i<0xff;i++)
@@ -113,7 +133,10 @@ px_bool PX_Loop()
 				{
 					e.Event=PX_OBJECT_EVENT_KEYDOWN;
 					e.Param_uint[0]=i;
-					PX_ObjectPostEvent(main_root,e);
+					if(main_console.show)
+						PX_ConsolePostEvent(&main_console,e);
+					else
+						PX_ObjectPostEvent(main_root,e);
 				}
 			}
 		}
@@ -122,15 +145,27 @@ px_bool PX_Loop()
 		{
 			e.Event=PX_OBJECT_EVENT_DRAGFILE;
 			e.user=dragFileString;
-			PX_ObjectPostEvent(main_root,e);
+			if(main_console.show)
+				PX_ConsolePostEvent(&main_console,e);
+			else
+				PX_ObjectPostEvent(main_root,e);
 			dragFileString[0]='\0';
 		}
 
 		PX_SurfaceClear(&main_runtime.RenderSurface,0,0,main_runtime.RenderSurface.width-1,main_runtime.RenderSurface.height-1,PX_COLOR(255,255,255,255));
-		PX_ObjectUpdate(main_root,elpased);
-		PX_ObjectRender(&main_runtime.RenderSurface,main_root,elpased);
+		if (main_console.show)
+		{
+			PX_ConsoleUpdate(&main_console,main_renderElpased);
+			PX_ConsoleRender(&main_console,main_renderElpased);
+		}
+		else
+		{
+			PX_ObjectUpdate(main_root,main_renderElpased);
+			PX_ObjectRender(&main_runtime.RenderSurface,main_root,main_renderElpased);
+		}
 		PX_SurfaceRender(&main_runtime.RenderSurface,&main_DrawSurface,0,0,PX_TEXTURERENDER_REFPOINT_LEFTTOP,PX_NULL);
 		PX_SystemRender(main_runtime.RenderSurface.surfaceBuffer,main_runtime.width,main_runtime.height);
+		main_renderElpased=0;
 	}
 	else
 	{
@@ -334,101 +369,66 @@ _ERROR:
 
 px_bool PX_LoadTextureToResource(PX_Runtime *runtime,px_char Path[],px_char key[])
 {
-	px_memorypool mp_calc;
 	PX_IO_Data io;
-
-	mp_calc=MP_Create(MP_Malloc(&runtime->mp,PE_MEMORY_CALC_SIZE),PE_MEMORY_CALC_SIZE);
-	if(mp_calc.StartAddr==PX_NULL) return PX_FALSE;
-
 	io=PX_LoadFileToIOData(Path);
 	if (!io.size)goto _ERROR;
-	if(!PX_ResourceLibraryLoad(&mp_calc,&runtime->ResourceLibrary,PX_RESOURCE_TYPE_TEXTURE,io.buffer,io.size,key)) goto _ERROR;
+	if(!PX_ResourceLibraryLoad(&runtime->ResourceLibrary,PX_RESOURCE_TYPE_TEXTURE,io.buffer,io.size,key)) goto _ERROR;
 	PX_FreeIOData(&io);
-	MP_Free(&runtime->mp,mp_calc.StartAddr);
 	return PX_TRUE;
 _ERROR:
 	PX_FreeIOData(&io);
-	MP_Free(&runtime->mp,mp_calc.StartAddr);
 	return PX_FALSE;
 }
 
 px_bool PX_LoadShapeToResource(PX_Runtime *runtime,px_char Path[],px_char key[])
 {
-	px_memorypool mp_calc;
 	PX_IO_Data io;
-
-	mp_calc=MP_Create(MP_Malloc(&runtime->mp,PE_MEMORY_CALC_SIZE),PE_MEMORY_CALC_SIZE);
-	if(mp_calc.StartAddr==PX_NULL) return PX_FALSE;
-
 	io=PX_LoadFileToIOData(Path);
 	if (!io.size)goto _ERROR;
-	if(!PX_ResourceLibraryLoad(&mp_calc,&runtime->ResourceLibrary,PX_RESOURCE_TYPE_SHAPE,io.buffer,io.size,key)) goto _ERROR;
+	if(!PX_ResourceLibraryLoad(&runtime->ResourceLibrary,PX_RESOURCE_TYPE_SHAPE,io.buffer,io.size,key)) goto _ERROR;
 	PX_FreeIOData(&io);
-	MP_Free(&runtime->mp,mp_calc.StartAddr);
 	return PX_TRUE;
 _ERROR:
 	PX_FreeIOData(&io);
-	MP_Free(&runtime->mp,mp_calc.StartAddr);
 	return PX_FALSE;
 }
 
 px_bool PX_LoadAnimationToResource(PX_Runtime *runtime,px_char Path[],px_char key[])
 {
-	px_memorypool mp_calc;
 	PX_IO_Data io;
-
-	mp_calc=MP_Create(MP_Malloc(&runtime->mp,PE_MEMORY_CALC_SIZE),PE_MEMORY_CALC_SIZE);
-	if(mp_calc.StartAddr==PX_NULL) return PX_FALSE;
-
 	io=PX_LoadFileToIOData(Path);
 	if (!io.size)goto _ERROR;
-	if(!PX_ResourceLibraryLoad(&mp_calc,&runtime->ResourceLibrary,PX_RESOURCE_TYPE_ANIMATIONLIBRARY,io.buffer,io.size,key)) goto _ERROR;
+	if(!PX_ResourceLibraryLoad(&runtime->ResourceLibrary,PX_RESOURCE_TYPE_ANIMATIONLIBRARY,io.buffer,io.size,key)) goto _ERROR;
 	PX_FreeIOData(&io);
-	MP_Free(&runtime->mp,mp_calc.StartAddr);
 	return PX_TRUE;
 _ERROR:
 	PX_FreeIOData(&io);
-	MP_Free(&runtime->mp,mp_calc.StartAddr);
 	return PX_FALSE;
 }
 
 px_bool PX_LoadScriptToResource(PX_Runtime *runtime,px_char Path[],px_char key[])
 {
-	px_memorypool mp_calc;
 	PX_IO_Data io;
-
-	mp_calc=MP_Create(MP_Malloc(&runtime->mp,PE_MEMORY_CALC_SIZE),PE_MEMORY_CALC_SIZE);
-	if(mp_calc.StartAddr==PX_NULL) return PX_FALSE;
-
 	io=PX_LoadFileToIOData(Path);
 	if (!io.size)goto _ERROR;
-	if(!PX_ResourceLibraryLoad(&mp_calc,&runtime->ResourceLibrary,PX_RESOURCE_TYPE_SCRIPT,io.buffer,io.size,key)) goto _ERROR;
+	if(!PX_ResourceLibraryLoad(&runtime->ResourceLibrary,PX_RESOURCE_TYPE_SCRIPT,io.buffer,io.size,key)) goto _ERROR;
 	PX_FreeIOData(&io);
-	MP_Free(&runtime->mp,mp_calc.StartAddr);
 	return PX_TRUE;
 _ERROR:
 	PX_FreeIOData(&io);
-	MP_Free(&runtime->mp,mp_calc.StartAddr);
 	return PX_FALSE;
 }
 
 
 px_bool PX_LoadSoundToResource(PX_Runtime *runtime,px_char Path[],px_char key[])
 {
-	px_memorypool mp_calc;
 	PX_IO_Data io;
-
-	mp_calc=MP_Create(MP_Malloc(&runtime->mp,PE_MEMORY_CALC_SIZE),PE_MEMORY_CALC_SIZE);
-	if(mp_calc.StartAddr==PX_NULL) return PX_FALSE;
-
 	io=PX_LoadFileToIOData(Path);
 	if (!io.size)goto _ERROR;
-	if(!PX_ResourceLibraryLoad(&mp_calc,&runtime->ResourceLibrary,PX_RESOURCE_TYPE_SOUND,io.buffer,io.size,key)) goto _ERROR;
+	if(!PX_ResourceLibraryLoad(&runtime->ResourceLibrary,PX_RESOURCE_TYPE_SOUND,io.buffer,io.size,key)) goto _ERROR;
 	PX_FreeIOData(&io);
-	MP_Free(&runtime->mp,mp_calc.StartAddr);
 	return PX_TRUE;
 _ERROR:
 	PX_FreeIOData(&io);
-	MP_Free(&runtime->mp,mp_calc.StartAddr);
 	return PX_FALSE;
 }

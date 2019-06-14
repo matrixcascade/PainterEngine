@@ -243,15 +243,12 @@ BOOL PX_SystemLoop()
 	MSG Msg;
 	ZeroMemory(&Msg, sizeof(MSG));
 
-	if(PeekMessage(&Msg, NULL, 0, 0, PM_REMOVE)) 
+	while(PeekMessage(&Msg, NULL, 0, 0, PM_REMOVE)) 
 	{
 		TranslateMessage(&Msg);
 		DispatchMessage(&Msg);
 	} 
-	else
-	{
-		Sleep(10);
-	}
+	Sleep(1);
 	return TRUE;
 }
 

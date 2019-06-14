@@ -20,6 +20,8 @@ typedef struct
 
 px_bool PX_Loop();
 px_void PX_Clear(px_color clr);
+px_void PX_ShowConsole();
+px_void PX_HideConsole();
 px_bool PX_Initialize(px_char *name,px_int width,px_int height);
 px_surface *PX_GetSurface();
 PX_Object  *PX_GetUiRoot();

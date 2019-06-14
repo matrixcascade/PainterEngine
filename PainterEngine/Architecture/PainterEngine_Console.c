@@ -725,9 +725,6 @@ px_void PX_ConsoleOnMouseDown(PX_Object *Obj,PX_Object_Event e,px_void *user_ptr
 
 px_bool PC_ConsoleInit(PX_Console *pc)
 {
-	px_memorypool mp_calc;//6M
-
-	
 
 	pc->show=PX_FALSE;
 	pc->max_column=PC_CONSOLE_DEFAULT_MAX_COLUMN;
@@ -753,13 +750,8 @@ px_bool PC_ConsoleInit(PX_Console *pc)
 	
 //////////////////////////////////////////////////////////////////////////
 	//logo
-	mp_calc=MP_Create(MP_Malloc(&pc->runtime->mp,PE_MEMORY_CALC_SIZE),PE_MEMORY_CALC_SIZE);
 	
-	if(mp_calc.StartAddr==PX_NULL) return PX_FALSE;
-	
-	if(!PX_ResourceLibraryLoad(&mp_calc,&pc->runtime->ResourceLibrary,PX_RESOURCE_TYPE_TEXTURE,(px_byte *)fox_console_logo,sizeof(fox_console_logo),"console_logo"))return PX_FALSE;
-
-	MP_Free(&pc->runtime->mp,mp_calc.StartAddr);
+	if(!PX_ResourceLibraryLoad(&pc->runtime->ResourceLibrary,PX_RESOURCE_TYPE_TEXTURE,(px_byte *)fox_console_logo,sizeof(fox_console_logo),"console_logo"))return PX_FALSE;
 	
 	PX_ConsoleShowImage(pc,"console_logo");
 	PX_ConsolePrintText(pc,"             PainterEngine JIT Compilation Console\n            StoryScript  Shell For StoryVM\n                Code By DBinary Build on 2019\n             Refer To:www.GitHub.com/matrixcascade\n");

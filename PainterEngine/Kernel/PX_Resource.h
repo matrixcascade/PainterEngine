@@ -44,7 +44,7 @@ typedef struct
 
 
 px_bool PX_ResourceLibraryInit(px_memorypool *mp,PX_ResourceLibrary *lib);
-px_bool  PX_ResourceLibraryLoad(px_memorypool *mptemp,PX_ResourceLibrary *lib,PX_RESOURCE_TYPE type,px_byte *data,px_uint datasize,px_char *key);
+px_bool  PX_ResourceLibraryLoad(PX_ResourceLibrary *lib,PX_RESOURCE_TYPE type,px_byte *data,px_uint datasize,px_char *key);
 px_bool PX_ResourceLibraryAddTexture(PX_ResourceLibrary *lib,px_char *key,px_texture *pTexture);
 PX_Resource * PX_ResourceLibraryGet(PX_ResourceLibrary *lib,px_char *key);
 px_texture *PX_ResourceLibraryGetTexture(PX_ResourceLibrary *lib,px_char *key);
