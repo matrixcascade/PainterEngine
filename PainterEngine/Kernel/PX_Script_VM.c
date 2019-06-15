@@ -3191,6 +3191,10 @@ px_int PX_ScriptVM_GetFunctionIndex(PX_ScriptVM_Instance *Ins,px_char *func)
 {
 	int i;
 	px_char cmpName[sizeof(Ins->_func[0].name)];
+	if (func==PX_NULL)
+	{
+		return -1;
+	}
 	if (px_strlen(func)>=sizeof(cmpName))
 	{
 		return -1;
