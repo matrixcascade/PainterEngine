@@ -1,0 +1,87 @@
+#name "main"
+host float partical_rand();
+
+set vector
+{
+float x,y,z;
+}
+
+set hdr_color
+{
+int g,b,r,a;
+}
+
+set Partical_Init_Info
+{
+int	generateDuration;
+int	maxCount;
+vector  force;
+float   resistanceK;
+int     launchCount;
+}
+
+set PARTICAL_ATOM_INFO
+{
+float   size;
+float   rotation;
+float   mass;
+float   alpha;
+int     aliveTime;
+int     elpasedTime;
+vector  position;
+vector  velocity;
+float   hdrR;
+float   hdrG;
+float   hdrB;
+float   rotationSpeed;
+float   sizeIncrement;
+float   alphaIncrement;
+}
+
+Partical_Init_Info g_particalInitInfo;
+PARTICAL_ATOM_INFO atomInfo;
+
+export Partical_Init_Info *Partical_Init()
+{
+  g_particalInitInfo.generateDuration=25; //每个粒子的生成间隔时间,单位是毫秒
+  g_particalInitInfo.maxCount=128;//粒子的最大数量
+  g_particalInitInfo.force.x=0;//环境的力(x,y,z)方向,每个粒子都会被这个力所影响
+  g_particalInitInfo.force.y=0;
+  g_particalInitInfo.force.z=0;
+  g_particalInitInfo.resistanceK=0;//阻力系数
+  g_particalInitInfo.launchCount=-1;//最大发射粒子数量,一般设置为-1
+  return &g_particalInitInfo;
+}
+
+export PARTICAL_ATOM_INFO *Partical_Create(int index) //这个是粒子的生成函数
+{
+  atomInfo.size=0.5+partical_rand()/2; //设置初始大小,partical_rand返回一个0-1.0的随机数
+  atomInfo.rotation=partical_rand()*360;//每秒旋转角度
+  atomInfo.mass=1.0;//质量
+  atomInfo.alpha=1;//透明度
+  atomInfo.aliveTime=3000;//粒子生存时间,过了这个时间就会消失,单位是ms
+  atomInfo.elpasedTime=0;//经历时间,一般填0
+  atomInfo.position.x=0;//粒子初始位置
+  atomInfo.position.y=0;
+  atomInfo.position.z=0;
+  
+  atomInfo.velocity.x=300*partical_rand()-150;//速度x方向
+  atomInfo.velocity.y=300*partical_rand()-150;//速度y方向
+  atomInfo.velocity.z=0;//速度,z方向,一般z为0
+
+  atomInfo.hdrR=0.75+partical_rand()/4;//混色R通道
+  atomInfo.hdrG=0.75+partical_rand()/4;//混色G通道
+  atomInfo.hdrB=0.75+partical_rand()/4;//混色B通道
+
+  atomInfo.rotationSpeed=360*partical_rand();//粒子的旋转速度
+  atomInfo.alphaIncrement=-0.45;//透明度增量
+  atomInfo.sizeIncrement=-0.35;//尺寸增量
+
+  return &atomInfo;
+}
+
+
+export void Partical_Atom_Update(PARTICAL_ATOM_INFO *atomInfo)
+{
+
+}
