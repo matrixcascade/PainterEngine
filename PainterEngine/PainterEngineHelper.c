@@ -347,7 +347,7 @@ px_bool PX_LoadAnimationLibraryFromFile(px_memorypool *mp,px_animationlibrary *l
 
 }
 
-px_bool PX_LoadScriptFromFile(px_memorypool *mp,px_memory *code,px_char *path)
+px_bool PX_LoadScriptFromFile(px_memory *code,px_char *path)
 {
 	PX_IO_Data io=PX_LoadFileToIOData(path);
 	if (!io.size)
@@ -355,8 +355,6 @@ px_bool PX_LoadScriptFromFile(px_memorypool *mp,px_memory *code,px_char *path)
 		return PX_FALSE;
 	}
 	if(!PX_MemoryCopy(code,io.buffer,0,io.size))
-		goto _ERROR;
-	if(!PX_MemoryCat(code,"",1))
 		goto _ERROR;
 
 	PX_FreeIOData(&io);

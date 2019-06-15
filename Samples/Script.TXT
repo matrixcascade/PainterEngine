@@ -1,0 +1,14 @@
+#name "main" //StoryScript的开头必须以一个name打头
+#runtime stack 256 //栈大小,可以不写
+#runtime thread 1 //线程核心数,可不写
+
+host void drawline(int x0,int y0,int x1,int y1);//定义Host函数,Host函数是VM提供给脚本调用的API
+
+export void DrawTriangle()//这个函数必须用export修饰为导出函数,否者等下没办法调用
+{
+ drawline(400,100,200,300);
+ drawline(200,300,600,300);
+ drawline(600,300,400,100);
+ //绘制一个三角形
+ //会调用三次drawline
+}
