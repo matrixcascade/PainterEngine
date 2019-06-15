@@ -365,6 +365,24 @@ _ERROR:
 
 }
 
+
+px_bool PX_LoadScriptInstanceFromFile(px_memorypool *mp,PX_ScriptVM_Instance *ins,px_char *path)
+{
+	PX_IO_Data io=PX_LoadFileToIOData(path);
+	if (!io.size)
+	{
+		return PX_FALSE;
+	}
+	if(!PX_ScriptVM_InstanceInit(ins,mp,io.buffer,io.size))
+		goto _ERROR;
+
+	PX_FreeIOData(&io);
+	return PX_TRUE;
+_ERROR:
+	PX_FreeIOData(&io);
+	return PX_FALSE;
+}
+
 px_bool PX_LoadTextureToResource(PX_Runtime *runtime,px_char Path[],px_char key[])
 {
 	PX_IO_Data io;

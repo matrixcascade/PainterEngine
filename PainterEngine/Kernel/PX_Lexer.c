@@ -391,6 +391,16 @@ px_bool PX_LexerSortText(px_lexer *lexer,px_char *SourceText)
 		SourceText++;
 	}
 	lexer->Sources[Offset]='\0';
+	SourceText=lexer->Sources;
+	
+	while (*SourceText)
+	{
+		//replace \r
+		if(*SourceText=='\r')
+			*SourceText='\n';
+		SourceText++;
+	}
+
 	return PX_TRUE;
 }
 

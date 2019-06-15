@@ -90,7 +90,7 @@ px_bool PX_ScriptVM_InstanceFree(PX_ScriptVM_Instance *Ins);
 
 #define  PX_ScriptVM_STACK(Ins,i) ((Ins)->_mem[(Ins)->pThread[(Ins)->T].SP+i])
 #define  PX_ScriptVM_HOSTPARAM(Ins,i) ((Ins)->_mem[(Ins)->pThread[(Ins)->T].SP+i])
-#define  PX_ScriptVM_PARAM(Ins,i) ((Ins)->_mem[(Ins)->pThread[(Ins)->T].BP+i])
+#define  PX_ScriptVM_LOCALPARAM(Ins,i) ((Ins)->_mem[(Ins)->pThread[(Ins)->T].BP+i])
 #define  PX_ScriptVM_GLOBAL(Ins,i) ((Ins)->_mem[i])
 #define  PX_ScriptVM_RETURN_POINTER(Ins,oft) ((Ins)->_mem[((Ins)->pThread[(Ins)->T].R[1])._int+(oft)])
 #define  PX_ScriptVM_REG_RETURN(Ins)   ((Ins)->pThread[(Ins)->T].R[1])
