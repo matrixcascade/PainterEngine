@@ -19,6 +19,7 @@ typedef struct
 
 
 px_bool PX_Loop();
+px_void PX_SetBackgroundColor(px_color clr);
 px_void PX_Clear(px_color clr);
 px_void PX_ShowConsole();
 px_void PX_HideConsole();
@@ -34,6 +35,7 @@ px_bool PX_LoadShapeFromFile(px_memorypool *mp,px_shape *shape,px_char *path);
 px_bool PX_LoadSoundFromFile(px_memorypool *mp,px_shape *shape,px_char *path);
 px_bool PX_LoadAnimationLibraryFromFile(px_memorypool *mp,px_animationlibrary *lib,px_char *path);
 px_bool PX_LoadScriptFromFile(px_memory *code,px_char *path);
+px_bool PX_LoadScriptInstanceFromFile(px_memorypool *mp,PX_ScriptVM_Instance *ins,px_char *path);
 px_bool PX_LoadTextureToResource(PX_Runtime *runtime,px_char Path[],px_char key[]);
 px_bool PX_LoadShapeToResource(PX_Runtime *runtime,px_char Path[],px_char key[]);
 px_bool PX_LoadAnimationToResource(PX_Runtime *runtime,px_char Path[],px_char key[]);

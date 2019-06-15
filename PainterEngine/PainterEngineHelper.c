@@ -28,6 +28,14 @@ PX_Console      main_console;
 
 px_dword		main_time=0;
 px_dword        main_renderElpased=0;
+
+px_color        main_backgroundColor;
+
+px_void PX_SetBackgroundColor(px_color clr)
+{
+	main_backgroundColor=clr;
+}
+
 px_void PX_Clear(px_color clr)
 {
 	PX_SurfaceClear(&main_DrawSurface,0,0,main_DrawSurface.width-1,main_DrawSurface.height-1,clr);
@@ -152,7 +160,7 @@ px_bool PX_Loop()
 			dragFileString[0]='\0';
 		}
 
-		PX_SurfaceClear(&main_runtime.RenderSurface,0,0,main_runtime.RenderSurface.width-1,main_runtime.RenderSurface.height-1,PX_COLOR(255,255,255,255));
+		PX_SurfaceClear(&main_runtime.RenderSurface,0,0,main_runtime.RenderSurface.width-1,main_runtime.RenderSurface.height-1,main_backgroundColor);
 		if (main_console.show)
 		{
 			PX_ConsoleUpdate(&main_console,main_renderElpased);
@@ -182,6 +190,9 @@ px_bool PX_Initialize(px_char *name,px_int width,px_int height)
 
 	PX_srand(timeGetTime());
 
+
+
+
 	if (!PX_CreateWindow(width,height,name,PX_FALSE))
 	{
 		return 0;
@@ -200,6 +211,8 @@ px_bool PX_Initialize(px_char *name,px_int width,px_int height)
 
 	main_root=PX_ObjectRootCreate(&main_runtime.mp_ui);
 	main_time=timeGetTime();
+
+	main_backgroundColor=PX_COLOR(255,255,255,255);
 
 	return PX_TRUE;
 }
