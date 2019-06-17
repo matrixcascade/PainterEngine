@@ -162,7 +162,6 @@ px_bool PX_Loop()
 
 		PX_SurfaceClear(&main_runtime.RenderSurface,0,0,main_runtime.RenderSurface.width-1,main_runtime.RenderSurface.height-1,main_backgroundColor);
 		PX_SurfaceRender(&main_runtime.RenderSurface,&main_DrawSurface,0,0,PX_TEXTURERENDER_REFPOINT_LEFTTOP,PX_NULL);
-
 		if (main_console.show)
 		{
 			PX_ConsoleUpdate(&main_console,main_renderElpased);
