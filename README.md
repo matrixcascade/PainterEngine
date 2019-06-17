@@ -12,4 +12,7 @@ https://www.bilibili.com/video/av55528321<br/>
 https://www.bilibili.com/video/av55531233<br/>
 https://www.bilibili.com/video/av55598615<br/>
 https://www.bilibili.com/video/av55637752/<br/>
+<br/>
+交流QQ群419410284<br/><br/>
+
 后续DEMO将持续更新,PainterEngine也在持续完善中.
