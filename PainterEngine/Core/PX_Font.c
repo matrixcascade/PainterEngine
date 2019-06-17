@@ -20666,3 +20666,157 @@ px_int PX_GetFontTextPixelsWidth( px_char *Text )
 	}
 	return Size;
 }
+
+px_bool PX_FontModuleInitialize(px_memorypool *mp,PX_FontModule *module)
+{
+	module->mp=mp;
+	module->xspacer=__PX_FONT_MODULE_XSPACE_SIZE;
+	module->yspacer=__PX_FONT_MODULE_YSPACE_SIZE;
+	return PX_MapInit(mp,&module->characters_map);
+}
+
+px_bool PX_FontModuleLoad(PX_FontModule *module,px_byte *buffer,px_int size)
+{
+	px_int offset=0;
+	PX_FontModule_Charactor *cpy;
+	while (offset<size)
+	{
+		px_char hex[5]={0};
+		px_byte *pData;
+		
+		PX_FontModule_Charactor *pcHeader=(PX_FontModule_Charactor *)(buffer+offset);
+		offset+=sizeof(PX_FontModule_Charactor);
+		pData=(buffer+offset);
+		if(pcHeader->c_magic[0]!='P')  goto _ERROR;
+		if(pcHeader->c_magic[1]!='X')  goto _ERROR;
+		if(pcHeader->c_magic[2]!='F')  goto _ERROR;
+		if(pcHeader->c_magic[3]!='M')  goto _ERROR;
+
+		PX_itoa(pcHeader->charactor_code,hex,sizeof(hex),16);
+		if (PX_MapGet(&module->characters_map,hex))
+		{
+			offset+=pcHeader->Font_Width*pcHeader->Font_Height;
+			continue;
+		}
+
+		cpy=(PX_FontModule_Charactor *)MP_Malloc(module->mp,sizeof(PX_FontModule_Charactor));
+		
+		if (!cpy)
+		{
+			goto _ERROR;
+		}
+		
+		px_memcpy(cpy,pcHeader,sizeof(PX_FontModule_Charactor));
+
+		if(!PX_ShapeCreate(module->mp,&cpy->shape,cpy->Font_Width,cpy->Font_Height)) goto _ERROR;
+		px_memcpy(cpy->shape.alpha,pData,cpy->Font_Width*cpy->Font_Height);
+		offset+=cpy->Font_Width*cpy->Font_Height;
+		PX_MapPut(&module->characters_map,hex,cpy);
+	}
+	return PX_TRUE;
+_ERROR:
+	PX_FontModuleFree(module);
+	return PX_FALSE;
+}
+
+px_void PX_FontModuleFree(PX_FontModule *module)
+{
+	px_map_element *pme;
+	pme=PX_MapFirst(&module->characters_map);
+	while (pme)
+	{
+		PX_FontModule_Charactor *pmc=(PX_FontModule_Charactor *)pme->Ptr;
+		PX_ShapeFree(&pmc->shape);
+		MP_Free(module->mp,pmc);
+		pme=PX_MapNext(&module->characters_map,pme);
+	}
+	PX_MapFree(&module->characters_map);
+}
+
+px_void PX_FontModuleDrawText(px_surface *psurface,int x,int y,px_char *Text,px_color Color,PX_FontModule *mod)
+{
+	px_int dx,dy;
+	dx=x;
+	dy=y;
+	while (*Text)
+	{
+		px_dword unicode_code=0;
+		px_char hex[5];
+		PX_FontModule_Charactor *pChar;
+
+		if (((*Text)&0xf0)==0xf0)//4 byte
+		{
+			unicode_code=*Text;
+			Text++;
+			if(*Text==0) return;
+
+			unicode_code+=(*Text)<<8;
+			Text++;
+			if(*Text==0) return;
+
+			unicode_code+=(*Text)<<16;
+			Text++;
+			if(*Text==0) return;
+
+			unicode_code+=(*Text)<<24;
+			Text++;
+		}
+		else if (((*Text)&0xe0)==0xe0)//3 byte
+		{
+			unicode_code=*Text;
+			Text++;
+			if(*Text==0) return;
+
+			unicode_code+=(*Text)<<8;
+			Text++;
+			if(*Text==0) return;
+
+			unicode_code+=(*Text)<<16;
+			Text++;
+		}
+		else if (((*Text)&0xc0)==0xc0)//2 byte
+		{
+			unicode_code=*Text;
+			Text++;
+			if(*Text==0) return;
+
+			unicode_code+=(*Text)<<8;
+			Text++;
+		}
+		else if (((*Text)&0x80)==0)//1 byte
+		{
+			unicode_code=*Text;
+			Text++;
+		}
+
+		if (unicode_code!=' ')
+		{
+			PX_itoa(unicode_code,hex,sizeof(hex),16);
+			pChar=(PX_FontModule_Charactor *)PX_MapGet(&mod->characters_map,hex);
+			if (pChar)
+			{
+				PX_ShapeRender(psurface,&pChar->shape,dx+pChar->BearingX,dy-pChar->BearingY,PX_TEXTURERENDER_REFPOINT_LEFTTOP,Color);
+				dx+=pChar->Advance;
+			}
+			else
+			{
+				dx+=mod->xspacer;
+			}
+		}
+		else if (unicode_code!='\n')
+		{
+			dy+=mod->yspacer;
+			dx=x;
+		}
+		else
+		{
+			dx+=mod->yspacer;
+		}
+	}
+}
+
+px_void PX_FontModuleSetXYSpace(PX_FontModule *module,int x,int y)
+{
+	module->xspacer=x;
+	module->yspacer=y;
+}

@@ -46,9 +46,9 @@
 
 struct px_rb_node
 {
-	unsigned long  rb_parent_color;
 #define	RB_RED		0
 #define	RB_BLACK	1
+	unsigned long  rb_parent_color;
 	struct px_rb_node *rb_right;
 	struct px_rb_node *rb_left;
 };

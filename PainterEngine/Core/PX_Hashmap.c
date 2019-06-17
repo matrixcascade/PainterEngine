@@ -12,18 +12,7 @@ px_bool PX_MapInit(px_memorypool *mp,px_map *m)
 	return PX_TRUE;
 }
 
-typedef struct		__px_map_element
-{
-	struct px_rb_node node;//must be first member
-	px_char		string[PX_HASHMAP_STRINGKEY_LEN];
-	union
-	{
-		px_void		*Ptr;
-		px_int      _int;
-		px_float    _float;
-	};
-	
-}px_map_element;
+
 
 
 px_map_element * px_rbtree_search(struct px_rb_root *root, char *string)
@@ -156,6 +145,19 @@ PX_HASHMAP_RETURN PX_MapErase(px_map * m,px_char *stringkey)
 		return PX_HASHMAP_RETURN_OK;
 	}
 	return PX_HASHMAP_RETURN_NULL;
+}
+
+px_map_element * PX_MapFirst(px_map * m)
+{
+	struct px_rb_node *node;
+	m->size=0;
+	node = rb_first(&m->root);
+	return (px_map_element *)node;
+}
+
+px_map_element * PX_MapNext(px_map * m,px_map_element *node)
+{
+	return (px_map_element *)rb_next((struct px_rb_node *)node);
 }
 
 px_bool PX_MapGetInt(px_map * m, px_char* stringkey,px_int *v)
