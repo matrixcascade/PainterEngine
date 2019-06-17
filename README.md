@@ -5,9 +5,9 @@
 <br/><br/><br/>
 ===========================================================================
 <br/>当前项目由Windows平台Direct2D引导实现,用于PainterEngine的示范及教学.</font>
+<br/>PainterEngine\PainterEngineHelper为辅助实现代码.系windows平台相关代码
 <br/>引导代码在PainterEngine\Startup文件夹中.系windows平台相关代码
-<br/>PainterEngine\PainterEngineHelper为辅助实现代码.
-<br/>PainterEngine核心由PainterEngine\Core及PainterEngine\Kernel两个文件夹中的代码构成
+<br/>PainterEngine核心由PainterEngine\Core及PainterEngine\Kernel两个文件夹中的代码构成,可无需修改便可移植
 <br/>PainterEngine\Architecture实现了一个PainterEngine 控制台及运行环境,可无需修改便可移植
 <br/>
 ===========================================================================
