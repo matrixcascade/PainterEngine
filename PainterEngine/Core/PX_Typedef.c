@@ -139,7 +139,7 @@ px_int  PX_ftoa(px_float f, char *outbuf, px_int maxlen, px_int precision)
 	if (precision != 0)  
 		PUSH_CHAR('.');  
 
-	max = maxlen - (p - outbuf);  
+	max = maxlen - (px_int)(p - outbuf);  
 	if (max > precision)  
 		max = precision;  
 	/* print BCD */  
