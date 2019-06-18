@@ -12,7 +12,7 @@
 #define     PX_RAND_MAX         (0xefffffff)
 
 #ifdef _DEBUG
-#define PX_DEBUG_MODE _DEBUG
+#define PX_DEBUG_MODE _DEBUG&&_MSC_VER
 #endif
 
 
