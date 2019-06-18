@@ -5,7 +5,7 @@
 <br/><br/><br/>
 ===========================================================================<br/>
 移植说明:<br/>
-1-PainterEngine核心文件包含PainterEngine\Core,PainterEngine\Kernel两个个文件夹内容,可以无需任何修改进行移植.<br/>
+1-PainterEngine核心文件包含PainterEngine\Core,PainterEngine\Kernel两个文件夹内容,可以无需任何修改进行移植.<br/>
 2-PainterEngine\Architecture为PainterEngine运行环境配置及控制台实现,可以无需任何修改进行移植,可以选择性修改runtime中的内存池大小.以更低资源占用运行PainterEngine.<br/>
 3-PainterEngine\Startup为引导代码,包括实现平台上窗口创建,提供读取IO(键盘输入/触摸操控/鼠标事件),将PainterEngine渲染完成的图像buffer显示等代码
 需要依据对应平台进行修改.<br/>
