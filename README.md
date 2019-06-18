@@ -5,14 +5,24 @@
 <br/><br/><br/>
 ===========================================================================
 <br/>当前项目由Windows平台Direct2D引导实现,用于PainterEngine的示范及教学.</font>
-<br/>PainterEngine\PainterEngineHelper为辅助实现代码.系windows平台相关代码
+<br/>PainterEngine\PainterEngineHelper为辅助实现代码.包含Startup引导代码,是平台相关代码
 <br/>引导代码在PainterEngine\Startup文件夹中.系windows平台相关代码
 <br/>PainterEngine核心由PainterEngine\Core及PainterEngine\Kernel两个文件夹中的代码构成,可无需修改便可移植
 <br/>PainterEngine\Architecture实现了一个PainterEngine 控制台及运行环境,可无需修改便可移植
 <br/>
 ===========================================================================
 <br/><br/><br/>
-
+===========================================================================
+移植说明:<br/>
+1.PainterEngine核心文件包含PainterEngine\Architecture,PainterEngine\Core,PainterEngine\Kernel三个文件夹内容
+可以无需任何修改进行移植.<br/>
+2.PainterEngine\Startup为引导代码,包括实现平台上窗口创建,提供读取IO(键盘输入/触摸操控/鼠标事件),将PainterEngine渲染完成的图像buffer显示等代码
+需要依据对应平台进行修改.<br/>
+3.PainterEngine\PainterEngineHelper为辅助实现代码,底层基于PainterEngine核心及引导代码,提供文件系统文件读写操作(PainterEngine由特定资源管理器管理资源并无文件系统设计),在裸片开发的嵌入式环境中不建议移植,其它提供文件系统的平台可无需修改进行移植.<br/>
+4.默认Startup引导代码为Windows平台Direct2D实现<br/>
+5.其它平台(Android ubuntu iOS) 引导代码将在近期陆续更新,在PainterEngine\platform中可以找到需要移植直接替换就可以了.<br/>
+===========================================================================
+<br/><br/><br/>
 *教程地址:<br/>
 https://www.bilibili.com/video/av55520561<br/>
 https://www.bilibili.com/video/av55522040<br/>
