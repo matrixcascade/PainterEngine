@@ -296,6 +296,285 @@ px_void PX_TextureRender(px_surface *psurface,px_texture *tex,px_int x,px_int y,
 
 
 
+px_void PX_TextureRenderRotation(px_surface *psurface,px_texture *tex,px_int x,px_int y,PX_TEXTURERENDER_REFPOINT refPoint,PX_TEXTURERENDER_BLEND *blend,px_int Angle)
+{
+	PX_TextureRenderRotation_sincos(psurface,tex,x,y,refPoint,blend,PX_sin_angle((px_float)Angle),PX_cos_angle((px_float)Angle));
+}
+
+px_void PX_TextureRenderRotation_vector(px_surface *psurface,px_texture *tex,px_int x,px_int y,PX_TEXTURERENDER_REFPOINT refPoint,PX_TEXTURERENDER_BLEND *blend,px_point p_vector)
+{
+	PX_TextureRenderRotation_sincos(psurface,tex,x,y,refPoint,blend,PX_Point_sin(p_vector),PX_Point_cos(p_vector));
+}
+
+px_void PX_TextureRenderRotation_sincos(px_surface *psurface,px_texture *tex,px_int x,px_int y,PX_TEXTURERENDER_REFPOINT refPoint,PX_TEXTURERENDER_BLEND *blend,px_float sinx,px_float cosx)
+{
+	px_int newheight,newwidth,i,j,resHeight,resWidth;
+	px_point CornerPoint[4];
+	px_matrix rotMat;
+	px_double SampleX,SampleY,mapX,mapY;
+	px_double mixa,mixr,mixg,mixb,Weight;
+	px_float invCosAgl,invSinAgl;
+	px_color sampleColor;
+	px_int left,right,top,bottom;
+
+
+
+	resHeight=tex->height;
+	resWidth=tex->width;
+
+	CornerPoint[0].x=-tex->width/2.f;
+	CornerPoint[0].y=-tex->height/2.f;
+	CornerPoint[0].z=0;
+
+	CornerPoint[1].x=tex->width/2.f;
+	CornerPoint[1].y=-tex->height/2.f;
+	CornerPoint[1].z=0;
+
+	CornerPoint[2].x=-tex->width/2.f;
+	CornerPoint[2].y=tex->height/2.f;
+	CornerPoint[2].z=0;
+
+	CornerPoint[3].x=tex->width/2.f;
+	CornerPoint[3].y=tex->height/2.f;
+	CornerPoint[3].z=0;
+
+	rotMat._11=cosx;		rotMat._12=sinx;			rotMat._13=0.0f;			rotMat._14=0.0f;
+	rotMat._21=-sinx;		rotMat._22=cosx;			rotMat._23=0.0f;			rotMat._24=0.0f;
+	rotMat._31=0.0f;		rotMat._32=0.0f;			rotMat._33=1.0f;			rotMat._34=0.0f;
+	rotMat._41=0.0f;		rotMat._42=0.0f;			rotMat._43=0.0f;			rotMat._44=1.0f;
+
+
+	CornerPoint[0]=PX_PointMulMatrix(CornerPoint[0],rotMat);
+	CornerPoint[1]=PX_PointMulMatrix(CornerPoint[1],rotMat);
+	CornerPoint[2]=PX_PointMulMatrix(CornerPoint[2],rotMat);
+	CornerPoint[3]=PX_PointMulMatrix(CornerPoint[3],rotMat);
+
+	newheight=0;
+	newwidth=0;
+	for (i=0;i<4;i++)
+	{
+		if (CornerPoint[i].y>newheight)
+		{
+			newheight=(px_int)CornerPoint[i].y;
+		}
+		if (CornerPoint[i].x>newwidth)
+		{
+			newwidth=(px_int)CornerPoint[i].x;
+		}
+	}
+	newheight=PX_TRUNC(newheight*2+2);
+	newwidth=PX_TRUNC(newwidth*2+2);
+
+
+	switch (refPoint)
+	{
+	case PX_TEXTURERENDER_REFPOINT_LEFTTOP:
+		break;
+	case PX_TEXTURERENDER_REFPOINT_MIDTOP:
+		x-=newwidth/2;
+		break;
+	case PX_TEXTURERENDER_REFPOINT_RIGHTTOP:
+		x-=newwidth;
+		break;
+	case PX_TEXTURERENDER_REFPOINT_LEFTMID:
+		y-=newheight/2;
+		break;
+	case PX_TEXTURERENDER_REFPOINT_CENTER:
+		y-=newheight/2;
+		x-=newwidth/2;
+		break;
+	case PX_TEXTURERENDER_REFPOINT_RIGHTMID:
+		y-=newheight/2;
+		x-=newwidth;
+		break;
+	case PX_TEXTURERENDER_REFPOINT_LEFTBOTTOM:
+		y-=newheight;
+		break;
+	case PX_TEXTURERENDER_REFPOINT_MIDBOTTOM:
+		y-=newheight;
+		x-=newwidth/2;
+		break;
+	case PX_TEXTURERENDER_REFPOINT_RIGHTBOTTOM:
+		y-=newheight;
+		x-=newwidth;
+		break;
+	}
+
+
+	if (x<-newwidth)
+	{
+		return;
+	}
+	if (x>psurface->width-1)
+	{
+		return;
+	}
+	if (y<-newheight)
+	{
+		return;
+	}
+	if (y>psurface->height-1)
+	{
+		return;
+	}
+
+	if (x<0)
+	{
+		left=-x;
+	}
+	else
+	{
+		left=0;
+	}
+
+	if (x+newwidth>psurface->width)
+	{
+		right=psurface->width-x-1;
+	}
+	else
+	{
+		right=newwidth-1;
+	}
+
+	if (y<0)
+	{
+		top=-y;
+	}
+	else
+	{
+		top=0;
+	}
+
+	if (y+newheight>psurface->height)
+	{
+		bottom=psurface->height-y-1;
+	}
+	else
+	{
+		bottom=newheight-1;
+	}
+
+
+	
+
+
+	invCosAgl=cosx;
+	invSinAgl=-sinx;
+
+
+	for (j=top;j<bottom;j++)
+	{
+		for (i=left;i<right;i++)
+		{
+			SampleX=i-newwidth/2.0+0.5;
+			SampleY=j-newheight/2.0+0.5;
+
+			mapX=SampleX*invCosAgl-SampleY*invSinAgl+resWidth/2.f;
+			mapY=SampleX*invSinAgl+SampleY*invCosAgl+resHeight/2.f;
+
+			if (mapX<-0.5||mapX>resWidth+0.5)
+			{
+				continue;
+			}
+			if (mapY<-0.5||mapY>resHeight+0.5)
+			{
+				continue;
+			}
+			mixa=0;
+			mixr=0;
+			mixg=0;
+			mixb=0;
+			//Sample 4 points
+			//lt
+
+			SampleX=(mapX-0.5f);
+			SampleY=(mapY-0.5f);
+
+			if (SampleX>0&&(SampleX)<resWidth&&SampleY>0&&(SampleY)<resHeight)
+			{
+				//Sample color from resTexture
+				sampleColor=PX_SURFACECOLOR(tex,PX_TRUNC(SampleX),PX_TRUNC(SampleY));
+				Weight=(1-PX_FRAC(SampleX))*(1-PX_FRAC(SampleY));
+				mixa+=sampleColor._argb.a*Weight;
+				mixr+=sampleColor._argb.r*Weight;
+				mixg+=sampleColor._argb.g*Weight;
+				mixb+=sampleColor._argb.b*Weight;
+			}
+
+			SampleX=(mapX+0.5f);
+			SampleY=(mapY-0.5f);
+			if (SampleX>0&&(SampleX)<resWidth&&SampleY>0&&(SampleY)<resHeight)
+			{
+				//Sample color from resTexture
+				sampleColor=PX_SURFACECOLOR(tex,PX_TRUNC(SampleX),PX_TRUNC(SampleY));
+				Weight=PX_FRAC(mapX+0.5f)*(1-PX_FRAC(mapY-0.5f));
+				mixa+=sampleColor._argb.a*Weight;
+				mixr+=sampleColor._argb.r*Weight;
+				mixg+=sampleColor._argb.g*Weight;
+				mixb+=sampleColor._argb.b*Weight;
+			}
+
+			SampleX=(mapX-0.5f);
+			SampleY=(mapY+0.5f);
+			if (SampleX>0&&(SampleX)<resWidth&&SampleY>0&&(SampleY)<resHeight)
+			{
+				//Sample color from resTexture
+				sampleColor=PX_SURFACECOLOR(tex,PX_TRUNC(SampleX),PX_TRUNC(SampleY));
+				Weight=(1-PX_FRAC(SampleX))*(PX_FRAC(SampleY));
+				mixa+=sampleColor._argb.a*Weight;
+				mixr+=sampleColor._argb.r*Weight;
+				mixg+=sampleColor._argb.g*Weight;
+				mixb+=sampleColor._argb.b*Weight;
+			}
+
+			SampleX=(mapX+0.5f);
+			SampleY=(mapY+0.5f);
+			if (SampleX>0&&(SampleX)<resWidth&&SampleY>0&&(SampleY)<resHeight)
+			{
+				//Sample color from resTexture
+				sampleColor=PX_SURFACECOLOR(tex,PX_TRUNC(SampleX),PX_TRUNC(SampleY));
+				Weight=(PX_FRAC(SampleX))*(PX_FRAC(SampleY));
+				mixa+=sampleColor._argb.a*Weight;
+				mixr+=sampleColor._argb.r*Weight;
+				mixg+=sampleColor._argb.g*Weight;
+				mixb+=sampleColor._argb.b*Weight;
+			}
+
+			mixa>255?mixa=255:0;
+			mixr>255?mixr=255:0;
+			mixg>255?mixg=255:0;
+			mixb>255?mixb=255:0;
+			if (blend)
+			{
+				px_int bA,bR,bG,bB;
+				px_color clr=PX_COLOR((px_uchar)mixa,(px_uchar)mixr,(px_uchar)mixg,(px_uchar)mixb);
+				px_int Ab=(px_int)(blend->alpha*1000);
+				px_int Rb=(px_int)(blend->hdr_R*1000);
+				px_int Gb=(px_int)(blend->hdr_G*1000);
+				px_int Bb=(px_int)(blend->hdr_B*1000);
+
+				bA=(px_int)(clr._argb.a*Ab/1000);
+				bR=(px_int)(clr._argb.r*Rb/1000);
+				bG=(px_int)(clr._argb.g*Gb/1000);
+				bB=(px_int)(clr._argb.b*Bb/1000);
+
+				clr._argb.a=bA>255?255:(px_uchar)bA;
+				clr._argb.r=bR>255?255:(px_uchar)bR;
+				clr._argb.g=bG>255?255:(px_uchar)bG;
+				clr._argb.b=bB>255?255:(px_uchar)bB;
+
+				PX_SurfaceDrawPixel(psurface,i+x,j+y,PX_COLOR((px_uchar)mixa,(px_uchar)mixr,(px_uchar)mixg,(px_uchar)mixb));
+			}
+			else
+			{
+				PX_SurfaceDrawPixel(psurface,i+x,j+y,PX_COLOR((px_uchar)mixa,(px_uchar)mixr,(px_uchar)mixg,(px_uchar)mixb));
+			}
+
+		}
+	}
+	return;
+}
+
 px_void PX_TextureRenderMask(px_surface *psurface,px_texture *mask_tex,px_texture *map_tex,px_int x,px_int y,PX_TEXTURERENDER_REFPOINT refPoint,PX_TEXTURERENDER_BLEND *blend)
 {
 	px_int left,right,top,bottom,i,j;
@@ -1931,7 +2210,7 @@ px_void PX_TextureRenderEx_sincos(px_surface *psurface,px_texture *resTexture,px
 
 
 	invCosAgl=cosx;
-	invSinAgl=sinx;
+	invSinAgl=-sinx;
 
 	if (blend)
 	{	
@@ -2004,6 +2283,14 @@ px_void PX_TextureRenderEx_sincos(px_surface *psurface,px_texture *resTexture,px
 		}
 	}
 }
+
+
+px_void PX_TextureRenderEx_vector(px_surface *psurface,px_texture *resTexture,px_int x,px_int y,PX_TEXTURERENDER_REFPOINT refPoint,PX_TEXTURERENDER_BLEND *blend,px_float scale,px_point p_vector)
+{
+	PX_TextureRenderEx_sincos(psurface,resTexture,x,y,refPoint,blend,scale,PX_Point_sin(p_vector),PX_Point_cos(p_vector));
+}
+
+
 
 px_bool PX_TextureCopy(px_memorypool *mp,px_texture *restexture,px_texture *dest)
 {

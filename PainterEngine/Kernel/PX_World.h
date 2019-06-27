@@ -22,6 +22,8 @@ typedef struct
 	px_int     aliveCount;
 	px_int	   world_width,world_height;
 	px_int	   surface_width,surface_height;
+	px_int     offsetx;
+	px_int     offsety;
 	px_int     auxiliaryXSpacer;
 	px_int     auxiliaryYSpacer;
 	px_bool    auxiliaryline;
@@ -45,6 +47,7 @@ px_void         PX_WorldRemoveObject(PX_World *world,px_int i_index);
 px_bool         PX_WorldAddObject(PX_World *World,PX_Object *pObject);
 px_void         PX_WorldRemoveObjectEx(PX_World *world,px_int i_index);
 px_void			PX_WorldUpdate(PX_World *World,px_memorypool *calcmp,px_uint elpased );
+px_void			PX_WorldUpdateOffset(PX_World *pw);
 px_void			PX_WorldRender(px_surface *psurface,px_memorypool *calcmp,PX_World *World,px_uint elpased );
 px_void         PX_WorldSetCamera(PX_World *World,px_point camera_center_point);
 px_void			PX_WorldSetImpact(PX_Object *pObj,px_dword type,px_dword impact);

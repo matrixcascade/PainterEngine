@@ -51,6 +51,37 @@ px_float PX_ParticalVM_ConvertToFloat(PX_SCRIPTVM_VARIABLE var)
 	else
 		return 0;
 }
+
+px_bool PX_ParticalLauncherCreateEx(PX_Partical_Launcher *env,px_memorypool *mp,PX_ParticalLauncher_InitializeInfo Info)
+{
+	env->VM_Instance=PX_NULL;
+
+	env->mp=mp;
+	env->genIndex=0;
+	env->texture=Info.tex;
+	env->generateDuration=Info.generateDuration;
+	env->elpased=0;
+	env->maxCount=Info.maxCount;
+	env->force=Info.force;
+	env->resistanceK=Info.resistanceK;
+	env->launchCount=Info.launchCount;
+	env->Create_func=Info.Create_func;
+	env->Update_func=Info.Update_func;
+
+	env->velocity.x=0;
+	env->velocity.y=0;
+	env->velocity.z=0;
+	env->direction.x=0;
+	env->direction.y=1.0f;
+	env->direction.z=0;
+	env->CreateParticalFuncIndex=-1;
+	env->UpdateParitcalFuncIndex=-1;
+
+	env->ParticalPool=(PX_Partical_Atom *)MP_Malloc(mp,sizeof(PX_Partical_Atom)*env->maxCount);
+	px_memset(env->ParticalPool,0,sizeof(PX_Partical_Atom)*env->maxCount);
+	return PX_TRUE;
+}
+
 px_bool PX_ParticalLauncherCreate(PX_Partical_Launcher *env,px_memorypool *mp,px_texture *tex,PX_ScriptVM_Instance *pIns,px_char *Initfunc,px_char *_createfunc,px_char *_updatefunc)
 {
 	px_int vm_ptr;
@@ -60,6 +91,8 @@ px_bool PX_ParticalLauncherCreate(PX_Partical_Launcher *env,px_memorypool *mp,px
 	env->genIndex=0;
 	env->texture=tex;
 
+	env->Create_func=PX_NULL;
+	env->Update_func=PX_NULL;
 	
 	if (!PX_ScriptVM_InstanceRunFunction(env->VM_Instance,0,PX_NULL,Initfunc,0))
 	{
@@ -228,8 +261,11 @@ px_void PX_ParticalAtomUpdate(PX_Partical_Launcher *env,PX_Partical_Atom *pAtom,
 		float alphaIncrement;
 	};
 	*/
-
-		if(env->UpdateParitcalFuncIndex!=-1)
+		if (env->Update_func)
+		{
+			env->Update_func(env,pAtom);
+		}
+		else if(env->UpdateParitcalFuncIndex!=-1)
 			{
 				if(!PX_ScriptVM_LocalAlloc(env->VM_Instance,18,&memptr))
 					return;
@@ -276,7 +312,7 @@ px_void PX_ParticalAtomUpdate(PX_Partical_Launcher *env,PX_Partical_Atom *pAtom,
 			}
 
 			PX_ScriptVM_LocalFree(env->VM_Instance,&memptr);
-			}
+		}
 
 		if (pAtom->size<0)
 		{
@@ -366,8 +402,14 @@ px_bool PX_ParticalLauncherUpdate(PX_Partical_Launcher *env,px_dword elpased)
 				{
 					if (env->ParticalPool[j].aliveTime==0)
 					{
-						if(PX_ScriptVM_InstanceRunFunctionIndex(env->VM_Instance,0,PX_NULL,env->CreateParticalFuncIndex,1,PX_ScriptVM_Variable_int(env->genIndex)))
+						if (env->Create_func)
 						{
+							env->Create_func(env,env->genIndex);
+						}
+						else if (env->CreateParticalFuncIndex!=-1)
+						{
+							if(PX_ScriptVM_InstanceRunFunctionIndex(env->VM_Instance,0,PX_NULL,env->CreateParticalFuncIndex,1,PX_ScriptVM_Variable_int(env->genIndex)))
+							{
 							/*
 							set PARTICAL_ATOM_INFO
 							{
@@ -400,7 +442,9 @@ px_bool PX_ParticalLauncherUpdate(PX_Partical_Launcher *env,px_dword elpased)
 							env->ParticalPool[j].roatationSpeed=PX_ScriptVM_RETURN_POINTER(env->VM_Instance,15)._float;
 							env->ParticalPool[j].sizeIncrement=PX_ScriptVM_RETURN_POINTER(env->VM_Instance,16)._float;
 							env->ParticalPool[j].alphaIncrement=PX_ScriptVM_RETURN_POINTER(env->VM_Instance,17)._float;
+							}
 						}
+						
 
 						PX_ParticalAtomUpdate(env,&env->ParticalPool[j],redTime);
 

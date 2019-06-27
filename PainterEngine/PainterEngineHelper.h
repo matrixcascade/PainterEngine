@@ -8,6 +8,10 @@
 #define PE_MEMORY_RESOURCES_SIZE 1024*1024*96//16M
 #define PE_MEMORY_GAME_SIZE 1024*1024 //1M
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "./Startup/Platform_Windows_D2D.h"
 #include "./Architecture/PainterEngine_Console.h"
 
@@ -41,4 +45,9 @@ px_bool PX_LoadShapeToResource(PX_Runtime *runtime,px_char Path[],px_char key[])
 px_bool PX_LoadAnimationToResource(PX_Runtime *runtime,px_char Path[],px_char key[]);
 px_bool PX_LoadScriptToResource(PX_Runtime *runtime,px_char Path[],px_char key[]);
 px_bool PX_LoadSoundToResource(PX_Runtime *runtime,px_char Path[],px_char key[]);
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif

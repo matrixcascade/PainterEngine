@@ -1,16 +1,12 @@
 #include "PX_Typedef.h"
 
-static px_char __PX_LOG_OUT_DATA[1024]; //256 byte for output log
+static px_char __PX_LOG_OUT_DATA[1024]; //256 bytes for output log
 
 void PX_ASSERT()
 {
 #ifdef PX_DEBUG_MODE
-	_asm
-	{
-		int 3
-	}
+	__debugbreak();
 #endif
-	
 }
 
 void PX_ERROR(px_char fmt[],...)

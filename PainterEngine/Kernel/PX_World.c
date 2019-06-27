@@ -15,6 +15,8 @@ px_bool PX_WorldInit(px_memorypool *mp,PX_World *World,px_int world_width,px_int
 	World->auxiliaryline_color=PX_COLOR(255,255,192,255);
 	World->camera_offset=PX_POINT(0,0,0);
 	World->aliveCount=0;
+	World->offsetx=0;
+	World->offsety=0;
 	PX_WorldSetAuxiliaryXYSpacer(World,32,32);
 	return PX_TRUE;
 }
@@ -61,7 +63,7 @@ px_void PX_WorldUpdate( PX_World *world,px_memorypool *calcmp,px_uint elpased )
 	//////////////////////////////////////////////////////////////////////////
 	//impact test
 	//////////////////////////////////////////////////////////////////////////
-	for (i=0;i<sizeof(pwo->pObject->impact_type)*8;i++)
+	for (i=0;i<world->pObjects.size;i++)
 	{
 		pwo=PX_VECTORAT(PX_WorldObject,&world->pObjects,i);
 		if (!pwo->pObject)
@@ -133,21 +135,11 @@ px_void PX_WorldUpdate( PX_World *world,px_memorypool *calcmp,px_uint elpased )
 
 }
 
-px_void PX_WorldRender(px_surface *psurface,px_memorypool *calcmp,PX_World *pw,px_uint elpased)
+px_void PX_WorldUpdateOffset(PX_World *pw)
 {
-	px_int i;
-	px_int LeftTopX,LeftTopY;
-	PX_QuickSortAtom *ArrayIndex;
 	px_int surface_width,surface_height;
-	px_int sx,sy;
-	PX_WorldObject *pwo;
+	px_int LeftTopX,LeftTopY;
 
-	if (pw==PX_NULL)
-	{
-		return;
-	}
-
-	
 	surface_width=pw->surface_width;
 	surface_height=pw->surface_height;
 	LeftTopX=(px_int)(pw->camera_offset.x-surface_width/2),LeftTopY=(px_int)(pw->camera_offset.y-surface_height/2);
@@ -171,15 +163,38 @@ px_void PX_WorldRender(px_surface *psurface,px_memorypool *calcmp,PX_World *pw,p
 		LeftTopY=0;
 	}
 
+	pw->offsetx=LeftTopX;
+	pw->offsety=LeftTopY;
+}
+
+px_void PX_WorldRender(px_surface *psurface,px_memorypool *calcmp,PX_World *pw,px_uint elpased)
+{
+	px_int i;
+	px_int surface_width,surface_height;
+	PX_QuickSortAtom *ArrayIndex;
+	
+	px_int sx,sy;
+	PX_WorldObject *pwo;
+
+	if (pw==PX_NULL)
+	{
+		return;
+	}
+
+	PX_WorldUpdateOffset(pw);
+
+	surface_width=pw->surface_width;
+	surface_height=pw->surface_height;
+
 
 	if (pw->auxiliaryline)
 	{
-		for (sy=pw->auxiliaryYSpacer-(LeftTopY%pw->auxiliaryYSpacer);sy<surface_height;sy+=pw->auxiliaryYSpacer)
+		for (sy=pw->auxiliaryYSpacer-(pw->offsety%pw->auxiliaryYSpacer);sy<surface_height;sy+=pw->auxiliaryYSpacer)
 		{
 			PX_GeoDrawLine(psurface,0,sy,surface_width-1,sy,1,pw->auxiliaryline_color);
 		}
 
-		for (sx=pw->auxiliaryXSpacer-(LeftTopX%pw->auxiliaryXSpacer);sx<surface_width;sx+=pw->auxiliaryXSpacer)
+		for (sx=pw->auxiliaryXSpacer-(pw->offsetx%pw->auxiliaryXSpacer);sx<surface_width;sx+=pw->auxiliaryXSpacer)
 		{
 			PX_GeoDrawLine(psurface,sx,0,sx,surface_height-1,1,pw->auxiliaryline_color);
 		}
@@ -204,13 +219,15 @@ px_void PX_WorldRender(px_surface *psurface,px_memorypool *calcmp,PX_World *pw,p
 
 	PX_Quicksort_MaxToMin(ArrayIndex,0,pw->aliveCount-1);
 
+
+
 	for (i=0;i<pw->aliveCount;i++)
 	{
-		((PX_Object *)(ArrayIndex[i].pData))->x-=(px_float)LeftTopX;
-		((PX_Object *)(ArrayIndex[i].pData))->y-=(px_float)LeftTopY;
+		((PX_Object *)(ArrayIndex[i].pData))->x-=(px_float)pw->offsetx;
+		((PX_Object *)(ArrayIndex[i].pData))->y-=(px_float)pw->offsety;
 		PX_ObjectRender(psurface,(PX_Object *)ArrayIndex[i].pData,elpased);
-		((PX_Object *)(ArrayIndex[i].pData))->x+=(px_float)LeftTopX;
-		((PX_Object *)(ArrayIndex[i].pData))->y+=(px_float)LeftTopY;
+		((PX_Object *)(ArrayIndex[i].pData))->x+=(px_float)pw->offsetx;
+		((PX_Object *)(ArrayIndex[i].pData))->y+=(px_float)pw->offsety;
 	}
 	MP_Reset(calcmp);
 }
@@ -322,6 +339,7 @@ px_void PX_WorldFree(PX_World *pw)
 px_void PX_WorldSetCamera(PX_World *World,px_point camera_center_point)
 {
 	World->camera_offset=camera_center_point;
+	PX_WorldUpdateOffset(World);
 }
 
 px_void PX_WorldRemoveObject(PX_World *world,px_int i_index)

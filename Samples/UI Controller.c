@@ -17,7 +17,7 @@ int main()
 
 	//先讲解下按钮的用法,使用按钮前,我们需要先定义一个PX_Object对象
 	//创建按钮
-	PushButton=PX_Object_PushButtonCreate(PX_GetUiRoot(),300,300,96,24,"确定",PX_COLOR(255,0,0,255));
+	PushButton=PX_Object_PushButtonCreate(PX_GetUiRoot()->mp,PX_GetUiRoot(),300,300,96,24,"确定",PX_COLOR(255,0,0,255));
 	//我们可以尝试改变按钮的样式
 	PX_Object_GetPushButton(PushButton)->style=PX_OBJECT_PUSHBUTTON_STYLE_ROUNDRECT;
 
@@ -31,7 +31,7 @@ int main()
 	PX_ObjectRegisterEvent(PushButton,PX_OBJECT_EVENT_CURSORCLICK,PX_OnButtonDown,PX_NULL);
 
 	//试试加上个编辑框
-	Edit=PX_Object_EditCreate(PX_GetUiRoot(),300,200,200,24,PX_COLOR(255,0,0,255));
+	Edit=PX_Object_EditCreate(PX_GetUiRoot()->mp,PX_GetUiRoot(),300,200,200,24,PX_COLOR(255,0,0,255));
 
 
 	while(PX_Loop())

@@ -139,7 +139,7 @@ px_int  PX_ftoa(px_float f, char *outbuf, px_int maxlen, px_int precision)
 	if (precision != 0)  
 		PUSH_CHAR('.');  
 
-	max = maxlen - (p - outbuf);  
+	max = maxlen - (px_int)(p - outbuf);  
 	if (max > precision)  
 		max = precision;  
 	/* print BCD */  
@@ -259,12 +259,12 @@ px_int PX_itoa(px_int num,px_char *str,px_int MaxStrSize,px_int radix)
 
 float PX_sqrt( float number )  
 {  
-	px_int i;  
+	px_int32 i;  
 	float x2, y;  
 	const float threehalfs = 1.5F;  
 	x2 = number * 0.5F;  
 	y  = number;  
-	i  = * ( px_int * ) &y;       
+	i  = * ( px_int32 * ) &y;       
 	i  = 0x5f375a86 - ( i >> 1 );   //ILP32 only
 	y  = * ( float * ) &i;  
 	y  = y * ( threehalfs - ( x2 * y * y ) );   
@@ -362,6 +362,18 @@ px_float PX_cos_angle(px_float angle)
 {
 	angle-=((px_int)angle/360)*360;
 	return PX_cos_radian((angle*0.0174532925f));
+}
+
+
+px_float PX_Point_sin(px_point v)
+{
+	return v.y/PX_sqrt(v.x*v.x+v.y*v.y);
+}
+
+
+px_float PX_Point_cos(px_point v)
+{
+	return v.x/PX_sqrt(v.x*v.x+v.y*v.y);
 }
 
 void PX_MatrixZero(px_matrix *Mat)
@@ -788,7 +800,25 @@ px_float  PX_PointSquare(px_point p)
 
 px_point PX_PointUnit(px_point p)
 {
-	return PX_PointDiv(p,PX_PointMod(p));
+	if (p.x||p.y||p.z)
+	{
+		return PX_PointDiv(p,PX_PointMod(p));
+	}
+	return p;
+}
+
+
+px_point PX_PointReflectX(px_point vector_refer,px_point respoint)
+{
+	px_point ret;
+	px_float cosx,sinx;
+	px_float mod=PX_PointMod(vector_refer);
+	cosx=vector_refer.x/mod;
+	sinx=-vector_refer.y/mod;
+
+	ret.x=respoint.x*cosx+respoint.y*sinx;
+	ret.y=respoint.y*cosx-respoint.x*sinx;
+	return ret;
 }
 
 px_bool PX_isRectCrossRect(px_rect rect1,px_rect rect2)

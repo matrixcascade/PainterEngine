@@ -14,13 +14,15 @@
 #define PX_OBJECT_EVENT_CURSORRDOWN			3
 #define PX_OBJECT_EVENT_CURSORDOWN			4
 #define PX_OBJECT_EVENT_CURSORRUP			5
-#define PX_OBJECT_EVENT_STRING				6
-#define PX_OBJECT_EVENT_CURSORCLICK			7
-#define PX_OBJECT_EVENT_CURSORDRAG			8
-#define PX_OBJECT_EVENT_VALUECHAGE			9
-#define PX_OBJECT_EVENT_DRAGFILE			10
-#define PX_OBJECT_EVENT_KEYDOWN				11
-#define PX_OBJECT_EVENT_IMPACT				12
+#define PX_OBJECT_EVENT_CURSOROVER			6
+#define PX_OBJECT_EVENT_CURSOROUT			7
+#define PX_OBJECT_EVENT_STRING				8
+#define PX_OBJECT_EVENT_CURSORCLICK			9
+#define PX_OBJECT_EVENT_CURSORDRAG			10
+#define PX_OBJECT_EVENT_VALUECHAGE			11
+#define PX_OBJECT_EVENT_DRAGFILE			12
+#define PX_OBJECT_EVENT_KEYDOWN				13
+#define PX_OBJECT_EVENT_IMPACT				14
 
 //////////////////////////////////////////////////////////////////////////////
 //    Type of Controls
@@ -343,10 +345,10 @@ struct _PX_Object_EventAction
 typedef struct _PX_Object_EventAction PX_OBJECT_EventAction;
 
 
-PX_Object *PX_ObjectRootCreate(px_memorypool *mp);
-px_void	   PX_ObjectRootInit(PX_Object *Object,px_float x,px_float y,px_float z,px_float Width,px_float Height,px_float Lenght);
-PX_Object *PX_ObjectCreate(PX_Object *Parent,px_float x,px_float y,px_float z,px_float Width,px_float Height,px_float Lenght);
-px_void	   PX_ObjectInit(PX_Object *Object,PX_Object *Parent,px_float x,px_float y,px_float z,px_float Width,px_float Height,px_float Lenght);
+//PX_Object *PX_ObjectRootCreate(px_memorypool *mp);
+//px_void	   PX_ObjectRootInit(PX_Object *Object,px_float x,px_float y,px_float z,px_float Width,px_float Height,px_float Lenght);
+PX_Object *PX_ObjectCreate(px_memorypool *mp,PX_Object *Parent,px_float x,px_float y,px_float z,px_float Width,px_float Height,px_float Lenght);
+px_void	   PX_ObjectInit(px_memorypool *mp,PX_Object *Object,PX_Object *Parent,px_float x,px_float y,px_float z,px_float Width,px_float Height,px_float Lenght);
 px_void    PX_ObjectSetUserCode(PX_Object *pObject,px_int user_int);
 px_void    PX_ObjectSetUserPointer(PX_Object *pObject,px_void *user_ptr);
 px_void    PX_ObjectDelete(PX_Object *pObject);
@@ -369,7 +371,7 @@ px_void PX_ObjectExecuteEvent(PX_Object *pPost,PX_Object_Event Event);
 
 
 
-PX_Object *	PX_Object_LabelCreate(PX_Object *Parent,px_int x,px_int y,px_int Width,px_int Height,px_char *Text,px_color Color);
+PX_Object *	PX_Object_LabelCreate(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y,px_int Width,px_int Height,px_char *Text,px_color Color);
 PX_Object_Label  *	PX_Object_GetLabel(PX_Object *Object);
 px_char	  * PX_Object_LabelGetText(PX_Object *Label);
 px_void		PX_Object_LabelSetText(PX_Object *pLabel,px_char *Text);
@@ -380,7 +382,7 @@ px_void		PX_Object_LabelSetBorder(PX_Object *pLabel,px_bool Border);
 px_void		PX_Object_LabelRender(px_surface *psurface,PX_Object *pLabel,px_uint elpased);    
 px_void		PX_Object_LabelFree(PX_Object *pLabel);
 
-PX_Object *	PX_Object_ProcessBarCreate(PX_Object *Parent,px_int x,px_int y,px_int Width,px_int Height);
+PX_Object *	PX_Object_ProcessBarCreate(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y,px_int Width,px_int Height);
 PX_Object_ProcessBar *PX_Object_GetProcessBar(PX_Object *Object);
 px_void		PX_Object_ProcessBarSetColor(PX_Object *pProcessBar,px_color Color);
 px_void		PX_Object_ProcessBarSetValue(PX_Object *pProcessBar,px_int Value);
@@ -389,13 +391,13 @@ px_void		PX_Object_ProcessBarRender(px_surface *psurface,PX_Object *pProcessBar,
 px_int		PX_Object_ProcessBarGetValue(PX_Object *pProcessBar);
 px_void		PX_Object_ProcessBarFree(PX_Object *pProcessBar);
 
-PX_Object * PX_Object_RadiusICOCreate(PX_Object*Parent,px_int x,px_int y,px_int Radius);
+PX_Object * PX_Object_RadiusICOCreate(px_memorypool *mp,PX_Object*Parent,px_int x,px_int y,px_int Radius);
 PX_Object_RadiusICO *PX_Object_GetRadiusICO(PX_Object *Object);
 px_void		PX_Object_RadiusICOSetColor(PX_Object *pRadiusICO,px_color Color);
 px_void		PX_Object_RadiusICORender(px_surface *psurface,PX_Object *pRadiusICO,px_uint elpased);
 px_void     PX_Object_RadiusICOFree(PX_Object *pRadiusICO);
 
-PX_Object *PX_Object_ImageCreate(PX_Object *Parent,px_int x,px_int y,px_texture *ptex);
+PX_Object *PX_Object_ImageCreate(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y,px_texture *ptex);
 PX_Object_Image *PX_Object_GetImage(PX_Object *Object);
 px_void	   PX_Object_ImageSetAlign(PX_Object *pImage,px_uchar Align);
 px_void	   PX_Object_ImageSetMask(PX_Object *pImage,px_texture *pmask);
@@ -403,7 +405,7 @@ px_void	   PX_Object_ImageRender(px_surface *psurface,PX_Object *pImage,px_uint 
 px_void	   PX_Object_ImageFree(PX_Object *pImage);
 px_void	   PX_Object_ImageFreeWithTexture(PX_Object *pImage);
 
-PX_Object *PX_Object_SliderBarCreate(PX_Object *Parent,px_int x,px_int y,px_int Width,px_int Height,enum PX_OBJECT_SLIDERBAR_TYPE Type,enum PX_OBJECT_SLIDERBAR_STYLE style);
+PX_Object *PX_Object_SliderBarCreate(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y,px_int Width,px_int Height,enum PX_OBJECT_SLIDERBAR_TYPE Type,enum PX_OBJECT_SLIDERBAR_STYLE style);
 PX_Object_SliderBar *PX_Object_GetSliderBar(PX_Object *Object);
 px_void	   PX_Object_SliderBarSetValue(PX_Object *pSliderBar,px_int Value);
 px_void	   PX_Object_SliderBarSetMax(PX_Object *pSliderBar,px_int Max);
@@ -417,7 +419,7 @@ px_void	   PX_Object_SliderBarSetSliderButtonLength(PX_Object *pSliderBar,px_int
 
 
 
-PX_Object *PX_Object_PushButtonCreate(PX_Object *Parent,px_int x,px_int y,px_int Width,px_int Height,px_char *Text,px_color Color);
+PX_Object *PX_Object_PushButtonCreate(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y,px_int Width,px_int Height,px_char *Text,px_color Color);
 PX_Object_PushButton * PX_Object_GetPushButton( PX_Object *Object );
 px_char * PX_Object_PushButtonGetText( PX_Object *PushButton );
 px_void PX_Object_PushButtonSetText( PX_Object *pObject,px_char *Text );
@@ -432,7 +434,7 @@ px_void PX_Object_PushButtonSetTextColor( PX_Object *pObject,px_color Color );
 px_void PX_Object_PushButtonSetImage(PX_Object *pObject,px_texture *texture);
 px_void PX_Object_PushButtonFree( PX_Object *Obj );
 
-PX_Object* PX_Object_EditCreate( PX_Object *Parent,px_int x,px_int y,px_int Width,px_int Height,px_color TextColor );
+PX_Object* PX_Object_EditCreate(px_memorypool *mp, PX_Object *Parent,px_int x,px_int y,px_int Width,px_int Height,px_color TextColor );
 PX_Object_Edit * PX_Object_GetEdit( PX_Object *Object );
 px_char * PX_Object_EditGetText( PX_Object *pObject );
 px_void PX_Object_EditSetMaxTextLength(PX_Object *pObject,px_int max_length);
@@ -453,14 +455,14 @@ px_void PX_Object_EditSetOffset(PX_Object *pObject,px_int TopOffset,px_int LeftO
 px_void PX_Object_EditCursorBack(PX_Object *pObject);
 px_void PX_Object_EditCursorForward(PX_Object *pObject);
 
-PX_Object * PX_Object_StaticImageCreate( PX_Object *Parent,px_int x,px_int y,px_texture tex);
-PX_Object_StaticImage * PX_Object_GetStaticImage( PX_Object *Object );
-px_void PX_Object_StaticImageSetAlign( PX_Object *pImage,px_uchar Align);
-px_void PX_Object_StaticImageRender(px_surface *psurface, PX_Object *im,px_uint elpased);
-px_void PX_Object_StaticImageFree(PX_Object *pObj);
+// PX_Object * PX_Object_StaticImageCreate( PX_Object *Parent,px_int x,px_int y,px_texture tex);
+// PX_Object_StaticImage * PX_Object_GetStaticImage( PX_Object *Object );
+// px_void PX_Object_StaticImageSetAlign( PX_Object *pImage,px_uchar Align);
+// px_void PX_Object_StaticImageRender(px_surface *psurface, PX_Object *im,px_uint elpased);
+// px_void PX_Object_StaticImageFree(PX_Object *pObj);
 
 
-PX_Object *PX_Object_ScrollAreaCreate(PX_Object *Parent,int x,int y,int height,int width);
+PX_Object *PX_Object_ScrollAreaCreate(px_memorypool *mp,PX_Object *Parent,int x,int y,int height,int width);
 PX_Object_ScrollArea * PX_Object_GetScrollArea( PX_Object *Object );
 PX_Object * PX_Object_ScrollAreaGetIncludedObjects(PX_Object *pObj);
 px_void PX_Object_ScrollAreaMoveToBottom(PX_Object *pObject);
@@ -473,12 +475,12 @@ px_void PX_Object_ScrollAreaSetBorderColor(PX_Object *pObj,px_color borderColor)
 px_void PX_Object_ScrollAreaFree(PX_Object *pObj);
 
 
-PX_Object *PX_Object_RotationCreate(PX_Object *Parent,px_int angle_per_second,px_int x,px_int y,px_texture *ptexture);
+PX_Object *PX_Object_RotationCreate(px_memorypool *mp,PX_Object *Parent,px_int angle_per_second,px_int x,px_int y,px_texture *ptexture);
 PX_Object_Rotation * PX_Object_GetRotation( PX_Object *Object );
 px_void PX_Object_RotationSetSpeed(PX_Object *rot,px_int Angle_per_second);
 px_void PX_Object_RotationRender(px_surface *psurface, PX_Object *Obj,px_uint elpased);
 
-PX_Object *PX_Object_AutoTextCreate(PX_Object *Parent,int x,int y,int limit_width);
+PX_Object *PX_Object_AutoTextCreate(px_memorypool *mp,PX_Object *Parent,int x,int y,int limit_width);
 PX_Object_AutoText * PX_Object_GetAutoText( PX_Object *Object );
 px_void PX_Object_AutoTextSetTextColor( PX_Object *pObject,px_color Color );
 px_void PX_Object_AutoTextSetText(PX_Object *Obj,px_char *Text);
@@ -487,7 +489,7 @@ px_void PX_Object_AutoTextFree(PX_Object *Obj);
 px_int PX_Object_AutoTextGetHeight(PX_Object *Obj);
 
 
-PX_Object *PX_Object_AnimationCreate(PX_Object *Parent,px_int x,px_int y,px_animationlibrary *lib);
+PX_Object *PX_Object_AnimationCreate(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y,px_animationlibrary *lib);
 px_void PX_Object_AnimationSetLibrary(PX_Object *Object,px_animationlibrary *lib);
 PX_Object_Animation *PX_Object_GetAnimation(PX_Object *Object);
 px_void	   PX_Object_AnimationSetAlign(PX_Object *pObject,px_uchar Align);
@@ -495,22 +497,22 @@ px_void	   PX_Object_AnimationRender(px_surface *psurface,PX_Object *pImage,px_u
 px_void	   PX_Object_AnimationFree(PX_Object *pObject);
 
 
-
-PX_Object *PX_Object_ParticalCreate(PX_Object *Parent,px_int x,px_int y,px_texture *pTexture,PX_ScriptVM_Instance *pIns,px_char *_init,px_char *_create,px_char *_update);
+PX_Object *PX_Object_ParticalCreateEx(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y,PX_ParticalLauncher_InitializeInfo info);
+PX_Object *PX_Object_ParticalCreate(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y,px_texture *pTexture,PX_ScriptVM_Instance *pIns,px_char *_init,px_char *_create,px_char *_update);
 PX_Object_Partical *PX_Object_GetPartical(PX_Object *Object);
 px_void    PX_Object_ParticalSetDirection(PX_Object *pObject,px_point direction);
 px_void	   PX_Object_ParticalRender(px_surface *psurface,PX_Object *pObject,px_uint elpased);
 px_void	   PX_Object_ParticalFree(PX_Object *pObject);
 
 
-PX_Object *PX_Object_RoundCursorCreate(PX_Object *Parent,px_int x,px_int y,px_shape *pShape,px_color blendColor);
+PX_Object *PX_Object_RoundCursorCreate(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y,px_shape *pShape,px_color blendColor);
 PX_Object_RoundCursor *PX_Object_GetRoundCursor(PX_Object *Object);
 px_void    PX_Object_RoundCursorSetDirection(PX_Object *Object,px_point cursor_point);
 px_void	   PX_Object_RoundCursorRender(px_surface *psurface,PX_Object *pObject,px_uint elpased);
 px_void PX_Object_RoundCursorSetColor(PX_Object *Object,px_color clr);
 px_void		PX_Object_RoundCursorFree(PX_Object *pObject);
 
-PX_Object * PX_Object_ShapeCreate( PX_Object *Parent,px_int x,px_int y,px_shape *pshape );
+PX_Object * PX_Object_ShapeCreate(px_memorypool *mp, PX_Object *Parent,px_int x,px_int y,px_shape *pshape );
 PX_Object_Shape * PX_Object_GetShape( PX_Object *Object );
 px_void PX_Object_ShapeSetAlign( PX_Object *pShape,px_uchar Align);
 px_void PX_Object_ShapeSetBlendColor( PX_Object *pShape,px_color blendcolor);
@@ -518,7 +520,7 @@ px_void PX_Object_ShapeRender(px_surface *psurface, PX_Object *im,px_uint elpase
 px_void PX_Object_RoundCursor_Mousemove(PX_Object *pobject,PX_Object_Event e,px_void *user_ptr);
 
 //use pushbutton function to operate cursor-button
-PX_Object *PX_Object_CursorButtonCreate(PX_Object *Parent,px_int x,px_int y,px_int Width,px_int Height,px_char *Text,px_color Color);
+PX_Object *PX_Object_CursorButtonCreate(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y,px_int Width,px_int Height,px_char *Text,px_color Color);
 PX_Object_CursorButton * PX_Object_GetCursorButton( PX_Object *Object );
 PX_Object * PX_Object_GetCursorButtonPushButton(PX_Object *Object);
 

@@ -20733,60 +20733,34 @@ px_void PX_FontModuleFree(PX_FontModule *module)
 	PX_MapFree(&module->characters_map);
 }
 
-px_void PX_FontModuleDrawText(px_surface *psurface,int x,int y,px_char *Text,px_color Color,PX_FontModule *mod)
+//utf-16 le
+px_void PX_FontModuleDrawText(px_surface *psurface,int x,int y,px_uchar *Text,px_color Color,PX_FontModule *mod)
 {
 	px_int dx,dy;
 	dx=x;
 	dy=y;
-	while (*Text)
+
+	if (!Text)
+	{
+		PX_ASSERT();
+		return;
+	}
+
+	while (PX_TRUE)
 	{
 		px_dword unicode_code=0;
 		px_char hex[5];
 		PX_FontModule_Charactor *pChar;
 
-		if (((*Text)&0xf0)==0xf0)//4 byte
+		unicode_code=*Text;
+		Text++;
+		
+		unicode_code+=(*Text)<<8;
+		Text++;
+
+		if (unicode_code==0)
 		{
-			unicode_code=*Text;
-			Text++;
-			if(*Text==0) return;
-
-			unicode_code+=(*Text)<<8;
-			Text++;
-			if(*Text==0) return;
-
-			unicode_code+=(*Text)<<16;
-			Text++;
-			if(*Text==0) return;
-
-			unicode_code+=(*Text)<<24;
-			Text++;
-		}
-		else if (((*Text)&0xe0)==0xe0)//3 byte
-		{
-			unicode_code=*Text;
-			Text++;
-			if(*Text==0) return;
-
-			unicode_code+=(*Text)<<8;
-			Text++;
-			if(*Text==0) return;
-
-			unicode_code+=(*Text)<<16;
-			Text++;
-		}
-		else if (((*Text)&0xc0)==0xc0)//2 byte
-		{
-			unicode_code=*Text;
-			Text++;
-			if(*Text==0) return;
-
-			unicode_code+=(*Text)<<8;
-			Text++;
-		}
-		else if (((*Text)&0x80)==0)//1 byte
-		{
-			unicode_code=*Text;
-			Text++;
+			return;
 		}
 
 		if (unicode_code!=' ')

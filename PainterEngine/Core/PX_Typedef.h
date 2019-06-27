@@ -168,6 +168,8 @@ px_float PX_sin_radian(float radius);
 px_float PX_cos_radian(float radius);
 px_float PX_sin_angle(float angle);
 px_float PX_cos_angle(float angle);
+px_float PX_Point_sin(px_point v);
+px_float PX_Point_cos(px_point v);
 
 #define  PX_APO(x) ((px_int)((x)+0.5f))
 #define  PX_ABS(x) ((x)>0?(x):-(x))
@@ -256,6 +258,7 @@ px_point PX_PointCross(px_point p1,px_point p2);
 px_float PX_PointMod(px_point p);
 px_float PX_PointSquare(px_point p);
 px_point PX_PointUnit(px_point p);
+px_point PX_PointReflectX(px_point vector_refer,px_point respoint);
 
 px_point PX_PointMulMatrix(px_point p,px_matrix m);
 

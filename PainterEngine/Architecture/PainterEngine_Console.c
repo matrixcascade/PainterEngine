@@ -85,7 +85,7 @@ px_void PX_ConsoleUpdateEx(PX_Console *pc)
 PX_Object * PX_ConsolePrintText(PX_Console *pc,px_char *text)
 {
 	PX_ConsoleColumn obj;
-	PX_Object *pObject=PX_Object_AutoTextCreate(PX_Object_ScrollAreaGetIncludedObjects(pc->Area),0,0,pc->runtime->width-1);
+	PX_Object *pObject=PX_Object_AutoTextCreate(&pc->runtime->mp_ui,PX_Object_ScrollAreaGetIncludedObjects(pc->Area),0,0,pc->runtime->width-1);
 
 	if (pObject)
 	{
@@ -110,7 +110,7 @@ PX_Object * PX_ConsolePrintImage(PX_Console *pc,px_char *res_image_key)
 	{
 		if (pimageRes->Type==PX_RESOURCE_TYPE_TEXTURE)
 		{
-			pObject=PX_Object_ImageCreate(PX_Object_ScrollAreaGetIncludedObjects(pc->Area),0,0,&pimageRes->texture);
+			pObject=PX_Object_ImageCreate(&pc->runtime->mp_ui,PX_Object_ScrollAreaGetIncludedObjects(pc->Area),0,0,&pimageRes->texture);
 			PX_Object_ImageSetAlign(pObject,PX_OBJECT_ALIGN_TOP|PX_OBJECT_ALIGN_LEFT);
 			PX_ObjectSetSize(pObject,(px_float)pimageRes->texture.width,(px_float)pimageRes->texture.height,0);
 			obj.Object=pObject;
@@ -139,7 +139,7 @@ PX_Object * PX_ConsolePrintShape(PX_Console *pc,px_char *res_image_key,px_color 
 	{
 		if (pShape->Type==PX_RESOURCE_TYPE_SHAPE)
 		{
-			pObject=PX_Object_ShapeCreate(PX_Object_ScrollAreaGetIncludedObjects(pc->Area),0,0,&pShape->shape);
+			pObject=PX_Object_ShapeCreate(&pc->runtime->mp_ui,PX_Object_ScrollAreaGetIncludedObjects(pc->Area),0,0,&pShape->shape);
 			PX_Object_ShapeSetAlign(pObject,PX_OBJECT_ALIGN_TOP|PX_OBJECT_ALIGN_LEFT);
 			PX_Object_ShapeSetBlendColor(pObject,color);
 			PX_ObjectSetSize(pObject,(px_float)pShape->shape.width,(px_float)pShape->shape.height,0);
@@ -170,7 +170,7 @@ PX_Object * PX_ConsolePrintAnimation(PX_Console *pc,px_char *res_animation_key)
 	{
 		if (pAnimationRes->Type==PX_RESOURCE_TYPE_ANIMATIONLIBRARY)
 		{
-			pObject=PX_Object_AnimationCreate(PX_Object_ScrollAreaGetIncludedObjects(pc->Area),0,0,&pAnimationRes->animationlibrary);
+			pObject=PX_Object_AnimationCreate(&pc->runtime->mp_ui,PX_Object_ScrollAreaGetIncludedObjects(pc->Area),0,0,&pAnimationRes->animationlibrary);
 			PX_Object_AnimationSetAlign(pObject,PX_OBJECT_ALIGN_TOP|PX_OBJECT_ALIGN_LEFT);
 			rect=PX_AnimationGetSize(&PX_Object_GetAnimation(pObject)->animation);
 			PX_ObjectSetSize(pObject,(px_float)rect.width,(px_float)rect.height,0);
@@ -218,7 +218,7 @@ PX_Object * PX_ConsolePrintPartical(PX_Console *pc,px_int x,px_int y,px_char *re
 	}
 
 
-	pObject=PX_Object_ParticalCreate(PX_Object_ScrollAreaGetIncludedObjects(pc->Area),x,y,&pTextureRes->texture,&pScriptRes->Script,_init,_create,_updata);
+	pObject=PX_Object_ParticalCreate(&pc->runtime->mp_ui,PX_Object_ScrollAreaGetIncludedObjects(pc->Area),x,y,&pTextureRes->texture,&pScriptRes->Script,_init,_create,_updata);
 	PX_ObjectSetSize(pObject,0,0,0);
 	obj.Object=pObject;
 	obj.id=pc->id++;
@@ -236,7 +236,7 @@ PX_Object * PX_ConsoleShowImage(PX_Console *pc,px_char *res_image_key)
 	{
 		if (pimageRes->Type==PX_RESOURCE_TYPE_TEXTURE)
 		{
-			pObject=PX_Object_ImageCreate(PX_Object_ScrollAreaGetIncludedObjects(pc->Area),0,0,&pimageRes->texture);
+			pObject=PX_Object_ImageCreate(&pc->runtime->mp_ui,PX_Object_ScrollAreaGetIncludedObjects(pc->Area),0,0,&pimageRes->texture);
 			PX_Object_ImageSetAlign(pObject,PX_OBJECT_ALIGN_TOP|PX_OBJECT_ALIGN_LEFT);
 			obj.Object=pObject;
 			obj.id=pc->id++;
@@ -314,7 +314,7 @@ PX_Object *  PC_ConsoleCreateRoundCursor(PX_Console *pc,px_char *shape_key,px_co
 	{
 		if (pShape->Type==PX_RESOURCE_TYPE_SHAPE)
 		{
-			pObject=PX_Object_RoundCursorCreate(PX_Object_ScrollAreaGetIncludedObjects(pc->Area),0,0,&pShape->shape,clr);
+			pObject=PX_Object_RoundCursorCreate(&pc->runtime->mp_ui,PX_Object_ScrollAreaGetIncludedObjects(pc->Area),0,0,&pShape->shape,clr);
 			PX_ObjectSetSize(pObject,(px_float)pShape->shape.width,(px_float)pShape->shape.height,0);
 			obj.Object=pObject;
 			obj.id=pc->id++;
@@ -729,15 +729,15 @@ px_bool PC_ConsoleInit(PX_Console *pc)
 	pc->show=PX_FALSE;
 	pc->max_column=PC_CONSOLE_DEFAULT_MAX_COLUMN;
 	pc->column=0;
-	if(!(pc->Root=PX_ObjectRootCreate(&pc->runtime->mp_ui))) return PX_FALSE;
-	if(!(pc->Area=PX_Object_ScrollAreaCreate(pc->Root,0,0,pc->runtime->width,pc->runtime->height))) return PX_FALSE;
+	if(!(pc->Root=PX_ObjectCreate(&pc->runtime->mp_ui,0,0,0,0,0,0,0))) return PX_FALSE;
+	if(!(pc->Area=PX_Object_ScrollAreaCreate(&pc->runtime->mp_ui,pc->Root,0,0,pc->runtime->width,pc->runtime->height))) return PX_FALSE;
 
 
 	pc->Area->User_ptr=pc;
 	PX_ObjectRegisterEvent(pc->Area,PX_OBJECT_EVENT_KEYDOWN,PX_ConsoleOnEnter,PX_NULL);
 	PX_ObjectRegisterEvent(pc->Area,PX_OBJECT_EVENT_CURSORDOWN,PX_ConsoleOnMouseDown,PX_NULL);
 	PX_Object_ScrollAreaSetBorder(pc->Area,PX_FALSE);
-	if(!(pc->Input=PX_Object_EditCreate(PX_Object_ScrollAreaGetIncludedObjects(pc->Area),0,0,pc->runtime->width-1,PX_FontGetCharactorHeight()+4,PX_COLOR(255,0,255,0)))) return PX_FALSE;
+	if(!(pc->Input=PX_Object_EditCreate(&pc->runtime->mp_ui,PX_Object_ScrollAreaGetIncludedObjects(pc->Area),0,0,pc->runtime->width-1,PX_FontGetCharactorHeight()+4,PX_COLOR(255,0,255,0)))) return PX_FALSE;
 	PX_Object_EditSetCursorColor(pc->Input,PX_COLOR(255,0,255,0));
 	PX_Object_EditSetTextColor(pc->Input,PX_COLOR(255,0,255,0));
 	PX_Object_EditSetBorderColor(pc->Input,PX_COLOR(255,0,255,0));

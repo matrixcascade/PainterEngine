@@ -1,7 +1,7 @@
 #include "PX_Object.h"
 
 
-
+/*
 PX_Object * PX_ObjectRootCreate(px_memorypool *mp)
 {
 	PX_Object *pObject=(PX_Object *)MP_Malloc(mp,sizeof(PX_Object));
@@ -34,6 +34,7 @@ PX_Object * PX_ObjectRootCreate(px_memorypool *mp)
 
 	return pObject;
 }
+*/
 
 PX_Object  * PX_ObjectGetChild( PX_Object *Object,px_int Index )
 {
@@ -52,16 +53,16 @@ PX_Object  * PX_ObjectGetChild( PX_Object *Object,px_int Index )
 
 }
 
-PX_Object * PX_ObjectCreate( PX_Object *Parent,px_float x,px_float y,px_float z,px_float Width,px_float Height,px_float Lenght)
+PX_Object * PX_ObjectCreate(px_memorypool *mp,PX_Object *Parent,px_float x,px_float y,px_float z,px_float Width,px_float Height,px_float Lenght)
 {
 	
-	PX_Object *pObject=(PX_Object *)MP_Malloc(Parent->mp,sizeof(PX_Object));
+	PX_Object *pObject=(PX_Object *)MP_Malloc(mp,sizeof(PX_Object));
 
 	if (pObject==PX_NULL)
 	{
 		return PX_NULL;
 	}
-	PX_ObjectInit(pObject,Parent,x,y,z,Width,Height,Lenght);
+	PX_ObjectInit(mp,pObject,Parent,x,y,z,Width,Height,Lenght);
 
 	return pObject;
 }
@@ -273,7 +274,7 @@ px_float PX_ObjectGetWidth(PX_Object *Object)
 	return Object->Width;
 }
 
-
+/*
 px_void PX_ObjectRootInit(PX_Object *pObject,px_float x,px_float y,px_float z,px_float Width,px_float Height,px_float Lenght)
 {
 	pObject->pParent=PX_NULL;
@@ -301,9 +302,9 @@ px_void PX_ObjectRootInit(PX_Object *pObject,px_float x,px_float y,px_float z,px
 	pObject->Func_ObjectRender=PX_NULL;
 }
 
+*/
 
-
-px_void PX_ObjectInit( PX_Object *pObject,PX_Object *Parent,px_float x,px_float y,px_float z,px_float Width,px_float Height,px_float Lenght )
+px_void PX_ObjectInit(px_memorypool *mp,PX_Object *pObject,PX_Object *Parent,px_float x,px_float y,px_float z,px_float Width,px_float Height,px_float Lenght )
 {
 	PX_Object *pLinker;
 	pObject->pParent=Parent;
@@ -330,7 +331,7 @@ px_void PX_ObjectInit( PX_Object *pObject,PX_Object *Parent,px_float x,px_float 
 	pObject->User_int=0;
 	pObject->User_ptr=PX_NULL;
 
-	pObject->mp=pObject->pParent->mp;
+	pObject->mp=mp;
 	pObject->Func_ObjectFree=PX_NULL;
 	pObject->Func_ObjectRender=PX_NULL;
 
@@ -485,16 +486,16 @@ px_void PX_ObjectPostEvent( PX_Object *pPost,PX_Object_Event Event )
 
 
 
-PX_Object* PX_Object_LabelCreate( PX_Object *Parent,px_int x,px_int y,px_int Width,px_int Height,px_char *Text,px_color Color )
+PX_Object* PX_Object_LabelCreate(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y,px_int Width,px_int Height,px_char *Text,px_color Color )
 {
 	px_int TextLen;
 	PX_Object *pObject;
-	PX_Object_Label *pLable=(PX_Object_Label *)MP_Malloc(Parent->mp,sizeof(PX_Object_Label));
+	PX_Object_Label *pLable=(PX_Object_Label *)MP_Malloc(mp,sizeof(PX_Object_Label));
 	if (pLable==PX_NULL)
 	{
 		return PX_NULL;
 	}
-	pObject=PX_ObjectCreate(Parent,(px_float)x,(px_float)y,0,(px_float)Width,(px_float)Height,0);
+	pObject=PX_ObjectCreate(mp,Parent,(px_float)x,(px_float)y,0,(px_float)Width,(px_float)Height,0);
 
 	if (pObject==PX_NULL)
 	{
@@ -503,7 +504,7 @@ PX_Object* PX_Object_LabelCreate( PX_Object *Parent,px_int x,px_int y,px_int Wid
 
 	if (!pObject)
 	{
-		MP_Free(Parent->mp,pLable);
+		MP_Free(mp,pLable);
 		return PX_NULL;
 	}
 	pObject->pObject=pLable;
@@ -514,7 +515,7 @@ PX_Object* PX_Object_LabelCreate( PX_Object *Parent,px_int x,px_int y,px_int Wid
 
 	TextLen=px_strlen(Text);
 	
-	pLable->Text=(px_char *)MP_Malloc(Parent->mp,TextLen+1);
+	pLable->Text=(px_char *)MP_Malloc(mp,TextLen+1);
 	if (pLable->Text==PX_NULL)
 	{
 		MP_Free(pObject->mp,pObject);
@@ -704,15 +705,15 @@ px_void PX_Object_LabelFree( PX_Object *pLabel )
 }
 
 
-PX_Object * PX_Object_ProcessBarCreate( PX_Object *Parent,px_int x,px_int y,px_int Width,px_int Height )
+PX_Object * PX_Object_ProcessBarCreate(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y,px_int Width,px_int Height )
 {
 	PX_Object *pObject;
-	PX_Object_ProcessBar *ProcessBar=(PX_Object_ProcessBar *)MP_Malloc(Parent->mp,sizeof(PX_Object_ProcessBar));
+	PX_Object_ProcessBar *ProcessBar=(PX_Object_ProcessBar *)MP_Malloc(mp,sizeof(PX_Object_ProcessBar));
 	if (ProcessBar==PX_NULL)
 	{
 		return PX_NULL;
 	}
-	pObject=PX_ObjectCreate(Parent,(px_float)x,(px_float)y,0,(px_float)Width,(px_float)Height,0);
+	pObject=PX_ObjectCreate(mp,Parent,(px_float)x,(px_float)y,0,(px_float)Width,(px_float)Height,0);
 	if (pObject==PX_NULL)
 	{
 		MP_Free(pObject->mp,ProcessBar);
@@ -834,15 +835,15 @@ px_int PX_Object_ProcessBarGetValue( PX_Object *pProcessBar )
 
 
 
-PX_Object * PX_Object_RadiusICOCreate( PX_Object*Parent,px_int x,px_int y,px_int Radius )
+PX_Object * PX_Object_RadiusICOCreate(px_memorypool *mp,PX_Object*Parent,px_int x,px_int y,px_int Radius )
 {
 	PX_Object *pObject;
-	PX_Object_RadiusICO *RadiusICO=(PX_Object_RadiusICO *)MP_Malloc(Parent->mp,sizeof(PX_Object_RadiusICO));
+	PX_Object_RadiusICO *RadiusICO=(PX_Object_RadiusICO *)MP_Malloc(mp,sizeof(PX_Object_RadiusICO));
 	if (RadiusICO==PX_NULL)
 	{
 		return PX_NULL;
 	}
-	pObject=PX_ObjectCreate(Parent,(px_float)(x-Radius),(px_float)(y-Radius),0,(px_float)(2*Radius),(px_float)(2*Radius),0);
+	pObject=PX_ObjectCreate(mp,Parent,(px_float)(x-Radius),(px_float)(y-Radius),0,(px_float)(2*Radius),(px_float)(2*Radius),0);
 	if (pObject==PX_NULL)
 	{
 		MP_Free(pObject->mp,RadiusICO);
@@ -902,15 +903,15 @@ px_void PX_Object_RadiusICORender(px_surface *psurface, PX_Object *RadiusICO,px_
 }
 
 
-PX_Object * PX_Object_ImageCreate( PX_Object *Parent,px_int x,px_int y,px_texture *ptex )
+PX_Object * PX_Object_ImageCreate(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y,px_texture *ptex )
 {
 	PX_Object *pObject;
-	PX_Object_Image *pImage=(PX_Object_Image *)MP_Malloc(Parent->mp,sizeof(PX_Object_Image));
+	PX_Object_Image *pImage=(PX_Object_Image *)MP_Malloc(mp,sizeof(PX_Object_Image));
 	if (pImage==PX_NULL)
 	{
 		return PX_NULL;
 	}
-	pObject=PX_ObjectCreate(Parent,(px_float)x,(px_float)y,0,0,0,0);
+	pObject=PX_ObjectCreate(mp,Parent,(px_float)x,(px_float)y,0,0,0,0);
 	if (pObject==PX_NULL)
 	{
 		MP_Free(pObject->mp,pImage);
@@ -1222,15 +1223,15 @@ px_void PX_Object_SliderBarOnCursorDrag(PX_Object *pObject,PX_Object_Event e,px_
 }
 
 
-PX_Object * PX_Object_SliderBarCreate( PX_Object *Parent,px_int x,px_int y,px_int Width,px_int Height,enum PX_OBJECT_SLIDERBAR_TYPE Type,enum PX_OBJECT_SLIDERBAR_STYLE style)
+PX_Object * PX_Object_SliderBarCreate(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y,px_int Width,px_int Height,enum PX_OBJECT_SLIDERBAR_TYPE Type,enum PX_OBJECT_SLIDERBAR_STYLE style)
 {
 	PX_Object *pObject;
-	PX_Object_SliderBar *pSliderbar=(PX_Object_SliderBar *)MP_Malloc(Parent->mp,sizeof(PX_Object_SliderBar));
+	PX_Object_SliderBar *pSliderbar=(PX_Object_SliderBar *)MP_Malloc(mp,sizeof(PX_Object_SliderBar));
 	if (pSliderbar==PX_NULL)
 	{
 		return PX_NULL;
 	}
-	pObject=PX_ObjectCreate(Parent,(px_float)x,(px_float)y,0,(px_float)Width,(px_float)Height,0);
+	pObject=PX_ObjectCreate(mp,Parent,(px_float)x,(px_float)y,0,(px_float)Width,(px_float)Height,0);
 	if (pObject==PX_NULL)
 	{
 		MP_Free(pObject->mp,pSliderbar);
@@ -1666,11 +1667,32 @@ px_void PX_Object_PushButtonOnMouseMove(PX_Object *Object,PX_Object_Event e,px_v
 		{
 			if (pPushButton->state!=PX_OBJECT_BUTTON_STATE_ONPUSH)
 			{
+				if (pPushButton->state!=PX_OBJECT_BUTTON_STATE_ONCURSOR)
+				{
+					PX_Object_Event e;
+					e.Event=PX_OBJECT_EVENT_CURSOROVER;
+					e.Param_uint[0]=0;
+					e.Param_uint[1]=0;
+					e.Param_uint[2]=0;
+					e.Param_uint[3]=0;
+					e.user=PX_NULL;
+					PX_ObjectExecuteEvent(Object,e);
+				}
 				pPushButton->state=PX_OBJECT_BUTTON_STATE_ONCURSOR;
 			}
 		}
 		else
 		{
+			if (pPushButton->state!=PX_OBJECT_BUTTON_STATE_NORMAL)
+			{
+				PX_Object_Event e;
+				e.Event=PX_OBJECT_EVENT_CURSOROUT;
+				e.Param_uint[0]=0;
+				e.Param_uint[1]=0;
+				e.Param_uint[2]=0;
+				e.Param_uint[3]=0;
+				PX_ObjectExecuteEvent(Object,e);
+			}
 			pPushButton->state=PX_OBJECT_BUTTON_STATE_NORMAL;
 		}
 	}
@@ -1714,16 +1736,16 @@ px_void PX_Object_PushButtonOnMouseLButtonUp(PX_Object *Object,PX_Object_Event e
 
 
 
-PX_Object * PX_Object_PushButtonCreate(PX_Object *Parent,px_int x,px_int y,px_int Width,px_int Height,px_char *Text,px_color Color)
+PX_Object * PX_Object_PushButtonCreate(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y,px_int Width,px_int Height,px_char *Text,px_color Color)
 {
 	px_int TextLen;
 	PX_Object *pObject;
-	PX_Object_PushButton *pPushButton=(PX_Object_PushButton *)MP_Malloc(Parent->mp,sizeof(PX_Object_PushButton));
+	PX_Object_PushButton *pPushButton=(PX_Object_PushButton *)MP_Malloc(mp,sizeof(PX_Object_PushButton));
 	if (pPushButton==PX_NULL)
 	{
 		return PX_NULL;
 	}
-	pObject=PX_ObjectCreate(Parent,(px_float)x,(px_float)y,0,(px_float)Width,(px_float)Height,0);
+	pObject=PX_ObjectCreate(mp,Parent,(px_float)x,(px_float)y,0,(px_float)Width,(px_float)Height,0);
 
 	if (pObject==PX_NULL)
 	{
@@ -1732,7 +1754,7 @@ PX_Object * PX_Object_PushButtonCreate(PX_Object *Parent,px_int x,px_int y,px_in
 
 	if (!pObject)
 	{
-		MP_Free(Parent->mp,pPushButton);
+		MP_Free(mp,pPushButton);
 	}
 	pObject->pObject=pPushButton;
 	pObject->Type=PX_OBJECT_TYPE_PUSHBUTTON;
@@ -1742,7 +1764,7 @@ PX_Object * PX_Object_PushButtonCreate(PX_Object *Parent,px_int x,px_int y,px_in
 
 	TextLen=px_strlen(Text)+1;
 
-	pPushButton->Text=(px_char *)MP_Malloc(Parent->mp,TextLen);
+	pPushButton->Text=(px_char *)MP_Malloc(mp,TextLen);
 	
 	if (pPushButton->Text==PX_NULL)
 	{
@@ -2055,15 +2077,15 @@ px_void PX_Object_RotationRender(px_surface *psurface, PX_Object *Obj,px_uint el
 	
 }
 
-PX_Object * PX_Object_RotationCreate(PX_Object *Parent,px_int angle_per_second,px_int x,px_int y,px_texture *ptexture)
+PX_Object * PX_Object_RotationCreate(px_memorypool *mp,PX_Object *Parent,px_int angle_per_second,px_int x,px_int y,px_texture *ptexture)
 {
 	PX_Object *pObject;
-	PX_Object_Rotation *pRotation=(PX_Object_Rotation *)MP_Malloc(Parent->mp,sizeof(PX_Object_Rotation));
+	PX_Object_Rotation *pRotation=(PX_Object_Rotation *)MP_Malloc(mp,sizeof(PX_Object_Rotation));
 	if (pRotation==PX_NULL)
 	{
 		return PX_NULL;
 	}
-	pObject=PX_ObjectCreate(Parent,(px_float)x,(px_float)y,0,0,0,0);
+	pObject=PX_ObjectCreate(mp,Parent,(px_float)x,(px_float)y,0,0,0,0);
 	if (pObject==PX_NULL)
 	{
 		MP_Free(pObject->mp,pRotation);
@@ -2175,15 +2197,15 @@ static px_void PX_Object_EditCheckCursor(PX_Object_Edit*pedit)
 	}
 }
 
-PX_Object* PX_Object_EditCreate( PX_Object *Parent,px_int x,px_int y,px_int Width,px_int Height,px_color TextColor )
+PX_Object* PX_Object_EditCreate(px_memorypool *mp, PX_Object *Parent,px_int x,px_int y,px_int Width,px_int Height,px_color TextColor )
 {
 	PX_Object *pObject;
-	PX_Object_Edit *pEdit=(PX_Object_Edit *)MP_Malloc(Parent->mp,sizeof(PX_Object_Edit));
+	PX_Object_Edit *pEdit=(PX_Object_Edit *)MP_Malloc(mp,sizeof(PX_Object_Edit));
 	if (pEdit==PX_NULL)
 	{
 		return PX_NULL;
 	}
-	pObject=PX_ObjectCreate(Parent,(px_float)x,(px_float)y,0,(px_float)Width,(px_float)Height,0);
+	pObject=PX_ObjectCreate(mp,Parent,(px_float)x,(px_float)y,0,(px_float)Width,(px_float)Height,0);
 
 	if (pObject==PX_NULL)
 	{
@@ -2192,14 +2214,14 @@ PX_Object* PX_Object_EditCreate( PX_Object *Parent,px_int x,px_int y,px_int Widt
 
 	if (!pObject)
 	{
-		MP_Free(Parent->mp,pEdit);
+		MP_Free(mp,pEdit);
 		return PX_NULL;
 	}
 
-	if(!PX_SurfaceCreate(Parent->mp,Width,Height,&pEdit->EditSurface))
+	if(!PX_SurfaceCreate(mp,Width,Height,&pEdit->EditSurface))
 	{
-		MP_Free(Parent->mp,pEdit);
-		MP_Free(Parent->mp,pObject);
+		MP_Free(mp,pEdit);
+		MP_Free(mp,pObject);
 		return PX_NULL;
 	}
 
@@ -2211,7 +2233,7 @@ PX_Object* PX_Object_EditCreate( PX_Object *Parent,px_int x,px_int y,px_int Widt
 
 
 
-	PX_StringInit(Parent->mp,&pEdit->text);
+	PX_StringInit(mp,&pEdit->text);
 
 
 	pEdit->TextColor=TextColor;
@@ -2826,102 +2848,102 @@ px_void PX_Object_EditSetOffset(PX_Object *pObject,px_int TopOffset,px_int LeftO
 	}
 }
 
-
-PX_Object * PX_Object_StaticImageCreate( PX_Object *Parent,px_int x,px_int y,px_texture tex )
-{
-	PX_Object *pObject;
-	PX_Object_StaticImage *pImage=(PX_Object_StaticImage *)MP_Malloc(Parent->mp,sizeof(PX_Object_StaticImage));
-	if (pImage==PX_NULL)
-	{
-		return PX_NULL;
-	}
-	pObject=PX_ObjectCreate(Parent,(px_float)x,(px_float)y,0,0,0,0);
-	if (pObject==PX_NULL)
-	{
-		MP_Free(pObject->mp,pImage);
-		return PX_NULL;
-	}
-
-	pObject->pObject=pImage;
-	pObject->Enabled=PX_TRUE;
-	pObject->Visible=PX_TRUE;
-	pObject->Type=PX_OBJECT_TYPE_STATICIMAGE;
-	pObject->ReceiveEvents=PX_FALSE;
-	pObject->Func_ObjectFree=PX_Object_StaticImageFree;
-	pObject->Func_ObjectRender=PX_Object_StaticImageRender;
-	pImage->Texture=tex;
-	pImage->Align=PX_OBJECT_ALIGN_LEFT|PX_OBJECT_ALIGN_TOP;
-	return pObject;
-}
-
-
-PX_Object_StaticImage * PX_Object_GetStaticImage( PX_Object *Object )
-{
-	if(Object->Type==PX_OBJECT_TYPE_STATICIMAGE)
-		return (PX_Object_StaticImage *)Object->pObject;
-	else
-		return PX_NULL;
-}
-
-px_void PX_Object_StaticImageSetAlign( PX_Object *pImage,px_uchar Align)
-{
-	PX_Object_StaticImage *Bitmap=PX_Object_GetStaticImage(pImage);
-	if (Bitmap)
-	{
-		Bitmap->Align=Align;
-	}
-}
-
-
-px_void PX_Object_StaticImageRender(px_surface *psurface, PX_Object *im,px_uint elpased)
-{
-	px_int x;
-	px_int y;
-	PX_Object_StaticImage *pImage=PX_Object_GetStaticImage(im);
-	x=(px_int)im->x;
-	y=(px_int)im->y;
-
-	if (pImage->Align&PX_OBJECT_ALIGN_BOTTOM)
-	{
-		y=(px_int)im->y+(px_int)im->Height-pImage->Texture.height;
-	}
-	if (pImage->Align&PX_OBJECT_ALIGN_TOP)
-	{
-		y=(px_int)im->y;
-	}
-	if (pImage->Align&PX_OBJECT_ALIGN_LEFT)
-	{
-		x=(px_int)im->x;
-	}
-	if (pImage->Align&PX_OBJECT_ALIGN_RIGHT)
-	{
-		x=(px_int)im->x+(px_int)im->Width-pImage->Texture.width;
-	}
-
-	if (pImage->Align&PX_OBJECT_ALIGN_HCENTER)
-	{
-		x=(px_int)im->x+((px_int)im->Width-pImage->Texture.width)/2;
-	}
-	if (pImage->Align&PX_OBJECT_ALIGN_VCENTER)
-	{
-		y=(px_int)im->y+((px_int)im->Height-pImage->Texture.height)/2;
-	}
-
-	if (pImage!=PX_NULL)
-	{
-		PX_TextureRender(psurface,&pImage->Texture,x,y,PX_TEXTURERENDER_REFPOINT_LEFTTOP,PX_NULL);
-	}
-}
-
-px_void PX_Object_StaticImageFree(PX_Object *pObj)
-{
-	PX_Object_StaticImage *pImage;
-	pImage=PX_Object_GetStaticImage(pObj);
-	if (pImage)
-	{
-		PX_TextureFree(&pImage->Texture);
-	}
-}
+// 
+// PX_Object * PX_Object_StaticImageCreate(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y,px_texture tex )
+// {
+// 	PX_Object *pObject;
+// 	PX_Object_StaticImage *pImage=(PX_Object_StaticImage *)MP_Malloc(mp,sizeof(PX_Object_StaticImage));
+// 	if (pImage==PX_NULL)
+// 	{
+// 		return PX_NULL;
+// 	}
+// 	pObject=PX_ObjectCreate(mp,Parent,(px_float)x,(px_float)y,0,0,0,0);
+// 	if (pObject==PX_NULL)
+// 	{
+// 		MP_Free(pObject->mp,pImage);
+// 		return PX_NULL;
+// 	}
+// 
+// 	pObject->pObject=pImage;
+// 	pObject->Enabled=PX_TRUE;
+// 	pObject->Visible=PX_TRUE;
+// 	pObject->Type=PX_OBJECT_TYPE_STATICIMAGE;
+// 	pObject->ReceiveEvents=PX_FALSE;
+// 	pObject->Func_ObjectFree=PX_Object_StaticImageFree;
+// 	pObject->Func_ObjectRender=PX_Object_StaticImageRender;
+// 	pImage->Texture=tex;
+// 	pImage->Align=PX_OBJECT_ALIGN_LEFT|PX_OBJECT_ALIGN_TOP;
+// 	return pObject;
+// }
+// 
+// 
+// PX_Object_StaticImage * PX_Object_GetStaticImage( PX_Object *Object )
+// {
+// 	if(Object->Type==PX_OBJECT_TYPE_STATICIMAGE)
+// 		return (PX_Object_StaticImage *)Object->pObject;
+// 	else
+// 		return PX_NULL;
+// }
+// 
+// px_void PX_Object_StaticImageSetAlign( PX_Object *pImage,px_uchar Align)
+// {
+// 	PX_Object_StaticImage *Bitmap=PX_Object_GetStaticImage(pImage);
+// 	if (Bitmap)
+// 	{
+// 		Bitmap->Align=Align;
+// 	}
+// }
+// 
+// 
+// px_void PX_Object_StaticImageRender(px_surface *psurface, PX_Object *im,px_uint elpased)
+// {
+// 	px_int x;
+// 	px_int y;
+// 	PX_Object_StaticImage *pImage=PX_Object_GetStaticImage(im);
+// 	x=(px_int)im->x;
+// 	y=(px_int)im->y;
+// 
+// 	if (pImage->Align&PX_OBJECT_ALIGN_BOTTOM)
+// 	{
+// 		y=(px_int)im->y+(px_int)im->Height-pImage->Texture.height;
+// 	}
+// 	if (pImage->Align&PX_OBJECT_ALIGN_TOP)
+// 	{
+// 		y=(px_int)im->y;
+// 	}
+// 	if (pImage->Align&PX_OBJECT_ALIGN_LEFT)
+// 	{
+// 		x=(px_int)im->x;
+// 	}
+// 	if (pImage->Align&PX_OBJECT_ALIGN_RIGHT)
+// 	{
+// 		x=(px_int)im->x+(px_int)im->Width-pImage->Texture.width;
+// 	}
+// 
+// 	if (pImage->Align&PX_OBJECT_ALIGN_HCENTER)
+// 	{
+// 		x=(px_int)im->x+((px_int)im->Width-pImage->Texture.width)/2;
+// 	}
+// 	if (pImage->Align&PX_OBJECT_ALIGN_VCENTER)
+// 	{
+// 		y=(px_int)im->y+((px_int)im->Height-pImage->Texture.height)/2;
+// 	}
+// 
+// 	if (pImage!=PX_NULL)
+// 	{
+// 		PX_TextureRender(psurface,&pImage->Texture,x,y,PX_TEXTURERENDER_REFPOINT_LEFTTOP,PX_NULL);
+// 	}
+// }
+// 
+// px_void PX_Object_StaticImageFree(PX_Object *pObj)
+// {
+// 	PX_Object_StaticImage *pImage;
+// 	pImage=PX_Object_GetStaticImage(pObj);
+// 	if (pImage)
+// 	{
+// 		PX_TextureFree(&pImage->Texture);
+// 	}
+// }
 
 px_void PX_Object_ScrollArea_EventDispatcher(PX_Object *Object,PX_Object_Event e,px_void *user_ptr)
 {
@@ -2946,10 +2968,10 @@ px_void PX_Object_ScrollArea_EventDispatcher(PX_Object *Object,PX_Object_Event e
 
 
 
-PX_Object * PX_Object_ScrollAreaCreate(PX_Object *Parent,int x,int y,int Width,int Height)
+PX_Object * PX_Object_ScrollAreaCreate(px_memorypool *mp,PX_Object *Parent,int x,int y,int Width,int Height)
 {
 	PX_Object *pObject;
-	PX_Object_ScrollArea *pSA=(PX_Object_ScrollArea *)MP_Malloc(Parent->mp,sizeof(PX_Object_ScrollArea));
+	PX_Object_ScrollArea *pSA=(PX_Object_ScrollArea *)MP_Malloc(mp,sizeof(PX_Object_ScrollArea));
 
 	if (pSA==PX_NULL)
 	{
@@ -2961,7 +2983,7 @@ PX_Object * PX_Object_ScrollAreaCreate(PX_Object *Parent,int x,int y,int Width,i
 		return PX_NULL;
 	}
 
-	pObject=PX_ObjectCreate(Parent,(px_float)x,(px_float)y,0,(px_float)Width,(px_float)Height,0);
+	pObject=PX_ObjectCreate(mp,Parent,(px_float)x,(px_float)y,0,(px_float)Width,(px_float)Height,0);
 
 	if (pObject==PX_NULL)
 	{
@@ -2970,7 +2992,7 @@ PX_Object * PX_Object_ScrollAreaCreate(PX_Object *Parent,int x,int y,int Width,i
 
 	if (!pObject)
 	{
-		MP_Free(Parent->mp,pSA);
+		MP_Free(mp,pSA);
 		return PX_NULL;
 	}
 
@@ -2983,14 +3005,15 @@ PX_Object * PX_Object_ScrollAreaCreate(PX_Object *Parent,int x,int y,int Width,i
 	pSA->BackgroundColor=PX_COLOR(0,0,0,0);
 	pSA->bBorder=PX_TRUE;
 	pSA->borderColor=PX_COLOR(255,0,0,0);
-	pSA->Object=PX_ObjectRootCreate(pObject->mp);
+	//root
+	pSA->Object=PX_ObjectCreate(pObject->mp,0,0,0,0,0,0,0);
 	pSA->oftx=0;
 	pSA->ofty=0;
 
-	if(!PX_SurfaceCreate(Parent->mp,Width,Height,&pSA->surface))
+	if(!PX_SurfaceCreate(mp,Width,Height,&pSA->surface))
 	{
-		MP_Free(Parent->mp,pSA);
-		MP_Free(Parent->mp,pObject);
+		MP_Free(mp,pSA);
+		MP_Free(mp,pObject);
 		return PX_NULL;
 	}
 	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_ANY,PX_Object_ScrollArea_EventDispatcher,PX_NULL);
@@ -3145,12 +3168,12 @@ PX_Object_ScrollArea * PX_Object_GetScrollArea(PX_Object *Object)
 		return PX_NULL;
 }
 
-PX_Object * PX_Object_AutoTextCreate(PX_Object *Parent,int x,int y,int width)
+PX_Object * PX_Object_AutoTextCreate(px_memorypool *mp,PX_Object *Parent,int x,int y,int width)
 {
 	PX_Object *pObject;
 
-	PX_Object_AutoText *pAt=(PX_Object_AutoText *)MP_Malloc(Parent->mp,sizeof(PX_Object_AutoText));
-	PX_StringInit(Parent->mp,&pAt->text);
+	PX_Object_AutoText *pAt=(PX_Object_AutoText *)MP_Malloc(mp,sizeof(PX_Object_AutoText));
+	PX_StringInit(mp,&pAt->text);
 	if (pAt==PX_NULL)
 	{
 		return PX_NULL;
@@ -3162,7 +3185,7 @@ PX_Object * PX_Object_AutoTextCreate(PX_Object *Parent,int x,int y,int width)
 	}
 	
 
-	pObject=PX_ObjectCreate(Parent,(px_float)x,(px_float)y,0,(px_float)width,0,0);
+	pObject=PX_ObjectCreate(mp,Parent,(px_float)x,(px_float)y,0,(px_float)width,0,0);
 
 	if (pObject==PX_NULL)
 	{
@@ -3171,7 +3194,7 @@ PX_Object * PX_Object_AutoTextCreate(PX_Object *Parent,int x,int y,int width)
 
 	if (!pObject)
 	{
-		MP_Free(Parent->mp,pAt);
+		MP_Free(mp,pAt);
 		return PX_NULL;
 	}
 
@@ -3336,15 +3359,15 @@ px_void PX_Object_AutoTextSetText(PX_Object *Obj,px_char *Text)
 	Obj->Height=(px_float)PX_Object_AutoTextGetHeight(Obj);
 }
 
-PX_Object * PX_Object_AnimationCreate(PX_Object *Parent,px_int x,px_int y,px_animationlibrary *lib)
+PX_Object * PX_Object_AnimationCreate(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y,px_animationlibrary *lib)
 {
 	PX_Object *pObject;
-	PX_Object_Animation *pAnimation=(PX_Object_Animation *)MP_Malloc(Parent->mp,sizeof(PX_Object_Animation));
+	PX_Object_Animation *pAnimation=(PX_Object_Animation *)MP_Malloc(mp,sizeof(PX_Object_Animation));
 	if (pAnimation==PX_NULL)
 	{
 		return PX_NULL;
 	}
-	pObject=PX_ObjectCreate(Parent,(px_float)x,(px_float)y,0,0,0,0);
+	pObject=PX_ObjectCreate(mp,Parent,(px_float)x,(px_float)y,0,0,0,0);
 	if (pObject==PX_NULL)
 	{
 		MP_Free(pObject->mp,pAnimation);
@@ -3450,21 +3473,21 @@ px_void PX_Object_AnimationFree(PX_Object *pObj)
 	PX_AnimationFree(&pA->animation);
 }
 
-PX_Object * PX_Object_ParticalCreate(PX_Object *Parent,px_int x,px_int y,px_texture *pTexture,PX_ScriptVM_Instance *pIns,px_char *Initfunc,px_char *_create,px_char *_update)
+PX_Object * PX_Object_ParticalCreate(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y,px_texture *pTexture,PX_ScriptVM_Instance *pIns,px_char *Initfunc,px_char *_create,px_char *_update)
 {
 	PX_Object *pObject;
-	PX_Object_Partical *pPartical=(PX_Object_Partical *)MP_Malloc(Parent->mp,sizeof(PX_Object_Partical));
+	PX_Object_Partical *pPartical=(PX_Object_Partical *)MP_Malloc(mp,sizeof(PX_Object_Partical));
 	if (pPartical==PX_NULL)
 	{
 		return PX_NULL;
 	}
 
-	if(!PX_ParticalLauncherCreate(&pPartical->launcher,Parent->mp,pTexture,pIns,Initfunc,_create,_update))
+	if(!PX_ParticalLauncherCreate(&pPartical->launcher,mp,pTexture,pIns,Initfunc,_create,_update))
 	{
-		MP_Free(Parent->mp,pPartical);
+		MP_Free(mp,pPartical);
 	}
 
-	pObject=PX_ObjectCreate(Parent,(px_float)x,(px_float)y,0,0,0,0);
+	pObject=PX_ObjectCreate(mp,Parent,(px_float)x,(px_float)y,0,0,0,0);
 	if (pObject==PX_NULL)
 	{
 		MP_Free(pObject->mp,pPartical);
@@ -3479,6 +3502,40 @@ PX_Object * PX_Object_ParticalCreate(PX_Object *Parent,px_int x,px_int y,px_text
 	pObject->Func_ObjectFree=PX_Object_ParticalFree;
 	pObject->Func_ObjectRender=PX_Object_ParticalRender;
 	
+	return pObject;
+}
+
+
+PX_Object * PX_Object_ParticalCreateEx(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y,PX_ParticalLauncher_InitializeInfo info)
+{
+	PX_Object *pObject;
+	PX_Object_Partical *pPartical=(PX_Object_Partical *)MP_Malloc(mp,sizeof(PX_Object_Partical));
+	if (pPartical==PX_NULL)
+	{
+		return PX_NULL;
+	}
+
+	if(!PX_ParticalLauncherCreateEx(&pPartical->launcher,mp,info))
+	{
+		MP_Free(mp,pPartical);
+	}
+
+	pObject=PX_ObjectCreate(mp,Parent,(px_float)x,(px_float)y,0,0,0,0);
+
+	if (pObject==PX_NULL)
+	{
+		MP_Free(pObject->mp,pPartical);
+		return PX_NULL;
+	}
+
+	pObject->pObject=pPartical;
+	pObject->Enabled=PX_TRUE;
+	pObject->Visible=PX_TRUE;
+	pObject->Type=PX_OBJECT_TYPE_PARTICAL;
+	pObject->ReceiveEvents=PX_FALSE;
+	pObject->Func_ObjectFree=PX_Object_ParticalFree;
+	pObject->Func_ObjectRender=PX_Object_ParticalRender;
+
 	return pObject;
 }
 
@@ -3536,10 +3593,10 @@ px_void PX_Object_RoundCursor_Mousemove(PX_Object *pobject,PX_Object_Event e,px_
 	PX_Object_RoundCursorSetDirection(pobject,PX_POINT((px_float)e.Param_uint[0],(px_float)e.Param_uint[1],0));
 }
 
-PX_Object * PX_Object_RoundCursorCreate(PX_Object *Parent,px_int x,px_int y,px_shape *pShape,px_color blendColor)
+PX_Object * PX_Object_RoundCursorCreate(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y,px_shape *pShape,px_color blendColor)
 {
 	PX_Object *pObject;
-	PX_Object_RoundCursor *pRoundCursor=(PX_Object_RoundCursor *)MP_Malloc(Parent->mp,sizeof(PX_Object_RoundCursor));
+	PX_Object_RoundCursor *pRoundCursor=(PX_Object_RoundCursor *)MP_Malloc(mp,sizeof(PX_Object_RoundCursor));
 	if (pRoundCursor==PX_NULL)
 	{
 		return PX_NULL;
@@ -3548,7 +3605,7 @@ PX_Object * PX_Object_RoundCursorCreate(PX_Object *Parent,px_int x,px_int y,px_s
 	pRoundCursor->shape=pShape;
 	pRoundCursor->blendColor=blendColor;
 	pRoundCursor->cursorPoint=PX_POINT(0,0,0);
-	pObject=PX_ObjectCreate(Parent,(px_float)x,(px_float)y,0,0,0,0);
+	pObject=PX_ObjectCreate(mp,Parent,(px_float)x,(px_float)y,0,0,0,0);
 
 	if (pObject==PX_NULL)
 	{
@@ -3624,15 +3681,15 @@ px_void PX_Object_RoundCursorSetColor(PX_Object *Object,px_color clr)
 	}
 }
 
-PX_Object * PX_Object_ShapeCreate( PX_Object *Parent,px_int x,px_int y,px_shape *pshape )
+PX_Object * PX_Object_ShapeCreate(px_memorypool *mp, PX_Object *Parent,px_int x,px_int y,px_shape *pshape )
 {
 	PX_Object *pObject;
-	PX_Object_Shape *pShape=(PX_Object_Shape *)MP_Malloc(Parent->mp,sizeof(PX_Object_Shape));
+	PX_Object_Shape *pShape=(PX_Object_Shape *)MP_Malloc(mp,sizeof(PX_Object_Shape));
 	if (pShape==PX_NULL)
 	{
 		return PX_NULL;
 	}
-	pObject=PX_ObjectCreate(Parent,(px_float)x,(px_float)y,0,0,0,0);
+	pObject=PX_ObjectCreate(mp,Parent,(px_float)x,(px_float)y,0,0,0,0);
 	if (pObject==PX_NULL)
 	{
 		MP_Free(pObject->mp,pShape);
@@ -3807,15 +3864,15 @@ px_void PX_Object_CursorButtonOnMouseMove(PX_Object *Object,PX_Object_Event e,px
 
 
 
-PX_Object *PX_Object_CursorButtonCreate(PX_Object *Parent,px_int x,px_int y,px_int Width,px_int Height,px_char *Text,px_color Color)
+PX_Object *PX_Object_CursorButtonCreate(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y,px_int Width,px_int Height,px_char *Text,px_color Color)
 {
 	PX_Object *pObject;
-	PX_Object_CursorButton *pCb=(PX_Object_CursorButton *)MP_Malloc(Parent->mp,sizeof(PX_Object_CursorButton));
+	PX_Object_CursorButton *pCb=(PX_Object_CursorButton *)MP_Malloc(mp,sizeof(PX_Object_CursorButton));
 	if (pCb==PX_NULL)
 	{
 		return PX_NULL;
 	}
-	pObject=PX_ObjectCreate(Parent,(px_float)x,(px_float)y,0,(px_float)Width,(px_float)Height,0);
+	pObject=PX_ObjectCreate(mp,Parent,(px_float)x,(px_float)y,0,(px_float)Width,(px_float)Height,0);
 	if (pObject==PX_NULL)
 	{
 		MP_Free(pObject->mp,pCb);
@@ -3831,7 +3888,7 @@ PX_Object *PX_Object_CursorButtonCreate(PX_Object *Parent,px_int x,px_int y,px_i
 	pObject->Func_ObjectRender=PX_Object_CursorButtonRender;
 
 
-	pCb->pushbutton=PX_Object_PushButtonCreate(pObject,x,y,Width,Height,Text,Color);
+	pCb->pushbutton=PX_Object_PushButtonCreate(mp,pObject,x,y,Width,Height,Text,Color);
 	pCb->c_color=PX_COLOR(255,0,0,0);
 	pCb->c_distance=0;
 	pCb->c_distance_far=(px_float)(Width>Height?Height/4:Width/4);

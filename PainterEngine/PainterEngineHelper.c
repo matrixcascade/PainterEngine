@@ -161,6 +161,7 @@ px_bool PX_Loop()
 		}
 
 		PX_SurfaceClear(&main_runtime.RenderSurface,0,0,main_runtime.RenderSurface.width-1,main_runtime.RenderSurface.height-1,main_backgroundColor);
+		PX_SurfaceRender(&main_runtime.RenderSurface,&main_DrawSurface,0,0,PX_TEXTURERENDER_REFPOINT_LEFTTOP,PX_NULL);
 		if (main_console.show)
 		{
 			PX_ConsoleUpdate(&main_console,main_renderElpased);
@@ -171,7 +172,7 @@ px_bool PX_Loop()
 			PX_ObjectUpdate(main_root,main_renderElpased);
 			PX_ObjectRender(&main_runtime.RenderSurface,main_root,main_renderElpased);
 		}
-		PX_SurfaceRender(&main_runtime.RenderSurface,&main_DrawSurface,0,0,PX_TEXTURERENDER_REFPOINT_LEFTTOP,PX_NULL);
+		
 		PX_SystemRender(main_runtime.RenderSurface.surfaceBuffer,main_runtime.width,main_runtime.height);
 		main_renderElpased=0;
 	}
@@ -209,7 +210,7 @@ px_bool PX_Initialize(px_char *name,px_int width,px_int height)
 		return PX_FALSE;
 	}
 
-	main_root=PX_ObjectRootCreate(&main_runtime.mp_ui);
+	main_root=PX_ObjectCreate(&main_runtime.mp_ui,PX_NULL,0,0,0,0,0,0);
 	main_time=timeGetTime();
 
 	main_backgroundColor=PX_COLOR(255,255,255,255);
@@ -268,7 +269,7 @@ PX_IO_Data PX_LoadFileToIOData(px_char *path)
 
 	while (!feof(pf))
 	{
-		fileoft+=fread(io.buffer+fileoft,1,1024,pf);
+		fileoft+=(px_int)fread(io.buffer+fileoft,1,1024,pf);
 	}
 	fclose(pf);
 
