@@ -5,14 +5,7 @@ static px_char __PX_LOG_OUT_DATA[1024]; //256 bytes for output log
 void PX_ASSERT()
 {
 #ifdef PX_DEBUG_MODE
-<<<<<<< HEAD
-	__debugbreak();
-=======
-// 	_asm
-// 	{
-// 		int 3
-// 	}
->>>>>>> 2214d6d8c82f62f657f6ddfbece3e1e7b45f0b2d
+//__debugbreak();
 #endif
 }
 
