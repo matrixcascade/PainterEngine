@@ -5928,11 +5928,11 @@ static px_bool PX_ScriptParseExpressionStream(PX_SCRIPT_Analysis *analysis,px_ve
 	px_vector *op=&vOp;
 	px_vector *tk=&vTk;
 	PX_SCRIPT_AST_OPERAND retOperand;
-	PX_SCRIPT_AST_OPCODE *plastop;
+	PX_SCRIPT_AST_OPCODE *plastop=PX_NULL;
 	PX_SCRIPT_SET *pcurrentSet=PX_NULL;
 	px_int level=PX_SCRIPT_OPCODE_LEVEL_BOTTOM;
 	PX_SCRIPT_EXPR_STREAM *pVec=(PX_SCRIPT_EXPR_STREAM *)(stream->data);
-	PX_SCRIPT_FUNCTION *pfunc;
+	PX_SCRIPT_FUNCTION *pfunc=PX_NULL;
 	px_int i,LBracketBalance,MBracketBalance,paramBeginIndex[16],paramcount=0;
 	px_string fmrString;
 	PX_VectorInit(analysis->mp,op,sizeof(PX_SCRIPT_AST_OPCODE),16);
