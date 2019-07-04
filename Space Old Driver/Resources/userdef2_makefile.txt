@@ -1,0 +1,23 @@
+texture "cxk/cxk1.traw" u1
+texture "cxk/cxk2.traw" u2
+texture "cxk/cxk3.traw" u3
+texture "cxk/cxk4.traw" u4
+texture "cxk/cxk5.traw" u5
+animation main
+loop -1
+tag normal_begin
+frame u1
+sleep 300
+frame u2
+sleep 300
+frame u3
+sleep 300
+frame u4
+sleep 300
+frame u5
+sleep 300
+goto normal_begin
+end
+
+
+

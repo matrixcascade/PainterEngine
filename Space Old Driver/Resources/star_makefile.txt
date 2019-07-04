@@ -1,0 +1,13 @@
+texture "star/star1.traw" n1
+texture "star/star2.traw" n2
+
+animation main
+loop -1
+tag t_main
+frame n1
+sleep 3500
+frame n2
+sleep 300
+goto t_main
+end
+

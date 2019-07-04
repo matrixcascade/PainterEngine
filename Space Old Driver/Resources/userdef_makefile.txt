@@ -1,0 +1,12 @@
+texture "userdef/u1.traw" u1
+
+animation main
+loop -1
+tag normal_begin
+frame u1
+sleep 10000
+goto normal_begin
+end
+
+
+

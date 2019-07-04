@@ -1,0 +1,180 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{5ADF4771-B4F8-46BB-A0A6-1DDC45FAB50B}</ProjectGuid>
+    <RootNamespace>SpaceOldDriver</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup />
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\PainterEngine\Architecture\PainterEngine_Console.c" />
+    <ClCompile Include="..\..\PainterEngine\Architecture\PainterEngine_Runtime.c" />
+    <ClCompile Include="..\..\PainterEngine\Core\PX_AES.c" />
+    <ClCompile Include="..\..\PainterEngine\Core\PX_ANN.c" />
+    <ClCompile Include="..\..\PainterEngine\Core\PX_Arle.c" />
+    <ClCompile Include="..\..\PainterEngine\Core\PX_BaseGeo.c" />
+    <ClCompile Include="..\..\PainterEngine\Core\PX_Bitmap.c" />
+    <ClCompile Include="..\..\PainterEngine\Core\PX_BpNeural.c" />
+    <ClCompile Include="..\..\PainterEngine\Core\PX_curve25519.c" />
+    <ClCompile Include="..\..\PainterEngine\Core\PX_Effect.c" />
+    <ClCompile Include="..\..\PainterEngine\Core\PX_Font.c" />
+    <ClCompile Include="..\..\PainterEngine\Core\PX_Hashmap.c" />
+    <ClCompile Include="..\..\PainterEngine\Core\PX_Huffman.c" />
+    <ClCompile Include="..\..\PainterEngine\Core\PX_Linker.c" />
+    <ClCompile Include="..\..\PainterEngine\Core\PX_List.c" />
+    <ClCompile Include="..\..\PainterEngine\Core\PX_Log.c" />
+    <ClCompile Include="..\..\PainterEngine\Core\PX_Memory.c" />
+    <ClCompile Include="..\..\PainterEngine\Core\PX_MemoryPool.c" />
+    <ClCompile Include="..\..\PainterEngine\Core\PX_Packet.c" />
+    <ClCompile Include="..\..\PainterEngine\Core\PX_ParallelCore.c" />
+    <ClCompile Include="..\..\PainterEngine\Core\PX_Quadtree.c" />
+    <ClCompile Include="..\..\PainterEngine\Core\PX_Quicksort.c" />
+    <ClCompile Include="..\..\PainterEngine\Core\PX_rbtree.c" />
+    <ClCompile Include="..\..\PainterEngine\Core\PX_Sha256.c" />
+    <ClCompile Include="..\..\PainterEngine\Core\PX_Sound.c" />
+    <ClCompile Include="..\..\PainterEngine\Core\PX_String.c" />
+    <ClCompile Include="..\..\PainterEngine\Core\PX_Surface.c" />
+    <ClCompile Include="..\..\PainterEngine\Core\PX_Texture.c" />
+    <ClCompile Include="..\..\PainterEngine\Core\PX_TRaw.c" />
+    <ClCompile Include="..\..\PainterEngine\Core\PX_Typedef.c" />
+    <ClCompile Include="..\..\PainterEngine\Core\PX_Vector.c" />
+    <ClCompile Include="..\..\PainterEngine\Core\PX_Wave.c" />
+    <ClCompile Include="..\..\PainterEngine\Effect\MatrixEffect_ui.c" />
+    <ClCompile Include="..\..\PainterEngine\Kernel\PX_Actor.c" />
+    <ClCompile Include="..\..\PainterEngine\Kernel\PX_Animation.c" />
+    <ClCompile Include="..\..\PainterEngine\Kernel\PX_Grammar.c" />
+    <ClCompile Include="..\..\PainterEngine\Kernel\PX_Lexer.c" />
+    <ClCompile Include="..\..\PainterEngine\Kernel\PX_Object.c" />
+    <ClCompile Include="..\..\PainterEngine\Kernel\PX_Partical.c" />
+    <ClCompile Include="..\..\PainterEngine\Kernel\PX_Resource.c" />
+    <ClCompile Include="..\..\PainterEngine\Kernel\PX_Script_ASMCompiler.c" />
+    <ClCompile Include="..\..\PainterEngine\Kernel\PX_Script_Interpreter.c" />
+    <ClCompile Include="..\..\PainterEngine\Kernel\PX_Script_VM.c" />
+    <ClCompile Include="..\..\PainterEngine\Kernel\PX_Sync.c" />
+    <ClCompile Include="..\..\PainterEngine\Kernel\PX_TransmissionProtocal.c" />
+    <ClCompile Include="..\..\PainterEngine\Kernel\PX_World.c" />
+    <ClCompile Include="..\..\PainterEngine\platform\windows\Platform_Windows_D2D.cpp" />
+    <ClCompile Include="SOD_Message.c" />
+    <ClCompile Include="SOD_Game.c" />
+    <ClCompile Include="SOD_Play.c" />
+    <ClCompile Include="SOD_Runtime.c" />
+    <ClCompile Include="SOD_Startup.c" />
+    <ClCompile Include="__Main.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\PainterEngine\Architecture\PainterEngine_Console.h" />
+    <ClInclude Include="..\..\PainterEngine\Architecture\PainterEngine_Runtime.h" />
+    <ClInclude Include="..\..\PainterEngine\Core\PX_AES.h" />
+    <ClInclude Include="..\..\PainterEngine\Core\PX_ANN.h" />
+    <ClInclude Include="..\..\PainterEngine\Core\PX_Arle.h" />
+    <ClInclude Include="..\..\PainterEngine\Core\PX_BaseGeo.h" />
+    <ClInclude Include="..\..\PainterEngine\Core\PX_Bitmap.h" />
+    <ClInclude Include="..\..\PainterEngine\Core\PX_BpNeural.h" />
+    <ClInclude Include="..\..\PainterEngine\Core\PX_Core.h" />
+    <ClInclude Include="..\..\PainterEngine\Core\PX_curve25519.h" />
+    <ClInclude Include="..\..\PainterEngine\Core\PX_Effect.h" />
+    <ClInclude Include="..\..\PainterEngine\Core\PX_Font.h" />
+    <ClInclude Include="..\..\PainterEngine\Core\PX_Hashmap.h" />
+    <ClInclude Include="..\..\PainterEngine\Core\PX_Huffman.h" />
+    <ClInclude Include="..\..\PainterEngine\Core\PX_Linker.h" />
+    <ClInclude Include="..\..\PainterEngine\Core\PX_List.h" />
+    <ClInclude Include="..\..\PainterEngine\Core\PX_Log.h" />
+    <ClInclude Include="..\..\PainterEngine\Core\PX_MathTable.h" />
+    <ClInclude Include="..\..\PainterEngine\Core\PX_Memory.h" />
+    <ClInclude Include="..\..\PainterEngine\Core\PX_MemoryPool.h" />
+    <ClInclude Include="..\..\PainterEngine\Core\PX_Packet.h" />
+    <ClInclude Include="..\..\PainterEngine\Core\PX_ParallelCore.h" />
+    <ClInclude Include="..\..\PainterEngine\Core\PX_Quadtree.h" />
+    <ClInclude Include="..\..\PainterEngine\Core\PX_Quicksort.h" />
+    <ClInclude Include="..\..\PainterEngine\Core\PX_rbtree.h" />
+    <ClInclude Include="..\..\PainterEngine\Core\PX_Sha256.h" />
+    <ClInclude Include="..\..\PainterEngine\Core\PX_Sound.h" />
+    <ClInclude Include="..\..\PainterEngine\Core\PX_String.h" />
+    <ClInclude Include="..\..\PainterEngine\Core\PX_Surface.h" />
+    <ClInclude Include="..\..\PainterEngine\Core\PX_Texture.h" />
+    <ClInclude Include="..\..\PainterEngine\Core\PX_TRaw.h" />
+    <ClInclude Include="..\..\PainterEngine\Core\PX_Typedef.h" />
+    <ClInclude Include="..\..\PainterEngine\Core\PX_Vector.h" />
+    <ClInclude Include="..\..\PainterEngine\Core\PX_WAVE.h" />
+    <ClInclude Include="..\..\PainterEngine\Effect\MatrixEffect_ui.h" />
+    <ClInclude Include="..\..\PainterEngine\Kernel\PX_2dxCommon.h" />
+    <ClInclude Include="..\..\PainterEngine\Kernel\PX_Actor.h" />
+    <ClInclude Include="..\..\PainterEngine\Kernel\PX_Animation.h" />
+    <ClInclude Include="..\..\PainterEngine\Kernel\PX_Grammar.h" />
+    <ClInclude Include="..\..\PainterEngine\Kernel\PX_Kernel.h" />
+    <ClInclude Include="..\..\PainterEngine\Kernel\PX_Lexer.h" />
+    <ClInclude Include="..\..\PainterEngine\Kernel\PX_Object.h" />
+    <ClInclude Include="..\..\PainterEngine\Kernel\PX_Partical.h" />
+    <ClInclude Include="..\..\PainterEngine\Kernel\PX_Resource.h" />
+    <ClInclude Include="..\..\PainterEngine\Kernel\PX_ScriptCore.h" />
+    <ClInclude Include="..\..\PainterEngine\Kernel\PX_Script_ASMCompiler.h" />
+    <ClInclude Include="..\..\PainterEngine\Kernel\PX_Script_Interpreter.h" />
+    <ClInclude Include="..\..\PainterEngine\Kernel\PX_Script_VM.h" />
+    <ClInclude Include="..\..\PainterEngine\Kernel\PX_Sync.h" />
+    <ClInclude Include="..\..\PainterEngine\Kernel\PX_TransmissionProtocal.h" />
+    <ClInclude Include="..\..\PainterEngine\Kernel\PX_World.h" />
+    <ClInclude Include="..\..\PainterEngine\platform\windows\Platform_Windows_D2D.h" />
+    <ClInclude Include="SOD_Message.h" />
+    <ClInclude Include="SOD_Game.h" />
+    <ClInclude Include="SOD_Play.h" />
+    <ClInclude Include="SOD_Runtime.h" />
+    <ClInclude Include="SOD_Startup.h" />
+    <ClInclude Include="SOD_TEXT.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

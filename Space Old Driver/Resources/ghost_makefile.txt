@@ -1,0 +1,43 @@
+texture "ghost/normal1.traw" n1
+texture "ghost/normal2.traw" n2
+texture "ghost/normal3.traw" n3
+texture "ghost/normal4.traw" n4
+texture "ghost/normal5.traw" n5
+
+texture "ghost/angry1.traw" a1
+texture "ghost/angry2.traw" a2
+texture "ghost/angry3.traw" a3
+texture "ghost/angry4.traw" a4
+texture "ghost/angry5.traw" a5
+
+animation ghost_angry
+loop -1
+tag ghost_angry_begin
+frame a1
+sleep 100
+frame a2
+sleep 100
+frame a3
+sleep 100
+frame a4
+sleep 100
+frame a5
+sleep 100
+goto ghost_angry_begin
+end
+
+animation ghost_normal
+loop -1
+tag ghost_normal_begin
+frame n1
+sleep 100
+frame n2
+sleep 100
+frame n3
+sleep 100
+frame n4
+sleep 100
+frame n5
+sleep 100
+goto ghost_normal_begin
+end

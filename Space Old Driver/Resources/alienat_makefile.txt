@@ -1,0 +1,22 @@
+texture "aatom/at1.traw" a1
+texture "aatom/at2.traw" a2
+texture "aatom/at3.traw" a3
+texture "aatom/at4.traw" a4
+texture "aatom/at5.traw" a5
+
+animation main
+loop -1
+tag _main
+frame a1
+sleep 100
+frame a2
+sleep 100
+frame a3
+sleep 100
+frame a4
+sleep 100
+frame a5
+sleep 100
+goto _main
+end
+

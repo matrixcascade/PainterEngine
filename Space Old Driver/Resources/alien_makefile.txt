@@ -1,0 +1,49 @@
+texture "alien/n1.traw" n1
+texture "alien/n2.traw" n2
+texture "alien/n3.traw" n3
+
+texture "alien/a1.traw" a1
+texture "alien/a2.traw" a2
+texture "alien/a3.traw" a3
+
+texture "alien/v1.traw" v1
+texture "alien/v2.traw" v2
+texture "alien/v3.traw" v3
+
+animation alien_normal
+loop -1
+tag alien_normal_begin
+frame n1
+sleep 100
+frame n2
+sleep 100
+frame n3
+sleep 100
+goto alien_normal_begin
+end
+
+animation alien_angry
+loop -1
+tag alien_angry_begin
+frame a1
+sleep 100
+frame a2
+sleep 100
+frame a3
+sleep 100
+goto alien_angry_begin
+end
+
+animation alien_veryangry
+loop -1
+tag alien_veryangry_begin
+frame v1
+sleep 100
+frame v2
+sleep 100
+frame v3
+sleep 100
+goto alien_veryangry_begin
+end
+
+
