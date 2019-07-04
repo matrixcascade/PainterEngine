@@ -1088,9 +1088,9 @@ PX_Object* SOD_Object_UserObjectCreate(SOD_Play *play,px_int life)
 	pObject->x=play->world.world_width/2.0f;
 	pObject->y=play->world.world_height/2.0f;
 	pObject->z=SOD_ALIEN_Z;
-	pObject->Width=192;
-	pObject->diameter=192;
-	pObject->Height=192;
+	pObject->Width=96;
+	pObject->diameter=96;
+	pObject->Height=96;
 	pObject->pObject=pou;
 	pObject->Type=SOD_OBJECT_TYPE_USEROBJECT;
 	pObject->ReceiveEvents=PX_TRUE;
@@ -1152,7 +1152,7 @@ px_void SOD_Object_Ghost_OnImpact(PX_Object *pObject,PX_Object_Event e,px_void *
 		PX_WorldRemoveObject(&pPlay->world,pObject);
 		SOD_CreateExplosion(pPlay,PX_POINT(pObject->x,pObject->y,0),84);
 		e.Event=SOD_OBJECT_EVENT_DAMAGE;
-		e.Param_int[0]=50;
+		e.Param_int[0]=SOD_GHOST_IMPACT_DAMAGE;
 		PX_ObjectPostEvent(pTarget,e);
 	}
 }
@@ -2406,7 +2406,7 @@ px_void SOD_PlayReset(SOD_Play *pPlay)
 	pPlay->stone_genElpased=0;
 	pPlay->ghost_genElpased=0;
 	pPlay->alien_genElpased=0;
-	pPlay->bossscore=3000;
+	pPlay->bossscore=2000;
 
 	//初始化世界
 	if(!PX_WorldInit(&pPlay->runtime->runtime.mp_game,&pPlay->world,SOD_WORLD_WIDTH,SOD_WORLD_HEIGHT,pPlay->runtime->runtime.RenderSurface.width,pPlay->runtime->runtime.RenderSurface.height))
@@ -2622,7 +2622,7 @@ px_void SOD_PlayUpdate(SOD_Play *pPlay,px_dword elpased)
 	if (pPlay->score>pPlay->bossscore)
 	{
 		PX_Object *pObject=SOD_Object_UserObjectCreate(pPlay,pPlay->bossscore/6*4);
-		pPlay->bossscore+=3000;
+		pPlay->bossscore+=2000;
 		PX_WorldAddObject(&pPlay->world,pObject);
 	}
 	

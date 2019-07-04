@@ -7,11 +7,11 @@
 #define SOD_WORLD_HEIGHT 900 //世界高度
 #define SOD_WORLD_UPDATE_ATOM 10 //武器升级幅度
 
-#define SOD_USER_BULLET_DAMAGE 10 //外星飞船炮弹上杭
-#define SOD_ALIEN_BULLET_DAMAGE 10 //外星飞船炮弹上杭
-#define SOD_STONE_IMPACT_DAMAGE 30//石头碰撞伤害
-#define SOD_GHOST_IMPACT_DAMAGE 30//鬼魂碰撞伤害
-#define SOD_ALIEN_IMPACT_DAMAGE 15//外星飞船碰撞伤害
+#define SOD_USER_BULLET_DAMAGE 5 //外星飞船炮弹伤害
+#define SOD_ALIEN_BULLET_DAMAGE 5 //外星飞船炮弹伤害
+#define SOD_STONE_IMPACT_DAMAGE 15//石头碰撞伤害
+#define SOD_GHOST_IMPACT_DAMAGE 15//鬼魂碰撞伤害
+#define SOD_ALIEN_IMPACT_DAMAGE 5//外星飞船碰撞伤害
 
 #define SOD_SHIP_DEFAULT_FIRE_DURATION 350//初始武器射速
 #define SOD_MIN_FIRE_DURATION 100 //最小武器射速
@@ -59,7 +59,7 @@
 #define SOD_PARTICAL_MP_FIRE 1024*1024 //1M 内存池空间给火焰粒子 请勿修改
 #define SOD_PARTICAL_MP_EXPLODE 1024*1024 //1M 内存池空间给爆炸粒子 请勿修改
 
-#define SOD_USEROBJECT_SPEED 80
+#define SOD_USEROBJECT_SPEED 60
 #define SOD_USER_ATOM_ALIVE_TIME 8000 //user炮弹生存时间
 //IMPACT
 #define SOD_IMPACTTEST_OBJECTTYPE_USER			1
