@@ -19,16 +19,14 @@ typedef struct  _PX_AABB
 
 typedef struct
 {
-	px_float x,y,z,height,width,length;
-	px_int user;
-	px_int test;
-}PX_Quadtree_AABB_BOX;
-
+	px_void *ptr;
+}PX_Quadtree_UserData;
 typedef struct
 {
-	px_int box1Index;
-	px_int box2Index;
-}PX_Quadtree_AABB_ImpactInfo;
+	px_float x,y,height,width;
+	PX_Quadtree_UserData userdata;
+}PX_Quadtree_AABB_BOX;
+
 
 typedef struct
 {
@@ -40,8 +38,7 @@ typedef struct
 }PX_Quadtree;
 
 px_bool PX_QuadtreeCreate(px_memorypool *mp,PX_Quadtree *pQuadtree,px_float mapStartX,px_float mapStartY,px_float mapWidth,px_float mapHeight,px_int ObjectsCount,px_int deep);
-px_void PX_QuadtreeAddNode(PX_Quadtree *pQuadtree,px_float x,px_float y,px_float z,px_float width,px_float height,px_float length,px_int user);
-px_void PX_QuadtreeTestNode(PX_Quadtree *pQuadtree,px_float x,px_float y,px_float z,px_float width,px_float height,px_float length,px_int user);
-px_void PX_QuadtreeAddAndTestNode(PX_Quadtree *pQuadtree,px_float x,px_float y,px_float z,px_float width,px_float height,px_float length,px_int user);
-px_void PX_QuadtreeReset(PX_Quadtree *pQuadtree);
+px_void PX_QuadtreeAddNode(PX_Quadtree *pQuadtree,px_float x,px_float y,px_float width,px_float height,PX_Quadtree_UserData userData);
+px_void PX_QuadtreeTestNode(PX_Quadtree *pQuadtree,px_float x,px_float y,px_float width,px_float height,PX_Quadtree_UserData user);
+px_void PX_QuadtreeResetTest(PX_Quadtree *pQuadtree);
 #endif

@@ -788,6 +788,12 @@ px_point PX_PointCross(px_point p1,px_point p2)
 	return pt;
 }
 
+
+px_point PX_PointInverse(px_point p1)
+{
+	return PX_POINT(-p1.x,-p1.y,-p1.z);
+}
+
 px_float PX_PointMod(px_point p)
 {
 	return PX_sqrt(p.x*p.x+p.y*p.y+p.z*p.z);
@@ -818,6 +824,7 @@ px_point PX_PointReflectX(px_point vector_refer,px_point respoint)
 
 	ret.x=respoint.x*cosx+respoint.y*sinx;
 	ret.y=respoint.y*cosx-respoint.x*sinx;
+	ret.z=respoint.z;
 	return ret;
 }
 
@@ -831,6 +838,21 @@ px_bool PX_isRectCrossRect(px_rect rect1,px_rect rect2)
 		return PX_TRUE;
 	}
 	return PX_FALSE;
+}
+
+
+px_bool PX_isRectCrossCircle(px_rect rect1,px_point center,px_float radius)
+{
+	px_float dx=PX_ABS(rect1.x+rect1.width/2-center.x);
+	px_float dy=PX_ABS(rect1.y+rect1.height/2-center.y);
+	return (dx<radius+rect1.width/2)&&(dy<radius+rect1.height/2);
+}
+
+
+px_bool PX_isCircleCrossCircle(px_point center1,px_float radius1,px_point center2,px_float radius2)
+{
+	px_float dis=PX_PointDistance(center1,center2);
+	return (dis<radius1+radius2);
 }
 
 px_bool PX_isPointInRect(px_point p,px_rect rect)
@@ -2107,5 +2129,10 @@ px_point PX_PointRotate(px_point p,px_float angle)
 	px_matrix mat;
 	PX_MatrixRotateZ(&mat,angle);
 	return PX_PointMulMatrix(p,mat);
+}
+
+px_float PX_PointDistance(px_point p1,px_point p2)
+{
+	return PX_sqrt((p1.x-p2.x)*(p1.x-p2.x)+(p1.y-p2.y)*(p1.y-p2.y));
 }
 

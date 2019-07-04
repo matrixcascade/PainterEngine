@@ -200,9 +200,10 @@ px_void PX_ObjectUpdate(PX_Object *Object,px_uint elpased )
 {
 	if (Object==PX_NULL)
 	{
+		PX_ASSERT();
 		return;
 	}
-	if (Object->Visible==PX_FALSE)
+	if (Object->Visible==PX_FALSE||Object->Enabled==PX_FALSE)
 	{
 		return;
 	}
@@ -283,7 +284,7 @@ px_void PX_ObjectRootInit(PX_Object *pObject,px_float x,px_float y,px_float z,px
 	pObject->z=z;
 	pObject->Width=Width;
 	pObject->Height=Height;
-	pObject->Length=Lenght;
+
 	pObject->Enabled=PX_TRUE;
 	pObject->Visible=PX_TRUE;
 	pObject->pChilds=PX_NULL;
@@ -315,7 +316,7 @@ px_void PX_ObjectInit(px_memorypool *mp,PX_Object *pObject,PX_Object *Parent,px_
 	pObject->z=z;
 	pObject->Width=Width;
 	pObject->Height=Height;
-	pObject->Length=Lenght;
+
 	pObject->Enabled=PX_TRUE;
 	pObject->Visible=PX_TRUE;
 	pObject->pChilds=PX_NULL;
@@ -325,10 +326,11 @@ px_void PX_ObjectInit(px_memorypool *mp,PX_Object *pObject,PX_Object *Parent,px_
 	pObject->Type=PX_OBJECT_TYPE_NULL;
 	pObject->ReceiveEvents=PX_TRUE;
 	pObject->impact_test_type=0;
-	pObject->impact_type=0;
+	pObject->impact_Object_type=0;
 	pObject->pEventActions=PX_NULL;
-	
+	pObject->world_index=-1;
 	pObject->User_int=0;
+	pObject->diameter=0;
 	pObject->User_ptr=PX_NULL;
 
 	pObject->mp=mp;
@@ -1645,7 +1647,7 @@ px_void PX_ObjectSetSize( PX_Object *Object,px_float Width,px_float Height,px_fl
 	{
 		Object->Width=Width;
 		Object->Height=Height;
-		Object->Length=length;
+
 	}
 	else
 	{
@@ -1675,7 +1677,7 @@ px_void PX_Object_PushButtonOnMouseMove(PX_Object *Object,PX_Object_Event e,px_v
 					e.Param_uint[1]=0;
 					e.Param_uint[2]=0;
 					e.Param_uint[3]=0;
-					e.user=PX_NULL;
+					e.param_ptr[0]=PX_NULL;
 					PX_ObjectExecuteEvent(Object,e);
 				}
 				pPushButton->state=PX_OBJECT_BUTTON_STATE_ONCURSOR;
@@ -2181,7 +2183,7 @@ px_void PX_Object_EditOnKeyboardString(PX_Object *Object,PX_Object_Event e,px_vo
 
 	if (pEdit->onFocus)
 	{
-		PX_Object_EditAddString(Object,(px_char *)e.user);
+		PX_Object_EditAddString(Object,(px_char *)e.param_ptr[0]);
 	}
 }
 
@@ -2748,7 +2750,7 @@ px_void PX_Object_EditAddString(PX_Object *pObject,px_char *Text)
 	}
 	PX_Object_EditUpdateCursorViewRegion(pObject);
 	e.Event=PX_OBJECT_EVENT_VALUECHAGE;
-	e.user=(px_void *)(pEdit->text.buffer);
+	e.param_ptr[0]=(px_void *)(pEdit->text.buffer);
 	PX_ObjectExecuteEvent(pObject,e);
 }
 
@@ -2776,7 +2778,7 @@ px_void PX_Object_EditBackspace(PX_Object *pObject)
 				oft--;
 			}
 			e.Event=PX_OBJECT_EVENT_VALUECHAGE;
-			e.user=(px_void *)(pEdit->text.buffer);
+			e.param_ptr[0]=(px_void *)(pEdit->text.buffer);
 			PX_ObjectExecuteEvent(pObject,e);
 		}
 	}
@@ -3473,7 +3475,7 @@ px_void PX_Object_AnimationFree(PX_Object *pObj)
 	PX_AnimationFree(&pA->animation);
 }
 
-PX_Object * PX_Object_ParticalCreate(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y,px_texture *pTexture,PX_ScriptVM_Instance *pIns,px_char *Initfunc,px_char *_create,px_char *_update)
+PX_Object * PX_Object_ParticalCreate(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y,px_int z,px_texture *pTexture,PX_ScriptVM_Instance *pIns,px_char *Initfunc,px_char *_create,px_char *_update)
 {
 	PX_Object *pObject;
 	PX_Object_Partical *pPartical=(PX_Object_Partical *)MP_Malloc(mp,sizeof(PX_Object_Partical));
@@ -3506,7 +3508,7 @@ PX_Object * PX_Object_ParticalCreate(px_memorypool *mp,PX_Object *Parent,px_int 
 }
 
 
-PX_Object * PX_Object_ParticalCreateEx(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y,PX_ParticalLauncher_InitializeInfo info)
+PX_Object * PX_Object_ParticalCreateEx(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y,px_int z,PX_ParticalLauncher_InitializeInfo info)
 {
 	PX_Object *pObject;
 	PX_Object_Partical *pPartical=(PX_Object_Partical *)MP_Malloc(mp,sizeof(PX_Object_Partical));

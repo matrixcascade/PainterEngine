@@ -30,6 +30,7 @@ typedef struct
 typedef struct
 {
 	px_int offset;
+	px_bool loop;
 	PX_SoundData *data;
 }PX_Sound;
 
@@ -37,15 +38,16 @@ typedef struct
 {
 	px_memorypool *mp;
 	px_int	parallel;
-    px_bool bLock;
+	volatile px_bool bLock;
 	PX_SOUND_MIX_MODE mix_mode;
-	px_vector Sounds;
+	PX_Sound Sounds[PX_SOUND_DEFAULT_PARALLEL];
 }PX_SoundPlay;
 
 px_bool PX_SoundPlayInit(px_memorypool *mp,PX_SoundPlay *pSoundPlay);
 px_bool PX_SoundPlayAdd(PX_SoundPlay *pSoundPlay,PX_Sound sounddata);
 px_bool PX_SoundPlayRead(PX_SoundPlay *pSoundPlay,px_byte *pBuffer,px_int readSize);
 px_void PX_SoundPlayFree(PX_SoundPlay *pSoundPlay);
+px_void PX_SoundPlayClear(PX_SoundPlay *pSoundPlay);
 px_bool PX_SoundPlayGetDataCount(PX_SoundPlay *pSoundPlay);
-PX_Sound PX_SoundCreate(PX_SoundData *data);
+PX_Sound PX_SoundCreate(PX_SoundData *data,px_bool loop);
 #endif

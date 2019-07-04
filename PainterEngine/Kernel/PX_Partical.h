@@ -28,26 +28,30 @@ typedef px_void (* PX_ParticalLauncher_UpdateAtom)(struct _PX_Partical_Launcher 
 
 typedef struct _PX_Partical_Launcher
 {
-	PX_Partical_Atom *ParticalPool;
+	px_point        launcherPosition;
+	px_point        launcherVelocity;
+
 	px_dword		generateDuration;
 	px_dword        elpased;
 	px_uint			maxCount;
-	px_int         launchCount;
+	px_int			launchCount;
 	px_uint         genIndex;
 	px_point        force;
 	px_float        resistanceK;
-	px_memorypool   *mp;
-	px_texture      *texture;
-	PX_ScriptVM_Instance *VM_Instance;
 	px_void			*user;
 	px_point        velocity;
 	px_point        direction;
+	px_uint         CreateParticalFuncIndex;
+	px_uint         UpdateParitcalFuncIndex;
+	px_float        lefttopX,leftTopY,rightBottomX,rightBottomY;
 
 	PX_ParticalLauncher_CreateAtom Create_func;
 	PX_ParticalLauncher_UpdateAtom Update_func;
-	px_uint         CreateParticalFuncIndex;
-	px_uint         UpdateParitcalFuncIndex;
-	px_float          lefttopX,leftTopY,rightBottomX,rightBottomY;
+
+	px_memorypool   *mp;
+	px_texture      *texture;
+	PX_Partical_Atom *ParticalPool;
+	PX_ScriptVM_Instance *VM_Instance;
 }PX_Partical_Launcher;
 
 typedef struct
@@ -64,6 +68,7 @@ typedef struct
 
 px_bool PX_ParticalLauncherCreateEx(PX_Partical_Launcher *launcher,px_memorypool   *mp,PX_ParticalLauncher_InitializeInfo Info);
 px_bool PX_ParticalLauncherCreate(PX_Partical_Launcher *launcher,px_memorypool   *mp,px_texture *tex,PX_ScriptVM_Instance *pIns,px_char *Initfunc,px_char *_createfunc,px_char *_updatefunc);
+px_void PX_ParticalLauncherSetLauncherPosition(PX_Partical_Launcher *launcher,px_point position);
 px_bool PX_ParticalLauncherSetCreateFuncIndex(PX_Partical_Launcher *launcher,px_char *func_Name);
 px_bool PX_ParticalLauncherSetUpdateFuncIndex(PX_Partical_Launcher *launcher,px_char *func_Name);
 

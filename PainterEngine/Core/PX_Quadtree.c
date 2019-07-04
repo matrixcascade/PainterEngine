@@ -91,8 +91,17 @@ px_bool PX_QuadtreeCreate(px_memorypool *mp,PX_Quadtree *pQuadtree,px_float mapS
 {
 	pQuadtree->mp=mp;
 	pQuadtree->PX_AABB_MAX_DEEP=deep;
-	PX_VectorInit(mp,&pQuadtree->boxes,sizeof(PX_Quadtree_AABB),ObjectsCount);
-	PX_VectorInit(mp,&pQuadtree->Impacts,sizeof(PX_Quadtree_AABB_ImpactInfo),ObjectsCount);
+	if(!PX_VectorInit(mp,&pQuadtree->boxes,sizeof(PX_Quadtree_AABB),ObjectsCount))
+	{
+		PX_ASSERT();
+		return PX_FALSE;
+	}
+	if(!PX_VectorInit(mp,&pQuadtree->Impacts,sizeof(PX_Quadtree_UserData),ObjectsCount))
+	{
+		PX_ASSERT();
+		PX_VectorFree(&pQuadtree->boxes);
+		return PX_FALSE;
+	}
 	pQuadtree->AABB=(PX_Quadtree_AABB *)MP_Malloc(mp,sizeof(PX_Quadtree_AABB));
 	pQuadtree->AABB->deep=0;
 	pQuadtree->AABB->Area1=PX_NULL;
@@ -111,48 +120,50 @@ px_bool PX_QuadtreeCreate(px_memorypool *mp,PX_Quadtree *pQuadtree,px_float mapS
 	return PX_Quadtree_InitAABB(mp,pQuadtree->PX_AABB_MAX_DEEP,pQuadtree->AABB);
 }
 
-static px_void PX_QuadtreeTest(PX_Quadtree *pQuadtree,PX_Quadtree_AABB *aabb,px_int index)
+static px_void PX_QuadtreeTest(PX_Quadtree *pQuadtree,PX_Quadtree_AABB *aabb,PX_Quadtree_AABB_BOX testBox)
 {
 	px_list_node *pnode=aabb->dataList.head;
 	px_rect r1,r2;
-	PX_Quadtree_AABB_BOX *pBox,*ptestBox;
-	PX_Quadtree_AABB_ImpactInfo intersect;
+	PX_Quadtree_AABB_BOX *pBox;
+
+
 	while (pnode)
 	{
 		pBox=PX_VECTORAT(PX_Quadtree_AABB_BOX,&pQuadtree->boxes,*(px_int *)pnode->pdata);
-		ptestBox=PX_VECTORAT(PX_Quadtree_AABB_BOX,&pQuadtree->boxes,index);
-		
-		if (ptestBox->test!=index)
+		if (pBox->userdata.ptr!=testBox.userdata.ptr)
 		{
 			r1.x=pBox->x-pBox->width/2;
 			r1.y=pBox->y-pBox->height/2;
 			r1.width=pBox->width;
 			r1.height=pBox->height;
 
-			r2.x=ptestBox->x-ptestBox->width/2;
-			r2.y=ptestBox->y-ptestBox->height/2;
-			r2.width=ptestBox->width;
-			r2.height=ptestBox->height;
+			r2.x=testBox.x-testBox.width/2;
+			r2.y=testBox.y-testBox.height/2;
+			r2.width=testBox.width;
+			r2.height=testBox.height;
 
 			if (PX_isRectCrossRect(r1,r2))
 			{
-				if (PX_ABS(pBox->z-ptestBox->z)>=(pBox->length+ptestBox->length)/2)
+				px_int i;
+				for (i=0;i<pQuadtree->Impacts.size;i++)
 				{
-					ptestBox->test=index;
-					intersect.box1Index=pBox->user;
-					intersect.box2Index=ptestBox->user;
-					//printf("intersect %d:%d\n",pBox->index,ptestBox->index);
-					PX_VectorPushback(&pQuadtree->Impacts,&intersect);
+					if (PX_VECTORAT(PX_Quadtree_UserData,&pQuadtree->Impacts,i)->ptr==pBox->userdata.ptr)
+					{
+						break;
+					}
 				}
+
+				if(i==pQuadtree->Impacts.size)
+				PX_VectorPushback(&pQuadtree->Impacts,&pBox->userdata);
+				
 			}
 		}
-	
 		pnode=pnode->pnext;
 	}
 
 }
 
-static px_void PX_QuadtreeSortBox(PX_Quadtree *pQuadtree,PX_Quadtree_AABB *aabb,px_int index,px_bool btest)
+static px_void PX_QuadtreeSortBox(PX_Quadtree *pQuadtree,PX_Quadtree_AABB *aabb,px_int index)
 {
 	px_rect r1,r2;
 	PX_Quadtree_AABB_BOX *pBox;
@@ -170,90 +181,74 @@ static px_void PX_QuadtreeSortBox(PX_Quadtree *pQuadtree,PX_Quadtree_AABB *aabb,
 	{
 		if (aabb->deep>=pQuadtree->PX_AABB_MAX_DEEP)
 		{
-			if(btest)
-			PX_QuadtreeTest(pQuadtree,aabb,index);
-//			printf("Index %d at x:%f y:%f w:%f h:%f \n",index,r2.x,r2.y,r2.width,r2.height);
 			PX_ListPush(&aabb->dataList,&index,sizeof(px_int));
 		}
 		else
 		{
-			PX_QuadtreeSortBox(pQuadtree,aabb->Area1,index,btest);
-			PX_QuadtreeSortBox(pQuadtree,aabb->Area2,index,btest);
-			PX_QuadtreeSortBox(pQuadtree,aabb->Area3,index,btest);
-			PX_QuadtreeSortBox(pQuadtree,aabb->Area4,index,btest);
+			PX_QuadtreeSortBox(pQuadtree,aabb->Area1,index);
+			PX_QuadtreeSortBox(pQuadtree,aabb->Area2,index);
+			PX_QuadtreeSortBox(pQuadtree,aabb->Area3,index);
+			PX_QuadtreeSortBox(pQuadtree,aabb->Area4,index);
 		}
 	}
 }
-px_void PX_QuadtreeAddNode(PX_Quadtree *pQuadtree,px_float x,px_float y,px_float z,px_float width,px_float height,px_float length,px_int user)
+
+
+static px_void PX_QuadtreeTestBox(PX_Quadtree *pQuadtree,PX_Quadtree_AABB *aabb,PX_Quadtree_AABB_BOX Box)
 {
-	PX_Quadtree_AABB_BOX box;
-	box.height=height;
-	box.width=width;
-	box.length=length;
-	box.x=x;
-	box.y=y;
-	box.z=z;
-	box.user=user;
-	box.test=-1;
-	PX_VectorPushback(&pQuadtree->boxes,&box);
-
-	PX_QuadtreeSortBox(pQuadtree,pQuadtree->AABB,pQuadtree->boxes.size-1,PX_FALSE);
-}
-
-px_void PX_QuadtreeAddAndTestNode(PX_Quadtree *pQuadtree,px_float x,px_float y,px_float z,px_float width,px_float height,px_float length,px_int user)
-{
-	PX_Quadtree_AABB_BOX box;
-	box.height=height;
-	box.width=width;
-	box.length=length;
-	box.x=x;
-	box.y=y;
-	box.z=z;
-	box.user=user;
-	box.test=-1;
-	PX_VectorPushback(&pQuadtree->boxes,&box);
-
-	PX_QuadtreeSortBox(pQuadtree,pQuadtree->AABB,pQuadtree->boxes.size-1,PX_TRUE);
-}
-
-px_void PX_QuadtreeTestNode(PX_Quadtree *pQuadtree,px_float x,px_float y,px_float z,px_float width,px_float height,px_float length,px_int user)
-{
-	PX_Quadtree_AABB_BOX *ptestBox;
-	PX_Quadtree_AABB_ImpactInfo Impacts;
 	px_rect r1,r2;
-	px_int i;
-	
-	r1.x=x-width/2;
-	r1.y=y-height/2;
-	r1.width=width;
-	r1.height=height;
+	r1.x=Box.x-Box.width/2;
+	r1.y=Box.y-Box.height/2;
+	r1.width=Box.width;
+	r1.height=Box.height;
 
-	for (i=0;i<pQuadtree->boxes.size;i++)
+	r2.x=aabb->Left;
+	r2.y=aabb->Top;
+	r2.width=aabb->Right-aabb->Left+1;
+	r2.height=aabb->Bottom-aabb->Top+1;
+	if (PX_isRectCrossRect(r1,r2))
 	{
-		ptestBox=PX_VECTORAT(PX_Quadtree_AABB_BOX,&pQuadtree->boxes,i);
-
-		if (ptestBox->test!=0xffffff)
+		if (aabb->deep>=pQuadtree->PX_AABB_MAX_DEEP)
 		{
-			r1.x=x-width/2;
-			r1.y=y-height/2;
-			r1.width=width;
-			r1.height=height;
-
-			r2.x=ptestBox->x-ptestBox->width/2;
-			r2.y=ptestBox->y-ptestBox->height/2;
-			r2.width=ptestBox->width;
-			r2.height=ptestBox->height;
-
-			if (PX_isRectCrossRect(r1,r2))
-			{
-				if (PX_ABS(z-ptestBox->z)>=(length+ptestBox->length)/2)
-				{
-					ptestBox->test=0xffffff;
-					Impacts.box1Index=user;
-					Impacts.box2Index=ptestBox->user;
-					PX_VectorPushback(&pQuadtree->Impacts,&Impacts);
-				}
-			}
+			PX_QuadtreeTest(pQuadtree,aabb,Box);
+		}
+		else
+		{
+			PX_QuadtreeTestBox(pQuadtree,aabb->Area1,Box);
+			PX_QuadtreeTestBox(pQuadtree,aabb->Area2,Box);
+			PX_QuadtreeTestBox(pQuadtree,aabb->Area3,Box);
+			PX_QuadtreeTestBox(pQuadtree,aabb->Area4,Box);
 		}
 	}
+}
+
+
+px_void PX_QuadtreeAddNode(PX_Quadtree *pQuadtree,px_float x,px_float y,px_float width,px_float height,PX_Quadtree_UserData userData)
+{
+	PX_Quadtree_AABB_BOX box;
+	box.height=height;
+	box.width=width;
+	box.x=x;
+	box.y=y;
+	box.userdata=userData;
+	PX_VectorPushback(&pQuadtree->boxes,&box);
+
+	PX_QuadtreeSortBox(pQuadtree,pQuadtree->AABB,pQuadtree->boxes.size-1);
+}
+
+px_void PX_QuadtreeTestNode(PX_Quadtree *pQuadtree,px_float x,px_float y,px_float width,px_float height,PX_Quadtree_UserData userData)
+{
+	PX_Quadtree_AABB_BOX box;
+	box.height=height;
+	box.width=width;
+	box.x=x;
+	box.y=y;
+	box.userdata=userData;
+
+	PX_QuadtreeTestBox(pQuadtree,pQuadtree->AABB,box);
+}
+
+px_void PX_QuadtreeResetTest(PX_Quadtree *pQuadtree)
+{
+	PX_VectorClear(&pQuadtree->Impacts);
 }

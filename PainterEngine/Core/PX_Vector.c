@@ -58,16 +58,27 @@ px_bool PX_VectorPushback(px_vector *vec,px_void *data)
 	}
 	else
 	{
+		px_int allocSize=vec->allocsize;
+		if (allocSize==0)
+		{
+			allocSize=2;
+		}
+		else
+		{
+			allocSize=vec->allocsize*2;
+		}
+
 		old=vec->data;
-		vec->data=MP_Malloc(vec->mp,vec->allocsize*vec->nodesize*2);
+		vec->data=MP_Malloc(vec->mp,allocSize*vec->nodesize);
 		if (vec->data==PX_NULL)
 		{
 			return PX_FALSE;
 		}
 		px_memcpy(vec->data,old,vec->allocsize*vec->nodesize);
-		vec->allocsize=vec->allocsize*2;
+		vec->allocsize=allocSize;
 		px_memcpy((px_byte *)vec->data+vec->size*vec->nodesize,data,vec->nodesize);
 		vec->size++;
+		if(old)
 		MP_Free(vec->mp,old);
 	}
 	return PX_TRUE;

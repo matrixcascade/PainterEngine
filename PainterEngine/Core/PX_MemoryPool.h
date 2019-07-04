@@ -3,6 +3,8 @@
 #include "PX_Typedef.h"
 
 #define __PX_MEMORYPOOL_ALIGN_BYTES 4
+#define PX_MEMORYPOOL_DEBUG_CHECK
+
 
 typedef enum
 {
@@ -13,7 +15,7 @@ typedef enum
 
 typedef px_void (*PX_MP_ErrorCall)(PX_MEMORYPOOL_ERROR);
 
-#ifdef PX_DEBUG_MODE
+#if defined(PX_DEBUG_MODE) && defined(PX_MEMORYPOOL_DEBUG_CHECK)
 typedef struct 
 {
 	px_void *addr;
@@ -40,13 +42,13 @@ typedef struct _memoryPool
 	px_uint32 FreeTableCount;
 	px_uint32 MaxMemoryfragSize;
 	PX_MP_ErrorCall ErrorCall_Ptr;
-#ifdef PX_DEBUG_MODE
+#if defined(PX_DEBUG_MODE) && defined(PX_MEMORYPOOL_DEBUG_CHECK)
 	MP_alloc_debug DEBUG_allocdata[1024];
 #endif
 }px_memorypool;
 
 
-#ifdef PX_DEBUG_MODE
+#if defined(PX_DEBUG_MODE) && defined(PX_MEMORYPOOL_DEBUG_CHECK)
 px_void MP_UnreleaseInfo(px_memorypool *mp);
 #define MP_DEBUG_AID(x) MP_UnreleaseInfo(x)
 #else

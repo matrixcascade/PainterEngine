@@ -190,9 +190,15 @@ px_char* px_strstr(const char* dest, const char* src);
 ///////////////////////////////////////////////////////////////////////////
 //rectangle
 px_bool PX_isPointInRect(px_point p,px_rect rect);
-px_bool PX_isRectCrossRect(px_rect rect1,px_rect rect2);
 px_bool PX_isXYInRegion(px_float x,px_float y,px_float rectx,px_float recty,px_float width,px_float height);
 //////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////
+//cross
+px_bool PX_isRectCrossRect(px_rect rect1,px_rect rect2);
+px_bool PX_isRectCrossCircle(px_rect rect1,px_point center,px_float radius);
+px_bool PX_isCircleCrossCircle(px_point center1,px_float radius1,px_point center2,px_float radius2);
+
 
 //////////////////////////////////////////////////////////////////////////
 //memory
@@ -249,12 +255,14 @@ px_bool  PX_ColorEqual(px_color color1,px_color color2);
 //point
 px_point PX_POINT(px_float x,px_float y,px_float z);
 px_point PX_PointRotate(px_point p,px_float angle);
+px_float PX_PointDistance(px_point p1,px_point p2);
 px_point PX_PointAdd(px_point p1,px_point p2);
 px_point PX_PointSub(px_point p1,px_point p2);
 px_point PX_PointMul(px_point p1,px_float m);
 px_point PX_PointDiv(px_point p1,px_float m);
 px_float PX_PointDot(px_point p1,px_point p2);
 px_point PX_PointCross(px_point p1,px_point p2);
+px_point PX_PointInverse(px_point p1);
 px_float PX_PointMod(px_point p);
 px_float PX_PointSquare(px_point p);
 px_point PX_PointUnit(px_point p);

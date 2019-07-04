@@ -6,18 +6,54 @@ px_bool PX_SoundPlayInit(px_memorypool *mp,PX_SoundPlay *pSound)
 	pSound->bLock=PX_FALSE;
 	pSound->mix_mode=PX_SOUND_MIX_MODE_PARALLEL;
 	pSound->parallel=PX_SOUND_DEFAULT_PARALLEL;
-	return PX_VectorInit(mp,&pSound->Sounds,sizeof(PX_Sound),64);
+	px_memset(pSound->Sounds,0,sizeof(pSound->Sounds));
+	return PX_TRUE;
 }
 
 
 px_bool PX_SoundPlayAdd(PX_SoundPlay *pSound,PX_Sound sounddata)
 {
-	px_bool ret;
+	px_int i;
+	px_int min_size=0,index;
 	while(pSound->bLock);
 	pSound->bLock=PX_TRUE;
-	ret=PX_VectorPushback(&pSound->Sounds,&sounddata);
-	pSound->bLock=PX_FALSE;
-	return ret;
+
+	for (i=0;i<px_countof(pSound->Sounds);i++)
+	{
+		if (pSound->Sounds[i].data==PX_NULL)
+		{
+			index=i;
+			break;
+		}
+		else
+		{
+			if (min_size==0&&!pSound->Sounds[i].loop)
+			{
+				min_size=pSound->Sounds[i].data->size-pSound->Sounds[i].offset;
+				index=i;
+			}
+			else
+			{
+				if (!pSound->Sounds[i].loop && pSound->Sounds[i].data->size-pSound->Sounds[i].offset<min_size)
+				{
+					min_size=pSound->Sounds[i].data->size-pSound->Sounds[i].offset;
+					index=i;
+				}
+			}
+		}
+	}
+	if (index<px_countof(pSound->Sounds))
+	{
+		pSound->Sounds[index]=sounddata;
+		pSound->bLock=PX_FALSE;
+		return PX_TRUE;
+	}
+	else
+	{
+		pSound->bLock=PX_FALSE;
+		return PX_FALSE;
+	}
+	
 }
 
 
@@ -37,10 +73,16 @@ px_bool PX_SoundPlayRead(PX_SoundPlay *pSoundPlay,px_byte *pBuffer,px_int readSi
 	px_memset(pBuffer,0,readSize);
 
 
-	div=pSoundPlay->Sounds.size;
-	for (j=0;j<pSoundPlay->Sounds.size;j++)
+	div=px_countof(pSoundPlay->Sounds);
+
+	for (j=0;j<px_countof(pSoundPlay->Sounds);j++)
 	{
-		pSound=PX_VECTORAT(PX_Sound,&pSoundPlay->Sounds,j);
+		pSound=pSoundPlay->Sounds+j;
+		if (!pSound->data)
+		{
+			continue;
+		}
+
 		if (pSound->data->channel==PX_SOUND_CHANNEL_ONE)
 		{
 			
@@ -81,8 +123,11 @@ px_bool PX_SoundPlayRead(PX_SoundPlay *pSoundPlay,px_byte *pBuffer,px_int readSi
 
 			if (pSound->offset>=pSound->data->size)
 			{
-				PX_VectorErase(&pSoundPlay->Sounds,j);
-				j--;
+				if (!pSoundPlay->Sounds[j].loop)
+				{
+					pSoundPlay->Sounds[j].data=PX_NULL;
+				}
+				pSoundPlay->Sounds[j].offset=0;
 				continue;
 			}
 
@@ -125,8 +170,11 @@ px_bool PX_SoundPlayRead(PX_SoundPlay *pSoundPlay,px_byte *pBuffer,px_int readSi
 
 			if (pSound->offset>=pSound->data->size)
 			{
-				PX_VectorErase(&pSoundPlay->Sounds,j);
-				j--;
+				if (!pSoundPlay->Sounds[j].loop)
+				{
+					pSoundPlay->Sounds[j].data=PX_NULL;
+				}
+				pSoundPlay->Sounds[j].offset=0;
 				continue;
 			}
 		}
@@ -135,21 +183,41 @@ px_bool PX_SoundPlayRead(PX_SoundPlay *pSoundPlay,px_byte *pBuffer,px_int readSi
 	return PX_TRUE;
 }
 
-px_void PX_SoundPlayFree(PX_SoundPlay *pSound)
+px_void PX_SoundPlayFree(PX_SoundPlay *pSoundPlay)
 {
-	PX_VectorFree(&pSound->Sounds);
+	
+}
+
+
+px_void PX_SoundPlayClear(PX_SoundPlay *pSoundPlay)
+{
+	px_int count=0,j;
+	for (j=0;j<px_countof(pSoundPlay->Sounds);j++)
+	{
+		pSoundPlay->Sounds[j].data=PX_NULL;
+		pSoundPlay->Sounds[j].offset=0;
+	}
 }
 
 px_bool PX_SoundPlayGetDataCount(PX_SoundPlay *pSoundPlay)
 {
-	return pSoundPlay->Sounds.size;
+	px_int count=0,j;
+	for (j=0;j<px_countof(pSoundPlay->Sounds);j++)
+	{
+		if (pSoundPlay->Sounds[j].data)
+		{
+			count++;
+		}
+	}
+	return count;
 }
 
-PX_Sound PX_SoundCreate(PX_SoundData *data)
+PX_Sound PX_SoundCreate(PX_SoundData *data,px_bool loop)
 {
 	PX_Sound sound;
 	sound.data=data;
 	sound.offset=0;
+	sound.loop=loop;
 	return sound;
 }
 

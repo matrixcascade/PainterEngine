@@ -107,6 +107,7 @@ struct _PX_Object
 	px_float Width;
 	px_float Height;
 	px_float Length;
+	px_float diameter;//if the member is not zero,The Object is round shape
 	px_bool Enabled;
 	px_bool Visible;
 	px_bool ReceiveEvents;
@@ -115,7 +116,8 @@ struct _PX_Object
 	px_int  User_int;
 	px_void *User_ptr;
 	};
-	px_dword impact_type;
+	px_int   world_index;
+	px_dword impact_Object_type;
 	px_dword impact_test_type;
 	px_void *pObject;
 	px_memorypool *mp;
@@ -327,7 +329,7 @@ typedef struct _PX_Object_Event
 		px_uint Param_uint[4];
 		px_int Param_int[4];
 		px_float Param_float[4];
-		px_void *user;
+		px_void *param_ptr[4];
 	};
 }PX_Object_Event;
 
@@ -497,8 +499,8 @@ px_void	   PX_Object_AnimationRender(px_surface *psurface,PX_Object *pImage,px_u
 px_void	   PX_Object_AnimationFree(PX_Object *pObject);
 
 
-PX_Object *PX_Object_ParticalCreateEx(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y,PX_ParticalLauncher_InitializeInfo info);
-PX_Object *PX_Object_ParticalCreate(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y,px_texture *pTexture,PX_ScriptVM_Instance *pIns,px_char *_init,px_char *_create,px_char *_update);
+PX_Object *PX_Object_ParticalCreateEx(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y,px_int z,PX_ParticalLauncher_InitializeInfo info);
+PX_Object *PX_Object_ParticalCreate(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y,px_int z,px_texture *pTexture,PX_ScriptVM_Instance *pIns,px_char *_init,px_char *_create,px_char *_update);
 PX_Object_Partical *PX_Object_GetPartical(PX_Object *Object);
 px_void    PX_Object_ParticalSetDirection(PX_Object *pObject,px_point direction);
 px_void	   PX_Object_ParticalRender(px_surface *psurface,PX_Object *pObject,px_uint elpased);

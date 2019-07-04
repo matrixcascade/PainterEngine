@@ -218,7 +218,7 @@ PX_Object * PX_ConsolePrintPartical(PX_Console *pc,px_int x,px_int y,px_char *re
 	}
 
 
-	pObject=PX_Object_ParticalCreate(&pc->runtime->mp_ui,PX_Object_ScrollAreaGetIncludedObjects(pc->Area),x,y,&pTextureRes->texture,&pScriptRes->Script,_init,_create,_updata);
+	pObject=PX_Object_ParticalCreate(&pc->runtime->mp_ui,PX_Object_ScrollAreaGetIncludedObjects(pc->Area),x,y,0,&pTextureRes->texture,&pScriptRes->Script,_init,_create,_updata);
 	PX_ObjectSetSize(pObject,0,0,0);
 	obj.Object=pObject;
 	obj.id=pc->id++;
@@ -679,7 +679,7 @@ px_bool PX_ConsoleExecute(PX_Console *pc,char *pshellstr)
 
 
 	PX_ScriptVM_InstanceFree(&Ins);
-#ifdef PX_DEBUG_MODE
+#if defined(PX_DEBUG_MODE) && defined(PX_MEMORYPOOL_DEBUG_CHECK)
 	MP_UnreleaseInfo(&mp_calc);
 #endif
 	
