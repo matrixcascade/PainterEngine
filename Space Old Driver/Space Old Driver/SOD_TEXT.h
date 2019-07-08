@@ -5,11 +5,11 @@
 #define SOD_PATH_SND_EXPLODE02 "../Resources/explosion02.wav"
 #define SOD_PATH_SND_EXPLODE03 "../Resources/explosion03.wav"
 
-#define SOD_PATH_ANIMATION_USERDEF "../Resources/userdef/userdef.2dx"
+#define SOD_PATH_ANIMATION_USERDEF "../Resources/cxk/cxk.2dx"
 #define SOD_PATH_ANIMATION_AATOM "../Resources/aatom/aatom.2dx"
 #define SOD_PATH_ANIMATION_ALIEN "../Resources/alien/alien.2dx"
 
-#define SOD_PATH_HUAJI "../Resources/userdef/huaji_bullet.traw"
+#define SOD_PATH_HUAJI "../Resources/cxk/ball.traw"
 #define SOD_PATH_SHIELD "../Resources/shield.traw"
 #define SOD_PATH_PSTAR "../Resources/star/pstar.traw"
 #define SOD_PATH_ANIMATION_STAR "../Resources/star/star.2dx"

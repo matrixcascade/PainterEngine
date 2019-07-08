@@ -503,7 +503,7 @@ px_uint MP_Size(px_memorypool *Pool,px_void *pAddress)
 #if defined(PX_DEBUG_MODE) && defined(PX_MEMORYPOOL_DEBUG_CHECK)
 return (px_uint)(((px_char *)(TempNode->EndAddr)-(px_char *)(TempNode->StartAddr))+1-sizeof(MP_Append_data));
 #else
-	return ((px_char *)(TempNode->EndAddr)-(px_char *)(TempNode->StartAddr))+1;
+	return (px_uint32)((px_char *)(TempNode->EndAddr)-(px_char *)(TempNode->StartAddr))+1;
 #endif
 	
 }

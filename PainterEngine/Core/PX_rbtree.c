@@ -253,7 +253,9 @@ void rb_erase(struct px_rb_node *node, struct px_rb_root *root)
 			rb_set_parent(old->rb_right, node);
 		}
 
-		node->rb_parent_color = old->rb_parent_color;
+		//node->rb_parent_color = old->rb_parent_color;
+		node->parent=old->parent;
+		node->color=old->color;
 		node->rb_left = old->rb_left;
 		rb_set_parent(old->rb_left, node);
 

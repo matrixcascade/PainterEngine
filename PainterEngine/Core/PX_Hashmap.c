@@ -9,6 +9,7 @@ px_bool PX_MapInit(px_memorypool *mp,px_map *m)
 	m->mp=mp;
 	m->root.rb_node = PX_NULL;
 	m->size = 0;
+
 	return PX_TRUE;
 }
 

@@ -2,7 +2,7 @@
 #define PIXELSES_MEMORYPOOL
 #include "PX_Typedef.h"
 
-#define __PX_MEMORYPOOL_ALIGN_BYTES 4
+#define __PX_MEMORYPOOL_ALIGN_BYTES (sizeof(void *))
 #define PX_MEMORYPOOL_DEBUG_CHECK
 
 

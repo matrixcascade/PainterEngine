@@ -2406,7 +2406,7 @@ px_void SOD_PlayReset(SOD_Play *pPlay)
 	pPlay->stone_genElpased=0;
 	pPlay->ghost_genElpased=0;
 	pPlay->alien_genElpased=0;
-	pPlay->bossscore=2000;
+	pPlay->bossscore=1000;
 
 	//初始化世界
 	if(!PX_WorldInit(&pPlay->runtime->runtime.mp_game,&pPlay->world,SOD_WORLD_WIDTH,SOD_WORLD_HEIGHT,pPlay->runtime->runtime.RenderSurface.width,pPlay->runtime->runtime.RenderSurface.height))
@@ -2622,7 +2622,7 @@ px_void SOD_PlayUpdate(SOD_Play *pPlay,px_dword elpased)
 	if (pPlay->score>pPlay->bossscore)
 	{
 		PX_Object *pObject=SOD_Object_UserObjectCreate(pPlay,pPlay->bossscore/6*4);
-		pPlay->bossscore+=2000;
+		pPlay->bossscore+=1000;
 		PX_WorldAddObject(&pPlay->world,pObject);
 	}
 	

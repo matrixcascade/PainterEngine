@@ -19,7 +19,6 @@
 #define PX_FontGetAscCharactorWidth() (__PX_FONT_ASCSIZE)
 #define PX_FontGetGbkCharactorWidth() (__PX_FONT_GBKSIZE)
 
-
 typedef struct
 {
 	union
@@ -33,6 +32,12 @@ typedef struct
 	px_dword Advance;
 	px_dword Font_Width;
 	px_dword Font_Height;
+	px_dword align_dummy;
+}PX_FontModule_Charactor_Header;
+
+typedef struct
+{
+	PX_FontModule_Charactor_Header header;
 	px_shape shape;
 }PX_FontModule_Charactor;
 

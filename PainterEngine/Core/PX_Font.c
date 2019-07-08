@@ -20684,8 +20684,8 @@ px_bool PX_FontModuleLoad(PX_FontModule *module,px_byte *buffer,px_int size)
 		px_char hex[5]={0};
 		px_byte *pData;
 		
-		PX_FontModule_Charactor *pcHeader=(PX_FontModule_Charactor *)(buffer+offset);
-		offset+=sizeof(PX_FontModule_Charactor);
+		PX_FontModule_Charactor_Header *pcHeader=(PX_FontModule_Charactor_Header *)(buffer+offset);
+		offset+=sizeof(PX_FontModule_Charactor_Header);
 		pData=(buffer+offset);
 		if(pcHeader->c_magic[0]!='P')  goto _ERROR;
 		if(pcHeader->c_magic[1]!='X')  goto _ERROR;
@@ -20706,11 +20706,11 @@ px_bool PX_FontModuleLoad(PX_FontModule *module,px_byte *buffer,px_int size)
 			goto _ERROR;
 		}
 		
-		px_memcpy(cpy,pcHeader,sizeof(PX_FontModule_Charactor));
+		px_memcpy(cpy,pcHeader,sizeof(PX_FontModule_Charactor_Header));
 
-		if(!PX_ShapeCreate(module->mp,&cpy->shape,cpy->Font_Width,cpy->Font_Height)) goto _ERROR;
-		px_memcpy(cpy->shape.alpha,pData,cpy->Font_Width*cpy->Font_Height);
-		offset+=cpy->Font_Width*cpy->Font_Height;
+		if(!PX_ShapeCreate(module->mp,&cpy->shape,cpy->header.Font_Width,cpy->header.Font_Height)) goto _ERROR;
+		px_memcpy(cpy->shape.alpha,pData,cpy->header.Font_Width*cpy->header.Font_Height);
+		offset+=cpy->header.Font_Width*cpy->header.Font_Height;
 		PX_MapPut(&module->characters_map,hex,cpy);
 	}
 	return PX_TRUE;
@@ -20769,8 +20769,8 @@ px_void PX_FontModuleDrawText(px_surface *psurface,int x,int y,px_uchar *Text,px
 			pChar=(PX_FontModule_Charactor *)PX_MapGet(&mod->characters_map,hex);
 			if (pChar)
 			{
-				PX_ShapeRender(psurface,&pChar->shape,dx+pChar->BearingX,dy-pChar->BearingY,PX_TEXTURERENDER_REFPOINT_LEFTTOP,Color);
-				dx+=pChar->Advance;
+				PX_ShapeRender(psurface,&pChar->shape,dx+pChar->header.BearingX,dy-pChar->header.BearingY,PX_TEXTURERENDER_REFPOINT_LEFTTOP,Color);
+				dx+=pChar->header.Advance;
 			}
 			else
 			{

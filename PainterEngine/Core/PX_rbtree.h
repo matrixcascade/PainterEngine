@@ -48,6 +48,8 @@ struct px_rb_node
 {
 #define	RB_RED		0
 #define	RB_BLACK	1
+	struct px_rb_node *parent;
+	unsigned long color;
 	unsigned long  rb_parent_color;
 	struct px_rb_node *rb_right;
 	struct px_rb_node *rb_left;
@@ -60,20 +62,25 @@ struct px_rb_root
 };
 
 
-#define rb_parent(r)   ((struct px_rb_node *)((r)->rb_parent_color & ~3))
-#define rb_color(r)   ((r)->rb_parent_color & 1)
+//#define rb_parent(r)   ((struct px_rb_node *)((r)->rb_parent_color & ~3))
+#define rb_parent(r)   ((struct px_rb_node *)((r)->parent))
+//#define rb_color(r)   ((r)->rb_parent_color & 1)
+#define rb_color(r)   ((r)->color)
 #define rb_is_red(r)   (!rb_color(r))
 #define rb_is_black(r) rb_color(r)
-#define rb_set_red(r)  do { (r)->rb_parent_color &= ~1; } while (0)
-#define rb_set_black(r)  do { (r)->rb_parent_color |= 1; } while (0)
-
+// #define rb_set_red(r)  do { (r)->rb_parent_color &= ~1; } while (0)
+// #define rb_set_black(r)  do { (r)->rb_parent_color |= 1; } while (0)
+#define rb_set_red(r)  do { (r)->color = 0; } while (0)
+#define rb_set_black(r)  do { (r)->color = 1; } while (0)
 static void rb_set_parent(struct px_rb_node *rb, struct px_rb_node *p)
 {
-	rb->rb_parent_color = (rb->rb_parent_color & 3) | (unsigned long)p;
+	//rb->rb_parent_color = (rb->rb_parent_color & 3) | (unsigned long)p;
+	rb->parent = p;
 }
 static void rb_set_color(struct px_rb_node *rb, int color)
 {
-	rb->rb_parent_color = (rb->rb_parent_color & ~1) | color;
+	//rb->rb_parent_color = (rb->rb_parent_color & ~1) | color;
+	rb->color = color;
 }
 
 #define RB_ROOT	(struct px_rb_root) { PX_RB_NULL, }
@@ -84,7 +91,9 @@ static void rb_set_color(struct px_rb_node *rb, int color)
 
 static void rb_init_node(struct px_rb_node *rb)
 {
-	rb->rb_parent_color = 0;
+	//rb->rb_parent_color = 0;
+	rb->parent=0;
+	rb->color=0;
 	rb->rb_right = PX_RB_NULL;
 	rb->rb_left = PX_RB_NULL;
 	RB_CLEAR_NODE(rb);
@@ -115,6 +124,9 @@ static  void rb_link_node(struct px_rb_node * node, struct px_rb_node * parent,
 				struct px_rb_node ** rb_link)
 {
 	node->rb_parent_color = (unsigned long )parent;
+	node->parent=parent;
+	node->color=0;
+
 	node->rb_left = node->rb_right = PX_RB_NULL;
 
 	*rb_link = node;
