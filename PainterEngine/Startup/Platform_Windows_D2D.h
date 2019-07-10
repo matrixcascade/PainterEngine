@@ -161,7 +161,7 @@ extern  BOOL PX_MouseLButtonDown();
 extern  BOOL PX_MouseRButtonDown();
 extern  BOOL PX_MouseMButtonDown();
 extern  POINT PX_MousePosition();
-extern  BOOL PX_KeyDown(char key);
+extern BOOL PX_KeyDown(unsigned char key);
 
 
 #endif

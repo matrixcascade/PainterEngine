@@ -16,7 +16,7 @@ extern "C" BOOL PX_MouseLButtonDown();
 extern "C" BOOL PX_MouseRButtonDown();
 extern "C" BOOL PX_MouseMButtonDown();
 extern "C" POINT PX_MousePosition();
-extern "C" BOOL PX_KeyDown(char key);
+extern "C" BOOL PX_KeyDown(unsigned char key);
 
 #define         WIN_MAX_INPUT_STRING_LEN   64
 #define         WIN_MAX_INPUT_SPECKEY_LEN  0xff
@@ -328,7 +328,7 @@ HWND PX_GetWindowHwnd()
 	return Win_Hwnd;
 }
 
-BOOL PX_KeyDown(char key)
+BOOL PX_KeyDown(unsigned char key)
 {
 	if (Win_SpecKey[key])
 	{

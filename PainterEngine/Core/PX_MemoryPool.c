@@ -11,7 +11,7 @@ px_void MP_UnreleaseInfo(px_memorypool *mp)
 	for (i=0;i<sizeof(mp->DEBUG_allocdata)/sizeof(mp->DEBUG_allocdata[0]);i++)
 	{
 		if(mp->DEBUG_allocdata[i].addr) 
-			printf("Warning:Unreleased memory in MID %d\n",mp->DEBUG_allocdata[i].addr);
+			printf("Warning:Unreleased memory in MID %p\n",mp->DEBUG_allocdata[i].addr);
 
 	}
 }
