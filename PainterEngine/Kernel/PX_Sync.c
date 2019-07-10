@@ -35,8 +35,8 @@ static px_bool PX_SyncFrameServer_Write(PX_SyncFrame_Server *sync_server,PX_Sync
 }
 static px_bool PX_SyncFrameServer_Read(PX_SyncFrame_Server *server,PX_Sync_Port *port,PX_SyncFrame_Server_Clients **ppclient)
 {
-	PX_SyncFrame_Server_Clients *pClient;
-	PX_Sync_IO_Packet *packet;
+	PX_SyncFrame_Server_Clients *pClient=PX_NULL;
+	PX_Sync_IO_Packet *packet=PX_NULL;
 	
 __RE_RECV:
 
@@ -83,7 +83,7 @@ __RE_RECV:
 
 static px_void PX_SyncFrameServerHandle_StatusConnect(PX_SyncFrame_Server *sync_server,px_dword elpased)
 {
-	PX_SyncFrame_Server_Clients *pClient;
+	PX_SyncFrame_Server_Clients *pClient=PX_NULL;
 	PX_Sync_IO_Packet *recv_packet,*send_packet;
 	PX_Sync_Port port;
 	px_int i;
@@ -137,7 +137,7 @@ static px_void PX_SyncFrameServerHandle_StatusConnect(PX_SyncFrame_Server *sync_
 static px_void PX_SyncFrameServerHandle_StatusProcess(PX_SyncFrame_Server *sync_server,px_dword updateelpased)
 {
 	px_int i,datasize=0,dataoffset;
-	PX_SyncFrame_Server_Clients *pClient;
+	PX_SyncFrame_Server_Clients *pClient=PX_NULL;
 	PX_Sync_IO_Packet *send_packet,*recv_packet;
 	PX_Sync_Port port;
 	px_dword elpased;
@@ -758,7 +758,7 @@ px_bool PX_SyncDataServerInit(px_memorypool *mp,px_dword pid,PX_SyncData_Server 
 px_bool PX_SyncDataServerSetSyncData(PX_SyncData_Server *s,px_byte *data,px_dword size)
 {
 	px_int i,j;
-	PX_SyncData_Server_Client *pClient;
+	PX_SyncData_Server_Client *pClient=PX_NULL;
 
 	for (i=0;i<s->clients.size;i++)
 	{
@@ -840,7 +840,7 @@ px_bool PX_SyncDataServerUpdate(PX_SyncData_Server *s,px_int elpased)
 {
 	PX_Sync_Port port;
 	px_int readSize,i;
-	PX_SyncData_Server_Client *pClient;
+	PX_SyncData_Server_Client *pClient=PX_NULL;
 
 	px_memset(&port,0,sizeof(port));
 
