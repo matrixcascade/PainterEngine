@@ -50,7 +50,6 @@ struct px_rb_node
 #define	RB_BLACK	1
 	struct px_rb_node *parent;
 	unsigned long color;
-	unsigned long  rb_parent_color;
 	struct px_rb_node *rb_right;
 	struct px_rb_node *rb_left;
 };
@@ -123,7 +122,7 @@ extern void rb_replace_node(struct px_rb_node *victim, struct px_rb_node *newnod
 static  void rb_link_node(struct px_rb_node * node, struct px_rb_node * parent,
 				struct px_rb_node ** rb_link)
 {
-	node->rb_parent_color = (unsigned long )parent;
+//	node->rb_parent_color = (unsigned long )parent;
 	node->parent=parent;
 	node->color=0;
 

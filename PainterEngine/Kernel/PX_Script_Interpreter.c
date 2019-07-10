@@ -8535,7 +8535,7 @@ _ERROR:
 }
 px_bool PX_ScriptParseFunctionDefined(PX_SCRIPT_Analysis *analysis,PX_SCRIPT_TRANSLATOR_FUNCTION_TYPE functype)
 {
-	PX_SCRIPT_FUNCTION func,*pfunc;
+	PX_SCRIPT_FUNCTION func,*pfunc=PX_NULL;
 	PX_SCRIPT_VARIABLES fvar;
 	px_int count=0,i,j;
 	PX_LEXER_LEXEME_TYPE type;
