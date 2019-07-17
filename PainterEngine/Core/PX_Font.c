@@ -20578,10 +20578,68 @@ px_void PX_FontDrawASCII(px_surface *psurface, px_int x,px_int y,px_uchar ASCI,p
 	}
 }
 
-px_void PX_FontDrawText(px_surface *psurface,px_int x,px_int y,px_char *Text,px_color Color)
+px_void PX_FontDrawText(px_surface *psurface,px_int x,px_int y,px_char *Text,px_color Color,PX_FONT_ALIGN align)
 {
 	px_uchar TempChar;
-	px_int resX=x;
+	px_int resX=x,dx=0,dy=0;
+	px_int xlen=0;
+	switch(align)
+	{
+	case PX_FONT_ALIGN_XCENTER:
+	case PX_FONT_ALIGN_XRIGHT:
+		{
+			while(*Text!=0)
+			{
+				if (*Text=='\r'||*Text=='\n')
+				{
+					dy+=__PX_FONT_HEIGHT+4;
+					dx=resX;
+					Text++;
+					continue;
+				}
+
+				if((*Text)&0x80)
+				{
+					//Offset 2 byte
+					Text+=2;
+					//x Offset
+					dx += __PX_FONT_GBKSIZE;
+					continue;
+				}
+
+				if (*Text==' ')
+				{
+					Text++;
+					dx += __PX_FONT_ASCSIZE;
+
+					continue;
+				}
+
+				if (!((*Text)&0x80))
+				{
+					TempChar = *Text++;  
+					dx += __PX_FONT_ASCSIZE;  
+					continue;
+				}
+				if (dx>xlen)
+				{
+					xlen=dx;
+				}
+			}
+			if (align==PX_FONT_ALIGN_XCENTER)
+			{
+				x-=xlen/2;
+			}
+			if (align==PX_FONT_ALIGN_XRIGHT)
+			{
+				x-=xlen;
+			}
+		}
+		break;
+	case PX_FONT_ALIGN_XLEFT:
+	default:
+		break;
+	}
 
 	while(*Text!=0)
 	{
@@ -20734,17 +20792,76 @@ px_void PX_FontModuleFree(PX_FontModule *module)
 }
 
 //utf-16 le
-px_void PX_FontModuleDrawText(px_surface *psurface,int x,int y,px_uchar *Text,px_color Color,PX_FontModule *mod)
+px_void PX_FontModuleDrawText(px_surface *psurface,int x,int y,px_uchar *Text,px_color Color,PX_FontModule *mod,PX_FONT_ALIGN align)
 {
 	px_int dx,dy;
-	dx=x;
-	dy=y;
+	px_uchar *pTextPointer=Text;
 
 	if (!Text)
 	{
 		PX_ASSERT();
 		return;
 	}
+
+	
+	switch(align)
+	{
+	case PX_FONT_ALIGN_XRIGHT:
+	case PX_FONT_ALIGN_XCENTER:
+		{
+			dx=0;
+			while (PX_TRUE)
+			{
+				px_dword unicode_code=0;
+				px_char hex[5];
+				PX_FontModule_Charactor *pChar;
+
+				unicode_code=*pTextPointer;
+				pTextPointer++;
+
+				unicode_code+=(*pTextPointer)<<8;
+				pTextPointer++;
+
+				if (unicode_code==0)
+				{
+					break;
+				}
+
+				if (unicode_code!=' ')
+				{
+					PX_itoa(unicode_code,hex,sizeof(hex),16);
+					pChar=(PX_FontModule_Charactor *)PX_MapGet(&mod->characters_map,hex);
+					if (pChar)
+					{
+						dx+=pChar->header.Advance;
+					}
+					else
+					{
+						dx+=mod->xspacer;
+					}
+				}
+				else if (unicode_code!='\n')
+				{
+					dx=x;
+				}
+				else
+				{
+					dx+=mod->yspacer;
+				}
+			}
+			if(align==PX_FONT_ALIGN_XCENTER) x-=dx/2;
+			if(align==PX_FONT_ALIGN_XRIGHT) x-=dx;
+		}
+		break;
+	
+	default:
+	case PX_FONT_ALIGN_XLEFT:
+		break;
+	}
+
+
+	dx=x;
+	dy=y;
 
 	while (PX_TRUE)
 	{

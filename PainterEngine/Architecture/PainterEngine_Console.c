@@ -549,11 +549,11 @@ px_void  PC_ConsoleRunScriptFunction(PX_Console *pc,px_char *script_key,px_char 
 			PX_ScriptVM_RegistryHostFunction(&pScriptRes->Script,"PRINTSHAPE",PC_ConsoleVM_PrintShape);//Print Shape
 			PX_ScriptVM_RegistryHostFunction(&pScriptRes->Script,"PRINTANIMATION",PC_ConsoleVM_PrintAnimation);//Print Animation
 			PX_ScriptVM_RegistryHostFunction(&pScriptRes->Script,"PRINTPARTICAL",PC_ConsoleVM_PrintPartical);//Print Partical
-			if(!PX_ScriptVM_InstanceRunFunction(&pScriptRes->Script,0,pc,"_BOOT",0))
+			if(!PX_ScriptVM_InstanceRunFunction(&pScriptRes->Script,0,pc,"_BOOT",PX_NULL,0))
 			{
 				return;
 			}
-			if(!PX_ScriptVM_InstanceRunFunction(&pScriptRes->Script,0,pc,func_name,0))
+			if(!PX_ScriptVM_InstanceRunFunction(&pScriptRes->Script,0,pc,func_name,PX_NULL,0))
 			{
 				return ;
 			}
@@ -666,12 +666,12 @@ px_bool PX_ConsoleExecute(PX_Console *pc,char *pshellstr)
 	{
 		pc->registry_call(&Ins);
 	}
-	if(!PX_ScriptVM_InstanceRunFunction(&Ins,0,pc,"_BOOT",0))
+	if(!PX_ScriptVM_InstanceRunFunction(&Ins,0,pc,"_BOOT",PX_NULL,0))
 	{
 		MP_Free(&pc->runtime->mp,mp_calc.StartAddr);
 		return PX_FALSE;
 	}
-	if(!PX_ScriptVM_InstanceRunFunction(&Ins,0,pc,"MAIN",0))
+	if(!PX_ScriptVM_InstanceRunFunction(&Ins,0,pc,"MAIN",PX_NULL,0))
 	{
 		MP_Free(&pc->runtime->mp,mp_calc.StartAddr);
 		return PX_FALSE;

@@ -191,6 +191,8 @@ int main()
 	HANDLE hThread;
 	DWORD  threadId;
 	WAVEFORMATEX waveformat;
+
+
 	waveformat.wFormatTag = WAVE_FORMAT_PCM;
 	waveformat.nSamplesPerSec = 44100;//44100;
 	waveformat.wBitsPerSample = 16;//

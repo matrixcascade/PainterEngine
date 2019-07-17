@@ -59,6 +59,21 @@ px_float PX_atof(px_char fstr[])
 }
 
 
+PX_RETURN_STRING PX_ftos(float f, int precision)
+{
+	PX_RETURN_STRING str;
+	PX_ftoa(f,str.data,sizeof(str.data),precision);
+	return str;
+}
+
+
+PX_RETURN_STRING PX_itos(px_int num,px_int radix)
+{
+	PX_RETURN_STRING str;
+	PX_itoa(num,str.data,sizeof(str.data),radix);
+	return str;
+}
+
 #define PUSH_CHAR(x) do { if (ret < maxlen) { *p++ = x; ret++; } } while (0)  
 
 typedef union {  
@@ -374,6 +389,185 @@ px_float PX_Point_sin(px_point v)
 px_float PX_Point_cos(px_point v)
 {
 	return v.x/PX_sqrt(v.x*v.x+v.y*v.y);
+}
+
+
+px_stringformat PX_STRINGFORMAT_INT(px_int _i)
+{
+	px_stringformat fmt;
+	fmt.type=PX_STRINGFORMAT_TYPE_INT;
+	fmt._int=_i;
+	return fmt;
+}
+
+
+px_stringformat PX_STRINGFORMAT_FLOAT(px_float _f)
+{
+	px_stringformat fmt;
+	fmt.type=PX_STRINGFORMAT_TYPE_FLOAT;
+	fmt._float=_f;
+	return fmt;
+}
+
+
+px_stringformat PX_STRINGFORMAT_STRING(const px_char *_s)
+{
+	px_stringformat fmt;
+	fmt.type=PX_STRINGFORMAT_TYPE_STRING;
+	fmt._pstring=_s;
+	return fmt;
+}
+
+
+px_int px_sprintf8(px_char *_out_str,px_int str_size,px_char fmt[], px_stringformat _1, px_stringformat _2, px_stringformat _3, px_stringformat _4,px_stringformat _5, px_stringformat _6, px_stringformat _7, px_stringformat _8)
+{
+	px_int length=0;
+	px_char *p=PX_NULL;
+	PX_RETURN_STRING tret;
+	px_stringformat pstringfmt;
+	if (!_out_str||!str_size)
+	{
+		for (p = fmt;*p; p++) 
+		{
+			if(*p != '%') {
+				length++;
+				continue;
+			}
+			switch(*(p+1)) 
+			{
+			case '1': pstringfmt=_1; break;
+			case '2': pstringfmt=_2; break;
+			case '3': pstringfmt=_3; break;
+			case '4': pstringfmt=_4; break;
+			case '5': pstringfmt=_5; break;
+			case '6': pstringfmt=_6; break;
+			case '7': pstringfmt=_7; break;
+			case '8': pstringfmt=_8; break;
+			default:
+				length++;
+				continue;
+			}
+			switch (pstringfmt.type)
+			{
+			case PX_STRINGFORMAT_TYPE_INT:
+				length+=px_strlen(PX_itos(pstringfmt._int,10).data);
+				break;
+			case PX_STRINGFORMAT_TYPE_FLOAT:
+				length+=px_strlen(PX_ftos(pstringfmt._float,3).data);
+				break;
+			case PX_STRINGFORMAT_TYPE_STRING:
+				length+=px_strlen(pstringfmt._pstring);
+				break;
+			default:
+				return 0;
+			}
+			p++;
+		}
+		return length;
+	}
+	px_memset(_out_str,0,str_size);
+	for (p = fmt;*p; p++) 
+	{
+		if(*p != '%') {
+			_out_str[length]=*p;
+			length++;
+			continue;
+		}
+		switch(*(p+1)) 
+		{
+		case '1': pstringfmt=_1; break;
+		case '2': pstringfmt=_2; break;
+		case '3': pstringfmt=_3; break;
+		case '4': pstringfmt=_4; break;
+		case '5': pstringfmt=_5; break;
+		case '6': pstringfmt=_6; break;
+		case '7': pstringfmt=_7; break;
+		case '8': pstringfmt=_8; break;
+		default:
+			_out_str[length]=*p;
+			length++;
+			continue;
+		}
+
+		switch (pstringfmt.type)
+		{
+		case PX_STRINGFORMAT_TYPE_INT:
+			tret=PX_itos(pstringfmt._int,10);
+			if(length+px_strlen(tret.data)<str_size)
+			{
+				px_strcat(_out_str,tret.data);
+				length+=px_strlen(tret.data);
+			}
+			else
+				return length;
+			break;
+		case PX_STRINGFORMAT_TYPE_FLOAT:
+			tret=PX_ftos(pstringfmt._float,3);
+			if(length+px_strlen(tret.data)<str_size)
+			{
+				px_strcat(_out_str,tret.data);
+				length+=px_strlen(tret.data);
+			}
+			else
+				return length;
+			break;
+		case PX_STRINGFORMAT_TYPE_STRING:
+			if(length+px_strlen(pstringfmt._pstring)<str_size)
+			{
+				px_strcat(_out_str,pstringfmt._pstring);
+				length+=px_strlen(pstringfmt._pstring);
+			}
+			else
+				return length;
+			break;
+		default:
+			return 0;
+		}
+		p++;
+	}
+	return length;
+}
+
+
+px_int px_sprintf7(px_char *str,px_int str_size,px_char fmt[],px_stringformat _1,px_stringformat _2,px_stringformat _3,px_stringformat _4,px_stringformat _5,px_stringformat _6,px_stringformat _7)
+{
+	return px_sprintf8(str,str_size,fmt,_1,_2,_3,_4,_5,_6,_7,PX_STRINGFORMAT_INT(0));
+}
+
+
+px_int px_sprintf6(px_char *str,px_int str_size,px_char fmt[],px_stringformat _1,px_stringformat _2,px_stringformat _3,px_stringformat _4,px_stringformat _5,px_stringformat _6)
+{
+	return px_sprintf8(str,str_size,fmt,_1,_2,_3,_4,_5,_6,PX_STRINGFORMAT_INT(0),PX_STRINGFORMAT_INT(0));
+}
+
+
+px_int px_sprintf5(px_char *str,px_int str_size,px_char fmt[],px_stringformat _1,px_stringformat _2,px_stringformat _3,px_stringformat _4,px_stringformat _5)
+{
+	return px_sprintf8(str,str_size,fmt,_1,_2,_3,_4,_5,PX_STRINGFORMAT_INT(0),PX_STRINGFORMAT_INT(0),PX_STRINGFORMAT_INT(0));
+}
+
+
+px_int px_sprintf4(px_char *str,px_int str_size,px_char fmt[],px_stringformat _1,px_stringformat _2,px_stringformat _3,px_stringformat _4)
+{
+	return px_sprintf8(str,str_size,fmt,_1,_2,_3,_4,PX_STRINGFORMAT_INT(0),PX_STRINGFORMAT_INT(0),PX_STRINGFORMAT_INT(0),PX_STRINGFORMAT_INT(0));
+}
+
+
+px_int px_sprintf3(px_char *str,px_int str_size,px_char fmt[],px_stringformat _1,px_stringformat _2,px_stringformat _3)
+{
+	return px_sprintf8(str,str_size,fmt,_1,_2,_3,PX_STRINGFORMAT_INT(0),PX_STRINGFORMAT_INT(0),PX_STRINGFORMAT_INT(0),PX_STRINGFORMAT_INT(0),PX_STRINGFORMAT_INT(0));
+}
+
+
+px_int px_sprintf2(px_char *str,px_int str_size,px_char fmt[], px_stringformat _1,px_stringformat _2)
+{
+	return px_sprintf8(str,str_size,fmt,_1,_2,PX_STRINGFORMAT_INT(0),PX_STRINGFORMAT_INT(0),PX_STRINGFORMAT_INT(0),PX_STRINGFORMAT_INT(0),PX_STRINGFORMAT_INT(0),PX_STRINGFORMAT_INT(0));
+}
+
+
+px_int px_sprintf1(px_char *str,px_int str_size,px_char fmt[], px_stringformat _1)
+{
+	return px_sprintf8(str,str_size,fmt,_1,PX_STRINGFORMAT_INT(0),PX_STRINGFORMAT_INT(0),PX_STRINGFORMAT_INT(0),PX_STRINGFORMAT_INT(0),PX_STRINGFORMAT_INT(0),PX_STRINGFORMAT_INT(0),PX_STRINGFORMAT_INT(0));
 }
 
 void PX_MatrixZero(px_matrix *Mat)
@@ -922,7 +1116,7 @@ void px_memdwordset(void *dst,px_dword dw,px_uint count)
 }
 
 
-px_bool px_memequ(void *dst,void *src,px_uint size)
+px_bool px_memequ(const void *dst,const void *src,px_uint size)
 {
 	px_dword *_4byteMovSrc=(px_dword *)src;
 	px_dword *_4byteMovDst=(px_dword *)dst;
@@ -947,7 +1141,7 @@ px_bool px_memequ(void *dst,void *src,px_uint size)
 }
 
 
-px_void px_memcpy(px_void *dst,px_void *src,px_uint size)
+px_void px_memcpy(px_void *dst,const px_void *src,px_uint size)
 {
 	typedef struct
 	{
@@ -1012,7 +1206,7 @@ px_void px_memcpy(px_void *dst,px_void *src,px_uint size)
 
 
 
-	if ((px_uint)dst>(px_uint)src&&(px_uint)dst<=(px_uint)src+size)
+	if (dst>src&&(px_char *)dst<=(px_char *)src+size)
 	{
 		//backward overlap
 		psrc=(px_uchar *)src+size-1;
@@ -1172,7 +1366,7 @@ px_void px_memcpy(px_void *dst,px_void *src,px_uint size)
 
 
 
-px_void px_strcpy(px_char *dst,px_char *src,px_uint size)
+px_void px_strcpy(px_char *dst,const px_char *src,px_uint size)
 {
 	while(size--)
 		if(*src)
@@ -1185,7 +1379,7 @@ px_void px_strcpy(px_char *dst,px_char *src,px_uint size)
 	*(dst-1)='\0';
 }
 
-px_void px_strcat(px_char *src,px_char *cat)
+px_void px_strcat(px_char *src,const px_char *cat)
 {
 	px_int len=px_strlen(cat);
 	while(*src)src++;
@@ -1193,7 +1387,15 @@ px_void px_strcat(px_char *src,px_char *cat)
 	*src='\0';
 }
 
-px_int px_strlen(px_char *dst)
+
+px_void px_strset(px_char *dst,const px_char*src)
+{
+	dst[0]=0;
+	px_strcat(dst,src);
+}
+
+
+px_int px_strlen(const px_char *dst)
 {
 	px_int len=0;
 	if(!dst)
@@ -1856,71 +2058,6 @@ px_uint32 PX_crc32( px_void *buffer, px_uint size)
 	return crc^0xFFFFFFFF;  
 }  
 
-PX_PARALLEL_CREATE_FUNC __PX_PARALLEL_CORE_CREATEFUNC=PX_NULL;
-PX_PARALLEL_SETSIGNAL __PX_PARALLEL_CORE_SETSIGNAL=PX_NULL;
-
-px_int __PX_PARALLEL_EXTRA_CORE_COUNT=0;
-
-volatile static PX_PARALLEL_EXEC_FUNC __PX_PARALLEL_EXEC_FUNC[PX_PARALLEL_MAX_CORE_COUNT]={0};
-static px_void *__PX_PARALLEL_PARAMS[PX_PARALLEL_MAX_CORE_COUNT]={0};
-
-px_int PX_PARALLEL_CYCLE(px_void *p)
-{
-	px_int index=(px_int)p;
-	
-	while(1)
-	{
-		__PX_PARALLEL_CORE_SETSIGNAL(index,PX_TRUE);
-
-		if(__PX_PARALLEL_EXEC_FUNC[index])
-		{
-			__PX_PARALLEL_EXEC_FUNC[index](__PX_PARALLEL_PARAMS[index]);
-			__PX_PARALLEL_EXEC_FUNC[index]=PX_NULL;
-		}
-	}
-	
-}
-
-
-px_void PX_PARALLEL_EXTRA_CORE_SET(PX_PARALLEL_CREATE_FUNC create_func,PX_PARALLEL_SETSIGNAL signal_func,px_int ExtraCoreCount)
-{
-	px_int i;
-	
-	__PX_PARALLEL_CORE_CREATEFUNC=create_func;
-	__PX_PARALLEL_CORE_SETSIGNAL=signal_func;
-
-	if(ExtraCoreCount<PX_PARALLEL_MAX_CORE_COUNT)
-	__PX_PARALLEL_EXTRA_CORE_COUNT=ExtraCoreCount;
-	else
-		__PX_PARALLEL_EXTRA_CORE_COUNT=ExtraCoreCount;
-
-	for (i=0;i<ExtraCoreCount;i++)
-	{
-		__PX_PARALLEL_CORE_CREATEFUNC(PX_PARALLEL_CYCLE,(px_void *)i);
-	}
-	
-}
-
-px_void PX_PARALLEL_EXEC(PX_PARALLEL_EXEC_FUNC _func,px_void *param,px_int index)
-{
-	__PX_PARALLEL_PARAMS[index]=param;
-	__PX_PARALLEL_EXEC_FUNC[index]=_func;
-	__PX_PARALLEL_CORE_SETSIGNAL(index,PX_FALSE);
-}
-
-px_bool PX_PARALLEL_DONE()
-{
-	px_int i;
-	for (i=0;i<PX_PARALLEL_MAX_CORE_COUNT;i++)
-	{
-		if (__PX_PARALLEL_EXEC_FUNC[i])
-		{
-			return PX_FALSE;
-		}
-	}
-	return PX_TRUE;
-}
-
 static px_bool PX_checkCPUendian()
 {
 	union{
@@ -2050,79 +2187,79 @@ px_uint32 PX_sum32(px_void *buffer, px_uint size)
 
 
 //%s %d %f
-px_bool px_sprintf(px_char *str,px_int str_size,px_char fmt[],...)
-{
-	_px_va_list ap;
-	px_char *p, *sval;
-	px_int ival,oft=0;
-	px_int finalLen=0;
-	px_double dval;
-	px_char dat[32];
-	px_uchar shl=0;
-
-	_px_va_start(ap, fmt);
-	for (p = fmt; *p; p++) {
-		if(*p != '%') {
-			finalLen++;
-			continue;
-		}
-		switch(*++p) {
-		case 'd':
-			ival = _px_va_arg(ap, px_int);
-			finalLen +=PX_itoa(ival,dat,sizeof dat,10);
-			break;
-		case 'f':
-			dval = _px_va_arg(ap, px_double);
-			finalLen +=PX_ftoa((px_float)dval,dat,sizeof dat,6);
-			break;
-		case 's':
-			sval = _px_va_arg(ap, char *); 
-			finalLen +=px_strlen(sval);
-			break;
-		default:
-			finalLen+=1;
-			break;
-		}
-	}
-	_px_va_end(ap);
-	finalLen++;
-	if (str_size<finalLen)
-	{
-		return PX_FALSE;
-	}
-
-	px_memset(str,0,str_size);
-	_px_va_start(ap, fmt);
-	for (p = fmt; *p; p++) {
-		if(*p != '%') {
-			str[oft++]=*p;
-			continue;
-		}
-		switch(*++p) {
-		case 'd':
-			ival = _px_va_arg(ap, px_int);
-			oft+=PX_itoa(ival,dat,sizeof dat,10);
-			px_strcat(str,dat);
-			break;
-		case 'f':
-			dval = _px_va_arg(ap, px_double);
-			oft+=PX_ftoa((px_float)dval,dat,sizeof dat,6);
-			px_strcat(str,dat);
-			break;
-		case 's':
-			sval = _px_va_arg(ap, char *); 
-			oft+=px_strlen(sval);
-			px_strcat(str,sval);
-			break;
-		default:
-			str[oft++]=*p;
-			break;
-		}
-	}
-	_px_va_end(ap);
-	str[oft]='\0';
-	return oft;
-}
+// px_bool px_sprintf(px_char *str,px_int str_size,px_char fmt[],...)
+// {
+// 	_px_va_list ap;
+// 	px_char *p, *sval;
+// 	px_int ival,oft=0;
+// 	px_int finalLen=0;
+// 	px_double dval;
+// 	px_char dat[32];
+// 	px_uchar shl=0;
+// 
+// 	_px_va_start(ap, fmt);
+// 	for (p = fmt; *p; p++) {
+// 		if(*p != '%') {
+// 			finalLen++;
+// 			continue;
+// 		}
+// 		switch(*++p) {
+// 		case 'd':
+// 			ival = _px_va_arg(ap, px_int);
+// 			finalLen +=PX_itoa(ival,dat,sizeof dat,10);
+// 			break;
+// 		case 'f':
+// 			dval = _px_va_arg(ap, px_double);
+// 			finalLen +=PX_ftoa((px_float)dval,dat,sizeof dat,6);
+// 			break;
+// 		case 's':
+// 			sval = _px_va_arg(ap, char *); 
+// 			finalLen +=px_strlen(sval);
+// 			break;
+// 		default:
+// 			finalLen+=1;
+// 			break;
+// 		}
+// 	}
+// 	_px_va_end(ap);
+// 	finalLen++;
+// 	if (str_size<finalLen)
+// 	{
+// 		return PX_FALSE;
+// 	}
+// 
+// 	px_memset(str,0,str_size);
+// 	_px_va_start(ap, fmt);
+// 	for (p = fmt; *p; p++) {
+// 		if(*p != '%') {
+// 			str[oft++]=*p;
+// 			continue;
+// 		}
+// 		switch(*++p) {
+// 		case 'd':
+// 			ival = _px_va_arg(ap, px_int);
+// 			oft+=PX_itoa(ival,dat,sizeof dat,10);
+// 			px_strcat(str,dat);
+// 			break;
+// 		case 'f':
+// 			dval = _px_va_arg(ap, px_double);
+// 			oft+=PX_ftoa((px_float)dval,dat,sizeof dat,6);
+// 			px_strcat(str,dat);
+// 			break;
+// 		case 's':
+// 			sval = _px_va_arg(ap, char *); 
+// 			oft+=px_strlen(sval);
+// 			px_strcat(str,sval);
+// 			break;
+// 		default:
+// 			str[oft++]=*p;
+// 			break;
+// 		}
+// 	}
+// 	_px_va_end(ap);
+// 	str[oft]='\0';
+// 	return oft;
+// }
 
 px_point PX_PointRotate(px_point p,px_float angle)
 {

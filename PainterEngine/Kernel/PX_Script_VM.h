@@ -71,10 +71,10 @@ typedef px_bool (*PX_ScriptVM_Function_Modules)(PX_ScriptVM_Instance *Ins);
 px_int PX_ScriptVM_GetFunctionIndex(PX_ScriptVM_Instance *Ins,px_char *func);
 
 px_bool             PX_ScriptVM_InstanceThreadSwitch(PX_ScriptVM_Instance *Ins,px_int T);
-px_bool				PX_ScriptVM_InstanceRunFunction(PX_ScriptVM_Instance *Ins,px_int threadID,px_void *runParam,px_char *func,px_int paramcount,...);
-px_bool				PX_ScriptVM_InstanceRunFunctionIndex(PX_ScriptVM_Instance *Ins,px_int threadID,px_void *runParam,px_int funcIndex,px_int paramcount,...);
-px_bool				PX_ScriptVM_InstanceBeginThreadFunction(PX_ScriptVM_Instance *Ins,px_int threadID,px_void *runParam,px_char *func,px_int paramcount,...);
-px_bool				PX_ScriptVM_InstanceBeginThreadFunctionIndex(PX_ScriptVM_Instance *Ins,px_int threadID,px_void *runParam,px_int funcIndex,px_int paramcount,...);
+px_bool				PX_ScriptVM_InstanceRunFunction(PX_ScriptVM_Instance *Ins,px_int threadID,px_void *runParam,px_char *func,PX_SCRIPTVM_VARIABLE args[],px_int paramcount);
+px_bool				PX_ScriptVM_InstanceRunFunctionIndex(PX_ScriptVM_Instance *Ins,px_int threadID,px_void *runParam,px_int funcIndex,PX_SCRIPTVM_VARIABLE args[],px_int paramcount);
+px_bool				PX_ScriptVM_InstanceBeginThreadFunction(PX_ScriptVM_Instance *Ins,px_int threadID,px_void *runParam,px_char *func,PX_SCRIPTVM_VARIABLE args[],px_int paramcount);
+px_bool				PX_ScriptVM_InstanceBeginThreadFunctionIndex(PX_ScriptVM_Instance *Ins,px_int threadID,px_void *runParam,px_int funcIndex,PX_SCRIPTVM_VARIABLE args[],px_int paramcount);
 PX_SCRIPTVM_RUNRETURN PX_ScriptVM_InstanceRunThread(PX_ScriptVM_Instance *Ins,px_int tick);
 px_void				PX_ScriptVM_InstanceRun(PX_ScriptVM_Instance *Ins,px_int tick);
 px_void				PX_ScriptVM_ThreadStop(PX_ScriptVM_Instance *Ins,px_int ThreadId);

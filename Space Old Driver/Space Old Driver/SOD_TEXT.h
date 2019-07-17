@@ -80,7 +80,7 @@
 #define SOD_TEXT_ABOUT L"关于"
 #define SOD_TEXT_EXIT_GAME L"退出游戏"
 #define SOD_TEXT_SCORE L"分数:"
-#define SOD_TEXT_ALIVE_TIME "生存时间:%d.%ds"
+#define SOD_TEXT_ALIVE_TIME "生存时间:%1.%2s"
 #define SOD_TEXT_GAMEOVER L"Game Over"
 #define SOD_TEXT_HEALTH "生命恢复"
 #define SOD_TEXT_ADD_ATOM "子弹补充"

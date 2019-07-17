@@ -1,0 +1,74 @@
+﻿生成启动时间为 2019/7/17 9:05:03。
+     1>项目“I:\Space Old Driver\Space Old Driver\Space Old Driver.vcxproj”在节点 2 上(build 个目标)。
+     1>InitializeBuildStatus:
+         正在创建“Debug\Space Old Driver.unsuccessfulbuild”，因为已指定“AlwaysCreate”。
+       ClCompile:
+         d:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /Od /Oy- /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc100.pdb" /Gd /TC /analyze- /errorReport:prompt __Main.c
+         __Main.c
+         所有输出均为最新。
+       Link:
+         d:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"I:\Space Old Driver\Debug\Space Old Driver.exe" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /ManifestFile:"Debug\Space Old Driver.exe.intermediate.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /DEBUG /PDB:"I:\Space Old Driver\Debug\Space Old Driver.pdb" /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"I:\Space Old Driver\Debug\Space Old Driver.lib" /MACHINE:X86 Debug\PainterEngine_Console.obj
+         Debug\PainterEngine_Runtime.obj
+         Debug\PX_AES.obj
+         Debug\PX_ANN.obj
+         Debug\PX_Arle.obj
+         Debug\PX_BaseGeo.obj
+         Debug\PX_Bitmap.obj
+         Debug\PX_BpNeural.obj
+         Debug\PX_curve25519.obj
+         Debug\PX_Effect.obj
+         Debug\PX_Font.obj
+         Debug\PX_Hashmap.obj
+         Debug\PX_Huffman.obj
+         Debug\PX_Linker.obj
+         Debug\PX_List.obj
+         Debug\PX_Log.obj
+         Debug\PX_Memory.obj
+         Debug\PX_MemoryPool.obj
+         Debug\PX_Packet.obj
+         Debug\PX_ParallelCore.obj
+         Debug\PX_Quadtree.obj
+         Debug\PX_Quicksort.obj
+         Debug\PX_rbtree.obj
+         Debug\PX_Sha256.obj
+         Debug\PX_Sound.obj
+         Debug\PX_String.obj
+         Debug\PX_Surface.obj
+         Debug\PX_Texture.obj
+         Debug\PX_TRaw.obj
+         Debug\PX_Typedef.obj
+         Debug\PX_Vector.obj
+         Debug\PX_Wave.obj
+         Debug\MatrixEffect_ui.obj
+         Debug\PX_Actor.obj
+         Debug\PX_Animation.obj
+         Debug\PX_Grammar.obj
+         Debug\PX_Lexer.obj
+         Debug\PX_Object.obj
+         Debug\PX_Partical.obj
+         Debug\PX_Resource.obj
+         Debug\PX_Script_ASMCompiler.obj
+         Debug\PX_Script_Interpreter.obj
+         Debug\PX_Script_VM.obj
+         Debug\PX_Sync.obj
+         Debug\PX_TransmissionProtocal.obj
+         Debug\PX_World.obj
+         Debug\Platform_Windows_D2D.obj
+         Debug\SOD_Message.obj
+         Debug\SOD_Game.obj
+         Debug\SOD_Play.obj
+         Debug\SOD_Runtime.obj
+         Debug\SOD_Startup.obj
+         Debug\__Main.obj
+         LINK : 没有找到 I:\Space Old Driver\Debug\Space Old Driver.exe 或上一个增量链接没有生成它；正在执行完全链接
+         Space Old Driver.vcxproj -> I:\Space Old Driver\Debug\Space Old Driver.exe
+       Manifest:
+         C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\bin\mt.exe /nologo /verbose /outputresource:"I:\Space Old Driver\Debug\Space Old Driver.exe;#1" /manifest "Debug\Space Old Driver.exe.intermediate.manifest"
+       FinalizeBuildStatus:
+         正在删除文件“Debug\Space Old Driver.unsuccessfulbuild”。
+         正在对“Debug\Space Old Driver.lastbuildstate”执行 Touch 任务。
+     1>已完成生成项目“I:\Space Old Driver\Space Old Driver\Space Old Driver.vcxproj”(build 个目标)的操作。
+
+生成成功。
+
+已用时间 00:00:02.88

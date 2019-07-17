@@ -115,84 +115,173 @@ px_void PX_StringInitAlloc(px_memorypool *mp,px_string *str,px_int allocSize)
 }
 
 //%s %d %f
-px_void PX_StringFormat(px_string *str,px_char fmt[],...)
+// px_void PX_StringFormat(px_string *str,px_char fmt[],...)
+// {
+// 	_px_va_list ap;
+// 	px_char *p, *sval,*oldptr;
+// 	px_int ival,oft=0;
+// 	px_uint finalLen=0;
+// 	px_double dval;
+// 	px_char dat[32];
+// 	px_uchar shl=0;
+// 
+// 	_px_va_start(ap, fmt);
+// 	for (p = fmt; *p; p++) {
+// 		if(*p != '%') {
+// 			finalLen++;
+// 			continue;
+// 		}
+// 		switch(*++p) {
+// 		case 'd':
+// 			ival = _px_va_arg(ap, px_int);
+// 			finalLen +=PX_itoa(ival,dat,sizeof dat,10);
+// 			break;
+// 		case 'f':
+// 			dval = _px_va_arg(ap, px_double);
+// 			finalLen +=PX_ftoa((px_float)dval,dat,sizeof dat,6);
+// 			break;
+// 		case 's':
+// 			sval = _px_va_arg(ap, char *); 
+// 			finalLen +=px_strlen(sval);
+// 			break;
+// 		default:
+// 			finalLen+=1;
+// 			break;
+// 		}
+// 	}
+// 	_px_va_end(ap);
+// 	finalLen++;
+// 
+// 	
+// 	oldptr=str->buffer;
+// 	while ((px_uint)(1<<++shl)<=finalLen);
+// 	str->bufferlen=(1<<shl);
+// 	str->buffer=(px_char *)MP_Malloc(str->mp,str->bufferlen);
+// 	px_memset(str->buffer,0,str->bufferlen);
+// 	_px_va_start(ap, fmt);
+// 	for (p = fmt; *p; p++) {
+// 		if(*p != '%') {
+// 			str->buffer[oft++]=*p;
+// 			continue;
+// 		}
+// 		switch(*++p) {
+// 		case 'd':
+// 			ival = _px_va_arg(ap, px_int);
+// 			oft+=PX_itoa(ival,dat,sizeof dat,10);
+// 		    px_strcat(str->buffer,dat);
+// 			break;
+// 		case 'f':
+// 			dval = _px_va_arg(ap, px_double);
+// 			oft+=PX_ftoa((px_float)dval,dat,sizeof dat,6);
+// 			px_strcat(str->buffer,dat);
+// 			break;
+// 		case 's':
+// 			sval = _px_va_arg(ap, char *); 
+// 			oft+=px_strlen(sval);
+// 			px_strcat(str->buffer,sval);
+// 			break;
+// 		default:
+// 			str->buffer[oft++]=*p;
+// 			break;
+// 		}
+// 	}
+// 	_px_va_end(ap);
+// 	str->buffer[oft]='\0';
+// 
+// 	if(oldptr)
+// 	MP_Free(str->mp,oldptr);
+// }
+
+
+px_bool PX_StringFormat8(px_string *str,px_char fmt[],px_stringformat _1, px_stringformat _2, px_stringformat _3, px_stringformat _4,px_stringformat _5, px_stringformat _6, px_stringformat _7, px_stringformat _8)
 {
-	_px_va_list ap;
-	px_char *p, *sval,*oldptr;
-	px_int ival,oft=0;
+	px_char *oldptr;
 	px_uint finalLen=0;
-	px_double dval;
-	px_char dat[32];
 	px_uchar shl=0;
-
-	_px_va_start(ap, fmt);
-	for (p = fmt; *p; p++) {
-		if(*p != '%') {
-			finalLen++;
-			continue;
-		}
-		switch(*++p) {
-		case 'd':
-			ival = _px_va_arg(ap, px_int);
-			finalLen +=PX_itoa(ival,dat,sizeof dat,10);
-			break;
-		case 'f':
-			dval = _px_va_arg(ap, px_double);
-			finalLen +=PX_ftoa((px_float)dval,dat,sizeof dat,6);
-			break;
-		case 's':
-			sval = _px_va_arg(ap, char *); 
-			finalLen +=px_strlen(sval);
-			break;
-		default:
-			finalLen+=1;
-			break;
-		}
-	}
-	_px_va_end(ap);
-	finalLen++;
-
 	
+	finalLen=px_sprintf8(PX_NULL,0,fmt,_1,_2,_3,_4,_5,_6,_7,_8);
+
 	oldptr=str->buffer;
+
 	while ((px_uint)(1<<++shl)<=finalLen);
 	str->bufferlen=(1<<shl);
 	str->buffer=(px_char *)MP_Malloc(str->mp,str->bufferlen);
-	px_memset(str->buffer,0,str->bufferlen);
-	_px_va_start(ap, fmt);
-	for (p = fmt; *p; p++) {
-		if(*p != '%') {
-			str->buffer[oft++]=*p;
-			continue;
-		}
-		switch(*++p) {
-		case 'd':
-			ival = _px_va_arg(ap, px_int);
-			oft+=PX_itoa(ival,dat,sizeof dat,10);
-		    px_strcat(str->buffer,dat);
-			break;
-		case 'f':
-			dval = _px_va_arg(ap, px_double);
-			oft+=PX_ftoa((px_float)dval,dat,sizeof dat,6);
-			px_strcat(str->buffer,dat);
-			break;
-		case 's':
-			sval = _px_va_arg(ap, char *); 
-			oft+=px_strlen(sval);
-			px_strcat(str->buffer,sval);
-			break;
-		default:
-			str->buffer[oft++]=*p;
-			break;
-		}
+	if (!str->buffer)
+	{
+		return PX_FALSE;
 	}
-	_px_va_end(ap);
-	str->buffer[oft]='\0';
+	
+	finalLen=px_sprintf8(str->buffer,str->bufferlen,fmt,_1,_2,_3,_4,_5,_6,_7,_8);
 
 	if(oldptr)
-	MP_Free(str->mp,oldptr);
+		MP_Free(str->mp,oldptr);
+
+	return PX_TRUE;
+}
+px_bool PX_StringFormat7(px_string *str,px_char fmt[],px_stringformat _1, px_stringformat _2, px_stringformat _3, px_stringformat _4,px_stringformat _5, px_stringformat _6, px_stringformat _7)
+{
+	return PX_StringFormat8(str,fmt,_1,_2,_3,_4,_5,_6,_7,PX_STRINGFORMAT_INT(0));
 }
 
+px_bool PX_StringFormat6(px_string *str,px_char fmt[],px_stringformat _1, px_stringformat _2, px_stringformat _3, px_stringformat _4,px_stringformat _5, px_stringformat _6)
+{
+	return PX_StringFormat8(str,fmt,_1,_2,_3,_4,_5,_6,PX_STRINGFORMAT_INT(0),PX_STRINGFORMAT_INT(0));
+}
 
+px_bool PX_StringFormat5(px_string *str,px_char fmt[],px_stringformat _1, px_stringformat _2, px_stringformat _3, px_stringformat _4,px_stringformat _5)
+{
+	return PX_StringFormat8(str,fmt,_1,_2,_3,_4,_5,PX_STRINGFORMAT_INT(0),PX_STRINGFORMAT_INT(0),PX_STRINGFORMAT_INT(0));
+}
+
+px_bool PX_StringFormat4(px_string *str,px_char fmt[],px_stringformat _1, px_stringformat _2, px_stringformat _3, px_stringformat _4)
+{
+	return PX_StringFormat8(str,fmt,_1,_2,_3,_4,PX_STRINGFORMAT_INT(0),PX_STRINGFORMAT_INT(0),PX_STRINGFORMAT_INT(0),PX_STRINGFORMAT_INT(0));
+}
+
+px_bool PX_StringFormat3(px_string *str,px_char fmt[],px_stringformat _1, px_stringformat _2, px_stringformat _3)
+{
+	return PX_StringFormat8(str,fmt,_1,_2,_3,PX_STRINGFORMAT_INT(0),PX_STRINGFORMAT_INT(0),PX_STRINGFORMAT_INT(0),PX_STRINGFORMAT_INT(0),PX_STRINGFORMAT_INT(0));
+}
+
+px_bool PX_StringFormat2(px_string *str,px_char fmt[],px_stringformat _1, px_stringformat _2)
+{
+	return PX_StringFormat8(str,fmt,_1,_2,PX_STRINGFORMAT_INT(0),PX_STRINGFORMAT_INT(0),PX_STRINGFORMAT_INT(0),PX_STRINGFORMAT_INT(0),PX_STRINGFORMAT_INT(0),PX_STRINGFORMAT_INT(0));
+}
+
+px_bool PX_StringFormat1(px_string *str,px_char fmt[],px_stringformat _1)
+{
+	return PX_StringFormat8(str,fmt,_1,PX_STRINGFORMAT_INT(0),PX_STRINGFORMAT_INT(0),PX_STRINGFORMAT_INT(0),PX_STRINGFORMAT_INT(0),PX_STRINGFORMAT_INT(0),PX_STRINGFORMAT_INT(0),PX_STRINGFORMAT_INT(0));
+}
+
+px_bool PX_StringSet(px_string *str,px_char fmt[])
+{
+	px_char *oldptr;
+	px_uint finalLen=0;
+	px_uchar shl=0;
+
+	finalLen=px_strlen(fmt);
+
+	if (finalLen<(px_uint)str->bufferlen)
+	{
+		px_strset(str->buffer,fmt);
+		return PX_TRUE;
+	}
+
+	oldptr=str->buffer;
+
+	while ((px_uint)(1<<++shl)<=finalLen);
+	str->bufferlen=(1<<shl);
+	str->buffer=(px_char *)MP_Malloc(str->mp,str->bufferlen);
+	if (!str->buffer)
+	{
+		return PX_FALSE;
+	}
+	px_strset(str->buffer,fmt);
+
+	if(oldptr)
+		MP_Free(str->mp,oldptr);
+	return PX_TRUE;
+}
 
 px_float PX_StringToFloat(px_string *str)
 {

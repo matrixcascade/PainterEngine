@@ -238,7 +238,7 @@ typedef struct __PX_SCRIPT_ASM_MEMORY_NODE
 typedef struct __PX_SCRIPT_ASM_HOST_NODE 
 {
 	px_char		name[__PX_SCRIPT_ASM_MNEMONIC_NAME_LEN];
-	px_void		*map;
+	const px_void	*map;
 }PX_SCRIPT_ASM_HOST_NODE;
 
 typedef struct __PX_SCRIPT_ASM_GRAMMAR_INSTR

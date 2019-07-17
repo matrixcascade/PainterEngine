@@ -126,12 +126,12 @@ px_void SOD_GameRender(SOD_Game *game,px_dword elpased)
 			//äÖÈ¾Message¿ò
 			SOD_MessageRender(&game->GameOver,elpased);
 			//äÖÈ¾»ý·Ö
-			px_sprintf(Text,sizeof(Text),"%d",game->last_game_pt);
+			px_sprintf1(Text,sizeof(Text),"%1",PX_STRINGFORMAT_INT(game->last_game_pt));
 			i=0;
 			while(Text[i]){wtext[i]=Text[i];i++;}
 			wtext[i]=0;
-			PX_FontModuleDrawText(&game->sodrt.runtime.RenderSurface,350,370,(px_uchar *)SOD_TEXT_SCORE,PX_COLOR(255,255,255,255),&game->sodrt.fontmodule);
-			PX_FontModuleDrawText(&game->sodrt.runtime.RenderSurface,430,370,(px_uchar *)wtext,PX_COLOR(255,255,255,255),&game->sodrt.fontmodule);
+			PX_FontModuleDrawText(&game->sodrt.runtime.RenderSurface,350,370,(px_uchar *)SOD_TEXT_SCORE,PX_COLOR(255,255,255,255),&game->sodrt.fontmodule,PX_FONT_ALIGN_XLEFT);
+			PX_FontModuleDrawText(&game->sodrt.runtime.RenderSurface,430,370,(px_uchar *)wtext,PX_COLOR(255,255,255,255),&game->sodrt.fontmodule,PX_FONT_ALIGN_XLEFT);
 		}
 		break;
 	case SOD_GAME_STATUS_ABOUT:
