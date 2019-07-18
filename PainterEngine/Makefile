@@ -1,12 +1,12 @@
 PREFIX:=/usr/local
 
-all: libPainterEngine.so
+all: libPainterEngine.a
 
 clean:
 	make -C Core clean
 	make -C Kernel clean
 	make -C Architecture clean
-	-rm -f libPainterEngine.so
+	-rm -f libPainterEngine.a
 
 install:
 	mkdir -p $(PREFIX)/include/PainterEngine/Core
@@ -16,13 +16,13 @@ install:
 	make -C Core install PREFIX=$(PREFIX)/include/PainterEngine/Core
 	make -C Kernel install PREFIX=$(PREFIX)/include/PainterEngine/Kernel
 	make -C Architecture install PREFIX=$(PREFIX)/include/PainterEngine/Architecture
-	cp libPainterEngine.so $(PREFIX)/lib/libPainterEngine.so
+	cp libPainterEngine.a $(PREFIX)/lib/libPainterEngine.a
 
 uninstall:
-	-rm -rf $(PREFIX)/include/PainterEngine $(PREFIX)/lib/libPainterEngine.so
+	-rm -rf $(PREFIX)/include/PainterEngine $(PREFIX)/lib/libPainterEngine.a
 
-libPainterEngine.so:
+libPainterEngine.a:
 	make -C Core all 
 	make -C Kernel all
 	make -C Architecture all
-	g++ -shared -o $@ Core/lib.a Kernel/lib.a Architecture/lib.a $(LDFLAG)
+	ar r $@ $(wildcard Core/.obj/*.o) $(wildcard Kernel/.obj/*.o) $(wildcard Architecture/.obj/*.o) $(LDFLAG)
