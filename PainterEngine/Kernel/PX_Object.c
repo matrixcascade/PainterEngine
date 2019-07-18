@@ -67,6 +67,28 @@ PX_Object * PX_ObjectCreate(px_memorypool *mp,PX_Object *Parent,px_float x,px_fl
 	return pObject;
 }
 
+
+
+PX_Object * PX_ObjectCreateEx(px_memorypool *mp,PX_Object *Parent,px_float x,px_float y,px_float z,px_float Width,px_float Height,px_float Lenght,px_int type,Function_ObjectUpdate Func_ObjectUpdate,Function_ObjectRender Func_ObjectRender,Function_ObjectFree Func_ObjectFree,px_void *desc,px_int size)
+{
+	PX_Object *pObject=PX_ObjectCreate(mp,Parent,x,y,z,Width,Height,Lenght);
+	if (pObject)
+	{
+		pObject->pObject=MP_Malloc(mp,size);
+		if (!pObject->pObject)
+		{
+			MP_Free(mp,pObject);
+			return PX_NULL;
+		}
+		px_memcpy(pObject->pObject,desc,size);
+		pObject->Type=type;
+		pObject->Func_ObjectFree=Func_ObjectFree;
+		pObject->Func_ObjectRender=Func_ObjectRender;
+		pObject->Func_ObjectUpdate=Func_ObjectUpdate;
+	}
+	return pObject;
+}
+
 static px_void PX_Object_ObjectEventFree( PX_Object **Object )
 {
 	PX_OBJECT_EventAction *pNext,*pCur;;
@@ -694,7 +716,7 @@ px_void PX_Object_LabelRender(px_surface *psurface, PX_Object *pObject,px_uint e
 		PX_GeoDrawBorder(psurface,(px_int)pObject->x,(px_int)pObject->y,(px_int)pObject->x+(px_int)pObject->Width-1,(px_int)pObject->y+(px_int)pObject->Height-1,1,pLabel->TextColor);
 	}
 
-	PX_FontDrawText(psurface,x,y,pLabel->Text,pLabel->TextColor);
+	PX_FontDrawText(psurface,x,y,pLabel->Text,pLabel->TextColor,PX_FONT_ALIGN_XLEFT);
 }
 
 px_void PX_Object_LabelFree( PX_Object *pLabel )
@@ -1789,6 +1811,7 @@ PX_Object * PX_Object_PushButtonCreate(px_memorypool *mp,PX_Object *Parent,px_in
 	pPushButton->style=PX_OBJECT_PUSHBUTTON_STYLE_RECT;
 	pPushButton->roundradius=PX_OBJECT_PUSHBUTTON_ROUNDRADIUS;
 
+
 	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_CURSORMOVE,PX_Object_PushButtonOnMouseMove,PX_NULL);
 	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_CURSORDRAG,PX_Object_PushButtonOnMouseMove,PX_NULL);
 	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_CURSORDOWN,PX_Object_PushButtonOnMouseLButtonDown,PX_NULL);
@@ -1897,6 +1920,16 @@ px_void PX_Object_PushButtonSetCursorColor(PX_Object *pObject,px_color Color)
 	}
 }
 
+
+px_void PX_Object_PushButtonSetStyle(PX_Object *pObject,PX_OBJECT_PUSHBUTTON_STYLE style)
+{
+	PX_Object_PushButton * pPushButton=PX_Object_GetPushButton(pObject);
+	if (pPushButton)
+	{
+		pPushButton->style=style;
+	}
+}
+
 px_void PX_Object_PushButtonSetPushColor(PX_Object *pObject,px_color Color)
 {
 	PX_Object_PushButton * pPushButton=PX_Object_GetPushButton(pObject);
@@ -1929,7 +1962,7 @@ px_void PX_Object_PushButtonSetBorder( PX_Object *Object,px_uchar Border )
 px_void PX_Object_PushButtonRender(px_surface *psurface, PX_Object *pObject,px_uint elpased)
 {
 	px_int TextLen,i;
-	px_int x,y;
+	px_int fx,fy;
 	PX_Object_PushButton *pPushButton=PX_Object_GetPushButton(pObject);
 
 	if (pPushButton==PX_NULL)
@@ -1959,35 +1992,35 @@ px_void PX_Object_PushButtonRender(px_surface *psurface, PX_Object *pObject,px_u
 
 	if (pPushButton->Align&PX_OBJECT_ALIGN_HCENTER)
 	{
-		x=(px_int)pObject->x;
-		x=x+((px_int)pObject->Width-TextLen)/2;
+		fx=(px_int)pObject->x;
+		fx=fx+((px_int)pObject->Width-TextLen)/2;
 	}
 
 	if (pPushButton->Align&PX_OBJECT_ALIGN_VCENTER)
 	{
-		y=(px_int)pObject->y;
-		y=y+((px_int)pObject->Height-__PX_FONT_HEIGHT)/2;
+		fy=(px_int)pObject->y;
+		fy=fy+((px_int)pObject->Height-__PX_FONT_HEIGHT)/2;
 	}
 
 
 	if (pPushButton->Align&PX_OBJECT_ALIGN_LEFT)
 	{
-		x=(px_int)pObject->x;
+		fx=(px_int)pObject->x;
 	}
 
 	if (pPushButton->Align&PX_OBJECT_ALIGN_RIGHT)
 	{
-		x=(px_int)pObject->x+(px_int)pObject->Width-TextLen;
+		fx=(px_int)pObject->x+(px_int)pObject->Width-TextLen;
 	}
 
 	if (pPushButton->Align&PX_OBJECT_ALIGN_TOP)
 	{
-		y=(px_int)pObject->y;
+		fy=(px_int)pObject->y;
 	}
 
 	if (pPushButton->Align&PX_OBJECT_ALIGN_BOTTOM)
 	{
-		y=(px_int)pObject->y+(px_int)pObject->Height-__PX_FONT_HEIGHT;
+		fy=(px_int)pObject->y+(px_int)pObject->Height-__PX_FONT_HEIGHT;
 	}
 
 	switch(pPushButton->style)
@@ -2046,7 +2079,7 @@ px_void PX_Object_PushButtonRender(px_surface *psurface, PX_Object *pObject,px_u
 	}
 
 
-	PX_FontDrawText(psurface,x,y,pPushButton->Text,pPushButton->TextColor);
+	PX_FontDrawText(psurface,fx,fy,pPushButton->Text,pPushButton->TextColor,PX_FONT_ALIGN_XLEFT);
 
 }
 
@@ -2061,9 +2094,6 @@ px_void PX_Object_PushButtonFree( PX_Object *Obj )
 
 px_void PX_Object_RotationFree(PX_Object *Obj)
 {
-	PX_Object_Rotation *prot=PX_Object_GetRotation(Obj);
-	if(prot)
-	PX_TextureFree(&prot->RotationTexture);
 }
 
 
@@ -2072,12 +2102,14 @@ px_void PX_Object_RotationRender(px_surface *psurface, PX_Object *Obj,px_uint el
 	PX_Object_Rotation *pRot=PX_Object_GetRotation(Obj);
 	if (pRot)
 	{
-		pRot->angle+=(pRot->angle_per_second*(elpased/1000.0f));
-		PX_TextureRotationAngleToTexture(pRot->pTexture,pRot->angle,&pRot->RotationTexture);
-		PX_TextureRender(psurface,&pRot->RotationTexture,(px_int)Obj->x,(px_int)Obj->y,PX_TEXTURERENDER_REFPOINT_CENTER,PX_NULL);
+		if(!pRot->bstop)
+			pRot->angle+=(pRot->angle_per_second*(elpased/1000.0f));
+		PX_TextureRenderRotation(psurface,pRot->pTexture,(px_int)Obj->x,(px_int)Obj->y,PX_TEXTURERENDER_REFPOINT_CENTER,PX_NULL,(px_int)pRot->angle);
 	}
 	
 }
+
+
 
 PX_Object * PX_Object_RotationCreate(px_memorypool *mp,PX_Object *Parent,px_int angle_per_second,px_int x,px_int y,px_texture *ptexture)
 {
@@ -2094,12 +2126,6 @@ PX_Object * PX_Object_RotationCreate(px_memorypool *mp,PX_Object *Parent,px_int 
 		return PX_NULL;
 	}
 	
-	if(!PX_TextureCreateRotationAngle(pObject->mp,ptexture,45,&pRotation->RotationTexture))
-	{
-		MP_Free(pObject->mp,pRotation);
-		MP_Free(pObject->mp,pObject);
-		return PX_NULL;
-	}
 
 	pRotation->angle=0;
 	pRotation->angle_per_second=angle_per_second;
@@ -2134,7 +2160,15 @@ px_void PX_Object_RotationSetSpeed(PX_Object *rot,px_int Angle_per_second)
 	}
 }
 
-
+px_void PX_Object_RotationStop(PX_Object *rot,px_bool bstop)
+{
+	PX_Object_Rotation *pRot;
+	pRot=PX_Object_GetRotation(rot);
+	if (pRot)
+	{
+		pRot->bstop=bstop;
+	}
+}
 
 px_void PX_Object_EditOnMouseMove(PX_Object *Object,PX_Object_Event e,px_void *user_ptr)
 {
@@ -2299,7 +2333,8 @@ px_void PX_Object_EditSetText( PX_Object *pObject,px_char *Text )
 	PX_Object_Edit *pEdit=PX_Object_GetEdit(pObject);
 	if(pEdit)
 	{
-		PX_StringFormat(&pEdit->text,Text);
+		PX_StringClear(&pEdit->text);
+		PX_StringCat(&pEdit->text,Text);
 		pEdit->cursor_index=px_strlen(Text);
 	}
 }

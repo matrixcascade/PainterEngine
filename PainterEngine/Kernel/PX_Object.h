@@ -97,7 +97,9 @@ enum PX_OBJECT_SLIDERBAR_STATUS
 ///////////////////////////////////////////////////////////////////////////
 ////  PixelsES Object
 //////////////////////////////////////////////////////////////////////////
-
+typedef px_void  (*Function_ObjectUpdate)(struct _PX_Object *,px_uint elpased);
+typedef px_void  (*Function_ObjectRender)(px_surface *psurface,struct _PX_Object *,px_uint elpased);
+typedef px_void  (*Function_ObjectFree)(struct _PX_Object *);
 
 struct _PX_Object
 {
@@ -111,6 +113,7 @@ struct _PX_Object
 	px_bool Enabled;
 	px_bool Visible;
 	px_bool ReceiveEvents;
+	px_int	Type;
 	union
 	{
 	px_int  User_int;
@@ -127,10 +130,10 @@ struct _PX_Object
 	struct _PX_Object *pNextBrother;
 
 	struct _PX_Object_EventAction *pEventActions; 
-	px_void  (*Func_ObjectUpdate)(struct _PX_Object *,px_uint elpased);
-	px_void  (*Func_ObjectRender)(px_surface *psurface,struct _PX_Object *,px_uint elpased);
-	px_void  (*Func_ObjectFree)(struct _PX_Object *);
-	px_int	Type;
+	Function_ObjectUpdate Func_ObjectUpdate;
+	Function_ObjectRender Func_ObjectRender;
+	Function_ObjectFree   Func_ObjectFree;
+	
 };
 typedef struct _PX_Object PX_Object;
 
@@ -257,7 +260,8 @@ typedef struct
 {
 	px_int angle_per_second;
 	px_float angle;
-	px_texture *pTexture,RotationTexture;
+	px_bool bstop;
+	px_texture *pTexture;
 }PX_Object_Rotation;
 
 typedef struct 
@@ -347,9 +351,17 @@ struct _PX_Object_EventAction
 typedef struct _PX_Object_EventAction PX_OBJECT_EventAction;
 
 
-//PX_Object *PX_ObjectRootCreate(px_memorypool *mp);
-//px_void	   PX_ObjectRootInit(PX_Object *Object,px_float x,px_float y,px_float z,px_float Width,px_float Height,px_float Lenght);
 PX_Object *PX_ObjectCreate(px_memorypool *mp,PX_Object *Parent,px_float x,px_float y,px_float z,px_float Width,px_float Height,px_float Lenght);
+PX_Object *PX_ObjectCreateEx(px_memorypool *mp,PX_Object *Parent,\
+	px_float x,px_float y,px_float z,px_float Width,px_float Height,px_float Lenght,\
+	px_int type,\
+	Function_ObjectUpdate Func_ObjectUpdate,\
+	Function_ObjectRender Func_ObjectRender,\
+	Function_ObjectFree   Func_ObjectFree,\
+	px_void *desc,\
+	px_int size
+	);
+
 px_void	   PX_ObjectInit(px_memorypool *mp,PX_Object *Object,PX_Object *Parent,px_float x,px_float y,px_float z,px_float Width,px_float Height,px_float Lenght);
 px_void    PX_ObjectSetUserCode(PX_Object *pObject,px_int user_int);
 px_void    PX_ObjectSetUserPointer(PX_Object *pObject,px_void *user_ptr);
@@ -427,6 +439,7 @@ px_char * PX_Object_PushButtonGetText( PX_Object *PushButton );
 px_void PX_Object_PushButtonSetText( PX_Object *pObject,px_char *Text );
 px_void PX_Object_PushButtonSetBackgroundColor( PX_Object *pObject,px_color Color );
 px_void PX_Object_PushButtonSetCursorColor( PX_Object *pObject,px_color Color );
+px_void PX_Object_PushButtonSetStyle(PX_Object *pObject,PX_OBJECT_PUSHBUTTON_STYLE style);
 px_void PX_Object_PushButtonSetPushColor( PX_Object *pObject,px_color Color );
 px_void PX_Object_PushButtonSetBorderColor( PX_Object *pObject,px_color Color );
 px_void PX_Object_PushButtonSetAlign( PX_Object *pObject,px_uchar Align );
@@ -480,6 +493,7 @@ px_void PX_Object_ScrollAreaFree(PX_Object *pObj);
 PX_Object *PX_Object_RotationCreate(px_memorypool *mp,PX_Object *Parent,px_int angle_per_second,px_int x,px_int y,px_texture *ptexture);
 PX_Object_Rotation * PX_Object_GetRotation( PX_Object *Object );
 px_void PX_Object_RotationSetSpeed(PX_Object *rot,px_int Angle_per_second);
+px_void PX_Object_RotationStop(PX_Object *rot,px_bool bstop);
 px_void PX_Object_RotationRender(px_surface *psurface, PX_Object *Obj,px_uint elpased);
 
 PX_Object *PX_Object_AutoTextCreate(px_memorypool *mp,PX_Object *Parent,int x,int y,int limit_width);

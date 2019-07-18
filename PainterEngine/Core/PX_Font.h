@@ -49,16 +49,24 @@ typedef struct
 	px_int yspacer;
 }PX_FontModule;
 
+typedef enum
+{
+	PX_FONT_ALIGN_XLEFT,
+	PX_FONT_ALIGN_XCENTER,
+	PX_FONT_ALIGN_XRIGHT,
+}PX_FONT_ALIGN;
+
 px_void PX_FontDrawGBK(px_surface *psurface,px_int x,px_int y, px_uchar *str,px_color Color);
 px_void PX_FontDrawASCII(px_surface *psurface,px_int x,px_int y, px_uchar ASCI,px_color Color);
-px_void PX_FontDrawText(px_surface *psurface,int x,int y,px_char *Text,px_color Color);
+px_void PX_FontDrawText(px_surface *psurface,int x,int y,px_char *Text,px_color Color,PX_FONT_ALIGN align);
 px_void PX_FontDrawChar(px_surface *psurface,int x,int y,px_char *Text,px_color Color);
 px_int  PX_GetFontTextPixelsWidth(px_char *Text);
+
 
 px_bool PX_FontModuleInitialize(px_memorypool *mp,PX_FontModule *module);
 px_bool PX_FontModuleLoad(PX_FontModule *module,px_byte *buffer,px_int size);
 px_void PX_FontModuleFree(PX_FontModule *module);
-px_void PX_FontModuleDrawText(px_surface *psurface,int x,int y,px_uchar *Text,px_color Color,PX_FontModule *mod);
+px_void PX_FontModuleDrawText(px_surface *psurface,int x,int y,px_uchar *Text,px_color Color,PX_FontModule *mod,PX_FONT_ALIGN align);
 px_void PX_FontModuleSetXYSpace(PX_FontModule *module,int x,int y);
 
 #endif

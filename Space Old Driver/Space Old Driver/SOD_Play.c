@@ -767,8 +767,7 @@ px_void SOD_Object_AlienRender(px_surface *psurface,PX_Object *pObject,px_dword 
 	else
 		PX_AnimationRender(psurface,&pAlien->alien_animation,PX_POINT(pObject->x,pObject->y,0),PX_TEXTURERENDER_REFPOINT_CENTER,PX_NULL);
 
-	// 	px_sprintf(text,sizeof(text),"x:%d y:%d w:%d h:%d d:%d i:%d",(px_int)pObject->x,(px_int)pObject->y,(px_int)pObject->Width,(px_int)pObject->Height,(px_int)pObject->diameter,pObject->world_index);
-	// 	PX_FontDrawText(psurface,pObject->x,pObject->y,text,PX_COLOR(255,255,0,0));
+
 }
 
 PX_Object* SOD_Object_AlienCreate(SOD_Play *play,px_int life,px_float velocity)
@@ -1224,8 +1223,7 @@ px_void SOD_Object_GhostRender(px_surface *psurface,PX_Object *pObject,px_dword 
 	else
 		PX_AnimationRender(psurface,&pgho->alien_animation,PX_POINT(pObject->x,pObject->y,0),PX_TEXTURERENDER_REFPOINT_CENTER,PX_NULL);
 
-	// 	px_sprintf(text,sizeof(text),"x:%d y:%d w:%d h:%d d:%d i:%d",(px_int)pObject->x,(px_int)pObject->y,(px_int)pObject->Width,(px_int)pObject->Height,(px_int)pObject->diameter,pObject->world_index);
-	// 	PX_FontDrawText(psurface,pObject->x,pObject->y,text,PX_COLOR(255,255,0,0));
+
 }
 
 PX_Object* SOD_Object_GhostCreate(SOD_Play *play,px_int life,px_float velocity)
@@ -1370,8 +1368,7 @@ px_void SOD_Object_StoneRender(px_surface *psurface,PX_Object *pObject,px_dword 
 	else
 	PX_TextureRenderEx(psurface,pst->pTexture,(px_int)pObject->x,(px_int)pObject->y,PX_TEXTURERENDER_REFPOINT_CENTER,PX_NULL,pst->scale,pst->rotation);
 
-// 	px_sprintf(text,sizeof(text),"x:%d y:%d w:%d h:%d d:%d i:%d",(px_int)pObject->x,(px_int)pObject->y,(px_int)pObject->Width,(px_int)pObject->Height,(px_int)pObject->diameter,pObject->world_index);
-// 	PX_FontDrawText(psurface,pObject->x,pObject->y,text,PX_COLOR(255,255,0,0));
+
 
 	if (pst->show_impact_region)
 	{
@@ -1872,7 +1869,7 @@ px_void SOD_Object_ShipRender(px_surface *psurface, PX_Object *pObject,px_uint e
 		px_uchar a;
 		a=(px_uchar)(255*pShip->Buffer_Text_elpased/3000);
 		if(pShip->Buffer_Text)
-		PX_FontDrawText(psurface,(px_int)pObject->x-12,(px_int)pObject->y-48,pShip->Buffer_Text,PX_COLOR(255,0,0,255));
+		PX_FontDrawText(psurface,(px_int)pObject->x-12,(px_int)pObject->y-48,pShip->Buffer_Text,PX_COLOR(255,0,0,255),PX_FONT_ALIGN_XLEFT);
 	}
 
 	//渲染混沌
@@ -2281,7 +2278,7 @@ px_void SOD_PlayRenderUI(SOD_Play *pPlay)
 	PX_GeoDrawCircle(&pPlay->runtime->runtime.RenderSurface,32,32,24,8,PX_COLOR(255,0,0,0));
 	PX_GeoDrawRing(&pPlay->runtime->runtime.RenderSurface,32,32,24,6,color,90,90+(px_int)(force/pShip->max_force*360));
 	PX_itoa((px_int)force,text,sizeof(text),10);
-	PX_FontDrawText(&pPlay->runtime->runtime.RenderSurface,29-__PX_FONT_ASCSIZE*(px_strlen(text)-1)/2-1,26,text,color);
+	PX_FontDrawText(&pPlay->runtime->runtime.RenderSurface,29-__PX_FONT_ASCSIZE*(px_strlen(text)-1)/2-1,26,text,color,PX_FONT_ALIGN_XLEFT);
 
 	//渲染生命条
 	life_pc=pShip->life*1.0f/pShip->max_life;
@@ -2312,32 +2309,32 @@ px_void SOD_PlayRenderUI(SOD_Play *pPlay)
 	}
 
 	//分数
-	PX_FontModuleDrawText(&pPlay->runtime->runtime.RenderSurface,300,30,(px_uchar *)SOD_TEXT_SCORE,PX_COLOR(255,0,0,0),&pPlay->runtime->fontmodule);
+	PX_FontModuleDrawText(&pPlay->runtime->runtime.RenderSurface,300,30,(px_uchar *)SOD_TEXT_SCORE,PX_COLOR(255,0,0,0),&pPlay->runtime->fontmodule,PX_FONT_ALIGN_XLEFT);
 	PX_itoa(pPlay->showScore,text,sizeof(text),10);
 	for (i=0;i<px_strlen(text);i++)
 	{
 		utf16_text[i]=text[i];
 	}
 	utf16_text[i]=0;
-	PX_FontModuleDrawText(&pPlay->runtime->runtime.RenderSurface,385,30,(px_uchar *)utf16_text,PX_COLOR(255,0,128,255),&pPlay->runtime->fontmodule);
+	PX_FontModuleDrawText(&pPlay->runtime->runtime.RenderSurface,385,30,(px_uchar *)utf16_text,PX_COLOR(255,0,128,255),&pPlay->runtime->fontmodule,PX_FONT_ALIGN_XLEFT);
 
 	//时间
-	px_sprintf(text,sizeof(text),SOD_TEXT_ALIVE_TIME,pPlay->gametime/1000,(pPlay->gametime/10)%100);
-	PX_FontDrawText(&pPlay->runtime->runtime.RenderSurface,325,40,text,PX_COLOR(255,255,32,64));
+	px_sprintf2(text,sizeof(text),SOD_TEXT_ALIVE_TIME,PX_STRINGFORMAT_INT(pPlay->gametime/1000),PX_STRINGFORMAT_INT((pPlay->gametime/10)%100));
+	PX_FontDrawText(&pPlay->runtime->runtime.RenderSurface,325,40,text,PX_COLOR(255,255,32,64),PX_FONT_ALIGN_XLEFT);
 
 	//fps
-	px_sprintf(text,sizeof(text),"fps:%d",pPlay->fps);
+	px_sprintf1(text,sizeof(text),"fps:%1",PX_STRINGFORMAT_INT(pPlay->fps));
 	if (pPlay->fps<25)
 	{
-		PX_FontDrawText(&pPlay->runtime->runtime.RenderSurface,75,45,text,PX_COLOR(255,255,0,0));
+		PX_FontDrawText(&pPlay->runtime->runtime.RenderSurface,75,45,text,PX_COLOR(255,255,0,0),PX_FONT_ALIGN_XLEFT);
 	}
 	else if(pPlay->fps<35)
 	{
-		PX_FontDrawText(&pPlay->runtime->runtime.RenderSurface,75,45,text,PX_COLOR(255,255,255,0));
+		PX_FontDrawText(&pPlay->runtime->runtime.RenderSurface,75,45,text,PX_COLOR(255,255,255,0),PX_FONT_ALIGN_XLEFT);
 	}
 	else
 	{
-		PX_FontDrawText(&pPlay->runtime->runtime.RenderSurface,75,45,text,PX_COLOR(255,37,119,0));
+		PX_FontDrawText(&pPlay->runtime->runtime.RenderSurface,75,45,text,PX_COLOR(255,37,119,0),PX_FONT_ALIGN_XLEFT);
 	}
 	
 

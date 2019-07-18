@@ -2,7 +2,7 @@
 #define __PX_TYPEDEF_H
 
 #include	"PX_MathTable.h"
-//#include    "stdint.h"
+
 #define     _IN
 #define     _OUT
 #define     PX_FALSE			0
@@ -15,13 +15,17 @@
 #define PX_DEBUG_MODE _DEBUG
 #endif
 
+// 
+// typedef char * _px_va_list;
+// 
+// #define __PX_INTSIZEOF(n) ( (sizeof(n) + sizeof(int) - 1) & ~(sizeof(int) - 1) )
+// #define _px_va_start(ap,v) ( ap = (_px_va_list)&v + __PX_INTSIZEOF(v) )
+// #define _px_va_arg(ap,t) ( *(t *)((ap += __PX_INTSIZEOF(t)) - __PX_INTSIZEOF(t)) )
+// #define _px_va_end(ap) ( ap = (_px_va_list)0 )
 
-typedef char * _px_va_list;
 
-#define __PX_INTSIZEOF(n) ( (sizeof(n) + sizeof(int) - 1) & ~(sizeof(int) - 1) )
-#define _px_va_start(ap,v) ( ap = (_px_va_list)&v + __PX_INTSIZEOF(v) )
-#define _px_va_arg(ap,t) ( *(t *)((ap += __PX_INTSIZEOF(t)) - __PX_INTSIZEOF(t)) )
-#define _px_va_end(ap) ( ap = (_px_va_list)0 )
+
+
 #define px_countof(x) (sizeof(x)/sizeof(x[0]))
 
 
@@ -47,12 +51,15 @@ typedef     unsigned long long  px_qword;
 typedef     unsigned long long  px_uint64;//typedef     uint64_t			px_uint64;
 typedef     long long           px_int64;//typedef      int64_t				px_int64;
 
-
+typedef struct
+{
+	px_char data[128];
+}PX_RETURN_STRING;
 
 #include	"PX_Log.h"
 
 
-#define PX_STRUCT_OFFSET(t,m)    ((px_uint)(((t *)0)->m))
+#define PX_STRUCT_OFFSET(t,m)    ((((t *)0)->m-(px_byte *)0))
 #define BigLittleSwap16(A)  ((((px_word)(A) & 0xff00) >> 8)|(((px_word)(A) & 0x00ff) << 8))
 #define BigLittleSwap32(A)  ((((px_dword)(A) & 0xff000000) >> 24)|(((px_dword)(A) & 0x00ff0000) >> 8)|(((px_dword)(A) & 0x0000ff00) << 8)|(((px_dword)(A) & 0x000000ff)<<24))
 
@@ -112,23 +119,6 @@ px_word px_htons(px_word h);
 px_word px_ntohs(px_word n);
 
 
-typedef px_int (*PX_PARALLEL_EXEC_FUNC)(px_void *param);
-typedef px_int (*PX_PARALLEL_CREATE_FUNC)(PX_PARALLEL_EXEC_FUNC func,px_void *param);
-typedef px_int (*PX_PARALLEL_SETSIGNAL)(px_int index,px_bool setting);
-
-
-///////////////////////////////////////////////////////////////////////////
-//parallel core
-
-#define PX_PARALLEL_MAX_CORE_COUNT 32 //must be 4 byte aligned
-extern px_int __PX_PARALLEL_EXTRA_CORE_COUNT;
-
-px_void PX_PARALLEL_EXTRA_CORE_SET(PX_PARALLEL_CREATE_FUNC create_func,PX_PARALLEL_SETSIGNAL signal_func,px_int ExtraCoreCount);
-px_void PX_PARALLEL_EXEC(PX_PARALLEL_EXEC_FUNC _func,px_void *param,px_int index);
-px_bool PX_PARALLEL_DONE();
-#define PX_PARALLEL_ENABLED (__PX_PARALLEL_EXTRA_CORE_COUNT)
-#define PX_PARALLEL_COUNT (__PX_PARALLEL_EXTRA_CORE_COUNT)
-
 //////////////////////////////////////////////////////////////////////////
 //functions
 px_double PX_tanh(px_double x);
@@ -182,6 +172,8 @@ px_float PX_Point_cos(px_point v);
 px_uint PX_htoi(px_char hex_str[]);
 px_int  PX_atoi(px_char str[]);
 px_float PX_atof(px_char fstr[]);
+PX_RETURN_STRING PX_ftos(float f, int precision);
+PX_RETURN_STRING PX_itos(px_int num,px_int radix);
 int PX_ftoa(float f, char *outbuf, int maxlen, int precision);
 int PX_itoa(px_int num,px_char *str,px_int MaxStrSize,px_int radix);
 px_char *PX_strchr(const char *s,int ch);
@@ -204,11 +196,12 @@ px_bool PX_isCircleCrossCircle(px_point center1,px_float radius1,px_point center
 //memory
 void px_memset(void *dst,px_byte byte,px_uint size);
 void px_memdwordset(void *dst,px_dword dw,px_uint count);
-px_bool px_memequ(void *dst,void *src,px_uint size);
-px_void px_memcpy(px_void *dst,px_void *src,px_uint size);
-px_void px_strcpy(px_char *dst,px_char *src,px_uint size);
-px_void px_strcat(px_char *src,px_char *cat);
-px_int px_strlen(px_char *dst);
+px_bool px_memequ(const void *dst,const void *src,px_uint size);
+px_void px_memcpy(px_void *dst,const px_void *src,px_uint size);
+px_void px_strcpy(px_char *dst,const px_char *src,px_uint size);
+px_void px_strcat(px_char *src,const px_char *cat);
+px_void px_strset(px_void *dst,const px_void *src);
+px_int px_strlen(const px_char *dst);
 px_int px_strcmp(const px_char *str1, const px_char *str2);
 px_bool px_strequ(px_char *src,char *dst);
 px_void px_strupr(px_char *src);
@@ -217,7 +210,79 @@ px_bool px_strIsNumeric(px_char *str);
 px_bool px_strIsFloat(px_char *str);
 px_bool px_strIsInt(px_char *str);
 px_bool px_charIsNumeric(px_char ch);
-px_int px_sprintf(px_char *str,px_int str_size,px_char fmt[],...);
+
+typedef enum
+{
+	PX_STRINGFORMAT_TYPE_INT,
+	PX_STRINGFORMAT_TYPE_FLOAT,
+	PX_STRINGFORMAT_TYPE_STRING,
+}PX_STRINGFORMAT_TYPE;
+typedef struct
+{
+	PX_STRINGFORMAT_TYPE type;
+	union
+	{
+		px_int _int;
+		px_float _float;
+		const px_char *_pstring;
+	};
+}px_stringformat;
+px_stringformat PX_STRINGFORMAT_INT(px_int _i);
+px_stringformat PX_STRINGFORMAT_FLOAT(px_float _f);
+px_stringformat PX_STRINGFORMAT_STRING(const px_char *_s);
+px_int px_sprintf8(px_char *str,px_int str_size,px_char fmt[],\
+	px_stringformat _1,\
+	px_stringformat _2,\
+	px_stringformat _3,\
+	px_stringformat _4,\
+	px_stringformat _5,\
+	px_stringformat _6,\
+	px_stringformat _7,\
+	px_stringformat _8\
+	);
+px_int px_sprintf7(px_char *str,px_int str_size,px_char fmt[],\
+	px_stringformat _1,\
+	px_stringformat _2,\
+	px_stringformat _3,\
+	px_stringformat _4,\
+	px_stringformat _5,\
+	px_stringformat _6,\
+	px_stringformat _7
+	);
+px_int px_sprintf6(px_char *str,px_int str_size,px_char fmt[],\
+	px_stringformat _1,\
+	px_stringformat _2,\
+	px_stringformat _3,\
+	px_stringformat _4,\
+	px_stringformat _5,\
+	px_stringformat _6\
+	);
+px_int px_sprintf5(px_char *str,px_int str_size,px_char fmt[],\
+	px_stringformat _1,\
+	px_stringformat _2,\
+	px_stringformat _3,\
+	px_stringformat _4,\
+	px_stringformat _5\
+	);
+px_int px_sprintf4(px_char *str,px_int str_size,px_char fmt[],\
+	px_stringformat _1,\
+	px_stringformat _2,\
+	px_stringformat _3,\
+	px_stringformat _4\
+	);
+px_int px_sprintf3(px_char *str,px_int str_size,px_char fmt[],\
+	px_stringformat _1,\
+	px_stringformat _2,\
+	px_stringformat _3\
+	);
+px_int px_sprintf2(px_char *str,px_int str_size,px_char fmt[],\
+	px_stringformat _1,\
+	px_stringformat _2\
+	);
+px_int px_sprintf1(px_char *str,px_int str_size,px_char fmt[],\
+	px_stringformat _1\
+	);
+/*px_int px_sprintf(px_char *str,px_int str_size,px_char fmt[],...);*/
 //////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////

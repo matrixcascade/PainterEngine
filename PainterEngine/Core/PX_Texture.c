@@ -100,8 +100,6 @@ px_void PX_TextureRender(px_surface *psurface,px_texture *tex,px_int x,px_int y,
 	px_int bR,bG,bB,bA;
 	px_color *pdata;
 	px_color clr;
-	px_int mainThreadLines,othersLines,stTop;
-	PX_TEXTURERENDER_PARALLEL_DATA parallel_Data[PX_PARALLEL_MAX_CORE_COUNT];
 
 	pdata=(px_color *)tex->surfaceBuffer;
 	switch (refPoint)
@@ -191,70 +189,8 @@ px_void PX_TextureRender(px_surface *psurface,px_texture *tex,px_int x,px_int y,
 	{
 		bottom=tex->height-1;
 	}
-	if (PX_PARALLEL_ENABLED&&(bottom-top)*(right-left)>32*32)
-	{
-		mainThreadLines=((bottom-top+1)/(PX_PARALLEL_COUNT+1))+((bottom-top+1)%(PX_PARALLEL_COUNT+1));
-		othersLines=(bottom-top+1)/(PX_PARALLEL_COUNT+1);
-
-		stTop=top+mainThreadLines;
-		if(othersLines)
-		{
-			for (i=0;i<PX_PARALLEL_COUNT;i++)
-			{
-				parallel_Data[i].blend=blend;
-				parallel_Data[i].bottom=stTop+othersLines-1;
-				parallel_Data[i].left=left;
-				parallel_Data[i].right=right;
-				parallel_Data[i].psurface=psurface;
-				parallel_Data[i].refPoint=refPoint;
-				parallel_Data[i].Server=tex;
-				parallel_Data[i].top=stTop;
-				parallel_Data[i].x=x;
-				parallel_Data[i].y=y;
-				PX_PARALLEL_EXEC(PX_TextureRenderParallel,&parallel_Data[i],i);
-				stTop+=othersLines;
-			}
-		}
-		
-		if (blend)
-		{	
-			px_int Ab=(px_int)(blend->alpha*1000);
-			px_int Rb=(px_int)(blend->hdr_R*1000);
-			px_int Gb=(px_int)(blend->hdr_G*1000);
-			px_int Bb=(px_int)(blend->hdr_B*1000);
-			for (j=top;j<mainThreadLines;j++)
-			{
-				for (i=left;i<=right;i++)
-				{
-					clr=pdata[j*tex->width+i];
-					bA=(px_int)(clr._argb.a*Ab/1000);
-					bR=(px_int)(clr._argb.r*Rb/1000);
-					bG=(px_int)(clr._argb.g*Gb/1000);
-					bB=(px_int)(clr._argb.b*Bb/1000);
-
-					clr._argb.a=bA>255?255:(px_uchar)bA;
-					clr._argb.r=bR>255?255:(px_uchar)bR;
-					clr._argb.g=bG>255?255:(px_uchar)bG;
-					clr._argb.b=bB>255?255:(px_uchar)bB;
-					PX_SurfaceDrawPixelFaster(psurface,x+i,y+j,clr);
-				}
-			}
-		}
-		else
-		{
-			for (j=top;j<mainThreadLines;j++)
-			{
-				for (i=left;i<=right;i++)
-				{
-					clr=pdata[j*tex->width+i];
-					PX_SurfaceDrawPixelFaster(psurface,x+i,y+j,clr);
-				}
-			}
-		}
-		while(!PX_PARALLEL_DONE());
-	}
-	else
-	{
+	
+	
 		if (blend)
 		{	
 			px_int Ab=(px_int)(blend->alpha*1000);
@@ -291,7 +227,7 @@ px_void PX_TextureRender(px_surface *psurface,px_texture *tex,px_int x,px_int y,
 				}
 			}
 		}
-	}
+	
 }
 
 

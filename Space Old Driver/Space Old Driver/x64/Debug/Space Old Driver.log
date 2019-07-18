@@ -1,0 +1,128 @@
+﻿生成启动时间为 2019/7/17 9:14:26。
+     1>项目“I:\Space Old Driver\Space Old Driver\Space Old Driver.vcxproj”在节点 2 上(build 个目标)。
+     1>InitializeBuildStatus:
+         正在创建“x64\Debug\Space Old Driver.unsuccessfulbuild”，因为已指定“AlwaysCreate”。
+       ClCompile:
+         d:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\x86_amd64\CL.exe /c /Zi /nologo /W3 /WX- /Od /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"x64\Debug\\" /Fd"x64\Debug\vc100.pdb" /Gd /TC /errorReport:prompt ..\..\PainterEngine\Architecture\PainterEngine_Console.c ..\..\PainterEngine\Architecture\PainterEngine_Runtime.c ..\..\PainterEngine\Core\PX_AES.c ..\..\PainterEngine\Core\PX_ANN.c ..\..\PainterEngine\Core\PX_Arle.c ..\..\PainterEngine\Core\PX_BaseGeo.c ..\..\PainterEngine\Core\PX_Bitmap.c ..\..\PainterEngine\Core\PX_BpNeural.c ..\..\PainterEngine\Core\PX_Effect.c ..\..\PainterEngine\Core\PX_Font.c ..\..\PainterEngine\Core\PX_Hashmap.c ..\..\PainterEngine\Core\PX_Huffman.c ..\..\PainterEngine\Core\PX_List.c ..\..\PainterEngine\Core\PX_Log.c ..\..\PainterEngine\Core\PX_Memory.c ..\..\PainterEngine\Core\PX_MemoryPool.c ..\..\PainterEngine\Core\PX_Packet.c ..\..\PainterEngine\Core\PX_Quadtree.c ..\..\PainterEngine\Core\PX_Quicksort.c ..\..\PainterEngine\Core\PX_Sha256.c ..\..\PainterEngine\Core\PX_Sound.c ..\..\PainterEngine\Core\PX_String.c ..\..\PainterEngine\Core\PX_Surface.c ..\..\PainterEngine\Core\PX_TRaw.c ..\..\PainterEngine\Core\PX_Texture.c ..\..\PainterEngine\Core\PX_Typedef.c ..\..\PainterEngine\Core\PX_Vector.c ..\..\PainterEngine\Core\PX_Wave.c ..\..\PainterEngine\Core\PX_curve25519.c ..\..\PainterEngine\Effect\MatrixEffect_ui.c ..\..\PainterEngine\Kernel\PX_Animation.c ..\..\PainterEngine\Kernel\PX_Grammar.c ..\..\PainterEngine\Kernel\PX_Lexer.c ..\..\PainterEngine\Kernel\PX_Object.c ..\..\PainterEngine\Kernel\PX_Partical.c ..\..\PainterEngine\Kernel\PX_Resource.c ..\..\PainterEngine\Kernel\PX_Script_ASMCompiler.c ..\..\PainterEngine\Kernel\PX_Script_Interpreter.c ..\..\PainterEngine\Kernel\PX_Script_VM.c ..\..\PainterEngine\Kernel\PX_Sync.c ..\..\PainterEngine\Kernel\PX_TransmissionProtocal.c ..\..\PainterEngine\Kernel\PX_World.c SOD_Game.c SOD_Message.c SOD_Play.c SOD_Runtime.c SOD_Startup.c __Main.c
+         __Main.c
+         SOD_Startup.c
+         SOD_Runtime.c
+     1>SOD_Runtime.c(66): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+                 d:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\stdio.h(234) : 参见“fopen”的声明
+         SOD_Play.c
+         SOD_Message.c
+         SOD_Game.c
+         PX_World.c
+         PX_TransmissionProtocal.c
+         PX_Sync.c
+         PX_Script_VM.c
+         PX_Script_Interpreter.c
+         PX_Script_ASMCompiler.c
+         PX_Resource.c
+         PX_Partical.c
+         PX_Object.c
+         PX_Lexer.c
+         PX_Grammar.c
+         PX_Animation.c
+         MatrixEffect_ui.c
+         PX_curve25519.c
+         Generating Code...
+         Compiling...
+         PX_Wave.c
+         PX_Vector.c
+         PX_Typedef.c
+         PX_Texture.c
+         PX_TRaw.c
+         PX_Surface.c
+         PX_String.c
+         PX_Sound.c
+         PX_Sha256.c
+         PX_Quicksort.c
+         PX_Quadtree.c
+         PX_Packet.c
+         PX_MemoryPool.c
+         PX_Memory.c
+         PX_Log.c
+         PX_List.c
+         PX_Huffman.c
+         PX_Hashmap.c
+         PX_Font.c
+         PX_Effect.c
+         Generating Code...
+         Compiling...
+         PX_BpNeural.c
+         PX_Bitmap.c
+         PX_BaseGeo.c
+         PX_Arle.c
+         PX_ANN.c
+         PX_AES.c
+         PainterEngine_Runtime.c
+         PainterEngine_Console.c
+         Generating Code...
+         所有输出均为最新。
+       Link:
+         d:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\x86_amd64\link.exe /ERRORREPORT:PROMPT /OUT:"I:\Space Old Driver\x64\Debug\Space Old Driver.exe" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /ManifestFile:"x64\Debug\Space Old Driver.exe.intermediate.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /DEBUG /PDB:"I:\Space Old Driver\x64\Debug\Space Old Driver.pdb" /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"I:\Space Old Driver\x64\Debug\Space Old Driver.lib" /MACHINE:X64 x64\Debug\PainterEngine_Console.obj
+         x64\Debug\PainterEngine_Runtime.obj
+         x64\Debug\PX_AES.obj
+         x64\Debug\PX_ANN.obj
+         x64\Debug\PX_Arle.obj
+         x64\Debug\PX_BaseGeo.obj
+         x64\Debug\PX_Bitmap.obj
+         x64\Debug\PX_BpNeural.obj
+         x64\Debug\PX_curve25519.obj
+         x64\Debug\PX_Effect.obj
+         x64\Debug\PX_Font.obj
+         x64\Debug\PX_Hashmap.obj
+         x64\Debug\PX_Huffman.obj
+         x64\Debug\PX_Linker.obj
+         x64\Debug\PX_List.obj
+         x64\Debug\PX_Log.obj
+         x64\Debug\PX_Memory.obj
+         x64\Debug\PX_MemoryPool.obj
+         x64\Debug\PX_Packet.obj
+         x64\Debug\PX_ParallelCore.obj
+         x64\Debug\PX_Quadtree.obj
+         x64\Debug\PX_Quicksort.obj
+         x64\Debug\PX_rbtree.obj
+         x64\Debug\PX_Sha256.obj
+         x64\Debug\PX_Sound.obj
+         x64\Debug\PX_String.obj
+         x64\Debug\PX_Surface.obj
+         x64\Debug\PX_Texture.obj
+         x64\Debug\PX_TRaw.obj
+         x64\Debug\PX_Typedef.obj
+         x64\Debug\PX_Vector.obj
+         x64\Debug\PX_Wave.obj
+         x64\Debug\MatrixEffect_ui.obj
+         x64\Debug\PX_Actor.obj
+         x64\Debug\PX_Animation.obj
+         x64\Debug\PX_Grammar.obj
+         x64\Debug\PX_Lexer.obj
+         x64\Debug\PX_Object.obj
+         x64\Debug\PX_Partical.obj
+         x64\Debug\PX_Resource.obj
+         x64\Debug\PX_Script_ASMCompiler.obj
+         x64\Debug\PX_Script_Interpreter.obj
+         x64\Debug\PX_Script_VM.obj
+         x64\Debug\PX_Sync.obj
+         x64\Debug\PX_TransmissionProtocal.obj
+         x64\Debug\PX_World.obj
+         x64\Debug\Platform_Windows_D2D.obj
+         x64\Debug\SOD_Message.obj
+         x64\Debug\SOD_Game.obj
+         x64\Debug\SOD_Play.obj
+         x64\Debug\SOD_Runtime.obj
+         x64\Debug\SOD_Startup.obj
+         x64\Debug\__Main.obj
+         LINK : 没有找到 I:\Space Old Driver\x64\Debug\Space Old Driver.exe 或上一个增量链接没有生成它；正在执行完全链接
+         Space Old Driver.vcxproj -> I:\Space Old Driver\x64\Debug\Space Old Driver.exe
+       Manifest:
+         C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\bin\mt.exe /nologo /verbose /outputresource:"I:\Space Old Driver\x64\Debug\Space Old Driver.exe;#1" /manifest "x64\Debug\Space Old Driver.exe.intermediate.manifest"
+       FinalizeBuildStatus:
+         正在删除文件“x64\Debug\Space Old Driver.unsuccessfulbuild”。
+         正在对“x64\Debug\Space Old Driver.lastbuildstate”执行 Touch 任务。
+     1>已完成生成项目“I:\Space Old Driver\Space Old Driver\Space Old Driver.vcxproj”(build 个目标)的操作。
+
+生成成功。
+
+已用时间 00:00:07.65

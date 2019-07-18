@@ -219,7 +219,7 @@ static px_void PX_SyncFrameServerHandle_StatusProcess(PX_SyncFrame_Server *sync_
 						break;
 					}
 					pClient->onceRecvSize+=sync_server->recv_cache_size;
-					datasize=sync_server->recv_cache_size-PX_STRUCT_OFFSET(PX_Sync_IO_Packet,data);
+					datasize=sync_server->recv_cache_size-(px_int)PX_STRUCT_OFFSET(PX_Sync_IO_Packet,data);
 
 					PX_MemoryCat(&sync_server->stampsInstrStream,&pClient->c_id,sizeof(pClient->c_id));//id 
 					PX_MemoryCat(&sync_server->stampsInstrStream,&datasize,sizeof(px_dword));//size
@@ -263,7 +263,7 @@ static px_void PX_SyncFrameServerHandle_StatusProcess(PX_SyncFrame_Server *sync_
 					   send_packet->type=PX_SYNC_IO_TYPE_OPCODE;
 					   send_packet->verify_id=0;
 
-					   reserve_size=sizeof(pClient->send_cache_instr_buffer)-PX_STRUCT_OFFSET(PX_Sync_IO_Packet,data);
+					   reserve_size=sizeof(pClient->send_cache_instr_buffer)- (px_int)PX_STRUCT_OFFSET(PX_Sync_IO_Packet,data);
 
 					   wstream_size=sync_server->stampsInstrStream.usedsize-pClient->timeStreamOffset;
 
@@ -565,9 +565,9 @@ static px_void PX_SyncFrame_ClientHandle_StatusProcess(PX_SyncFrame_Client *clie
 			
 			sendsize+=sizeof(recv_packet->type)+sizeof(recv_packet->verify_id);
 			
-			if((px_uint)client->Input_InstrStream.usedsize<sizeof(client->send_cache_Instr_buffer)-PX_STRUCT_OFFSET(PX_Sync_IO_Packet,data))
+			if((px_uint)client->Input_InstrStream.usedsize<sizeof(client->send_cache_Instr_buffer)- (px_int)PX_STRUCT_OFFSET(PX_Sync_IO_Packet,data))
 			{
-				client->send_cache_Instr_size=client->Input_InstrStream.usedsize+PX_STRUCT_OFFSET(PX_Sync_IO_Packet,data);
+				client->send_cache_Instr_size=client->Input_InstrStream.usedsize+ (px_int)PX_STRUCT_OFFSET(PX_Sync_IO_Packet,data);
 				px_memcpy(send_packet->data,client->Input_InstrStream.buffer,client->Input_InstrStream.usedsize);
 			}
 			else
@@ -632,7 +632,7 @@ static px_void PX_SyncFrame_ClientHandle_StatusProcess(PX_SyncFrame_Client *clie
 			{
 				PX_MemoryCat(&client->stampsInstrStream,streamdata,streamSize);
 			}
-			reserve_size=client->recv_cache_buffer_size-streamSize-sizeof(px_dword)*2-PX_STRUCT_OFFSET(PX_Sync_IO_Packet,data);
+			reserve_size=client->recv_cache_buffer_size-streamSize-sizeof(px_dword)*2- (px_int)PX_STRUCT_OFFSET(PX_Sync_IO_Packet,data);
 			if (reserve_size>=sizeof(PX_SyncFrame_Server_StampIndex)+sizeof(px_dword)*2)
 			{
 				stampStartIndex=*(px_dword *)(recv_packet->data+sizeof(px_dword)*2+streamSize);

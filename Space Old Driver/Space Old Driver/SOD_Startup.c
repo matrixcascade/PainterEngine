@@ -83,9 +83,9 @@ px_void SOD_StartupRender(SOD_Startup *Startup,px_dword elpased)
 {
 	PX_TextureRender(&Startup->pRuntime->runtime.RenderSurface,&Startup->background,0,0,PX_TEXTURERENDER_REFPOINT_LEFTTOP,PX_NULL);
 	PX_ObjectRender(&Startup->pRuntime->runtime.RenderSurface,Startup->root,elpased);
-	PX_FontModuleDrawText(&Startup->pRuntime->runtime.RenderSurface,335,252,(px_uchar *)SOD_TEXT_START_GAME,PX_COLOR(255,0,0,0),&Startup->pRuntime->fontmodule);
-	PX_FontModuleDrawText(&Startup->pRuntime->runtime.RenderSurface,360,314,(px_uchar *)SOD_TEXT_ABOUT,PX_COLOR(255,0,0,0),&Startup->pRuntime->fontmodule);
-	PX_FontModuleDrawText(&Startup->pRuntime->runtime.RenderSurface,335,372,(px_uchar *)SOD_TEXT_EXIT_GAME,PX_COLOR(255,0,0,0),&Startup->pRuntime->fontmodule);
+	PX_FontModuleDrawText(&Startup->pRuntime->runtime.RenderSurface,335,252,(px_uchar *)SOD_TEXT_START_GAME,PX_COLOR(255,0,0,0),&Startup->pRuntime->fontmodule,PX_FONT_ALIGN_XLEFT);
+	PX_FontModuleDrawText(&Startup->pRuntime->runtime.RenderSurface,360,314,(px_uchar *)SOD_TEXT_ABOUT,PX_COLOR(255,0,0,0),&Startup->pRuntime->fontmodule,PX_FONT_ALIGN_XLEFT);
+	PX_FontModuleDrawText(&Startup->pRuntime->runtime.RenderSurface,335,372,(px_uchar *)SOD_TEXT_EXIT_GAME,PX_COLOR(255,0,0,0),&Startup->pRuntime->fontmodule,PX_FONT_ALIGN_XLEFT);
 }
 
 px_void SOD_StartupPostEvent(SOD_Startup *Startup,PX_Object_Event e)

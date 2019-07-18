@@ -1550,7 +1550,7 @@ PX_SCRIPTVM_RUNRETURN PX_ScriptVM_InstanceRunThread(PX_ScriptVM_Instance *Ins,px
 			pchar=px_strstr(sVar._string.buffer,tVar._string.buffer);
 			if (pchar)
 			{
-				pVar->_int=(px_uint)pchar-(px_uint)sVar._string.buffer;
+				pVar->_int=(px_uint)(pchar-sVar._string.buffer);
 			}
 			pT->IP+=(4+3*4);
 		}
@@ -2687,12 +2687,10 @@ _ERROR:
 	return PX_SCRIPTVM_RUNRETURN_ERROR;
 }
 
-px_bool PX_ScriptVM_InstanceRunFunction(PX_ScriptVM_Instance *Ins,px_int threadID,px_void *runParam,px_char *func,px_int paramcount,...)
+px_bool PX_ScriptVM_InstanceRunFunction(PX_ScriptVM_Instance *Ins,px_int threadID,px_void *runParam,px_char *func,PX_SCRIPTVM_VARIABLE args[],px_int paramcount)
 {
 	int i,j,ip;
-	PX_SCRIPTVM_VARIABLE var[16];
 	px_char	uprname[__PX_SCRIPT_ASM_MNEMONIC_NAME_LEN];
-	_px_va_list ap;
 	px_int old_T;
 	if (paramcount>16||threadID>=Ins->maxThreadCount)
 	{
@@ -2744,17 +2742,10 @@ px_bool PX_ScriptVM_InstanceRunFunction(PX_ScriptVM_Instance *Ins,px_int threadI
 		return PX_FALSE;
 	}
 
-	_px_va_start(ap, paramcount);
-	for (i = 0; i<paramcount; i++) 
-	{
-		var[i] = _px_va_arg(ap, PX_SCRIPTVM_VARIABLE);
-	}
-
 	for (i=paramcount-1;i>=0;i--)
 	{
-		PX_ScriptVM_PUSH(Ins,var[i]);
+		PX_ScriptVM_PUSH(Ins,args[i]);
 	}
-	_px_va_end(ap);
 
 	PX_ScriptVM_PUSH(Ins,PX_ScriptVM_Variable_int(-1));
 
@@ -2764,11 +2755,9 @@ px_bool PX_ScriptVM_InstanceRunFunction(PX_ScriptVM_Instance *Ins,px_int threadI
 	return PX_TRUE;
 }
 
-px_bool PX_ScriptVM_InstanceRunFunctionIndex(PX_ScriptVM_Instance *Ins,px_int threadID,px_void *runParam,px_int funcIndex,px_int paramcount,...)
+px_bool PX_ScriptVM_InstanceRunFunctionIndex(PX_ScriptVM_Instance *Ins,px_int threadID,px_void *runParam,px_int funcIndex,PX_SCRIPTVM_VARIABLE args[],px_int paramcount)
 {
 	int i,j,ip;
-	PX_SCRIPTVM_VARIABLE var[16];
-	_px_va_list ap;
 	px_int old_T;
 	if (paramcount>16||threadID>=Ins->maxThreadCount)
 	{
@@ -2801,17 +2790,10 @@ px_bool PX_ScriptVM_InstanceRunFunctionIndex(PX_ScriptVM_Instance *Ins,px_int th
 		return PX_FALSE;
 	}
 
-	_px_va_start(ap, paramcount);
-	for (i = 0; i<paramcount; i++) 
-	{
-		var[i] = _px_va_arg(ap, PX_SCRIPTVM_VARIABLE);
-	}
-
 	for (i=paramcount-1;i>=0;i--)
 	{
-		PX_ScriptVM_PUSH(Ins,var[i]);
+		PX_ScriptVM_PUSH(Ins,args[i]);
 	}
-	_px_va_end(ap);
 
 	PX_ScriptVM_PUSH(Ins,PX_ScriptVM_Variable_int(-1));
 	
@@ -2821,13 +2803,11 @@ px_bool PX_ScriptVM_InstanceRunFunctionIndex(PX_ScriptVM_Instance *Ins,px_int th
 }
 
 
-px_bool PX_ScriptVM_InstanceBeginThreadFunction(PX_ScriptVM_Instance *Ins,px_int threadID,px_void *runParam,px_char *func,px_int paramcount,...)
+px_bool PX_ScriptVM_InstanceBeginThreadFunction(PX_ScriptVM_Instance *Ins,px_int threadID,px_void *runParam,px_char *func,PX_SCRIPTVM_VARIABLE args[],px_int paramcount)
 {
 	int i,j,ip;
 	px_int old_T;
-	PX_SCRIPTVM_VARIABLE var[16];
 	px_char	uprname[__PX_SCRIPT_ASM_MNEMONIC_NAME_LEN];
-	_px_va_list ap;
 
 	if (paramcount>16||threadID>=Ins->maxThreadCount)
 	{
@@ -2875,17 +2855,10 @@ px_bool PX_ScriptVM_InstanceBeginThreadFunction(PX_ScriptVM_Instance *Ins,px_int
 		return PX_FALSE;
 	}
 
-	_px_va_start(ap, paramcount);
-	for (i = 0; i<paramcount; i++) 
-	{
-		var[i] = _px_va_arg(ap, PX_SCRIPTVM_VARIABLE);
-	}
-
 	for (i=paramcount-1;i>=0;i--)
 	{
-		PX_ScriptVM_PUSH(Ins,var[i]);
+		PX_ScriptVM_PUSH(Ins,args[i]);
 	}
-	_px_va_end(ap);
 
 	PX_ScriptVM_PUSH(Ins,PX_ScriptVM_Variable_int(-1));
 
@@ -2896,11 +2869,9 @@ px_bool PX_ScriptVM_InstanceBeginThreadFunction(PX_ScriptVM_Instance *Ins,px_int
 	return PX_TRUE;
 }
 
-px_bool PX_ScriptVM_InstanceBeginThreadFunctionIndex(PX_ScriptVM_Instance *Ins,px_int threadID,px_void *runParam,px_int funcIndex,px_int paramcount,...)
+px_bool PX_ScriptVM_InstanceBeginThreadFunctionIndex(PX_ScriptVM_Instance *Ins,px_int threadID,px_void *runParam,px_int funcIndex,PX_SCRIPTVM_VARIABLE args[],px_int paramcount)
 {
 	int i,j,ip;
-	PX_SCRIPTVM_VARIABLE var[16];
-	_px_va_list ap;
 	px_int old_T;
 	if (paramcount>16||threadID>=Ins->maxThreadCount)
 	{
@@ -2933,17 +2904,12 @@ px_bool PX_ScriptVM_InstanceBeginThreadFunctionIndex(PX_ScriptVM_Instance *Ins,p
 		return PX_FALSE;
 	}
 
-	_px_va_start(ap, paramcount);
-	for (i = 0; i<paramcount; i++) 
-	{
-		var[i] = _px_va_arg(ap, PX_SCRIPTVM_VARIABLE);
-	}
 
 	for (i=paramcount-1;i>=0;i--)
 	{
-		PX_ScriptVM_PUSH(Ins,var[i]);
+		PX_ScriptVM_PUSH(Ins,args[i]);
 	}
-	_px_va_end(ap);
+	
 
 	PX_ScriptVM_PUSH(Ins,PX_ScriptVM_Variable_int(-1));
 

@@ -32,8 +32,19 @@ px_void PX_StringTrimRight(px_string *str,px_int RightCount);
 px_bool PX_StringIsNumeric(px_string *str);
 px_bool PX_StringIsFloat(px_string *str);
 
-px_void PX_StringFormat(px_string *str,px_char fmt[],...);
+//px_void PX_StringFormat(px_string *str,px_char fmt[],...);
 px_void PX_StringReplace(px_string *str,px_char *source,px_char *replaceto);
 px_bool PX_StringTrimer_Solve(px_string *pstring,px_char *parseCode,px_char *ReplaceCode);
 px_void PX_StringInitAlloc(px_memorypool *mp,px_string *str,px_int allocSize);
+
+px_bool PX_StringFormat8(px_string *str,px_char fmt[],px_stringformat _1, px_stringformat _2, px_stringformat _3, px_stringformat _4,px_stringformat _5, px_stringformat _6, px_stringformat _7, px_stringformat _8);
+px_bool PX_StringFormat7(px_string *str,px_char fmt[],px_stringformat _1, px_stringformat _2, px_stringformat _3, px_stringformat _4,px_stringformat _5, px_stringformat _6, px_stringformat _7);
+px_bool PX_StringFormat6(px_string *str,px_char fmt[],px_stringformat _1, px_stringformat _2, px_stringformat _3, px_stringformat _4,px_stringformat _5, px_stringformat _6);
+px_bool PX_StringFormat5(px_string *str,px_char fmt[],px_stringformat _1, px_stringformat _2, px_stringformat _3, px_stringformat _4,px_stringformat _5);
+px_bool PX_StringFormat4(px_string *str,px_char fmt[],px_stringformat _1, px_stringformat _2, px_stringformat _3, px_stringformat _4);
+px_bool PX_StringFormat3(px_string *str,px_char fmt[],px_stringformat _1, px_stringformat _2, px_stringformat _3);
+px_bool PX_StringFormat2(px_string *str,px_char fmt[],px_stringformat _1, px_stringformat _2);
+px_bool PX_StringFormat1(px_string *str,px_char fmt[],px_stringformat _1);
+px_bool PX_StringSet(px_string *str,px_char fmt[]);
+
 #endif

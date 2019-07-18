@@ -1260,19 +1260,19 @@ static px_bool PX_ScriptParseAST_MapTokenToR2(PX_SCRIPT_Analysis *analysis,PX_SC
 
 			if(operand.region==PX_SCRIPT_VARIABLE_REGION_LOCAL)
 			{
-				PX_StringFormat(&fmrString,"MOV R2,LOCAL[%d]\n",operand._oft);
+				PX_StringFormat1(&fmrString,"MOV R2,LOCAL[%1]\n",PX_STRINGFORMAT_INT(operand._oft));
 				PX_StringCat(out,fmrString.buffer);
 			}
 			else if(operand.region==PX_SCRIPT_VARIABLE_REGION_GLOBAL)
 			{
-				PX_StringFormat(&fmrString,"MOV R2,GLOBAL[%d]\n",operand._oft);
+				PX_StringFormat1(&fmrString,"MOV R2,GLOBAL[%1]\n",PX_STRINGFORMAT_INT(operand._oft));
 				PX_StringCat(out,fmrString.buffer);
 			}
 			else if(operand.region==PX_SCRIPT_VARIABLE_REGION_POP)
 			{
-				PX_StringFormat(&fmrString,"POP R2\n");
+				PX_StringSet(&fmrString,"POP R2\n");
 				PX_StringCat(out,fmrString.buffer);
-				PX_StringFormat(&fmrString,"MOV R2,GLOBAL[R2]\n");
+				PX_StringSet(&fmrString,"MOV R2,GLOBAL[R2]\n");
 				PX_StringCat(out,fmrString.buffer);
 			}
 			else
@@ -1301,18 +1301,18 @@ static px_bool PX_ScriptParseAST_MapTokenToR2(PX_SCRIPT_Analysis *analysis,PX_SC
 
 			if(operand.region==PX_SCRIPT_VARIABLE_REGION_GLOBAL)
 			{
-				PX_StringFormat(&fmrString,"MOV R2,%d\n",operand._oft);
+				PX_StringFormat1(&fmrString,"MOV R2,%1\n",PX_STRINGFORMAT_INT(operand._oft));
 				PX_StringCat(out,fmrString.buffer);
 			}
 			else if(operand.region==PX_SCRIPT_VARIABLE_REGION_LOCAL)
 			{
-				PX_StringFormat(&fmrString,"MOV R2,%d\n",operand._oft);
+				PX_StringFormat1(&fmrString,"MOV R2,%1\n",PX_STRINGFORMAT_INT(operand._oft));
 				PX_StringCat(out,fmrString.buffer);
 				PX_StringCat(out,"ADD R2,BP\n");
 			}
 			else if(operand.region==PX_SCRIPT_VARIABLE_REGION_POP)
 			{
-				PX_StringFormat(&fmrString,"POP R2\n");
+				PX_StringSet(&fmrString,"POP R2\n");
 				PX_StringCat(out,fmrString.buffer);
 			}
 			else
@@ -1331,12 +1331,12 @@ static px_bool PX_ScriptParseAST_MapTokenToR2(PX_SCRIPT_Analysis *analysis,PX_SC
 
 			if(operand.region==PX_SCRIPT_VARIABLE_REGION_GLOBAL)
 			{
-				PX_StringFormat(&fmrString,"MOV R2,%d\n",operand._int);
+				PX_StringFormat1(&fmrString,"MOV R2,%1\n",PX_STRINGFORMAT_INT(operand._int));
 				PX_StringCat(out,fmrString.buffer);
 			}
 			else if(operand.region==PX_SCRIPT_VARIABLE_REGION_POP)
 			{
-				PX_StringFormat(&fmrString,"POP R2\n");
+				PX_StringSet(&fmrString,"POP R2\n");
 				PX_StringCat(out,fmrString.buffer);
 			}
 			else
@@ -1355,12 +1355,12 @@ static px_bool PX_ScriptParseAST_MapTokenToR2(PX_SCRIPT_Analysis *analysis,PX_SC
 
 			if(operand.region==PX_SCRIPT_VARIABLE_REGION_GLOBAL)
 			{
-				PX_StringFormat(&fmrString,"MOV R2,%f\n",operand._float);
+				PX_StringFormat1(&fmrString,"MOV R2,%1\n",PX_STRINGFORMAT_FLOAT(operand._float));
 				PX_StringCat(out,fmrString.buffer);
 			}
 			else if(operand.region==PX_SCRIPT_VARIABLE_REGION_POP)
 			{
-				PX_StringFormat(&fmrString,"POP R2\n");
+				PX_StringSet(&fmrString,"POP R2\n");
 				PX_StringCat(out,fmrString.buffer);
 			}
 			else
@@ -1381,12 +1381,12 @@ static px_bool PX_ScriptParseAST_MapTokenToR2(PX_SCRIPT_Analysis *analysis,PX_SC
 
 			if(operand.region==PX_SCRIPT_VARIABLE_REGION_GLOBAL)
 			{
-				PX_StringFormat(&fmrString,"MOV R2,%s\n",operand._contaniner);
+				PX_StringFormat1(&fmrString,"MOV R2,%1\n",PX_STRINGFORMAT_STRING(operand._contaniner));
 				PX_StringCat(out,fmrString.buffer);
 			}
 			else if(operand.region==PX_SCRIPT_VARIABLE_REGION_POP)
 			{
-				PX_StringFormat(&fmrString,"POP R2\n");
+				PX_StringSet(&fmrString,"POP R2\n");
 				PX_StringCat(out,fmrString.buffer);
 			}
 			else
@@ -1411,12 +1411,12 @@ static px_bool PX_ScriptParseAST_MapTokenToR2(PX_SCRIPT_Analysis *analysis,PX_SC
 					if(operand.bAtomPopIndex)
 					{
 						PX_StringCat(out,"POP R3\n");
-						PX_StringFormat(&fmrString,"STRCHR R2,LOCAL[%d],R3\n",operand._oft);
+						PX_StringFormat1(&fmrString,"STRCHR R2,LOCAL[%1],R3\n",PX_STRINGFORMAT_INT(operand._oft));
 						PX_StringCat(out,fmrString.buffer);
 					}
 					else
 					{
-						PX_StringFormat(&fmrString,"STRCHR R2,LOCAL[%d],%d\n",operand._oft,operand.bAtomPopIndex);
+						PX_StringFormat2(&fmrString,"STRCHR R2,LOCAL[%1],%2\n",PX_STRINGFORMAT_INT(operand._oft),PX_STRINGFORMAT_INT(operand.bAtomPopIndex));
 						PX_StringCat(out,fmrString.buffer);
 					}
 					PX_StringFree(&fmrString);
@@ -1428,12 +1428,12 @@ static px_bool PX_ScriptParseAST_MapTokenToR2(PX_SCRIPT_Analysis *analysis,PX_SC
 					if(operand.bAtomPopIndex)
 					{
 						PX_StringCat(out,"POP R3\n");
-						PX_StringFormat(&fmrString,"STRCHR R2,GLOBAL[%d],R3\n",operand._oft);
+						PX_StringFormat1(&fmrString,"STRCHR R2,GLOBAL[%1],R3\n",PX_STRINGFORMAT_INT(operand._oft));
 						PX_StringCat(out,fmrString.buffer);
 					}
 					else
 					{
-						PX_StringFormat(&fmrString,"STRCHR R2,GLOBAL[%d],%d\n",operand._oft,operand.bAtomPopIndex);
+						PX_StringFormat2(&fmrString,"STRCHR R2,GLOBAL[%1],%2\n",PX_STRINGFORMAT_INT(operand._oft),PX_STRINGFORMAT_INT(operand.bAtomPopIndex));
 						PX_StringCat(out,fmrString.buffer);
 					}
 					PX_StringFree(&fmrString);
@@ -1447,13 +1447,13 @@ static px_bool PX_ScriptParseAST_MapTokenToR2(PX_SCRIPT_Analysis *analysis,PX_SC
 					{
 						PX_StringCat(out,"POP R1\n");
 						PX_StringCat(out,"POP R3\n");
-						PX_StringFormat(&fmrString,"STRCHR R2,GLOBAL[R1],R3\n");
+						PX_StringSet(&fmrString,"STRCHR R2,GLOBAL[R1],R3\n");
 						PX_StringCat(out,fmrString.buffer);
 					}
 					else
 					{
 						PX_StringCat(out,"POP R1\n");
-						PX_StringFormat(&fmrString,"STRCHR R2,STRSET GLOBAL[R1],%d\n",operand._oft,operand.AtomIndex);
+						PX_StringFormat1(&fmrString,"STRCHR R2,STRSET GLOBAL[R1],%1\n",PX_STRINGFORMAT_INT(operand._oft));
 						PX_StringCat(out,fmrString.buffer);
 					}	
 					PX_StringFree(&fmrString);
@@ -1476,12 +1476,12 @@ static px_bool PX_ScriptParseAST_MapTokenToR2(PX_SCRIPT_Analysis *analysis,PX_SC
 					if(operand.bAtomPopIndex)
 					{
 						PX_StringCat(out,"POP R3\n");
-						PX_StringFormat(&fmrString,"MEMBYTE R2,LOCAL[%d],R3\n",operand._oft);
+						PX_StringFormat1(&fmrString,"MEMBYTE R2,LOCAL[%1],R3\n",PX_STRINGFORMAT_INT(operand._oft));
 						PX_StringCat(out,fmrString.buffer);
 					}
 					else
 					{
-						PX_StringFormat(&fmrString,"MEMBYTE R2,LOCAL[%d],%d\n",operand._oft,operand.bAtomPopIndex);
+						PX_StringFormat2(&fmrString,"MEMBYTE R2,LOCAL[%1],%2\n",PX_STRINGFORMAT_INT(operand._oft),PX_STRINGFORMAT_INT(operand.bAtomPopIndex));
 						PX_StringCat(out,fmrString.buffer);
 					}
 					PX_StringFree(&fmrString);
@@ -1493,12 +1493,12 @@ static px_bool PX_ScriptParseAST_MapTokenToR2(PX_SCRIPT_Analysis *analysis,PX_SC
 					if(operand.bAtomPopIndex)
 					{
 						PX_StringCat(out,"POP R3\n");
-						PX_StringFormat(&fmrString,"MEMBYTE R2,GLOBAL[%d],R3\n",operand._oft);
+						PX_StringFormat1(&fmrString,"MEMBYTE R2,GLOBAL[%1],R3\n",PX_STRINGFORMAT_INT(operand._oft));
 						PX_StringCat(out,fmrString.buffer);
 					}
 					else
 					{
-						PX_StringFormat(&fmrString,"MEMBYTE R2,GLOBAL[%d],%d\n",operand._oft,operand.bAtomPopIndex);
+						PX_StringFormat2(&fmrString,"MEMBYTE R2,GLOBAL[%1],%2\n",PX_STRINGFORMAT_INT(operand._oft),PX_STRINGFORMAT_INT(operand.bAtomPopIndex));
 						PX_StringCat(out,fmrString.buffer);
 					}
 					PX_StringFree(&fmrString);
@@ -1512,13 +1512,13 @@ static px_bool PX_ScriptParseAST_MapTokenToR2(PX_SCRIPT_Analysis *analysis,PX_SC
 					{
 						PX_StringCat(out,"POP R1\n");
 						PX_StringCat(out,"POP R3\n");
-						PX_StringFormat(&fmrString,"MEMBYTE R2,GLOBAL[R1],R3\n");
+						PX_StringSet(&fmrString,"MEMBYTE R2,GLOBAL[R1],R3\n");
 						PX_StringCat(out,fmrString.buffer);
 					}
 					else
 					{
 						PX_StringCat(out,"POP R1\n");
-						PX_StringFormat(&fmrString,"MEMBYTE R2,STRSET GLOBAL[R1],%d\n",operand._oft,operand.AtomIndex);
+						PX_StringFormat1(&fmrString,"MEMBYTE R2,STRSET GLOBAL[R1],%1\n",PX_STRINGFORMAT_INT(operand._oft));
 						PX_StringCat(out,fmrString.buffer);
 					}	
 					PX_StringFree(&fmrString);
@@ -1561,19 +1561,19 @@ static px_bool PX_ScriptParseAST_MapTokenToR1(PX_SCRIPT_Analysis *analysis,PX_SC
 
 			if(operand.region==PX_SCRIPT_VARIABLE_REGION_LOCAL)
 			{
-				PX_StringFormat(&fmrString,"MOV R1,LOCAL[%d]\n",operand._oft);
+				PX_StringFormat1(&fmrString,"MOV R1,LOCAL[%1]\n",PX_STRINGFORMAT_INT(operand._oft));
 				PX_StringCat(out,fmrString.buffer);
 			}
 			else if(operand.region==PX_SCRIPT_VARIABLE_REGION_GLOBAL)
 			{
-				PX_StringFormat(&fmrString,"MOV R1,GLOBAL[%d]\n",operand._oft);
+				PX_StringFormat1(&fmrString,"MOV R1,GLOBAL[%1]\n",PX_STRINGFORMAT_INT(operand._oft));
 				PX_StringCat(out,fmrString.buffer);
 			}
 			else if(operand.region==PX_SCRIPT_VARIABLE_REGION_POP)
 			{
-				PX_StringFormat(&fmrString,"POP R1\n");
+				PX_StringSet(&fmrString,"POP R1\n");
 				PX_StringCat(out,fmrString.buffer);
-				PX_StringFormat(&fmrString,"MOV R1,GLOBAL[R1]\n");
+				PX_StringSet(&fmrString,"MOV R1,GLOBAL[R1]\n");
 				PX_StringCat(out,fmrString.buffer);
 			}
 			else
@@ -1602,18 +1602,18 @@ static px_bool PX_ScriptParseAST_MapTokenToR1(PX_SCRIPT_Analysis *analysis,PX_SC
 
 			if(operand.region==PX_SCRIPT_VARIABLE_REGION_GLOBAL)
 			{
-				PX_StringFormat(&fmrString,"MOV R1,%d\n",operand._oft);
+				PX_StringFormat1(&fmrString,"MOV R1,%1\n",PX_STRINGFORMAT_INT(operand._oft));
 				PX_StringCat(out,fmrString.buffer);
 			}
 			else if(operand.region==PX_SCRIPT_VARIABLE_REGION_LOCAL)
 			{
-				PX_StringFormat(&fmrString,"MOV R2,%d\n",operand._oft);
+				PX_StringFormat1(&fmrString,"MOV R2,%1\n",PX_STRINGFORMAT_INT(operand._oft));
 				PX_StringCat(out,fmrString.buffer);
 				PX_StringCat(out,"ADD R2,BP\n");
 			}
 			else if(operand.region==PX_SCRIPT_VARIABLE_REGION_POP)
 			{
-				PX_StringFormat(&fmrString,"POP R1\n");
+				PX_StringSet(&fmrString,"POP R1\n");
 				PX_StringCat(out,fmrString.buffer);
 			}
 			else
@@ -1632,12 +1632,12 @@ static px_bool PX_ScriptParseAST_MapTokenToR1(PX_SCRIPT_Analysis *analysis,PX_SC
 
 			if(operand.region==PX_SCRIPT_VARIABLE_REGION_GLOBAL)
 			{
-				PX_StringFormat(&fmrString,"MOV R1,%d\n",operand._int);
+				PX_StringFormat1(&fmrString,"MOV R1,%1\n",PX_STRINGFORMAT_INT(operand._int));
 				PX_StringCat(out,fmrString.buffer);
 			}
 			else if(operand.region==PX_SCRIPT_VARIABLE_REGION_POP)
 			{
-				PX_StringFormat(&fmrString,"POP R1\n");
+				PX_StringSet(&fmrString,"POP R1\n");
 				PX_StringCat(out,fmrString.buffer);
 			}
 			else
@@ -1656,12 +1656,12 @@ static px_bool PX_ScriptParseAST_MapTokenToR1(PX_SCRIPT_Analysis *analysis,PX_SC
 
 			if(operand.region==PX_SCRIPT_VARIABLE_REGION_GLOBAL)
 			{
-				PX_StringFormat(&fmrString,"MOV R1,%f\n",operand._float);
+				PX_StringFormat1(&fmrString,"MOV R1,%1\n",PX_STRINGFORMAT_FLOAT(operand._float));
 				PX_StringCat(out,fmrString.buffer);
 			}
 			else if(operand.region==PX_SCRIPT_VARIABLE_REGION_POP)
 			{
-				PX_StringFormat(&fmrString,"POP R1\n");
+				PX_StringSet(&fmrString,"POP R1\n");
 				PX_StringCat(out,fmrString.buffer);
 			}
 			else
@@ -1682,12 +1682,12 @@ static px_bool PX_ScriptParseAST_MapTokenToR1(PX_SCRIPT_Analysis *analysis,PX_SC
 
 			if(operand.region==PX_SCRIPT_VARIABLE_REGION_GLOBAL)
 			{
-				PX_StringFormat(&fmrString,"MOV R1,%s\n",operand._contaniner);
+				PX_StringFormat1(&fmrString,"MOV R1,%1\n",PX_STRINGFORMAT_STRING(operand._contaniner));
 				PX_StringCat(out,fmrString.buffer);
 			}
 			else if(operand.region==PX_SCRIPT_VARIABLE_REGION_POP)
 			{
-				PX_StringFormat(&fmrString,"POP R1\n");
+				PX_StringSet(&fmrString,"POP R1\n");
 				PX_StringCat(out,fmrString.buffer);
 			}
 			else
@@ -1712,12 +1712,12 @@ static px_bool PX_ScriptParseAST_MapTokenToR1(PX_SCRIPT_Analysis *analysis,PX_SC
 					if(operand.bAtomPopIndex)
 					{
 						PX_StringCat(out,"POP R3\n");
-						PX_StringFormat(&fmrString,"STRCHR R1,LOCAL[%d],R3\n",operand._oft);
+						PX_StringFormat1(&fmrString,"STRCHR R1,LOCAL[%1],R3\n",PX_STRINGFORMAT_INT(operand._oft));
 						PX_StringCat(out,fmrString.buffer);
 					}
 					else
 					{
-						PX_StringFormat(&fmrString,"STRCHR R1,LOCAL[%d],%d\n",operand._oft,operand.bAtomPopIndex);
+						PX_StringFormat2(&fmrString,"STRCHR R1,LOCAL[%1],%2\n",PX_STRINGFORMAT_INT(operand._oft),PX_STRINGFORMAT_INT(operand.bAtomPopIndex));
 						PX_StringCat(out,fmrString.buffer);
 					}
 					PX_StringFree(&fmrString);
@@ -1729,12 +1729,12 @@ static px_bool PX_ScriptParseAST_MapTokenToR1(PX_SCRIPT_Analysis *analysis,PX_SC
 					if(operand.bAtomPopIndex)
 					{
 						PX_StringCat(out,"POP R3\n");
-						PX_StringFormat(&fmrString,"STRCHR R1,GLOBAL[%d],R3\n",operand._oft);
+						PX_StringFormat1(&fmrString,"STRCHR R1,GLOBAL[%1],R3\n",PX_STRINGFORMAT_INT(operand._oft));
 						PX_StringCat(out,fmrString.buffer);
 					}
 					else
 					{
-						PX_StringFormat(&fmrString,"STRCHR R1,GLOBAL[%d],%d\n",operand._oft,operand.bAtomPopIndex);
+						PX_StringFormat2(&fmrString,"STRCHR R1,GLOBAL[%1],%2\n",PX_STRINGFORMAT_INT(operand._oft),PX_STRINGFORMAT_INT(operand.bAtomPopIndex));
 						PX_StringCat(out,fmrString.buffer);
 					}
 					PX_StringFree(&fmrString);
@@ -1748,13 +1748,13 @@ static px_bool PX_ScriptParseAST_MapTokenToR1(PX_SCRIPT_Analysis *analysis,PX_SC
 					{
 						PX_StringCat(out,"POP R1\n");
 						PX_StringCat(out,"POP R3\n");
-						PX_StringFormat(&fmrString,"STRCHR R1,GLOBAL[R1],R3\n");
+						PX_StringSet(&fmrString,"STRCHR R1,GLOBAL[R1],R3\n");
 						PX_StringCat(out,fmrString.buffer);
 					}
 					else
 					{
 						PX_StringCat(out,"POP R1\n");
-						PX_StringFormat(&fmrString,"STRCHR R1,STRSET GLOBAL[R1],%d\n",operand._oft,operand.AtomIndex);
+						PX_StringFormat1(&fmrString,"STRCHR R1,STRSET GLOBAL[R1],%1\n",PX_STRINGFORMAT_INT(operand._oft));
 						PX_StringCat(out,fmrString.buffer);
 					}	
 					PX_StringFree(&fmrString);
@@ -1777,12 +1777,12 @@ static px_bool PX_ScriptParseAST_MapTokenToR1(PX_SCRIPT_Analysis *analysis,PX_SC
 					if(operand.bAtomPopIndex)
 					{
 						PX_StringCat(out,"POP R3\n");
-						PX_StringFormat(&fmrString,"MEMBYTE R1,LOCAL[%d],R3\n",operand._oft);
+						PX_StringFormat1(&fmrString,"MEMBYTE R1,LOCAL[%1],R3\n",PX_STRINGFORMAT_INT(operand._oft));
 						PX_StringCat(out,fmrString.buffer);
 					}
 					else
 					{
-						PX_StringFormat(&fmrString,"MEMBYTE R1,LOCAL[%d],%d\n",operand._oft,operand.bAtomPopIndex);
+						PX_StringFormat2(&fmrString,"MEMBYTE R1,LOCAL[%1],%2\n",PX_STRINGFORMAT_INT(operand._oft),PX_STRINGFORMAT_INT(operand.bAtomPopIndex));
 						PX_StringCat(out,fmrString.buffer);
 					}
 					PX_StringFree(&fmrString);
@@ -1794,12 +1794,12 @@ static px_bool PX_ScriptParseAST_MapTokenToR1(PX_SCRIPT_Analysis *analysis,PX_SC
 					if(operand.bAtomPopIndex)
 					{
 						PX_StringCat(out,"POP R3\n");
-						PX_StringFormat(&fmrString,"MEMBYTE R1,GLOBAL[%d],R3\n",operand._oft);
+						PX_StringFormat1(&fmrString,"MEMBYTE R1,GLOBAL[%1],R3\n",PX_STRINGFORMAT_INT(operand._oft));
 						PX_StringCat(out,fmrString.buffer);
 					}
 					else
 					{
-						PX_StringFormat(&fmrString,"MEMBYTE R1,GLOBAL[%d],%d\n",operand._oft,operand.bAtomPopIndex);
+						PX_StringFormat2(&fmrString,"MEMBYTE R1,GLOBAL[%1],%2\n",PX_STRINGFORMAT_INT(operand._oft),PX_STRINGFORMAT_INT(operand.bAtomPopIndex));
 						PX_StringCat(out,fmrString.buffer);
 					}
 					PX_StringFree(&fmrString);
@@ -1813,13 +1813,13 @@ static px_bool PX_ScriptParseAST_MapTokenToR1(PX_SCRIPT_Analysis *analysis,PX_SC
 					{
 						PX_StringCat(out,"POP R1\n");
 						PX_StringCat(out,"POP R3\n");
-						PX_StringFormat(&fmrString,"MEMBYTE R1,GLOBAL[R1],R3\n");
+						PX_StringSet(&fmrString,"MEMBYTE R1,GLOBAL[R1],R3\n");
 						PX_StringCat(out,fmrString.buffer);
 					}
 					else
 					{
 						PX_StringCat(out,"POP R1\n");
-						PX_StringFormat(&fmrString,"MEMBYTE R1,STRSET GLOBAL[R1],%d\n",operand._oft,operand.AtomIndex);
+						PX_StringFormat1(&fmrString,"MEMBYTE R1,STRSET GLOBAL[R1],%1\n",PX_STRINGFORMAT_INT(operand._oft));
 						PX_StringCat(out,fmrString.buffer);
 					}	
 					PX_StringFree(&fmrString);
@@ -1859,7 +1859,7 @@ static px_bool PX_ScriptParseLastInstr_DOT(PX_SCRIPT_Analysis *analysis,px_vecto
 	if (operand1.region==PX_SCRIPT_VARIABLE_REGION_POP)
 	{
 		PX_StringInit(analysis->mp,&fmrString);
-		PX_StringFormat(&fmrString,"POP R1\nADD R1,%d\nPUSH R1\n",operand2._oft);
+		PX_StringFormat1(&fmrString,"POP R1\nADD R1,%1\nPUSH R1\n",PX_STRINGFORMAT_INT(operand2._oft));
 		PX_StringCat(out,fmrString.buffer);
 		PX_StringFree(&fmrString);
 		operand2._oft=0;
@@ -1932,9 +1932,9 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 					case PX_SCRIPT_VARIABLE_REGION_LOCAL:
 						{
 							PX_StringInit(analysis->mp,&fmrString);
-							PX_StringFormat(&fmrString,"MOV LOCAL[%d],R2\n",operandLeft._oft);
+							PX_StringFormat1(&fmrString,"MOV LOCAL[%1],R2\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 							PX_StringCat(out,fmrString.buffer);
-							PX_StringFormat(&fmrString,"PUSH LOCAL[%d]\n",operandLeft._oft);
+							PX_StringFormat1(&fmrString,"PUSH LOCAL[%1]\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 							PX_StringCat(out,fmrString.buffer);
 							PX_StringFree(&fmrString);
 						}
@@ -1942,9 +1942,9 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 					case PX_SCRIPT_VARIABLE_REGION_GLOBAL:
 						{
 							PX_StringInit(analysis->mp,&fmrString);
-							PX_StringFormat(&fmrString,"MOV GLOBAL[%d],R2\n",operandLeft._oft);
+							PX_StringFormat1(&fmrString,"MOV GLOBAL[%1],R2\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 							PX_StringCat(out,fmrString.buffer);
-							PX_StringFormat(&fmrString,"PUSH GLOBAL[%d]\n",operandLeft._oft);
+							PX_StringFormat1(&fmrString,"PUSH GLOBAL[%1]\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 							PX_StringCat(out,fmrString.buffer);
 							PX_StringFree(&fmrString);
 						}
@@ -1953,9 +1953,9 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 						{
 							PX_StringInit(analysis->mp,&fmrString);
 							PX_StringCat(out,"POP R1\n");
-							PX_StringFormat(&fmrString,"MOV LOCAL[R1],R2\n");
+							PX_StringSet(&fmrString,"MOV LOCAL[R1],R2\n");
 							PX_StringCat(out,fmrString.buffer);
-							PX_StringFormat(&fmrString,"PUSH LOCAL[R1]\n");
+							PX_StringSet(&fmrString,"PUSH LOCAL[R1]\n");
 							PX_StringCat(out,fmrString.buffer);
 							PX_StringFree(&fmrString);
 						}
@@ -1979,16 +1979,16 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 							if(operandLeft.bAtomPopIndex)
 							{
 								PX_StringCat(out,"POP R3\n");
-								PX_StringFormat(&fmrString,"STRSET LOCAL[%d],R3,R2\n",operandLeft._oft);
+								PX_StringFormat1(&fmrString,"STRSET LOCAL[%1],R3,R2\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 								PX_StringCat(out,fmrString.buffer);
-								PX_StringFormat(&fmrString,"PUSH LOCAL[%d]\n",operandLeft._oft);
+								PX_StringFormat1(&fmrString,"PUSH LOCAL[%1]\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 								PX_StringCat(out,fmrString.buffer);
 							}
 							else
 							{
-								PX_StringFormat(&fmrString,"STRSET LOCAL[%d],%d,R2\n",operandLeft._oft,operandLeft.AtomIndex);
+								PX_StringFormat2(&fmrString,"STRSET LOCAL[%1],%2,R2\n",PX_STRINGFORMAT_INT(operandLeft._oft),PX_STRINGFORMAT_INT(operandLeft.AtomIndex));
 								PX_StringCat(out,fmrString.buffer);
-								PX_StringFormat(&fmrString,"PUSH LOCAL[%d]\n",operandLeft._oft);
+								PX_StringFormat1(&fmrString,"PUSH LOCAL[%1]\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 								PX_StringCat(out,fmrString.buffer);
 							}
 							PX_StringFree(&fmrString);
@@ -2000,16 +2000,16 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 							if(operandLeft.bAtomPopIndex)
 							{
 								PX_StringCat(out,"POP R3\n");
-								PX_StringFormat(&fmrString,"STRSET GLOBAL[%d],R3,R2\n",operandLeft._oft);
+								PX_StringFormat1(&fmrString,"STRSET GLOBAL[%1],R3,R2\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 								PX_StringCat(out,fmrString.buffer);
-								PX_StringFormat(&fmrString,"PUSH GLOBAL[%d]\n",operandLeft._oft);
+								PX_StringFormat1(&fmrString,"PUSH GLOBAL[%1]\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 								PX_StringCat(out,fmrString.buffer);
 							}
 							else
 							{
-								PX_StringFormat(&fmrString,"STRSET GLOBAL[%d],%d,R2\n",operandLeft._oft,operandLeft.AtomIndex);
+								PX_StringFormat2(&fmrString,"STRSET GLOBAL[%1],%2,R2\n",PX_STRINGFORMAT_INT(operandLeft._oft),PX_STRINGFORMAT_INT(operandLeft.AtomIndex));
 								PX_StringCat(out,fmrString.buffer);
-								PX_StringFormat(&fmrString,"PUSH GLOBAL[%d]\n",operandLeft._oft);
+								PX_StringFormat1(&fmrString,"PUSH GLOBAL[%1]\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 								PX_StringCat(out,fmrString.buffer);
 							}
 							PX_StringFree(&fmrString);
@@ -2023,17 +2023,17 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 							{
 								PX_StringCat(out,"POP R1\n");
 								PX_StringCat(out,"POP R3\n");
-								PX_StringFormat(&fmrString,"STRSET GLOBAL[R1],R3,R2\n");
+								PX_StringSet(&fmrString,"STRSET GLOBAL[R1],R3,R2\n");
 								PX_StringCat(out,fmrString.buffer);
-								PX_StringFormat(&fmrString,"PUSH GLOBAL[R1]\n");
+								PX_StringSet(&fmrString,"PUSH GLOBAL[R1]\n");
 								PX_StringCat(out,fmrString.buffer);
 							}
 							else
 							{
 								PX_StringCat(out,"POP R1\n");
-								PX_StringFormat(&fmrString,"STRSET GLOBAL[R1],%d,R2\n",operandLeft._oft,operandLeft.AtomIndex);
+								PX_StringFormat1(&fmrString,"STRSET GLOBAL[R1],%1,R2\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 								PX_StringCat(out,fmrString.buffer);
-								PX_StringFormat(&fmrString,"PUSH GLOBAL[R1]\n");
+								PX_StringSet(&fmrString,"PUSH GLOBAL[R1]\n");
 								PX_StringCat(out,fmrString.buffer);
 							}	
 							PX_StringFree(&fmrString);
@@ -2058,16 +2058,16 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 							if(operandLeft.bAtomPopIndex)
 							{
 								PX_StringCat(out,"POP R3\n");
-								PX_StringFormat(&fmrString,"MEMSET LOCAL[%d],R3,R2\n",operandLeft._oft);
+								PX_StringFormat1(&fmrString,"MEMSET LOCAL[%1],R3,R2\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 								PX_StringCat(out,fmrString.buffer);
-								PX_StringFormat(&fmrString,"PUSH LOCAL[%d]\n",operandLeft._oft);
+								PX_StringFormat1(&fmrString,"PUSH LOCAL[%1]\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 								PX_StringCat(out,fmrString.buffer);
 							}
 							else
 							{
-								PX_StringFormat(&fmrString,"MEMSET LOCAL[%d],%d,R2\n",operandLeft._oft,operandLeft.AtomIndex);
+								PX_StringFormat2(&fmrString,"MEMSET LOCAL[%1],%2,R2\n",PX_STRINGFORMAT_INT(operandLeft._oft),PX_STRINGFORMAT_INT(operandLeft.AtomIndex));
 								PX_StringCat(out,fmrString.buffer);
-								PX_StringFormat(&fmrString,"PUSH LOCAL[%d]\n",operandLeft._oft);
+								PX_StringFormat1(&fmrString,"PUSH LOCAL[%1]\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 								PX_StringCat(out,fmrString.buffer);
 							}
 							PX_StringFree(&fmrString);
@@ -2079,16 +2079,16 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 							if(operandLeft.bAtomPopIndex)
 							{
 								PX_StringCat(out,"POP R3\n");
-								PX_StringFormat(&fmrString,"MEMSET GLOBAL[%d],R3,R2\n",operandLeft._oft);
+								PX_StringFormat1(&fmrString,"MEMSET GLOBAL[%1],R3,R2\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 								PX_StringCat(out,fmrString.buffer);
-								PX_StringFormat(&fmrString,"PUSH GLOBAL[%d]\n",operandLeft._oft);
+								PX_StringFormat1(&fmrString,"PUSH GLOBAL[%1]\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 								PX_StringCat(out,fmrString.buffer);
 							}
 							else
 							{
-								PX_StringFormat(&fmrString,"MEMSET GLOBAL[%d],%d,R2\n",operandLeft._oft,operandLeft.AtomIndex);
+								PX_StringFormat2(&fmrString,"MEMSET GLOBAL[%1],%2,R2\n",PX_STRINGFORMAT_INT(operandLeft._oft),PX_STRINGFORMAT_INT(operandLeft.AtomIndex));
 								PX_StringCat(out,fmrString.buffer);
-								PX_StringFormat(&fmrString,"PUSH GLOBAL[%d]\n",operandLeft._oft);
+								PX_StringFormat1(&fmrString,"PUSH GLOBAL[%1]\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 								PX_StringCat(out,fmrString.buffer);
 							}
 
@@ -2103,17 +2103,17 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 							{
 								PX_StringCat(out,"POP R1\n");
 								PX_StringCat(out,"POP R3\n");
-								PX_StringFormat(&fmrString,"MEMSET GLOBAL[R1],R3,R2\n");
+								PX_StringSet(&fmrString,"MEMSET GLOBAL[R1],R3,R2\n");
 								PX_StringCat(out,fmrString.buffer);
-								PX_StringFormat(&fmrString,"PUSH GLOBAL[R1]\n");
+								PX_StringSet(&fmrString,"PUSH GLOBAL[R1]\n");
 								PX_StringCat(out,fmrString.buffer);
 							}
 							else
 							{
 								PX_StringCat(out,"POP R1\n");
-								PX_StringFormat(&fmrString,"MEMSET GLOBAL[R1],%d,R2\n",operandLeft._oft,operandLeft.AtomIndex);
+								PX_StringFormat1(&fmrString,"MEMSET GLOBAL[R1],%1,R2\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 								PX_StringCat(out,fmrString.buffer);
-								PX_StringFormat(&fmrString,"PUSH GLOBAL[R1]\n");
+								PX_StringSet(&fmrString,"PUSH GLOBAL[R1]\n");
 								PX_StringCat(out,fmrString.buffer);
 							}	
 							PX_StringFree(&fmrString);
@@ -2163,9 +2163,9 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 					case PX_SCRIPT_VARIABLE_REGION_LOCAL:
 						{
 							PX_StringInit(analysis->mp,&fmrString);
-							PX_StringFormat(&fmrString,"MOV LOCAL[%d],R2\n",operandLeft._oft);
+							PX_StringFormat1(&fmrString,"MOV LOCAL[%1],R2\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 							PX_StringCat(out,fmrString.buffer);
-							PX_StringFormat(&fmrString,"PUSH LOCAL[%d]\n",operandLeft._oft);
+							PX_StringFormat1(&fmrString,"PUSH LOCAL[%1]\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 							PX_StringCat(out,fmrString.buffer);
 							PX_StringFree(&fmrString);
 						}
@@ -2173,9 +2173,9 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 					case PX_SCRIPT_VARIABLE_REGION_GLOBAL:
 						{
 							PX_StringInit(analysis->mp,&fmrString);
-							PX_StringFormat(&fmrString,"MOV GLOBAL[%d],R2\n",operandLeft._oft);
+							PX_StringFormat1(&fmrString,"MOV GLOBAL[%1],R2\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 							PX_StringCat(out,fmrString.buffer);
-							PX_StringFormat(&fmrString,"PUSH GLOBAL[%d]\n",operandLeft._oft);
+							PX_StringFormat1(&fmrString,"PUSH GLOBAL[%1]\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 							PX_StringCat(out,fmrString.buffer);
 							PX_StringFree(&fmrString);
 						}
@@ -2184,9 +2184,9 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 						{
 							PX_StringInit(analysis->mp,&fmrString);
 							PX_StringCat(out,"POP R1\n");
-							PX_StringFormat(&fmrString,"MOV GLOBAL[R1],R2\n");
+							PX_StringSet(&fmrString,"MOV GLOBAL[R1],R2\n");
 							PX_StringCat(out,fmrString.buffer);
-							PX_StringFormat(&fmrString,"PUSH GLOBAL[R1]\n");
+							PX_StringSet(&fmrString,"PUSH GLOBAL[R1]\n");
 							PX_StringCat(out,fmrString.buffer);
 							PX_StringFree(&fmrString);
 						}
@@ -2253,19 +2253,19 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 
 			if(operandRight.region==PX_SCRIPT_VARIABLE_REGION_LOCAL)
 			{
-				PX_StringFormat(&fmrString,"MOV R2,LOCAL[%d]\n",operandRight._oft);
+				PX_StringFormat1(&fmrString,"MOV R2,LOCAL[%1]\n",PX_STRINGFORMAT_INT(operandRight._oft));
 				PX_StringCat(out,fmrString.buffer);
 			}
 			else if(operandRight.region==PX_SCRIPT_VARIABLE_REGION_GLOBAL)
 			{
-				PX_StringFormat(&fmrString,"MOV R2,GLOBAL[%d]\n",operandRight._oft);
+				PX_StringFormat1(&fmrString,"MOV R2,GLOBAL[%1]\n",PX_STRINGFORMAT_INT(operandRight._oft));
 				PX_StringCat(out,fmrString.buffer);
 			}
 			else if(operandRight.region==PX_SCRIPT_VARIABLE_REGION_POP)
 			{
-				PX_StringFormat(&fmrString,"POP R2\n");
+				PX_StringSet(&fmrString,"POP R2\n");
 				PX_StringCat(out,fmrString.buffer);
-				PX_StringFormat(&fmrString,"MOV R2,GLOBAL[R2]\n");
+				PX_StringSet(&fmrString,"MOV R2,GLOBAL[R2]\n");
 				PX_StringCat(out,fmrString.buffer);
 			}
 			else
@@ -2280,9 +2280,9 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 			case PX_SCRIPT_VARIABLE_REGION_LOCAL:
 				{
 					PX_StringInit(analysis->mp,&fmrString);
-					PX_StringFormat(&fmrString,"MOV LOCAL[%d],R2\n",operandLeft._oft);
+					PX_StringFormat1(&fmrString,"MOV LOCAL[%1],R2\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 					PX_StringCat(out,fmrString.buffer);
-					PX_StringFormat(&fmrString,"PUSH LOCAL[%d]\n",operandLeft._oft);
+					PX_StringFormat1(&fmrString,"PUSH LOCAL[%1]\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 					PX_StringCat(out,fmrString.buffer);
 					PX_StringFree(&fmrString);
 				}
@@ -2290,9 +2290,9 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 			case PX_SCRIPT_VARIABLE_REGION_GLOBAL:
 				{
 					PX_StringInit(analysis->mp,&fmrString);
-					PX_StringFormat(&fmrString,"MOV GLOBAL[%d],R2\n",operandLeft._oft);
+					PX_StringFormat1(&fmrString,"MOV GLOBAL[%1],R2\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 					PX_StringCat(out,fmrString.buffer);
-					PX_StringFormat(&fmrString,"PUSH GLOBAL[%d]\n",operandLeft._oft);
+					PX_StringFormat1(&fmrString,"PUSH GLOBAL[%1]\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 					PX_StringCat(out,fmrString.buffer);
 					PX_StringFree(&fmrString);
 				}
@@ -2301,9 +2301,9 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 				{
 					PX_StringInit(analysis->mp,&fmrString);
 					PX_StringCat(out,"POP R1\n");
-					PX_StringFormat(&fmrString,"MOV GLOBAL[R1],R2\n");
+					PX_StringSet(&fmrString,"MOV GLOBAL[R1],R2\n");
 					PX_StringCat(out,fmrString.buffer);
-					PX_StringFormat(&fmrString,"PUSH GLOBAL[R1]\n");
+					PX_StringSet(&fmrString,"PUSH GLOBAL[R1]\n");
 					PX_StringCat(out,fmrString.buffer);
 					PX_StringFree(&fmrString);
 				}
@@ -2331,19 +2331,19 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 	        {
 				case PX_SCRIPT_VARIABLE_REGION_GLOBAL:
 				{
-				PX_StringFormat(&fmrString,"MOV R2,%d\n",operandRight._int);
+				PX_StringFormat1(&fmrString,"MOV R2,%1\n",PX_STRINGFORMAT_INT(operandRight._int));
 				PX_StringCat(out,fmrString.buffer);
 				}
 				break;
 			case PX_SCRIPT_VARIABLE_REGION_LOCAL:
 				{
-				PX_StringFormat(&fmrString,"MOV R2,%d\nADD R2,BP\n",operandRight._int);
+				PX_StringFormat1(&fmrString,"MOV R2,%1\nADD R2,BP\n",PX_STRINGFORMAT_INT(operandRight._int));
 				PX_StringCat(out,fmrString.buffer);
 				}
 				break;
 			case PX_SCRIPT_VARIABLE_REGION_POP:
 				{
-				PX_StringFormat(&fmrString,"POP R2\n");
+				PX_StringSet(&fmrString,"POP R2\n");
 				PX_StringCat(out,fmrString.buffer);
 				}
 				break;
@@ -2358,19 +2358,19 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 			{
 			case PX_SCRIPT_VARIABLE_REGION_GLOBAL:
 				{
-					PX_StringFormat(&fmrString,"MOV R1,%d\n",operandLeft._int);
+					PX_StringFormat1(&fmrString,"MOV R1,%1\n",PX_STRINGFORMAT_INT(operandLeft._int));
 					PX_StringCat(out,fmrString.buffer);
 				}
 				break;
 			case PX_SCRIPT_VARIABLE_REGION_LOCAL:
 				{
-					PX_StringFormat(&fmrString,"MOV R1,%d\nADD R1,BP\n",operandLeft._int);
+					PX_StringFormat1(&fmrString,"MOV R1,%1\nADD R1,BP\n",PX_STRINGFORMAT_INT(operandLeft._int));
 					PX_StringCat(out,fmrString.buffer);
 				}
 				break;
 			case PX_SCRIPT_VARIABLE_REGION_POP:
 				{
-					PX_StringFormat(&fmrString,"POP R1\n");
+					PX_StringSet(&fmrString,"POP R1\n");
 					PX_StringCat(out,fmrString.buffer);
 				}
 				break;
@@ -2381,9 +2381,9 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 				}
 			}
 
-			PX_StringFormat(&fmrString,"DATACPY R1,R2,%d\n",operandLeft.pSet->size);
+			PX_StringFormat1(&fmrString,"DATACPY R1,R2,%1\n",PX_STRINGFORMAT_INT(operandLeft.pSet->size));
 			PX_StringCat(out,fmrString.buffer);
-			PX_StringFormat(&fmrString,"PUSH R1\n");
+			PX_StringSet(&fmrString,"PUSH R1\n");
 			PX_StringCat(out,fmrString.buffer);
 			PX_StringFree(&fmrString);
 			pTop->operandType=PX_SCRIPT_AST_OPERAND_TYPE_SET;
@@ -2425,18 +2425,18 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 
 			if(operandRight.region==PX_SCRIPT_VARIABLE_REGION_GLOBAL)
 			{
-				PX_StringFormat(&fmrString,"MOV R2,%d\n",operandRight._oft);
+				PX_StringFormat1(&fmrString,"MOV R2,%1\n",PX_STRINGFORMAT_INT(operandRight._oft));
 				PX_StringCat(out,fmrString.buffer);
 			}
 			else if(operandRight.region==PX_SCRIPT_VARIABLE_REGION_LOCAL)
 			{
-				PX_StringFormat(&fmrString,"MOV R2,%d\n",operandRight._oft);
+				PX_StringFormat1(&fmrString,"MOV R2,%1\n",PX_STRINGFORMAT_INT(operandRight._oft));
 				PX_StringCat(out,fmrString.buffer);
 				PX_StringCat(out,"ADD R2,BP\n");
 			}
 			else if(operandRight.region==PX_SCRIPT_VARIABLE_REGION_POP)
 			{
-				PX_StringFormat(&fmrString,"POP R2\n");
+				PX_StringSet(&fmrString,"POP R2\n");
 				PX_StringCat(out,fmrString.buffer);
 			}
 			else
@@ -2449,26 +2449,26 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 			{
 			case PX_SCRIPT_VARIABLE_REGION_LOCAL:
 				{
-					PX_StringFormat(&fmrString,"MOV LOCAL[%d],R2\n",operandLeft._oft);
+					PX_StringFormat1(&fmrString,"MOV LOCAL[%1],R2\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 					PX_StringCat(out,fmrString.buffer);
-					PX_StringFormat(&fmrString,"PUSH LOCAL[%d]\n",operandLeft._oft);
+					PX_StringFormat1(&fmrString,"PUSH LOCAL[%1]\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 					PX_StringCat(out,fmrString.buffer);
 				}
 				break;
 			case PX_SCRIPT_VARIABLE_REGION_GLOBAL:
 				{
-					PX_StringFormat(&fmrString,"MOV GLOBAL[%d],R2\n",operandLeft._oft);
+					PX_StringFormat1(&fmrString,"MOV GLOBAL[%1],R2\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 					PX_StringCat(out,fmrString.buffer);
-					PX_StringFormat(&fmrString,"PUSH GLOBAL[%d]\n",operandLeft._oft);
+					PX_StringFormat1(&fmrString,"PUSH GLOBAL[%1]\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 					PX_StringCat(out,fmrString.buffer);
 				}
 				break;
 			case PX_SCRIPT_VARIABLE_REGION_POP:
 				{
 					PX_StringCat(out,"POP R1\n");
-					PX_StringFormat(&fmrString,"MOV LOCAL[R1],R2\n");
+					PX_StringSet(&fmrString,"MOV LOCAL[R1],R2\n");
 					PX_StringCat(out,fmrString.buffer);
-					PX_StringFormat(&fmrString,"PUSH LOCAL[R1]\n");
+					PX_StringSet(&fmrString,"PUSH LOCAL[R1]\n");
 					PX_StringCat(out,fmrString.buffer);
 				}
 				break;
@@ -2519,9 +2519,9 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 					case PX_SCRIPT_VARIABLE_REGION_LOCAL:
 						{
 							PX_StringInit(analysis->mp,&fmrString);
-							PX_StringFormat(&fmrString,"MOV LOCAL[%d],R2\n",operandLeft._oft);
+							PX_StringFormat1(&fmrString,"MOV LOCAL[%1],R2\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 							PX_StringCat(out,fmrString.buffer);
-							PX_StringFormat(&fmrString,"PUSH LOCAL[%d]\n",operandLeft._oft);
+							PX_StringFormat1(&fmrString,"PUSH LOCAL[%1]\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 							PX_StringCat(out,fmrString.buffer);
 							PX_StringFree(&fmrString);
 						}
@@ -2529,9 +2529,9 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 					case PX_SCRIPT_VARIABLE_REGION_GLOBAL:
 						{
 							PX_StringInit(analysis->mp,&fmrString);
-							PX_StringFormat(&fmrString,"MOV GLOBAL[%d],R2\n",operandLeft._oft);
+							PX_StringFormat1(&fmrString,"MOV GLOBAL[%1],R2\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 							PX_StringCat(out,fmrString.buffer);
-							PX_StringFormat(&fmrString,"PUSH GLOBAL[%d]\n",operandLeft._oft);
+							PX_StringFormat1(&fmrString,"PUSH GLOBAL[%1]\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 							PX_StringCat(out,fmrString.buffer);
 							PX_StringFree(&fmrString);
 						}
@@ -2540,9 +2540,9 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 						{
 							PX_StringInit(analysis->mp,&fmrString);
 							PX_StringCat(out,"POP R1\n");
-							PX_StringFormat(&fmrString,"MOV GLOBAL[R1],R2\n");
+							PX_StringSet(&fmrString,"MOV GLOBAL[R1],R2\n");
 							PX_StringCat(out,fmrString.buffer);
-							PX_StringFormat(&fmrString,"PUSH GLOBAL[R1]\n");
+							PX_StringSet(&fmrString,"PUSH GLOBAL[R1]\n");
 							PX_StringCat(out,fmrString.buffer);
 							PX_StringFree(&fmrString);
 						}
@@ -2566,16 +2566,16 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 							if(operandLeft.bAtomPopIndex)
 							{
 								PX_StringCat(out,"POP R3\n");
-								PX_StringFormat(&fmrString,"STRSET LOCAL[%d],R3,R2\n",operandLeft._oft);
+								PX_StringFormat1(&fmrString,"STRSET LOCAL[%1],R3,R2\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 								PX_StringCat(out,fmrString.buffer);
-								PX_StringFormat(&fmrString,"PUSH LOCAL[%d]\n",operandLeft._oft);
+								PX_StringFormat1(&fmrString,"PUSH LOCAL[%1]\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 								PX_StringCat(out,fmrString.buffer);
 							}
 							else
 							{
-								PX_StringFormat(&fmrString,"STRSET LOCAL[%d],%d,R2\n",operandLeft._oft,operandLeft.AtomIndex);
+								PX_StringFormat2(&fmrString,"STRSET LOCAL[%1],%2,R2\n",PX_STRINGFORMAT_INT(operandLeft._oft),PX_STRINGFORMAT_INT(operandLeft.AtomIndex));
 								PX_StringCat(out,fmrString.buffer);
-								PX_StringFormat(&fmrString,"PUSH LOCAL[%d]\n",operandLeft._oft);
+								PX_StringFormat1(&fmrString,"PUSH LOCAL[%1]\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 								PX_StringCat(out,fmrString.buffer);
 							}
 							PX_StringFree(&fmrString);
@@ -2587,16 +2587,16 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 							if(operandLeft.bAtomPopIndex)
 							{
 								PX_StringCat(out,"POP R3\n");
-								PX_StringFormat(&fmrString,"STRSET GLOBAL[%d],R3,R2\n",operandLeft._oft);
+								PX_StringFormat1(&fmrString,"STRSET GLOBAL[%1],R3,R2\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 								PX_StringCat(out,fmrString.buffer);
-								PX_StringFormat(&fmrString,"PUSH GLOBAL[%d]\n",operandLeft._oft);
+								PX_StringFormat1(&fmrString,"PUSH GLOBAL[%1]\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 								PX_StringCat(out,fmrString.buffer);
 							}
 							else
 							{
-								PX_StringFormat(&fmrString,"STRSET GLOBAL[%d],%d,R2\n",operandLeft._oft,operandLeft.AtomIndex);
+								PX_StringFormat2(&fmrString,"STRSET GLOBAL[%1],%2,R2\n",PX_STRINGFORMAT_INT(operandLeft._oft),PX_STRINGFORMAT_INT(operandLeft.AtomIndex));
 								PX_StringCat(out,fmrString.buffer);
-								PX_StringFormat(&fmrString,"PUSH GLOBAL[%d]\n",operandLeft._oft);
+								PX_StringFormat1(&fmrString,"PUSH GLOBAL[%1]\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 								PX_StringCat(out,fmrString.buffer);
 							}
 							PX_StringFree(&fmrString);
@@ -2610,17 +2610,17 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 							{
 								PX_StringCat(out,"POP R1\n");
 								PX_StringCat(out,"POP R3\n");
-								PX_StringFormat(&fmrString,"STRSET GLOBAL[R1],R3,R2\n");
+								PX_StringSet(&fmrString,"STRSET GLOBAL[R1],R3,R2\n");
 								PX_StringCat(out,fmrString.buffer);
-								PX_StringFormat(&fmrString,"PUSH GLOBAL[R1]\n");
+								PX_StringSet(&fmrString,"PUSH GLOBAL[R1]\n");
 								PX_StringCat(out,fmrString.buffer);
 							}
 							else
 							{
 								PX_StringCat(out,"POP R1\n");
-								PX_StringFormat(&fmrString,"STRSET GLOBAL[R1],%d,R2\n",operandLeft._oft,operandLeft.AtomIndex);
+								PX_StringFormat1(&fmrString,"STRSET GLOBAL[R1],%1,R2\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 								PX_StringCat(out,fmrString.buffer);
-								PX_StringFormat(&fmrString,"PUSH GLOBAL[R1]\n");
+								PX_StringSet(&fmrString,"PUSH GLOBAL[R1]\n");
 								PX_StringCat(out,fmrString.buffer);
 							}	
 							PX_StringFree(&fmrString);
@@ -2645,16 +2645,16 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 							if(operandLeft.bAtomPopIndex)
 							{
 								PX_StringCat(out,"POP R3\n");
-								PX_StringFormat(&fmrString,"MEMSET LOCAL[%d],R3,R2\n",operandLeft._oft);
+								PX_StringFormat1(&fmrString,"MEMSET LOCAL[%1],R3,R2\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 								PX_StringCat(out,fmrString.buffer);
-								PX_StringFormat(&fmrString,"PUSH LOCAL[%d]\n",operandLeft._oft);
+								PX_StringFormat1(&fmrString,"PUSH LOCAL[%1]\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 								PX_StringCat(out,fmrString.buffer);
 							}
 							else
 							{
-								PX_StringFormat(&fmrString,"MEMSET LOCAL[%d],%d,R2\n",operandLeft._oft,operandLeft.AtomIndex);
+								PX_StringFormat2(&fmrString,"MEMSET LOCAL[%1],%2,R2\n",PX_STRINGFORMAT_INT(operandLeft._oft),PX_STRINGFORMAT_INT(operandLeft.AtomIndex));
 								PX_StringCat(out,fmrString.buffer);
-								PX_StringFormat(&fmrString,"PUSH LOCAL[%d]\n",operandLeft._oft);
+								PX_StringFormat1(&fmrString,"PUSH LOCAL[%1]\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 								PX_StringCat(out,fmrString.buffer);
 							}
 							PX_StringFree(&fmrString);
@@ -2666,16 +2666,16 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 							if(operandLeft.bAtomPopIndex)
 							{
 								PX_StringCat(out,"POP R3\n");
-								PX_StringFormat(&fmrString,"MEMSET GLOBAL[%d],R3,R2\n",operandLeft._oft);
+								PX_StringFormat1(&fmrString,"MEMSET GLOBAL[%1],R3,R2\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 								PX_StringCat(out,fmrString.buffer);
-								PX_StringFormat(&fmrString,"PUSH GLOBAL[%d]\n",operandLeft._oft);
+								PX_StringFormat1(&fmrString,"PUSH GLOBAL[%1]\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 								PX_StringCat(out,fmrString.buffer);
 							}
 							else
 							{
-								PX_StringFormat(&fmrString,"MEMSET GLOBAL[%d],%d,R2\n",operandLeft._oft,operandLeft.AtomIndex);
+								PX_StringFormat2(&fmrString,"MEMSET GLOBAL[%1],%2,R2\n",PX_STRINGFORMAT_INT(operandLeft._oft),PX_STRINGFORMAT_INT(operandLeft.AtomIndex));
 								PX_StringCat(out,fmrString.buffer);
-								PX_StringFormat(&fmrString,"PUSH GLOBAL[%d]\n",operandLeft._oft);
+								PX_StringFormat1(&fmrString,"PUSH GLOBAL[%1]\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 								PX_StringCat(out,fmrString.buffer);
 							}
 							PX_StringFree(&fmrString);
@@ -2689,17 +2689,17 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 							{
 								PX_StringCat(out,"POP R1\n");
 								PX_StringCat(out,"POP R3\n");
-								PX_StringFormat(&fmrString,"MEMSET GLOBAL[R1],R3,R2\n");
+								PX_StringSet(&fmrString,"MEMSET GLOBAL[R1],R3,R2\n");
 								PX_StringCat(out,fmrString.buffer);
-								PX_StringFormat(&fmrString,"PUSH GLOBAL[R1]\n");
+								PX_StringSet(&fmrString,"PUSH GLOBAL[R1]\n");
 								PX_StringCat(out,fmrString.buffer);
 							}
 							else
 							{
 								PX_StringCat(out,"POP R1\n");
-								PX_StringFormat(&fmrString,"MEMSET GLOBAL[R1],%d,R2\n",operandLeft._oft,operandLeft.AtomIndex);
+								PX_StringFormat1(&fmrString,"MEMSET GLOBAL[R1],%1,R2\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 								PX_StringCat(out,fmrString.buffer);
-								PX_StringFormat(&fmrString,"PUSH GLOBAL[R1]\n");
+								PX_StringSet(&fmrString,"PUSH GLOBAL[R1]\n");
 								PX_StringCat(out,fmrString.buffer);
 							}	
 							PX_StringFree(&fmrString);
@@ -2751,9 +2751,9 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 						case PX_SCRIPT_VARIABLE_REGION_LOCAL:
 							{
 								PX_StringInit(analysis->mp,&fmrString);
-								PX_StringFormat(&fmrString,"MOV LOCAL[%d],R2\n",operandLeft._oft);
+								PX_StringFormat1(&fmrString,"MOV LOCAL[%1],R2\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 								PX_StringCat(out,fmrString.buffer);
-								PX_StringFormat(&fmrString,"PUSH LOCAL[%d]\n",operandLeft._oft);
+								PX_StringFormat1(&fmrString,"PUSH LOCAL[%1]\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 								PX_StringCat(out,fmrString.buffer);
 								PX_StringFree(&fmrString);
 							}
@@ -2761,9 +2761,9 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 						case PX_SCRIPT_VARIABLE_REGION_GLOBAL:
 							{
 								PX_StringInit(analysis->mp,&fmrString);
-								PX_StringFormat(&fmrString,"MOV GLOBAL[%d],R2\n",operandLeft._oft);
+								PX_StringFormat1(&fmrString,"MOV GLOBAL[%1],R2\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 								PX_StringCat(out,fmrString.buffer);
-								PX_StringFormat(&fmrString,"PUSH GLOBAL[%d]\n",operandLeft._oft);
+								PX_StringFormat1(&fmrString,"PUSH GLOBAL[%1]\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 								PX_StringCat(out,fmrString.buffer);
 								PX_StringFree(&fmrString);
 							}
@@ -2772,9 +2772,9 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 							{
 								PX_StringInit(analysis->mp,&fmrString);
 								PX_StringCat(out,"POP R1\n");
-								PX_StringFormat(&fmrString,"MOV GLOBAL[R1],R2\n");
+								PX_StringSet(&fmrString,"MOV GLOBAL[R1],R2\n");
 								PX_StringCat(out,fmrString.buffer);
-								PX_StringFormat(&fmrString,"PUSH GLOBAL[R1]\n");
+								PX_StringSet(&fmrString,"PUSH GLOBAL[R1]\n");
 								PX_StringCat(out,fmrString.buffer);
 								PX_StringFree(&fmrString);
 							}
@@ -2811,12 +2811,12 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 
 				if(operandRight.region==PX_SCRIPT_VARIABLE_REGION_GLOBAL)
 				{
-					PX_StringFormat(&fmrString,"MOV R2,%s\n",operandRight._contaniner);
+					PX_StringFormat1(&fmrString,"MOV R2,%1\n",PX_STRINGFORMAT_STRING(operandRight._contaniner));
 					PX_StringCat(out,fmrString.buffer);
 				}
 				else if(operandRight.region==PX_SCRIPT_VARIABLE_REGION_POP)
 				{
-					PX_StringFormat(&fmrString,"POP R2\n");
+					PX_StringSet(&fmrString,"POP R2\n");
 					PX_StringCat(out,fmrString.buffer);
 				}
 				else
@@ -2833,9 +2833,9 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 				case PX_SCRIPT_VARIABLE_REGION_LOCAL:
 					{
 						PX_StringInit(analysis->mp,&fmrString);
-						PX_StringFormat(&fmrString,"MOV LOCAL[%d],R2\n",operandLeft._oft);
+						PX_StringFormat1(&fmrString,"MOV LOCAL[%1],R2\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 						PX_StringCat(out,fmrString.buffer);
-						PX_StringFormat(&fmrString,"PUSH LOCAL[%d]\n",operandLeft._oft);
+						PX_StringFormat1(&fmrString,"PUSH LOCAL[%1]\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 						PX_StringCat(out,fmrString.buffer);
 						PX_StringFree(&fmrString);
 					}
@@ -2843,9 +2843,9 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 				case PX_SCRIPT_VARIABLE_REGION_GLOBAL:
 					{
 						PX_StringInit(analysis->mp,&fmrString);
-						PX_StringFormat(&fmrString,"MOV GLOBAL[%d],R2\n",operandLeft._oft);
+						PX_StringFormat1(&fmrString,"MOV GLOBAL[%1],R2\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 						PX_StringCat(out,fmrString.buffer);
-						PX_StringFormat(&fmrString,"PUSH GLOBAL[%d]\n",operandLeft._oft);
+						PX_StringFormat1(&fmrString,"PUSH GLOBAL[%1]\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 						PX_StringCat(out,fmrString.buffer);
 						PX_StringFree(&fmrString);
 					}
@@ -2854,9 +2854,9 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 					{
 						PX_StringInit(analysis->mp,&fmrString);
 						PX_StringCat(out,"POP R1\n");
-						PX_StringFormat(&fmrString,"MOV GLOBAL[R1],R2\n");
+						PX_StringSet(&fmrString,"MOV GLOBAL[R1],R2\n");
 						PX_StringCat(out,fmrString.buffer);
-						PX_StringFormat(&fmrString,"PUSH GLOBAL[R1]\n");
+						PX_StringSet(&fmrString,"PUSH GLOBAL[R1]\n");
 						PX_StringCat(out,fmrString.buffer);
 						PX_StringFree(&fmrString);
 					}
@@ -2891,9 +2891,9 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 					case PX_SCRIPT_VARIABLE_REGION_LOCAL:
 						{
 							PX_StringInit(analysis->mp,&fmrString);
-							PX_StringFormat(&fmrString,"MOV LOCAL[%d],R2\n",operandLeft._oft);
+							PX_StringFormat1(&fmrString,"MOV LOCAL[%1],R2\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 							PX_StringCat(out,fmrString.buffer);
-							PX_StringFormat(&fmrString,"PUSH LOCAL[%d]\n",operandLeft._oft);
+							PX_StringFormat1(&fmrString,"PUSH LOCAL[%1]\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 							PX_StringCat(out,fmrString.buffer);
 							PX_StringFree(&fmrString);
 						}
@@ -2901,9 +2901,9 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 					case PX_SCRIPT_VARIABLE_REGION_GLOBAL:
 						{
 							PX_StringInit(analysis->mp,&fmrString);
-							PX_StringFormat(&fmrString,"MOV GLOBAL[%d],R2\n",operandLeft._oft);
+							PX_StringFormat1(&fmrString,"MOV GLOBAL[%1],R2\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 							PX_StringCat(out,fmrString.buffer);
-							PX_StringFormat(&fmrString,"PUSH GLOBAL[%d]\n",operandLeft._oft);
+							PX_StringFormat1(&fmrString,"PUSH GLOBAL[%1]\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 							PX_StringCat(out,fmrString.buffer);
 							PX_StringFree(&fmrString);
 						}
@@ -2912,9 +2912,9 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 						{
 							PX_StringInit(analysis->mp,&fmrString);
 							PX_StringCat(out,"POP R1\n");
-							PX_StringFormat(&fmrString,"MOV GLOBAL[R1],R2\n");
+							PX_StringSet(&fmrString,"MOV GLOBAL[R1],R2\n");
 							PX_StringCat(out,fmrString.buffer);
-							PX_StringFormat(&fmrString,"PUSH GLOBAL[R1]\n");
+							PX_StringSet(&fmrString,"PUSH GLOBAL[R1]\n");
 							PX_StringCat(out,fmrString.buffer);
 							PX_StringFree(&fmrString);
 						}
@@ -2934,16 +2934,16 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 							if(operandLeft.bAtomPopIndex)
 							{
 								PX_StringCat(out,"POP R3\n");
-								PX_StringFormat(&fmrString,"STRSET LOCAL[%d],R3,R2\n",operandLeft._oft);
+								PX_StringFormat1(&fmrString,"STRSET LOCAL[%1],R3,R2\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 								PX_StringCat(out,fmrString.buffer);
-								PX_StringFormat(&fmrString,"PUSH LOCAL[%d]\n",operandLeft._oft);
+								PX_StringFormat1(&fmrString,"PUSH LOCAL[%1]\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 								PX_StringCat(out,fmrString.buffer);
 							}
 							else
 							{
-								PX_StringFormat(&fmrString,"STRSET LOCAL[%d],%d,R2\n",operandLeft._oft,operandLeft.bAtomPopIndex);
+								PX_StringFormat2(&fmrString,"STRSET LOCAL[%1],%2,R2\n",PX_STRINGFORMAT_INT(operandLeft._oft),PX_STRINGFORMAT_INT(operandLeft.bAtomPopIndex));
 								PX_StringCat(out,fmrString.buffer);
-								PX_StringFormat(&fmrString,"PUSH LOCAL[%d]\n",operandLeft._oft);
+								PX_StringFormat1(&fmrString,"PUSH LOCAL[%1]\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 								PX_StringCat(out,fmrString.buffer);
 							}
 							PX_StringFree(&fmrString);
@@ -2955,16 +2955,16 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 							if(operandLeft.bAtomPopIndex)
 							{
 								PX_StringCat(out,"POP R3\n");
-								PX_StringFormat(&fmrString,"STRSET GLOBAL[%d],R3,R2\n",operandLeft._oft);
+								PX_StringFormat1(&fmrString,"STRSET GLOBAL[%1],R3,R2\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 								PX_StringCat(out,fmrString.buffer);
-								PX_StringFormat(&fmrString,"PUSH GLOBAL[%d]\n",operandLeft._oft);
+								PX_StringFormat1(&fmrString,"PUSH GLOBAL[%1]\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 								PX_StringCat(out,fmrString.buffer);
 							}
 							else
 							{
-								PX_StringFormat(&fmrString,"STRSET GLOBAL[%d],%d,R2\n",operandLeft._oft,operandLeft.bAtomPopIndex);
+								PX_StringFormat2(&fmrString,"STRSET GLOBAL[%1],%2,R2\n",PX_STRINGFORMAT_INT(operandLeft._oft),PX_STRINGFORMAT_INT(operandLeft.bAtomPopIndex));
 								PX_StringCat(out,fmrString.buffer);
-								PX_StringFormat(&fmrString,"PUSH GLOBAL[%d]\n",operandLeft._oft);
+								PX_StringFormat1(&fmrString,"PUSH GLOBAL[%1]\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 								PX_StringCat(out,fmrString.buffer);
 							}
 							PX_StringFree(&fmrString);
@@ -2978,17 +2978,17 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 							{
 								PX_StringCat(out,"POP R1\n");
 								PX_StringCat(out,"POP R3\n");
-								PX_StringFormat(&fmrString,"STRSET GLOBAL[R1],R3,R2\n");
+								PX_StringSet(&fmrString,"STRSET GLOBAL[R1],R3,R2\n");
 								PX_StringCat(out,fmrString.buffer);
-								PX_StringFormat(&fmrString,"PUSH GLOBAL[R1]\n");
+								PX_StringSet(&fmrString,"PUSH GLOBAL[R1]\n");
 								PX_StringCat(out,fmrString.buffer);
 							}
 							else
 							{
 								PX_StringCat(out,"POP R1\n");
-								PX_StringFormat(&fmrString,"STRSET GLOBAL[R1],%d,R2\n",operandLeft._oft,operandLeft.AtomIndex);
+								PX_StringFormat1(&fmrString,"STRSET GLOBAL[R1],%1,R2\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 								PX_StringCat(out,fmrString.buffer);
-								PX_StringFormat(&fmrString,"PUSH GLOBAL[R1]\n",operandLeft._oft);
+								PX_StringSet(&fmrString,"PUSH GLOBAL[R1]\n");
 								PX_StringCat(out,fmrString.buffer);
 							}	
 							PX_StringFree(&fmrString);
@@ -3008,16 +3008,16 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 							if(operandLeft.bAtomPopIndex)
 							{
 								PX_StringCat(out,"POP R3\n");
-								PX_StringFormat(&fmrString,"MEMSET LOCAL[%d],R3,R2\n",operandLeft._oft);
+								PX_StringFormat1(&fmrString,"MEMSET LOCAL[%1],R3,R2\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 								PX_StringCat(out,fmrString.buffer);
-								PX_StringFormat(&fmrString,"PUSH LOCAL[%d]\n",operandLeft._oft);
+								PX_StringFormat1(&fmrString,"PUSH LOCAL[%1]\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 								PX_StringCat(out,fmrString.buffer);
 							}
 							else
 							{
-								PX_StringFormat(&fmrString,"MEMSET LOCAL[%d],%d,R2\n",operandLeft._oft,operandLeft.bAtomPopIndex);
+								PX_StringFormat2(&fmrString,"MEMSET LOCAL[%1],%2,R2\n",PX_STRINGFORMAT_INT(operandLeft._oft),PX_STRINGFORMAT_INT(operandLeft.bAtomPopIndex));
 								PX_StringCat(out,fmrString.buffer);
-								PX_StringFormat(&fmrString,"PUSH LOCAL[%d]\n",operandLeft._oft);
+								PX_StringFormat1(&fmrString,"PUSH LOCAL[%1]\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 								PX_StringCat(out,fmrString.buffer);
 							}
 							PX_StringFree(&fmrString);
@@ -3029,16 +3029,16 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 							if(operandLeft.bAtomPopIndex)
 							{
 								PX_StringCat(out,"POP R3\n");
-								PX_StringFormat(&fmrString,"MEMSET GLOBAL[%d],R3,R2\n",operandLeft._oft);
+								PX_StringFormat1(&fmrString,"MEMSET GLOBAL[%1],R3,R2\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 								PX_StringCat(out,fmrString.buffer);
-								PX_StringFormat(&fmrString,"PUSH GLOBAL[%d]\n",operandLeft._oft);
+								PX_StringFormat1(&fmrString,"PUSH GLOBAL[%1]\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 								PX_StringCat(out,fmrString.buffer);
 							}
 							else
 							{
-								PX_StringFormat(&fmrString,"MEMSET GLOBAL[%d],%d,R2\n",operandLeft._oft,operandLeft.bAtomPopIndex);
+								PX_StringFormat2(&fmrString,"MEMSET GLOBAL[%1],%2,R2\n",PX_STRINGFORMAT_INT(operandLeft._oft),PX_STRINGFORMAT_INT(operandLeft.bAtomPopIndex));
 								PX_StringCat(out,fmrString.buffer);
-								PX_StringFormat(&fmrString,"PUSH GLOBAL[%d]\n",operandLeft._oft);
+								PX_StringFormat1(&fmrString,"PUSH GLOBAL[%1]\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 								PX_StringCat(out,fmrString.buffer);
 							}
 							PX_StringFree(&fmrString);
@@ -3052,17 +3052,17 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 							{
 								PX_StringCat(out,"POP R1\n");
 								PX_StringCat(out,"POP R3\n");
-								PX_StringFormat(&fmrString,"MEMSET GLOBAL[R1],R3,R2\n");
+								PX_StringSet(&fmrString,"MEMSET GLOBAL[R1],R3,R2\n");
 								PX_StringCat(out,fmrString.buffer);
-								PX_StringFormat(&fmrString,"PUSH GLOBAL[R1]\n");
+								PX_StringSet(&fmrString,"PUSH GLOBAL[R1]\n");
 								PX_StringCat(out,fmrString.buffer);
 							}
 							else
 							{
 								PX_StringCat(out,"POP R1\n");
-								PX_StringFormat(&fmrString,"MEMSET GLOBAL[R1],%d,R2\n",operandLeft._oft,operandLeft.AtomIndex);
+								PX_StringFormat1(&fmrString,"MEMSET GLOBAL[R1],%1,R2\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 								PX_StringCat(out,fmrString.buffer);
-								PX_StringFormat(&fmrString,"PUSH GLOBAL[R1]\n");
+								PX_StringSet(&fmrString,"PUSH GLOBAL[R1]\n");
 								PX_StringCat(out,fmrString.buffer);
 							}	
 							PX_StringFree(&fmrString);
@@ -3098,9 +3098,9 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 						case PX_SCRIPT_VARIABLE_REGION_LOCAL:
 							{
 								PX_StringInit(analysis->mp,&fmrString);
-								PX_StringFormat(&fmrString,"MOV LOCAL[%d],R2\n",operandLeft._oft);
+								PX_StringFormat1(&fmrString,"MOV LOCAL[%1],R2\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 								PX_StringCat(out,fmrString.buffer);
-								PX_StringFormat(&fmrString,"PUSH LOCAL[%d]\n",operandLeft._oft);
+								PX_StringFormat1(&fmrString,"PUSH LOCAL[%1]\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 								PX_StringCat(out,fmrString.buffer);
 								PX_StringFree(&fmrString);
 							}
@@ -3108,9 +3108,9 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 						case PX_SCRIPT_VARIABLE_REGION_GLOBAL:
 							{
 								PX_StringInit(analysis->mp,&fmrString);
-								PX_StringFormat(&fmrString,"MOV GLOBAL[%d],R2\n",operandLeft._oft);
+								PX_StringFormat1(&fmrString,"MOV GLOBAL[%1],R2\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 								PX_StringCat(out,fmrString.buffer);
-								PX_StringFormat(&fmrString,"PUSH GLOBAL[%d]\n",operandLeft._oft);
+								PX_StringFormat1(&fmrString,"PUSH GLOBAL[%1]\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 								PX_StringCat(out,fmrString.buffer);
 								PX_StringFree(&fmrString);
 							}
@@ -3119,9 +3119,9 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 							{
 								PX_StringInit(analysis->mp,&fmrString);
 								PX_StringCat(out,"POP R1\n");
-								PX_StringFormat(&fmrString,"MOV GLOBAL[R1],R2\n");
+								PX_StringSet(&fmrString,"MOV GLOBAL[R1],R2\n");
 								PX_StringCat(out,fmrString.buffer);
-								PX_StringFormat(&fmrString,"PUSH GLOBAL[R1]\n");
+								PX_StringSet(&fmrString,"PUSH GLOBAL[R1]\n");
 								PX_StringCat(out,fmrString.buffer);
 								PX_StringFree(&fmrString);
 							}
@@ -3141,16 +3141,16 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 								if(operandLeft.bAtomPopIndex)
 								{
 									PX_StringCat(out,"POP R3\n");
-									PX_StringFormat(&fmrString,"MEMSET LOCAL[%d],R3,R2\n",operandLeft._oft);
+									PX_StringFormat1(&fmrString,"MEMSET LOCAL[%1],R3,R2\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 									PX_StringCat(out,fmrString.buffer);
-									PX_StringFormat(&fmrString,"PUSH LOCAL[%d]\n",operandLeft._oft);
+									PX_StringFormat1(&fmrString,"PUSH LOCAL[%1]\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 									PX_StringCat(out,fmrString.buffer);
 								}
 								else
 								{
-									PX_StringFormat(&fmrString,"MEMSET LOCAL[%d],%d,R2\n",operandLeft._oft,operandLeft.bAtomPopIndex);
+									PX_StringFormat2(&fmrString,"MEMSET LOCAL[%1],%2,R2\n",PX_STRINGFORMAT_INT(operandLeft._oft),PX_STRINGFORMAT_INT(operandLeft.bAtomPopIndex));
 									PX_StringCat(out,fmrString.buffer);
-									PX_StringFormat(&fmrString,"PUSH LOCAL[%d]\n",operandLeft._oft);
+									PX_StringFormat1(&fmrString,"PUSH LOCAL[%1]\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 									PX_StringCat(out,fmrString.buffer);
 								}
 								PX_StringFree(&fmrString);
@@ -3162,16 +3162,16 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 								if(operandLeft.bAtomPopIndex)
 								{
 									PX_StringCat(out,"POP R3\n");
-									PX_StringFormat(&fmrString,"MEMSET GLOBAL[%d],R3,R2\n",operandLeft._oft);
+									PX_StringFormat1(&fmrString,"MEMSET GLOBAL[%1],R3,R2\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 									PX_StringCat(out,fmrString.buffer);
-									PX_StringFormat(&fmrString,"PUSH GLOBAL[%d]\n",operandLeft._oft);
+									PX_StringFormat1(&fmrString,"PUSH GLOBAL[%1]\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 									PX_StringCat(out,fmrString.buffer);
 								}
 								else
 								{
-									PX_StringFormat(&fmrString,"MEMSET GLOBAL[%d],%d,R2\n",operandLeft._oft,operandLeft.bAtomPopIndex);
+									PX_StringFormat2(&fmrString,"MEMSET GLOBAL[%1],%2,R2\n",PX_STRINGFORMAT_INT(operandLeft._oft),PX_STRINGFORMAT_INT(operandLeft.bAtomPopIndex));
 									PX_StringCat(out,fmrString.buffer);
-									PX_StringFormat(&fmrString,"PUSH GLOBAL[%d]\n",operandLeft._oft);
+									PX_StringFormat1(&fmrString,"PUSH GLOBAL[%1]\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 									PX_StringCat(out,fmrString.buffer);
 								}
 								PX_StringFree(&fmrString);
@@ -3185,17 +3185,17 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 								{
 									PX_StringCat(out,"POP R1\n");
 									PX_StringCat(out,"POP R3\n");
-									PX_StringFormat(&fmrString,"MEMSET GLOBAL[R1],R3,R2\n");
+									PX_StringSet(&fmrString,"MEMSET GLOBAL[R1],R3,R2\n");
 									PX_StringCat(out,fmrString.buffer);
-									PX_StringFormat(&fmrString,"PUSH GLOBAL[R1]\n");
+									PX_StringSet(&fmrString,"PUSH GLOBAL[R1]\n");
 									PX_StringCat(out,fmrString.buffer);
 								}
 								else
 								{
 									PX_StringCat(out,"POP R1\n");
-									PX_StringFormat(&fmrString,"MEMSET GLOBAL[R1],%d,R2\n",operandLeft._oft,operandLeft.AtomIndex);
+									PX_StringFormat1(&fmrString,"MEMSET GLOBAL[R1],%1,R2\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 									PX_StringCat(out,fmrString.buffer);
-									PX_StringFormat(&fmrString,"PUSH GLOBAL[R1]\n");
+									PX_StringSet(&fmrString,"PUSH GLOBAL[R1]\n");
 									PX_StringCat(out,fmrString.buffer);
 								}	
 								PX_StringFree(&fmrString);
@@ -3215,16 +3215,16 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 								if(operandLeft.bAtomPopIndex)
 								{
 									PX_StringCat(out,"POP R3\n");
-									PX_StringFormat(&fmrString,"STRSET LOCAL[%d],R3,R2\n",operandLeft._oft);
+									PX_StringFormat1(&fmrString,"STRSET LOCAL[%1],R3,R2\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 									PX_StringCat(out,fmrString.buffer);
-									PX_StringFormat(&fmrString,"PUSH LOCAL[%d]\n",operandLeft._oft);
+									PX_StringFormat1(&fmrString,"PUSH LOCAL[%1]\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 									PX_StringCat(out,fmrString.buffer);
 								}
 								else
 								{
-									PX_StringFormat(&fmrString,"STRSET LOCAL[%d],%d,R2\n",operandLeft._oft,operandLeft.bAtomPopIndex);
+									PX_StringFormat2(&fmrString,"STRSET LOCAL[%1],%2,R2\n",PX_STRINGFORMAT_INT(operandLeft._oft),PX_STRINGFORMAT_INT(operandLeft.bAtomPopIndex));
 									PX_StringCat(out,fmrString.buffer);
-									PX_StringFormat(&fmrString,"PUSH LOCAL[%d]\n",operandLeft._oft);
+									PX_StringFormat1(&fmrString,"PUSH LOCAL[%1]\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 									PX_StringCat(out,fmrString.buffer);
 								}
 								PX_StringFree(&fmrString);
@@ -3236,16 +3236,16 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 								if(operandLeft.bAtomPopIndex)
 								{
 									PX_StringCat(out,"POP R3\n");
-									PX_StringFormat(&fmrString,"STRSET GLOBAL[%d],R3,R2\n",operandLeft._oft);
+									PX_StringFormat1(&fmrString,"STRSET GLOBAL[%1],R3,R2\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 									PX_StringCat(out,fmrString.buffer);
-									PX_StringFormat(&fmrString,"PUSH GLOBAL[%d]\n",operandLeft._oft);
+									PX_StringFormat1(&fmrString,"PUSH GLOBAL[%1]\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 									PX_StringCat(out,fmrString.buffer);
 								}
 								else
 								{
-									PX_StringFormat(&fmrString,"STRSET GLOBAL[%d],%d,R2\n",operandLeft._oft,operandLeft.bAtomPopIndex);
+									PX_StringFormat2(&fmrString,"STRSET GLOBAL[%1],%2,R2\n",PX_STRINGFORMAT_INT(operandLeft._oft),PX_STRINGFORMAT_INT(operandLeft.bAtomPopIndex));
 									PX_StringCat(out,fmrString.buffer);
-									PX_StringFormat(&fmrString,"PUSH GLOBAL[%d]\n",operandLeft._oft);
+									PX_StringFormat1(&fmrString,"PUSH GLOBAL[%1]\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 									PX_StringCat(out,fmrString.buffer);
 								}
 								PX_StringFree(&fmrString);
@@ -3259,17 +3259,17 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 								{
 									PX_StringCat(out,"POP R1\n");
 									PX_StringCat(out,"POP R3\n");
-									PX_StringFormat(&fmrString,"STRSET GLOBAL[R1],R3,R2\n");
+									PX_StringSet(&fmrString,"STRSET GLOBAL[R1],R3,R2\n");
 									PX_StringCat(out,fmrString.buffer);
-									PX_StringFormat(&fmrString,"PUSH GLOBAL[R1]\n");
+									PX_StringSet(&fmrString,"PUSH GLOBAL[R1]\n");
 									PX_StringCat(out,fmrString.buffer);
 								}
 								else
 								{
 									PX_StringCat(out,"POP R1\n");
-									PX_StringFormat(&fmrString,"MEMSET GLOBAL[R1],%d,R2\n",operandLeft._oft,operandLeft.AtomIndex);
+									PX_StringFormat1(&fmrString,"MEMSET GLOBAL[R1],%1,R2\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 									PX_StringCat(out,fmrString.buffer);
-									PX_StringFormat(&fmrString,"PUSH GLOBAL[R1]\n");
+									PX_StringSet(&fmrString,"PUSH GLOBAL[R1]\n");
 									PX_StringCat(out,fmrString.buffer);
 								}	
 								PX_StringFree(&fmrString);
@@ -3358,25 +3358,25 @@ static px_bool PX_ScriptParseLastInstr_IDX(PX_SCRIPT_Analysis *analysis,px_vecto
 			{
 				resOperand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_SET;
 				resOperand.pSet=operand1.pSet;
-				PX_StringFormat(&fmrString,"MUL R2,%d\n",operand1.pSet->size);
+				PX_StringFormat1(&fmrString,"MUL R2,%1\n",PX_STRINGFORMAT_INT(operand1.pSet->size));
 				PX_StringCat(out,fmrString.buffer);
 			}
 
 			if (operand1.region==PX_SCRIPT_VARIABLE_REGION_GLOBAL)
 			{
-				PX_StringFormat(&fmrString,"ADD R2,GLOBAL[%d]\n",operand1._oft);
+				PX_StringFormat1(&fmrString,"ADD R2,GLOBAL[%1]\n",PX_STRINGFORMAT_INT(operand1._oft));
 				PX_StringCat(out,fmrString.buffer);
 			}
 			else if(operand1.region==PX_SCRIPT_VARIABLE_REGION_LOCAL)
 			{
-				PX_StringFormat(&fmrString,"ADD R2,LOCAL[%d]\n",operand1._oft);
+				PX_StringFormat1(&fmrString,"ADD R2,LOCAL[%1]\n",PX_STRINGFORMAT_INT(operand1._oft));
 				PX_StringCat(out,fmrString.buffer);
 				PX_StringCat(out,"ADD R2,BP\n");
 			}
 			else if(operand1.region==PX_SCRIPT_VARIABLE_REGION_POP)
 			{
 				PX_StringCat(out,"POP R3\n");
-				PX_StringFormat(&fmrString,"ADD R2,GLOBAL[R3]\n");
+				PX_StringSet(&fmrString,"ADD R2,GLOBAL[R3]\n");
 				PX_StringCat(out,fmrString.buffer);
 			}
 			else
@@ -3417,27 +3417,27 @@ static px_bool PX_ScriptParseLastInstr_IDX(PX_SCRIPT_Analysis *analysis,px_vecto
 				{
 					resOperand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_SET;
 					resOperand.pSet=operand1.pSet;
-					PX_StringFormat(&fmrString,"MUL R2,%d\n",operand1.pSet->size);
+					PX_StringFormat1(&fmrString,"MUL R2,%1\n",PX_STRINGFORMAT_INT(operand1.pSet->size));
 					PX_StringCat(out,fmrString.buffer);
 
 				}
 
 				if (operand1.region==PX_SCRIPT_VARIABLE_REGION_GLOBAL)
 				{
-					PX_StringFormat(&fmrString,"ADD R2,%d\n",operand1._oft);
+					PX_StringFormat1(&fmrString,"ADD R2,%1\n",PX_STRINGFORMAT_INT(operand1._oft));
 					PX_StringCat(out,fmrString.buffer);
 				}
 				else if(operand1.region==PX_SCRIPT_VARIABLE_REGION_LOCAL)
 				{
-					PX_StringFormat(&fmrString,"ADD R2,BP\n");
+					PX_StringSet(&fmrString,"ADD R2,BP\n");
 					PX_StringCat(out,fmrString.buffer);
-					PX_StringFormat(&fmrString,"ADD R2,%d\n",operand1._oft);
+					PX_StringFormat1(&fmrString,"ADD R2,%1\n",PX_STRINGFORMAT_INT(operand1._oft));
 					PX_StringCat(out,fmrString.buffer);
 				}
 				else if(operand1.region==PX_SCRIPT_VARIABLE_REGION_POP)
 				{
 					PX_StringCat(out,"POP R3\n");
-					PX_StringFormat(&fmrString,"ADD R2,GLOBAL[R3]\n");
+					PX_StringSet(&fmrString,"ADD R2,GLOBAL[R3]\n");
 					PX_StringCat(out,fmrString.buffer);
 				}
 				else
@@ -3461,14 +3461,14 @@ static px_bool PX_ScriptParseLastInstr_IDX(PX_SCRIPT_Analysis *analysis,px_vecto
 
 				if (operand1.region==PX_SCRIPT_VARIABLE_REGION_GLOBAL)
 				{
-					PX_StringFormat(&fmrString,"MOV R2,%d\n",operand1._oft);
+					PX_StringFormat1(&fmrString,"MOV R2,%1\n",PX_STRINGFORMAT_INT(operand1._oft));
 					PX_StringCat(out,fmrString.buffer);
 				}
 				else if(operand1.region==PX_SCRIPT_VARIABLE_REGION_LOCAL)
 				{
-					PX_StringFormat(&fmrString,"MOV R2,%d\n",operand1._oft);
+					PX_StringFormat1(&fmrString,"MOV R2,%1\n",PX_STRINGFORMAT_INT(operand1._oft));
 					PX_StringCat(out,fmrString.buffer);
-					PX_StringFormat(&fmrString,"ADD R2,BP\n");
+					PX_StringSet(&fmrString,"ADD R2,BP\n");
 					PX_StringCat(out,fmrString.buffer);
 				}
 				else if(operand1.region==PX_SCRIPT_VARIABLE_REGION_POP)
@@ -3515,7 +3515,7 @@ static px_bool PX_ScriptParseLastInstr_OFT(PX_SCRIPT_Analysis *analysis,px_vecto
 	if(!PX_ScriptParseAST_MapTokenToR1(analysis,operand1,out)) return PX_FALSE;
 	
 	PX_StringInit(analysis->mp,&fmrString);
-	PX_StringFormat(&fmrString,"ADD R1,%d\nPUSH R1\n",operand2._oft);
+	PX_StringFormat1(&fmrString,"ADD R1,%1\nPUSH R1\n",PX_STRINGFORMAT_INT(operand2._oft));
 	PX_StringCat(out,fmrString.buffer);
 	PX_StringFree(&fmrString);
 
@@ -3655,11 +3655,11 @@ static px_bool PX_ScriptParseLastInstr_ADR(PX_SCRIPT_Analysis *analysis,px_vecto
 	else if(operand1.region==PX_SCRIPT_VARIABLE_REGION_LOCAL)
 	{
 		PX_StringInit(analysis->mp,&fmrString);
-		PX_StringFormat(&fmrString,"MOV R1,%d\n",operand1._oft);
+		PX_StringFormat1(&fmrString,"MOV R1,%1\n",PX_STRINGFORMAT_INT(operand1._oft));
 		PX_StringCat(out,fmrString.buffer);
-		PX_StringFormat(&fmrString,"ADD R1,BP\n");
+		PX_StringSet(&fmrString,"ADD R1,BP\n");
 		PX_StringCat(out,fmrString.buffer);
-		PX_StringFormat(&fmrString,"PUSH R1\n");
+		PX_StringSet(&fmrString,"PUSH R1\n");
 		PX_StringCat(out,fmrString.buffer);
 		PX_StringFree(&fmrString);
 
@@ -3910,7 +3910,7 @@ static px_bool PX_ScriptParseLastInstr_ADD(PX_SCRIPT_Analysis *analysis,px_vecto
 					if(!PX_ScriptParseAST_MapTokenToR2(analysis,operand2,out)) return PX_FALSE;
 					if(!PX_ScriptParseAST_MapTokenToR1(analysis,operand1,out)) return PX_FALSE;
 					PX_StringInit(analysis->mp,&fmrString);
-					PX_StringFormat(&fmrString,"MUL R2,%d\n",operand1.pSet->size);
+					PX_StringFormat1(&fmrString,"MUL R2,%1\n",PX_STRINGFORMAT_INT(operand1.pSet->size));
 					PX_StringCat(out,fmrString.buffer);
 					PX_StringFree(&fmrString);
 					PX_StringCat(out,"ADD R1,R2\nPUSH R1\n");
@@ -4055,7 +4055,7 @@ static px_bool PX_ScriptParseLastInstr_INC(PX_SCRIPT_Analysis *analysis,px_vecto
 	case PX_SCRIPT_VARIABLE_REGION_GLOBAL:
 		{
 			PX_StringInit(analysis->mp,&fmrString);
-			PX_StringFormat(&fmrString,"ADD GLOBAL[%d],1\n",operand1._oft);
+			PX_StringFormat1(&fmrString,"ADD GLOBAL[%1],1\n",PX_STRINGFORMAT_INT(operand1._oft));
 			PX_StringCat(out,fmrString.buffer);
 			PX_StringFree(&fmrString);
 		}
@@ -4063,7 +4063,7 @@ static px_bool PX_ScriptParseLastInstr_INC(PX_SCRIPT_Analysis *analysis,px_vecto
 	case PX_SCRIPT_VARIABLE_REGION_LOCAL:
 		{
 			PX_StringInit(analysis->mp,&fmrString);
-			PX_StringFormat(&fmrString,"ADD LOCAL[%d],1\n",operand1._oft);
+			PX_StringFormat1(&fmrString,"ADD LOCAL[%1],1\n",PX_STRINGFORMAT_INT(operand1._oft));
 			PX_StringCat(out,fmrString.buffer);
 			PX_StringFree(&fmrString);
 		}
@@ -4072,7 +4072,7 @@ static px_bool PX_ScriptParseLastInstr_INC(PX_SCRIPT_Analysis *analysis,px_vecto
 		{
 			PX_StringInit(analysis->mp,&fmrString);
 			PX_StringCat(out,"POP R1\n");
-			PX_StringFormat(&fmrString,"ADD GLOBAL[R1],1\n",operand1._oft);
+			PX_StringSet(&fmrString,"ADD GLOBAL[R1],1\n");
 			PX_StringCat(out,fmrString.buffer);
 			PX_StringCat(out,"PUSH R1\n");
 			PX_StringFree(&fmrString);
@@ -4375,7 +4375,7 @@ static px_bool PX_ScriptParseLastInstr_DEC(PX_SCRIPT_Analysis *analysis,px_vecto
 	case PX_SCRIPT_VARIABLE_REGION_GLOBAL:
 		{
 			PX_StringInit(analysis->mp,&fmrString);
-			PX_StringFormat(&fmrString,"SUB GLOBAL[%d],1\n",operand1._oft);
+			PX_StringFormat1(&fmrString,"SUB GLOBAL[%1],1\n",PX_STRINGFORMAT_INT(operand1._oft));
 			PX_StringCat(out,fmrString.buffer);
 			PX_StringFree(&fmrString);
 		}
@@ -4383,7 +4383,7 @@ static px_bool PX_ScriptParseLastInstr_DEC(PX_SCRIPT_Analysis *analysis,px_vecto
 	case PX_SCRIPT_VARIABLE_REGION_LOCAL:
 		{
 			PX_StringInit(analysis->mp,&fmrString);
-			PX_StringFormat(&fmrString,"SUB LOCAL[%d],1\n",operand1._oft);
+			PX_StringFormat1(&fmrString,"SUB LOCAL[%1],1\n",PX_STRINGFORMAT_INT(operand1._oft));
 			PX_StringCat(out,fmrString.buffer);
 			PX_StringFree(&fmrString);
 		}
@@ -4392,7 +4392,7 @@ static px_bool PX_ScriptParseLastInstr_DEC(PX_SCRIPT_Analysis *analysis,px_vecto
 		{
 			PX_StringInit(analysis->mp,&fmrString);
 			PX_StringCat(out,"POP R1\n");
-			PX_StringFormat(&fmrString,"SUB GLOBAL[R1],1\n",operand1._oft);
+			PX_StringSet(&fmrString,"SUB GLOBAL[R1],1\n");
 			PX_StringCat(out,fmrString.buffer);
 			PX_StringCat(out,"PUSH R1\n");
 			PX_StringFree(&fmrString);
@@ -6303,12 +6303,12 @@ _EXPR_OUT:
 			case PX_SCRIPT_TRANSLATOR_FUNCTION_TYPE_EXPORT:
 			case PX_SCRIPT_TRANSLATOR_FUNCTION_TYPE_CUSTOM:
 				PX_StringInit(analysis->mp,&fmrString);
-				PX_StringFormat(&fmrString,"CALL %s\n",pfunc->name);
+				PX_StringFormat1(&fmrString,"CALL %1\n",PX_STRINGFORMAT_STRING(pfunc->name));
 				PX_StringCat(out,fmrString.buffer);
 
 				if(pfunc->parametersCount)
 				{
-					PX_StringFormat(&fmrString,"POPN %d\n",pfunc->parametersSize);
+					PX_StringFormat1(&fmrString,"POPN %1\n",PX_STRINGFORMAT_INT(pfunc->parametersSize));
 					PX_StringCat(out,fmrString.buffer);
 				}
 				PX_StringCat(out,"POP BP\n");
@@ -6317,11 +6317,11 @@ _EXPR_OUT:
 				break;
 			case PX_SCRIPT_TRANSLATOR_FUNCTION_TYPE_HOST:
 				PX_StringInit(analysis->mp,&fmrString);
-				PX_StringFormat(&fmrString,"CALL $%s\n",pfunc->name);
+				PX_StringFormat1(&fmrString,"CALL $%1\n",PX_STRINGFORMAT_STRING(pfunc->name));
 				PX_StringCat(out,fmrString.buffer);
 				if(pfunc->parametersCount)
 				{
-					PX_StringFormat(&fmrString,"POPN %d\n",pfunc->parametersSize);
+					PX_StringFormat1(&fmrString,"POPN %1\n",PX_STRINGFORMAT_INT(pfunc->parametersSize));
 					PX_StringCat(out,fmrString.buffer);
 				}
 				PX_StringCat(out,"POP BP\n");
@@ -8826,10 +8826,10 @@ px_bool PX_ScriptParseFunctionGuiderCode(PX_SCRIPT_Analysis *analysis)
 	PX_StringInit(analysis->mp,&code);
 	if(stacksize-analysis->currentFunc.parametersCount!=0)
 	{
-	PX_StringFormat(&code,"SUB SP,%d\n",stacksize-analysis->currentFunc.parametersCount-1);
+	PX_StringFormat1(&code,"SUB SP,%1\n",PX_STRINGFORMAT_INT(stacksize-analysis->currentFunc.parametersCount-1));
 	PX_StringCat(&analysis->code,code.buffer);
 	}
-	PX_StringFormat(&code,"MOV BP,SP\n");
+	PX_StringSet(&code,"MOV BP,SP\n");
 	PX_StringCat(&analysis->code,code.buffer);
 
 	for (i=0;i<analysis->v_variableStackTable.size;i++)
@@ -8837,12 +8837,12 @@ px_bool PX_ScriptParseFunctionGuiderCode(PX_SCRIPT_Analysis *analysis)
 		pvar=PX_VECTORAT(PX_SCRIPT_VARIABLES,&analysis->v_variableStackTable,i);
 		if (!pvar->bParam&&pvar->type==PX_SCRIPT_PARSER_VAR_TYPE_STRING)
 		{
-			PX_StringFormat(&code,"MOV LOCAL[%d],\"\"\n",pvar->BeginIndex);
+			PX_StringFormat1(&code,"MOV LOCAL[%1],\"\"\n",PX_STRINGFORMAT_INT(pvar->BeginIndex));
 			PX_StringCat(&analysis->code,code.buffer);
 		}
 		if (!pvar->bParam&&pvar->type==PX_SCRIPT_PARSER_VAR_TYPE_MEMORY)
 		{
-			PX_StringFormat(&code,"MOV LOCAL[%d],@00@\n",pvar->BeginIndex);
+			PX_StringFormat1(&code,"MOV LOCAL[%1],@00@\n",PX_STRINGFORMAT_INT(pvar->BeginIndex));
 			PX_StringCat(&analysis->code,code.buffer);
 		}
 		if (!pvar->bParam&&pvar->type==PX_SCRIPT_PARSER_VAR_TYPE_SET)
@@ -8856,12 +8856,12 @@ px_bool PX_ScriptParseFunctionGuiderCode(PX_SCRIPT_Analysis *analysis)
 
 					if (!pvar->bParam&&pvar->type==PX_SCRIPT_PARSER_VAR_TYPE_STRING)
 					{
-						PX_StringFormat(&code,"MOV LOCAL[%d],\"\"\n",pvar->BeginIndex);
+						PX_StringFormat1(&code,"MOV LOCAL[%1],\"\"\n",PX_STRINGFORMAT_INT(pvar->BeginIndex));
 						PX_StringCat(&analysis->code,code.buffer);
 					}
 					if (!pvar->bParam&&pvar->type==PX_SCRIPT_PARSER_VAR_TYPE_MEMORY)
 					{
-						PX_StringFormat(&code,"MOV LOCAL[%d],@00@\n",pvar->BeginIndex);
+						PX_StringFormat1(&code,"MOV LOCAL[%1],@00@\n",PX_STRINGFORMAT_INT(pvar->BeginIndex));
 						PX_StringCat(&analysis->code,code.buffer);
 					}
 				}
@@ -8880,7 +8880,7 @@ px_bool PX_ScriptParseFunctionGuiderCode(PX_SCRIPT_Analysis *analysis)
 		{
 		PX_StringInit(analysis->mp,&code);
 		PX_StringInit(analysis->mp,&exprgen);
-		PX_StringFormat(&code,"%s=%s",pvar->Mnemonic.buffer,pvar->GlobalInitializeValue.buffer);
+		PX_StringFormat2(&code,"%1=%2",PX_STRINGFORMAT_STRING(pvar->Mnemonic.buffer),PX_STRINGFORMAT_STRING(pvar->GlobalInitializeValue.buffer));
 		if (!PX_ScriptParseExpression(analysis,code.buffer,&exprgen,&retOperand))
 		{
 			PX_StringFree(&code);
@@ -8908,7 +8908,7 @@ px_bool PX_ScriptParseBootCode(PX_SCRIPT_Analysis *analysis)
 		{
 			PX_StringInit(analysis->mp,&code);
 			PX_StringInit(analysis->mp,&exprgen);
-			PX_StringFormat(&code,"%s=%s\n",pvar->Mnemonic.buffer,pvar->GlobalInitializeValue.buffer);
+			PX_StringFormat2(&code,"%1=%2\n",PX_STRINGFORMAT_STRING(pvar->Mnemonic.buffer),PX_STRINGFORMAT_STRING(pvar->GlobalInitializeValue.buffer));
 			if (!PX_ScriptParseExpression(analysis,code.buffer,&exprgen,&retOperand))
 			{
 				PX_StringFree(&code);
@@ -8929,7 +8929,7 @@ px_bool PX_ScriptParseFunctionReturn(PX_SCRIPT_Analysis *analysis)
 
 	if(analysis->currentFunc.LocalSize!=0)
 	{
-		PX_StringFormat(&code,"POPN %d\n",analysis->currentFunc.LocalSize);
+		PX_StringFormat1(&code,"POPN %1\n",PX_STRINGFORMAT_INT(analysis->currentFunc.LocalSize));
 		PX_StringCat(&analysis->code,code.buffer);
 	}
 	PX_StringCat(&analysis->code,"RET\n");
@@ -9046,7 +9046,7 @@ px_bool PX_ScriptParseLastCodeblockEnd(PX_SCRIPT_Analysis *analysis)
 			{
 				//generate code
 				PX_StringInit(analysis->mp,&fmrString);
-				PX_StringFormat(&fmrString,"JMP _ELSE_%d\n",astStruct._if.elseflag);
+				PX_StringFormat1(&fmrString,"JMP _ELSE_%1\n",PX_STRINGFORMAT_INT(astStruct._if.elseflag));
 				PX_StringCat(&analysis->code,fmrString.buffer);
 				PX_StringFree(&fmrString);
 
@@ -9067,7 +9067,7 @@ px_bool PX_ScriptParseLastCodeblockEnd(PX_SCRIPT_Analysis *analysis)
 				PX_VectorPushback(&analysis->v_astStructure,&buildastStruct);
 
 				PX_StringInit(analysis->mp,&fmrString);
-				PX_StringFormat(&fmrString,"_IF_%d:\n",astStruct._if.ifflag);
+				PX_StringFormat1(&fmrString,"_IF_%1:\n",PX_STRINGFORMAT_INT(astStruct._if.ifflag));
 				PX_StringCat(&analysis->code,fmrString.buffer);
 				PX_StringFree(&fmrString);
 			}
@@ -9076,7 +9076,7 @@ px_bool PX_ScriptParseLastCodeblockEnd(PX_SCRIPT_Analysis *analysis)
 				PX_LexerSetState(state);
 
 				PX_StringInit(analysis->mp,&fmrString);
-				PX_StringFormat(&fmrString,"_IF_%d:\n",astStruct._if.ifflag);
+				PX_StringFormat1(&fmrString,"_IF_%1:\n",PX_STRINGFORMAT_INT(astStruct._if.ifflag));
 				PX_StringCat(&analysis->code,fmrString.buffer);
 				PX_StringFree(&fmrString);
 
@@ -9093,7 +9093,7 @@ px_bool PX_ScriptParseLastCodeblockEnd(PX_SCRIPT_Analysis *analysis)
 		{
 			//
 			PX_StringInit(analysis->mp,&fmrString);
-			PX_StringFormat(&fmrString,"_ELSE_%d:\n",astStruct._else.elseflag);
+			PX_StringFormat1(&fmrString,"_ELSE_%1:\n",PX_STRINGFORMAT_INT(astStruct._else.elseflag));
 			PX_StringCat(&analysis->code,fmrString.buffer);
 			PX_StringFree(&fmrString);
 
@@ -9106,9 +9106,9 @@ px_bool PX_ScriptParseLastCodeblockEnd(PX_SCRIPT_Analysis *analysis)
 	case PX_SCRIPT_AST_STRUCTURE_TYPE_WHILE:
 		{
 			PX_StringInit(analysis->mp,&fmrString);
-			PX_StringFormat(&fmrString,"JMP _WHILE_%d\n",astStruct._while.loopflag);
+			PX_StringFormat1(&fmrString,"JMP _WHILE_%1\n",PX_STRINGFORMAT_INT(astStruct._while.loopflag));
 			PX_StringCat(&analysis->code,fmrString.buffer);
-			PX_StringFormat(&fmrString,"_WHILE_%d:\n",astStruct._while.endflag);
+			PX_StringFormat1(&fmrString,"_WHILE_%1:\n",PX_STRINGFORMAT_INT(astStruct._while.endflag));
 			PX_StringCat(&analysis->code,fmrString.buffer);
 			PX_StringFree(&fmrString);
 
@@ -9121,10 +9121,10 @@ px_bool PX_ScriptParseLastCodeblockEnd(PX_SCRIPT_Analysis *analysis)
 	case PX_SCRIPT_AST_STRUCTURE_TYPE_FOR:
 		{
 			PX_StringInit(analysis->mp,&fmrString);
-			PX_StringFormat(&fmrString,"JMP _FOR_%d\n",astStruct._for.additionFlag);
+			PX_StringFormat1(&fmrString,"JMP _FOR_%1\n",PX_STRINGFORMAT_INT(astStruct._for.additionFlag));
 			PX_StringCat(&analysis->code,fmrString.buffer);
 			//endflag
-			PX_StringFormat(&fmrString,"_FOR_%d:\n",astStruct._for.endFlag);
+			PX_StringFormat1(&fmrString,"_FOR_%1:\n",PX_STRINGFORMAT_INT(astStruct._for.endFlag));
 			PX_StringCat(&analysis->code,fmrString.buffer);
 			PX_StringFree(&fmrString);
 
@@ -9139,10 +9139,10 @@ px_bool PX_ScriptParseLastCodeblockEnd(PX_SCRIPT_Analysis *analysis)
 		{
 			PX_StringInit(analysis->mp,&fmrString);
 			//endflag
-			PX_StringFormat(&fmrString,"_COMPARE_%d:\n",astStruct._compare.endFlag);
+			PX_StringFormat1(&fmrString,"_COMPARE_%1:\n",PX_STRINGFORMAT_INT(astStruct._compare.endFlag));
 			PX_StringCat(&analysis->code,fmrString.buffer);
 			//pop 
-			PX_StringFormat(&fmrString,"POP R1\n",analysis->currentFunc.name,astStruct._for.additionFlag);
+			PX_StringSet(&fmrString,"POP R1\n");
 			PX_StringCat(&analysis->code,fmrString.buffer);
 			
 			PX_StringFree(&fmrString);
@@ -9158,7 +9158,7 @@ px_bool PX_ScriptParseLastCodeblockEnd(PX_SCRIPT_Analysis *analysis)
 		{
 			PX_StringInit(analysis->mp,&fmrString);
 			//endflag
-			PX_StringFormat(&fmrString,"_WITH_%d:\n",astStruct._compare.endFlag);
+			PX_StringFormat1(&fmrString,"_WITH_%1:\n",PX_STRINGFORMAT_INT(astStruct._compare.endFlag));
 			PX_StringCat(&analysis->code,fmrString.buffer);
 
 			PX_StringFree(&fmrString);
@@ -9768,7 +9768,7 @@ px_bool PX_ScriptCompilerCompile(PX_SCRIPT_LIBRARY *lib,px_char *name,px_string 
 			PX_VectorPushback(&analysis.v_astStructure,&buildAstStruct);
 
 			PX_StringInit(analysis.mp,&expression);
-			PX_StringFormat(&expression,"JE R1,0,_IF_%d\n",buildAstStruct._if.ifflag);
+			PX_StringFormat1(&expression,"JE R1,0,_IF_%1\n",PX_STRINGFORMAT_INT(buildAstStruct._if.ifflag));
 			PX_StringCat(&analysis.code,expression.buffer);
 			PX_StringFree(&expression);
 			continue;
@@ -9807,7 +9807,7 @@ px_bool PX_ScriptCompilerCompile(PX_SCRIPT_LIBRARY *lib,px_char *name,px_string 
 			buildAstStruct._while.endflag=analysis._jFlag++;
 
 			PX_StringInit(analysis.mp,&fmrString);
-			PX_StringFormat(&fmrString,"_WHILE_%d:\n",buildAstStruct._while.loopflag);
+			PX_StringFormat1(&fmrString,"_WHILE_%1:\n",PX_STRINGFORMAT_INT(buildAstStruct._while.loopflag));
 			PX_StringCat(&analysis.code,fmrString.buffer);
 			PX_StringFree(&fmrString);
 
@@ -9844,7 +9844,7 @@ px_bool PX_ScriptCompilerCompile(PX_SCRIPT_LIBRARY *lib,px_char *name,px_string 
 			PX_VectorPushback(&analysis.v_astStructure,&buildAstStruct);
 
 			PX_StringInit(analysis.mp,&expression);
-			PX_StringFormat(&expression,"JE R1,0,_WHILE_%d\n",buildAstStruct._while.endflag);
+			PX_StringFormat1(&expression,"JE R1,0,_WHILE_%1\n",PX_STRINGFORMAT_INT(buildAstStruct._while.endflag));
 			PX_StringCat(&analysis.code,expression.buffer);
 			PX_StringFree(&expression);
 			continue;
@@ -9883,7 +9883,7 @@ px_bool PX_ScriptCompilerCompile(PX_SCRIPT_LIBRARY *lib,px_char *name,px_string 
 					if(pvar->type==PX_SCRIPT_PARSER_VAR_TYPE_INT||pvar->type==PX_SCRIPT_PARSER_VAR_TYPE_FLOAT||pvar->type==PX_SCRIPT_PARSER_VAR_TYPE_STRING||pvar->type==PX_SCRIPT_PARSER_VAR_TYPE_MEMORY)
 					if (px_strequ(pvar->Mnemonic.buffer,analysis.lexer.CurLexeme.buffer))
 					{
-						PX_StringFormat(&fmrString,"LOCAL[%d]",pvar->BeginIndex);
+						PX_StringFormat1(&fmrString,"LOCAL[%1]",PX_STRINGFORMAT_INT(pvar->BeginIndex));
 						PX_StringCat(&codes,fmrString.buffer);
 						goto _CONTINUE;
 					}
@@ -9895,7 +9895,7 @@ px_bool PX_ScriptCompilerCompile(PX_SCRIPT_LIBRARY *lib,px_char *name,px_string 
 					if(pvar->type==PX_SCRIPT_PARSER_VAR_TYPE_INT||pvar->type==PX_SCRIPT_PARSER_VAR_TYPE_FLOAT||pvar->type==PX_SCRIPT_PARSER_VAR_TYPE_STRING||pvar->type==PX_SCRIPT_PARSER_VAR_TYPE_MEMORY)
 					if (px_strequ(pvar->Mnemonic.buffer,analysis.lexer.CurLexeme.buffer))
 					{
-						PX_StringFormat(&fmrString,"GLOBAL[%d]",pvar->BeginIndex);
+						PX_StringFormat1(&fmrString,"GLOBAL[%1]",PX_STRINGFORMAT_INT(pvar->BeginIndex));
 						PX_StringCat(&codes,fmrString.buffer);
 						goto _CONTINUE;
 					}
@@ -9963,7 +9963,7 @@ _CONTINUE:
 
 			//Jump to condition
 			
-			PX_StringFormat(&fmrString,"JMP _FOR_%d\n",buildAstStruct._for.conditionFlag);
+			PX_StringFormat1(&fmrString,"JMP _FOR_%1\n",PX_STRINGFORMAT_INT(buildAstStruct._for.conditionFlag));
 			PX_StringCat(&analysis.code,fmrString.buffer);
 
 
@@ -9990,7 +9990,7 @@ _CONTINUE:
 
 			//Addition
 			//Addition flag
-			PX_StringFormat(&fmrString,"_FOR_%d:\n",buildAstStruct._for.additionFlag);
+			PX_StringFormat1(&fmrString,"_FOR_%1:\n",PX_STRINGFORMAT_INT(buildAstStruct._for.additionFlag));
 			PX_StringCat(&analysis.code,fmrString.buffer);
 
 			if(!PX_ScriptParseGetExpression(&analysis,&expression,')'))
@@ -10014,12 +10014,12 @@ _CONTINUE:
 
 			//condition
 			//condition flag
-			PX_StringFormat(&fmrString,"_FOR_%d:\n",buildAstStruct._for.conditionFlag);
+			PX_StringFormat1(&fmrString,"_FOR_%1:\n",PX_STRINGFORMAT_INT(buildAstStruct._for.conditionFlag));
 			PX_StringCat(&analysis.code,fmrString.buffer);
 			PX_StringCat(&analysis.code,condCodes.buffer);
 
 			//jump to end
-			PX_StringFormat(&fmrString,"JE R1,0,_FOR_%d\n",buildAstStruct._for.endFlag);
+			PX_StringFormat1(&fmrString,"JE R1,0,_FOR_%1\n",PX_STRINGFORMAT_INT(buildAstStruct._for.endFlag));
 			PX_StringCat(&analysis.code,fmrString.buffer);
 
 			PX_StringFree(&expression);
@@ -10257,7 +10257,7 @@ _CONTINUE:
 				}
 				
 			}
-			PX_StringFormat(&expCode,"JE R3,0,_WITH_%d\n",buildAstStruct._with.endFlag);
+			PX_StringFormat1(&expCode,"JE R3,0,_WITH_%1\n",PX_STRINGFORMAT_INT(buildAstStruct._with.endFlag));
 			PX_StringCat(&analysis.code,expCode.buffer);
 
 			PX_StringFree(&expression);
@@ -10301,7 +10301,7 @@ _CONTINUE:
 				case PX_SCRIPT_AST_STRUCTURE_TYPE_WHILE:
 					{
 						PX_StringInit(analysis.mp,&fmrString);
-						PX_StringFormat(&fmrString,"JMP _WHILE_%d\n",astStruct._while.endflag);
+						PX_StringFormat1(&fmrString,"JMP _WHILE_%1\n",PX_STRINGFORMAT_INT(astStruct._while.endflag));
 						PX_StringCat(&analysis.code,fmrString.buffer);
 						PX_StringFree(&fmrString);
 						goto _BREAKOUT;
@@ -10310,7 +10310,7 @@ _CONTINUE:
 				case PX_SCRIPT_AST_STRUCTURE_TYPE_FOR:
 					{
 						PX_StringInit(analysis.mp,&fmrString);
-						PX_StringFormat(&fmrString,"JMP _FOR_%d\n",astStruct._for.endFlag);
+						PX_StringFormat1(&fmrString,"JMP _FOR_%1\n",PX_STRINGFORMAT_INT(astStruct._for.endFlag));
 						PX_StringCat(&analysis.code,fmrString.buffer);
 						PX_StringFree(&fmrString);
 						goto _BREAKOUT;
@@ -10319,7 +10319,7 @@ _CONTINUE:
 				case PX_SCRIPT_AST_STRUCTURE_TYPE_COMPARE:
 					{
 						PX_StringInit(analysis.mp,&fmrString);
-						PX_StringFormat(&fmrString,"JMP _COMPARE_%d\n",astStruct._compare.endFlag);
+						PX_StringFormat1(&fmrString,"JMP _COMPARE_%1\n",PX_STRINGFORMAT_INT(astStruct._compare.endFlag));
 						PX_StringCat(&analysis.code,fmrString.buffer);
 						PX_StringFree(&fmrString);
 						goto _BREAKOUT;
@@ -10358,7 +10358,7 @@ _CONTINUE:
 				case PX_SCRIPT_AST_STRUCTURE_TYPE_WHILE:
 					{
 						PX_StringInit(analysis.mp,&fmrString);
-						PX_StringFormat(&fmrString,"JMP _WHILE_%d\n",astStruct._while.loopflag);
+						PX_StringFormat1(&fmrString,"JMP _WHILE_%1\n",PX_STRINGFORMAT_INT(astStruct._while.loopflag));
 						PX_StringCat(&analysis.code,fmrString.buffer);
 						PX_StringFree(&fmrString);
 						goto _CONTINUEOUT;
@@ -10367,7 +10367,7 @@ _CONTINUE:
 				case PX_SCRIPT_AST_STRUCTURE_TYPE_FOR:
 					{
 						PX_StringInit(analysis.mp,&fmrString);
-						PX_StringFormat(&fmrString,"JMP _FOR_%d\n",astStruct._for.additionFlag);
+						PX_StringFormat1(&fmrString,"JMP _FOR_%1\n",PX_STRINGFORMAT_INT(astStruct._for.additionFlag));
 						PX_StringCat(&analysis.code,fmrString.buffer);
 						PX_StringFree(&fmrString);
 						goto _CONTINUEOUT;
@@ -10585,7 +10585,7 @@ _CONTINUEOUT:
 	}
 
 	PX_StringInit(analysis.mp,&fmrString);
-	PX_StringFormat(&fmrString,".GLOBAL %d\n.STACK %d\n.THREAD %d\n",globalSize,LocalStackSize,thread);
+	PX_StringFormat3(&fmrString,".GLOBAL %1\n.STACK %2\n.THREAD %3\n",PX_STRINGFORMAT_INT(globalSize),PX_STRINGFORMAT_INT(LocalStackSize),PX_STRINGFORMAT_INT(thread));
 	PX_StringCat(ASM,fmrString.buffer);
 	PX_StringFree(&fmrString);
 
@@ -10597,12 +10597,12 @@ _CONTINUEOUT:
 		pvar=PX_VECTORAT(PX_SCRIPT_VARIABLES,&analysis.v_variablesGlobalTable,i);
 		if (!pvar->bParam&&pvar->type==PX_SCRIPT_PARSER_VAR_TYPE_STRING)
 		{
-			PX_StringFormat(&fmrString,"MOV GLOBAL[%d],\"\"\n",pvar->BeginIndex);
+			PX_StringFormat1(&fmrString,"MOV GLOBAL[%1],\"\"\n",PX_STRINGFORMAT_INT(pvar->BeginIndex));
 			PX_StringCat(ASM,fmrString.buffer);
 		}
 		if (!pvar->bParam&&pvar->type==PX_SCRIPT_PARSER_VAR_TYPE_MEMORY)
 		{
-			PX_StringFormat(&fmrString,"MOV GLOBAL[%d],@00@\n",pvar->BeginIndex);
+			PX_StringFormat1(&fmrString,"MOV GLOBAL[%1],@00@\n",PX_STRINGFORMAT_INT(pvar->BeginIndex));
 			PX_StringCat(ASM,fmrString.buffer);
 		}
 	}
