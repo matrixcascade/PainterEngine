@@ -1,13 +1,13 @@
 #ifndef PIXELSES_BITMAP
 #define PIXELSES_BITMAP
 
-#include "../Core/PX_Surface.h"
+#include "PX_Surface.h"
 
 typedef struct PX_BITMAPFILEHEADER {
 	px_char    bfType[2];              //Must be "BM" offset 0-1
 	px_char    bfSize[4];				//offset 2-5
 	px_char	bfReserbed[4];          //offset 6-13
-	px_dword bfOffbits;
+	px_uchar bfOffbits[4];
 } PX_BITMAPFILEHEADER;				//14 Byte 
 
 typedef struct PX_BITMAPINFOHEADER{

@@ -6016,6 +6016,11 @@ px_void PX_Object_CoordinatesCursorPressEvent(PX_Object *pObject, PX_Object_Even
 	px_int y=(px_int)(e.Param_int[1]-pObject->y);
 	PX_Object_Coordinates *pcd=PX_Object_GetCoordinates(pObject);
 
+     if(!PX_ObjectIsPointInRegion(pObject,(px_float)e.Param_int[0],(px_float)e.Param_int[1]))
+	{
+		return;
+	}
+
 	if (x<pcd->LeftSpacer)
 	{
 		x=pcd->LeftSpacer;
@@ -6078,21 +6083,25 @@ px_void PX_Object_CoordinatesCursorReleaseEvent( PX_Object *pObject, PX_Object_E
 	px_int y=e.Param_int[1];
 	PX_Object_Coordinates *pcd=PX_Object_GetCoordinates(pObject);
 
-	pcd->bScaleDrag=PX_FALSE;
-	pcd->DragingPoint.x=(px_float)(e.Param_int[0]-pObject->x);
-	pcd->DragingPoint.y=(px_float)(e.Param_int[1]-pObject->y);
-
-	if(pcd->DragingPoint.y<pcd->DragStartPoint.y&&pcd->DragingPoint.x<pcd->DragStartPoint.x)
-	{
-		PX_Object_CoordinatesRestoreCoordinates(pObject);
-	}
-	else
-	{
-		PX_Object_CoordinatesScaleCoordinates(pObject);
-	}
-
 	pcd->OnMarkStatus=PX_FALSE;
 	pcd->MarkLineX=-1;
+
+    if (pcd->bScaleDrag)
+	{
+		pcd->bScaleDrag=PX_FALSE;
+		pcd->DragingPoint.x=(px_float)(e.Param_int[0]-pObject->x);
+		pcd->DragingPoint.y=(px_float)(e.Param_int[1]-pObject->y);
+
+		if(pcd->DragingPoint.y<pcd->DragStartPoint.y&&pcd->DragingPoint.x<pcd->DragStartPoint.x)
+		{
+			PX_Object_CoordinatesRestoreCoordinates(pObject);
+		}
+		else
+		{
+			PX_Object_CoordinatesScaleCoordinates(pObject);
+		}
+	}
+	
 }
 
 px_void PX_Object_CoordinatesCursorMoveEvent(PX_Object *pObject, PX_Object_Event e,px_void *ptr )

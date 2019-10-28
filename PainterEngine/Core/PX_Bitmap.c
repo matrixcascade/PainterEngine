@@ -277,6 +277,7 @@ px_bool PX_BitmapBuild(px_surface *psurface,px_char *BitmapBuffer,px_int *size)
 	*size=_outsize;
 	if (BitmapBuffer)
 	{
+		px_dword bfoftsize=sizeof(PX_BITMAPFILEHEADER)+sizeof(PX_BITMAPINFOHEADER);
 		fileheader.bfType[0]='B';
 		fileheader.bfType[1]='M';
 		PX_memcpy(fileheader.bfSize,&_outsize,4);
@@ -284,7 +285,7 @@ px_bool PX_BitmapBuild(px_surface *psurface,px_char *BitmapBuffer,px_int *size)
 		fileheader.bfReserbed[1]=0;
 		fileheader.bfReserbed[2]=0;
 		fileheader.bfReserbed[3]=0;
-		fileheader.bfOffbits=sizeof(PX_BITMAPFILEHEADER)+sizeof(PX_BITMAPINFOHEADER);
+		PX_memcpy(fileheader.bfOffbits,&bfoftsize,4);
 
 		infoheader.biBitCount=24;
 		infoheader.biClrImportant=0;
@@ -299,9 +300,9 @@ px_bool PX_BitmapBuild(px_surface *psurface,px_char *BitmapBuffer,px_int *size)
 		infoheader.biYPelsPerMeter=2834;
 
 		PX_memcpy(BitmapBuffer,&fileheader,sizeof(fileheader));
-		PX_memcpy(BitmapBuffer+sizeof(PX_BITMAPFILEHEADER),&infoheader,sizeof(infoheader));
+		PX_memcpy(BitmapBuffer+14,&infoheader,sizeof(infoheader));
 
-		pdata=(PX_BITMAP_RGB24 *)(BitmapBuffer+fileheader.bfOffbits);
+		pdata=(PX_BITMAP_RGB24 *)(BitmapBuffer+sizeof(PX_BITMAPFILEHEADER)+sizeof(PX_BITMAPINFOHEADER));
 		for (y=psurface->height-1;y>=0;y--)
 		{
 			for (x=0;x<psurface->width;x++)
@@ -316,5 +317,5 @@ px_bool PX_BitmapBuild(px_surface *psurface,px_char *BitmapBuffer,px_int *size)
 		return PX_TRUE;
 	}
 	else
-		return PX_FALSE;
+		return PX_TRUE;
 }

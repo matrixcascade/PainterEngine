@@ -120,7 +120,7 @@ _ERROR:
 
 
 
-static px_bool PX_JsonInterpret_Value(PX_Json *pjson,px_lexer *lexer,PX_Json_Value *_value,px_bool arrayElement)
+px_bool PX_JsonInterpret_Value(PX_Json *pjson,px_lexer *lexer,PX_Json_Value *_value,px_bool arrayElement)
 {
 	PX_LEXER_STATE state;
 	PX_LEXER_LEXEME_TYPE type;
@@ -231,7 +231,7 @@ _ERROR:
 	return PX_FALSE;
 }
 
-static px_bool PX_JsonInterpret_Object(PX_Json *pjson,px_lexer *lexer,PX_Json_Object *json_Object)
+px_bool PX_JsonInterpret_Object(PX_Json *pjson,px_lexer *lexer,PX_Json_Object *json_Object)
 {
 	PX_LEXER_LEXEME_TYPE type;
 	PX_Json_Value _value;

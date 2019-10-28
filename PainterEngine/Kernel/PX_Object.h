@@ -129,9 +129,12 @@ enum PX_OBJECT_SLIDERBAR_STATUS
 ///////////////////////////////////////////////////////////////////////////
 ////  PixelsES Object
 //////////////////////////////////////////////////////////////////////////
-typedef px_void  (*Function_ObjectUpdate)(struct _PX_Object *,px_uint elpased);
-typedef px_void  (*Function_ObjectRender)(px_surface *psurface,struct _PX_Object *,px_uint elpased);
-typedef px_void  (*Function_ObjectFree)(struct _PX_Object *);
+struct _PX_Object;
+typedef struct _PX_Object PX_Object;
+
+typedef px_void  (*Function_ObjectUpdate)(PX_Object *,px_uint elpased);
+typedef px_void  (*Function_ObjectRender)(px_surface *psurface,PX_Object *,px_uint elpased);
+typedef px_void  (*Function_ObjectFree)(PX_Object *);
 
 struct _PX_Object
 {
@@ -167,7 +170,7 @@ struct _PX_Object
 	Function_ObjectFree   Func_ObjectFree;
 	
 };
-typedef struct _PX_Object PX_Object;
+
 
 //////////////////////////////////////////////////////////////////////////
 ///   Controllers
