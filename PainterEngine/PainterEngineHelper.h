@@ -4,8 +4,8 @@
 #define PE_MEMORY_RENDER_SURFACE   1024*1024*4 //4M
 #define PE_MEMORY_CACHE_NODE       128
 #define PE_MEMORY_RUNTIME_SIZE (1024*1024*128+PE_MEMORY_RENDER_SURFACE+PE_MEMORY_CACHE_NODE)//128M for runtime
-#define PE_MEMORY_UI_SIZE 1024*1024*16  //8M
-#define PE_MEMORY_RESOURCES_SIZE 1024*1024*96//16M
+#define PE_MEMORY_UI_SIZE 1024*1024*2  //2M
+#define PE_MEMORY_RESOURCES_SIZE 1024*1024*64//48M
 #define PE_MEMORY_GAME_SIZE 1024*1024 //1M
 
 #ifdef __cplusplus
@@ -14,6 +14,8 @@ extern "C" {
 
 #include "./Startup/Platform_Windows_D2D.h"
 #include "./Architecture/PainterEngine_Console.h"
+
+//#include "../decoder/PainterEngine_ImageDecoder.h"
 
 typedef struct
 {

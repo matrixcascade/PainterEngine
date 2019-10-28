@@ -296,7 +296,20 @@ px_void PX_FreeIOData(PX_IO_Data *io)
 
 px_bool PX_LoadTextureFromFile(px_memorypool *mp,px_texture *tex,px_char *path)
 {
-	PX_IO_Data io=PX_LoadFileToIOData(path);
+	PX_IO_Data io;
+	
+#ifdef PAINTERENGINE_IMAGEDECODER_H
+	if (PX_TextureCreateFromPngFile(mp,tex,path))
+	{
+		return PX_TRUE;
+	}
+	if (PX_TextureCreateFromJpegFile(mp,tex,path))
+	{
+		return PX_TRUE;
+	}
+#endif
+
+	io=PX_LoadFileToIOData(path);
 	if (!io.size)
 	{
 		return PX_FALSE;
