@@ -188,7 +188,7 @@ px_bool PX_Loop()
 
 
 
-px_bool PX_Initialize(px_char *name,px_int width,px_int height)
+px_bool PX_Initialize(const px_char *name,px_int width,px_int height)
 {
 
 	PX_srand(timeGetTime());
