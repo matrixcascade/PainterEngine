@@ -66,5 +66,6 @@ px_bool PX_ShapeCreateFromMemory(px_memorypool *mp,px_void *data,px_int size,px_
 px_void PX_ShapeRender(px_surface *psurface,px_shape *shape,px_int x,px_int y,PX_TEXTURERENDER_REFPOINT refPoint,px_color blendColor);
 px_void PX_ShapeRenderEx(px_surface *psurface,px_shape *shape,px_int x,px_int y,PX_TEXTURERENDER_REFPOINT refPoint,px_color blendColor,px_float scale,px_float Angle);
 px_void PX_ShapeRenderEx_sincos(px_surface *psurface,px_shape *shape,px_int x,px_int y,PX_TEXTURERENDER_REFPOINT refPoint,px_color blendColor,px_float scale,px_float sinx,px_float cosx);
+px_void PX_ShapeRenderEx_vector(px_surface *psurface,px_shape *shape,px_int x,px_int y,PX_TEXTURERENDER_REFPOINT refPoint,px_color blendcolor,px_float scale,px_point p_vector);
 px_void PX_ShapeFree(px_shape *shape);
 #endif

@@ -106,6 +106,13 @@ typedef struct _px_point
 	px_float z;
 }px_point;
 
+typedef struct _px_wpoint
+{
+	px_double x;
+	px_double y;
+	px_double z;
+}px_wpoint;
+
 typedef px_point px_point3D;
 typedef px_point px_vector3D;
 
@@ -222,6 +229,9 @@ px_bool PX_isRectCrossRect(px_rect rect1,px_rect rect2);
 px_bool PX_isRectCrossCircle(px_rect rect1,px_point center,px_float radius);
 px_bool PX_isCircleCrossCircle(px_point center1,px_float radius1,px_point center2,px_float radius2);
 
+//////////////////////////////////////////////////////////////////////////
+px_double PX_Covariance(px_double x[],px_double y[],px_int n);
+px_double PX_Variance(px_double x[],px_int n);
 
 //////////////////////////////////////////////////////////////////////////
 //memory

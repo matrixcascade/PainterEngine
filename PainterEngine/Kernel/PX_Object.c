@@ -1710,7 +1710,7 @@ px_void PX_Object_PushButtonOnMouseMove(PX_Object *Object,PX_Object_Event e,px_v
 					e.Param_uint[1]=0;
 					e.Param_uint[2]=0;
 					e.Param_uint[3]=0;
-					e.param_ptr[0]=PX_NULL;
+					e.Param_ptr[0]=PX_NULL;
 					PX_ObjectExecuteEvent(Object,e);
 				}
 				pPushButton->state=PX_OBJECT_BUTTON_STATE_ONCURSOR;
@@ -2228,7 +2228,7 @@ px_void PX_Object_EditOnKeyboardString(PX_Object *Object,PX_Object_Event e,px_vo
 
 	if (pEdit->onFocus)
 	{
-		PX_Object_EditAddString(Object,(px_char *)e.param_ptr[0]);
+		PX_Object_EditAddString(Object,(px_char *)e.Param_ptr[0]);
 	}
 }
 
@@ -2805,7 +2805,7 @@ px_void PX_Object_EditAddString(PX_Object *pObject,px_char *Text)
 	}
 	PX_Object_EditUpdateCursorViewRegion(pObject);
 	e.Event=PX_OBJECT_EVENT_VALUECHAGE;
-	e.param_ptr[0]=(px_void *)(pEdit->text.buffer);
+	e.Param_ptr[0]=(px_void *)(pEdit->text.buffer);
 	PX_ObjectExecuteEvent(pObject,e);
 }
 
@@ -2833,7 +2833,7 @@ px_void PX_Object_EditBackspace(PX_Object *pObject)
 				oft--;
 			}
 			e.Event=PX_OBJECT_EVENT_VALUECHAGE;
-			e.param_ptr[0]=(px_void *)(pEdit->text.buffer);
+			e.Param_ptr[0]=(px_void *)(pEdit->text.buffer);
 			PX_ObjectExecuteEvent(pObject,e);
 		}
 	}
@@ -4037,8 +4037,12 @@ px_void PX_Object_ListOnButtonDown(PX_Object *pObject,PX_Object_Event e,px_void 
 px_void PX_Object_ListOnWheel(PX_Object *pObject,PX_Object_Event e,px_void *ptr)
 {
 	PX_Object_List *pList= PX_Object_GetList(pObject);
-
-	pList->offsety-=e.Param_int[3]/5;
+	
+	if (!PX_ObjectIsPointInRegion(pObject,(px_float)e.Param_int[0],(px_float)e.Param_int[1]))
+	{
+		return;
+	}
+	pList->offsety-=e.Param_int[2]/5;
 
 
 	if (pList->offsety>(pList->ItemHeight)*pList->pData.size-pObject->Height)
@@ -4204,13 +4208,17 @@ px_void PX_Object_ListOnEvent(PX_Object  *Object,PX_Object_Event e,px_void *ptr)
 
 	switch (e.Event)
 	{
+	case PX_OBJECT_EVENT_CURSORWHEEL:
+		if (!PX_ObjectIsPointInRegion(Object,(px_float)e.Param_int[0],(px_float)e.Param_int[1]))
+		{
+			return;
+		}
 	case PX_OBJECT_EVENT_CURSORDRAG:
 	case PX_OBJECT_EVENT_CURSORRDOWN:
 	case PX_OBJECT_EVENT_CURSORDOWN:
 	case PX_OBJECT_EVENT_CURSORUP:
 	case PX_OBJECT_EVENT_CURSORRUP:
 	case PX_OBJECT_EVENT_CURSORMOVE:
-	case PX_OBJECT_EVENT_CURSORWHEEL:
 		e.Param_int[0]-=(px_int)Object->x;
 		e.Param_int[1]-=(px_int)Object->y;
 		break;
@@ -4763,8 +4771,8 @@ PX_Object* PX_Object_VirtualKeyBoardCreate(px_memorypool *mp, PX_Object *Parent,
 
 	for (i=42;i<=51;i++)
 	{
-		keyboard.Keys[i].d_key[0]=line3_lower[i-42];
-		keyboard.Keys[i].u_key[0]=line3_upper[i-42];
+		keyboard.Keys[i].d_key[0]=line4_lower[i-42];
+		keyboard.Keys[i].u_key[0]=line4_upper[i-42];
 		keyboard.Keys[i].x=xoffset;
 		keyboard.Keys[i].y=yoffset;
 		keyboard.Keys[i].width=kw;

@@ -227,7 +227,7 @@ NEW_OBJECT_CONTINUE:
 						if (pimpactWo->DeleteMark!=PX_TRUE)
 						{
 							e.Event=PX_OBJECT_EVENT_IMPACT;
-							e.param_ptr[0]=pObj2;
+							e.Param_ptr[0]=pObj2;
 							PX_ObjectPostEvent(pObj1,e);
 						}
 					}

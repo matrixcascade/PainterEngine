@@ -25,6 +25,8 @@
 #define PX_OBJECT_EVENT_KEYDOWN				14
 #define PX_OBJECT_EVENT_IMPACT				15
 #define PX_OBJECT_EVENT_ONFOCUSCHANGED		16
+#define PX_OBJECT_EVENT_SCALE               17
+
 
 //////////////////////////////////////////////////////////////////////////////
 //    Type of Controls
@@ -428,7 +430,7 @@ typedef struct _PX_Object_Event
 		px_uint Param_uint[4];
 		px_int Param_int[4];
 		px_float Param_float[4];
-		px_void *param_ptr[4];
+		px_void *Param_ptr[4];
 		px_bool Param_bool[4];
 	};
 }PX_Object_Event;

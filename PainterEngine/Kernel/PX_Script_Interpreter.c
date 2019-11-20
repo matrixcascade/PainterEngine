@@ -18,15 +18,18 @@ px_void PX_ScriptParserClearStackVariables(PX_SCRIPT_Analysis *analysis)
 }
 px_void PX_ScriptTranslatorError(px_lexer *lexer,px_char *info)
 {
-	lexer->Sources[lexer->SourceOffset]='\0';
-	PX_Script_InterpreterError[0]='\0';
-	if (lexer->SourceOffset>200)
+	if (lexer)
 	{
-		PX_strcpy(PX_Script_InterpreterError,lexer->Sources+lexer->SourceOffset-200,200);	
-	}
-	else
-	{
-		PX_strcpy(PX_Script_InterpreterError,lexer->Sources,200);	
+		lexer->Sources[lexer->SourceOffset]='\0';
+		PX_Script_InterpreterError[0]='\0';
+		if (lexer->SourceOffset>200)
+		{
+			PX_strcpy(PX_Script_InterpreterError,lexer->Sources+lexer->SourceOffset-200,200);	
+		}
+		else
+		{
+			PX_strcpy(PX_Script_InterpreterError,lexer->Sources,200);	
+		}
 	}
 	PX_LOG(info);
 }
@@ -9334,7 +9337,7 @@ px_bool PX_ScriptCompilerCompile(PX_SCRIPT_LIBRARY *lib,px_char *name,px_string 
 	
 	if (i==lib->codeLibraries.size)
 	{
-		PX_ScriptTranslatorError(&analysis.lexer,"Code of name was not existed");
+		PX_ScriptTranslatorError(PX_NULL,"Code of name was not existed");
 		return PX_FALSE;
 	}
 

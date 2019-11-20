@@ -13,6 +13,12 @@ void PX_ERROR(px_char fmt[])
 	//while(1);
 }
 
+
+px_char * PX_GETLOG()
+{
+	return "";
+}
+
 void PX_LOG(px_char fmt[])
 {
 	

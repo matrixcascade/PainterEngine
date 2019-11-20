@@ -203,7 +203,11 @@ px_void * MP_Malloc(px_memorypool *MP, px_uint Size )
 #if defined(PX_DEBUG_MODE) && defined(PX_MEMORYPOOL_DEBUG_CHECK)
 	MP_Append_data *pAppend;
 	MemoryNode *itNode;
-
+	if (MP==PX_NULL)
+	{
+		PX_ASSERT();
+		return PX_NULL;
+	}
 	for (DEBUG_i=0;DEBUG_i<sizeof(MP->DEBUG_allocdata)/sizeof(MP->DEBUG_allocdata[0]);DEBUG_i++)
 	{
 		if (MP->DEBUG_allocdata[DEBUG_i].addr!=PX_NULL)

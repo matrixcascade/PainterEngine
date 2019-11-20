@@ -1138,6 +1138,69 @@ px_bool PX_isCircleCrossCircle(px_point center1,px_float radius1,px_point center
 	return (dis<radius1+radius2);
 }
 
+
+px_double PX_Covariance(px_double x[],px_double y[],px_int n)
+{
+	px_int i;
+	px_double x_average,y_average;
+	px_double sum;
+	sum=0;
+
+	if (n-1<=0)
+	{
+		return 0;
+	}
+
+
+	for (i=0;i<n;i++)
+	{
+		sum+=x[i];
+	}
+
+	x_average=sum/(n);
+
+	sum=0;
+	for (i=0;i<n;i++)
+	{
+		sum+=y[i];
+	}
+	y_average=sum/(n);
+
+	sum=0; 
+	for (i=0;i<n;i++)
+		sum+=(x[i]-x_average)*(y[i]-y_average);
+
+	return sum/(n-1);
+}
+
+
+px_double PX_Variance(px_double x[],px_int n)
+{
+	px_int i;
+	px_double average;
+	px_double sum;
+
+
+	if (n-1<=0)
+	{
+		return 0;
+	}
+
+	sum=0;
+	for (i=0;i<n;i++)
+	{
+		sum+=x[i];
+	}
+	average=sum/(n);
+
+	for (i=0;i<n;i++)
+	{
+		sum+=(x[i]-average)*(x[i]-average);
+	}
+
+	return sum/(n-1);
+}
+
 px_bool PX_isPointInRect(px_point p,px_rect rect)
 {
 		if (p.x<rect.x)
@@ -1484,7 +1547,11 @@ px_void PX_memcpy(px_void *dst,const px_void *src,px_int size)
 	PX_MEMCPY_16 *_16byteMovSrc,*_16byteMovDst;
 	px_uint _movTs;
 
-
+// 	if (!src||!dst)
+// 	{
+// 		PX_ASSERT();
+// 		return;
+// 	}
 
 	if (dst>src&&(px_char *)dst<=(px_char *)src+size)
 	{

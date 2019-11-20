@@ -2133,6 +2133,11 @@ px_void PX_ShapeRenderEx_sincos(px_surface *psurface,px_shape *shape,px_int x,px
 	}
 }
 
+px_void PX_ShapeRenderEx_vector(px_surface *psurface,px_shape *shape,px_int x,px_int y,PX_TEXTURERENDER_REFPOINT refPoint,px_color blendColor,px_float scale,px_point p_vector)
+{
+	PX_ShapeRenderEx_sincos(psurface,shape,x,y,refPoint,blendColor,scale,PX_Point_sin(p_vector),PX_Point_cos(p_vector));
+}
+
 px_void PX_TextureRenderEx_sincos(px_surface *psurface,px_texture *resTexture,px_int x,px_int y,PX_TEXTURERENDER_REFPOINT refPoint,PX_TEXTURERENDER_BLEND *blend,px_float scale,px_float sinx,px_float cosx)
 {
 	px_int newWidth,newHeight;

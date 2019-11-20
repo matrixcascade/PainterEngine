@@ -4431,7 +4431,7 @@ px_void PX_ScriptVM_ThreadStop(PX_ScriptVM_Instance *Ins,px_int ThreadId)
 		if (Ins->pThread[ThreadId].Activated)
 		{
 			popn=Ins->VM_memsize-Ins->VM_Stacksize*ThreadId-Ins->pThread[ThreadId].SP;
-			PX_ScriptVM_POPN(Ins,popn,ThreadId);
+			PX_ScriptVM_POPN(Ins,ThreadId,popn);
 			Ins->pThread[ThreadId].Activated=PX_FALSE;
 		}
 	}
@@ -4445,7 +4445,7 @@ px_void PX_ScriptVM_ThreadClear(PX_ScriptVM_Instance *Ins,px_int ThreadId)
 	{
 		    //clear stack
 			popn=Ins->VM_memsize-Ins->VM_Stacksize*ThreadId-Ins->pThread[ThreadId].SP;
-			PX_ScriptVM_POPN(Ins,popn,ThreadId);
+			PX_ScriptVM_POPN(Ins,ThreadId,popn);
 			//Clear registers
 			for (i=0;i<PX_SCRIPTVM_REG_COUNT;i++)
 			 {
