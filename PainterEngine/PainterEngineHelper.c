@@ -70,7 +70,7 @@ px_bool PX_Loop()
 		if(PX_SystemisAvtivated())
 		{
 			
-			e.param_ptr[0]=PX_NULL;
+			e.Param_ptr[0]=PX_NULL;
 			mousePosition=PX_MousePosition();
 			if (main_MouseLastPosition.x!=mousePosition.x||main_MouseLastPosition.y!=mousePosition.y)
 			{
@@ -130,7 +130,7 @@ px_bool PX_Loop()
 			if (keyBoardString=PX_KeyboardString())
 			{
 				e.Event=PX_OBJECT_EVENT_STRING;
-				e.param_ptr[0]=keyBoardString;
+				e.Param_ptr[0]=keyBoardString;
 				if(main_console.show)
 					PX_ConsolePostEvent(&main_console,e);
 				else
@@ -154,7 +154,7 @@ px_bool PX_Loop()
 		if ((dragFileString=PX_DragfileString())[0])
 		{
 			e.Event=PX_OBJECT_EVENT_DRAGFILE;
-			e.param_ptr[0]=dragFileString;
+			e.Param_ptr[0]=dragFileString;
 			if(main_console.show)
 				PX_ConsolePostEvent(&main_console,e);
 			else
