@@ -83,6 +83,7 @@ typedef struct
 	px_vector facestream;
 	px_dword PX_3D_PRESENTMODE;
 	PX_3D_CULLMODE cullmode;
+	PX_3D_PixelShader pixelShader;
 }PX_3D_RenderList;
 
 typedef struct
@@ -134,5 +135,5 @@ px_void PX_3D_RenderListReset(PX_3D_RenderList *list);
 px_void PX_3D_RenderListFree(PX_3D_RenderList *list);
 px_void PX_3D_Scene(PX_3D_RenderList *list,PX_3D_World *world,PX_3D_Camera *camera);
 px_void PX_3D_Present(px_surface *psurface, PX_3D_RenderList *list,PX_3D_Camera *camera);
-
+px_void PX_3D_RenderListSetPixelShader(PX_3D_RenderList *list,PX_3D_PixelShader func);
 #endif

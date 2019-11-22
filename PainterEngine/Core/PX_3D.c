@@ -308,7 +308,7 @@ px_void PX_3D_RenderListTransform_Screen(PX_3D_RenderList *list,PX_3D_Camera *ca
 
 
 
-px_void PX_3D_RenderListPixelShader(px_surface *psurface,px_int x,px_int y,px_float z,px_float u,px_float v,px_point4D normal,px_texture *pTexture,px_color color,px_float *zbuffer,px_int zw)
+px_void PX_3D_RenderListPixelShader(px_surface *psurface,px_int x,px_int y,px_float z,px_float u,px_float v,px_point4D normal,px_texture *pTexture,px_color color/*px_float *zbuffer,px_int zw*/)
 {
 	//texture mapping
 	px_double SampleX,SampleY,mapX,mapY;
@@ -317,10 +317,7 @@ px_void PX_3D_RenderListPixelShader(px_surface *psurface,px_int x,px_int y,px_fl
 	px_int resWidth;
 	px_int resHeight;
 
-	if (zbuffer[x+y*zw]!=0&&zbuffer[x+y*zw]<z)
-	{
-		return;
-	}
+	
 
 	if (pTexture)
 	{
@@ -408,18 +405,19 @@ px_void PX_3D_RenderListPixelShader(px_surface *psurface,px_int x,px_int y,px_fl
 		mixb>255?mixb=255:0;
 
 		PX_SurfaceDrawPixel(psurface,x,y,PX_COLOR((px_uchar)mixa,(px_uchar)mixr,(px_uchar)mixg,(px_uchar)mixb));
-		zbuffer[x+y*zw]=z;
+		
 	}
 
 	if (color._argb.ucolor!=0)
 	{
 		PX_SurfaceDrawPixel(psurface,x,y,color);
-		zbuffer[x+y*zw]=z;
+
 	}
 }
 
-static px_void PX_3D_RenderListRasterization(px_surface *psurface,PX_3D_Vertex p0,PX_3D_Vertex p1,PX_3D_Vertex p2,px_texture *ptexture,px_color color,px_float zbuffer[],px_int zw)
+static px_void PX_3D_RenderListRasterization(px_surface *psurface,PX_3D_RenderList *pList,PX_3D_Vertex p0,PX_3D_Vertex p1,PX_3D_Vertex p2,px_texture *ptexture,px_color color,px_float zbuffer[],px_int zw)
 {
+	px_int ix,iy;
 	px_bool  k01infinite=PX_FALSE;
 	px_bool  k02infinite=PX_FALSE;
 	px_bool  k12infinite=PX_FALSE;
@@ -617,7 +615,25 @@ static px_void PX_3D_RenderListRasterization(px_surface *psurface,PX_3D_Vertex p
 			s = soverz / oneoverz;
 			t = toverz / oneoverz;
 			originalZ=1.0f/oneoverz;
-			PX_3D_RenderListPixelShader(psurface,(px_int)x,(px_int)y,originalZ,s,t,p0.normal,ptexture,color,zbuffer,zw);
+
+			ix=(px_int)x;
+			iy=(px_int)y;
+
+			if (zbuffer[ix+iy*zw]!=0&&zbuffer[ix+iy*zw]<originalZ)
+			{
+				continue;;
+			}
+
+			zbuffer[ix+iy*zw]=originalZ;
+			if (pList->pixelShader)
+			{
+				pList->pixelShader(psurface,ix,iy,s,t,p0.normal,ptexture,color/*,zbuffer,zw*/);
+			}
+			else
+			{
+				PX_3D_RenderListPixelShader(psurface,ix,iy,originalZ,s,t,p0.normal,ptexture,color/*,zbuffer,zw*/);
+			}
+			
 		}
 	}
 	
@@ -792,7 +808,26 @@ static px_void PX_3D_RenderListRasterization(px_surface *psurface,PX_3D_Vertex p
 			originalZ=1.0f/oneoverz;
 			s = soverz / oneoverz;
 			t = toverz / oneoverz;
-			PX_3D_RenderListPixelShader(psurface,(px_int)x,(px_int)(2*midy-y),originalZ,s,t,p0.normal,ptexture,color,zbuffer,zw);
+
+			ix=(px_int)x;
+			iy=(px_int)(2*midy-y);
+
+			if (zbuffer[ix+iy*zw]!=0&&zbuffer[ix+iy*zw]<originalZ)
+			{
+				continue;;
+			}
+
+			zbuffer[ix+iy*zw]=originalZ;
+
+			if (pList->pixelShader)
+			{
+				pList->pixelShader(psurface,ix,iy,s,t,p0.normal,ptexture,color/*,zbuffer,zw*/);
+			}
+			else
+			{
+				PX_3D_RenderListPixelShader(psurface,ix,iy,originalZ,s,t,p0.normal,ptexture,color/*,zbuffer,zw*/);
+			}
+			
 		}
 	}
 
@@ -835,6 +870,53 @@ px_void PX_3D_Present(px_surface *psurface, PX_3D_RenderList *list,PX_3D_Camera 
 	px_color clr;
 	
 
+	if (list->PX_3D_PRESENTMODE&PX_3D_PRESENTMODE_PURE)
+	{
+		if (list->facestream.size)
+		{
+			pface=PX_VECTORAT(PX_3D_Face,&list->facestream,0);
+			clr=pface->transform_vertex[0].clr;
+		}
+		else
+		{
+			clr._argb.ucolor=0;
+		}
+	}
+	else
+	{
+		clr._argb.ucolor=0;
+	}
+
+	if (list->PX_3D_PRESENTMODE&PX_3D_PRESENTMODE_TEXTURE)
+	{
+		ptex=list->ptexture;
+	}
+	else
+	{
+		ptex=PX_NULL;
+	}
+
+	if (ptex||clr._argb.ucolor)
+	{
+		for (i=0;i<list->facestream.size;i++)
+		{
+			pface=PX_VECTORAT(PX_3D_Face,&list->facestream,i);
+			if (!(pface->state&PX_3D_FACESTATE_BACKFACE||pface->state&PX_3D_FACESTATE_CLIPPED))
+			{
+				if (list->PX_3D_PRESENTMODE&PX_3D_PRESENTMODE_PURE)
+				{
+					PX_3D_RenderListRasterization(psurface,list,pface->transform_vertex[0],pface->transform_vertex[1],pface->transform_vertex[2],list->ptexture,clr,camera->zbuffer,(px_int)camera->viewport_width);
+				}
+				else
+				{
+					PX_3D_RenderListRasterization(psurface,list,pface->transform_vertex[0],pface->transform_vertex[1],pface->transform_vertex[2],ptex,PX_COLOR(0,0,0,0),camera->zbuffer,(px_int)camera->viewport_width);
+				}
+
+			}
+
+		}
+	}
+
 	if (list->PX_3D_PRESENTMODE&PX_3D_PRESENTMODE_LINE)
 	{
 		for (i=0;i<list->facestream.size;i++)
@@ -846,45 +928,16 @@ px_void PX_3D_Present(px_surface *psurface, PX_3D_RenderList *list,PX_3D_Camera 
 				PX_GeoDrawLine(psurface,(px_int)pface->transform_vertex[1].position.x,(px_int)pface->transform_vertex[1].position.y,(px_int)pface->transform_vertex[2].position.x,(px_int)pface->transform_vertex[2].position.y,1,pface->transform_vertex[1].clr);
 				PX_GeoDrawLine(psurface,(px_int)pface->transform_vertex[2].position.x,(px_int)pface->transform_vertex[2].position.y,(px_int)pface->transform_vertex[0].position.x,(px_int)pface->transform_vertex[0].position.y,1,pface->transform_vertex[2].clr);
 			}
-		
-		}
-	}
-	if (list->PX_3D_PRESENTMODE&PX_3D_PRESENTMODE_TEXTURE)
-	{
-		ptex=list->ptexture;
-	}
-	else
-	{
-		ptex=PX_NULL;
-	}
-	if (list->PX_3D_PRESENTMODE&PX_3D_PRESENTMODE_PURE)
-	{
-		clr=pface->transform_vertex[0].clr;
-	}
-	else
-	{
-		clr._argb.ucolor=0;
-	}
-	if (ptex||clr._argb.ucolor)
-	{
-		for (i=0;i<list->facestream.size;i++)
-		{
-			pface=PX_VECTORAT(PX_3D_Face,&list->facestream,i);
-			if (!(pface->state&PX_3D_FACESTATE_BACKFACE||pface->state&PX_3D_FACESTATE_CLIPPED))
-			{
-				if (list->PX_3D_PRESENTMODE&PX_3D_PRESENTMODE_PURE)
-				{
-					PX_3D_RenderListRasterization(psurface,pface->transform_vertex[0],pface->transform_vertex[1],pface->transform_vertex[2],list->ptexture,clr,camera->zbuffer,(px_int)camera->viewport_width);
-				}
-				else
-				{
-					PX_3D_RenderListRasterization(psurface,pface->transform_vertex[0],pface->transform_vertex[1],pface->transform_vertex[2],ptex,PX_COLOR(0,0,0,0),camera->zbuffer,(px_int)camera->viewport_width);
-				}
-
-			}
 
 		}
 	}
+	
+
+}
+
+px_void PX_3D_RenderListSetPixelShader(PX_3D_RenderList *list,PX_3D_PixelShader func)
+{
+	list->pixelShader=func;
 }
 
 px_void PX_3D_RenderListTransform_Perspective(PX_3D_RenderList *list,PX_3D_Camera *camera)
@@ -1073,6 +1126,7 @@ px_bool PX_3D_RenderListInitialize(px_memorypool *mp,PX_3D_RenderList *list,px_d
 	list->ptexture=ptexture;
 	list->PX_3D_PRESENTMODE=PX_3D_PRESENTMODE;
 	list->cullmode=cullmode;
+	list->pixelShader=PX_NULL;
 	if(!PX_VectorInit(mp,&list->facestream,sizeof(PX_3D_Face),64))
 	{
 		return PX_FALSE;
