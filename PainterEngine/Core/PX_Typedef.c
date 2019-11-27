@@ -1170,7 +1170,7 @@ px_double PX_Covariance(px_double x[],px_double y[],px_int n)
 	for (i=0;i<n;i++)
 		sum+=(x[i]-x_average)*(y[i]-y_average);
 
-	return sum/(n-1);
+	return (px_double)sum/(n-1);
 }
 
 
@@ -1198,7 +1198,7 @@ px_double PX_Variance(px_double x[],px_int n)
 		sum+=(x[i]-average)*(x[i]-average);
 	}
 
-	return sum/(n-1);
+	return (px_double)sum/(n-1);
 }
 
 px_bool PX_isPointInRect(px_point p,px_rect rect)
@@ -1251,6 +1251,10 @@ px_bool PX_isLineCrossRect(px_point p1,px_point p2,px_rect rect,px_point *cp1,px
 	px_float calx,caly;
 	px_bool bcross=PX_FALSE;
 	
+	if (!cp1||!cp2)
+	{
+		return PX_FALSE;
+	}
 	if (cp1&&cp2)
 	{
 		*cp1=p1;

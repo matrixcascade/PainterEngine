@@ -20,4 +20,5 @@
 #include "PX_Object.h"
 #include "PX_Json.h"
 #include "PX_3D_ObjData.h"
+#include "PX_MODBUS.h"
 #endif
