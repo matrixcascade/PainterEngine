@@ -321,6 +321,7 @@ px_bool PX_JsonParse(PX_Json *pjson,const px_char *json_content)
 	PX_LexerRegisterDelimiter(&lexer,']');
 	PX_LexerRegisterSpacer(&lexer,' ');
 	PX_LexerRegisterSpacer(&lexer,'\t');
+	PX_LexerRegisterComment(&lexer,"//","\n");
 	json_quotes=PX_LexerRegisterContainer(&lexer,"\"","\"");
 	if(!PX_LexerLoadSourceFromMemory(&lexer,json_content)) goto _ERROR;
 

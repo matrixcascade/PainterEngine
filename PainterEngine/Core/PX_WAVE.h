@@ -1,6 +1,6 @@
 #ifndef PX_WAVE_H
 #define PX_WAVE_H
-#include "PX_Sound.h"
+#include "PX_Typedef.h"
 
 typedef struct
 {
@@ -34,9 +34,10 @@ typedef struct
 	px_dword dwDataSize;
 }PX_WAVE_DATA_BLOCK;
 
-px_uint PX_WAVEGetChannel(px_byte *buffer,px_int size);
-px_bool PX_WAVEVerify(px_byte *buffer,px_int size);
-px_uint PX_WAVEGetPCMSize(px_byte *buffer,px_int size);
+px_uint PX_WaveGetChannel(px_byte *buffer,px_int size);
+px_bool PX_WaveVerify(px_byte *buffer,px_int size);
+px_uint PX_WaveGetPCMSize(px_byte *buffer,px_int size);
+px_byte* PX_WaveGetPCMDataPtr(px_int index,px_byte *buffer,px_int size);
 
 #endif
 

@@ -3,7 +3,7 @@
 #include <d2d1helper.h>
 #pragma comment(lib,"d2d1.lib")
 
-extern "C" BOOL PX_CreateWindow( int Width,int Height,char *name,BOOL bfullScreen);
+extern "C" BOOL PX_CreateWindow( int Width,int Height,const char *name,BOOL bfullScreen);
 extern "C" HWND PX_GetWindowHwnd();
 extern "C" VOID PX_SystemReadDeviceState();
 extern "C" BOOL PX_SystemLoop();
@@ -67,7 +67,7 @@ BOOL PX_D3DReset(HWND hWnd,int Width,int Height,BOOL bfullScreen)
 }
 
 
-BOOL PX_CreateWindow( int Width,int Height,char *name,BOOL bfullScreen)
+BOOL PX_CreateWindow( int Width,int Height,const char *name,BOOL bfullScreen)
 {
 	HRESULT hr;
 	D2D1_SIZE_U size;
@@ -257,9 +257,9 @@ BOOL PX_SystemRender(void *raw,int width,int height)
 {
 	D2D1_RECT_U size;
 	size.left=0;
-	size.right=width-1;
+	size.right=width;
 	size.top=0;
-	size.bottom=height-1;
+	size.bottom=height;
 
 	D2D_pRenderTarget->BeginDraw();
 	D2D_pRenderTarget->Clear();

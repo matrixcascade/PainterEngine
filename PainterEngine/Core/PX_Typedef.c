@@ -59,7 +59,7 @@ px_float PX_atof(px_char fstr[])
 }
 
 
-PX_RETURN_STRING PX_ftos(float f, int precision)
+PX_RETURN_STRING PX_ftos(px_float f, px_int precision)
 {
 	PX_RETURN_STRING str;
 	PX_ftoa(f,str.data,sizeof(str.data),precision);
@@ -285,33 +285,59 @@ px_int PX_itoa(px_int num,px_char *str,px_int MaxStrSize,px_int radix)
 	return l; 
 } 
 
-float PX_sqrt( float number )  
+px_float PX_sqrt( px_float number )  
 {  
 	px_int32 i;  
-	float x2, y;  
-	const float threehalfs = 1.5F;  
+	px_float x2, y;  
+	const px_float threehalfs = 1.5F;  
 	x2 = number * 0.5F;  
 	y  = number;  
 	i  = * ( px_int32 * ) &y;       
-	i  = 0x5f375a86 - ( i >> 1 );   //ILP32 only
-	y  = * ( float * ) &i;  
+	i  = 0x5f375a86 - ( i >> 1 );
+	y  = * ( px_float * ) &i;  
 	y  = y * ( threehalfs - ( x2 * y * y ) );   
 	y  = y * ( threehalfs - ( x2 * y * y ) );     
+	y  = y * ( threehalfs - ( x2 * y * y ) );
 	y  = y * ( threehalfs - ( x2 * y * y ) );   
+	y  = y * ( threehalfs - ( x2 * y * y ) );     
+	y  = y * ( threehalfs - ( x2 * y * y ) );      
 	return number*y;  
 } 
 
-float PX_SqrtRec( float number )  
+//0x5fe6ec85e7de30da
+
+px_double PX_sqrtd( px_double number )  
+{  
+	px_int64 i;  
+	px_double x2, y;  
+	const px_double threehalfs = 1.5;  
+	x2 = number * 0.5;  
+	y  = number;  
+	i  = * ( px_int64 * ) &y;       
+	i  = 0x5fe6ec85e7de30da - ( i / 2 ); 
+	y  = * ( px_double * ) &i;  
+	y  = y * ( threehalfs - ( x2 * y * y ) );   
+	y  = y * ( threehalfs - ( x2 * y * y ) );     
+	y  = y * ( threehalfs - ( x2 * y * y ) );
+	y  = y * ( threehalfs - ( x2 * y * y ) );   
+	y  = y * ( threehalfs - ( x2 * y * y ) );     
+	y  = y * ( threehalfs - ( x2 * y * y ) );   
+	y  = y * ( threehalfs - ( x2 * y * y ) );   
+	y  = y * ( threehalfs - ( x2 * y * y ) );        
+	return number*y;  
+} 
+
+px_float PX_SqrtRec( px_float number )  
 {  
 	px_int i;  
-	float x2, y;  
-	const float threehalfs = 1.5F;  
+	px_float x2, y;  
+	const px_float threehalfs = 1.5F;  
 
 	x2 = number * 0.5F;  
 	y  = number;  
 	i  = * ( px_int * ) &y;       
 	i  = 0x5f375a86 - ( i >> 1 );   
-	y  = * ( float * ) &i;  
+	y  = * ( px_float * ) &i;  
 	y  = y * ( threehalfs - ( x2 * y * y ) );   
 	y  = y * ( threehalfs - ( x2 * y * y ) );     
 	y  = y * ( threehalfs - ( x2 * y * y ) );   
@@ -377,12 +403,14 @@ px_float PX_sin_radian(px_float radius)
 		return px_sinx_radius[1570-(radIndex%1571)];
 	}
 }
+
+
 px_float PX_cos_radian(px_float radius)
 {
-	return PX_sin_radian(PX_PI/2-radius);
+	return PX_sin_radian((px_float)(PX_PI/2-radius));
 }
 
-px_float PX_tan_radian(float radius)
+px_float PX_tan_radian(px_float radius)
 {
 	return PX_sin_radian(radius)/PX_cos_radian(radius);
 }
@@ -399,7 +427,7 @@ px_float PX_cos_angle(px_float angle)
 }
 
 
-px_float PX_tan_angle(float angle)
+px_float PX_tan_angle(px_float angle)
 {
 	return PX_sin_angle(angle)/PX_cos_angle(angle);
 }
@@ -415,7 +443,341 @@ px_float PX_Point_cos(px_point v)
 	return v.x/PX_sqrt(v.x*v.x+v.y*v.y);
 }
 
+static volatile const px_double Tiny =(px_double)2.225073858507201383e-308 ;
 
+static px_double Tail(px_double x)
+{
+	static const px_double HalfPi = PX_PI/2;
+	static const px_double p03 = (px_double)(-0.3333333333331767734);
+	static const px_double p05 = (px_double)(0.1999999999714804158);
+	static const px_double p07 = (px_double)(-0.1428571408980792989);
+	static const px_double p09 = (px_double)(0.1111110405917124038);
+	static const px_double p11 = (px_double)(-0.09090757063599989862);
+	static const px_double p13 = (px_double)(0.07690189054748748643);
+	static const px_double p15 = (px_double)(-0.06646850218576683123);
+	static const px_double p17 = (px_double)(0.0575572605769638368);
+	static const px_double p19 = (px_double)(-0.04709779890322960544);
+	static const px_double p21 = (px_double)(0.03130684024963894391);
+	static const px_double p23 = (px_double)(-0.01183640847691868649);
+
+	static const px_double p000 = (px_double)(1.570796326794896558);
+	static const px_double p001 = (px_double)(6.123233995736766036e-17);
+	px_double y ;
+	// Square y.
+	px_double y2 ;
+
+	if ((9007199254740992.0) <= x)
+		return HalfPi + Tiny;
+
+	 y = 1 / x;
+	 y2 = y * y;
+
+	return p001 - ((((((((((((
+		+p23) * y2
+		+ p21) * y2
+		+ p19) * y2
+		+ p17) * y2
+		+ p15) * y2
+		+ p13) * y2
+		+ p11) * y2
+		+ p09) * y2
+		+ p07) * y2
+		+ p05) * y2
+		+ p03) * y2 * y + y) + p000;
+}
+
+static px_double atani0(px_double x)
+{
+	static const px_double p03 = (px_double)(-0.3333333333333300952);
+	static const px_double p05 = (px_double)(0.1999999999990851318);
+	static const px_double p07 = (px_double)(-0.1428571427670465022);
+	static const px_double p09 = (px_double)(0.11111111066822130927);
+	static const px_double p11 = (px_double)(-0.09090896357643575565);
+	static const px_double p13 = (px_double)(0.07692074439069175595);
+	static const px_double p15 = (px_double)(-0.06663806168831017118);
+	static const px_double p17 = (px_double)(0.058582174411949621);
+	static const px_double p19 = (px_double)(-0.05121467553745503998);
+	static const px_double p21 = (px_double)(0.0418461372066637749);
+	static const px_double p23 = (px_double)(-0.02739990312425184121);
+	static const px_double p25 = (px_double)(0.01008979802853119875);
+
+	// Square x.
+	px_double x2 = x * x;
+
+	return ((((((((((((
+		+p25) * x2
+		+ p23) * x2
+		+ p21) * x2
+		+ p19) * x2
+		+ p17) * x2
+		+ p15) * x2
+		+ p13) * x2
+		+ p11) * x2
+		+ p09) * x2
+		+ p07) * x2
+		+ p05) * x2
+		+ p03) * x2 * x + x;
+}
+
+static px_double atani1(px_double x)
+{
+	static const px_double p00 = (px_double)(0.5585993153435655501);
+	static const px_double p01 = (px_double)(0.7191011235955026004);
+	static const px_double p02 = (px_double)(-0.3231915162226940974);
+	static const px_double p03 = (px_double)(0.02130401005855760144);
+	static const px_double p04 = (px_double)(0.1018414372498045034);
+	static const px_double p05 = (px_double)(-0.08242613472076004699);
+	static const px_double p06 = (px_double)(0.01291956298376459658);
+	static const px_double p07 = (px_double)(0.03238363329851735167);
+	static const px_double p08 = (px_double)(-0.03243829816327323257);
+	static const px_double p09 = (px_double)(0.00780078683156177656);
+	static const px_double p10 = (px_double)(0.01236133736686602196);
+	static const px_double p11 = (px_double)(-0.01442112851466732272);
+	static const px_double p12 = (px_double)(0.004164927187425533986);
+
+	px_double y = x - (px_double)(0.6250000000000043299)-1;
+
+	return ((((((((((((
+		+p12) * y
+		+ p11) * y
+		+ p10) * y
+		+ p09) * y
+		+ p08) * y
+		+ p07) * y
+		+ p06) * y
+		+ p05) * y
+		+ p04) * y
+		+ p03) * y
+		+ p02) * y
+		+ p01) * y
+		+ p00;
+}
+
+static px_double atani2(px_double x)
+{
+	static const px_double p00 = (px_double)(0.7188299996845015638);
+	static const px_double p01 = (px_double)(0.5663716813536087136);
+	static const px_double p02 = (px_double)(-0.2806797712949650192);
+	static const px_double p03 = (px_double)(0.07853829253223243434);
+	static const px_double p04 = (px_double)(0.02110208940610767275);
+	static const px_double p05 = (px_double)(-0.04342139500642782507);
+	static const px_double p06 = (px_double)(0.0278965408671968812);
+	static const px_double p07 = (px_double)(-0.006133549533512984951);
+	static const px_double p08 = (px_double)(-0.006532089191404124792);
+	static const px_double p09 = (px_double)(0.008457549704878185304);
+	static const px_double p10 = (px_double)(-0.004491743889132696586);
+	static const px_double p11 = (px_double)(0.0001093120021936477832);
+
+	px_double y = x - (px_double)(0.8750000001110173065)-1;
+
+	return (((((((((((
+		+p11) * y
+		+ p10) * y
+		+ p09) * y
+		+ p08) * y
+		+ p07) * y
+		+ p06) * y
+		+ p05) * y
+		+ p04) * y
+		+ p03) * y
+		+ p02) * y
+		+ p01) * y
+		+ p00;
+}
+
+static px_double atani3(px_double x)
+{
+	static const px_double p00 = (px_double)(0.8621700546672244059);
+	static const px_double p01 = (px_double)(0.4235294117647077639);
+	static const px_double p02 = (px_double)(-0.2092733564013857794);
+	static const px_double p03 = (px_double)(0.07808182373302373358);
+	static const px_double p04 = (px_double)(-0.0135556997637514675);
+	static const px_double p05 = (px_double)(-0.009124992591382986157);
+	static const px_double p06 = (px_double)(0.01134219138389198391);
+	static const px_double p07 = (px_double)(-0.00684699873146459112);
+	static const px_double p08 = (px_double)(0.002317836143188779178);
+	static const px_double p09 = (px_double)(0.0002192642833474152939);
+	static const px_double p10 = (px_double)(-0.0009808674228592557075);
+	static const px_double p11 = (px_double)(0.0008098046818543229095);
+	static const px_double p12 = (px_double)(-0.0003740695734151908039);
+
+	px_double y = x - (px_double)(1.66666666666662078);
+
+	return ((((((((((((
+		+p12) * y
+		+ p11) * y
+		+ p10) * y
+		+ p09) * y
+		+ p08) * y
+		+ p07) * y
+		+ p06) * y
+		+ p05) * y
+		+ p04) * y
+		+ p03) * y
+		+ p02) * y
+		+ p01) * y
+		+ p00;
+}
+
+static px_double atani4(px_double x)
+{
+	static const px_double p00 = (px_double)(0.9827937232473292761);
+	static const px_double p01 = (px_double)(0.3076923076923072653);
+	static const px_double p02 = (px_double)(-0.142011834319542396);
+	static const px_double p03 = (px_double)(0.05583371263871451939);
+	static const px_double p04 = (px_double)(-0.01680613422985677979);
+	static const px_double p05 = (px_double)(0.002102921348931583931);
+	static const px_double p06 = (px_double)(0.0018297786863776509);
+	static const px_double p07 = (px_double)(-0.001909912753511534573);
+	static const px_double p08 = (px_double)(0.001120490304029380041);
+	static const px_double p09 = (px_double)(-0.0004624685412818255181);
+	static const px_double p10 = (px_double)(0.0001041619583992129452);
+	static const px_double p11 = (px_double)(3.081575322765031172e-05);
+
+	px_double y = x - 1.50000000000000666;
+
+	return (((((((((((
+		+p11) * y
+		+ p10) * y
+		+ p09) * y
+		+ p08) * y
+		+ p07) * y
+		+ p06) * y
+		+ p05) * y
+		+ p04) * y
+		+ p03) * y
+		+ p02) * y
+		+ p01) * y
+		+ p00;
+}
+
+static px_double atani5(px_double x)
+{
+	static const px_double p00 = (px_double)(1.071449605063853356);
+	static const px_double p01 = (px_double)(0.2292993631001272459);
+	static const px_double p02 = (px_double)(-0.09639336283821990647);
+	static const px_double p03 = (px_double)(0.03650333485983356385);
+	static const px_double p04 = (px_double)(-0.01196655808839080896);
+	static const px_double p05 = (px_double)(0.003026728804287181791);
+	static const px_double p06 = (px_double)(-0.0002913554434445434329);
+	static const px_double p07 = (px_double)(-0.0002857253601689876445);
+	static const px_double p08 = (px_double)(0.0002603252202535161078);
+	static const px_double p09 = (px_double)(-0.0001450883505235225923);
+	static const px_double p10 = (px_double)(6.120525496089561119e-05);
+
+	px_double y = x - (px_double)(1.833333333111296204);
+
+	return ((((((((((
+		+p10) * y
+		+ p09) * y
+		+ p08) * y
+		+ p07) * y
+		+ p06) * y
+		+ p05) * y
+		+ p04) * y
+		+ p03) * y
+		+ p02) * y
+		+ p01) * y
+		+ p00;
+}
+
+// See documentation above.
+px_double PX_atan(px_double x)
+{
+	if (x < 0)
+		if (x < -1)
+			if (x < -5 / 3.)
+				if (x < -2)
+					return -Tail(-x);
+				else
+					return -atani5(-x);
+			else
+				if (x < -4 / 3.)
+					return -atani4(-x);
+				else
+					return -atani3(-x);
+		else
+			if (x < -.5)
+				if (x < -.75)
+					return -atani2(-x);
+				else
+					return -atani1(-x);
+			else
+				if (x < (px_double)(1.353860343122586362e-8))
+					return atani0(x);
+				else
+					if (x <= (px_double)(2.225073858507201383e-308))
+						// Generate inexact and return x.
+						return (Tiny + 1) * x;
+					else
+						if (x == 0)
+							return x;
+						else
+							// Generate underflow and return x.
+							return x * Tiny + x;
+	else
+		if (x <= +1)
+			if (x <= +.5)
+				if (x <= (px_double)(1.353860343122586362e-8))
+					if (x < (px_double)(2.225073858507201383e-308))
+						if (x == 0)
+							return x;
+						else
+							// Generate underflow and return x.
+							return x * Tiny + x;
+					else
+						// Generate inexact and return x.
+						return (Tiny + 1) * x;
+				else
+					return atani0(x);
+			else
+				if (x <= +.75)
+					return +atani1(+x);
+				else
+					return +atani2(+x);
+		else
+			if (x <= +5 / 3.)
+				if (x <= +4 / 3.)
+					return +atani3(+x);
+				else
+					return +atani4(+x);
+			else
+				if (x <= +2)
+					return +atani5(+x);
+				else
+					return +Tail(+x);
+}
+
+px_double PX_atan2(px_double y, px_double x)
+{
+	px_double atanv=PX_atan(y/x);
+
+	if (x>0)
+	{
+		return atanv;
+	}
+	else if (y >= 0 && x < 0)
+	{
+		return atanv + PX_PI;
+	}
+	else if (y < 0 && x < 0)
+	{
+		return atanv - PX_PI;
+	}
+	else if (y > 0 && x == 0)
+	{
+		return PX_PI / 2;
+	}
+	else if (y < 0 && x == 0)
+	{
+		return -1 * PX_PI / 2;
+	}
+	else
+	{
+		return 0;
+	}
+
+}
 px_stringformat PX_STRINGFORMAT_INT(px_int _i)
 {
 	px_stringformat fmt;
@@ -693,7 +1055,7 @@ px_bool PX_MatrixEqual(px_matrix Mat1,px_matrix Mat2)
 	return PX_TRUE;
 }
 
-px_void PX_MatrixTranslation(px_matrix *mat,float x,float y,float z)
+px_void PX_MatrixTranslation(px_matrix *mat,px_float x,px_float y,px_float z)
 {
 	mat->_11=1.0f;	mat->_12=0.0f;	mat->_13=0.0f;	mat->_14=0.0f;
 	mat->_21=0.0f;	mat->_22=1.0f;	mat->_23=0.0f;	mat->_24=0.0f;
@@ -701,7 +1063,7 @@ px_void PX_MatrixTranslation(px_matrix *mat,float x,float y,float z)
 	mat->_41=x;	mat->_42=y;	mat->_43=z;	mat->_44=1.0f;
 }
 
-px_void PX_MatrixRotateX(px_matrix *mat,float Angle)
+px_void PX_MatrixRotateX(px_matrix *mat,px_float Angle)
 {	
 	mat->_11=1.0f;						mat->_12=0;								mat->_13=0.0f;								mat->_14=0.0f;
 	mat->_21=0.0f;						mat->_22=PX_cos_angle(Angle);			mat->_23=PX_sin_angle(Angle);				mat->_24=0.0f;
@@ -709,7 +1071,7 @@ px_void PX_MatrixRotateX(px_matrix *mat,float Angle)
 	mat->_41=0.0f;						mat->_42=0.0f;							mat->_43=0.0f;								mat->_44=1.0f;
 }
 
-px_void PX_MatrixRotateY(px_matrix *mat,float Angle)
+px_void PX_MatrixRotateY(px_matrix *mat,px_float Angle)
 {
 	mat->_11=PX_cos_angle(Angle);		mat->_12=0.0f;							mat->_13=PX_sin_angle(Angle);			mat->_14=0.0f;
 	mat->_21=0.0f;						mat->_22=1.0f;							mat->_23=0.0f;							mat->_24=0.0f;
@@ -717,7 +1079,7 @@ px_void PX_MatrixRotateY(px_matrix *mat,float Angle)
 	mat->_41=0.0f;						mat->_42=0.0f;							mat->_43=0.0f;							mat->_44=1.0f;
 }
 
-px_void PX_MatrixRotateZ(px_matrix *mat,float Angle)
+px_void PX_MatrixRotateZ(px_matrix *mat,px_float Angle)
 {
 	
 	mat->_11=PX_cos_angle(Angle);		mat->_12=PX_sin_angle(Angle);			mat->_13=0.0f;			mat->_14=0.0f;
@@ -727,7 +1089,7 @@ px_void PX_MatrixRotateZ(px_matrix *mat,float Angle)
 }
 
 
-px_void PX_MatrixRotateXRadian(px_matrix *mat,float rad)
+px_void PX_MatrixRotateXRadian(px_matrix *mat,px_float rad)
 {	
 	mat->_11=1.0f;						mat->_12=0;								mat->_13=0.0f;								mat->_14=0.0f;
 	mat->_21=0.0f;						mat->_22=PX_cos_radian(rad);			mat->_23=PX_sin_radian(rad);				mat->_24=0.0f;
@@ -735,7 +1097,7 @@ px_void PX_MatrixRotateXRadian(px_matrix *mat,float rad)
 	mat->_41=0.0f;						mat->_42=0.0f;							mat->_43=0.0f;								mat->_44=1.0f;
 }
 
-px_void PX_MatrixRotateYRadian(px_matrix *mat,float rad)
+px_void PX_MatrixRotateYRadian(px_matrix *mat,px_float rad)
 {
 	mat->_11=PX_cos_radian(rad);		mat->_12=0.0f;							mat->_13=PX_sin_radian(rad);			mat->_14=0.0f;
 	mat->_21=0.0f;						mat->_22=1.0f;							mat->_23=0.0f;							mat->_24=0.0f;
@@ -743,7 +1105,7 @@ px_void PX_MatrixRotateYRadian(px_matrix *mat,float rad)
 	mat->_41=0.0f;						mat->_42=0.0f;							mat->_43=0.0f;							mat->_44=1.0f;
 }
 
-px_void PX_MatrixRotateZRadian(px_matrix *mat,float rad)
+px_void PX_MatrixRotateZRadian(px_matrix *mat,px_float rad)
 {
 
 	mat->_11=PX_cos_radian(rad);		mat->_12=PX_sin_radian(rad);			mat->_13=0.0f;			mat->_14=0.0f;
@@ -752,7 +1114,7 @@ px_void PX_MatrixRotateZRadian(px_matrix *mat,float rad)
 	mat->_41=0.0f;						mat->_42=0.0f;							mat->_43=0.0f;			mat->_44=1.0f;
 }
 
-px_void PX_MatrixScale(px_matrix *mat,float x,float y,float z)
+px_void PX_MatrixScale(px_matrix *mat,px_float x,px_float y,px_float z)
 {
 	mat->_11=x;	mat->_12=0.0f;	mat->_13=0.0f;	mat->_14=0.0f;
 	mat->_21=0.0f;	mat->_22=y;	mat->_23=0.0f;	mat->_24=0.0f;
@@ -760,13 +1122,13 @@ px_void PX_MatrixScale(px_matrix *mat,float x,float y,float z)
 	mat->_41=0.0f;	mat->_42=0.0f;	mat->_43=0.0f;	mat->_44=1.0f;
 }
 
-static float ptabs(float x){return x>0?x:-x;}
-static px_bool Gauss(float A[][4], float B[][4])
+static px_float ptabs(px_float x){return x>0?x:-x;}
+static px_bool Gauss(px_float A[][4], px_float B[][4])
 {
 
 	px_int i, j, k;
-	float max, temp;
-	float t[4][4];                
+	px_float max, temp;
+	px_float t[4][4];                
 	for (i = 0; i < 4; i++)        
 	{
 		for (j = 0; j < 4; j++)
@@ -778,7 +1140,7 @@ static px_bool Gauss(float A[][4], float B[][4])
 	{
 		for (j = 0; j < 4; j++)
 		{
-			B[i][j] = (i == j) ? (float)1 : 0;
+			B[i][j] = (i == j) ? (px_float)1 : 0;
 		}
 	}
 	for (i = 0; i < 4; i++)
@@ -1846,7 +2208,7 @@ px_rect PX_RECTPOINT2(px_point p1,px_point p2)
 	return rect;
 }
 
-px_complex complexBuild(float re,float im)
+px_complex complexBuild(px_float re,px_float im)
 {
 	px_complex cx;
 	cx.re=re;
@@ -1880,8 +2242,8 @@ void PX_DFT(_IN px_complex x[],_OUT px_complex X[],px_int N)
 		X[k].im=0;
 		for (n=0;n<N;n++)
 		{
-			Wnk.re=(float)PX_cos_radian(2*PX_PI*k*n/N);
-			Wnk.im=(float)-PX_sin_radian(2*PX_PI*k*n/N);
+			Wnk.re=(px_float)PX_cos_radian((px_float)(2*PX_PI*k*n/N));
+			Wnk.im=(px_float)-PX_sin_radian((px_float)(2*PX_PI*k*n/N));
 			X[k]=complexAdd(X[k],complexMult(x[n],Wnk));
 		}
 	}
@@ -1890,7 +2252,7 @@ void PX_DFT(_IN px_complex x[],_OUT px_complex X[],px_int N)
 void PX_IDFT(_IN px_complex X[],_OUT px_complex x[],px_int N)
 {
 	px_int k,n;
-	float im=0;
+	px_float im=0;
 	px_complex ejw;
 	for (k=0;k<N;k++)
 	{
@@ -1898,8 +2260,8 @@ void PX_IDFT(_IN px_complex X[],_OUT px_complex x[],px_int N)
 		x[k].im=0;
 		for (n=0;n<N;n++)
 		{
-			ejw.re=(float)PX_cos_radian(2*PX_PI*k*n/N);
-			ejw.im=(float)PX_sin_radian(2*PX_PI*k*n/N);
+			ejw.re=(px_float)PX_cos_radian((px_float)(2*PX_PI*k*n/N));
+			ejw.im=(px_float)PX_sin_radian((px_float)(2*PX_PI*k*n/N));
 			x[k]=complexAdd(x[k],complexMult(X[n],ejw));
 		}
 
@@ -1936,8 +2298,8 @@ void FFT_Base2(_IN _OUT px_complex x[],px_int N)
 
 		for(k=0;k<N>>1;k++)
 		{
-			Wnk.re=(float)PX_cos_radian(-2*PX_PI*k/N);
-			Wnk.im=(float)PX_sin_radian(-2*PX_PI*k/N);
+			Wnk.re=(px_float)PX_cos_radian((px_float)(-2*PX_PI*k/N));
+			Wnk.im=(px_float)PX_sin_radian((px_float)(-2*PX_PI*k/N));
 			cx0=x[k];
 			cx1=x[k+(N>>1)];
 			x[k]=complexAdd(cx0,complexMult(Wnk,cx1));
@@ -1994,8 +2356,8 @@ void IFFT_Base2(_IN _OUT px_complex X[],px_int N)
 
 		for(n=0;n<N>>1;n++)
 		{
-			Wnnk.re=(float)PX_cos_radian(2*PX_PI*n/N);
-			Wnnk.im=(float)PX_sin_radian(2*PX_PI*n/N);
+			Wnnk.re=(px_float)PX_cos_radian((px_float)(2*PX_PI*n/N));
+			Wnnk.im=(px_float)PX_sin_radian((px_float)(2*PX_PI*n/N));
 			cx0=X[n];
 			cx1=X[n+(N>>1)];
 			X[n]=complexAdd(cx0,complexMult(Wnnk,cx1));
@@ -2333,9 +2695,9 @@ px_int PX_pow_ii(px_int i,px_int n)
 }
 
 
-px_double PX_log(px_double __x)
+px_double PX_ln(px_double __x)
 {
-	px_int N = 15;
+	px_int N = 128;
 	px_int k,nk;
 	px_double x,xx,y;
 	x = (__x-1)/(__x+1);
@@ -2349,6 +2711,21 @@ px_double PX_log(px_double __x)
 
 	}
 	return 2.0*x*y;
+}
+
+px_double PX_log(px_double __x)
+{
+	return PX_ln(__x);
+}
+
+px_double PX_lg(px_double __x)
+{
+	return PX_log10(__x);
+}
+
+px_double PX_log10(px_double __x)
+{
+	return PX_ln(__x)/2.30258509299404568401799145468;
 }
 
 static px_uint64 px_srand_seed=0x31415926;
@@ -2383,7 +2760,7 @@ px_double PX_GaussRand()
 		v = ((px_double) PX_rand() / (PX_RAND_MAX)) * 2 - 1;
 		r = u * u + v * v;
 		if (r == 0 || r > 1)  continue;
-		c = (px_double)PX_sqrt((px_float)(-2 * PX_log(r) / r));
+		c = (px_double)PX_sqrt((px_float)(-2 * PX_ln(r) / r));
 		return u * c;
 	}
 }
@@ -2482,7 +2859,7 @@ static px_bool PX_checkCPUendian()
 
 
 
-px_char *PX_strchr(const char *s,int ch)
+px_char *PX_strchr(const char *s,px_int ch)
 {
 
 	while(*s!='\0')
@@ -2496,7 +2873,7 @@ px_char *PX_strchr(const char *s,int ch)
 
 px_int PX_strcmp(const px_char *str1, const px_char *str2)
 {
-	int ret=0;
+	px_int ret=0;
 	while( !(ret = *(px_uchar*)str1 - *(px_uchar*)str2 ) && *str1 )
 	{
 		str1++;
@@ -2544,7 +2921,7 @@ px_dword  PX_inet_addr( px_char cp[] )
 
 px_char* PX_inet_ntoa(px_dword ipv4)
 {
-	int b[4];
+	px_int b[4];
 	static px_char a[17];
 	a[0]='\0';
 	b[0]=((ipv4 & 0xff000000)>>24);
@@ -2683,3 +3060,443 @@ px_float PX_PointDistance(px_point p1,px_point p2)
 	return PX_sqrt((p1.x-p2.x)*(p1.x-p2.x)+(p1.y-p2.y)*(p1.y-p2.y));
 }
 
+
+px_void  PX_WindowFunction_triangular(px_double data[],px_int N)
+{
+	px_int i;
+	if((N%2)==1)
+	{
+		for(i=0;i<((N-1)/2);i++)
+		{
+			data[i]=2*(px_double)(i+1)/(N+1);
+		}
+		for(i=((N-1)/2);i<N;i++)
+		{
+			data[i]=2*(px_double)(N-i)/(N+1);
+		}
+	}
+
+	else
+	{
+		for(i=0;i<(N/2);i++)
+		{
+			data[i]=(i+i+1)*(px_double)1/N;
+		}
+
+		for(i=(N/2);i<N;i++)
+		{
+			data[i]=data[N-1-i];
+		}
+	}
+}
+px_void PX_gain(px_double b[],px_double a[],px_int m,px_int n,px_double x[],px_double y[],px_int len,px_int sign) 
+{
+	px_int i,k;
+	px_double ar,ai,br,bi,zr,zi,im,re,den,numr,numi,freq,temp;
+	for (k=0;k<len;k++)
+	{
+		freq=k*0.5/(len-1);
+		zr=PX_cos_radian((px_float)(-8.0*PX_atan(1.0)*freq));
+		zi=PX_sin_radian((px_float)(-8.0*PX_atan(1.0)*freq));
+		br=0;
+		bi=0;
+		for (i=m;i>0;i--)
+		{
+			re=br;
+			im=bi;
+			br=(re+b[i])*zr-im*zi;
+			bi=(re+b[i])*zi+im*zr;
+		}
+		ar=0.0;
+		ai=0;
+		for(i=n;i>0;i--)
+		{
+			re=ar;
+			im=ai;
+			ar=(re+a[i])*zr-im*zi;
+			ai=(re+a[i])*zi+im*zr;
+		}
+		br=br+b[0];
+		ar=ar+1.0;
+		numr=ar*br+ai*bi;
+		numi=ar*bi-ai*br;
+		den=ar*ar+ai*ai;
+		x[k]=numr/den;
+		y[k]=numi/den;
+		switch(sign)
+		{
+		case 1:
+			{
+				temp=PX_sqrtd(x[k]*x[k]+y[k]*y[k]);
+				y[k]=PX_atan2(y[k],x[k]);
+				x[k]=temp;
+			}
+			break;
+		case 2:
+			{
+				temp=(x[k]*x[k]+y[k]*y[k]);
+				y[k]=PX_atan2(y[k],x[k]);
+				x[k]=10*PX_log10(temp);
+			}
+			break;
+		}
+
+	}
+}
+
+px_void PX_gainc(px_double b[],px_double a[],px_int n,px_int ns,px_double x[],px_double y[],px_int len,px_int sign)
+{
+	px_int i,j,k,nl;
+	px_double ar,ai,br,bi,zr,zi,im,re,den,numr,numi,freq,temp;
+	px_double hr,hi,tr,ti;
+	nl=n+1;
+	for (k=0;k<len;k++)
+	{
+		freq=k*0.5/(len-1);
+		zr=PX_cos_radian((px_float)(-8.0*PX_atan(1.0)*freq));
+		zi=PX_sin_radian((px_float)(-8.0*PX_atan(1.0)*freq));
+		x[k]=1.0;
+		y[k]=0.0;
+		for (j=0;j<ns;j++)
+		{
+			br=0;
+			bi=0;
+			for (i=n;i>0;i--)
+			{
+				re=br;
+				im=bi;
+				br=(re+b[j*nl+i])*zr-im*zi;
+				bi=(re+b[j*nl+i])*zi+im*zr;
+			}
+			ar=0;
+			ai=0;
+			for (i=n;i>0;i--)
+			{
+				re=ar;
+				im=ai;
+				ar=(re+a[j*nl+i])*zr-im*zi;
+				ai=(re+b[j*nl+i])*zi+im*zr;
+			}
+			br=br+b[j*nl+0];
+			ar=ar+1.0;
+			numr=ar*br+ai*bi;
+			numi=ar*bi-ai*br;
+			den=ar*ar+ai*ai;
+			hr=numr/den;
+			hi=numi/den;
+			tr=x[k]*hr-y[k]*hi;
+			ti=x[k]*hi+y[k]*hr;
+			x[k]=tr;
+			y[k]=ti;
+		}
+		switch(sign)
+		{
+		case 1:
+			{
+				temp=PX_sqrtd(x[k]*x[k]+y[k]*y[k]);
+				if (temp!=0)
+				{
+					y[k]=PX_atan2(y[k],x[k]);
+				}
+				else
+				{
+					y[k]=0;
+				}
+				x[k]=temp;
+			}
+			break;
+		case 2:
+			{
+				temp=(x[k]*x[k]+y[k]*y[k]);
+				if (temp!=0)
+				{
+					y[k]=PX_atan2(y[k],x[k]);
+				}
+				else
+				{
+					temp=1.0e-40;
+					y[k]=0;
+				}
+				x[k]=10*PX_log10(temp);
+			}
+			break;
+		}
+	}
+}
+
+
+
+px_void  PX_WindowFunction_blackMan(px_double data[],px_int N)
+{
+	px_int n;
+	for(n=0;n<N;n++)
+	{
+		data[n]=0.42-0.5*PX_cos_radian((px_float)(2*PX_PI*(px_double)n/(N-1))+0.08f*PX_cos_radian((px_float)(4*PX_PI*(px_double)n/(N-1))));
+	}
+}
+
+px_void  PX_WindowFunction_hamming(px_double data[],px_int N)
+{
+	px_int n;
+	for(n=0;n<N;n++)
+	{
+		data[n]=0.54-0.46*PX_cos_radian((px_float)(2*PX_PI*(px_double)n/(N-1)));
+	}
+}
+
+px_double PX_Bessel(px_int n,px_double x)
+{
+	px_int i,m;
+	px_double t,y,p=0,b0,b1,q;
+	static px_double a[7]={ 1.0,3.5156229,3.0899424,1.2067492,	0.2659732,0.0360768,0.0045813};
+	static px_double b[7]={ 0.5,0.87890594,0.51498869,	0.15084934,0.02658773,0.00301532,0.00032411};
+	static px_double c[9]={ 0.39894228,0.01328592,0.00225319,-0.00157565,0.00916281,-0.02057706,0.02635537,-0.01647633,0.00392377};	
+	static px_double d[9]={ 0.39894228,-0.03988024,-0.00362018,0.00163801,-0.01031555,0.02282967,-0.02895312,0.01787654,-0.00420059};
+	if (n<0) n=-n;
+	t=PX_ABS(x);
+	if (n!=1)
+	{ 
+		if (t<3.75)
+		{ 
+			y=(x/3.75)*(x/3.75); p=a[6];
+			for (i=5; i>=0; i--)
+				p=p*y+a[i];
+		}
+		else
+		{ 
+			y=3.75/t; p=c[8];
+			for (i=7; i>=0; i--)
+				p=p*y+c[i];
+			p=p*PX_exp(t)/PX_sqrtd(t);
+		}
+	}
+	if (n==0) return(p);
+	q=p;
+	if (t<3.75)
+	{ 
+		y=(x/3.75)*(x/3.75); p=b[6];
+		for (i=5; i>=0; i--) p=p*y+b[i];
+		p=p*t;
+	}
+	else
+	{ 
+		y=3.75/t; p=d[8];
+		for (i=7; i>=0; i--) p=p*y+d[i];
+		p=p*PX_exp(t)/PX_sqrtd(t);
+	}
+	if (x<0.0) p=-p;
+	if (n==1) return(p);
+	if (x==0.0) return(0.0);
+	y=2.0/t; t=0.0; b1=1.0; b0=0.0;
+	m=n+(px_int)PX_sqrtd(40.0*n);
+	m=2*m;
+
+	for (i=m; i>0; i--)
+	{ 
+		p=b0+i*y*b1; b0=b1; b1=p;
+		if (PX_ABS(b1)>1.0e+10)
+		{ 
+			t=t*1.0e-10; b0=b0*1.0e-10;
+			b1=b1*1.0e-10;
+		}
+		if (i==n) t=b0;
+	}
+	p=t*q/b1;
+	if ((x<0.0)&&(n%2==1)) p=-p;
+	return(p);
+}
+
+px_void PX_WindowFunction_tukey(px_double data[],px_int N)
+{
+	px_int n;
+	if (N<16)
+	{
+		return;
+	}
+	for (n=0;n<=(N-2)/10;n++)
+	{
+		data[n]=0.5*(1-PX_cos_radian((px_float)(10*PX_PI*n/(N+8))));
+	}
+	for (n=(N-2)/10;n<=9*(N-2)/10;n++)
+	{
+		data[n]=1;
+	}
+	for (n=9*(N-2)/10;n<=N-1;n++)
+	{
+		data[n]=0.5*(1-PX_cos_radian((px_float)(10*PX_PI*(N-n-1)/(N+8))));;
+	}
+}
+
+px_void PX_WindowFunction_hanning(px_double data[],px_int N)
+{
+	px_int n;
+	for(n=0;n<N;n++)
+	{
+		data[n]=0.5-0.5*PX_cos_radian((px_float)(2*PX_PI*(px_double)n/(N-1)));
+	}
+}
+
+px_void   PX_WindowFunction_kaiser(px_double beta,px_double data[],px_int N)
+{
+	px_int n;
+	px_double theta;
+	for(n = 0; n < N; n++)
+	{
+		theta = beta * PX_sqrtd( 1 - ( (2 * (px_double)n/(N -1)) - 1)*( (2 * (px_double)n/(N -1)) - 1) );
+		data[n]= (px_double)PX_Bessel(0, theta ) / PX_Bessel(0,beta);
+	}
+}
+
+
+static px_double PX_FIRKaiser(px_int i,px_int n,px_double beta)
+{
+	px_double a,w,a2,b1,b2,beta1;
+	b1=PX_Bessel(0,beta);
+	a=2.0*i/(px_double)(n-1)-1.0;
+	a2=a*a;
+	beta1=beta*PX_sqrtd(1.0-a2);
+	b2=PX_Bessel(0,beta1);
+	w=b2/b1;
+	return w;
+}
+
+static px_double PX_FIRWindow(PX_FIRFILTER_WINDOW_TYPE type,px_int n,px_int i,px_double beta)
+{
+	px_int k;
+	px_double pi,w;
+	pi=4.0*PX_atan(1.0);
+	w=1.0;
+	switch(type)
+	{
+	case PX_FIRFILTER_WINDOW_TYPE_RECT:
+		{
+			w=1.0;
+			break;
+		}
+	case PX_FIRFILTER_WINDOW_TYPE_TUKEY:
+		{
+			k=(n-2)/10;
+			if (i<=k)
+			{
+				w=0.5*(1.0-PX_cos_radian((px_float)(i*pi/(k+1))));
+			}
+			if (i>n-k-2)
+			{
+				w=0.5*((px_float)(1.0-PX_cos_radian((px_float)((n-i-1)*pi/(k+1)))));
+			}
+			break;
+		}
+	case PX_FIRFILTER_WINDOW_TYPE_TRIANGULAR:
+		{
+			w=1.0-PX_ABS(1.0-2*i/(n-1.0));
+			break;
+		}
+	case PX_FIRFILTER_WINDOW_TYPE_HANNING:
+		{
+			w=0.5*(1.0-PX_cos_radian((px_float)(2*i*pi/(n-1))));
+			break;
+		}
+	case PX_FIRFILTER_WINDOW_TYPE_HAMMING:
+		{
+			w=0.54-0.46*PX_cos_radian((px_float)(2*i*pi/(n-1)));
+			break;
+		}
+	case PX_FIRFILTER_WINDOW_TYPE_BLACKMAN:
+		{
+			w=0.42-0.5*PX_cos_radian((px_float)(2*i*pi/(n-1)))+0.08*PX_cos_radian((px_float)(4*i*pi/(n-1)));
+			break;
+		}
+	case PX_FIRFILTER_WINDOW_TYPE_KAISER:
+		{
+			w=PX_FIRKaiser(i,n,beta);
+			break;
+		}
+	}
+	return w;
+}
+
+px_void PX_FIRFilterBuild(PX_FIRFILTER_TYPE bandtype,px_double fln,px_double fhn,PX_FIRFILTER_WINDOW_TYPE wn,px_double h[],px_int n,px_double beta)
+{
+	px_int i,n2,mid;
+	px_double s,pi,wc1,wc2,delay;
+	
+	pi=4.0*PX_atan(1.0);
+	if ((n%2)==0)
+	{
+		n2=n/2-1;
+		mid=1;
+	}
+	else
+	{
+		n2=n/2;
+		mid=0;
+	}
+	delay=n/2.0;
+	wc1=2.0*pi*fln;
+	if (bandtype>=3)
+	{
+		wc2=2.0*pi*fhn;
+	}
+	switch(bandtype)
+	{
+	case PX_FIRFILTER_TYPE_LOWPASS:
+		{
+			for (i=0;i<=n2;i++)
+			{
+				s=i-delay;
+				h[i]=(PX_sin_radian((px_float)(wc1*s))/(pi*s))*PX_FIRWindow(wn,n+1,i,beta);
+				h[n-i]=h[i];
+			}
+			if (mid==1)
+			{
+				h[n/2]=wc1/pi;
+			}
+		}
+		break;
+	case PX_FIRFILTER_TYPE_HIGHPASS:
+		{
+			for (i=0;i<=n2;i++)
+			{
+				s=i-delay;
+				h[i]=(PX_sin_radian((px_float)(pi*s))-PX_sin_radian((px_float)(wc1*s)))/(pi*s);
+				h[i]=h[i]*PX_FIRWindow(wn,n+1,i,beta);
+				h[n-i]=h[i];
+			}
+			if (mid==1)
+			{
+				h[n/2]=1.0-wc1/pi;
+			}
+		}
+		break;
+	case PX_FIRFILTER_TYPE_BANDPASS:
+		{
+			for (i=0;i<=n2;i++)
+			{
+				s=i-delay;
+				h[i]=(PX_sin_radian((px_float)(wc2*s))-PX_sin_radian((px_float)(wc1*s)))/(pi*s);
+				h[i]=h[i]*PX_FIRWindow(wn,n+1,i,beta);
+				h[n-i]=h[i];
+			}
+			if (mid==1)
+			{
+				h[n/2]=(wc2-wc1)/pi;
+			}
+		}
+		break;
+	case PX_FIRFILTER_TYPE_STOPBANDFILTER:
+		{
+			for (i=0;i<=n2;i++)
+			{
+				s=i-delay;
+				h[i]=(PX_sin_radian((px_float)(wc1*s))-PX_sin_radian((px_float)(wc2*s)))/(pi*s);
+				h[i]=h[i]*PX_FIRWindow(wn,n+1,i,beta);
+				h[n-i]=h[i];
+			}
+			if (mid==1)
+			{
+				h[n/2]=(wc1+pi-wc2)/pi;
+			}
+		}
+		break;
+	}
+}

@@ -13,12 +13,14 @@ typedef struct
 	px_byte size;
 	px_byte unit;
 	px_byte opcode;
-	px_word startAddress;
-	px_word regcount;
-	px_byte data[250];
+	px_byte startAddress[2];
+	px_byte regcount[2];
+	px_byte data[247];
 }PX_ModbusPacket;
 
-px_int PX_ModbusPacketBuild(PX_ModbusPacket *packet,px_byte addr,px_byte opcode,px_word startAddr,px_word regcount, px_byte *buffer,px_int size); 
+px_int PX_ModbusPacketBuild(PX_ModbusPacket *packet,px_byte opcode,px_word startAddr,px_word regcount, px_byte *buffer,px_int size);
+px_int PX_ModbusWrite(PX_ModbusPacket *packet,px_word startAddr,px_word regcount, px_word *buffer,px_int size); 
+px_int PX_ModbusRead(PX_ModbusPacket *packet,px_word startAddr,px_word regcount); 
 
 #endif
 

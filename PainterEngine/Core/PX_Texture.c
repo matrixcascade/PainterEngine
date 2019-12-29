@@ -894,7 +894,7 @@ px_bool PX_TextureCreateScale(px_memorypool *mp,px_texture *resTexture,px_int ne
 
 px_bool PX_TextureCreateRotationRadian(px_memorypool *mp,px_texture *resTexture,px_float radian,px_texture *out)
 {
-    return PX_TextureCreateRotationAngle(mp,resTexture,radian*180/PX_PI,out);
+    return PX_TextureCreateRotationAngle(mp,resTexture,(px_float)(radian*180/PX_PI),out);
 }
 
 px_bool PX_TextureCreateRotationAngle(px_memorypool *mp,px_texture *resTexture,px_float Angle,px_texture *out)

@@ -1,12 +1,12 @@
 #include "PX_WAVE.h"
 
-px_uint PX_WAVEGetPCMSize(px_byte *buffer,px_int size)
+px_uint PX_WaveGetPCMSize(px_byte *buffer,px_int size)
 {
 	px_int offset=0,pcmSize;
 	PX_WAVE_DATA_BLOCK *pBlock;
 	PX_WAVE_RIFF_HEADER *pHeader=(PX_WAVE_RIFF_HEADER *)buffer;
 	PX_WAVE_FMT_BLOCK  *pfmt_block;
-	if (!PX_WAVEVerify(buffer,size))
+	if (!PX_WaveVerify(buffer,size))
 	{
 		return 0;
 	}
@@ -30,7 +30,55 @@ px_uint PX_WAVEGetPCMSize(px_byte *buffer,px_int size)
 	return pcmSize;
 }
 
-px_bool PX_WAVEVerify(px_byte *buffer,px_int size)
+px_byte* PX_WaveGetPCMDataPtr(px_int index,px_byte *data,px_int datasize)
+{
+	if (PX_WaveVerify(data,datasize))
+	{
+		px_uint offset=0,pcmSize;
+		pcmSize=PX_WaveGetPCMSize(data,datasize);
+
+		if (pcmSize!=0)
+		{
+			PX_WAVE_DATA_BLOCK *pBlock;
+			PX_WAVE_RIFF_HEADER *pHeader=(PX_WAVE_RIFF_HEADER *)data;
+			PX_WAVE_FMT_BLOCK  *pfmt_block;
+
+			pfmt_block=(PX_WAVE_FMT_BLOCK  *)(data+sizeof(PX_WAVE_RIFF_HEADER));
+			offset+=sizeof(PX_WAVE_RIFF_HEADER);
+			offset+=8;
+			offset+=pfmt_block->dwFmtSize;
+			pcmSize=0;
+
+			while (offset<(px_uint)datasize)
+			{
+				pBlock=(PX_WAVE_DATA_BLOCK*)(data+offset);
+				if(!PX_memequ(pBlock->szDataID,"data",4))
+				{
+					offset+=pBlock->dwDataSize+sizeof(PX_WAVE_DATA_BLOCK);
+					continue;
+				}
+				offset+=sizeof(PX_WAVE_DATA_BLOCK);
+				if (index==0)
+				{
+					return data+offset;
+				}
+				else
+				{
+					offset+=pBlock->dwDataSize;
+				}
+			}
+			return PX_NULL;
+		}
+		else
+			return PX_NULL;
+	}
+	else
+	{
+		return PX_NULL;
+	}
+}
+
+px_bool PX_WaveVerify(px_byte *buffer,px_int size)
 {
 	PX_WAVE_RIFF_HEADER *pHeader=(PX_WAVE_RIFF_HEADER *)buffer;
 	PX_WAVE_FMT_BLOCK  *pfmt_block;
@@ -70,10 +118,10 @@ px_bool PX_WAVEVerify(px_byte *buffer,px_int size)
 	return PX_TRUE;
 }
 
-px_uint PX_WAVEGetChannel(px_byte *buffer,px_int size)
+px_uint PX_WaveGetChannel(px_byte *buffer,px_int size)
 {
 	PX_WAVE_FMT_BLOCK  *pfmt_block;
-	if (!PX_WAVEVerify(buffer,size))
+	if (!PX_WaveVerify(buffer,size))
 	{
 		return 0;
 	}

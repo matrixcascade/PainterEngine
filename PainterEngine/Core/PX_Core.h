@@ -26,7 +26,6 @@
 #include "PX_Quadtree.h"
 #include "PX_curve25519.h"
 #include "PX_Sha256.h"
-#include "PX_WAVE.h"
 #include "PX_Arle.h"
 #include "PX_Huffman.h"
 #include "PX_Packet.h"

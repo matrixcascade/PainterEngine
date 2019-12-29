@@ -37,6 +37,7 @@ PX_ResourceLibrary * PX_GetResourceLibrary();
 px_memorypool *PX_GetMP();
 
 px_bool PX_LoadTextureFromFile(px_memorypool *mp,px_texture *tex,px_char *path);
+px_bool PX_LoadFontModuleFromFile(PX_FontModule *fm,px_char *path);
 px_bool PX_LoadShapeFromFile(px_memorypool *mp,px_shape *shape,px_char *path);
 px_bool PX_LoadSoundFromFile(px_memorypool *mp,px_shape *shape,px_char *path);
 px_bool PX_LoadAnimationLibraryFromFile(px_memorypool *mp,px_animationlibrary *lib,px_char *path);

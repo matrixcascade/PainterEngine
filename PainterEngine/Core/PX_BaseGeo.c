@@ -1045,7 +1045,7 @@ px_void PX_GeoDrawRect(px_surface *psurface, px_int left, px_int top, px_int rig
 	}
 }
 
-px_void PX_GeoDrawSolidCircle(px_surface *psurface, px_int x,px_int y,px_int Radius,px_color color )
+static px_void PX_GeoDrawSolidCircle_Ex1(px_surface *psurface, px_int x,px_int y,px_int Radius,px_color color )
 {
 	px_int ry,dy,i,xleft,xright,Sy,cY,drx,dry;
 	px_float rad2,xoft1,xoft2,S,fy,fdis;
@@ -1077,11 +1077,11 @@ px_void PX_GeoDrawSolidCircle(px_surface *psurface, px_int x,px_int y,px_int Rad
 			PX_SurfaceDrawPixel(psurface,x+i,y,color);
 			PX_SurfaceDrawPixel(psurface,x-i,y,color);
 		}
-		
+
 		// Draw 45-degree cross
 		//inside
 		ry=0;
-	
+
 		//out side
 		rad2=(px_float)Radius;
 		dy=PX_TRUNC(rad2/1.4142135623731f+0.5);
@@ -1216,7 +1216,179 @@ px_void PX_GeoDrawSolidCircle(px_surface *psurface, px_int x,px_int y,px_int Rad
 			Sy++;
 		}
 	}
+}
 
+static px_void PX_GeoDrawSolidCircle_Ex2(px_surface *psurface, px_int x,px_int y,px_int Radius,px_color color )
+{
+	px_int left,top,right,bottom,mid,i,j;
+	px_float d;
+	px_color clr;
+	if(color._argb.a==0)
+	{
+		return;
+	}
+
+	left=x-Radius;
+	top=y-Radius;
+	right=x+Radius;
+	bottom=y+Radius;
+
+
+	if (left<0)
+	{
+		left=0;
+	}
+	if (top<0)
+	{
+		top=0;
+	}
+
+	if (right>psurface->width-1)
+	{
+		right=psurface->width-1;
+	}
+
+	if (bottom>psurface->height-1)
+	{
+		bottom=psurface->height-1;
+	}
+
+	if (left>psurface->width-1)
+	{
+		return;
+	}
+
+	if (bottom<0)
+	{
+		return;
+	}
+
+	if (right<0)
+	{
+		return;
+	}
+
+	if (top>psurface->height-1)
+	{
+		return;
+	}
+
+
+	if (left>right)
+	{
+		mid=left;
+		left=right;
+		right=mid;
+	}
+	if (top>bottom)
+	{
+		mid=top;
+		top=bottom;
+		bottom=mid;
+	}
+
+	for (i=top;i<=bottom;i++)
+	{
+		for (j=left;j<=right;j++)
+		{
+			d=PX_sqrt((px_float)((i-y)*(i-y)+(j-x)*(j-x)));
+			if (d<Radius)
+			{
+				if ((px_float)Radius-d<1.414f)
+				{
+					clr=color;
+					clr._argb.a=(px_uchar)(clr._argb.a*((px_float)Radius-d)/1.414f);
+					PX_SurfaceDrawPixel(psurface,j,i,clr);
+				}
+				else
+				PX_SurfaceDrawPixel(psurface,j,i,color);
+			}
+			
+		}
+	}
+
+}
+
+
+
+px_void PX_GeoDrawSolidCircle(px_surface *psurface, px_int x,px_int y,px_int Radius,px_color color )
+{
+	px_int Sc,Sr;
+	px_int left,top,right,bottom,mid;
+	if(color._argb.a==0)
+	{
+		return;
+	}
+
+	left=x-Radius;
+	top=y-Radius;
+	right=x+Radius;
+	bottom=y+Radius;
+
+
+	if (left<0)
+	{
+		left=0;
+	}
+	if (top<0)
+	{
+		top=0;
+	}
+
+	if (right>psurface->width-1)
+	{
+		right=psurface->width-1;
+	}
+
+	if (bottom>psurface->height-1)
+	{
+		bottom=psurface->height-1;
+	}
+
+	if (left>psurface->width-1)
+	{
+		return;
+	}
+
+	if (bottom<0)
+	{
+		return;
+	}
+
+	if (right<0)
+	{
+		return;
+	}
+
+	if (top>psurface->height-1)
+	{
+		return;
+	}
+
+
+	if (left>right)
+	{
+		mid=left;
+		left=right;
+		right=mid;
+	}
+	if (top>bottom)
+	{
+		mid=top;
+		top=bottom;
+		bottom=mid;
+	}
+
+	Sc=(px_int)(PX_PI*Radius*Radius);
+	Sr=(right-left+1)*(bottom-top+1);
+	if (Sr<Sc)
+	{
+		PX_GeoDrawSolidCircle_Ex2(psurface,x,y,Radius,color);
+	}
+	else
+	{
+		PX_GeoDrawSolidCircle_Ex1(psurface,x,y,Radius,color);
+	}
 }
 
 px_void PX_GeoDrawCircle(px_surface *psurface, px_int x,px_int y,px_int Radius,px_int lineWidth,px_color color )

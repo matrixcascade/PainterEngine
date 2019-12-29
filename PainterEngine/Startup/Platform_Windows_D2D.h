@@ -148,7 +148,7 @@
 #define PX_DIK_MAIL            0xEC    /* Mail */
 #define PX_DIK_MEDIASELECT     0xED    /* Media Select */
 
-extern  BOOL PX_CreateWindow( int Width,int Height,char *name,BOOL bfullScreen);
+extern  BOOL PX_CreateWindow( int Width,int Height,const char *name,BOOL bfullScreen);
 extern  HWND PX_GetWindowHwnd();
 extern  VOID PX_SystemReadDeviceState();
 extern  BOOL PX_SystemLoop();

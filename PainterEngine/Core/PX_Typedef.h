@@ -8,7 +8,7 @@
 #define     PX_FALSE			0
 #define     PX_TRUE				1
 #define		PX_NULL				0
-#define     PX_PI				3.14159265359f
+#define     PX_PI				3.141592653589793238462
 #define     PX_RAND_MAX         (0xefffffff)
 
 #ifdef _DEBUG
@@ -34,6 +34,7 @@ typedef		void				px_void;
 typedef		int					px_bool;
 typedef		unsigned int		px_dword;//typedef     uint32_t		       px_dword;
 typedef     short               px_short;
+typedef     short				px_int16;
 typedef     unsigned short		px_word; //typedef     uint16_t		       px_word;
 typedef		unsigned short		px_ushort;
 typedef     unsigned int		px_uint;
@@ -140,8 +141,8 @@ typedef struct _px_rect
 
 typedef struct __px_complex
 {
-	px_float re;// really 
-	px_float im;// imaginary
+	px_double re;// really 
+	px_double im;// imaginary
 }px_complex;
 
 
@@ -184,18 +185,24 @@ px_uint32 PX_sum32(px_void *buffer, px_uint size);
 px_int	PX_pow_ii(px_int i,px_int n);
 px_double PX_pow_ff(px_double num,px_double m);
 px_float PX_sqrt( px_float number );
+px_double PX_sqrtd( px_double number );
 px_float PX_SqrtRec( px_float number );
-px_double PX_log(px_double __x);
+px_double PX_ln(px_double __x);
+px_double PX_lg(px_double __x);
+px_double PX_log10(px_double __x);
 
 #define  PX_RadianToAngle(angle) ((angle)*PX_PI/180)
 #define  PX_AngleToRadian(radian) ((radian)*180/PX_PI)
 
-px_float PX_sin_radian(float radius);
-px_float PX_cos_radian(float radius);
-px_float PX_tan_radian(float radius);
-px_float PX_sin_angle(float angle);
-px_float PX_cos_angle(float angle);
-px_float PX_tan_angle(float angle);
+px_float PX_sin_radian(px_float radius);
+px_float PX_cos_radian(px_float radius);
+px_float PX_tan_radian(px_float radius);
+px_float PX_sin_angle(px_float angle);
+px_float PX_cos_angle(px_float angle);
+px_float PX_tan_angle(px_float angle);
+px_double PX_atan(px_double x);
+px_double PX_atan2(px_double y, px_double x);
+
 px_float PX_Point_sin(px_point v);
 px_float PX_Point_cos(px_point v);
 
@@ -207,13 +214,14 @@ px_float PX_Point_cos(px_point v);
 
 //////////////////////////////////////////////////////////////////////////
 //string to others
+
 px_uint PX_htoi(px_char hex_str[]);
 px_int  PX_atoi(px_char str[]);
 px_float PX_atof(px_char fstr[]);
-PX_RETURN_STRING PX_ftos(float f, int precision);
+PX_RETURN_STRING PX_ftos(px_float f, int precision);
 PX_RETURN_STRING PX_itos(px_int num,px_int radix);
 px_void PX_AscToWord(const px_char *asc,px_word *u16);
-px_int PX_ftoa(float f, char *outbuf, int maxlen, int precision);
+px_int PX_ftoa(px_float f, char *outbuf, int maxlen, int precision);
 px_int PX_itoa(px_int num,px_char *str,px_int MaxStrSize,px_int radix);
 px_char *PX_strchr(const char *s,int ch);
 px_char* PX_strstr(const char* dest, const char* src);
@@ -271,6 +279,8 @@ typedef struct
 		const px_char *_pstring;
 	};
 }px_stringformat;
+
+
 px_stringformat PX_STRINGFORMAT_INT(px_int _i);
 px_stringformat PX_STRINGFORMAT_FLOAT(px_float _f);
 px_stringformat PX_STRINGFORMAT_STRING(const px_char *_s);
@@ -337,14 +347,14 @@ px_matrix PX_MatrixMultiply(px_matrix Mat1,px_matrix Mat2);
 px_matrix PX_MatrixAdd(px_matrix Mat1,px_matrix Mat2);
 px_matrix PX_MatrixSub(px_matrix Mat1,px_matrix Mat2);
 px_bool PX_MatrixEqual(px_matrix Mat1,px_matrix Mat2);
-px_void PX_MatrixTranslation(px_matrix *mat,float x,float y,float z);
-px_void PX_MatrixRotateX(px_matrix *mat,float Angle);
-px_void PX_MatrixRotateY(px_matrix *mat,float Angle);
-px_void PX_MatrixRotateZ(px_matrix *mat,float Angle);
-px_void PX_MatrixRotateXRadian(px_matrix *mat,float rad);
-px_void PX_MatrixRotateYRadian(px_matrix *mat,float rad);
-px_void PX_MatrixRotateZRadian(px_matrix *mat,float rad);
-px_void PX_MatrixScale(px_matrix *mat,float x,float y,float z);
+px_void PX_MatrixTranslation(px_matrix *mat,px_float x,px_float y,px_float z);
+px_void PX_MatrixRotateX(px_matrix *mat,px_float Angle);
+px_void PX_MatrixRotateY(px_matrix *mat,px_float Angle);
+px_void PX_MatrixRotateZ(px_matrix *mat,px_float Angle);
+px_void PX_MatrixRotateXRadian(px_matrix *mat,px_float rad);
+px_void PX_MatrixRotateYRadian(px_matrix *mat,px_float rad);
+px_void PX_MatrixRotateZRadian(px_matrix *mat,px_float rad);
+px_void PX_MatrixScale(px_matrix *mat,px_float x,px_float y,px_float z);
 px_bool PX_MatrixInverse(px_matrix *mat);
 px_void PX_MatrixTranspose(px_matrix *matrix);
 //////////////////////////////////////////////////////////////////////////
@@ -366,6 +376,8 @@ px_point PX_POINT(px_float x,px_float y,px_float z);
 px_point4D PX_POINT4D(px_float x,px_float y,px_float z);
 px_point PX_PointRotate(px_point p,px_float angle);
 px_float PX_PointDistance(px_point p1,px_point p2);
+
+
 px_point PX_PointAdd(px_point p1,px_point p2);
 px_point PX_PointSub(px_point p1,px_point p2);
 px_point4D PX_Point4DSub(px_point4D p1,px_point4D p2);
@@ -408,9 +420,57 @@ void PX_FFT_2_Shift(_IN px_complex _in[],_OUT px_complex _out[],px_int N_N);
 
 //////////////////////////////////////////////////////////////////////////
 
+
 //////////////////////////////////////////////////////////////////////////
 //ipv4
 px_dword PX_inet_addr( px_char cp[] );
 px_char* PX_inet_ntoa( px_dword ipv4 );
+
+//////////////////////////////////////////////////////////////////////////
+//Bessel
+px_double PX_Bessel(int n,double x);
+//////////////////////////////////////////////////////////////////////////
+//Window Functions
+px_void PX_WindowFunction_tukey(px_double data[],px_int N);
+px_void PX_WindowFunction_hanning(px_double data[],px_int N);
+px_void PX_WindowFunction_blackMan(px_double data[],px_int N);
+px_void PX_WindowFunction_hamming(px_double data[],px_int N);
+px_void PX_WindowFunction_kaiser(px_double beta,px_double data[],px_int N);
+px_void PX_WindowFunction_triangular(px_double data[],px_int N);
+
+
+//////////////////////////////////////////////////////////////////////////
+//gainc
+px_void PX_gain(px_double b[],px_double a[],px_int m,px_int n,px_double x[],px_double y[],px_int len,px_int sign);
+px_void PX_gainc(px_double b[],px_double a[],px_int n,px_int ns,px_double x[],px_double y[],px_int len,px_int sign);
+//////////////////////////////////////////////////////////////////////////
+
+
+
+
+//FIR Filter
+typedef enum
+{
+	PX_FIRFILTER_TYPE_LOWPASS,
+	PX_FIRFILTER_TYPE_HIGHPASS,
+	PX_FIRFILTER_TYPE_BANDPASS,
+	PX_FIRFILTER_TYPE_STOPBANDFILTER,
+}PX_FIRFILTER_TYPE;
+
+typedef enum
+{
+	PX_FIRFILTER_WINDOW_TYPE_RECT,
+	PX_FIRFILTER_WINDOW_TYPE_TUKEY,
+	PX_FIRFILTER_WINDOW_TYPE_TRIANGULAR,
+	PX_FIRFILTER_WINDOW_TYPE_HANNING,
+	PX_FIRFILTER_WINDOW_TYPE_HAMMING,
+	PX_FIRFILTER_WINDOW_TYPE_BLACKMAN,
+	PX_FIRFILTER_WINDOW_TYPE_KAISER,
+}PX_FIRFILTER_WINDOW_TYPE;
+
+px_void PX_FIRFilterBuild(PX_FIRFILTER_TYPE bandtype,px_double fln,px_double fhn,PX_FIRFILTER_WINDOW_TYPE wn,px_double h[],px_int n,px_double beta);
+
+
+
 
 #endif

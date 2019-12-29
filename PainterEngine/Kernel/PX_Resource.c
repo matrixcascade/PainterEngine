@@ -99,10 +99,10 @@ px_bool PX_ResourceLibraryLoad(PX_ResourceLibrary *lib,PX_RESOURCE_TYPE type,px_
 			return PX_FALSE;
 		break;
 	case PX_RESOURCE_TYPE_SOUND:
-		if (PX_WAVEVerify(data,datasize))
+		if (PX_WaveVerify(data,datasize))
 		{
 			px_uint offset=0,pcmSize,woffset;
-			pcmSize=PX_WAVEGetPCMSize(data,datasize);
+			pcmSize=PX_WaveGetPCMSize(data,datasize);
 			
 			if (pcmSize!=0)
 			{
@@ -111,7 +111,7 @@ px_bool PX_ResourceLibraryLoad(PX_ResourceLibrary *lib,PX_RESOURCE_TYPE type,px_
 				PX_WAVE_FMT_BLOCK  *pfmt_block;
 				res.sound.buffer=(px_byte *)MP_Malloc(lib->mp,pcmSize);
 				res.sound.size=pcmSize;
-				res.sound.channel=PX_WAVEGetChannel(data,pcmSize)==1?PX_SOUND_CHANNEL_ONE:PX_SOUND_CHANNEL_DOUBLE;
+				res.sound.channel=PX_WaveGetChannel(data,pcmSize)==1?PX_SOUND_CHANNEL_ONE:PX_SOUND_CHANNEL_DOUBLE;
 				if (!res.sound.buffer)
 				{
 					return PX_FALSE;

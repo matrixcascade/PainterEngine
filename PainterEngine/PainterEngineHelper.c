@@ -194,8 +194,6 @@ px_bool PX_Initialize(const px_char *name,px_int width,px_int height)
 	PX_srand(timeGetTime());
 
 
-
-
 	if (!PX_CreateWindow(width,height,name,PX_FALSE))
 	{
 		return 0;
@@ -315,6 +313,24 @@ px_bool PX_LoadTextureFromFile(px_memorypool *mp,px_texture *tex,px_char *path)
 		return PX_FALSE;
 	}
 	if (PX_TextureCreateFromMemory(mp,io.buffer,io.size,tex))
+	{
+		PX_FreeIOData(&io);
+		return PX_TRUE;
+	}
+	PX_FreeIOData(&io);
+	return PX_FALSE;
+}
+
+px_bool PX_LoadFontModuleFromFile(PX_FontModule *fm,px_char *path)
+{
+	PX_IO_Data io;
+
+	io=PX_LoadFileToIOData(path);
+	if (!io.size)
+	{
+		return PX_FALSE;
+	}
+	if (PX_FontModuleLoad(fm,io.buffer,io.size))
 	{
 		PX_FreeIOData(&io);
 		return PX_TRUE;

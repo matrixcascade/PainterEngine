@@ -221,3 +221,61 @@ PX_Sound PX_SoundCreate(PX_SoundData *data,px_bool loop)
 	return sound;
 }
 
+px_bool PX_SoundStaticDataCreate(PX_SoundStaticData *sounddata,px_memorypool *mp,px_byte *data,px_int datasize)
+{
+	if (PX_WaveVerify(data,datasize))
+	{
+		px_uint offset=0,pcmSize,woffset;
+		sounddata->mp=mp;
+		pcmSize=PX_WaveGetPCMSize(data,datasize);
+
+		if (pcmSize!=0)
+		{
+			PX_WAVE_DATA_BLOCK *pBlock;
+			PX_WAVE_RIFF_HEADER *pHeader=(PX_WAVE_RIFF_HEADER *)data;
+			PX_WAVE_FMT_BLOCK  *pfmt_block;
+			sounddata->buffer=(px_byte *)MP_Malloc(mp,pcmSize);
+			sounddata->size=pcmSize;
+			sounddata->channel=PX_WaveGetChannel(data,pcmSize)==1?PX_SOUND_CHANNEL_ONE:PX_SOUND_CHANNEL_DOUBLE;
+			if (!sounddata->buffer)
+			{
+				return PX_FALSE;
+			}
+			pfmt_block=(PX_WAVE_FMT_BLOCK  *)(data+sizeof(PX_WAVE_RIFF_HEADER));
+			offset+=sizeof(PX_WAVE_RIFF_HEADER);
+			offset+=8;
+			offset+=pfmt_block->dwFmtSize;
+
+			pcmSize=0;
+			woffset=0;
+			while (offset<(px_uint)datasize)
+			{
+				pBlock=(PX_WAVE_DATA_BLOCK*)(data+offset);
+				if(!PX_memequ(pBlock->szDataID,"data",4))
+				{
+					offset+=pBlock->dwDataSize+sizeof(PX_WAVE_DATA_BLOCK);
+					continue;
+				}
+				offset+=sizeof(PX_WAVE_DATA_BLOCK);
+				PX_memcpy(sounddata->buffer+woffset,data+offset,pBlock->dwDataSize);
+				offset+=pBlock->dwDataSize;
+				woffset+=pBlock->dwDataSize;
+			}
+		}
+		else
+			return PX_FALSE;
+	}
+	else
+	{
+		return PX_FALSE;
+	}
+	return PX_TRUE;
+}
+
+px_void PX_SoundStaticDataFree(PX_SoundStaticData *sounddata)
+{
+	MP_Free(sounddata->mp,sounddata->buffer);
+	sounddata->buffer=PX_NULL;
+	sounddata->size=0;
+}
+
