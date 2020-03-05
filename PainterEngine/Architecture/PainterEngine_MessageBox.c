@@ -35,8 +35,8 @@ px_bool PX_MessageBoxInitialize(PX_Runtime *runtime,PX_MessageBox *pm,PX_FontMod
 	pm->show=PX_FALSE;
 	pm->fontmodule=fontmodule;
 
-	PX_ObjectRegisterEvent(pm->btn_Ok,PX_OBJECT_EVENT_CURSORCLICK,PX_MessageBox_BtnYesClick,pm);
-	PX_ObjectRegisterEvent(pm->btn_Cancel,PX_OBJECT_EVENT_CURSORCLICK,PX_MessageBox_BtnNoClick,pm);
+	PX_ObjectRegisterEvent(pm->btn_Ok,PX_OBJECT_EVENT_EXECUTE,PX_MessageBox_BtnYesClick,pm);
+	PX_ObjectRegisterEvent(pm->btn_Cancel,PX_OBJECT_EVENT_EXECUTE,PX_MessageBox_BtnNoClick,pm);
 	return PX_TRUE;
 }
 
@@ -82,6 +82,11 @@ px_void PX_MessageBoxUpdate(PX_MessageBox *pm,px_dword elpased)
 		
 		
 	}
+}
+
+px_void PX_MessageBoxClose(PX_MessageBox *pm)
+{
+	pm->mode=PX_MESSAGEBOX_MODE_CLOSE;
 }
 
 px_void PX_MessageBoxRender(px_surface *pSurface,PX_MessageBox *pm,px_dword elpased)
@@ -147,7 +152,7 @@ px_void PX_MessageBoxRender(px_surface *pSurface,PX_MessageBox *pm,px_dword elpa
 	
 }
 
-px_void PX_MessageBoxAlertOk(PX_MessageBox *pm,const char *message)
+px_void PX_MessageBoxAlertOk(PX_MessageBox *pm,const px_char *message)
 {
 	pm->schedule=0;
 	pm->show=PX_TRUE;

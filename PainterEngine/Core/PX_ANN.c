@@ -1,6 +1,6 @@
 #include "PX_ANN.h"
 
-px_bool PX_ANNInit(px_memorypool *mp,PX_ANN *pANN,px_double learningRate,PX_ANN_REGULARZATION regularzation,px_double regularization_rate)
+px_bool PX_ANNInitialize(px_memorypool *mp,PX_ANN *pANN,px_double learningRate,PX_ANN_REGULARZATION regularzation,px_double regularization_rate)
 {
 	pANN->mp=mp;
 	pANN->LayerCount=0;
@@ -23,11 +23,10 @@ px_bool PX_ANNAddLayer(PX_ANN *pAnn,px_int Neurals,px_double bias,PX_ANN_ACTIVAT
 	newLayer->net=PX_NULL;
 	newLayer->w=PX_NULL;
 	newLayer->back=PX_NULL;
-
+	newLayer->weight_init=weight_c;
 	if(!newLayer) return PX_FALSE;
 
 	newLayer->activation=activation;
-	newLayer->bias=bias;
 	newLayer->Neurals=Neurals;
 
 	newLayer->out=(px_double *)MP_Malloc(pAnn->mp,sizeof(px_double)*Neurals);
@@ -38,6 +37,14 @@ px_bool PX_ANNAddLayer(PX_ANN *pAnn,px_int Neurals,px_double bias,PX_ANN_ACTIVAT
 
 	newLayer->net=(px_double *)MP_Malloc(pAnn->mp,sizeof(px_double)*Neurals);
 	if(!newLayer->net) goto _ERROR;
+
+	newLayer->bias=(px_double *)MP_Malloc(pAnn->mp,sizeof(px_double)*Neurals);
+	if(!newLayer->bias) goto _ERROR;
+
+	for (i=0;i<Neurals;i++)
+	{
+		newLayer->bias[i]=bias;
+	}
 
 	newLayer->pNext=PX_NULL;
 	newLayer->w_initMode=mode;
@@ -94,6 +101,7 @@ _ERROR:
 	if(newLayer->net) MP_Free(pAnn->mp,newLayer->net);
 	if(newLayer->w) MP_Free(pAnn->mp,newLayer->w);
 	if(newLayer->back) MP_Free(pAnn->mp,newLayer->back);
+	if(newLayer->back) MP_Free(pAnn->mp,newLayer->bias);
 	return PX_FALSE;
 	
 }
@@ -131,8 +139,8 @@ px_double PX_ANNBackward(PX_ANN *pAnn,px_double *expect)
 			p->net[i]=1;
 			break;
 		}
-		p->net[i]*=-(expect[i]-p->out[i])/pAnn->Layer->Neurals;
-		e+=(expect[i]-p->out[i])*(expect[i]-p->out[i])*0.5;
+		p->net[i]*=-(expect[i]-p->out[i]);
+		e+=(expect[i]-p->out[i])*(expect[i]-p->out[i]);
 	}
 
 	p=p->pPrevious;
@@ -270,7 +278,7 @@ px_void PX_ANNForward(PX_ANN *pAnn,px_double *input)
 			{
 				p->net[i]+=pPre->out[j]*p->w[i*pPre->Neurals+j];
 			}
-			p->net[i]+=pPre->bias;
+			p->net[i]+=p->bias[i];
 
 			switch(p->activation)
 			{
@@ -304,6 +312,7 @@ px_void PX_LayerFree(PX_ANN *pANN,PX_ANN_Layer *layer)
 	MP_Free(pANN->mp,layer->net);
 	MP_Free(pANN->mp,layer->out);
 	MP_Free(pANN->mp,layer->w);
+	MP_Free(pANN->mp,layer->bias);
 }
 px_void PX_ANNFree(PX_ANN *pANN)
 {
@@ -317,11 +326,155 @@ px_void PX_ANNFree(PX_ANN *pANN)
 	}
 }
 
+
+px_bool PX_ANNExport(PX_ANN *pAnn,px_void *buffer,px_int *size)
+{
+	PX_ANN_Layer *pLayer;
+	px_byte *wBuffer=(px_byte *)buffer;
+	PX_ANN_Data_Header dataheader;
+	PX_ANN_Data_LayerHeader Layerheader;
+
+	*size=0;
+
+	pLayer=pAnn->Layer;
+
+	dataheader.LayerCount=pAnn->LayerCount;
+	dataheader.learningRate=pAnn->LayerCount;
+	dataheader.regularization_rate=pAnn->regularization_rate;
+	dataheader.regularzation=pAnn->regularzation;
+	
+	//write dataheader
+	if (wBuffer)
+	{
+		PX_memcpy(wBuffer,&dataheader,sizeof(dataheader));
+		wBuffer+=sizeof(dataheader);
+	}
+	
+	*size+=sizeof(dataheader);
+	//write layers
+	while (pLayer)
+	{
+		//layer headers
+		Layerheader.NeuralsCount=pLayer->Neurals;
+		Layerheader.weight_count=pLayer->w_count;
+		Layerheader.activation=pLayer->activation;
+
+		if (wBuffer)
+		{
+		PX_memcpy(wBuffer,&Layerheader,sizeof(Layerheader));
+		wBuffer+=sizeof(Layerheader);
+		}
+
+		*size+=sizeof(Layerheader);
+
+		//weights
+		if (wBuffer)
+		{
+		PX_memcpy(wBuffer,pLayer->w,sizeof(pLayer->w[0])*pLayer->w_count);
+		wBuffer+=sizeof(pLayer->w[0])*pLayer->w_count;
+		}
+		*size+=sizeof(pLayer->w[0])*pLayer->w_count;
+
+		//bias
+		if (wBuffer)
+		{
+		PX_memcpy(wBuffer,pLayer->bias,sizeof(pLayer->bias[0])*pLayer->Neurals);
+		wBuffer+=sizeof(pLayer->bias[0])*pLayer->Neurals;
+		}
+		*size+=sizeof(pLayer->bias[0])*pLayer->Neurals;
+
+		pLayer=pLayer->pNext;
+	}
+	return PX_TRUE;
+}
+
+
+px_bool PX_ANNImport(px_memorypool *mp,PX_ANN *pAnn,px_void *buffer,px_int size)
+{
+	px_int i;
+	px_byte *rBuffer=(px_byte *)buffer;
+	PX_ANN_Data_Header dataheader;
+	PX_ANN_Data_LayerHeader Layerheader;
+	PX_ANN_Layer *pLastLayer;
+	PX_memcpy(&dataheader,rBuffer,sizeof(dataheader));
+	rBuffer+=sizeof(PX_ANN_Data_Header);
+	size-=sizeof(PX_ANN_Data_Header);
+	if (size<=0){return PX_FALSE;}
+
+	if(!PX_ANNInitialize(mp,pAnn,dataheader.learningRate,(PX_ANN_REGULARZATION)dataheader.regularzation,dataheader.regularization_rate))
+		return PX_FALSE;
+
+	for (i=0;i<(px_int)dataheader.LayerCount;i++)
+	{
+		PX_memcpy(&Layerheader,rBuffer,sizeof(Layerheader));
+		rBuffer+=sizeof(Layerheader);
+		size-=sizeof(Layerheader);
+		if (size<=0){PX_ANNFree(pAnn); return PX_FALSE;}
+		
+		if(!PX_ANNAddLayer(pAnn,Layerheader.NeuralsCount,0,(PX_ANN_ACTIVATION_FUNCTION)Layerheader.activation,PX_ANN_LAYER_WEIGHT_INITMODE_CONST,0))
+		{
+			PX_ANNFree(pAnn);
+			return PX_FALSE;
+		}
+		pLastLayer=pAnn->Layer;
+		while (pLastLayer->pNext)
+		{
+			pLastLayer=pLastLayer->pNext;
+		}
+
+		PX_memcpy(pLastLayer->w,rBuffer,Layerheader.weight_count*sizeof(px_double));
+		rBuffer+=Layerheader.weight_count*sizeof(px_double);
+		size-=Layerheader.weight_count*sizeof(px_double);
+		if (size<=0){PX_ANNFree(pAnn); return PX_FALSE;}
+
+		PX_memcpy(pLastLayer->bias,rBuffer,Layerheader.NeuralsCount*sizeof(px_double));
+		rBuffer+=Layerheader.NeuralsCount*sizeof(px_double);
+		size-=Layerheader.NeuralsCount*sizeof(px_double);
+		if (size<0){PX_ANNFree(pAnn); return PX_FALSE;}
+
+	}
+	return PX_TRUE;
+}
+
 px_void PX_ANNGetOutput(PX_ANN *pAnn,px_double *result)
 {
 	PX_ANN_Layer *p=pAnn->Layer;
 	if(!p) return;
 	while (p->pNext) p=p->pNext;
 	PX_memcpy(result,p->out,p->Neurals*sizeof(px_double));
+}
+
+px_void PX_ANNReset(PX_ANN *pANN)
+{
+	PX_ANN_Layer *pLayer=pANN->Layer;
+	px_int i;
+	while (pLayer)
+	{
+		switch(pLayer->w_initMode)
+		{
+
+		case PX_ANN_LAYER_WEIGHT_INITMODE_RAND:
+			for (i=0;i<pLayer->w_count;i++)
+			{
+				pLayer->w[i]=PX_rand()/1.0/PX_RAND_MAX;
+			}
+			break;
+		case PX_ANN_LAYER_WEIGHT_INITMODE_GAUSSRAND:
+			for (i=0;i<pLayer->w_count;i++)
+			{
+				pLayer->w[i]=PX_GaussRand();
+			}
+			break;
+
+		case PX_ANN_LAYER_WEIGHT_INITMODE_CONST:
+		default:
+			for (i=0;i<pLayer->w_count;i++)
+			{
+				pLayer->w[i]=pLayer->weight_init;
+			}
+			break;
+		}
+		pLayer=pLayer->pNext;
+	}
 }
 

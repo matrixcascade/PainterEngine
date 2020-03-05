@@ -973,6 +973,19 @@ px_void PX_GeoDrawRect(px_surface *psurface, px_int left, px_int top, px_int rig
 		return;
 	}
 	
+	if (left>right)
+	{
+		mid=left;
+		left=right;
+		right=mid;
+	}
+	if (top>bottom)
+	{
+		mid=top;
+		top=bottom;
+		bottom=mid;
+	}
+
 	if (left<0)
 	{
 		left=0;
@@ -1013,18 +1026,7 @@ px_void PX_GeoDrawRect(px_surface *psurface, px_int left, px_int top, px_int rig
 	}
 
 
-	if (left>right)
-	{
-		mid=left;
-		left=right;
-		right=mid;
-	}
-	if (top>bottom)
-	{
-		mid=top;
-		top=bottom;
-		bottom=mid;
-	}
+	
 
 	
 

@@ -3,13 +3,22 @@
 
 #include	"PX_MathTable.h"
 
+#define PX_DBL_POSITIVE_MAX 1.7976931348623158e+308
+#define PX_DBL_POSITIVE_MIN 4.94065645841246544e-324
+
+#define PX_DBL_NEGATIVE_MIN -1.79769313486231570E+308
+#define PX_DBL_NEGATIVE_MAX -4.94065645841246544E-324
+
 #define     _IN
 #define     _OUT
 #define     PX_FALSE			0
 #define     PX_TRUE				1
 #define		PX_NULL				0
 #define     PX_PI				3.141592653589793238462
+#define     PX_e                (2.7182818284590452353602)
+#define     PX_e2               (PX_e*PX_e)
 #define     PX_RAND_MAX         (0xefffffff)
+
 
 #ifdef _DEBUG
 #define PX_DEBUG_MODE _DEBUG
@@ -157,6 +166,10 @@ px_word PX_ntohs(px_word n);
 
 
 //////////////////////////////////////////////////////////////////////////
+//
+px_double PX_exp(px_double x);
+
+//////////////////////////////////////////////////////////////////////////
 //functions
 px_double PX_tanh(px_double x);
 px_double PX_sigmoid(px_double x);
@@ -166,10 +179,13 @@ px_double PX_ReLU(px_double x);
 //PMMCLCG
 px_void PX_srand(px_uint64 seed);
 px_uint32 PX_rand();
+px_double PX_randRange(px_double min,px_double max);
 px_uint32 PX_randEx(px_uint64 seed);
 //gauss rand
 px_double PX_GaussRand();
 
+//ceil
+px_double PX_Ceil(px_double v);
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -183,17 +199,20 @@ px_uint32 PX_sum32(px_void *buffer, px_uint size);
 //////////////////////////////////////////////////////////////////////////
 //maths
 px_int	PX_pow_ii(px_int i,px_int n);
-px_double PX_pow_ff(px_double num,px_double m);
+px_double PX_pow_dd(px_double num,px_double m);
 px_float PX_sqrt( px_float number );
 px_double PX_sqrtd( px_double number );
 px_float PX_SqrtRec( px_float number );
 px_double PX_ln(px_double __x);
+px_double PX_log(px_double __x);
 px_double PX_lg(px_double __x);
 px_double PX_log10(px_double __x);
 
 #define  PX_RadianToAngle(angle) ((angle)*PX_PI/180)
 #define  PX_AngleToRadian(radian) ((radian)*180/PX_PI)
 
+px_double PX_sind(px_double radius);
+px_double PX_cosd(px_double radius);
 px_float PX_sin_radian(px_float radius);
 px_float PX_cos_radian(px_float radius);
 px_float PX_tan_radian(px_float radius);
@@ -227,7 +246,8 @@ px_char *PX_strchr(const char *s,int ch);
 px_char* PX_strstr(const char* dest, const char* src);
 
 ///////////////////////////////////////////////////////////////////////////
-//rectangle
+//rectangle circle
+px_bool PX_isPointInCircle(px_point p,px_point circle,px_float radius);
 px_bool PX_isPointInRect(px_point p,px_rect rect);
 px_bool PX_isXYInRegion(px_float x,px_float y,px_float rectx,px_float recty,px_float width,px_float height);
 //////////////////////////////////////////////////////////////////////////
@@ -408,18 +428,52 @@ px_plane PX_PLANE(px_point3D p,px_vector3D n);
 px_rect PX_RECT(px_float x,px_float y,px_float width,px_float height);
 px_rect PX_RECTPOINT2(px_point p1,px_point p2);
 
+
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//complex
+px_complex PX_complexBuild(px_float re,px_float im);
+px_complex PX_complexAdd(px_complex a,px_complex b);
+px_complex PX_complexMult(px_complex a,px_complex b);
+px_double  PX_complexMod(px_complex a);
+px_complex PX_complexLog(px_complex a);
+px_complex PX_complexExp(px_complex a);
+px_complex PX_complexSin(px_complex a);
+
 //////////////////////////////////////////////////////////////////////////
 //DFT/FFT
 void PX_DFT(_IN px_complex x[],_OUT px_complex X[],px_int N);
+void PX_DCT(_IN px_double x[],_OUT px_double X[],px_int N);
 void PX_IDFT(_IN px_complex X[],_OUT px_complex x[],px_int N);
+void PX_IDCT(_IN px_double x[],_OUT px_double X[],px_int N);
 void PX_FFT(_IN px_complex x[],_OUT px_complex X[],px_int N);
 void PX_IFFT(_IN px_complex X[],_OUT px_complex x[],px_int N);
 void PX_FFT_2(_IN px_complex x[],_OUT px_complex X[],px_int N_N);
 void PX_IFFT_2(_IN px_complex X[],_OUT px_complex x[],px_int N_N);
 void PX_FFT_2_Shift(_IN px_complex _in[],_OUT px_complex _out[],px_int N_N);
+void PX_FT_Symmetry(_IN px_complex x[],_OUT px_complex X[],px_int N);
 
 //////////////////////////////////////////////////////////////////////////
+//cepstrum
+typedef enum
+{
+	PX_CEPTRUM_TYPE_REAL,
+	PX_CEPSTRUM_TYPE_COMPLEX,
+}PX_CEPSTRUM_TYPE;
+void PX_Cepstrum(_IN px_complex x[],_OUT px_complex X[],px_int N,PX_CEPSTRUM_TYPE type);
 
+//////////////////////////////////////////////////////////////////////////
+//PitchEstimation
+px_int PX_PitchEstimation(_IN px_complex x[],px_int N,px_int sampleRate);
+//////////////////////////////////////////////////////////////////////////
+//PreEmphasise
+void PX_PreEmphasise(const px_double *data, int len, px_double *out, px_double preF);//0.9<preF<1.0 suggest 0.9;
+
+//////////////////////////////////////////////////////////////////////////
+//up/down sampling
+void PX_LinearInterpolationResample(_IN px_double x[],_OUT px_double X[],px_int N,px_int M);
+void PX_DownSampled(_IN px_complex x[],_OUT px_complex X[],px_int N,px_int M);
+void PX_UpSampled(_IN px_complex x[],_OUT px_complex X[],px_int N,px_int L);
 
 //////////////////////////////////////////////////////////////////////////
 //ipv4
@@ -435,9 +489,10 @@ px_void PX_WindowFunction_tukey(px_double data[],px_int N);
 px_void PX_WindowFunction_hanning(px_double data[],px_int N);
 px_void PX_WindowFunction_blackMan(px_double data[],px_int N);
 px_void PX_WindowFunction_hamming(px_double data[],px_int N);
+px_void PX_WindowFunction_sinc(px_double data[],px_int N);
 px_void PX_WindowFunction_kaiser(px_double beta,px_double data[],px_int N);
 px_void PX_WindowFunction_triangular(px_double data[],px_int N);
-
+px_void PX_WindowFunction_Apply(px_double data[],px_double window[],px_int N);
 
 //////////////////////////////////////////////////////////////////////////
 //gainc
@@ -445,8 +500,24 @@ px_void PX_gain(px_double b[],px_double a[],px_int m,px_int n,px_double x[],px_d
 px_void PX_gainc(px_double b[],px_double a[],px_int n,px_int ns,px_double x[],px_double y[],px_int len,px_int sign);
 //////////////////////////////////////////////////////////////////////////
 
+//////////////////////////////////////////////////////////////////////////
+//sine
+typedef struct
+{
+	px_double A;
+	px_double p;
+	px_double f;
+}px_sine;//f(t)=Asin(wt+p)
+
+px_sine PX_SINE(px_double A,px_double P,px_double F);
+
+//////////////////////////////////////////////////////////////////////////
+//Instantaneous Frequency
+px_sine PX_InstantaneousFrequency(px_sine src,px_double p2,px_double delta_t);
 
 
+//////////////////////////////////////////////////////////////////////////
+//
 
 //FIR Filter
 typedef enum

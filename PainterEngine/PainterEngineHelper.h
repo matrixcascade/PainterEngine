@@ -4,9 +4,9 @@
 #define PE_MEMORY_RENDER_SURFACE   1024*1024*4 //4M
 #define PE_MEMORY_CACHE_NODE       128
 #define PE_MEMORY_RUNTIME_SIZE (1024*1024*128+PE_MEMORY_RENDER_SURFACE+PE_MEMORY_CACHE_NODE)//128M for runtime
-#define PE_MEMORY_UI_SIZE 1024*1024*2  //2M
+#define PE_MEMORY_UI_SIZE 1024*1024*8  //8M
 #define PE_MEMORY_RESOURCES_SIZE 1024*1024*64//48M
-#define PE_MEMORY_GAME_SIZE 1024*1024 //1M
+#define PE_MEMORY_GAME_SIZE 1024*1024*8 //8M
 
 #ifdef __cplusplus
 extern "C" {
@@ -29,15 +29,17 @@ px_void PX_SetBackgroundColor(px_color clr);
 px_void PX_Clear(px_color clr);
 px_void PX_ShowConsole();
 px_void PX_HideConsole();
-px_bool PX_Initialize(const px_char *name,px_int width,px_int height);
+px_bool PX_Initialize(px_char *name,px_int width,px_int height);
 px_surface *PX_GetSurface();
 PX_Object  *PX_GetUiRoot();
 PX_Runtime *PX_GetRuntime();
 PX_ResourceLibrary * PX_GetResourceLibrary();
 px_memorypool *PX_GetMP();
 
+PX_IO_Data PX_LoadFileToIOData(px_char *path);
+px_void PX_FreeIOData(PX_IO_Data *io);
+
 px_bool PX_LoadTextureFromFile(px_memorypool *mp,px_texture *tex,px_char *path);
-px_bool PX_LoadFontModuleFromFile(PX_FontModule *fm,px_char *path);
 px_bool PX_LoadShapeFromFile(px_memorypool *mp,px_shape *shape,px_char *path);
 px_bool PX_LoadSoundFromFile(px_memorypool *mp,px_shape *shape,px_char *path);
 px_bool PX_LoadAnimationLibraryFromFile(px_memorypool *mp,px_animationlibrary *lib,px_char *path);

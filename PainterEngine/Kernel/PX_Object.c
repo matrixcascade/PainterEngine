@@ -287,6 +287,11 @@ px_bool PX_ObjectIsPointInRegion( PX_Object *Object,px_float x,px_float y )
 	return PX_isXYInRegion(x,y,Object->x,Object->y,Object->Width,Object->Height);
 }
 
+px_bool PX_ObjectIsCursorInRegion(PX_Object *Object,PX_Object_Event e)
+{
+	return PX_ObjectIsPointInRegion(Object,(px_float)e.Param_int[0],(px_float)e.Param_int[1]);
+}
+
 px_float PX_ObjectGetHeight(PX_Object *Object)
 {
 	return Object->Height;
@@ -1085,12 +1090,12 @@ px_void PX_Object_SliderBarOnMouseLButtonDown(PX_Object *pObject,PX_Object_Event
 					break;
 				case PX_OBJECT_SLIDERBAR_STYLE_BOX:
 					{
-						Sx=(px_int)pObject->x+(px_int)((pObject->Width-4-pSliderBar->SliderButtonLength)*(1.0f)*pSliderBar->Value/pSliderBar->Value);
+						Sx=(px_int)pObject->x+(px_int)((pObject->Width-4-pSliderBar->SliderButtonLength)*(1.0f)*pSliderBar->Value/pSliderBar->Max);
 					
 						rect.x=(px_float)Sx;
 						rect.y=(px_float)pObject->y+2;
 						rect.width=(px_float)pSliderBar->SliderButtonLength;
-						rect.height=(px_float)pObject->Height/2-4;
+						rect.height=(px_float)pObject->Height-2;
 
 						if (PX_isPointInRect(PX_POINT((px_float)x,(px_float)y,0),rect))
 						{
@@ -1413,7 +1418,7 @@ px_void PX_Object_SliderBarRender(px_surface *psurface, PX_Object *pObject,px_ui
 						pSliderBar->DargButtonX=Sx;
 						Sx+=SliderBtnLen/2;
 						//draw slider bar
-						PX_GeoDrawRect(psurface,(px_int)pObject->x+Sx-SliderBtnLen/2+2,(px_int)pObject->y+2,(px_int)pObject->x+Sx-SliderBtnLen/2+SliderBtnLen-1,(px_int)pObject->y+(px_int)pObject->Height-2,pSliderBar->color);
+						PX_GeoDrawRect(psurface,(px_int)pObject->x+Sx-SliderBtnLen/2+2,(px_int)pObject->y+2,(px_int)pObject->x+Sx-SliderBtnLen/2+SliderBtnLen-1,(px_int)pObject->y+(px_int)pObject->Height-3,pSliderBar->color);
 					}
 					break;
 				}
@@ -1452,7 +1457,7 @@ px_void PX_Object_SliderBarRender(px_surface *psurface, PX_Object *pObject,px_ui
 						pSliderBar->DargButtonY=Sy;
 						Sy+=SliderBtnLen/2;
 						//draw slider bar
-						PX_GeoDrawRect(psurface,(px_int)pObject->x+2,(px_int)pObject->y+Sy-SliderBtnLen/2+2,(px_int)pObject->x+(px_int)pObject->Width-1-2,(px_int)pObject->y+Sy+SliderBtnLen/2-1+2,pSliderBar->color);
+						PX_GeoDrawRect(psurface,(px_int)pObject->x+2,(px_int)pObject->y+Sy-SliderBtnLen/2+2,(px_int)pObject->x+(px_int)pObject->Width-1-2,(px_int)pObject->y+Sy+SliderBtnLen/2-1+1,pSliderBar->color);
 					}
 					break;
 				}
@@ -1504,7 +1509,7 @@ px_void PX_Object_SliderBarRender(px_surface *psurface, PX_Object *pObject,px_ui
 						}
 						Sx+=SliderBtnLen/2;
 						//draw slider bar
-						PX_GeoDrawRect(psurface,(px_int)pObject->x+Sx-SliderBtnLen/2+2,(px_int)pObject->y+2,(px_int)pObject->x+Sx-SliderBtnLen/2+SliderBtnLen-1,(px_int)pObject->y+(px_int)pObject->Height-2,pSliderBar->color);
+						PX_GeoDrawRect(psurface,(px_int)pObject->x+Sx-SliderBtnLen/2+2,(px_int)pObject->y+2,(px_int)pObject->x+Sx-SliderBtnLen/2+SliderBtnLen-1,(px_int)pObject->y+(px_int)pObject->Height-3,pSliderBar->color);
 					}
 					break;
 				}
@@ -1557,8 +1562,6 @@ px_void PX_Object_SliderBarRender(px_surface *psurface, PX_Object *pObject,px_ui
 						Sx=(px_int)pObject->x;
 						Sy+=SliderBtnLen/2;
 						
-
-
 						//draw slider bar
 						PX_GeoDrawRect(psurface,(px_int)pObject->x+2,(px_int)pObject->y+Sy-SliderBtnLen/2+2,(px_int)pObject->x+(px_int)pObject->Width-1-2,(px_int)pObject->y+Sy+SliderBtnLen/2-1+2,pSliderBar->color);
 					}
@@ -1763,7 +1766,7 @@ px_void PX_Object_PushButtonOnMouseLButtonUp(PX_Object *Object,PX_Object_Event e
 			if(pPushButton->state==PX_OBJECT_BUTTON_STATE_ONPUSH)
 			{
 				pPushButton->state=PX_OBJECT_BUTTON_STATE_ONCURSOR;
-				e.Event=PX_OBJECT_EVENT_CURSORCLICK;
+				e.Event=PX_OBJECT_EVENT_EXECUTE;
 				PX_ObjectExecuteEvent(Object,e);
 			}
 	}
@@ -3010,7 +3013,7 @@ px_void PX_Object_ScrollArea_EventDispatcher(PX_Object *Object,PX_Object_Event e
 		return;
 	}
 
-	if (e.Event==PX_OBJECT_EVENT_CURSORCLICK||e.Event==PX_OBJECT_EVENT_CURSORDRAG||e.Event==PX_OBJECT_EVENT_CURSORDOWN||e.Event==PX_OBJECT_EVENT_CURSORUP||e.Event==PX_OBJECT_EVENT_CURSORMOVE)
+	if (e.Event==PX_OBJECT_EVENT_EXECUTE||e.Event==PX_OBJECT_EVENT_CURSORDRAG||e.Event==PX_OBJECT_EVENT_CURSORDOWN||e.Event==PX_OBJECT_EVENT_CURSORUP||e.Event==PX_OBJECT_EVENT_CURSORMOVE)
 	{
 
 		if (!PX_ObjectIsPointInRegion(Object,(px_float)e.Param_uint[0],(px_float)e.Param_uint[1]))
@@ -4996,7 +4999,7 @@ px_void PX_Object_CoordinatesSetRightVerticalDividing(PX_Object *pObj,px_int Cou
 
 
 
-px_void PX_Object_CoordinatesSetLineMode(PX_Object *pObj,PX_OBJECT_COORDINATES_LINEMODE mode)
+px_void PX_Object_CoordinatesSetStyle(PX_Object *pObj,PX_OBJECT_COORDINATES_LINEMODE mode)
 {
 	PX_Object_Coordinates *pcd=PX_Object_GetCoordinates(pObj);
 	if (!pcd)
@@ -5042,6 +5045,17 @@ px_void PX_Object_CoordinatesSetGuidesShowMode(PX_Object *pObject,PX_OBJECT_COOR
 	pcd->guidesShowMode=mode;
 }
 
+
+px_void PX_Object_CoordinatesShowHelpLine(PX_Object *pObject,px_bool show)
+{
+	PX_Object_Coordinates *pcd=PX_Object_GetCoordinates(pObject);
+	if (!pcd)
+	{
+		PX_ASSERT();
+		return;
+	}
+	pcd->ShowHelpLine=show;
+}
 
 px_void PX_Object_CoordinatesSetDataLineWidth(PX_Object *pObject,px_float linewidth)
 {
@@ -5104,6 +5118,17 @@ px_void PX_Object_CoordinatesSetTitleFontColor(PX_Object *pObject,px_color clr)
 	pcd->FontColor=clr;
 }
 
+px_void PX_Object_CoordinatesSetDashLineColor(PX_Object *pObject,px_color clr)
+{
+	PX_Object_Coordinates *pcd=PX_Object_GetCoordinates(pObject);
+	if (!pcd)
+	{
+		PX_ASSERT();
+		return;
+	}
+	pcd->DashColor=clr;
+}
+
 px_void PX_Object_CoordinatesSetTitleLeftShow(PX_Object *pObject,px_bool bshow)
 {
 	PX_Object_Coordinates *pcd=PX_Object_GetCoordinates(pObject);
@@ -5124,6 +5149,17 @@ px_void PX_Object_CoordinatesSetTitleRightShow(PX_Object *pObject,px_bool bshow)
 		return;
 	}
 	pcd->RightTitleShow=bshow;
+}
+
+px_void PX_Object_CoordinatesSetHorizontalShow(PX_Object *pObject,px_bool bshow)
+{
+	PX_Object_Coordinates *pcd=PX_Object_GetCoordinates(pObject);
+	if (!pcd)
+	{
+		PX_ASSERT();
+		return;
+	}
+	pcd->HorizontalShow=bshow;
 }
 
 px_void PX_Object_CoordinatesSetFloatFlagFormatHorizontal(PX_Object *pObject,const char *fmt)
@@ -5267,6 +5303,16 @@ px_void PX_Object_CoordinatesSetBorderColor(PX_Object *pObject,px_color clr)
 	}
 }
 
+PX_Object_CoordinateData * PX_Object_CoordinatesGetCoordinateData(PX_Object *pObject,px_int index)
+{
+	PX_Object_Coordinates *pcd=PX_Object_GetCoordinates(pObject);
+	if (index>pcd->vData.size-1)
+	{
+		return PX_NULL;
+	}
+	return PX_VECTORAT(PX_Object_CoordinateData,&pcd->vData,index);
+}
+
 px_int PX_Object_CoordinatesGetCoordinateWidth(PX_Object *pObject)
 {
 	PX_Object_Coordinates *pcd=PX_Object_GetCoordinates(pObject);
@@ -5400,6 +5446,13 @@ px_double  PX_Object_CoordinatesMapPixelValueToVertical(PX_Object *pObject,px_in
 		Min=pcd->RightVerticalRangeMin;
 		return pcd->RightVerticalRangeMin+(pObject->Height-pcd->BottomSpacer-Pixel)*(Max-Min)/PX_Object_CoordinatesGetCoordinateHeight(pObject);
 	}
+
+	if (Map==PX_OBJECT_COORDINATEDATA_MAP_HORIZONTAL)
+	{
+		Max=pcd->HorizontalRangeMax;
+		Min=pcd->HorizontalRangeMin;
+		return pcd->HorizontalRangeMin+(Pixel-pcd->LeftSpacer)*(Max-Min)/PX_Object_CoordinatesGetCoordinateWidth(pObject);
+	}
 	return 0;
 }
 
@@ -5451,7 +5504,7 @@ static px_void PX_Object_CoordinatesDrawDashed(px_surface *psurface,PX_Object *p
 					offsetx+(px_int)(pcd->LeftSpacer+i*HorizontalInc),offsety+pcd->TopSpacer,\
 					offsetx+(px_int)(pcd->LeftSpacer+i*HorizontalInc),offsety+pcd->TopSpacer+PX_Object_CoordinatesGetCoordinateHeight(pObject),\
 					1,\
-					PX_COLOR(PX_OBJECT_COORDINATES_DEFAULT_DASH_RGB)\
+					pcd->DashColor
 					);
 			}
 		}
@@ -5647,7 +5700,7 @@ static px_void PX_Object_CoordinatesDrawTitle(px_surface *psurface,PX_Object *pO
 static px_void PX_Object_CoordinatesDrawDataInfo(px_surface *psurface,PX_Object *pObject,px_double *Horizontal,px_double *Vertical,px_int linewidth,px_int Size,px_int Map,px_color Color)
 {
 	px_double RangeMin,RangeMax;
-	px_double x,y,w,h;
+	px_double x,y,w,btm,zeroy;
 	px_int dx1,dy1,dx2,dy2;
 	px_int i;
 	px_int offsetx=(px_int)pObject->x;
@@ -5666,21 +5719,53 @@ static px_void PX_Object_CoordinatesDrawDataInfo(px_surface *psurface,PX_Object 
 		RangeMin=pcd->RightVerticalRangeMin;
 		RangeMax=pcd->RightVerticalRangeMax;
 	}
-
+	
 	switch(pcd->LineMode)
 	{
 	case PX_OBJECT_COORDINATES_LINEMODE_PILLAR:
 		{
+			zeroy=PX_Object_CoordinatesMapVerticalValueToPixel(pObject,0,Map);
 			for (i=0;i<Size;i++)
 			{
 				if (Horizontal[i]>=pcd->HorizontalRangeMin)
 				{
+					
 					x=PX_Object_CoordinatesMapHorizontalValueToPixel(pObject,Horizontal[i-1])-pcd->DataPillarWidth/2;
 					y=PX_Object_CoordinatesMapVerticalValueToPixel(pObject,Vertical[i],Map);
-
+					
 					w=pcd->DataPillarWidth;
-					h=pObject->Height-y-pcd->BottomSpacer;
-					PX_GeoDrawRect(psurface,offsetx+(px_int)x,offsety+(px_int)y,offsetx+(px_int)(x+w),offsety+(px_int)(y+h),Color);
+					btm=zeroy;
+
+					if (y>btm)
+					{
+						double tem;
+						tem=btm;
+						btm=y;
+						y=tem;
+					}
+
+					if (!(btm<pcd->TopSpacer||y>pObject->Height-pcd->BottomSpacer))
+					{
+						if (y<pcd->TopSpacer)
+						{
+							y=pcd->TopSpacer;
+						}
+						if (btm>pObject->Height-pcd->BottomSpacer)
+						{
+							btm=pObject->Height-pcd->BottomSpacer;
+						}
+						if (x-(px_int)x>0.1)
+						{
+							PX_GeoDrawRect(psurface,offsetx+(px_int)x,offsety+(px_int)y,offsetx+(px_int)(x+w),offsety+(px_int)(btm),Color);
+						}
+						else
+						{
+							PX_GeoDrawRect(psurface,offsetx+(px_int)x,offsety+(px_int)y,offsetx+(px_int)(x+w),offsety+(px_int)(btm),Color);
+						}
+					}
+					
+					
+					
 				}
 				if(Horizontal[i]>pcd->HorizontalRangeMax)
 					break;
@@ -5743,7 +5828,8 @@ static px_void PX_Object_CoordinatesDrawData(px_surface *psurface,PX_Object *pOb
 		{
 			PX_Object_CoordinateData *pData=PX_VECTORAT(PX_Object_CoordinateData,&pcd->vData,i);
 			if(pData->Visibled)
-				PX_Object_CoordinatesDrawDataInfo(psurface,pObject,pData->MapHorizontalArray,pData->MapVerticalArray,pData->linewidth,pData->Size,pData->Map,pData->Color);
+					PX_Object_CoordinatesDrawDataInfo(psurface,pObject,pData->MapHorizontalArray,pData->MapVerticalArray,pData->linewidth,pData->Size,pData->Map,pData->Color);
+
 		}
 	}
 }
@@ -5764,6 +5850,132 @@ static px_void PX_Object_CoordinatesDrawScaleDraging(px_surface *psurface,PX_Obj
 		PX_GeoDrawRect(psurface,offsetx+(px_int)pcd->DragStartPoint.x,offsety+(px_int)pcd->DragStartPoint.y,offsetx+(px_int)pcd->DragingPoint.x,offsety+(px_int)pcd->DragingPoint.y,PX_COLOR(96,167,233,128));
 
 }
+
+static px_void PX_Object_CoordinatesDrawHelpLine(px_surface *psurface,PX_Object *pObject)
+{
+	px_int x,y;
+	px_double value;
+	PX_Object_Coordinates *pcd=PX_Object_GetCoordinates(pObject);
+
+	if (!pcd->ShowHelpLine)
+	{
+		return;
+	}
+	//Draw X line
+
+	if(pcd->HorizontalShow)
+	{
+		value=PX_Object_CoordinatesMapPixelValueToVertical(pObject,pcd->helpLineX,PX_OBJECT_COORDINATEDATA_MAP_HORIZONTAL);
+
+		if (value>pcd->HorizontalRangeMin&&value<pcd->HorizontalRangeMax)
+		{
+			px_int IsFloat;
+			px_int X,Y;
+			px_double ValInc=value;
+			px_char text[16];
+			x=PX_Object_CoordinatesMapHorizontalValueToPixel(pObject,value);
+
+			PX_GeoDrawLine(psurface,(px_int)pObject->x+x,(px_int)(pObject->y+pObject->Height-pcd->BottomSpacer),(px_int)pObject->x+x,(px_int)pObject->y+pcd->TopSpacer,(px_int)1,pcd->helpLineColor);
+			//Draw text
+
+			if (PX_ABS(ValInc-(px_int)ValInc)<0.000001f)
+			{
+				IsFloat=PX_FALSE;
+			}
+			else
+			{
+				IsFloat=PX_TRUE;
+			}
+
+
+			X=PX_Object_CoordinatesMapHorizontalValueToPixel(pObject,value);
+			Y=(px_int)(pObject->Height-pcd->BottomSpacer);
+
+			if(IsFloat)
+				PX_sprintf1(text,sizeof(text),"%1",PX_STRINGFORMAT_FLOAT((px_float)ValInc));
+			else
+				PX_sprintf1(text,sizeof(text),"%1",PX_STRINGFORMAT_INT((px_int)ValInc));
+
+			PX_FontDrawText(psurface,(px_int)(pObject->x+X-PX_OBJECT_COORDINATES_DEFAULT_FLAGTEXT_SPACER*1.5),(px_int)pObject->y+Y,text,pcd->helpLineColor,PX_FONT_ALIGN_XLEFT);
+		}
+	}
+
+
+	//Draw YL line
+
+	if(pcd->LeftTitleShow)
+	{
+		value=PX_Object_CoordinatesMapPixelValueToVertical(pObject,pcd->helpLineY,PX_OBJECT_COORDINATEDATA_MAP_LEFT);
+
+		if (value>pcd->LeftVerticalRangeMin&&value<pcd->LeftVerticalRangeMax)
+		{
+			px_int IsFloat;
+			px_int X,Y;
+			px_double ValInc=value;
+			px_char text[16];
+
+			y=pcd->helpLineY;//PX_Object_CoordinatesMapVerticalValueToPixel(pObject,value,PX_OBJECT_COORDINATEDATA_MAP_LEFT);
+
+			PX_GeoDrawLine(psurface,(px_int)pObject->x+pcd->LeftSpacer,(px_int)pObject->y+y,(px_int)(pObject->x+pObject->Width-pcd->RightSpacer),(px_int)pObject->y+y,1,pcd->helpLineColor);
+			//Draw text
+
+			if (PX_ABS(ValInc-(px_int)ValInc)<0.000000001)
+			{
+				IsFloat=PX_FALSE;
+			}
+			else
+			{
+				IsFloat=PX_TRUE;
+			}
+
+
+			X=pcd->LeftSpacer;
+			Y=y;//PX_Object_CoordinatesMapVerticalValueToPixel(pObject,ValInc,PX_OBJECT_COORDINATEDATA_MAP_LEFT);
+
+			if(IsFloat)
+				PX_sprintf1(text,sizeof(text),"%1",PX_STRINGFORMAT_FLOAT((px_float)ValInc));
+			else
+				PX_sprintf1(text,sizeof(text),"%1",PX_STRINGFORMAT_INT((px_int)ValInc));
+
+			PX_FontDrawText(psurface,(px_int)pObject->x+X,(px_int)pObject->y+Y-PX_OBJECT_COORDINATES_DEFAULT_FLAGTEXT_SPACER*2-1,text,pcd->helpLineColor,PX_FONT_ALIGN_XLEFT);
+		}
+	}
+
+
+	//Draw YR line
+	if(pcd->RightTitleShow)
+	{
+		value=PX_Object_CoordinatesMapPixelValueToVertical(pObject,pcd->helpLineY,PX_OBJECT_COORDINATEDATA_MAP_RIGHT);
+
+		if (value>pcd->RightVerticalRangeMin&&value<pcd->RightVerticalRangeMax)
+		{
+			px_int IsFloat;
+			px_int X,Y;
+			px_double ValInc=value;
+			px_char text[16];
+
+			y=pcd->helpLineY;//PX_Object_CoordinatesMapVerticalValueToPixel(pObject,pflgl->Y,PX_OBJECT_COORDINATEDATA_MAP_RIGHT);
+			PX_GeoDrawLine(psurface,(px_int)pObject->x+pcd->LeftSpacer,(px_int)pObject->y+y,(px_int)(pObject->x+pObject->Width-pcd->RightSpacer),(px_int)pObject->y+y,(px_int)(1),pcd->helpLineColor);
+
+			if (PX_ABS(ValInc-(px_int)ValInc)<0.000001f)
+			{
+				IsFloat=PX_FALSE;
+			}
+			else
+			{
+				IsFloat=PX_TRUE;
+			}
+
+			X=(px_int)(pObject->Width-pcd->RightSpacer);
+			Y=y;//PX_Object_CoordinatesMapVerticalValueToPixel(pObject,ValInc,PX_OBJECT_COORDINATEDATA_MAP_RIGHT);
+
+			PX_FontDrawText(psurface,(px_int)pObject->x+X,(px_int)pObject->y+Y-PX_OBJECT_COORDINATES_DEFAULT_FLAGTEXT_SPACER*2-1,text,pcd->helpLineColor,PX_FONT_ALIGN_XLEFT);
+		}
+	}
+}
+
+
+
 static px_void PX_Object_CoordinatesDrawFlagLine(px_surface *psurface,PX_Object *pObject)
 {
 	px_int x,y,i;
@@ -5783,7 +5995,7 @@ static px_void PX_Object_CoordinatesDrawFlagLine(px_surface *psurface,PX_Object 
 				px_char text[16];
 				x=PX_Object_CoordinatesMapHorizontalValueToPixel(pObject,pflgl->X);
 
-				PX_GeoDrawLine(psurface,x,(px_int)(pObject->Height-pcd->BottomSpacer),x,pcd->TopSpacer,(px_int)pflgl->LineWidth,pflgl->color);
+				PX_GeoDrawLine(psurface,(px_int)pObject->x+x,(px_int)((px_int)pObject->y+pObject->Height-pcd->BottomSpacer),(px_int)pObject->x+x,(px_int)pObject->y+pcd->TopSpacer,(px_int)pflgl->LineWidth,pflgl->color);
 				//Draw text
 
 				if (PX_ABS(ValInc-(px_int)ValInc)<0.000001f)
@@ -5804,7 +6016,7 @@ static px_void PX_Object_CoordinatesDrawFlagLine(px_surface *psurface,PX_Object 
 				else
 					PX_sprintf1(text,sizeof(text),"%1",PX_STRINGFORMAT_INT((px_int)ValInc));
 
-				PX_FontDrawText(psurface,(px_int)(X-PX_OBJECT_COORDINATES_DEFAULT_FLAGTEXT_SPACER*1.5),Y,text,pcd->FontColor,PX_FONT_ALIGN_XLEFT);
+				PX_FontDrawText(psurface,(px_int)((px_int)pObject->x+X-PX_OBJECT_COORDINATES_DEFAULT_FLAGTEXT_SPACER*1.5),(px_int)pObject->y+Y,text,pcd->FontColor,PX_FONT_ALIGN_XLEFT);
 			}
 		}
 
@@ -5817,14 +6029,14 @@ static px_void PX_Object_CoordinatesDrawFlagLine(px_surface *psurface,PX_Object 
 			{
 				px_int IsFloat;
 				px_int X,Y;
-				px_double ValInc=pflgl->X;
+				px_double ValInc=pflgl->Y;
 				px_char text[16];
 				y=PX_Object_CoordinatesMapVerticalValueToPixel(pObject,pflgl->Y,PX_OBJECT_COORDINATEDATA_MAP_LEFT);
 
-				PX_GeoDrawLine(psurface,pcd->LeftSpacer,y,(px_int)(pObject->Width-pcd->RightSpacer),y,(px_int)(pflgl->LineWidth),pflgl->color);
+				PX_GeoDrawLine(psurface,(px_int)pObject->x+pcd->LeftSpacer,(px_int)pObject->y+y,(px_int)((px_int)pObject->x+pObject->Width-pcd->RightSpacer),(px_int)pObject->y+y,(px_int)(pflgl->LineWidth),pflgl->color);
 				//Draw text
 
-				if (PX_ABS(ValInc-(px_int)ValInc)<0.000001f)
+				if (PX_ABS(ValInc-(px_int)ValInc)<0.000000001)
 				{
 					IsFloat=PX_FALSE;
 				}
@@ -5835,14 +6047,14 @@ static px_void PX_Object_CoordinatesDrawFlagLine(px_surface *psurface,PX_Object 
 
 
 				X=pcd->LeftSpacer;
-				Y=PX_Object_CoordinatesMapVerticalValueToPixel(pObject,ValInc,PX_OBJECT_COORDINATEDATA_MAP_LEFT);
+				Y=y;//PX_Object_CoordinatesMapVerticalValueToPixel(pObject,ValInc,PX_OBJECT_COORDINATEDATA_MAP_LEFT);
 
 				if(IsFloat)
 					PX_sprintf1(text,sizeof(text),"%1",PX_STRINGFORMAT_FLOAT((px_float)ValInc));
 				else
 					PX_sprintf1(text,sizeof(text),"%1",PX_STRINGFORMAT_INT((px_int)ValInc));
 
-				PX_FontDrawText(psurface,X-4*PX_OBJECT_COORDINATES_DEFAULT_FLAGTEXT_SPACER,Y-PX_OBJECT_COORDINATES_DEFAULT_FLAGTEXT_SPACER,text,pcd->FontColor,PX_FONT_ALIGN_XLEFT);
+				PX_FontDrawText(psurface,(px_int)pObject->x+X-4*PX_OBJECT_COORDINATES_DEFAULT_FLAGTEXT_SPACER,(px_int)pObject->y+Y-PX_OBJECT_COORDINATES_DEFAULT_FLAGTEXT_SPACER,text,pcd->FontColor,PX_FONT_ALIGN_XLEFT);
 			}
 		}
 
@@ -5854,11 +6066,11 @@ static px_void PX_Object_CoordinatesDrawFlagLine(px_surface *psurface,PX_Object 
 			{
 				px_int IsFloat;
 				px_int X,Y;
-				px_double ValInc=pflgl->X;
+				px_double ValInc=pflgl->Y;
 				px_char text[16];
 
 				y=PX_Object_CoordinatesMapVerticalValueToPixel(pObject,pflgl->Y,PX_OBJECT_COORDINATEDATA_MAP_RIGHT);
-				PX_GeoDrawLine(psurface,pcd->LeftSpacer,y,(px_int)(pObject->Width-pcd->RightSpacer),y,(px_int)(pflgl->LineWidth),pflgl->color);
+				PX_GeoDrawLine(psurface,(px_int)pObject->x+pcd->LeftSpacer,(px_int)pObject->y+y,(px_int)((px_int)pObject->x+pObject->Width-pcd->RightSpacer),(px_int)pObject->y+y,(px_int)(pflgl->LineWidth),pflgl->color);
 
 				if (PX_ABS(ValInc-(px_int)ValInc)<0.000001f)
 				{
@@ -5870,9 +6082,9 @@ static px_void PX_Object_CoordinatesDrawFlagLine(px_surface *psurface,PX_Object 
 				}
 
 				X=(px_int)(pObject->Width-pcd->RightSpacer);
-				Y=PX_Object_CoordinatesMapVerticalValueToPixel(pObject,ValInc,PX_OBJECT_COORDINATEDATA_MAP_LEFT);
+				Y=y;//PX_Object_CoordinatesMapVerticalValueToPixel(pObject,ValInc,PX_OBJECT_COORDINATEDATA_MAP_RIGHT);
 
-				PX_FontDrawText(psurface,X,Y-PX_OBJECT_COORDINATES_DEFAULT_FLAGTEXT_SPACER,text,pcd->FontColor,PX_FONT_ALIGN_XLEFT);
+				PX_FontDrawText(psurface,(px_int)pObject->x+X,(px_int)pObject->y+Y-PX_OBJECT_COORDINATES_DEFAULT_FLAGTEXT_SPACER,text,pcd->FontColor,PX_FONT_ALIGN_XLEFT);
 			}
 		}
 	}
@@ -5999,7 +6211,8 @@ px_void PX_Object_CoordinatesRender(px_surface *psurface, PX_Object *pObject,px_
 
 	PX_Object_CoordinatesDrawFlagLine(psurface,pObject);
 
-	PX_Object_CoordinatesDrawFlagText(psurface,pObject);
+	if(pcd->HorizontalShow)
+		PX_Object_CoordinatesDrawFlagText(psurface,pObject);
 
 	PX_Object_CoordinatesDrawTitle(psurface,pObject);
 
@@ -6007,7 +6220,10 @@ px_void PX_Object_CoordinatesRender(px_surface *psurface, PX_Object *pObject,px_
 
 	PX_Object_CoordinatesDrawFrameLine(psurface,pObject);
 
-	PX_Object_CoordinatesDrawScaleDraging(psurface,pObject);
+	if(pcd->ScaleEnabled)
+		PX_Object_CoordinatesDrawScaleDraging(psurface,pObject);
+
+	PX_Object_CoordinatesDrawHelpLine(psurface,pObject);
 
 }
 
@@ -6052,36 +6268,6 @@ px_void PX_Object_CoordinatesCursorPressEvent(PX_Object *pObject, PX_Object_Even
 	pcd->DragingPoint=pcd->DragStartPoint;
 
 	pcd->bScaleDrag=PX_TRUE;
-
-	// 	do{
-	// 		if (pcd->MarkValueEnabled)
-	// 		{
-	// 			double mx;
-	// 			pcd->OnMarkStatus=PX_TRUE;
-	// 			pcd->MarkLineX=x;
-	// 
-	// 			if (x<pcd->LeftSpacer||x>pObject->Width-pcd->RightSpacer)
-	// 			{
-	// 				break;
-	// 			}
-	// 			if (y<pcd->TopSpacer||y>pObject->Height-pcd->BottomSpacer)
-	// 			{
-	// 				break;
-	// 			}
-	// 			mx=PX_Object_CoordinatesMapPixelValueToHorizontal(pObject,x);
-	// 
-	// 			for (i=0;i<pcd->vData.size;i++)
-	// 			{
-	// 				//Be careful,Structure copied.
-	// 				CoordinateData *pdata=PX_VECTORAT(CoordinateData,&pcd->vData,i);
-	// 				if (pdata->MapHorizontalArray!=NULL)
-	// 				{
-	// 					int Index=PX_Object_CoordinatesDichotomy(pdata->MapHorizontalArray,pdata->Size,mx);
-	// 					//SignalOnMouseMark(data.ID,data.MapHorizontalArray[Index],data.MapVerticalArray[Index]);
-	// 				}
-	// 			}
-	// 		}
-	// 	}while(0);
 }
 
 px_void PX_Object_CoordinatesCursorReleaseEvent( PX_Object *pObject, PX_Object_Event e,px_void *ptr )
@@ -6112,22 +6298,22 @@ px_void PX_Object_CoordinatesCursorReleaseEvent( PX_Object *pObject, PX_Object_E
 	
 }
 
-px_void PX_Object_CoordinatesCursorMoveEvent(PX_Object *pObject, PX_Object_Event e,px_void *ptr )
+px_void PX_Object_CoordinatesCursorDragEvent(PX_Object *pObject, PX_Object_Event e,px_void *ptr )
 {
 	PX_Object_Coordinates *pcd=PX_Object_GetCoordinates(pObject);
 
-	pcd->OnMarkStatus=PX_FALSE;
-	pcd->MarkLineX=-1;
-
-	// 	emit SignalOnMousePosition(this->MapPixelValueToHorizontal(e->x()),
-	// 		e->x(),
-	// 		this->MapPixelValueToVertical(e->y(),COORDINATEDATA_MAP_RIGHT));
 
 	if (pcd->bScaleDrag)
 	{
 		int x=(px_int)(e.Param_int[0]-pObject->x);
 		int y=(px_int)(e.Param_int[1]-pObject->y);
 
+		pcd->OnMarkStatus=PX_FALSE;
+		pcd->MarkLineX=-1;
+
+		// 	emit SignalOnMousePosition(this->MapPixelValueToHorizontal(e->x()),
+		// 		e->x(),
+		// 		this->MapPixelValueToVertical(e->y(),COORDINATEDATA_MAP_RIGHT));
 		if (x<pcd->LeftSpacer)
 		{
 			x=pcd->LeftSpacer;
@@ -6144,10 +6330,56 @@ px_void PX_Object_CoordinatesCursorMoveEvent(PX_Object *pObject, PX_Object_Event
 		{
 			y=(px_int)(pObject->Height-pcd->BottomSpacer);
 		}
+
 		pcd->DragingPoint.x=(px_float)(x);
 		pcd->DragingPoint.y=(px_float)(y);
 	}
+
 }
+
+px_void PX_Object_CoordinatesCursorMoveEvent(PX_Object *pObject, PX_Object_Event e,px_void *ptr )
+{
+	PX_Object_Coordinates *pcd=PX_Object_GetCoordinates(pObject);
+
+	if (pcd->ShowHelpLine)
+	{
+		int x=(px_int)(e.Param_int[0]-pObject->x);
+		int y=(px_int)(e.Param_int[1]-pObject->y);
+
+		pcd->OnMarkStatus=PX_FALSE;
+		pcd->MarkLineX=-1;
+
+		// 	emit SignalOnMousePosition(this->MapPixelValueToHorizontal(e->x()),
+		// 		e->x(),
+		// 		this->MapPixelValueToVertical(e->y(),COORDINATEDATA_MAP_RIGHT));
+		if (x<pcd->LeftSpacer)
+		{
+			x=pcd->LeftSpacer;
+		}
+		if (x>pObject->Width-pcd->RightSpacer)
+		{
+			x=(px_int)(pObject->Width-pcd->RightSpacer);
+		}
+		if (y<pcd->TopSpacer)
+		{ 
+			y=pcd->TopSpacer;
+		}
+		if (y>pObject->Height-pcd->BottomSpacer)
+		{
+			y=(px_int)(pObject->Height-pcd->BottomSpacer);
+		}
+
+		if (pcd->bScaleDrag)
+		{
+			pcd->DragingPoint.x=(px_float)(x);
+			pcd->DragingPoint.y=(px_float)(y);
+		}
+
+		pcd->helpLineX=(x);
+		pcd->helpLineY=(y);
+	}
+}
+
 
 
 
@@ -6164,6 +6396,8 @@ PX_Object *PX_Object_CoordinatesCreate(px_memorypool *mp, PX_Object *Parent,px_i
 	Coordinates.RightVerticalDividing=PX_OBJECT_COORDINATES_DEFAULE_DIVIDING;
 	Coordinates.bScaleDrag=PX_FALSE;
 	Coordinates.guidesShowMode=PX_OBJECT_COORDINATES_GUIDESSHOWMODE_ALL;
+	Coordinates.helpLineColor=PX_COLOR(255,255,0,0);
+	Coordinates.ShowHelpLine=PX_TRUE;
 	PX_Object_CoordinatesSetMargin(&Coordinates,(px_int)(1.5f*PX_OBJECT_COORDINATES_DEFAULT_SPACER),(px_int)(1.5*PX_OBJECT_COORDINATES_DEFAULT_SPACER),PX_OBJECT_COORDINATES_DEFAULT_SPACER,PX_OBJECT_COORDINATES_DEFAULT_SPACER);
 
 	Coordinates.HorizontalRangeMin=-150;
@@ -6191,6 +6425,7 @@ PX_Object *PX_Object_CoordinatesCreate(px_memorypool *mp, PX_Object *Parent,px_i
 	Coordinates.DataLineWidth=PX_OBJECT_COORDINATES_DEFAULT_LINE_WIDTH;
 	Coordinates.FontColor=PX_COLOR(255,0,0,0);
 	Coordinates.borderColor=PX_COLOR(255,0,0,0);
+	Coordinates.DashColor=PX_COLOR(PX_OBJECT_COORDINATES_DEFAULT_DASH_RGB);
 	Coordinates.OnMarkStatus=PX_FALSE;
 	Coordinates.MarkValueEnabled=PX_TRUE;
 	Coordinates.MarkLineX=-1;
@@ -6201,6 +6436,7 @@ PX_Object *PX_Object_CoordinatesCreate(px_memorypool *mp, PX_Object *Parent,px_i
 
 	Coordinates.LeftTitleShow=PX_TRUE;
 	Coordinates.RightTitleShow=PX_TRUE;
+	Coordinates.HorizontalShow=PX_TRUE;
 	Coordinates.ScaleEnabled=PX_TRUE;
 	Coordinates.ShowGuides=PX_TRUE;
 
@@ -6214,10 +6450,475 @@ PX_Object *PX_Object_CoordinatesCreate(px_memorypool *mp, PX_Object *Parent,px_i
 	pObject=PX_ObjectCreateEx(mp,Parent,(px_float)x,(px_float)y,0,(px_float)Width,(px_float)Height,0,PX_OBJECT_TYPE_COORDINATE,PX_Object_CoordinatesUpdate,PX_Object_CoordinatesRender,PX_Object_CoordinatesFree,&Coordinates,sizeof(PX_Object_Coordinates));
 
 	//PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_CURSORMOVE,PX_Object_CoordinatesCursorMoveEvent,PX_NULL);
-	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_CURSORDRAG,PX_Object_CoordinatesCursorMoveEvent,PX_NULL);
+	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_CURSORMOVE,PX_Object_CoordinatesCursorMoveEvent,PX_NULL);
+	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_CURSORDRAG,PX_Object_CoordinatesCursorDragEvent,PX_NULL);
 	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_CURSORDOWN,PX_Object_CoordinatesCursorPressEvent,PX_NULL);
 	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_CURSORUP,PX_Object_CoordinatesCursorReleaseEvent,PX_NULL);
 
 	return pObject;
 }
+
+PX_Object_FilterEditor * PX_Object_GetFilterEditor(PX_Object *Object)
+{
+	if (Object->Type==PX_OBJECT_TYPE_FILTEREDITOR)
+	{
+		return (PX_Object_FilterEditor *)Object->pObject;
+	}
+	return PX_NULL;
+}
+
+static px_void PX_Object_FilterEditorDrawFrameLine(px_surface *psurface,PX_Object *pObject)
+{
+	PX_Object_FilterEditor *pfe=PX_Object_GetFilterEditor(pObject);
+	px_int offsetx=(px_int)pObject->x;
+	px_int offsety=(px_int)pObject->y;
+
+	PX_GeoDrawLine(psurface,offsetx,offsety,offsetx+(px_int)(pObject->Width-1),offsety,PX_OBJECT_FILTEREDITOR_DEFAULT_FRAMELINE_WIDTH,pfe->borderColor);
+	PX_GeoDrawLine(psurface,offsetx,offsety,offsetx,offsety+(px_int)(pObject->Height-1),PX_OBJECT_FILTEREDITOR_DEFAULT_FRAMELINE_WIDTH,pfe->borderColor);
+	PX_GeoDrawLine(psurface,(px_int)(offsetx+pObject->Width-1),offsety+(px_int)(pObject->Height-1),offsetx,offsety+(px_int)pObject->Height-1,PX_OBJECT_COORDINATES_DEFAULT_FRAMELINE_WIDTH,pfe->borderColor);
+	PX_GeoDrawLine(psurface,(px_int)(offsetx+pObject->Width-1),offsety+(px_int)(pObject->Height-1),offsetx+(px_int)(pObject->Width-1),offsety,PX_OBJECT_COORDINATES_DEFAULT_FRAMELINE_WIDTH,pfe->borderColor);
+}
+
+static px_void PX_Object_FilterEditorDrawSelectDraging(px_surface *psurface,PX_Object *pObject)
+{
+	px_float offsetx=pObject->x;
+	px_float offsety=pObject->y;
+
+	PX_Object_FilterEditor *pfe=PX_Object_GetFilterEditor(pObject);
+
+	if (!pfe->bSelectDrag)
+	{
+		return;
+	}
+
+	PX_GeoDrawRect(psurface,(px_int)(offsetx+pfe->DragStartPoint.x),(px_int)(offsety+(px_int)pfe->DragStartPoint.y),(px_int)(offsetx+(px_int)pfe->DragingPoint.x),(px_int)(offsety+(px_int)pfe->DragingPoint.y),PX_COLOR(96,171,81,128));	
+}
+
+static px_void PX_Object_FilterEditorDrawPt(px_surface *psurface,PX_Object *pObject)
+{
+	PX_Object_FilterEditor *pfe=PX_Object_GetFilterEditor(pObject);
+	px_int i;
+	px_float oftx=pObject->x;
+	px_float ofty=pObject->y;
+	for (i=0;i<pfe->opCount;i++)
+	{
+		PX_GeoDrawSolidCircle(psurface,(px_int)(oftx+pfe->pt[i].x),(px_int)(ofty+pfe->pt[i].y),pfe->radius,pfe->ptColor);
+		if (pfe->pt[i].bselect||pfe->pt[i].bCursor)
+		{
+			PX_GeoDrawCircle(psurface,(px_int)(oftx+pfe->pt[i].x),(px_int)(ofty+pfe->pt[i].y),pfe->radius+2,1,pfe->ptColor);
+		}
+	}
+
+	for (i=0;i<pfe->opCount-1;i++)
+	{
+		PX_GeoDrawLine(psurface,(px_int)(oftx+pfe->pt[i].x),(px_int)(ofty+pfe->pt[i].y),(px_int)(oftx+pfe->pt[i+1].x),(px_int)(ofty+pfe->pt[i+1].y),2,pfe->ptColor);
+	}
+
+}
+
+static px_void PX_Object_FilterEditorDrawHelpLine(px_surface *psurface,PX_Object *pObject)
+{
+	PX_Object_FilterEditor *pfe=PX_Object_GetFilterEditor(pObject);
+	px_char text[16];
+	px_double midy,incx,incy,x,y,val;
+	px_double oftx,ofty;
+	if (!pfe->ShowHelpLine)
+	{
+		return;
+	}
+	oftx=pObject->x;
+	ofty=pObject->y;
+	midy=pObject->Height/2;
+	incy=pObject->Height/2/(pfe->VerticalDividing/2);
+
+	//up
+	for (y=midy;y>=0;y-=incy)
+	{
+		//line
+		PX_GeoDrawLine(psurface,(px_int)(oftx),(px_int)(ofty+y),(px_int)(oftx+pObject->Width),(px_int)(ofty+y),1,pfe->helpLineColor);
+		val=(midy-y)/(pObject->Height/2)*pfe->rangedb;
+		PX_sprintf1(text,sizeof(text),"+%1.2db",PX_STRINGFORMAT_FLOAT((px_float)val));
+		//text
+		PX_FontDrawText(psurface,(px_int)(oftx-1),(px_int)(ofty+y-6),text,pfe->FontColor,PX_FONT_ALIGN_XRIGHT);
+	}
+	//down
+	for (y=midy;y<=pObject->Height;y+=incy)
+	{
+		//line
+		PX_GeoDrawLine(psurface,(px_int)(oftx),(px_int)(ofty+y),(px_int)(oftx+pObject->Width),(px_int)(ofty+y),1,pfe->helpLineColor);
+		val=(midy-y)/(pObject->Height/2)*pfe->rangedb;
+		PX_sprintf1(text,sizeof(text),"%1.2db",PX_STRINGFORMAT_FLOAT((px_float)val));
+		//text
+		PX_FontDrawText(psurface,(px_int)(oftx-1),(px_int)(ofty+y-6),text,pfe->FontColor,PX_FONT_ALIGN_XRIGHT);
+	}
+
+	//horizontal
+	incx=pObject->Width/pfe->HorizontalDividing;
+	for (x=0;x<pObject->Width;x+=incx)
+	{
+		//line
+		PX_GeoDrawLine(psurface,(px_int)(oftx+x),(px_int)(ofty+0),(px_int)(oftx+x),(px_int)(ofty+pObject->Height-1),1,pfe->helpLineColor);
+		val=x/pObject->Width;
+		//text
+		PX_sprintf1(text,sizeof(text),"%1.2",PX_STRINGFORMAT_FLOAT((px_float)val));
+		PX_FontDrawText(psurface,(px_int)(oftx+x-1),(px_int)(ofty+pObject->Height+3),text,pfe->FontColor,PX_FONT_ALIGN_XCENTER);
+	}
+
+}
+
+px_void PX_Object_FilterEditorCursorReleaseEvent( PX_Object *pObject, PX_Object_Event e,px_void *ptr )
+{
+	PX_Object_FilterEditor *pfe=PX_Object_GetFilterEditor(pObject);
+
+	pfe->bSelectDrag=PX_FALSE;
+	pfe->bAdjust=PX_FALSE;
+}
+
+
+px_void PX_Object_FilterEditorRender(px_surface *psurface, PX_Object *pObject,px_uint elpased)
+{
+	PX_Object_FilterEditorDrawFrameLine(psurface,pObject);
+	PX_Object_FilterEditorDrawHelpLine(psurface,pObject);
+	PX_Object_FilterEditorDrawPt(psurface,pObject);
+	PX_Object_FilterEditorDrawSelectDraging(psurface,pObject);
+}
+
+px_void PX_Object_FilterEditorCursorPressEvent(PX_Object *pObject, PX_Object_Event e,px_void *ptr)
+{
+	px_int i,j;
+	px_bool bSelectlge1=PX_FALSE;
+	px_float x=(e.Param_int[0]-pObject->x);
+	px_float y=(e.Param_int[1]-pObject->y);
+	PX_Object_FilterEditor *pfe=PX_Object_GetFilterEditor(pObject);
+
+	if(!PX_ObjectIsPointInRegion(pObject,(px_float)e.Param_int[0],(px_float)e.Param_int[1]))
+	{
+		return;
+	}
+
+	for (i=0;i<pfe->opCount;i++)
+	{
+		if(PX_isPointInCircle(PX_POINT(x,y,0),PX_POINT((px_float)pfe->pt[i].x,(px_float)pfe->pt[i].y,0),(px_float)pfe->radius))
+		{
+			if (!pfe->pt[i].bselect)
+			{
+				for (j=0;j<pfe->opCount;j++)
+				{
+					pfe->pt[j].bselect=PX_FALSE;
+				}
+				pfe->pt[i].bselect=PX_TRUE;
+			}
+			bSelectlge1=PX_TRUE;
+		}
+
+	}
+
+	if (bSelectlge1)
+	{
+		pfe->bSelectDrag=PX_FALSE;
+		pfe->bAdjust=PX_TRUE;
+		pfe->lastAdjustPoint.x=(x);
+		pfe->lastAdjustPoint.y=(y);
+	}
+	else
+	{
+		for (i=0;i<pfe->opCount;i++)
+		{
+			pfe->pt[i].bselect=PX_FALSE;
+		}
+		pfe->DragStartPoint.x=(x);
+		pfe->DragStartPoint.y=(y);
+		pfe->DragingPoint=pfe->DragStartPoint;
+		pfe->bSelectDrag=PX_TRUE;
+		pfe->bAdjust=PX_FALSE;
+	}
+	
+}
+
+px_void PX_Object_FilterEditorCursorMoveEvent(PX_Object *pObject, PX_Object_Event e,px_void *ptr )
+{
+	PX_Object_FilterEditor *pfe=PX_Object_GetFilterEditor(pObject);
+	px_int i;
+	px_float x=(e.Param_int[0]-pObject->x);
+	px_float y=(e.Param_int[1]-pObject->y);
+
+	if(!PX_ObjectIsPointInRegion(pObject,(px_float)e.Param_int[0],(px_float)e.Param_int[1]))
+	{
+		return;
+	}
+
+	for (i=0;i<pfe->opCount;i++)
+	{
+		if(PX_isPointInCircle(PX_POINT(x,y,0),PX_POINT((px_float)pfe->pt[i].x,(px_float)pfe->pt[i].y,0),(px_float)pfe->radius))
+		{
+			pfe->pt[i].bCursor=PX_TRUE;
+		}
+		else
+		{
+			pfe->pt[i].bCursor=PX_FALSE;
+		}
+	}
+
+}
+
+
+px_void PX_Object_FilterEditorCursorDragEvent(PX_Object *pObject, PX_Object_Event e,px_void *ptr )
+{
+	px_int i;
+	PX_Object_FilterEditor *pfe=PX_Object_GetFilterEditor(pObject);
+	px_float x=(e.Param_int[0]-pObject->x);
+	px_float y=(e.Param_int[1]-pObject->y);
+
+
+	if (pfe->bSelectDrag)
+	{
+		px_rect rect;
+
+		if (x<0)
+		{
+			x=0;
+		}
+		if (x>pObject->Width)
+		{
+			x=(pObject->Width);
+		}
+		if (y<0)
+		{ 
+			y=0;
+		}
+		if (y>pObject->Height)
+		{
+			y=(pObject->Height);
+		}
+
+		pfe->DragingPoint.x=(px_float)(x);
+		pfe->DragingPoint.y=(px_float)(y);
+		rect=PX_RECT(pfe->DragStartPoint.x,pfe->DragStartPoint.y,x-pfe->DragStartPoint.x,y-pfe->DragStartPoint.y);
+		for (i=0;i<pfe->opCount;i++)
+		{
+			if(PX_isPointInRect(PX_POINT((px_float)pfe->pt[i].x,(px_float)pfe->pt[i].y,0),rect))
+			{
+				pfe->pt[i].bselect=PX_TRUE;
+			}
+			else
+			{
+				pfe->pt[i].bselect=PX_FALSE;
+			}
+		}
+	}
+
+	else if (pfe->bAdjust)
+	{
+		for (i=0;i<pfe->opCount;i++)
+		{
+			if(pfe->pt[i].bselect==PX_TRUE)
+			{
+				pfe->pt[i].y+=(px_int)(y-pfe->lastAdjustPoint.y);
+				if (pfe->pt[i].y<0)
+				{
+					pfe->pt[i].y=0;
+				}
+				if (pfe->pt[i].y>pObject->Height-1)
+				{
+					pfe->pt[i].y=(px_int)pObject->Height-1;
+				}
+			}
+		}
+		pfe->lastAdjustPoint=PX_POINT(x,y,0);
+	}
+}
+
+
+px_void PX_Object_FilterEditorSetOperateCount(PX_Object *pObject,px_int count)
+{
+	px_int i;
+	PX_Object_FilterEditor *pfe=PX_Object_GetFilterEditor(pObject);
+	px_float Inc;
+	px_int y;
+	if (count<2)
+	{
+		count=2;
+	}
+	if (count>PX_COUNTOF(pfe->pt))
+	{
+		count=PX_COUNTOF(pfe->pt);
+	}
+	Inc=pObject->Width/(count-1);
+	y=(px_int)(pObject->Height/2);
+	for (i=0;i<count;i++)
+	{
+		pfe->pt[i].x=(px_int)(Inc*i);
+		pfe->pt[i].y=y;
+	}
+	pfe->opCount=count;
+}
+
+px_void PX_Object_FilterEditorReset(PX_Object *Object)
+{
+	px_int i,y;
+	PX_Object_FilterEditor *pfe=PX_Object_GetFilterEditor(Object);
+	y=(px_int)(Object->Height/2);
+	for (i=0;i<pfe->opCount;i++)
+	{
+		pfe->pt[i].y=y;
+	}
+}
+
+px_void PX_Object_FilterEditorSetRange(PX_Object *Object,px_double range)
+{
+	
+	PX_Object_FilterEditor *pfe=PX_Object_GetFilterEditor(Object);
+	if (pfe)
+	{
+		pfe->rangedb=range;
+	}
+}
+
+px_void PX_Object_FilterEditorSetFontColor(PX_Object *Object,px_color clr)
+{
+	PX_Object_FilterEditor *pfe=PX_Object_GetFilterEditor(Object);
+	if (pfe)
+	{
+		pfe->FontColor=clr;
+	}
+}
+
+px_void PX_Object_FilterEditorSetBorderColor(PX_Object *Object,px_color clr)
+{
+	PX_Object_FilterEditor *pfe=PX_Object_GetFilterEditor(Object);
+	if (pfe)
+	{
+		pfe->borderColor=clr;
+	}
+}
+
+px_void PX_Object_FilterEditorSethelpLineColor(PX_Object *Object,px_color clr)
+{
+	PX_Object_FilterEditor *pfe=PX_Object_GetFilterEditor(Object);
+	if (pfe)
+	{
+		pfe->helpLineColor=clr;
+	}
+}
+
+px_void PX_Object_FilterEditorSetFontSize(PX_Object *Object,px_int size)
+{
+	PX_Object_FilterEditor *pfe=PX_Object_GetFilterEditor(Object);
+	if (pfe)
+	{
+		pfe->FontSize=size;
+	}
+}
+
+px_void PX_Object_FilterEditorSetHorizontalDividing(PX_Object *Object,px_int div)
+{
+	PX_Object_FilterEditor *pfe=PX_Object_GetFilterEditor(Object);
+	if (pfe)
+	{
+		pfe->HorizontalDividing=div;
+	}
+}
+
+px_void PX_Object_FilterEditorSetVerticalDividing(PX_Object *Object,px_int div)
+{
+	PX_Object_FilterEditor *pfe=PX_Object_GetFilterEditor(Object);
+	if (pfe)
+	{
+		pfe->VerticalDividing=div;
+	}
+}
+
+px_void PX_Object_FilterEditorMapData(PX_Object *Object,px_double data[],px_int size)
+{
+	px_int i,mapIndex;
+	px_double ptValue[PX_OBJECT_FILTER_EDITOR_MAX_PT];
+	px_double step,frac,d2,d1,dm;
+	PX_Object_FilterEditor *pfe=PX_Object_GetFilterEditor(Object);
+	if (!pfe)
+	{
+		return;
+	}
+	//pt to value
+	for (i=0;i<pfe->opCount;i++)
+	{
+		if (pfe->pt[i].y>Object->Height-10)
+		{
+			ptValue[i]=-1000;
+		}
+		else
+		{
+			ptValue[i]=((Object->Height/2)-pfe->pt[i].y)/(Object->Height/2)*pfe->rangedb;
+		}
+	}
+
+	step=1.0/(pfe->opCount-1);
+
+	for (i=0;i<size;i++)
+	{
+		mapIndex=(px_int)((1.0*i/size)/step);
+		frac=((1.0*i/size)-mapIndex*step)/step;
+		d2=ptValue[mapIndex+1];
+		d1=ptValue[mapIndex];
+		dm=d1+frac*(d2-d1);
+		dm=PX_pow_dd(10,dm/20.0);
+		data[i]=dm;
+	}
+}
+
+px_double PX_Object_FilterEditorMapValue(PX_Object *Object,px_double precent)
+{
+	px_int mapIndex;
+	px_double step,frac,d2,d1,dm;
+	PX_Object_FilterEditor *pfe=PX_Object_GetFilterEditor(Object);
+	if (!pfe)
+	{
+		return 1;
+	}
+
+	step=1.0/(pfe->opCount-1);
+	mapIndex=(px_int)(precent/step);
+	if (mapIndex>pfe->opCount-1)
+	{
+		return 1;
+	}
+	frac=(precent-mapIndex*step)/step;
+	d2=((Object->Height/2)-pfe->pt[mapIndex+1].y)/(Object->Height/2)*pfe->rangedb;
+	d1=((Object->Height/2)-pfe->pt[mapIndex].y)/(Object->Height/2)*pfe->rangedb;
+	dm=d1+frac*(d2-d1);
+	dm=PX_pow_dd(10,dm/20.0);
+
+	return dm;
+}
+
+PX_Object * PX_Object_FilterEditorCreate(px_memorypool *mp, PX_Object *Parent,px_int x,px_int y,px_int Width,px_int Height)
+{
+	PX_Object *pObject;
+	PX_Object_FilterEditor FilterEditor;
+	PX_memset(&FilterEditor,0,sizeof(FilterEditor));
+
+	FilterEditor.borderColor=PX_COLOR(255,0,0,0);
+	FilterEditor.FontColor=PX_COLOR(255,0,0,0);
+	FilterEditor.bSelectDrag=PX_FALSE;
+	FilterEditor.bAdjust=PX_FALSE;
+	FilterEditor.DragingPoint=PX_POINT(0,0,0);
+	FilterEditor.DragStartPoint=PX_POINT(0,0,0);
+	FilterEditor.FontSize=16;
+	FilterEditor.helpLineColor=PX_COLOR(255,0,0,0);
+	FilterEditor.ptColor=PX_COLOR(255,0,0,0);
+	FilterEditor.HorizontalDividing=16;
+	FilterEditor.VerticalDividing=16;
+	FilterEditor.ShowHelpLine=PX_TRUE;
+	FilterEditor.rangedb=6;
+	FilterEditor.radius=PX_OBJECT_FILTER_EDITOR_DEFAULT_RADIUS;
+	pObject=PX_ObjectCreateEx(mp,Parent,(px_float)x,(px_float)y,0,(px_float)Width,(px_float)Height,0,PX_OBJECT_TYPE_FILTEREDITOR,PX_NULL,PX_Object_FilterEditorRender,PX_NULL,&FilterEditor,sizeof(PX_Object_FilterEditor));
+	PX_Object_FilterEditorSetOperateCount(pObject,8);
+
+	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_CURSORMOVE,PX_Object_FilterEditorCursorMoveEvent,PX_NULL);
+	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_CURSORDRAG,PX_Object_FilterEditorCursorDragEvent,PX_NULL);
+	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_CURSORDOWN,PX_Object_FilterEditorCursorPressEvent,PX_NULL);
+	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_CURSORUP,PX_Object_FilterEditorCursorReleaseEvent,PX_NULL);
+	return pObject;
+}
+
+
 

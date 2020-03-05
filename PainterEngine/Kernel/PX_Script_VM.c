@@ -1195,16 +1195,16 @@ PX_SCRIPTVM_RUNRETURN PX_ScriptVM_InstanceRunThread(PX_ScriptVM_Instance *Ins,px
 			}
 			else if (pVar->type==PX_SCRIPTVM_VARIABLE_TYPE_INT&&cVar.type==PX_SCRIPTVM_VARIABLE_TYPE_FLOAT)
 			{
-				pVar->_float=(px_float)PX_pow_ff(pVar->_int,cVar._float);
+				pVar->_float=(px_float)PX_pow_dd(pVar->_int,cVar._float);
 				pVar->type=PX_SCRIPTVM_VARIABLE_TYPE_FLOAT;
 			}
 			else if (pVar->type==PX_SCRIPTVM_VARIABLE_TYPE_FLOAT&&cVar.type==PX_SCRIPTVM_VARIABLE_TYPE_FLOAT)
 			{
-				pVar->_float=(px_float)PX_pow_ff(pVar->_float,cVar._float);
+				pVar->_float=(px_float)PX_pow_dd(pVar->_float,cVar._float);
 			}
 			else if (pVar->type==PX_SCRIPTVM_VARIABLE_TYPE_FLOAT&&cVar.type==PX_SCRIPTVM_VARIABLE_TYPE_INT)
 			{
-				pVar->_float=(px_float)PX_pow_ff(pVar->_float,cVar._int);
+				pVar->_float=(px_float)PX_pow_dd(pVar->_float,cVar._int);
 			}
 			pT->IP+=(4+2*4);
 		}

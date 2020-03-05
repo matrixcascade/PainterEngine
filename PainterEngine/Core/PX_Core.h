@@ -31,5 +31,6 @@
 #include "PX_Packet.h"
 #include "PX_Base64.h"
 #include "PX_3D.h"
+#include "PX_MFCC.h"
 #include "PX_KalmanFilter.h"
 #endif

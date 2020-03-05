@@ -2,9 +2,9 @@
 
 void PX_ASSERT()
 {
-// #ifdef PX_DEBUG_MODE
-// 	__debugbreak();
-// #endif
+#ifdef PX_DEBUG_MODE
+	__debugbreak();
+#endif
 }
 
 void PX_ERROR(px_char fmt[])

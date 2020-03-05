@@ -109,6 +109,7 @@ px_bool PX_ResourceLibraryLoad(PX_ResourceLibrary *lib,PX_RESOURCE_TYPE type,px_
 				PX_WAVE_DATA_BLOCK *pBlock;
 				PX_WAVE_RIFF_HEADER *pHeader=(PX_WAVE_RIFF_HEADER *)data;
 				PX_WAVE_FMT_BLOCK  *pfmt_block;
+				res.sound.mp=lib->mp;
 				res.sound.buffer=(px_byte *)MP_Malloc(lib->mp,pcmSize);
 				res.sound.size=pcmSize;
 				res.sound.channel=PX_WaveGetChannel(data,pcmSize)==1?PX_SOUND_CHANNEL_ONE:PX_SOUND_CHANNEL_DOUBLE;

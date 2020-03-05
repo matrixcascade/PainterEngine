@@ -20738,6 +20738,15 @@ px_int PX_GetFontTextPixelsWidth( px_char *Text )
 	return Size;
 }
 
+
+px_void PX_FontModule_atow(const char *a,px_word *w)
+{
+	while (*a)
+	{
+		*w++=*a++;
+	}
+}
+
 px_bool PX_FontModuleInitialize(px_memorypool *mp,PX_FontModule *module)
 {
 	module->mp=mp;
@@ -20861,10 +20870,10 @@ px_int PX_FontModuleGetTextPixelsWidth(PX_FontModule *mod,px_word *Text)
 }
 
 //utf-16 le
-px_void PX_FontModuleDrawText(px_surface *psurface,int x,int y,px_word *Text,px_color Color,PX_FontModule *mod,PX_FONT_ALIGN align)
+px_void PX_FontModuleDrawText(px_surface *psurface,int x,int y,const px_word *Text,px_color Color,PX_FontModule *mod,PX_FONT_ALIGN align)
 {
 	px_int dx,dy;
-	px_word *pTextPointer=Text;
+	px_word *pTextPointer=(px_word *)Text;
 
 	if (!Text)
 	{

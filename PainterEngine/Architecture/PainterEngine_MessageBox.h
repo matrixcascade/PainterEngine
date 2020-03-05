@@ -46,8 +46,9 @@ typedef struct
 px_bool PX_MessageBoxInitialize(PX_Runtime *runtime,PX_MessageBox *pm,PX_FontModule *fontmodule,px_int window_Width,px_int window_Height);
 px_void PX_MessageBoxPostEvent(PX_MessageBox *pm,PX_Object_Event e);
 px_void PX_MessageBoxUpdate(PX_MessageBox *pm,px_dword elpased);
+px_void PX_MessageBoxClose(PX_MessageBox *pm);
 px_void PX_MessageBoxRender(px_surface *pSurface,PX_MessageBox *pm,px_dword elpased);
-px_void PX_MessageBoxAlertOk(PX_MessageBox *pm,const char *message);
+px_void PX_MessageBoxAlertOk(PX_MessageBox *pm,const px_char *message);
 px_void PX_MessageBoxYesNo(PX_MessageBox *pm,const char *Message);
 px_void PX_MessageBoxSetColorModule(PX_MessageBox *pm,PX_MESSAGEBOX_COLORMOD colormod);
 PX_MESSAGEBOX_RETURN SS_MessageBoxGetLastReturn(PX_MessageBox *pm);

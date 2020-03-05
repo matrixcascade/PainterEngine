@@ -1,5 +1,16 @@
 #include "PX_Typedef.h"
 
+static px_bool PX_isBigEndianCPU()
+{
+	union{
+		px_dword i;
+		unsigned char s[4];
+	}c;
+	c.i = 0x12345678;
+	return (0x12 == c.s[0]);
+
+}
+
 px_uint PX_htoi(px_char hex_str[])   
 {  
 	px_char ch;   
@@ -87,147 +98,55 @@ px_void PX_AscToWord(const px_char *asc,px_word *u16)
 	*u16=0;
 }
 
-#define PUSH_CHAR(x) do { if (ret < maxlen) { *p++ = x; ret++; } } while (0)  
-
-typedef union {  
-	px_int L;  
-	px_float F;  
-} __LF_t;  
-
 px_int  PX_ftoa(px_float f, char *outbuf, px_int maxlen, px_int precision)   
 {  
-	px_int mantissa, int_part, int_part2, frac_part;  
-	px_ushort exp2;  
-	px_int sign, i, m, max;  
-	__LF_t x;  
-	char c, *p = outbuf;  
-	px_int ret = 0;  
-
-	if(f<1&&f>0)
-	x.F = f+1;  
-	else if(f>-1&&f<0)
-	x.F=f-1;
+	px_int i_value;
+	px_int f_value;
+	px_int shl=10;
+	px_int len;
+	px_int zero_oft=0;
+	if (maxlen==0)
+	{
+		return 0;
+	}
+	shl=PX_pow_ii(shl,precision);
+	i_value=(px_int)f;
+	f_value=(px_int)PX_ABS(shl*(f-(px_int)f));
+	if (i_value==0&&f<0)
+	{
+		outbuf[0]='-';
+		PX_itoa(i_value,outbuf+1,maxlen-1,10);
+	}
 	else
-	x.F = f;
-
-	//exp2 = (unsigned char)(x.L >> 23);  
-	exp2 = (((((px_int)1) << 8) - 1) & (x.L >> 23)); /* JEB fixed for 16-bit char F2xxx */   
-	mantissa = (x.L & ((((px_int)1) << 23) - 1));  
-	//printf("%x\n", x.L);  
-	if (x.L >= 0) sign = +1; else sign = -1;  
-	if (exp2 == ((((px_int)1) << 8) - 1)) {  
-		if (mantissa == 0) {  
-			if (sign == -1)  
-				PUSH_CHAR('-');  
-			PUSH_CHAR('i');  
-			PUSH_CHAR('n');  
-			PUSH_CHAR('f');  
-			return ret;  
-		} else {  
-			PUSH_CHAR('n');  
-			PUSH_CHAR('a');  
-			PUSH_CHAR('n');  
-			return ret;  
-		}  
-	}  
-
-	exp2 -= ((((px_int)1) << 8) >> 1) - 1; //127;  
-	mantissa |= (((px_int)1) << 23);  
-	frac_part = 0;  
-	int_part = 0;  
-
-	if (exp2 >= 23)  
-		int_part = mantissa << (exp2 - 23);  
-	else if (exp2 >= 0) {  
-		int_part = mantissa >> (23 - exp2);  
-		frac_part = (mantissa << (exp2 + 1)) & ((((px_int)1) << (23 + 1)) - 1); //0xFFFFFF;  
-	}  
-	else /* if (exp2 < 0) */  
-		frac_part = (mantissa & ((((px_int)1) << (23 + 1)) - 1)) >> -(exp2 + 1);  
-
-	if (int_part == 0) {  
-		if (sign == -1)  
-			PUSH_CHAR('-');  
-		PUSH_CHAR('0');  
-	} else {  
-		while (int_part != 0) {  
-			int_part2 = int_part / 10;  
-			PUSH_CHAR((char)(int_part - ((int_part2 << 3) + (int_part2 << 1)) + '0'));  
-			int_part = int_part2;  
-		}  
-		if (sign == -1)  
-			PUSH_CHAR('-');  
-		// Reverse string  
-		for (i = 0; i < ret / 2; i++) {  
-			c = outbuf[i];  
-			outbuf[i] = outbuf[ret - i - 1];  
-			outbuf[ret - i - 1] = c;  
-		}  
-	}  
-	if (precision != 0)  
-		PUSH_CHAR('.');  
-
-	max = maxlen - (px_int)(p - outbuf);  
-	if (max > precision)  
-		max = precision;  
-	/* print BCD */  
-	for (m = 0; m < max; m++) {  
-		/* frac_part *= 10; */  
-		frac_part = (frac_part << 3) + (frac_part << 1);  
-
-		PUSH_CHAR((char)((frac_part >> (23 + 1)) + '0'));  
-		frac_part &= ((((px_int)1) << (23 + 1)) - 1); //0xFFFFFF;  
-	}  
-	/* delete ending zeroes */  
-	//for (--p; p[0] == '0' && p[-1] != '.'; --p, --ret) ;  
-
-	{  
-		px_int digit, roundup = 0;  
-		// Rounding  
-		// Look at the next digit  
-		frac_part = (frac_part << 3) + (frac_part << 1);  
-		digit = (frac_part >> (23 + 1));  
-		if (digit > 5) roundup = 1;  
-		else if (digit == 5) {  
-			frac_part &= ((((px_int)1) << (23 + 1)) - 1); //0xFFFFFF;  
-			if (frac_part != 0) roundup = 1;  
-		}  
-		if (roundup) {  
-			char d;  
-			px_int pos = ret - 1;  
-			do {  
-				d = outbuf[pos]; // last digit  
-				if (d == '-') break;  
-				if (d == '.') { pos--; continue; }  
-				d++; outbuf[pos] = d;  
-				if (d != ':') break;  
-				outbuf[pos] = '0';  
-				pos--;  
-			} while (pos);  
-		}  
-	}  
-	outbuf[ret]='\0';
-	if (f<1&&f>0)
 	{
-		outbuf[0]='0';
+		PX_itoa(i_value,outbuf,maxlen,10);
+	}
+	
+	len=PX_strlen(outbuf);
+
+	if (precision==0)
+	{
+		return len; 
 	}
 
-	if (f>-1&&f<0)
+	if (len>maxlen-3)
 	{
-		outbuf[1]='0';
+		return len; 
+	}
+	outbuf[len]='.';
+	outbuf[len+1]='\0';
+	
+	while (f_value<shl)
+	{
+		*(outbuf+len+1+zero_oft)='0';
+		shl/=10;
+		zero_oft++;
 	}
 
-	while (PX_TRUE)
-	{
-		if (PX_strlen(outbuf)>2&&outbuf[PX_strlen(outbuf)-1]=='0'&&outbuf[PX_strlen(outbuf)-2]!='.')
-		{
-			outbuf[PX_strlen(outbuf)-1]='\0';
-			ret--;
-		}
-		else{break;}
-	}
-
-	return ret;  
+	PX_itoa(f_value,outbuf+len+zero_oft,maxlen-len-1,10);
+	*(outbuf+len+1+precision)='\0';
+	len+=PX_strlen(outbuf+len);
+	return len;
 }  
 
 
@@ -285,6 +204,25 @@ px_int PX_itoa(px_int num,px_char *str,px_int MaxStrSize,px_int radix)
 	return l; 
 } 
 
+static px_int32 PX_i32SwapEndian(px_int32 val){
+	val = ((val << 8)&0xFF00FF00) | ((val >> 8)&0x00FF00FF);
+	return (val << 16)|(val >> 16);
+}
+
+static px_int64 PX_i64SwapEndian(px_int64 val)
+{
+	px_int32 u32_host_h, u32_host_l;
+	px_int64 u64_net;
+	u32_host_l = val & 0xffffffff;
+	u32_host_h = (val >> 32) & 0xffffffff;
+
+	u64_net = PX_i32SwapEndian(u32_host_l);
+	u64_net = ( u64_net << 32 ) | PX_i32SwapEndian(u32_host_h);
+	return u64_net;
+}
+
+
+
 px_float PX_sqrt( px_float number )  
 {  
 	px_int32 i;  
@@ -292,7 +230,13 @@ px_float PX_sqrt( px_float number )
 	const px_float threehalfs = 1.5F;  
 	x2 = number * 0.5F;  
 	y  = number;  
-	i  = * ( px_int32 * ) &y;       
+	i  = * ( px_int32 * ) &y;
+
+	if (PX_isBigEndianCPU())
+	{
+		i=PX_i32SwapEndian(i);
+	}
+	
 	i  = 0x5f375a86 - ( i >> 1 );
 	y  = * ( px_float * ) &i;  
 	y  = y * ( threehalfs - ( x2 * y * y ) );   
@@ -313,7 +257,13 @@ px_double PX_sqrtd( px_double number )
 	const px_double threehalfs = 1.5;  
 	x2 = number * 0.5;  
 	y  = number;  
-	i  = * ( px_int64 * ) &y;       
+	i  = * ( px_int64 * ) &y;
+
+	if (PX_isBigEndianCPU())
+	{
+		i=PX_i64SwapEndian(i);
+	}
+
 	i  = 0x5fe6ec85e7de30da - ( i / 2 ); 
 	y  = * ( px_double * ) &i;  
 	y  = y * ( threehalfs - ( x2 * y * y ) );   
@@ -335,7 +285,11 @@ px_float PX_SqrtRec( px_float number )
 
 	x2 = number * 0.5F;  
 	y  = number;  
-	i  = * ( px_int * ) &y;       
+	i  = * ( px_int * ) &y;   
+	if (PX_isBigEndianCPU())
+	{
+		i=PX_i32SwapEndian(i);
+	}
 	i  = 0x5f375a86 - ( i >> 1 );   
 	y  = * ( px_float * ) &i;  
 	y  = y * ( threehalfs - ( x2 * y * y ) );   
@@ -344,13 +298,18 @@ px_float PX_SqrtRec( px_float number )
 	return y;  
 } 
 
-px_double PX_exp(px_double x) {
+px_double PX_fast_exp(px_double x) {
 	x = 1.0 + x / (65536);
 	x *= x; x *= x; x *= x; x *= x;
 	x *= x; x *= x; x *= x; x *= x;
 	x *= x; x *= x; x *= x; x *= x;
 	x *= x; x *= x; x *= x; x *= x;
 	return x;
+}
+
+px_double PX_exp(px_double x)
+{
+	return PX_pow_dd(PX_e,x);
 }
 
 px_double PX_tanh(px_double x)
@@ -360,6 +319,7 @@ px_double PX_tanh(px_double x)
 	eix=1/ex;
 	return (ex-eix)/(ex+eix);
 }
+
 
 px_double PX_sigmoid(px_double x)
 {
@@ -371,6 +331,59 @@ px_double PX_sigmoid(px_double x)
 px_double PX_ReLU(px_double x)
 {
 	return x<=0?0:x;
+}
+
+px_double PX_sind(px_double x)
+{
+	px_double it;
+	px_double term;
+	px_double result;
+
+	it=x/(2*PX_PI);
+	x=x-(2*PX_PI)*PX_TRUNC(it);
+
+	term=x;
+	result=0;
+
+	result+=term;
+	term*=(-x*x)/(2*3);
+	result+=term;
+	term*=(-x*x)/(4*5);
+	result+=term;
+	term*=(-x*x)/(6*7);
+	result+=term;
+	term*=(-x*x)/(8*9);
+	result+=term;
+	term*=(-x*x)/(10*11);
+	result+=term;
+	term*=(-x*x)/(12*13);
+	result+=term;
+	term*=(-x*x)/(14*15);
+	result+=term;
+	term*=(-x*x)/(16*17);
+	result+=term;
+	term*=(-x*x)/(18*19);
+	result+=term;
+	term*=(-x*x)/(20*21);
+	result+=term;
+	term*=(-x*x)/(22*23);
+	result+=term;
+	term*=(-x*x)/(24*25);
+	result+=term;
+	term*=(-x*x)/(26*27);
+	result+=term;
+	term*=(-x*x)/(28*29);
+	result+=term;
+	term*=(-x*x)/(30*31);
+	result+=term;
+	term*=(-x*x)/(32*33);
+	return result;
+
+}
+
+px_double PX_cosd(px_double radius)
+{
+	return PX_sind((PX_PI/2-radius));
 }
 
 px_float PX_sin_radian(px_float radius)
@@ -535,7 +548,7 @@ static px_double atani1(px_double x)
 	static const px_double p11 = (px_double)(-0.01442112851466732272);
 	static const px_double p12 = (px_double)(0.004164927187425533986);
 
-	px_double y = x - (px_double)(0.6250000000000043299)-1;
+	px_double y = x - (px_double)(0.6250000000000043299);
 
 	return ((((((((((((
 		+p12) * y
@@ -568,7 +581,7 @@ static px_double atani2(px_double x)
 	static const px_double p10 = (px_double)(-0.004491743889132696586);
 	static const px_double p11 = (px_double)(0.0001093120021936477832);
 
-	px_double y = x - (px_double)(0.8750000001110173065)-1;
+	px_double y = x - (px_double)(0.8750000001110173065);
 
 	return (((((((((((
 		+p11) * y
@@ -601,7 +614,7 @@ static px_double atani3(px_double x)
 	static const px_double p11 = (px_double)(0.0008098046818543229095);
 	static const px_double p12 = (px_double)(-0.0003740695734151908039);
 
-	px_double y = x - (px_double)(1.66666666666662078);
+	px_double y = x - (px_double)(1.16666666666662078);
 
 	return ((((((((((((
 		+p12) * y
@@ -750,19 +763,17 @@ px_double PX_atan(px_double x)
 
 px_double PX_atan2(px_double y, px_double x)
 {
-	px_double atanv=PX_atan(y/x);
-
 	if (x>0)
 	{
-		return atanv;
+		return PX_atan(y/x);;
 	}
 	else if (y >= 0 && x < 0)
 	{
-		return atanv + PX_PI;
+		return PX_atan(y/x) + PX_PI;
 	}
 	else if (y < 0 && x < 0)
 	{
-		return atanv - PX_PI;
+		return PX_atan(y/x) - PX_PI;
 	}
 	else if (y > 0 && x == 0)
 	{
@@ -2178,6 +2189,18 @@ px_rect PX_RECT(px_float x,px_float y,px_float width,px_float height)
 	rect.y=y;
 	rect.width=width;
 	rect.height=height;
+
+	if (width<0)
+	{
+		rect.width=-width;
+		rect.x+=width;
+	}
+
+	if (height<0)
+	{
+		rect.height=-height;
+		rect.y+=height;
+	}
 	return rect;
 }
 
@@ -2208,7 +2231,7 @@ px_rect PX_RECTPOINT2(px_point p1,px_point p2)
 	return rect;
 }
 
-px_complex complexBuild(px_float re,px_float im)
+px_complex PX_complexBuild(px_float re,px_float im)
 {
 	px_complex cx;
 	cx.re=re;
@@ -2216,7 +2239,7 @@ px_complex complexBuild(px_float re,px_float im)
 	return cx;
 }
 
-px_complex complexAdd(px_complex a,px_complex b)
+px_complex PX_complexAdd(px_complex a,px_complex b)
 {
 	px_complex ret;
 	ret.re=a.re+b.re;
@@ -2224,7 +2247,7 @@ px_complex complexAdd(px_complex a,px_complex b)
 	return ret;
 }
 
-px_complex complexMult(px_complex a,px_complex b)
+px_complex PX_complexMult(px_complex a,px_complex b)
 {
 	px_complex ret;
 	ret.re=a.re*b.re-a.im*b.im;
@@ -2232,20 +2255,83 @@ px_complex complexMult(px_complex a,px_complex b)
 	return ret;
 }
 
+px_double PX_complexMod(px_complex a)
+{
+	return PX_sqrtd(a.re*a.re+a.im*a.im);
+}
+
+px_complex PX_complexLog(px_complex a)
+{
+	px_complex ret;
+	ret.re=PX_sqrtd(a.re*a.re+a.im*a.im);
+	ret.im=PX_atan2(a.im,a.re);
+	return ret;
+}
+
+px_complex PX_complexExp(px_complex a)
+{
+	px_double p;
+	px_complex ret;
+	p=PX_exp(a.re);
+	ret.re=p*PX_cosd(a.im);
+	ret.im=p*PX_cosd(a.re);
+	return ret;
+}
+
+px_complex PX_complexSin(px_complex a)
+{
+	double q,p;
+	px_complex ret;
+	p=PX_exp(a.im);
+	q=1/p;
+	ret.re=PX_sind(a.re)*(q+p)/2.0;
+	ret.im=PX_cosd(a.re)*(p-q)/2.0;
+	return ret;
+}
+
+
 void PX_DFT(_IN px_complex x[],_OUT px_complex X[],px_int N)
 {
 	px_int k,n;
 	px_complex Wnk;
+	if (x==X)
+	{
+		//overlap error
+		PX_ASSERT();
+	}
+
 	for (k=0;k<N;k++)
 	{
 		X[k].re=0;
 		X[k].im=0;
 		for (n=0;n<N;n++)
 		{
-			Wnk.re=(px_float)PX_cos_radian((px_float)(2*PX_PI*k*n/N));
-			Wnk.im=(px_float)-PX_sin_radian((px_float)(2*PX_PI*k*n/N));
-			X[k]=complexAdd(X[k],complexMult(x[n],Wnk));
+			Wnk.re=(px_float)PX_cosd((2*PX_PI*k*n/N));
+			Wnk.im=(px_float)-PX_sind((2*PX_PI*k*n/N));
+			X[k]=PX_complexAdd(X[k],PX_complexMult(x[n],Wnk));
 		}
+	}
+}
+
+void PX_DCT(_IN px_double x[],_OUT px_double X[],px_int N)
+{
+	px_int n,m;
+	px_double v;
+	PX_memset(X,0,sizeof(px_double)*N);
+	for (n=0;n<N;n++)
+	{
+		for (m=0;m<N;m++)
+		{
+			X[n]+=x[m]*PX_cosd((2*m+1)*PX_PI*n/(2*N));
+		}	
+	}
+
+	v=PX_sqrtd(2.0/N);
+	X[0]*=PX_sqrtd(1.0/N);
+	
+	for (n=1;n<N;n++)
+	{
+		X[n]*=v;
 	}
 }
 
@@ -2254,20 +2340,52 @@ void PX_IDFT(_IN px_complex X[],_OUT px_complex x[],px_int N)
 	px_int k,n;
 	px_float im=0;
 	px_complex ejw;
+	
+	if (x==X)
+	{
+		//overlap error
+		PX_ASSERT();
+	}
+
 	for (k=0;k<N;k++)
 	{
 		x[k].re=0;
 		x[k].im=0;
 		for (n=0;n<N;n++)
 		{
-			ejw.re=(px_float)PX_cos_radian((px_float)(2*PX_PI*k*n/N));
-			ejw.im=(px_float)PX_sin_radian((px_float)(2*PX_PI*k*n/N));
-			x[k]=complexAdd(x[k],complexMult(X[n],ejw));
+			ejw.re=(px_float)PX_cosd((2*PX_PI*k*n/N));
+			ejw.im=(px_float)PX_sind((2*PX_PI*k*n/N));
+			x[k]=PX_complexAdd(x[k],PX_complexMult(X[n],ejw));
 		}
 
 		x[k].re/=N;x[k].im/=N;
 	}
 }   
+
+void PX_IDCT(_IN px_double X[],_OUT px_double x[],px_int N)
+{
+	px_int n,m;
+	px_double v0,v;
+	PX_memset(x,0,sizeof(px_double)*N);
+
+	v=PX_sqrtd(2.0/N);
+	v0=PX_sqrtd(1.0/N);
+
+	for (m=0;m<N;m++)
+	{
+		for (n=0;n<N;n++)
+		{
+			if (n==0)
+			{
+				x[m]+=v0*X[n]*PX_cosd(PX_PI*n*(2*m+1)/(2*N));
+			}
+			else
+			{
+				x[m]+=v*X[n]*PX_cosd(PX_PI*n*(2*m+1)/(2*N));
+			}
+		}
+	}	
+}
 
 void FFT_Base2(_IN _OUT px_complex x[],px_int N)
 {
@@ -2298,14 +2416,14 @@ void FFT_Base2(_IN _OUT px_complex x[],px_int N)
 
 		for(k=0;k<N>>1;k++)
 		{
-			Wnk.re=(px_float)PX_cos_radian((px_float)(-2*PX_PI*k/N));
-			Wnk.im=(px_float)PX_sin_radian((px_float)(-2*PX_PI*k/N));
+			Wnk.re=(px_float)PX_cosd((-2*PX_PI*k/N));
+			Wnk.im=(px_float)PX_sind((-2*PX_PI*k/N));
 			cx0=x[k];
 			cx1=x[k+(N>>1)];
-			x[k]=complexAdd(cx0,complexMult(Wnk,cx1));
+			x[k]=PX_complexAdd(cx0,PX_complexMult(Wnk,cx1));
 			Wnk.re=-Wnk.re;
 			Wnk.im=-Wnk.im;
-			x[k+(N>>1)]=complexAdd(cx0,complexMult(Wnk,cx1));
+			x[k+(N>>1)]=PX_complexAdd(cx0,PX_complexMult(Wnk,cx1));
 		}
 	}
 	else
@@ -2313,10 +2431,10 @@ void FFT_Base2(_IN _OUT px_complex x[],px_int N)
 		//2 dot DFT
 		cx0=x[0];
 		cx1=x[1];
-		x[0]=complexAdd(cx0,cx1);
+		x[0]=PX_complexAdd(cx0,cx1);
 		cx1.im=-cx1.im;
 		cx1.re=-cx1.re;
-		x[1]=complexAdd(cx0,cx1);
+		x[1]=PX_complexAdd(cx0,cx1);
 	}
 
 
@@ -2356,15 +2474,15 @@ void IFFT_Base2(_IN _OUT px_complex X[],px_int N)
 
 		for(n=0;n<N>>1;n++)
 		{
-			Wnnk.re=(px_float)PX_cos_radian((px_float)(2*PX_PI*n/N));
-			Wnnk.im=(px_float)PX_sin_radian((px_float)(2*PX_PI*n/N));
+			Wnnk.re=(px_float)PX_cosd((2*PX_PI*n/N));
+			Wnnk.im=(px_float)PX_sind((2*PX_PI*n/N));
 			cx0=X[n];
 			cx1=X[n+(N>>1)];
-			X[n]=complexAdd(cx0,complexMult(Wnnk,cx1));
+			X[n]=PX_complexAdd(cx0,PX_complexMult(Wnnk,cx1));
 
 			Wnnk.re=-Wnnk.re;
 			Wnnk.im=-Wnnk.im;
-			X[n+(N>>1)]=complexAdd(cx0,complexMult(Wnnk,cx1));
+			X[n+(N>>1)]=PX_complexAdd(cx0,PX_complexMult(Wnnk,cx1));
 
 		}
 	}
@@ -2373,11 +2491,11 @@ void IFFT_Base2(_IN _OUT px_complex X[],px_int N)
 		//2 dot IDFT
 		cx0=X[0];
 		cx1=X[1];
-		X[0]=complexAdd(cx0,cx1);
+		X[0]=PX_complexAdd(cx0,cx1);
 
 		cx1.im=-cx1.im;
 		cx1.re=-cx1.re;
-		X[1]=complexAdd(cx0,cx1);
+		X[1]=PX_complexAdd(cx0,cx1);
 
 	}
 }
@@ -2496,6 +2614,198 @@ void PX_FFT_2_Shift(_IN px_complex _in[],_OUT px_complex _out[],px_int N)
 		}
 	}
 }
+
+void PX_FT_Symmetry(_IN px_complex x[],_OUT px_complex X[],px_int N)
+{
+	px_int l=1,r=N-1;
+	PX_memcpy(X,x,N/2*sizeof(px_complex)+1);
+	while (l<r)
+	{
+		X[r]=X[l];
+		X[r].im=-X[r].im;
+		l++;
+		r--;
+	}
+}
+
+void PX_Cepstrum(_IN px_complex x[],_OUT px_complex X[],px_int N,PX_CEPSTRUM_TYPE type)
+{
+	px_int i;
+	PX_FFT(x,X,N);
+	if (type==PX_CEPSTRUM_TYPE_COMPLEX)
+	{
+		for (i=0;i<N;i++)
+		{
+			X[i]=PX_complexLog(X[i]);
+		}
+		PX_IFFT(X,X,N);
+	}
+	else
+	{
+		for (i=0;i<N;i++)
+		{
+			X[i].re=PX_log((X[i].re*X[i].re+X[i].im*X[i].im)+1);
+			X[i].im=0;
+		}
+		PX_IFFT(X,X,N);
+		for (i=0;i<N;i++)
+		{
+			X[i].re=(X[i].re*X[i].re+X[i].im*X[i].im);
+			X[i].im=0;
+		}
+	}
+	
+}
+
+px_int PX_PitchEstimation(_IN px_complex x[],px_int N,px_int sampleRate)
+{
+	px_int low,high,i,idx;
+	px_double max=0,avg=0;
+	low=sampleRate/1200;
+	high=sampleRate/83;
+	PX_Cepstrum(x,x,N,PX_CEPTRUM_TYPE_REAL);
+	avg=0;
+	if (high>=N||high==low)
+	{
+		return 0;
+	}
+
+	for (i=low;i<=high;i++)
+	{
+		if(x[i].re>max)
+		{
+			max=x[i].re;
+			idx=i;
+		}
+		avg+=x[i].re;
+	}
+	avg/=(high-low+1);
+
+	if (max>avg*12)
+	{
+		return sampleRate/idx;
+	}
+	return 0;
+}
+
+void PX_PreEmphasise(const px_double *data, int len, px_double *out, px_double preF)//0.9<preF<1.0 suggest 0.9
+{
+	px_int i;
+	for(i = len - 1; i >= 1; i--)
+	{
+		out[i] = data[i] - preF * data[i-1];
+	}
+	out[0] = data[0];
+}
+
+void PX_LinearInterpolationResample(_IN px_double x[],_OUT px_double X[],px_int N,px_int M)
+{
+	px_int k,m=0;
+	px_double d1=0,d2=0;
+	px_double freqscale=N*1.0/M;
+	for (k=0;k<M;k++)
+	{
+		/* linear interpolation */
+		d1=0.0;
+		if (m<N){
+			d1+=(1.0-d2)*x[m];
+		}
+		if (m+1<N){
+			d1+=d2*x[m+1];
+		}
+
+		/* propagate in inbuf */
+		d2+=freqscale;
+		if (d2>=1.0){
+			m+=(px_int)(d2);
+			d2-=(px_int)(d2);
+			
+		}
+		X[k]=d1;
+	}
+}
+
+void PX_UpSampled(_IN px_complex x[],_OUT px_complex X[],px_int N,px_int L)
+{
+	px_int i,j;
+	for (i=0;i<N;i++)
+	{
+		X[i*L]=x[i];
+		for (j=1;j<L;j++)
+		{
+			X[i*L+j].re=0;
+			X[i*L+j].im=0;
+		}
+	}
+
+	if (((N*L)&(N*L-1))==0)
+	{
+		PX_FFT(X,X,N*L);
+	}
+	else
+	{
+		PX_DFT(X,X+N*L,N*L);
+		PX_memcpy(X,X+N*L,sizeof(px_complex)*N*L);
+	}
+
+	for (i=N/2+1;i<N*L/2+1;i++)
+	{
+		X[i].re=0;
+		X[i].im=0;
+	}
+
+	PX_FT_Symmetry(X,X,N*L);
+
+
+	if (((N*L)&(N*L-1))==0)
+	{
+		PX_IFFT(X,X,N*L);
+	}
+	else
+	{
+		PX_IDFT(X,X+N*L,N*L);
+		PX_memcpy(X,X+N*L,sizeof(px_complex)*N*L);
+	}
+}
+
+void PX_DownSampled(_IN px_complex x[],_OUT px_complex X[],px_int N,px_int M)
+{
+	px_int i;
+	if (((N)&(N-1))==0)
+	{
+		PX_FFT(x,X,N);
+	}
+	else
+	{
+		PX_DFT(x,X+N,N);
+		PX_memcpy(X,X+N,sizeof(px_complex)*N);
+	}
+
+	for (i=N/(2*M)+1;i<N/2+1;i++)
+	{
+		X[i].re=0;
+		X[i].im=0;
+	}
+	PX_FT_Symmetry(X,X,N);
+
+	if (((N)&(N-1))==0)
+	{
+		PX_IFFT(X,X,N);
+	}
+	else
+	{
+		PX_IDFT(X,X+N,N);
+		PX_memcpy(X,X+N,sizeof(px_complex)*N);
+	}
+	for (i=0;i<N/M;i++)
+	{
+		X[i]=X[i*M];
+	}
+}
+
+
+
+
 
 px_point PX_POINT(px_float x,px_float y,px_float z)
 {
@@ -2642,26 +2952,77 @@ static px_double __px_pow_i(px_double num,px_int n)
 {
 	px_double powint=1;
 	px_int i;
-	for(i=1;i<=n;i++) powint*=num;
+	for(i=1;i<=n;i++) 
+	{
+		powint*=num;
+		if (powint==0)
+		{
+			break; 
+		}
+		if (powint>0)
+		{
+			if (powint>=PX_DBL_POSITIVE_MAX||powint<=PX_DBL_POSITIVE_MIN)
+			{
+				PX_ASSERT();
+				break;
+			}
+		}
+		else
+		{
+			if (powint<=PX_DBL_NEGATIVE_MIN||powint>=PX_DBL_NEGATIVE_MAX)
+			{
+				PX_ASSERT();
+				break;
+			}
+		}
+	}
 	return powint;
 }
 
 static px_double __px_pow_f(px_double num,px_double m)
 {
 	px_int i,j;
-	px_double powf=0,x,tmpm=1;
+	px_double powd=0,x,tmpm=1;
 	x=num-1;
-	for(i=1;tmpm>0.00001 || tmpm<-0.00001;i++)
+	for(i=1;tmpm>0.0000000001 || tmpm<-0.0000000001;i++)
 	{
 		for(j=1,tmpm=1;j<=i;j++) 
+		{
 			tmpm*=(m-j+1)*x/j;
-		powf+=tmpm;
+		}
+		powd+=tmpm;
+		
+		if (powd==0)
+		{
+			break; 
+		}
+		if (powd>0)
+		{
+			if (powd>=PX_DBL_POSITIVE_MAX||powd<=PX_DBL_POSITIVE_MIN)
+			{
+				PX_ASSERT();
+				break;
+			}
+		}
+		else
+		{
+			if (powd<=PX_DBL_NEGATIVE_MIN||powd>=PX_DBL_NEGATIVE_MAX)
+			{
+				PX_ASSERT();
+				break;
+			}
+		}
 	}
-	return powf+1;
+	return powd+1;
 }
 
-px_double PX_pow_ff(px_double num,px_double m)
+px_double PX_pow_dd(px_double num,px_double m)
 {
+	while (num>2)
+	{
+		num=PX_sqrtd(num);
+		m*=2;
+	}
 	if(num==0 && m!=0) return 0;
 	else if(num==0 && m==0) return 1;
 	else if(num<0 && m-(px_int)(m)!=0) return 0;
@@ -2670,7 +3031,7 @@ px_double PX_pow_ff(px_double num,px_double m)
 		num=1/num;
 		m=-m;
 	}
-	if(m<0) return 1/PX_pow_ff(num,-m);
+	if(m<0) return 1/PX_pow_dd(num,-m);
 	if(m-(px_int)(m)==0) 
 		return __px_pow_i(num,(px_int)m);
 	else 
@@ -2700,6 +3061,12 @@ px_double PX_ln(px_double __x)
 	px_int N = 128;
 	px_int k,nk;
 	px_double x,xx,y;
+	px_double m=1;
+	while (__x>PX_e)
+	{
+		__x=PX_sqrtd(__x);
+		m*=2;
+	}
 	x = (__x-1)/(__x+1);
 	xx = x*x;
 	nk = 2*N+1;
@@ -2708,9 +3075,8 @@ px_double PX_ln(px_double __x)
 	{
 		nk = nk - 2;
 		y = 1.0/nk+xx*y;
-
 	}
-	return 2.0*x*y;
+	return 2.0*x*y*m;
 }
 
 px_double PX_log(px_double __x)
@@ -2728,6 +3094,8 @@ px_double PX_log10(px_double __x)
 	return PX_ln(__x)/2.30258509299404568401799145468;
 }
 
+
+
 static px_uint64 px_srand_seed=0x31415926;
 
 px_void PX_srand(px_uint64 seed)
@@ -2741,6 +3109,11 @@ px_uint32 PX_rand()
 	return  (px_uint32)(px_srand_seed = (px_srand_seed*764261123)%(0xefffffff));
 }
 
+
+px_double PX_randRange(px_double min,px_double max)
+{
+	return min+PX_rand()*1.0/PX_RAND_MAX*(max-min);
+}
 
 px_uint32 PX_randEx(px_uint64 seed)
 {
@@ -2763,6 +3136,11 @@ px_double PX_GaussRand()
 		c = (px_double)PX_sqrt((px_float)(-2 * PX_ln(r) / r));
 		return u * c;
 	}
+}
+
+px_double PX_Ceil(px_double v)
+{
+	return	v-(px_int)v?(px_double)((px_int)(v+1)):v;
 }
 
 static const px_uint32 crc32tab[] = {  
@@ -2845,16 +3223,7 @@ px_uint32 PX_crc32( px_void *buffer, px_uint size)
 	return crc^0xFFFFFFFF;  
 }  
 
-static px_bool PX_checkCPUendian()
-{
-	union{
-		px_dword i;
-		unsigned char s[4];
-	}c;
-	c.i = 0x12345678;
-	return (0x12 == c.s[0]);
 
-}
 
 
 
@@ -2907,6 +3276,15 @@ px_char* PX_strstr(const char* dest, const char* src)
 
 
 
+px_bool PX_isPointInCircle(px_point p,px_point circle,px_float radius)
+{
+	if ((p.x-circle.x)*(p.x-circle.x)+(p.y-circle.y)*(p.y-circle.y)<=radius*radius)
+	{
+		return PX_TRUE;
+	}
+	return PX_FALSE;
+}
+
 px_dword  PX_inet_addr( px_char cp[] )
 {
 	px_uchar ipBytes[4]={0};
@@ -2941,23 +3319,23 @@ px_char* PX_inet_ntoa(px_dword ipv4)
 
 px_dword PX_htonl(px_dword h)
 {
-	return PX_checkCPUendian() ? h : BigLittleSwap32(h);
+	return PX_isBigEndianCPU() ? h : BigLittleSwap32(h);
 }
 
 
 px_dword PX_ntohl(px_dword n)
 {
-	return PX_checkCPUendian() ? n : BigLittleSwap32(n);
+	return PX_isBigEndianCPU() ? n : BigLittleSwap32(n);
 }
 
 px_word  PX_htons(px_word h)
 {
-	return PX_checkCPUendian() ? h : BigLittleSwap16(h);
+	return PX_isBigEndianCPU() ? h : BigLittleSwap16(h);
 }
 
 px_word PX_ntohs(px_word n)
 {
-	return PX_checkCPUendian() ? n : BigLittleSwap16(n);
+	return PX_isBigEndianCPU() ? n : BigLittleSwap16(n);
 }
 
 px_uint32 PX_sum32(px_void *buffer, px_uint size)
@@ -3089,6 +3467,16 @@ px_void  PX_WindowFunction_triangular(px_double data[],px_int N)
 		}
 	}
 }
+
+px_void PX_WindowFunction_Apply(px_double data[],px_double window[],px_int N)
+{
+	px_int i;
+	for (i=0;i<N;i++)
+	{
+		data[i]*=window[i];
+	}
+}
+
 px_void PX_gain(px_double b[],px_double a[],px_int m,px_int n,px_double x[],px_double y[],px_int len,px_int sign) 
 {
 	px_int i,k;
@@ -3096,8 +3484,8 @@ px_void PX_gain(px_double b[],px_double a[],px_int m,px_int n,px_double x[],px_d
 	for (k=0;k<len;k++)
 	{
 		freq=k*0.5/(len-1);
-		zr=PX_cos_radian((px_float)(-8.0*PX_atan(1.0)*freq));
-		zi=PX_sin_radian((px_float)(-8.0*PX_atan(1.0)*freq));
+		zr=PX_cosd((-8.0*PX_atan(1.0)*freq));
+		zi=PX_sind((-8.0*PX_atan(1.0)*freq));
 		br=0;
 		bi=0;
 		for (i=m;i>0;i--)
@@ -3153,8 +3541,8 @@ px_void PX_gainc(px_double b[],px_double a[],px_int n,px_int ns,px_double x[],px
 	for (k=0;k<len;k++)
 	{
 		freq=k*0.5/(len-1);
-		zr=PX_cos_radian((px_float)(-8.0*PX_atan(1.0)*freq));
-		zi=PX_sin_radian((px_float)(-8.0*PX_atan(1.0)*freq));
+		zr=PX_cosd((-8.0*PX_atan(1.0)*freq));
+		zi=PX_sind((-8.0*PX_atan(1.0)*freq));
 		x[k]=1.0;
 		y[k]=0.0;
 		for (j=0;j<ns;j++)
@@ -3231,7 +3619,7 @@ px_void  PX_WindowFunction_blackMan(px_double data[],px_int N)
 	px_int n;
 	for(n=0;n<N;n++)
 	{
-		data[n]=0.42-0.5*PX_cos_radian((px_float)(2*PX_PI*(px_double)n/(N-1))+0.08f*PX_cos_radian((px_float)(4*PX_PI*(px_double)n/(N-1))));
+		data[n]=0.42-0.5*PX_cosd((px_float)(2*PX_PI*(px_double)n/(N-1))+0.08f*PX_cos_radian((px_float)(4*PX_PI*(px_double)n/(N-1))));
 	}
 }
 
@@ -3240,7 +3628,16 @@ px_void  PX_WindowFunction_hamming(px_double data[],px_int N)
 	px_int n;
 	for(n=0;n<N;n++)
 	{
-		data[n]=0.54-0.46*PX_cos_radian((px_float)(2*PX_PI*(px_double)n/(N-1)));
+		data[n]=0.54-0.46*PX_cosd((px_float)(2*PX_PI*(px_double)n/(N-1)));
+	}
+}
+
+px_void PX_WindowFunction_sinc(px_double data[],px_int N)
+{
+	px_int n;
+	for(n=0;n<N;n++)
+	{
+		data[N-n-1]=(data[n]=PX_sind(PX_PI*(((px_double)n)+0.5)/((px_double)N)));
 	}
 }
 
@@ -3315,7 +3712,7 @@ px_void PX_WindowFunction_tukey(px_double data[],px_int N)
 	}
 	for (n=0;n<=(N-2)/10;n++)
 	{
-		data[n]=0.5*(1-PX_cos_radian((px_float)(10*PX_PI*n/(N+8))));
+		data[n]=0.5*(1-PX_cosd((px_float)(10*PX_PI*n/(N+8))));
 	}
 	for (n=(N-2)/10;n<=9*(N-2)/10;n++)
 	{
@@ -3323,7 +3720,7 @@ px_void PX_WindowFunction_tukey(px_double data[],px_int N)
 	}
 	for (n=9*(N-2)/10;n<=N-1;n++)
 	{
-		data[n]=0.5*(1-PX_cos_radian((px_float)(10*PX_PI*(N-n-1)/(N+8))));;
+		data[n]=0.5*(1-PX_cosd((px_float)(10*PX_PI*(N-n-1)/(N+8))));;
 	}
 }
 
@@ -3332,7 +3729,7 @@ px_void PX_WindowFunction_hanning(px_double data[],px_int N)
 	px_int n;
 	for(n=0;n<N;n++)
 	{
-		data[n]=0.5-0.5*PX_cos_radian((px_float)(2*PX_PI*(px_double)n/(N-1)));
+		data[n]=0.5-0.5*PX_cosd((px_float)(2*PX_PI*(px_double)n/(N-1)));
 	}
 }
 
@@ -3415,6 +3812,25 @@ static px_double PX_FIRWindow(PX_FIRFILTER_WINDOW_TYPE type,px_int n,px_int i,px
 	return w;
 }
 
+px_sine PX_SINE(px_double A,px_double P,px_double F)
+{
+	px_sine s;
+	s.A=A;
+	s.p=P;
+	s.f=F;
+	return s;
+}
+
+px_sine PX_InstantaneousFrequency(px_sine src,px_double p2,px_double delta_t)
+{
+	px_double delta=(p2-src.p);
+	delta=delta-(px_int)delta-1/2;
+	delta/=delta_t;
+	src.f+=delta;
+	return src;
+}
+
+
 px_void PX_FIRFilterBuild(PX_FIRFILTER_TYPE bandtype,px_double fln,px_double fhn,PX_FIRFILTER_WINDOW_TYPE wn,px_double h[],px_int n,px_double beta)
 {
 	px_int i,n2,mid;
@@ -3444,7 +3860,7 @@ px_void PX_FIRFilterBuild(PX_FIRFILTER_TYPE bandtype,px_double fln,px_double fhn
 			for (i=0;i<=n2;i++)
 			{
 				s=i-delay;
-				h[i]=(PX_sin_radian((px_float)(wc1*s))/(pi*s))*PX_FIRWindow(wn,n+1,i,beta);
+				h[i]=(PX_sind((wc1*s))/(pi*s))*PX_FIRWindow(wn,n+1,i,beta);
 				h[n-i]=h[i];
 			}
 			if (mid==1)
@@ -3458,7 +3874,7 @@ px_void PX_FIRFilterBuild(PX_FIRFILTER_TYPE bandtype,px_double fln,px_double fhn
 			for (i=0;i<=n2;i++)
 			{
 				s=i-delay;
-				h[i]=(PX_sin_radian((px_float)(pi*s))-PX_sin_radian((px_float)(wc1*s)))/(pi*s);
+				h[i]=(PX_sind((pi*s))-PX_sind((wc1*s)))/(pi*s);
 				h[i]=h[i]*PX_FIRWindow(wn,n+1,i,beta);
 				h[n-i]=h[i];
 			}
@@ -3473,7 +3889,7 @@ px_void PX_FIRFilterBuild(PX_FIRFILTER_TYPE bandtype,px_double fln,px_double fhn
 			for (i=0;i<=n2;i++)
 			{
 				s=i-delay;
-				h[i]=(PX_sin_radian((px_float)(wc2*s))-PX_sin_radian((px_float)(wc1*s)))/(pi*s);
+				h[i]=(PX_sind((wc2*s))-PX_sind((wc1*s)))/(pi*s);
 				h[i]=h[i]*PX_FIRWindow(wn,n+1,i,beta);
 				h[n-i]=h[i];
 			}
@@ -3488,7 +3904,7 @@ px_void PX_FIRFilterBuild(PX_FIRFILTER_TYPE bandtype,px_double fln,px_double fhn
 			for (i=0;i<=n2;i++)
 			{
 				s=i-delay;
-				h[i]=(PX_sin_radian((px_float)(wc1*s))-PX_sin_radian((px_float)(wc2*s)))/(pi*s);
+				h[i]=(PX_sind((wc1*s))-PX_sind((wc2*s)))/(pi*s);
 				h[i]=h[i]*PX_FIRWindow(wn,n+1,i,beta);
 				h[n-i]=h[i];
 			}

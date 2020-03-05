@@ -18,14 +18,15 @@
 #define PX_OBJECT_EVENT_CURSOROUT			7
 #define PX_OBJECT_EVENT_CURSORWHEEL         8
 #define PX_OBJECT_EVENT_STRING				9
-#define PX_OBJECT_EVENT_CURSORCLICK			10
-#define PX_OBJECT_EVENT_CURSORDRAG			11
-#define PX_OBJECT_EVENT_VALUECHAGE			12
-#define PX_OBJECT_EVENT_DRAGFILE			13
-#define PX_OBJECT_EVENT_KEYDOWN				14
-#define PX_OBJECT_EVENT_IMPACT				15
-#define PX_OBJECT_EVENT_ONFOCUSCHANGED		16
-#define PX_OBJECT_EVENT_SCALE               17
+#define PX_OBJECT_EVENT_EXECUTE				10
+#define PX_OBJECT_EVENT_CURSORCLICK			11
+#define PX_OBJECT_EVENT_CURSORDRAG			12
+#define PX_OBJECT_EVENT_VALUECHAGE			13
+#define PX_OBJECT_EVENT_DRAGFILE			14
+#define PX_OBJECT_EVENT_KEYDOWN				15
+#define PX_OBJECT_EVENT_IMPACT				16
+#define PX_OBJECT_EVENT_ONFOCUSCHANGED		17
+#define PX_OBJECT_EVENT_SCALE               18
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -55,6 +56,7 @@ enum PX_OBJECT_TYPE
   PX_OBJECT_TYPE_CURSORBUTTON   ,
   PX_OBJECT_TYPE_VKEYBOARD		,
   PX_OBJECT_TYPE_COORDINATE     ,
+  PX_OBJECT_TYPE_FILTEREDITOR   ,
 };
 
 
@@ -101,6 +103,7 @@ enum PX_OBJECT_SLIDERBAR_STATUS
 
 #define  PX_OBJECT_COORDINATEDATA_MAP_LEFT  0
 #define  PX_OBJECT_COORDINATEDATA_MAP_RIGHT 1
+#define  PX_OBJECT_COORDINATEDATA_MAP_HORIZONTAL 2
 
 #define  PX_OBJECT_COORDINATES_DEFAULE_MINHORIZONTALPIXELDIVIDING 48
 #define  PX_OBJECT_COORDINATES_DEFAULE_MINVERTICALPIXELDIVIDING	  20
@@ -127,6 +130,13 @@ enum PX_OBJECT_SLIDERBAR_STATUS
 #define  PX_OBJECT_COORDINATEFLAGLINE_XSHOW						 1
 #define  PX_OBJECT_COORDINATEFLAGLINE_YLSHOW					 2
 #define  PX_OBJECT_COORDINATEFLAGLINE_YRSHOW					 4
+
+
+
+#define  PX_OBJECT_FILTEREDITOR_DEFAULE_HORIZONTALPIXELDIVIDING 48
+#define  PX_OBJECT_FILTEREDITOR_DEFAULE_VERTICALPIXELDIVIDING   20
+#define	 PX_OBJECT_FILTEREDITOR_DEFAULT_FRAMELINE_WIDTH			   2
+
 
 ///////////////////////////////////////////////////////////////////////////
 ////  PixelsES Object
@@ -470,6 +480,7 @@ px_void    PX_ObjectSetSize(PX_Object *Object,px_float Width,px_float Height,px_
 px_void	   PX_ObjectSetVisible(PX_Object *Object,px_bool visible);
 PX_Object  *PX_ObjectGetChild(PX_Object *Object,px_int Index);
 px_bool		PX_ObjectIsPointInRegion(PX_Object *Object,px_float x,px_float y);
+px_bool		PX_ObjectIsCursorInRegion(PX_Object *Object,PX_Object_Event e);
 px_float	PX_ObjectGetHeight(PX_Object *Object);
 px_float	PX_ObjectGetWidth(PX_Object *Object);
 
@@ -663,7 +674,7 @@ px_char PX_Object_VirtualKeyBoardGetCode(PX_Object *pObject);
 typedef enum 
 {
 	PX_OBJECT_COORDINATES_LINEMODE_LINES=0,
-	PX_OBJECT_COORDINATES_LINEMODE_PILLAR=1
+	PX_OBJECT_COORDINATES_LINEMODE_PILLAR=1,
 }PX_OBJECT_COORDINATES_LINEMODE;
 
 typedef enum 
@@ -742,11 +753,14 @@ typedef struct
 	px_bool MarkValueEnabled;
 	px_bool OnMarkStatus;
 	px_bool bDataUpdatePainter;
+	px_bool ShowHelpLine;
 
-	px_bool LeftTitleShow,RightTitleShow;
+	px_bool LeftTitleShow,RightTitleShow,HorizontalShow;
 
+	px_color DashColor;
 	px_color FontColor;
 	px_color borderColor;
+	px_color helpLineColor;
 	int      FontSize;
 
 	PX_OBJECT_COORDINATES_LINEMODE LineMode;
@@ -758,61 +772,112 @@ typedef struct
 	px_float GuidesLineWidth;
 	px_vector  vData;
 	px_vector  vFlagLine;
+
+	px_int  helpLineX,helpLineY;
 }PX_Object_Coordinates;
 
 
 PX_Object_Coordinates *PX_Object_GetCoordinates(PX_Object *pObject);
 // 
-void PX_Object_CoordinatesSetMinVerticalPixelDividing(PX_Object *pObject,int val);
-void PX_Object_CoordinatesSetMinHorizontalPixelDividing(PX_Object *pObject,int val);
-void PX_Object_CoordinatesSetHorizontalDividing(PX_Object *pObject,int Count);
-void PX_Object_CoordinatesSetLeftVerticalDividing(PX_Object *pObject,int Count);
-void PX_Object_CoordinatesSetRightVerticalDividing(PX_Object *pObject,int Count);
-void PX_Object_CoordinatesSetLineMode(PX_Object *pObject,PX_OBJECT_COORDINATES_LINEMODE mode);
-void PX_Object_CoordinatesSetScaleEnabled(PX_Object *pObject,px_bool Enabled);
-void PX_Object_CoordinatesSetGuidesVisible(PX_Object *pObject,px_bool Visible); 
-void PX_Object_CoordinatesSetGuidesShowMode(PX_Object *pObject,PX_OBJECT_COORDINATES_GUIDESSHOWMODE mode);
+px_void PX_Object_CoordinatesSetMinVerticalPixelDividing(PX_Object *pObject,int val);
+px_void PX_Object_CoordinatesSetMinHorizontalPixelDividing(PX_Object *pObject,int val);
+px_void PX_Object_CoordinatesSetHorizontalDividing(PX_Object *pObject,int Count);
+px_void PX_Object_CoordinatesSetLeftVerticalDividing(PX_Object *pObject,int Count);
+px_void PX_Object_CoordinatesSetRightVerticalDividing(PX_Object *pObject,int Count);
+px_void PX_Object_CoordinatesSetStyle(PX_Object *pObject,PX_OBJECT_COORDINATES_LINEMODE mode);
+px_void PX_Object_CoordinatesSetScaleEnabled(PX_Object *pObject,px_bool Enabled);
+px_void PX_Object_CoordinatesSetGuidesVisible(PX_Object *pObject,px_bool Visible); 
+px_void PX_Object_CoordinatesSetGuidesShowMode(PX_Object *pObject,PX_OBJECT_COORDINATES_GUIDESSHOWMODE mode);
+px_void PX_Object_CoordinatesShowHelpLine(PX_Object *pObject,px_bool show); 
 
-void PX_Object_CoordinatesSetDataLineWidth(PX_Object *pObject,px_float linewidth );
-void PX_Object_CoordinatesSetDataShow(PX_Object *pObject,px_int index,px_bool show );
-void PX_Object_CoordinatesSetGuidesLineWidth(PX_Object *pObject,px_float linewidth);
-void PX_Object_CoordinatesSetTitleFontSize(PX_Object *pObject,int size);
-void PX_Object_CoordinatesSetTitleFontColor(PX_Object *pObject,px_color clr);
-void PX_Object_CoordinatesSetTitleLeftShow(PX_Object *pObject,px_bool bshow);
-void PX_Object_CoordinatesSetTitleRightShow(PX_Object *pObject,px_bool bshow);
-void PX_Object_CoordinatesSetFloatFlagFormatHorizontal(PX_Object *pObject,const char *fmt);
-void PX_Object_CoordinatesSetIntFlagFormatHorizontal(PX_Object *pObject,const char *fmt);
-void PX_Object_CoordinatesSetFloatFlagFormatVerticalLeft(PX_Object *pObject,const char *fmt);
-void PX_Object_CoordinatesSetIntFlagFormatVerticalLeft(PX_Object *pObject,const char *fmt);
-void PX_Object_CoordinatesSetFloatFlagFormatVerticalRight(PX_Object *pObject,const char *fmt);
-void PX_Object_CoordinatesSetIntFlagFormatVericalRight(PX_Object *pObject,const char *fmt);
+px_void PX_Object_CoordinatesSetDataLineWidth(PX_Object *pObject,px_float linewidth );
+px_void PX_Object_CoordinatesSetDataShow(PX_Object *pObject,px_int index,px_bool show );
+px_void PX_Object_CoordinatesSetGuidesLineWidth(PX_Object *pObject,px_float linewidth);
+px_void PX_Object_CoordinatesSetTitleFontSize(PX_Object *pObject,int size);
+px_void PX_Object_CoordinatesSetTitleFontColor(PX_Object *pObject,px_color clr);
+px_void PX_Object_CoordinatesSetDashLineColor(PX_Object *pObject,px_color clr);
+px_void PX_Object_CoordinatesSetTitleLeftShow(PX_Object *pObject,px_bool bshow);
+px_void PX_Object_CoordinatesSetTitleRightShow(PX_Object *pObject,px_bool bshow);
+px_void PX_Object_CoordinatesSetHorizontalShow(PX_Object *pObject,px_bool bshow);
+px_void PX_Object_CoordinatesSetFloatFlagFormatHorizontal(PX_Object *pObject,const char *fmt);
+px_void PX_Object_CoordinatesSetIntFlagFormatHorizontal(PX_Object *pObject,const char *fmt);
+px_void PX_Object_CoordinatesSetFloatFlagFormatVerticalLeft(PX_Object *pObject,const char *fmt);
+px_void PX_Object_CoordinatesSetIntFlagFormatVerticalLeft(PX_Object *pObject,const char *fmt);
+px_void PX_Object_CoordinatesSetFloatFlagFormatVerticalRight(PX_Object *pObject,const char *fmt);
+px_void PX_Object_CoordinatesSetIntFlagFormatVericalRight(PX_Object *pObject,const char *fmt);
 
 
 
-void PX_Object_CoordinatesSetHorizontalMin(PX_Object *pObject,double Min);
-void PX_Object_CoordinatesSetHorizontalMax(PX_Object *pObject,double Max);
-void PX_Object_CoordinatesSetLeftVerticalMin(PX_Object *pObject,double Min);
-void PX_Object_CoordinatesSetLeftVerticalMax(PX_Object *pObject,double Max);
-void PX_Object_CoordinatesSetRightVerticalMax(PX_Object *pObject,double Max);
-void PX_Object_CoordinatesSetRightVerticalMin(PX_Object *pObject,double Min);
+px_void PX_Object_CoordinatesSetHorizontalMin(PX_Object *pObject,double Min);
+px_void PX_Object_CoordinatesSetHorizontalMax(PX_Object *pObject,double Max);
+px_void PX_Object_CoordinatesSetLeftVerticalMin(PX_Object *pObject,double Min);
+px_void PX_Object_CoordinatesSetLeftVerticalMax(PX_Object *pObject,double Max);
+px_void PX_Object_CoordinatesSetRightVerticalMax(PX_Object *pObject,double Max);
+px_void PX_Object_CoordinatesSetRightVerticalMin(PX_Object *pObject,double Min);
 
 px_void PX_Object_CoordinatesSetBorderColor(PX_Object *pObject,px_color clr);
+PX_Object_CoordinateData *PX_Object_CoordinatesGetCoordinateData(PX_Object *pObject,px_int index);
 int PX_Object_CoordinatesGetCoordinateWidth(PX_Object *pObject);
 int PX_Object_CoordinatesGetCoordinateHeight(PX_Object *pObject);
-//void PX_Object_CoordinatesSetTitleLeft(PX_Object *pObject,const px_char * title);
-//void PX_Object_CoordinatesSetTitleRight(PX_Object *pObject,const px_char * title);
-void PX_Object_CoordinatesSetTitleTop(PX_Object *pObject,const px_char * title);
-void PX_Object_CoordinatesSetTitleBottom(PX_Object *pObject,const px_char * title);
+//px_void PX_Object_CoordinatesSetTitleLeft(PX_Object *pObject,const px_char * title);
+//px_void PX_Object_CoordinatesSetTitleRight(PX_Object *pObject,const px_char * title);
+px_void PX_Object_CoordinatesSetTitleTop(PX_Object *pObject,const px_char * title);
+px_void PX_Object_CoordinatesSetTitleBottom(PX_Object *pObject,const px_char * title);
 
 
-void PX_Object_CoordinatesSetMarkValueEnabled(PX_Object *pObject,px_bool Enabled);
-void PX_Object_CoordinatesSetFontColor(PX_Object *pObject,px_color clr);
-void PX_Object_CoordinatesClearContext(PX_Object *pObject);
-void PX_Object_CoordinatesClearFlagLine(PX_Object *pObject);
-void PX_Object_CoordinatesAddData(PX_Object *pObject,PX_Object_CoordinateData data);
-void PX_Object_CoordinatesAddCoordinateFlagLine(PX_Object *pObject,PX_Object_CoordinateFlagLine Line);
+px_void PX_Object_CoordinatesSetMarkValueEnabled(PX_Object *pObject,px_bool Enabled);
+px_void PX_Object_CoordinatesSetFontColor(PX_Object *pObject,px_color clr);
+px_void PX_Object_CoordinatesClearContext(PX_Object *pObject);
+px_void PX_Object_CoordinatesClearFlagLine(PX_Object *pObject);
+px_void PX_Object_CoordinatesAddData(PX_Object *pObject,PX_Object_CoordinateData data);
+px_void PX_Object_CoordinatesAddCoordinateFlagLine(PX_Object *pObject,PX_Object_CoordinateFlagLine Line);
 // 
-void PX_Object_CoordinatesSetMargin(PX_Object_Coordinates *pcd,int Left,int Right,int Top,int Bottom);
+px_void PX_Object_CoordinatesSetMargin(PX_Object_Coordinates *pcd,int Left,int Right,int Top,int Bottom);
 px_void PX_Object_CoordinatesRestoreCoordinates(PX_Object *pObject);
 PX_Object *PX_Object_CoordinatesCreate(px_memorypool *mp, PX_Object *Parent,px_int x,px_int y,px_int Width,px_int Height);
+
+
+#define PX_OBJECT_FILTER_EDITOR_MAX_PT 256
+#define PX_OBJECT_FILTER_EDITOR_DEFAULT_RADIUS 6
+typedef struct
+{
+	px_int x,y;
+	px_bool bselect;
+	px_bool bCursor;
+}PX_Object_FilterEditor_OperatorPoint;
+
+typedef struct
+{
+	px_bool ShowHelpLine;
+	px_color FontColor;
+	px_color borderColor;
+	px_color helpLineColor;
+	px_color ptColor;
+	int      FontSize;
+	px_int   HorizontalDividing;
+	px_int   VerticalDividing;
+	px_point DragStartPoint;
+	px_point lastAdjustPoint;
+	px_point DragingPoint;
+	px_int	 bSelectDrag;
+	px_int	 bAdjust;
+	px_int   opCount;
+	px_int   radius;
+	px_double rangedb; 
+	PX_Object_FilterEditor_OperatorPoint pt[PX_OBJECT_FILTER_EDITOR_MAX_PT];
+}PX_Object_FilterEditor;
+
+PX_Object_FilterEditor *PX_Object_GetFilterEditor(PX_Object *Object);
+PX_Object *PX_Object_FilterEditorCreate(px_memorypool *mp, PX_Object *Parent,px_int x,px_int y,px_int Width,px_int Height);
+px_void PX_Object_FilterEditorSetOperateCount(PX_Object *Object,px_int opcount);
+px_void PX_Object_FilterEditorReset(PX_Object *Object);
+px_void PX_Object_FilterEditorSetRange(PX_Object *Object,px_double range);
+px_void PX_Object_FilterEditorSetFontColor(PX_Object *Object,px_color clr);
+px_void PX_Object_FilterEditorSetBorderColor(PX_Object *Object,px_color clr);
+px_void PX_Object_FilterEditorSethelpLineColor(PX_Object *Object,px_color clr);
+px_void PX_Object_FilterEditorSetFontSize(PX_Object *Object,px_int size);
+px_void PX_Object_FilterEditorSetHorizontalDividing(PX_Object *Object,px_int div);
+px_void PX_Object_FilterEditorSetVerticalDividing(PX_Object *Object,px_int div);
+px_void PX_Object_FilterEditorMapData(PX_Object *Object,px_double data[],px_int size);
+px_double PX_Object_FilterEditorMapValue(PX_Object *Object,px_double precent);
 #endif
