@@ -2,6 +2,11 @@
 #define PLATFORM_WINDOWS
 
 #include <Windows.h>
+#include "stdio.h"
+#pragma comment(lib,"User32.lib")
+#pragma comment(lib,"Shell32.lib")
+#pragma comment(lib,"Ole32.lib")
+#pragma comment(lib,"winmm.lib" )
 
 #define PX_DIK_ESCAPE          0x01
 #define PX_DIK_1               0x02
@@ -148,20 +153,31 @@
 #define PX_DIK_MAIL            0xEC    /* Mail */
 #define PX_DIK_MEDIASELECT     0xED    /* Media Select */
 
-extern  BOOL PX_CreateWindow( int Width,int Height,const char *name,BOOL bfullScreen);
-extern  HWND PX_GetWindowHwnd();
-extern  VOID PX_SystemReadDeviceState();
-extern  BOOL PX_SystemLoop();
-extern  BOOL PX_SystemRender(void *raw,int width,int height);
-extern  BOOL PX_SystemisAvtivated();
-extern  BOOL PX_KeyboardDown(unsigned char X );
-extern  char *PX_KeyboardString();
-extern  char *PX_DragfileString();
-extern  BOOL PX_MouseLButtonDown();
-extern  BOOL PX_MouseRButtonDown();
-extern  BOOL PX_MouseMButtonDown();
-extern  POINT PX_MousePosition();
+typedef struct
+{
+	UINT uMsg;
+	LPARAM lparam;
+	WPARAM wparam;
+}WM_MESSAGE;
+
+extern BOOL PX_CreateWindow( int Width,int Height,char *name,BOOL bfullScreen);
+extern HWND PX_GetWindowHwnd();
+extern VOID PX_SystemReadDeviceState();
+extern BOOL PX_SystemLoop();
+extern BOOL PX_SystemRender(void *raw,int width,int height);
+extern BOOL PX_SystemisAvtivated();
+extern BOOL PX_KeyboardDown(unsigned char X );
+extern char *PX_KeyboardString();
+extern char *PX_DragfileString();
+extern BOOL PX_MouseLButtonDown();
+extern BOOL PX_MouseRButtonDown();
+extern BOOL PX_MouseMButtonDown();
+extern POINT PX_MousePosition();
 extern BOOL PX_KeyDown(unsigned char key);
-
-
+extern BOOL PX_MouseWheel(int *x,int *y,int *delta);
+extern BOOL PX_GetWinMessage(WM_MESSAGE *Msg);
+extern char *PX_OpenFileDialog(const char Filter[]);
+extern char *PX_MultFileDialog(const char Filter[]);
+extern char *PX_GetFileName(const char filePath[]);
+extern char *PX_SaveFileDialog(const char Filter[],const char ext[]);
 #endif
