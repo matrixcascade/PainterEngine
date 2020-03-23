@@ -65,7 +65,7 @@ ID2D1HwndRenderTarget  *D2D_pRenderTarget;
 
 
 
-static WNDCLASSEX      Win_Wcx;
+static WNDCLASSEXA      Win_Wcx;
 
 /////////////////////////////////////////////////////
 LRESULT CALLBACK AppWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
@@ -119,7 +119,7 @@ BOOL PX_CreateWindow( int Width,int Height,char *name,BOOL bfullScreen)
 		///////////////////////////////////////////////////////////////////////////
 		//Class Register
 		///////////////////////////////////////////////////////////////////////////
-		if(!RegisterClassEx(&Win_Wcx))
+		if(!RegisterClassExA(&Win_Wcx))
 			return FALSE;
 	}
 
@@ -131,7 +131,7 @@ BOOL PX_CreateWindow( int Width,int Height,char *name,BOOL bfullScreen)
 	////////////////////////////////////////////////////////////////////////////
 	//Create window
 	////////////////////////////////////////////////////////////////////////////
-	Win_Hwnd = CreateWindow("WindowCls", name,
+	Win_Hwnd = CreateWindowA("WindowCls", name,
 		WS_OVERLAPPED|WS_SYSMENU,
 		CW_USEDEFAULT, CW_USEDEFAULT,
 		Width, Height,
@@ -261,7 +261,7 @@ LRESULT CALLBACK AppWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 	case WM_DROPFILES:
 		{
 			HDROP hdrop = (HDROP)wParam;
-			DragQueryFile(hdrop, 0, DInput_AccepyFile, MAX_PATH);
+			DragQueryFileA(hdrop, 0, DInput_AccepyFile, MAX_PATH);
 			DragFinish(hdrop);
 		}
 		break;
@@ -429,7 +429,7 @@ BOOL PX_GetWinMessage(WM_MESSAGE *Msg)
 
 char *PX_OpenFileDialog(const char Filter[])
 {
-	OPENFILENAME ofn;
+	OPENFILENAMEA ofn;
 	static char szFile[MAX_PATH];
 	ZeroMemory(&ofn,sizeof(ofn));
 	ofn.lStructSize = sizeof(ofn);
@@ -444,7 +444,7 @@ char *PX_OpenFileDialog(const char Filter[])
 	ofn.hwndOwner = Win_Hwnd;
 	ofn.Flags = OFN_EXPLORER |OFN_PATHMUSTEXIST ;
 
-	if (GetSaveFileName(&ofn))
+	if (GetSaveFileNameA(&ofn))
 	{
 		return szFile;
 	}
@@ -453,7 +453,7 @@ char *PX_OpenFileDialog(const char Filter[])
 
 char *PX_MultFileDialog(const char Filter[])
 {
-	OPENFILENAME ofn;
+	OPENFILENAMEA ofn;
 	static char szFile[MAX_PATH*64];
 	ZeroMemory(&ofn,sizeof(ofn));
 	ofn.lStructSize = sizeof(ofn);
@@ -468,7 +468,7 @@ char *PX_MultFileDialog(const char Filter[])
 	ofn.hwndOwner = Win_Hwnd;
 	ofn.Flags = OFN_EXPLORER |OFN_PATHMUSTEXIST|OFN_ALLOWMULTISELECT;
 
-	if (GetOpenFileName(&ofn))
+	if (GetOpenFileNameA(&ofn))
 	{
 		if (szFile[strlen(szFile)+1]=='\0')
 		{
@@ -490,7 +490,7 @@ char *PX_MultFileDialog(const char Filter[])
 
 char *PX_SaveFileDialog(const char Filter[],const char ext[])
 {
-	OPENFILENAME ofn;
+	OPENFILENAMEA ofn;
 	static char szFile[MAX_PATH];
 	ZeroMemory(&ofn,sizeof(ofn));
 	ofn.lStructSize = sizeof(ofn);
@@ -505,7 +505,7 @@ char *PX_SaveFileDialog(const char Filter[],const char ext[])
 	ofn.hwndOwner = Win_Hwnd;
 	ofn.Flags = OFN_EXPLORER |OFN_PATHMUSTEXIST ;
 
-	if (GetSaveFileName(&ofn))
+	if (GetSaveFileNameA(&ofn))
 	{
 		if (ext)
 		{
