@@ -511,13 +511,13 @@ char *PX_SaveFileDialog(const char Filter[],const char ext[])
 		{
 			char uprFile[MAX_PATH]={0};
 			char uprExt[MAX_PATH]={0};
-			strcpy(uprExt,ext);
-			strupr(uprExt);
-			strcpy(uprFile,szFile);
-			strupr(uprFile);
+			strcpy_s(uprExt,ext);
+			_strupr_s(uprExt);
+			strcpy_s(uprFile,szFile);
+			_strupr_s(uprFile);
 			if (!strstr(uprFile,uprExt))
 			{
-				strcat(szFile,ext);
+				strcat_s(szFile,ext);
 			}
 		}
 		return szFile;
