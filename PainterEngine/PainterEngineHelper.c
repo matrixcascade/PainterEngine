@@ -261,7 +261,7 @@ px_bool PX_Loop()
 
 
 
-px_bool PX_Initialize(px_char *name,px_int width,px_int height)
+px_bool PX_Initialize(const px_char *name,px_int width,px_int height)
 {
 
 	PX_srand(314159265);
@@ -319,7 +319,7 @@ px_surface * PX_GetSurface()
 //////////////////////////////////////////////////////////////////////////
 //Functions
 
-PX_IO_Data PX_LoadFileToIOData(px_char *path)
+PX_IO_Data PX_LoadFileToIOData(const px_char *path)
 {
 	PX_IO_Data io;
 	px_int fileoft=0;

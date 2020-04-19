@@ -160,7 +160,7 @@ typedef struct
 	WPARAM wparam;
 }WM_MESSAGE;
 
-extern BOOL PX_CreateWindow( int Width,int Height,char *name,BOOL bfullScreen);
+extern BOOL PX_CreateWindow( int Width,int Height,const char *name,BOOL bfullScreen);
 extern HWND PX_GetWindowHwnd();
 extern VOID PX_SystemReadDeviceState();
 extern BOOL PX_SystemLoop();

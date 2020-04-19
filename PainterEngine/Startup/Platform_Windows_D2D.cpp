@@ -10,7 +10,7 @@ typedef struct
 	WPARAM wparam;
 }WM_MESSAGE;
 
-extern "C" BOOL PX_CreateWindow( int Width,int Height,char *name,BOOL bfullScreen);
+extern "C" BOOL PX_CreateWindow( int Width,int Height,const char *name,BOOL bfullScreen);
 extern "C" HWND PX_GetWindowHwnd();
 extern "C" VOID PX_SystemReadDeviceState();
 extern "C" BOOL PX_SystemLoop();
@@ -86,7 +86,7 @@ BOOL PX_D3DReset(HWND hWnd,int Width,int Height,BOOL bfullScreen)
 }
 
 
-BOOL PX_CreateWindow( int Width,int Height,char *name,BOOL bfullScreen)
+BOOL PX_CreateWindow( int Width,int Height,const char *name,BOOL bfullScreen)
 {
 	HRESULT hr;
 	D2D1_SIZE_U size;
