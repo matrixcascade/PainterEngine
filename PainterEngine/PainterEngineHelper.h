@@ -15,7 +15,7 @@ extern "C" {
 #include "./Startup/Platform_Windows_D2D.h"
 #include "./Architecture/PainterEngine_Console.h"
 
-//#include "../decoder/PainterEngine_ImageDecoder.h"
+#include "../decoder/PainterEngine_ImageDecoder.h"
 
 typedef struct
 {

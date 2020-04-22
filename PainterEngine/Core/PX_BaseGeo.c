@@ -224,6 +224,12 @@ px_void PX_GeoDrawLine(px_surface *psurface, px_int x0, px_int y0, px_int x1, px
 		y1=(px_int)Cross2points[1].y;
 	}
 
+	if (x1==x0&&y1==y0)
+	{
+		return;
+	}
+
+
 	if (k>0)
 	{
 		if(k<1.f)
