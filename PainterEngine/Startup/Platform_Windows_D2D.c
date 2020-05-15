@@ -50,7 +50,7 @@ BOOL                    Win_bFullScreen;
 BOOL                    Win_Activated;
 WM_MESSAGE              Win_messageStack[WIN_MESSAGESTACK_SIZE] = {0};
 unsigned char           DInput_KeyBoardState[256];
-char                    DInput_AccepyFile[MAX_PATH] = {0};
+char                    DInput_AcceptFile[MAX_PATH] = {0};
 POINT                   DInput_MousePosition;
 POINT                   DInput_MouseWheelPosition;
 POINT                   DInput_MouseWheelDelta;
@@ -259,7 +259,7 @@ LRESULT CALLBACK AppWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 	case WM_DROPFILES:
 	{
 		HDROP hdrop = (HDROP)wParam;
-		DragQueryFileA(hdrop, 0, DInput_AccepyFile, MAX_PATH);
+		DragQueryFileA(hdrop, 0, DInput_AcceptFile, MAX_PATH);
 		DragFinish(hdrop);
 		break;
 	}
@@ -377,7 +377,7 @@ VOID PX_SystemReadDeviceState(void)
 
 char *PX_DragfileString(void)
 {
-	return DInput_AccepyFile;
+	return DInput_AcceptFile;
 }
 
 HWND PX_GetWindowHwnd(void)
