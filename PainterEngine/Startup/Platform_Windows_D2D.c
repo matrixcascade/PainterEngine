@@ -85,6 +85,7 @@ BOOL PX_CreateWindow(int Width, int Height, const char *name, BOOL bfullScreen)
 	D2D1_SIZE_U size;
 	D2D1_RENDER_TARGET_PROPERTIES render_target_properties;
 	D2D1_HWND_RENDER_TARGET_PROPERTIES hwnd_render_target_properties;
+	D2D1_BITMAP_PROPERTIES bitmapformat;
 	RECT rc;
 
 	int nScreenWidth, nScreenHeight;
@@ -183,7 +184,6 @@ BOOL PX_CreateWindow(int Width, int Height, const char *name, BOOL bfullScreen)
 		return FALSE;
 	}
 
-	D2D1_BITMAP_PROPERTIES bitmapformat;
 	bitmapformat.dpiX = 0;
 	bitmapformat.dpiY = 0;
 	bitmapformat.pixelFormat.format = DXGI_FORMAT_R8G8B8A8_UNORM;
