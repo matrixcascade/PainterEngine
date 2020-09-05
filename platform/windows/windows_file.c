@@ -15,7 +15,7 @@ FILE *PX_Windows_fopen(const char path[], const char mode[])
 
 int PX_SaveDataToFile(void *buffer,int size,const char path[])
 {
-	FILE *pf= PX_Windows_fopen(path,"rb");
+	FILE *pf= PX_Windows_fopen(path,"wb");
 	if (pf)
 	{
 		fwrite(buffer,1,size,pf);
