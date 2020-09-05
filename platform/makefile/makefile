@@ -37,7 +37,7 @@ $(project_path)/%.o:$(project_path)/%.c
 	gcc -c $^ -o $@ -I "$(painterengine_path)" -I "$(painterengine_path)/platform/windows"
 
 $(painterengine_path)/architecture/%.o:$(painterengine_path)/architecture/%.c 
-	gcc -c $^ -o $@ -I "$(painterengine_path)
+	gcc -c $^ -o $@ -I "$(painterengine_path)"
 
 $(painterengine_path)/kernel/%.o:$(painterengine_path)/kernel/%.c
 	gcc -c $^ -o $@
