@@ -410,7 +410,7 @@ px_void PX_ObjectInit(px_memorypool *mp,PX_Object *pObject,PX_Object *Parent,px_
 	pObject->mp=mp;
 	pObject->Func_ObjectFree=PX_NULL;
 	pObject->Func_ObjectRender=PX_NULL;
-
+	pObject->Func_ObjectUpdate=PX_NULL;
 	if (Parent!=PX_NULL)
 	{
 		if(Parent->pChilds==PX_NULL)

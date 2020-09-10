@@ -486,6 +486,12 @@ px_bool PX_HexStringToBuffer(const px_char hex_str[],px_byte data[])
 	}
 	while (*hex_str)
 	{
+		if (*hex_str==' ')
+		{
+			hex_str++;
+			continue;
+		}
+
 		hex[0]=*hex_str;
 		hex_str++;
 		hex[1]=*hex_str;

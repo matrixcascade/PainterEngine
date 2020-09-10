@@ -42,7 +42,7 @@ px_void PX_MessageBox_EditOnEnter(PX_Object *pObject,PX_Object_Event e,px_void *
 	}
 }
 
-px_bool PX_MessageBoxInitialize(PX_Runtime *runtime,PX_MessageBox *pm,PX_FontModule *fontmodule)
+px_bool PX_MessageBoxInitialize(PX_Runtime *runtime,px_memorypool *mp,PX_MessageBox *pm,PX_FontModule *fontmodule)
 {
 
 	pm->schedule=0;
@@ -53,13 +53,13 @@ px_bool PX_MessageBoxInitialize(PX_Runtime *runtime,PX_MessageBox *pm,PX_FontMod
 	pm->function_no=PX_NULL;
 	pm->function_yes=PX_NULL;
 
-	if(!(pm->root=PX_ObjectCreate(&runtime->mp_ui,PX_NULL,0,0,0,0,0,0))) return PX_FALSE;
+	if(!(pm->root=PX_ObjectCreate(mp,PX_NULL,0,0,0,0,0,0))) return PX_FALSE;
 	
-	if(!(pm->btn_Ok=PX_Object_PushButtonCreate(&runtime->mp_ui,pm->root,pm->window_Width/2+200,pm->window_Height/2+150,84,28,"OK",PX_NULL,PX_COLOR(255,0,0,0)))) return PX_FALSE;
+	if(!(pm->btn_Ok=PX_Object_PushButtonCreate(mp,pm->root,pm->window_Width/2+200,pm->window_Height/2+150,84,28,"OK",PX_NULL,PX_COLOR(255,0,0,0)))) return PX_FALSE;
 	
-	if(!(pm->btn_Cancel=PX_Object_PushButtonCreate(&runtime->mp_ui,pm->root,pm->window_Width/2+300,pm->window_Height/2+150,84,28,"Cancel",PX_NULL,PX_COLOR(255,0,0,0)))) return PX_FALSE;
+	if(!(pm->btn_Cancel=PX_Object_PushButtonCreate(mp,pm->root,pm->window_Width/2+300,pm->window_Height/2+150,84,28,"Cancel",PX_NULL,PX_COLOR(255,0,0,0)))) return PX_FALSE;
 	
-	if(!(pm->edit_inputbox=PX_Object_EditCreate(&runtime->mp_ui,pm->root,pm->window_Width/2-100,pm->window_Height/2-12,256,32,fontmodule,PX_COLOR(255,0,0,0)))) return PX_FALSE;
+	if(!(pm->edit_inputbox=PX_Object_EditCreate(mp,pm->root,pm->window_Width/2-100,pm->window_Height/2-12,256,32,fontmodule,PX_COLOR(255,0,0,0)))) return PX_FALSE;
 	PX_Object_EditSetBackgroundColor(pm->edit_inputbox,PX_COLOR(255,255,255,255));
 	PX_ObjectSetVisible(pm->edit_inputbox,PX_FALSE);
 

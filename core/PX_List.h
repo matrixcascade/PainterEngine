@@ -23,6 +23,7 @@ px_void *PX_ListPush(px_list *list,px_void *data,px_int size);
 px_bool PX_ListPop(px_list *list,px_list_node *node);
 px_bool PX_ListErase(px_list *list,px_int i);
 px_list_node* PX_ListAt(px_list *list,px_int index);
+px_void PX_ListMove(px_list *list,px_int index,px_int moveto);
 px_int	PX_ListSize(px_list *list);
 px_void PX_ListClear(px_list *list);
 px_void PX_ListFree(px_list *list);

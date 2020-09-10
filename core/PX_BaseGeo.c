@@ -2814,3 +2814,31 @@ px_void PX_GeoDrawRoundRect(px_surface *psurface, px_int left, px_int top, px_in
 	}
 }
 
+
+px_void PX_GeoDrawBezierCurvePoint(px_surface *rendersurface,px_point pt[],px_int pt_count,px_float t,px_float radius,px_color clr)
+{
+	px_int i;
+
+	if (pt_count<=0)
+	{
+		return;
+	}
+
+	if (pt_count==1)
+	{
+		if(rendersurface)
+			PX_GeoDrawPenCircle(rendersurface,pt[0].x,pt[0].y,radius,clr);
+		return;
+	}
+
+	//update path
+	for (i=0;i<pt_count-1;i++)
+	{
+		px_point vector_unit=PX_PointUnit(PX_PointSub(pt[i+1],pt[i]));
+		px_float distance=PX_PointMod(PX_PointSub(pt[i+1],pt[i]));
+
+		pt[i]=PX_PointAdd(pt[i],PX_PointMul(vector_unit,distance*t));
+	}
+
+	PX_GeoDrawBezierCurvePoint(rendersurface,pt,pt_count-1,t,radius,clr);
+}

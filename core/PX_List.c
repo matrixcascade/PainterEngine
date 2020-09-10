@@ -105,6 +105,73 @@ px_list_node* PX_ListAt(px_list *list,px_int index)
 	return node;
 }
 
+
+px_void PX_ListMove(px_list *list,px_int index,px_int moveto)
+{
+	px_list_node *pNode=list->head;
+	px_list_node *pMoveToNode=list->head;
+	if (index>=list->size||index==moveto)
+	{
+		return;
+	}
+
+	while (index)
+	{
+		pNode=pNode->pnext;
+		index--;
+	}
+
+	while (moveto)
+	{
+		pMoveToNode=pMoveToNode->pnext;
+		moveto--;
+	}
+
+	//disconnect
+	if (pNode==list->head)
+	{
+		list->head=pNode->pnext;
+		pNode->pnext->ppre=pNode->ppre;
+	}
+	else if (pNode==list->end)
+	{
+		pNode->ppre->pnext=PX_NULL;
+		list->end=pNode->ppre;
+	}
+	else
+	{
+		pNode->ppre->pnext=pNode->pnext;
+		pNode->pnext->ppre=pNode->ppre;
+	}
+	
+	//insert
+	if (pMoveToNode==list->head)
+	{
+		pNode->pnext=list->head;
+		pNode->ppre=PX_NULL;
+
+		list->head->ppre=pNode;
+		list->head=pNode;
+	}
+	else if (pMoveToNode==list->end)
+	{
+		pNode->ppre=list->end;
+		pNode->pnext=PX_NULL;
+
+		list->end->pnext=pNode;
+		list->end=pNode;
+	}
+	else
+	{
+		pNode->pnext=pMoveToNode;
+		pNode->ppre=pMoveToNode->ppre;
+		pMoveToNode->ppre->pnext=pNode;
+		pMoveToNode->ppre=pNode;
+	}
+
+
+}
+
 px_int PX_ListSize(px_list *list)
 {
 	return list->size;

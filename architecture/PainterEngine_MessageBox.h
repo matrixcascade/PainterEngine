@@ -51,7 +51,7 @@ typedef struct
 }PX_MessageBox;
 
 
-px_bool PX_MessageBoxInitialize(PX_Runtime *runtime,PX_MessageBox *pm,PX_FontModule *fontmodule);
+px_bool PX_MessageBoxInitialize(PX_Runtime *runtime,px_memorypool *mp,PX_MessageBox *pm,PX_FontModule *fontmodule);
 px_void PX_MessageBoxPostEvent(PX_MessageBox *pm,PX_Object_Event e);
 px_void PX_MessageBoxUpdate(PX_MessageBox *pm,px_dword elpased);
 px_void PX_MessageBoxClose(PX_MessageBox *pm);
