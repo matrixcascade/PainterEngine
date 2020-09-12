@@ -415,6 +415,13 @@ px_void PX_3D_RenderListPixelShader(px_surface *psurface,px_int x,px_int y,px_fl
 	}
 }
 
+
+
+static px_void PX_3D_RenderListRasterizationPt(px_surface *psurface,PX_3D_RenderList *pList,PX_3D_Vertex p0,PX_3D_Vertex p1,PX_3D_Vertex p2,px_int x,px_int y,px_texture *ptexture,px_color color,px_float zbuffer[],px_int zw)
+{
+
+}
+
 static px_void PX_3D_RenderListRasterization(px_surface *psurface,PX_3D_RenderList *pList,PX_3D_Vertex p0,PX_3D_Vertex p1,PX_3D_Vertex p2,px_texture *ptexture,px_color color,px_float zbuffer[],px_int zw)
 {
 	px_int ix,iy;
@@ -455,7 +462,21 @@ static px_void PX_3D_RenderListRasterization(px_surface *psurface,PX_3D_RenderLi
 	px_float btmy,midy;
 	px_float originalZ;
 
-	
+	if ((px_int)p0.position.x==210&&(px_int)p0.position.y==253)
+	{
+		PX_ASSERT();
+	}
+	if ((px_int)p1.position.x==210&&(px_int)p1.position.y==253)
+	{
+		PX_ASSERT();
+	}
+	if ((px_int)p2.position.x==210&&(px_int)p2.position.y==253)
+	{
+		PX_ASSERT();
+	}
+
+	//    p0
+	// p1   p2
 	
 	if (p1.position.y<p0.position.y)
 	{
@@ -480,6 +501,8 @@ static px_void PX_3D_RenderListRasterization(px_surface *psurface,PX_3D_RenderLi
 		midy=p1.position.y;
 		btmy=p2.position.y;
 	}
+
+	
 
 	do 
 	{
@@ -513,8 +536,7 @@ static px_void PX_3D_RenderListRasterization(px_surface *psurface,PX_3D_RenderLi
 		}
 	} while (0);
 
-//    p0
-// p1   p2
+
 
 	x0=p0.position.x;
 	y0=p0.position.y;
@@ -571,7 +593,7 @@ static px_void PX_3D_RenderListRasterization(px_surface *psurface,PX_3D_RenderLi
 	}
 
 	
-	for(y = y0; y < midy; y++)
+	for(y = (px_int)(y0+0.5f)+0.5f; y <=midy; y++)
 	{
 		if (k01infinite)
 		{
@@ -610,7 +632,9 @@ static px_void PX_3D_RenderListRasterization(px_surface *psurface,PX_3D_RenderLi
 		toverz_bottom = t2 / z2;
 		toverz_right = (y-y0) * (toverz_bottom-toverz_top) / (y2-y0) + toverz_top;
 		toverz_step = (toverz_right-toverz_left) / (xright-xleft);
-		for(x = xleft, oneoverz = oneoverz_left,soverz = soverz_left, toverz = toverz_left;x < xright; ++x, oneoverz += oneoverz_step,soverz += soverz_step, toverz += toverz_step)
+		oneoverz = oneoverz_left,soverz = soverz_left, toverz = toverz_left;
+
+		for(x = xleft;x < xright; ++x)
 		{
 			s = soverz / oneoverz;
 			t = toverz / oneoverz;
@@ -633,24 +657,15 @@ static px_void PX_3D_RenderListRasterization(px_surface *psurface,PX_3D_RenderLi
 			{
 				PX_3D_RenderListPixelShader(psurface,ix,iy,originalZ,s,t,p0.normal,ptexture,color/*,zbuffer,zw*/);
 			}
-			
+			oneoverz += oneoverz_step;
+			soverz += soverz_step;
+			toverz += toverz_step;
 		}
 	}
-	
-	//inv p0
-	p0.position.y=2*midy-p0.position.y;
-	if (p1.position.y<p2.position.y)
-	{
-		//inv p2
-		p2.position.y=2*midy-p2.position.y;
-	}
-	else
-	{
-		//inv p1
-		p1.position.y=2*midy-p1.position.y;
-	}
 
-	if (p1.position.y<p0.position.y)
+	// p1   p2
+	//    p0
+	if (p1.position.y>p0.position.y)
 	{
 		PX_3D_Vertex t;
 		t=p1;
@@ -658,7 +673,7 @@ static px_void PX_3D_RenderListRasterization(px_surface *psurface,PX_3D_RenderLi
 		p0=t;
 	}
 
-	if (p2.position.y<p0.position.y)
+	if (p2.position.y>p0.position.y)
 	{
 		PX_3D_Vertex t;
 		t=p2;
@@ -668,11 +683,13 @@ static px_void PX_3D_RenderListRasterization(px_surface *psurface,PX_3D_RenderLi
 
 	btmy=p1.position.y;
 	midy=p2.position.y;
-	if (p2.position.y>btmy)
+	if (p2.position.y<btmy)
 	{
 		midy=p1.position.y;
 		btmy=p2.position.y;
 	}
+
+	
 
 	do 
 	{
@@ -706,8 +723,7 @@ static px_void PX_3D_RenderListRasterization(px_surface *psurface,PX_3D_RenderLi
 		}
 	} while (0);
 
-	//    p0
-	// p1   p2
+
 
 	x0=p0.position.x;
 	y0=p0.position.y;
@@ -730,7 +746,6 @@ static px_void PX_3D_RenderListRasterization(px_surface *psurface,PX_3D_RenderLi
 	k01infinite=PX_FALSE;
 	k02infinite=PX_FALSE;
 	k12infinite=PX_FALSE;
-
 	if (x0==x1)
 	{
 		k01infinite=PX_TRUE;
@@ -765,7 +780,7 @@ static px_void PX_3D_RenderListRasterization(px_surface *psurface,PX_3D_RenderLi
 	}
 
 
-	for(y = midy; y > y0; y--)
+	for(y = (px_int)(midy+0.5f)+0.5f; y < y0; y++)
 	{
 		if (k01infinite)
 		{
@@ -785,6 +800,7 @@ static px_void PX_3D_RenderListRasterization(px_surface *psurface,PX_3D_RenderLi
 			xright = (y-b02)/k02;
 		}
 
+
 		oneoverz_top = 1.0f / z0;
 		oneoverz_bottom = 1.0f/z1;
 		oneoverz_left = (y-y0) * (oneoverz_bottom-oneoverz_top) / (y1-y0) + oneoverz_top;
@@ -803,14 +819,16 @@ static px_void PX_3D_RenderListRasterization(px_surface *psurface,PX_3D_RenderLi
 		toverz_bottom = t2 / z2;
 		toverz_right = (y-y0) * (toverz_bottom-toverz_top) / (y2-y0) + toverz_top;
 		toverz_step = (toverz_right-toverz_left) / (xright-xleft);
-		for(x = xleft, oneoverz = oneoverz_left,soverz = soverz_left, toverz = toverz_left;x < xright; ++x, oneoverz += oneoverz_step,soverz += soverz_step, toverz += toverz_step)
+		oneoverz = oneoverz_left,soverz = soverz_left, toverz = toverz_left;
+
+		for(x = xleft;x < xright; ++x)
 		{
-			originalZ=1.0f/oneoverz;
 			s = soverz / oneoverz;
 			t = toverz / oneoverz;
+			originalZ=1.0f/oneoverz;
 
 			ix=(px_int)x;
-			iy=(px_int)(2*midy-y);
+			iy=(px_int)y;
 
 			if (zbuffer[ix+iy*zw]!=0&&zbuffer[ix+iy*zw]<originalZ)
 			{
@@ -818,7 +836,6 @@ static px_void PX_3D_RenderListRasterization(px_surface *psurface,PX_3D_RenderLi
 			}
 
 			zbuffer[ix+iy*zw]=originalZ;
-
 			if (pList->pixelShader)
 			{
 				pList->pixelShader(psurface,ix,iy,s,t,p0.normal,ptexture,color/*,zbuffer,zw*/);
@@ -827,7 +844,9 @@ static px_void PX_3D_RenderListRasterization(px_surface *psurface,PX_3D_RenderLi
 			{
 				PX_3D_RenderListPixelShader(psurface,ix,iy,originalZ,s,t,p0.normal,ptexture,color/*,zbuffer,zw*/);
 			}
-			
+			oneoverz += oneoverz_step;
+			soverz += soverz_step;
+			toverz += toverz_step;
 		}
 	}
 
