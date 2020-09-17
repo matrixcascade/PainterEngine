@@ -6040,8 +6040,8 @@ static px_bool PX_ScriptParseExpressionStream(PX_SCRIPT_Analysis *analysis,px_ve
 							goto _EXPR_OUT;
 						}
 						break;
-						default:
-							goto _ERROR;
+					default:
+							break;
 					}
 					(*offset)++;
 				}
@@ -9014,7 +9014,9 @@ px_bool PX_ScriptParseLastBlockEnd(PX_SCRIPT_Analysis *analysis)
 			}
 		}
 		break;
-		default:
+	case PX_SCRIPT_AST_STRUCTURE_TYPE_FUNCTION:
+		break;
+	default:
 			return PX_FALSE;
 	}
 	return PX_TRUE;
@@ -9247,7 +9249,7 @@ px_bool PX_ScriptParseIfLastAST(PX_SCRIPT_Analysis *analysis)
 			}
 			break;
 			default:
-				return PX_FALSE;
+				break;
 		}
 	}
 	else

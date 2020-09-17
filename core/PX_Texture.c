@@ -1153,6 +1153,7 @@ px_void PX_TextureFree(px_texture *tex)
 	PX_SurfaceFree(tex);
 }
 
+
 px_void PX_SurfaceRender(px_surface *psurface,px_surface *surface,px_int x,px_int y,PX_TEXTURERENDER_REFPOINT refPoint,PX_TEXTURERENDER_BLEND *blend)
 {
 	PX_TextureRender(psurface,surface,x,y,refPoint,blend);

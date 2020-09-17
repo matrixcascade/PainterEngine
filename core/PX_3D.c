@@ -1170,3 +1170,58 @@ px_void PX_3D_RenderListTransform_LocalToGlobal(PX_3D_RenderList *list,PX_3D_Wor
 	PX_3D_RenderListTransform(list,world->mat,PX_3D_RENDERLIST_TRANSFORM_LOACL_TO_GLOBAL);
 }
 
+px_point *PX_3D_CreateTextureNormal(px_memorypool *mp,px_texture *pTexture)
+{
+	px_int i,j;
+	px_point *pmatrix=(px_point *)MP_Malloc(mp,sizeof(px_point)*pTexture->width*pTexture->height);
+	px_float *gradient_x=(px_float *)MP_Malloc(mp,sizeof(px_float)*pTexture->width*pTexture->height);
+	px_float *gradient_y=(px_float *)MP_Malloc(mp,sizeof(px_float)*pTexture->width*pTexture->height);
+
+	PX_ImageFilter_SobelX(pTexture,gradient_x);
+	PX_ImageFilter_SobelY(pTexture,gradient_y);
+
+	for(j=0;j<pTexture->height;j++)
+	{
+		for (i=0;i<pTexture->width;i++)
+		{
+ 			pmatrix[j*pTexture->width+i].x=(px_float)(-gradient_x[j*pTexture->width+i]/PX_sqrtd(gradient_x[j*pTexture->width+i]*gradient_x[j*pTexture->width+i]+gradient_y[j*pTexture->width+i]*gradient_y[j*pTexture->width+i]+1));
+ 			pmatrix[j*pTexture->width+i].y=(px_float)(-gradient_y[j*pTexture->width+i]/PX_sqrtd(gradient_x[j*pTexture->width+i]*gradient_x[j*pTexture->width+i]+gradient_y[j*pTexture->width+i]*gradient_y[j*pTexture->width+i]+1));
+ 			pmatrix[j*pTexture->width+i].z=(px_float)(1/PX_sqrtd(gradient_x[j*pTexture->width+i]*gradient_x[j*pTexture->width+i]+gradient_y[j*pTexture->width+i]*gradient_y[j*pTexture->width+i]+1));
+		}
+	}
+	MP_Free(mp,gradient_x);
+	MP_Free(mp,gradient_y);
+	return pmatrix;
+}
+
+
+px_point *PX_3D_CreateBumpTextureNormal(px_memorypool *mp,px_texture *pTexture)
+{
+	px_int i,j;
+	px_point *pmatrix=(px_point *)MP_Malloc(mp,sizeof(px_point)*pTexture->width*pTexture->height);
+	px_float *gradient_x=(px_float *)MP_Malloc(mp,sizeof(px_float)*pTexture->width*pTexture->height);
+	px_float *gradient_y=(px_float *)MP_Malloc(mp,sizeof(px_float)*pTexture->width*pTexture->height);
+
+	PX_ImageFilter_SobelX(pTexture,gradient_x);
+	PX_ImageFilter_SobelY(pTexture,gradient_y);
+
+	for(j=0;j<pTexture->height;j++)
+	{
+		for (i=0;i<pTexture->width;i++)
+		{
+			px_point v1,v2;
+			v1.z=0;
+			v1.x=(px_float)PX_cosd(gradient_x[j*pTexture->width+i]*PX_PI/4);
+			v1.y=(px_float)PX_sind(gradient_y[j*pTexture->width+i]*PX_PI/4);
+
+			v2.z=(px_float)PX_cosd(gradient_x[j*pTexture->width+i]*PX_PI/4);
+			v2.x=0;
+			v2.y=(px_float)PX_sind(gradient_y[j*pTexture->width+i]*PX_PI/4);
+
+			pmatrix[j*pTexture->width+i]=PX_PointUnit(PX_PointCross(v1,v2));
+		}
+	}
+	MP_Free(mp,gradient_x);
+	MP_Free(mp,gradient_y);
+	return pmatrix;
+}

@@ -502,7 +502,7 @@ px_void PX_ConsoleOnMouseDown(PX_Object *Obj,PX_Object_Event e,px_void *user_ptr
 px_bool PC_ConsoleInit(PX_Console *pc)
 {
 
-	pc->show=PX_FALSE;
+	pc->show=PX_TRUE;
 	pc->max_column=PC_CONSOLE_DEFAULT_MAX_COLUMN;
 	pc->column=0;
 	if(!(pc->Root=PX_ObjectCreate(&pc->runtime->mp_ui,0,0,0,0,0,0,0))) return PX_FALSE;

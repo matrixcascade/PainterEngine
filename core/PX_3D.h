@@ -5,6 +5,7 @@
 #include "PX_BaseGeo.h"
 #include "PX_Vector.h"
 #include "PX_Texture.h"
+#include "PX_ImageFilter.h"
 
 #define PX_3D_FACESTATE_ACTIVE 1
 #define	PX_3D_FACESTATE_CLIPPED 2
@@ -130,6 +131,8 @@ px_void PX_3D_CameraSetPosition(PX_3D_Camera *camera,px_point4D cameraPosition,p
 px_bool PX_3D_RenderListInitialize(px_memorypool *mp,PX_3D_RenderList *list,px_dword PX_3D_PRESENTMODE,PX_3D_CULLMODE cullmode,px_texture *ptexture);
 px_void PX_3D_CameraFree(PX_3D_Camera *camera);
 px_bool PX_3D_RenderListPush(PX_3D_RenderList *list,PX_3D_Face face);
+px_point *PX_3D_CreateTextureNormal(px_memorypool *mp,px_texture *pTexture);
+px_point *PX_3D_CreateBumpTextureNormal(px_memorypool *mp,px_texture *pTexture);
 px_void PX_3D_RenderListTransform(PX_3D_RenderList *list,px_matrix mat,PX_3D_RENDERLIST_TRANSFORM t);
 px_void PX_3D_RenderListReset(PX_3D_RenderList *list);
 px_void PX_3D_RenderListFree(PX_3D_RenderList *list);

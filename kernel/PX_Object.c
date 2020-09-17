@@ -3004,7 +3004,7 @@ static px_void PX_Object_ScrollAreaClildRender(px_surface *pSurface, PX_Object *
 	}
 	if (Object->pChilds!=PX_NULL)
 	{
-		PX_Object_ScrollAreaClildRender(pSurface,Object->pNextBrother,elpased,oftX,oftY);
+		PX_Object_ScrollAreaClildRender(pSurface,Object->pChilds,elpased,oftX,oftY);
 	}
 }
 
@@ -3193,7 +3193,7 @@ px_void PX_Object_AutoTextRender(px_surface *psurface, PX_Object *pObject,px_uin
 				x_draw_oft+=width;
 			}
 
-			if (x_draw_oft>pObject->x+pObject->Width)
+			if (x_draw_oft>pObject->x+pObject->Width-PX_FontGetAscCharactorWidth()*2)
 			{
 				x_draw_oft=(px_int)pObject->x;
 				y_draw_oft+=pAt->fontModule->max_Height;
@@ -3222,7 +3222,7 @@ px_void PX_Object_AutoTextRender(px_surface *psurface, PX_Object *pObject,px_uin
 				break;
 			}
 
-			if (x_draw_oft>pObject->x+pObject->Width)
+			if (x_draw_oft>pObject->x+pObject->Width-PX_FontGetAscCharactorWidth()*2)
 			{
 				x_draw_oft=(px_int)pObject->x;
 				y_draw_oft+=__PX_FONT_HEIGHT;
@@ -3255,6 +3255,7 @@ px_int PX_Object_AutoTextGetHeight(PX_Object *pObject)
 	{
 		return 0;
 	}
+
 	for (i=0;i<PX_strlen(pAt->text.buffer);i++)
 	{
 		if (pAt->text.buffer[i]=='\n')
@@ -3280,7 +3281,7 @@ px_int PX_Object_AutoTextGetHeight(PX_Object *pObject)
 		}
 		else
 		{
-			if(w+PX_FontGetAscCharactorWidth()>pObject->Width)
+			if(w+PX_FontGetAscCharactorWidth()>pObject->Width-PX_FontGetAscCharactorWidth()*2)
 			{
 				w=0;
 				h+=PX_FontGetCharactorHeight();

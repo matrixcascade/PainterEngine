@@ -34,4 +34,5 @@
 #include "PX_MFCC.h"
 #include "PX_KalmanFilter.h"
 #include "PX_SoundModule.h"
+#include "PX_ImageFilter.h"
 #endif

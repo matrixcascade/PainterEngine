@@ -244,8 +244,8 @@ DWORD WINAPI DEMO_RenderThreadFunc(LPVOID p)
 	}
 	return 0;
 }
-//int main()
-int WINAPI WinMain( __in HINSTANCE hInstance, __in_opt HINSTANCE hPrevInstance, __in LPSTR lpCmdLine, __in int nShowCmd )
+int main()
+//int WINAPI WinMain( __in HINSTANCE hInstance, __in_opt HINSTANCE hPrevInstance, __in LPSTR lpCmdLine, __in int nShowCmd )
 {
 	HANDLE hThread;
 	DWORD  threadId;
