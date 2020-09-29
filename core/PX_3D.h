@@ -35,11 +35,12 @@ typedef enum
 	PX_3D_CULLMODE_CCW,
 }PX_3D_CULLMODE;
 
-#define PX_3D_PRESENTMODE_LINE    1
-#define PX_3D_PRESENTMODE_TEXTURE 2
-#define PX_3D_PRESENTMODE_PURE	  4
+#define PX_3D_PRESENTMODE_POINT   1
+#define PX_3D_PRESENTMODE_LINE    2
+#define PX_3D_PRESENTMODE_TEXTURE 4
+#define PX_3D_PRESENTMODE_PURE	  8
 
-typedef px_void (*PX_3D_PixelShader)(px_surface *psurface,px_int x,px_int y,px_float u,px_float v,px_point4D normal,px_texture *pTexture,px_color color);
+typedef px_void (*PX_3D_PixelShader)(px_surface *psurface,px_int x,px_int y,px_point position,px_float u,px_float v,px_point4D normal,px_texture *pTexture,px_color color);
 // typedef enum
 // {
 // 	PX_3D_FACEATTRIBUTE_2SIDED=1,

@@ -46,14 +46,13 @@ px_bool PX_3D_ObjectDataLoad(PX_3D_ObjectData *ObjectData,const px_byte *data,px
 				||PX_strequ(Lexer.CurLexeme.buffer,"s")\
 				||PX_strequ(Lexer.CurLexeme.buffer,"o"))
 			{
-				type=PX_3D_ObjectDataNextTokenSN(&Lexer);
-				if (type==PX_LEXER_LEXEME_TYPE_TOKEN)
+				while (PX_TRUE)
 				{
-					
-				}
-				else
-				{
-					goto _ERROR;
+					type=PX_LexerGetNextLexeme(&Lexer);
+					if (type==PX_LEXER_LEXEME_TYPE_NEWLINE||type==PX_LEXER_LEXEME_TYPE_END)
+					{
+						break;
+					}
 				}
 				continue;
 			}
@@ -145,10 +144,13 @@ px_bool PX_3D_ObjectDataLoad(PX_3D_ObjectData *ObjectData,const px_byte *data,px
 				ov.y=v[1];
 				ov.z=v[2];
 				if(!PX_VectorPushback(&ObjectData->vn,&ov)) goto _ERROR;
+
+
+
 				continue;
 			}
 
-			//vt <param>/<param>/<param>
+			//vt <param> <param>
 			if (PX_strequ(Lexer.CurLexeme.buffer,"vt"))
 			{
 				px_int i;
@@ -167,6 +169,16 @@ px_bool PX_3D_ObjectDataLoad(PX_3D_ObjectData *ObjectData,const px_byte *data,px
 				ov.u=v[0];
 				ov.v=v[1];
 				if(!PX_VectorPushback(&ObjectData->vt,&ov)) goto _ERROR;
+
+				while (PX_TRUE)
+				{
+					type=PX_LexerGetNextLexeme(&Lexer);
+					if (type==PX_LEXER_LEXEME_TYPE_NEWLINE||type==PX_LEXER_LEXEME_TYPE_END)
+					{
+						break;
+					}
+				}
+
 				continue;
 			}
 

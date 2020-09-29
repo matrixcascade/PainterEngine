@@ -2954,7 +2954,7 @@ PX_Object * PX_Object_ScrollAreaGetIncludedObjects(PX_Object *pObj)
 
 px_void PX_Object_ScrollAreaMoveToBottom(PX_Object *pObject)
 {
-	px_int w,h;
+	px_int w=0,h=0;
 	PX_Object_ScrollArea *psa=PX_Object_GetScrollArea(pObject);
 	if(psa)
 	{

@@ -273,7 +273,7 @@ px_void PX_3D_RenderListCalculateNormal(PX_3D_RenderList *list)
 		pface=PX_VECTORAT(PX_3D_Face,&list->facestream,i);
 		v1=PX_Point4DSub(pface->transform_vertex[1].position,pface->transform_vertex[0].position);
 		v2=PX_Point4DSub(pface->transform_vertex[2].position,pface->transform_vertex[1].position);
-		pface->transform_vertex[0].normal=PX_Point4DCross(v1,v2);
+		pface->transform_vertex[0].normal=PX_Point4DUnit(PX_Point4DCross(v1,v2));
 		pface->transform_vertex[1].normal=pface->transform_vertex[0].normal;
 		pface->transform_vertex[2].normal=pface->transform_vertex[0].normal;
 	}
@@ -461,6 +461,15 @@ static px_void PX_3D_RenderListRasterization(px_surface *psurface,PX_3D_RenderLi
 	px_float s, t;
 	px_float btmy,midy;
 	px_float originalZ;
+
+	px_float a,b,c;
+	px_point position;
+	a=(px_float)PX_sqrtd((p1.position.x-p2.position.x)*(p1.position.x-p2.position.x));
+	b=(px_float)PX_sqrtd((p0.position.x-p2.position.x)*(p0.position.x-p2.position.x));
+	c=(px_float)PX_sqrtd((p1.position.x-p0.position.x)*(p1.position.x-p0.position.x));
+
+	position.x=(a*p0.position.x+b*p1.position.x+c*p2.position.x)/(a+b+c);
+	position.y=(a*p0.position.y+b*p1.position.y+c*p2.position.y)/(a+b+c);
 
 	if ((px_int)p0.position.x==210&&(px_int)p0.position.y==253)
 	{
@@ -651,7 +660,8 @@ static px_void PX_3D_RenderListRasterization(px_surface *psurface,PX_3D_RenderLi
 			zbuffer[ix+iy*zw]=originalZ;
 			if (pList->pixelShader)
 			{
-				pList->pixelShader(psurface,ix,iy,s,t,p0.normal,ptexture,color/*,zbuffer,zw*/);
+				position.z=originalZ;
+				pList->pixelShader(psurface,ix,iy,position,s,t,p0.normal,ptexture,color/*,zbuffer,zw*/);
 			}
 			else
 			{
@@ -838,7 +848,8 @@ static px_void PX_3D_RenderListRasterization(px_surface *psurface,PX_3D_RenderLi
 			zbuffer[ix+iy*zw]=originalZ;
 			if (pList->pixelShader)
 			{
-				pList->pixelShader(psurface,ix,iy,s,t,p0.normal,ptexture,color/*,zbuffer,zw*/);
+				position.z=originalZ;
+				pList->pixelShader(psurface,ix,iy,position,s,t,p0.normal,ptexture,color/*,zbuffer,zw*/);
 			}
 			else
 			{
@@ -932,6 +943,18 @@ px_void PX_3D_Present(px_surface *psurface, PX_3D_RenderList *list,PX_3D_Camera 
 				}
 
 			}
+
+		}
+	}
+
+	if (list->PX_3D_PRESENTMODE&PX_3D_PRESENTMODE_POINT)
+	{
+		for (i=0;i<list->facestream.size;i++)
+		{
+			pface=PX_VECTORAT(PX_3D_Face,&list->facestream,i);
+			PX_GeoDrawSolidCircle(psurface,(px_int)pface->transform_vertex[0].position.x,(px_int)pface->transform_vertex[0].position.y,2,pface->transform_vertex[0].clr);
+			PX_GeoDrawSolidCircle(psurface,(px_int)pface->transform_vertex[1].position.x,(px_int)pface->transform_vertex[1].position.y,2,pface->transform_vertex[1].clr);
+			PX_GeoDrawSolidCircle(psurface,(px_int)pface->transform_vertex[2].position.x,(px_int)pface->transform_vertex[2].position.y,2,pface->transform_vertex[2].clr);
 
 		}
 	}
