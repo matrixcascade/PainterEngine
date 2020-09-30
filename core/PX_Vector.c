@@ -86,12 +86,16 @@ px_bool PX_VectorPushback(px_vector *vec,px_void *data)
 
 px_bool PX_VectorErase(px_vector *vec,px_int index)
 {
+	px_int i;
 	if (index>=vec->size)
 	{
 		PX_ERROR("Vector Erase Error!");
 		return PX_FALSE;
 	}
-	PX_memcpy((px_byte *)vec->data+index*vec->nodesize,(px_byte *)vec->data+(index+1)*vec->nodesize,(vec->size-index-1)*vec->nodesize);
+	for (i=index;i<vec->size-1;i++)
+	{
+		PX_memcpy((px_byte *)vec->data+i*vec->nodesize,(px_byte *)vec->data+(i+1)*vec->nodesize,vec->nodesize);
+	}
 	vec->size--;
 	return PX_TRUE;
 }
