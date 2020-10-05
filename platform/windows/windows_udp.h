@@ -7,9 +7,8 @@
 
 #include <Windows.h>															//header 
 #include <WinSock.h>
-#include <strsafe.h>
 #include <Mmsystem.h>
-#include <assert.h>
+#include "stdio.h"
 
 
 typedef enum

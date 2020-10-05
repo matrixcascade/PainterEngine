@@ -1,8 +1,8 @@
 #win32 makefile
 #####################################################
 target :=PainterEngine.exe
-project_path := I:/PainterEngineDEMO
-painterengine_path := I:/PainterEngine
+project_path := H:/PainterEngineDEMO
+painterengine_path := H:/PainterEngine
 #####################################################
 
 project_build := $(wildcard $(project_path)/*.c)
@@ -31,6 +31,7 @@ all:$(project_build_o)  $(painterengine_build_painterengine_o)
 	-I "$(painterengine_path)/platform/windows" \
 	-L. -lwinmm -ld2d1 -lws2_32 -ldsound -lcomdlg32
 	$(target)
+	make clean
 	
 
 $(project_path)/%.o:$(project_path)/%.c

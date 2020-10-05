@@ -1232,16 +1232,42 @@ px_point *PX_3D_CreateBumpTextureNormal(px_memorypool *mp,px_texture *pTexture)
 	{
 		for (i=0;i<pTexture->width;i++)
 		{
-			px_point v1,v2;
-			v1.z=0;
-			v1.x=(px_float)PX_cosd(gradient_x[j*pTexture->width+i]*PX_PI/4);
-			v1.y=(px_float)PX_sind(gradient_y[j*pTexture->width+i]*PX_PI/4);
+			px_point v;
+			if (gradient_x[j*pTexture->width+i]==0&&gradient_y[j*pTexture->width+i]==0)
+			{
+				
+				v=PX_POINT(0,0,-1);
 
-			v2.z=(px_float)PX_cosd(gradient_x[j*pTexture->width+i]*PX_PI/4);
-			v2.x=0;
-			v2.y=(px_float)PX_sind(gradient_y[j*pTexture->width+i]*PX_PI/4);
+			}
+			else
+			{
+				px_float rad,scale;
+				px_color clr;
 
-			pmatrix[j*pTexture->width+i]=PX_PointUnit(PX_PointCross(v1,v2));
+				clr=pTexture->surfaceBuffer[j*pTexture->width+i];
+				v.x=-gradient_x[j*pTexture->width+i];
+				v.y=-gradient_y[j*pTexture->width+i];
+				v=PX_PointUnit(v);
+
+				rad=(clr._argb.r+clr._argb.g+clr._argb.b)/3/255.0f;
+				v.z=-(px_float)PX_sind(rad*PX_PI/2);
+				scale=(px_float)PX_cosd(rad*PX_PI/2);
+				v.x*=scale;
+				v.y*=scale;
+			}
+			
+			
+			pmatrix[j*pTexture->width+i]=v;
+// 			px_point v1,v2;
+// 			v1.z=0;
+// 			v1.x=(px_float)PX_cosd(gradient_x[j*pTexture->width+i]*PX_PI/2);
+// 			v1.y=(px_float)PX_sind(gradient_x[j*pTexture->width+i]*PX_PI/2);
+// 
+// 			v2.z=-(px_float)PX_sind(gradient_y[j*pTexture->width+i]*PX_PI/2);
+// 			v2.x=0;
+// 			v2.y=-(px_float)PX_cosd(gradient_y[j*pTexture->width+i]*PX_PI/2);
+// 
+// 			pmatrix[j*pTexture->width+i]=PX_PointUnit(PX_PointCross(v1,v2));
 		}
 	}
 	MP_Free(mp,gradient_x);

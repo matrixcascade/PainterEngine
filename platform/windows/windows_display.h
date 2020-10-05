@@ -37,6 +37,7 @@ extern POINT PX_MousePosition();
 extern BOOL PX_KeyDown(unsigned char key);
 extern BOOL PX_MouseWheel(int *x,int *y,int *delta);
 extern BOOL PX_GetWinMessage(WM_MESSAGE *Msg);
+extern double PX_GetWindowScale();
 
 extern char *PX_OpenFileDialog(const char Filter[]);
 extern char *PX_MultFileDialog(const char Filter[]);

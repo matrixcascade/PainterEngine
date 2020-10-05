@@ -333,6 +333,112 @@ px_void PX_TextureCover(px_surface *psurface,px_texture *tex,px_int x,px_int y,P
 
 }
 
+px_void PX_TextureRenderPixelShader(px_surface *psurface,px_texture *tex,px_int x,px_int y,PX_TEXTURERENDER_REFPOINT refPoint,PX_TexturePixelShader shader,px_void *ptr)
+{
+	px_int left,right,top,bottom,i,j;
+	px_color *pdata;
+	px_color clr;
+
+	pdata=(px_color *)tex->surfaceBuffer;
+	switch (refPoint)
+	{
+	case PX_TEXTURERENDER_REFPOINT_LEFTTOP:
+		break;
+	case PX_TEXTURERENDER_REFPOINT_MIDTOP:
+		x-=tex->width/2;
+		break;
+	case PX_TEXTURERENDER_REFPOINT_RIGHTTOP:
+		x-=tex->width;
+		break;
+	case PX_TEXTURERENDER_REFPOINT_LEFTMID:
+		y-=tex->height/2;
+		break;
+	case PX_TEXTURERENDER_REFPOINT_CENTER:
+		y-=tex->height/2;
+		x-=tex->width/2;
+		break;
+	case PX_TEXTURERENDER_REFPOINT_RIGHTMID:
+		y-=tex->height/2;
+		x-=tex->width;
+		break;
+	case PX_TEXTURERENDER_REFPOINT_LEFTBOTTOM:
+		y-=tex->height;
+		break;
+	case PX_TEXTURERENDER_REFPOINT_MIDBOTTOM:
+		y-=tex->height;
+		x-=tex->width/2;
+		break;
+	case PX_TEXTURERENDER_REFPOINT_RIGHTBOTTOM:
+		y-=tex->height;
+		x-=tex->width;
+		break;
+	}
+
+
+	if (x<-tex->width)
+	{
+		return;
+	}
+	if (x>psurface->width-1)
+	{
+		return;
+	}
+	if (y<-tex->height)
+	{
+		return;
+	}
+	if (y>psurface->height-1)
+	{
+		return;
+	}
+
+	if (x<0)
+	{
+		left=-x;
+	}
+	else
+	{
+		left=0;
+	}
+
+	if (x+tex->width>psurface->width)
+	{
+		right=psurface->width-x-1;
+	}
+	else
+	{
+		right=tex->width-1;
+	}
+
+	if (y<0)
+	{
+		top=-y;
+	}
+	else
+	{
+		top=0;
+	}
+
+	if (y+tex->height>psurface->height)
+	{
+		bottom=psurface->height-y-1;
+	}
+	else
+	{
+		bottom=tex->height-1;
+	}
+
+
+	for (j=top;j<=bottom;j++)
+	{
+		for (i=left;i<=right;i++)
+		{
+			clr=pdata[j*tex->width+i];
+			shader(psurface,x+i,y+j,clr,ptr);
+		}
+	}
+}
+
 px_void PX_TextureRenderRotation(px_surface *psurface,px_texture *tex,px_int x,px_int y,PX_TEXTURERENDER_REFPOINT refPoint,PX_TEXTURERENDER_BLEND *blend,px_int Angle)
 {
 	PX_TextureRenderRotation_sincos(psurface,tex,x,y,refPoint,blend,PX_sin_angle((px_float)Angle),PX_cos_angle((px_float)Angle));

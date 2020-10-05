@@ -35,7 +35,7 @@ extern "C" BOOL PX_GetWinMessage(WM_MESSAGE *Msg);
 extern "C" char *PX_OpenFileDialog(const char Filter[]);
 extern "C" char *PX_MultFileDialog(const char Filter[]);
 extern "C" char *PX_SaveFileDialog(const char Filter[],const char ext[]);
-
+extern "C" double PX_GetWindowScale();
 #define         WIN_MAX_INPUT_STRING_LEN   64
 #define         WIN_MAX_INPUT_SPECKEY_LEN  0xff
 
@@ -53,6 +53,7 @@ extern "C" char *PX_SaveFileDialog(const char Filter[],const char ext[]);
 HWND					Win_Hwnd;
 int						Win_Height;
 int						Win_Width;
+double					Win_Scale;
 int						Surface_Height;
 int						Surface_Width;
 BOOL                    Win_Activated;
@@ -62,6 +63,7 @@ char				   DInput_AccepyFile[MAX_PATH]={0};
 POINT				   DInput_MousePosition;
 POINT                  DInput_MouseWheelPosition;
 POINT                  DInput_MouseWheelDelta;
+
 
 unsigned int			D2D_ColorConversion;
 ID2D1Bitmap			   *D2D_pSurface;
@@ -289,8 +291,8 @@ BOOL PX_CreateWindow( int surfaceWidth,int surfaceHeight,int windowWidth,int win
 		MessageBox(0,"could not create d2d bitmap","error",MB_OK);
 		return FALSE;
 	}
-	return (SUCCEEDED(hr));
 
+	PX_GetWindowScale();
 	return TRUE;
 }
 /////////////////////////////////////////////////////////////
@@ -420,8 +422,8 @@ BOOL PX_SystemRender(void *raw,int width,int height)
 
 	screenSize.left=0;
 	screenSize.top=0;
-	screenSize.right=(FLOAT)Win_Width;
-	screenSize.bottom=(FLOAT)Win_Height;
+	screenSize.right=(FLOAT)(Win_Width*Win_Scale);
+	screenSize.bottom=(FLOAT)(Win_Height*Win_Scale);
 
 	D2D_pRenderTarget->BeginDraw();
 	D2D_pRenderTarget->Clear();
@@ -642,4 +644,33 @@ char *PX_SaveFileDialog(const char Filter[],const char ext[])
 int PX_SetWindowResizeable()
 {
 	return SetWindowLong(Win_Hwnd,GWL_STYLE,WS_OVERLAPPED|WS_SYSMENU);
+}
+
+double PX_GetWindowScale()
+{
+	
+	HWND hWnd = GetDesktopWindow();
+	HMONITOR hMonitor = MonitorFromWindow(hWnd, MONITOR_DEFAULTTONEAREST);
+
+	
+	MONITORINFOEX miex;
+	miex.cbSize = sizeof(miex);
+	GetMonitorInfo(hMonitor, &miex);
+	int cxLogical = (miex.rcMonitor.right - miex.rcMonitor.left);
+	int cyLogical = (miex.rcMonitor.bottom - miex.rcMonitor.top);
+
+	
+	DEVMODE dm;
+	dm.dmSize = sizeof(dm);
+	dm.dmDriverExtra = 0;
+	EnumDisplaySettings(miex.szDevice, ENUM_CURRENT_SETTINGS, &dm);
+	int cxPhysical = dm.dmPelsWidth;
+	int cyPhysical = dm.dmPelsHeight;
+
+	
+	double horzScale = ((double)cxPhysical / (double)cxLogical);
+	double vertScale = ((double)cyPhysical / (double)cyLogical);
+	
+	Win_Scale=horzScale;
+	return horzScale;
 }
