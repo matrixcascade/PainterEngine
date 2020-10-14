@@ -243,7 +243,7 @@ BOOL PX_CreateWindow( int surfaceWidth,int surfaceHeight,int windowWidth,int win
 	size.height=rc.bottom - rc.top;
 
 	hr=D2D_pDirect2dFactory->CreateHwndRenderTarget(
-		D2D1::RenderTargetProperties(),
+		D2D1::RenderTargetProperties(D2D1_RENDER_TARGET_TYPE_DEFAULT, D2D1::PixelFormat(), 96.0F, 96.0F, D2D1_RENDER_TARGET_USAGE_NONE, D2D1_FEATURE_LEVEL_DEFAULT),
 		D2D1::HwndRenderTargetProperties(Win_Hwnd, size),
 		&D2D_pRenderTarget
 		);
