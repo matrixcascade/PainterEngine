@@ -422,8 +422,8 @@ BOOL PX_SystemRender(void *raw,int width,int height)
 
 	screenSize.left=0;
 	screenSize.top=0;
-	screenSize.right=(FLOAT)(Win_Width*Win_Scale);
-	screenSize.bottom=(FLOAT)(Win_Height*Win_Scale);
+	screenSize.right=(FLOAT)(Win_Width/*Win_Scale*/);
+	screenSize.bottom=(FLOAT)(Win_Height/*Win_Scale*/);
 
 	D2D_pRenderTarget->BeginDraw();
 	D2D_pRenderTarget->Clear();
@@ -549,7 +549,7 @@ char *PX_OpenFileDialog(const char Filter[])
 	ofn.lpstrFile = szFile;
 	ofn.lpstrFile[0] = TEXT('\0');
 	ofn.nMaxFile = sizeof(szFile);
-	ofn.lpstrFilter = Filter;//TEXT("Mirror文件(.mirror)\0*.mirror");
+	ofn.lpstrFilter = Filter;//TEXT("Mirror脦脛录镁(.mirror)\0*.mirror");
 	ofn.nFilterIndex = 1;
 	ofn.lpstrFileTitle = NULL;
 	ofn.nMaxFileTitle = 0;
@@ -573,7 +573,7 @@ char *PX_MultFileDialog(const char Filter[])
 	ofn.lpstrFile = szFile;
 	ofn.lpstrFile[0] = TEXT('\0');
 	ofn.nMaxFile = sizeof(szFile);
-	ofn.lpstrFilter = Filter;//TEXT("Mirror文件(.mirror)\0*.mirror");
+	ofn.lpstrFilter = Filter;//TEXT("Mirror脦脛录镁(.mirror)\0*.mirror");
 	ofn.nFilterIndex = 1;
 	ofn.lpstrFileTitle = NULL;
 	ofn.nMaxFileTitle = 0;
@@ -610,7 +610,7 @@ char *PX_SaveFileDialog(const char Filter[],const char ext[])
 	ofn.lpstrFile = szFile;
 	ofn.lpstrFile[0] = TEXT('\0');
 	ofn.nMaxFile = sizeof(szFile);
-	ofn.lpstrFilter = Filter;//TEXT("Mirror文件(.mirror)\0*.mirror");
+	ofn.lpstrFilter = Filter;//TEXT("Mirror脦脛录镁(.mirror)\0*.mirror");
 	ofn.nFilterIndex = 1;
 	ofn.lpstrFileTitle = NULL;
 	ofn.nMaxFileTitle = 0;
