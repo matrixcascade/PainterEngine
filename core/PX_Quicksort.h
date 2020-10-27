@@ -5,7 +5,7 @@
 
 typedef struct
 {
-	px_float power;
+	px_float weight;
 	px_void *pData;
 }PX_QuickSortAtom;
 void PX_Quicksort_MinToMax(PX_QuickSortAtom array[], px_int left, px_int right);

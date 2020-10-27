@@ -78,7 +78,7 @@ px_void PX_huffmanCompress(px_byte *_in,px_uint input_size,px_byte *_out,px_uint
 		 PX_memcpy(s_nodes,nodes,sizeof(s_nodes));
 		 for(i=0;i<256;i++)
 		 {
-			 s_Atom[i].power=(px_float)s_nodes[i].weight;
+			 s_Atom[i].weight=(px_float)s_nodes[i].weight;
 			 s_Atom[i].pData=&s_nodes[i];
 		 }
 		 PX_Quicksort_MaxToMin(s_Atom,0,255);

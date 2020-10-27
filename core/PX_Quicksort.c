@@ -11,13 +11,13 @@ static void swap(PX_QuickSortAtom array[], px_int left, px_int right)
 
 static px_int partition_l(PX_QuickSortAtom array[], px_int left, px_int right, px_int pivot_index)
 {
-	px_float pivot_value = array[pivot_index].power;
+	px_float pivot_value = array[pivot_index].weight;
 	px_int store_index = left;
 	px_int i;
 
 	swap(array, pivot_index, right);
 	for (i = left; i < right; i++)
-		if (array[i].power < pivot_value) {
+		if (array[i].weight < pivot_value) {
 			swap(array, i, store_index);
 			++store_index;
 		}
@@ -27,13 +27,13 @@ static px_int partition_l(PX_QuickSortAtom array[], px_int left, px_int right, p
 
 static px_int partition_m(PX_QuickSortAtom array[], px_int left, px_int right, px_int pivot_index)
 {
-	px_float pivot_value = array[pivot_index].power;
+	px_float pivot_value = array[pivot_index].weight;
 	px_int store_index = left;
 	px_int i;
 
 	swap(array, pivot_index, right);
 	for (i = left; i < right; i++)
-		if (array[i].power > pivot_value) {
+		if (array[i].weight > pivot_value) {
 			swap(array, i, store_index);
 			++store_index;
 		}

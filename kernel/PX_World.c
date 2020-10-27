@@ -387,7 +387,7 @@ px_void PX_WorldRender(px_surface *psurface,PX_World *pw,px_uint elpased)
 		{
 			continue;
 		}
-		ArrayIndex[j].power=pwo->pObject->z;
+		ArrayIndex[j].weight=pwo->pObject->z;
 		ArrayIndex[j].pData=pwo->pObject;
 		j++;
 	}
