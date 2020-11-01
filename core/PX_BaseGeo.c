@@ -2842,3 +2842,195 @@ px_void PX_GeoDrawBezierCurvePoint(px_surface *rendersurface,px_point pt[],px_in
 
 	PX_GeoDrawBezierCurvePoint(rendersurface,pt,pt_count-1,t,radius,clr);
 }
+
+px_void PX_GeoDrawBresenhamLine(px_surface *psurface,int x0, int y0, int x1, int y1,px_color color)
+{
+	px_point Cross2points[2];
+	px_int CrossCount=0;
+	px_int lm;
+	px_int trimLX,trimRX,trimTY,trimBY;
+	px_float ftemp,fconst;
+	px_float k,recK;
+	
+
+	if (PX_ABS(x0-x1)+PX_ABS(y0-y1)==0)
+	{
+		return;
+	}
+
+	if (x0==x1)
+	{
+		if (y0<0)
+		{
+			y0=0;
+		}
+		if (y1<0)
+		{
+			y1=0;
+		}
+		if (y0>psurface->height-1)
+		{
+			y0=psurface->height-1;
+		}
+		if (y1>psurface->height-1)
+		{
+			y1=psurface->height-1;
+		}
+		PX_GeoDrawRect(psurface,x0,y0,x1,y1,color);
+		return;
+	}
+
+	if (y0==y1)
+	{
+		if (x0<0)
+		{
+			x0=0;
+		}
+		if (x1<0)
+		{
+			x1=0;
+		}
+		if (x0>psurface->width-1)
+		{
+			x0=psurface->width-1;
+		}
+		if (x1>psurface->width-1)
+		{
+			x1=psurface->width-1;
+		}
+		PX_GeoDrawRect(psurface,x0,y0,x1,y1,color);
+		return;
+	}
+
+	if (x0>x1)
+	{
+		lm=x0;
+		x0=x1;
+		x1=lm;
+
+		lm=y0;
+		y0=y1;
+		y1=lm;
+	} 
+
+	k=((px_float)(y1-y0))/(x1-x0);
+	recK=1/k;
+
+	//trim
+	trimLX=0-1;
+	trimRX=psurface->width+1;
+	trimTY=0-1;
+	trimBY=psurface->height+1;
+
+	//calculate c
+	//TrimLX
+	fconst=y0-k*x0;
+	ftemp=trimLX*k+fconst;
+
+	do 
+	{
+		if (ftemp>=trimTY&&ftemp<=trimBY)
+		{
+			Cross2points[CrossCount].x=(px_float)trimLX;
+			Cross2points[CrossCount].y=ftemp;
+			CrossCount++;
+		}
+
+		//TrimRX
+		ftemp=trimRX*k+fconst;
+
+		if (ftemp>=trimTY&&ftemp<=trimBY)
+		{
+			Cross2points[CrossCount].x=(px_float)trimRX;
+			Cross2points[CrossCount].y=ftemp;
+			CrossCount++;
+			if (CrossCount==2)
+			{
+				break;
+			}
+		}
+
+		//trimBY
+		ftemp=(trimBY-fconst)/k;
+		if (ftemp>trimLX&&ftemp<trimRX)
+		{
+			Cross2points[CrossCount].x=ftemp;
+			Cross2points[CrossCount].y=(px_float)trimBY;
+			CrossCount++;
+			if (CrossCount==2)
+			{
+				break;
+			}
+		}
+
+		//trimTY
+		ftemp=(trimTY-fconst)/k;
+		if (ftemp>trimLX&&ftemp<trimRX)
+		{
+			Cross2points[CrossCount].x=ftemp;
+			Cross2points[CrossCount].y=(px_float)trimTY;
+			CrossCount++;
+		}
+	} while (0);
+
+	if (CrossCount!=2)
+	{
+		return;
+	}
+
+
+	if (Cross2points[0].x>Cross2points[1].x)
+	{
+		ftemp=Cross2points[0].x;
+		Cross2points[0].x=Cross2points[1].x;
+		Cross2points[1].x=ftemp;
+
+		ftemp=Cross2points[0].y;
+		Cross2points[0].y=Cross2points[1].y;
+		Cross2points[1].y=ftemp;
+	}
+
+
+	if (x0<Cross2points[0].x)
+	{
+		x0=(px_int)Cross2points[0].x;
+		y0=(px_int)Cross2points[0].y;
+	}
+	else if(x0>Cross2points[1].x)
+	{
+		return;
+	}
+
+
+	if (x1<Cross2points[0].x)
+	{
+		return;
+	}
+	else if(x1>Cross2points[1].x)
+	{
+		x1=(px_int)Cross2points[1].x;
+		y1=(px_int)Cross2points[1].y;
+	}
+
+	if (x1==x0&&y1==y0)
+	{
+		return;
+	}
+
+
+	do 
+	{
+		int dx = PX_ABS(x1-x0), sx = x0<x1 ? 1 : -1;
+		int dy = PX_ABS(y1-y0), sy = y0<y1 ? 1 : -1; 
+		int err = (dx>dy ? dx : -dy)/2, e2;
+		while(PX_TRUE)
+		{
+			PX_SurfaceDrawPixel(psurface,x0,y0,color);
+			if (x0==x1 && y0==y1) break;
+			e2 = err;
+			if (e2 >-dx) { err -= dy; x0 += sx; }
+			if (e2 < dy) { err += dx; y0 += sy; }
+		}
+	} while (0);
+	
+}

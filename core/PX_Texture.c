@@ -1749,6 +1749,134 @@ px_void PX_TextureRenderMaskEx(px_surface *psurface,px_texture *mask_tex,px_text
 
 
 
+px_void PX_TextureFill(px_memorypool *mp,px_texture *ptexture,px_int x,px_int y,px_color test_color,px_color fill_color)
+{
+	typedef struct
+	{
+		px_int x,y;
+	}__PX_POINT;
+	px_vector pstack;
+	PX_VectorInit(mp,&pstack,sizeof(__PX_POINT),8);
+	
+	do 
+	{
+		__PX_POINT pt;
+		pt.x=x;
+		pt.y=y;
+		PX_VectorPushback(&pstack,&pt);
+	} while (0);
+
+	while (pstack.size)
+	{
+		__PX_POINT retPt=*PX_VECTORLAST(__PX_POINT,&pstack);
+		PX_VectorPop(&pstack);
+
+		x=retPt.x;
+		y=retPt.y;
+
+		//xo mark
+		while (x>0&&(PX_SurfaceGetPixel(ptexture,x-1,y)._argb.ucolor==test_color._argb.ucolor))
+		{
+			x--;
+		}
+
+		//up
+		if (y>0)
+		{
+			if (PX_SurfaceGetPixel(ptexture,x,y-1)._argb.ucolor==test_color._argb.ucolor)
+			{
+				__PX_POINT pt;
+				pt.x=x;
+				pt.y=y-1;
+				PX_VectorPushback(&pstack,&pt);
+			}
+		}
+
+		//down
+		if (y<ptexture->height-1)
+		{
+			if (PX_SurfaceGetPixel(ptexture,x,y+1)._argb.ucolor==test_color._argb.ucolor)
+			{
+				__PX_POINT pt;
+				pt.x=x;
+				pt.y=y+1;
+				PX_VectorPushback(&pstack,&pt);
+			}
+		}
+
+		PX_SurfaceSetPixel(ptexture,x,y,fill_color);
+		x++;
+
+		//left top
+		while (x<ptexture->width)
+		{
+			if (PX_SurfaceGetPixel(ptexture,x,y)._argb.ucolor!=test_color._argb.ucolor)
+			{
+				break;
+			}
+
+			PX_SurfaceSetPixel(ptexture,x,y,fill_color);
+
+			if (x>0)
+			{
+				//up
+				if (y>0)
+				{
+					if (PX_SurfaceGetPixel(ptexture,x-1,y-1)._argb.ucolor!=test_color._argb.ucolor&&PX_SurfaceGetPixel(ptexture,x,y-1)._argb.ucolor==test_color._argb.ucolor)
+					{
+						__PX_POINT pt;
+						pt.x=x;
+						pt.y=y-1;
+						PX_VectorPushback(&pstack,&pt);
+					}
+				}
+					
+				//down
+				if (y<ptexture->height-1)
+				{
+					if (PX_SurfaceGetPixel(ptexture,x-1,y+1)._argb.ucolor!=test_color._argb.ucolor&&PX_SurfaceGetPixel(ptexture,x,y+1)._argb.ucolor==test_color._argb.ucolor)
+					{
+						__PX_POINT pt;
+						pt.x=x;
+						pt.y=y+1;
+						PX_VectorPushback(&pstack,&pt);
+					}
+				}
+					
+			}
+			else
+			{
+				//up
+				if (y>0)
+				{
+					if (PX_SurfaceGetPixel(ptexture,x,y-1)._argb.ucolor==test_color._argb.ucolor)
+					{
+						__PX_POINT pt;
+						pt.x=x;
+						pt.y=y-1;
+						PX_VectorPushback(&pstack,&pt);
+					}
+				}
+				
+				//down
+				if (y<ptexture->height-1)
+				{
+					if (PX_SurfaceGetPixel(ptexture,x,y+1)._argb.ucolor==test_color._argb.ucolor)
+					{
+						__PX_POINT pt;
+						pt.x=x;
+						pt.y=y+1;
+						PX_VectorPushback(&pstack,&pt);
+					}
+				}
+					
+			}
+			x++;
+		}
+	}
+
+}
+
 px_bool PX_ShapeCreate(px_memorypool *mp,px_shape *shape,px_int width,px_int height)
 {
 	px_void *p=MP_Malloc(mp,height*width*sizeof(px_uchar));

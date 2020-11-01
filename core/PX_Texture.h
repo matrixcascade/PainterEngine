@@ -1,6 +1,7 @@
 #ifndef __PX_TEXTURE_H
 #define __PX_TEXTURE_H
 
+#include "PX_Vector.h"
 #include "PX_Surface.h"
 #include "PX_Bitmap.h"
 #include "PX_TRaw.h"
@@ -53,7 +54,7 @@ px_void PX_TextureRenderEx_sincos(px_surface *psurface,px_texture *resTexture,px
 px_void PX_TextureRenderEx_vector(px_surface *psurface,px_texture *resTexture,px_int x,px_int y,PX_TEXTURERENDER_REFPOINT refPoint,PX_TEXTURERENDER_BLEND *blend,px_float scale,px_point p_vector);
 px_void PX_TextureRenderMask(px_surface *psurface,px_texture *mask_tex,px_texture *map_tex,px_int x,px_int y,PX_TEXTURERENDER_REFPOINT refPoint,PX_TEXTURERENDER_BLEND *blend);
 px_void PX_TextureRenderMaskEx(px_surface *psurface,px_texture *mask_tex,px_texture *map_tex,px_int x,px_int y,PX_TEXTURERENDER_REFPOINT refPoint,PX_TEXTURERENDER_BLEND *blend,px_float scale,px_float Angle);
-
+px_void PX_TextureFill(px_memorypool *mp,px_texture *ptexture,px_int x,px_int y,px_color test_color,px_color fill_color);
 px_void PX_SurfaceRender(px_surface *pdestSurface,px_surface *pResSurface,px_int x,px_int y,PX_TEXTURERENDER_REFPOINT refPoint,PX_TEXTURERENDER_BLEND *blend);
 px_void PX_SurfaceCover(px_surface *pdestSurface,px_surface *pResSurface,px_int x,px_int y,PX_TEXTURERENDER_REFPOINT refPoint);
 px_void PX_SurfaceSetRect(px_surface *psurface, px_int left, px_int top, px_int right, px_int bottom,px_color color);
@@ -70,4 +71,7 @@ px_void PX_ShapeRenderEx(px_surface *psurface,px_shape *shape,px_int x,px_int y,
 px_void PX_ShapeRenderEx_sincos(px_surface *psurface,px_shape *shape,px_int x,px_int y,PX_TEXTURERENDER_REFPOINT refPoint,px_color blendColor,px_float scale,px_float sinx,px_float cosx);
 px_void PX_ShapeRenderEx_vector(px_surface *psurface,px_shape *shape,px_int x,px_int y,PX_TEXTURERENDER_REFPOINT refPoint,px_color blendcolor,px_float scale,px_point p_vector);
 px_void PX_ShapeFree(px_shape *shape);
+
+
+
 #endif

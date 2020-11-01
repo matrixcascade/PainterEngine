@@ -102,6 +102,10 @@ px_bool PX_VectorErase(px_vector *vec,px_int index)
 
 px_bool PX_VectorPop(px_vector *vec)
 {
+	if (vec->size==0)
+	{
+		return PX_FALSE;
+	}
 	vec->size--;
 	return PX_TRUE;
 }

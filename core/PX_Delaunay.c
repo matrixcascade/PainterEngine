@@ -460,6 +460,7 @@ px_bool PX_DelaunaryPointsBuild(px_memorypool *mp,px_point2D pt[],px_int count,p
 			}
 			index++;
 		}
+		PX_VectorFree(&sortTriangles);
 	} while (0);
 	
 
@@ -494,6 +495,7 @@ px_bool PX_DelaunaryPointsBuild(px_memorypool *mp,px_point2D pt[],px_int count,p
 	PX_VectorFree(&triangles);
 	PX_VectorFree(&DelaunaryTriangle);
 	PX_VectorFree(&edges);
+	
 	MP_Free(mp,sortPt);
 	return PX_TRUE;
 }
