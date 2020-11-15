@@ -10,7 +10,7 @@ typedef struct __px_vector
 	px_memorypool *mp;
 }px_vector;
 
-px_bool PX_VectorInit(px_memorypool *mp,px_vector *vec,px_int nodeSize,px_int init_size); 
+px_bool PX_VectorInitialize(px_memorypool *mp,px_vector *vec,px_int nodeSize,px_int init_size); 
 px_bool PX_VectorSet(px_vector *vec,px_uint index,px_void *data);
 px_bool PX_VectorAllocSize(px_vector *vec,px_int size);
 px_bool PX_VectorPushback(px_vector *vec,px_void *data);

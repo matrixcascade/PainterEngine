@@ -1,6 +1,6 @@
 #include "PX_List.h"
 
-px_void PX_ListInit(px_memorypool *mp,px_list *list)
+px_void PX_ListInitialize(px_memorypool *mp,px_list *list)
 {
 	list->end=PX_NULL;
 	list->head=PX_NULL;

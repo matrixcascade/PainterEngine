@@ -188,9 +188,9 @@ px_bool PX_DelaunaryPointsBuild(px_memorypool *mp,px_point2D pt[],px_int count,p
 	px_vector DelaunaryTriangle;
 
 
-	PX_VectorInit(mp,&triangles,sizeof(_Triangle),1);
-	PX_VectorInit(mp,&DelaunaryTriangle,sizeof(_Triangle),1);
-	PX_VectorInit(mp,&edges,sizeof(_Edge),1);
+	PX_VectorInitialize(mp,&triangles,sizeof(_Triangle),1);
+	PX_VectorInitialize(mp,&DelaunaryTriangle,sizeof(_Triangle),1);
+	PX_VectorInitialize(mp,&edges,sizeof(_Edge),1);
 
 	pAtoms=(PX_QuickSortAtom *)MP_Malloc(mp,sizeof(PX_QuickSortAtom)*count);
 	sortPt=(px_point2D *)MP_Malloc(mp,sizeof(px_point2D)*(count+3));
@@ -358,7 +358,7 @@ px_bool PX_DelaunaryPointsBuild(px_memorypool *mp,px_point2D pt[],px_int count,p
 		px_bool done=PX_FALSE;
 		px_int index;
 		px_vector sortTriangles;
-		PX_VectorInit(mp,&sortTriangles,sizeof(_Triangle *),1);
+		PX_VectorInitialize(mp,&sortTriangles,sizeof(_Triangle *),1);
 		for (i=0;i<DelaunaryTriangle.size;i++)
 		{
 			px_int k=0;

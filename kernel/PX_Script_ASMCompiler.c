@@ -756,6 +756,7 @@ px_void PX_ScriptAsmAddHost(PX_SCRIPT_ASM_COMPILER *compiler,px_char *Str)
 	}
 	PX_strcpy(Host.name,Str,sizeof(Host.name));
 	Host.map=PX_NULL;
+	Host.userptr=PX_NULL;
 	PX_ListPush(&compiler->HostTable,&Host,sizeof(Host));
 }
 
@@ -1496,13 +1497,13 @@ px_bool PX_ScriptAsmCompile(px_memorypool *mp,px_char *asmcode,px_memory *binmem
 	PX_LexerRegisterContainer(&compiler.lexer,"\'","\'");
 	PX_LexerRegisterContainer(&compiler.lexer,"@","@");
 
-	PX_VectorInit(mp,&compiler.StreamTable,sizeof(PX_SCRIPT_ASM_INSTR_BIN),256);
-	PX_ListInit(mp,&compiler.assumeTable);
-	PX_ListInit(mp,&compiler.GrammarInstrTable);
-	PX_ListInit(mp,&compiler.HostTable);
-	PX_ListInit(mp,&compiler.LabelTable);
-	PX_ListInit(mp,&compiler.StringTable);
-	PX_ListInit(mp,&compiler.memoriesTable);
+	PX_VectorInitialize(mp,&compiler.StreamTable,sizeof(PX_SCRIPT_ASM_INSTR_BIN),256);
+	PX_ListInitialize(mp,&compiler.assumeTable);
+	PX_ListInitialize(mp,&compiler.GrammarInstrTable);
+	PX_ListInitialize(mp,&compiler.HostTable);
+	PX_ListInitialize(mp,&compiler.LabelTable);
+	PX_ListInitialize(mp,&compiler.StringTable);
+	PX_ListInitialize(mp,&compiler.memoriesTable);
 	
 	compiler.threadcount=1;
 
@@ -1885,6 +1886,7 @@ px_bool PX_ScriptAsmCompile(px_memorypool *mp,px_char *asmcode,px_memory *binmem
 			PX_memset(host.name,0,sizeof(host.name));
 			PX_strcpy(host.name,PX_LISTAT(PX_SCRIPT_ASM_HOST_NODE,&compiler.HostTable,i)->name,sizeof(host.name));
 			host.map=PX_NULL;
+			host.userptr=PX_NULL;
 			expFunc.Addr=0;
 			PX_MemoryCat(binmemory,&host,sizeof(host));
 	}

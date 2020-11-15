@@ -420,8 +420,8 @@ typedef struct
 }PX_SCRIPT_Analysis;
 
 px_bool PX_ScriptCompilerInit(PX_SCRIPT_LIBRARY *lib,px_memorypool *mp);
-px_bool PX_ScriptCompilerLoad(PX_SCRIPT_LIBRARY *lib,px_char *code);
-px_bool PX_ScriptCompilerCompile(PX_SCRIPT_LIBRARY *lib,px_char *name,px_string *ASM,px_int StackSize);
+px_bool PX_ScriptCompilerLoad(PX_SCRIPT_LIBRARY *lib,const px_char *code);
+px_bool PX_ScriptCompilerCompile(PX_SCRIPT_LIBRARY *lib,const px_char *name,px_string *ASM,px_int StackSize);
 px_void PX_ScriptCompilerFree(PX_SCRIPT_LIBRARY *lib);
 px_char *PX_ScriptCompilerError();
 px_bool PX_ScriptInterpreterExpression(PX_SCRIPT_Analysis *analysis,px_char *expr,px_string *out,PX_SCRIPT_AST_OPERAND *retOperand);

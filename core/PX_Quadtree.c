@@ -8,7 +8,7 @@ static px_bool PX_Quadtree_InitAABB(px_memorypool *mp,px_int PX_AABB_MAX_DEEP,PX
 	{
 		if (aabb->deep>=PX_AABB_MAX_DEEP)
 		{
-			PX_ListInit(mp,&aabb->dataList);
+			PX_ListInitialize(mp,&aabb->dataList);
 			return PX_TRUE;
 		}
 		else
@@ -92,12 +92,12 @@ px_bool PX_QuadtreeCreate(px_memorypool *mp,PX_Quadtree *pQuadtree,px_float mapS
 	
 	pQuadtree->mp=mp;
 	pQuadtree->PX_AABB_MAX_DEEP=deep;
-	if(!PX_VectorInit(mp,&pQuadtree->boxes,sizeof(PX_Quadtree_AABB),ObjectsCount))
+	if(!PX_VectorInitialize(mp,&pQuadtree->boxes,sizeof(PX_Quadtree_AABB),ObjectsCount))
 	{
 		PX_ASSERT();
 		return PX_FALSE;
 	}
-	if(!PX_VectorInit(mp,&pQuadtree->Impacts,sizeof(PX_Quadtree_UserData),ObjectsCount))
+	if(!PX_VectorInitialize(mp,&pQuadtree->Impacts,sizeof(PX_Quadtree_UserData),ObjectsCount))
 	{
 		PX_ASSERT();
 		PX_VectorFree(&pQuadtree->boxes);

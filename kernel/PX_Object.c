@@ -2539,9 +2539,18 @@ px_void PX_Object_EditRender(px_surface *psurface, PX_Object *pObject,px_uint el
 		return;
 	}
 
+	if (pEdit->EditSurface.width!=(px_int)pObject->Width||pEdit->EditSurface.height!=(px_int)pObject->Height)
+	{
+		PX_SurfaceFree(&pEdit->EditSurface);
+		if(!PX_SurfaceCreate(pObject->mp,(px_int)pObject->Width,(px_int)pObject->Height,&pEdit->EditSurface))
+		{
+			return;
+		}
+	}
+
+
 	//clear
 	PX_SurfaceClear(&pEdit->EditSurface,0,0,(px_int)pObject->Width-1,(px_int)pObject->Height-1,pEdit->BackgroundColor);
-
 	if (pEdit->Border)
 	{
 		if(pEdit->state==PX_OBJECT_EDIT_STATE_NORMAL)
@@ -2984,19 +2993,19 @@ static px_void PX_Object_ScrollAreaClildRender(px_surface *pSurface, PX_Object *
 	{
 		return;
 	}
-	if (Object->Visible==PX_FALSE)
-	{
-		return;
-	}
+	
 	if (Object->Func_ObjectRender!=0)
 	{
-		px_float x=Object->x;
-		px_float y=Object->y;
-		Object->x-=oftX;
-		Object->y-=oftY;
-		Object->Func_ObjectRender(pSurface,Object,elpased);
-		Object->x=x;
-		Object->y=y;
+		if (Object->Visible!=PX_FALSE)
+		{
+			px_float x=Object->x;
+			px_float y=Object->y;
+			Object->x-=oftX;
+			Object->y-=oftY;
+			Object->Func_ObjectRender(pSurface,Object,elpased);
+			Object->x=x;
+			Object->y=y;
+		}
 	}
 	if (Object->pNextBrother!=PX_NULL)
 	{
@@ -3038,6 +3047,16 @@ px_void PX_Object_ScrollAreaRender(px_surface *psurface, PX_Object *pObject,px_u
 	{
 		return;
 	}
+
+	if (pSA->surface.height!=(px_int)pObject->Height||pSA->surface.width!=(px_int)pObject->Width)
+	{
+		PX_SurfaceFree(&pSA->surface);
+		if(!PX_SurfaceCreate(pObject->mp,(px_int)pObject->Width,(px_int)pObject->Height,&pSA->surface))
+		{
+			return;
+		}
+	}
+
 
 	PX_SurfaceClear(&pSA->surface,0,0,(px_int)pObject->Width-1,(px_int)pObject->Height-1,pSA->BackgroundColor);
 
@@ -3956,8 +3975,8 @@ PX_Object * PX_Object_ListCreate(px_memorypool *mp, PX_Object *Parent,px_int x,p
 	List.offsetx=0;
 	List.currentSelectedId=-1;
 	List.offsety=0;
-	PX_VectorInit(mp,&List.Items,sizeof(PX_Object *),64);
-	PX_VectorInit(mp,&List.pData,sizeof(px_void *),32);
+	PX_VectorInitialize(mp,&List.Items,sizeof(PX_Object *),64);
+	PX_VectorInitialize(mp,&List.pData,sizeof(px_void *),32);
 	if(!PX_SurfaceCreate(mp,Width,Height,&List.renderSurface)) return PX_NULL;
 
 	if(!(pListObject=PX_ObjectCreateEx(mp,Parent,(px_float)x,(px_float)y,0,(px_float)Width,(px_float)Height,0,PX_OBJECT_TYPE_LIST,PX_Object_ListUpdate,PX_Object_ListRender,PX_Object_ListFree,&List,sizeof(PX_Object_List)))) return PX_NULL;
@@ -6707,8 +6726,8 @@ PX_Object *PX_Object_CoordinatesCreate(px_memorypool *mp, PX_Object *Parent,px_i
 	Coordinates.leftTextDisplayMode=PX_OBJECT_COORDINATES_TEXT_DISPLAYMODE_NORMAL;
 	Coordinates.RightTextDisplayMode=PX_OBJECT_COORDINATES_TEXT_DISPLAYMODE_NORMAL;
 
-	PX_VectorInit(mp,&Coordinates.vData,sizeof(PX_Object_CoordinateData),16);
-	PX_VectorInit(mp,&Coordinates.vFlagLine,sizeof(PX_Object_CoordinateFlagLine),16);
+	PX_VectorInitialize(mp,&Coordinates.vData,sizeof(PX_Object_CoordinateData),16);
+	PX_VectorInitialize(mp,&Coordinates.vFlagLine,sizeof(PX_Object_CoordinateFlagLine),16);
 
 	pObject=PX_ObjectCreateEx(mp,Parent,(px_float)x,(px_float)y,0,(px_float)Width,(px_float)Height,0,PX_OBJECT_TYPE_COORDINATE,PX_Object_CoordinatesUpdate,PX_Object_CoordinatesRender,PX_Object_CoordinatesFree,&Coordinates,sizeof(PX_Object_Coordinates));
 

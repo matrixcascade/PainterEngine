@@ -1169,7 +1169,7 @@ px_bool PX_3D_RenderListInitialize(px_memorypool *mp,PX_3D_RenderList *list,px_d
 	list->PX_3D_PRESENTMODE=PX_3D_PRESENTMODE;
 	list->cullmode=cullmode;
 	list->pixelShader=PX_NULL;
-	if(!PX_VectorInit(mp,&list->facestream,sizeof(PX_3D_Face),64))
+	if(!PX_VectorInitialize(mp,&list->facestream,sizeof(PX_3D_Face),64))
 	{
 		return PX_FALSE;
 	}

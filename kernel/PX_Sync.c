@@ -24,8 +24,8 @@ px_bool PX_SyncFrameServerInit(PX_SyncFrame_Server *sync,px_memorypool *mp,px_dw
 	sync->instr_once_maxsize=PX_SYNC_DEFAULT_INSTR_ONCE_MAX_SIZE;
 	sync->unique=0;
 	sync->version=0;
-	PX_VectorInit(mp,&sync->clients,sizeof(PX_SyncFrame_Server_Clients),32);
-	PX_VectorInit(mp,&sync->stampsIndexTable,sizeof(PX_SyncFrame_InstrStream_StampIndex),PX_SYNC_INSTRS_SIZE);
+	PX_VectorInitialize(mp,&sync->clients,sizeof(PX_SyncFrame_Server_Clients),32);
+	PX_VectorInitialize(mp,&sync->stampsIndexTable,sizeof(PX_SyncFrame_InstrStream_StampIndex),PX_SYNC_INSTRS_SIZE);
 	PX_MemoryInit(mp,&sync->stampsInstrStream);
 	return PX_MemoryResize(&sync->stampsInstrStream,PX_SYNC_INSTRS_BYTES_SIZE);
 }
@@ -489,7 +489,7 @@ px_bool PX_SyncFrameClientInit(PX_SyncFrame_Client *client,px_memorypool *mp,px_
 	client->status=PX_SYNC_CLIENT_STATUS_CONNECTING;
 	client->send_cache_Instr_size=0;
 	client->send_repeat_times=0;
-	PX_VectorInit(mp,&client->stampsIndexTable,sizeof(PX_SyncFrame_InstrStream_StampIndex),PX_SYNC_INSTRS_SIZE);
+	PX_VectorInitialize(mp,&client->stampsIndexTable,sizeof(PX_SyncFrame_InstrStream_StampIndex),PX_SYNC_INSTRS_SIZE);
 	PX_MemoryInit(mp,&client->Input_InstrStream);
 	PX_MemoryInit(mp,&client->stampsInstrStream);
 	return PX_MemoryResize(&client->stampsInstrStream,2*PX_SYNC_INSTRS_SIZE);
@@ -877,7 +877,7 @@ px_bool PX_SyncDataServerInit(PX_SyncData_Server *syncdata_server,px_memorypool 
 	syncdata_server->read=read;
 	syncdata_server->write=write;
 	syncdata_server->user=user;
-	if(!PX_VectorInit(mp,&syncdata_server->clients,sizeof(PX_SyncData_Server_Client),16)) return PX_FALSE;
+	if(!PX_VectorInitialize(mp,&syncdata_server->clients,sizeof(PX_SyncData_Server_Client),16)) return PX_FALSE;
 	return PX_TRUE;
 }
 

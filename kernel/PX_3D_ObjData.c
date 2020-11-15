@@ -12,12 +12,12 @@ px_bool PX_3D_ObjectDataInitialize(px_memorypool *mp,PX_3D_ObjectData *ObjectDat
 {
 	ObjectData->mp=mp;
 	
-	if(!PX_VectorInit(mp,&ObjectData->v,sizeof(PX_3D_ObjectData_v),8)) return PX_FALSE;
-	if(!PX_VectorInit(mp,&ObjectData->vt,sizeof(PX_3D_ObjectData_vt),8)) return PX_FALSE;
-	if(!PX_VectorInit(mp,&ObjectData->vn,sizeof(PX_3D_ObjectData_vn),8)) return PX_FALSE;
-	if(!PX_VectorInit(mp,&ObjectData->face,sizeof(PX_3D_ObjectDataFace),8)) return PX_FALSE;
-	if(!PX_VectorInit(mp,&ObjectData->mtlFile,sizeof(px_string),8)) return PX_FALSE;
-	if(!PX_VectorInit(mp,&ObjectData->mtlName,sizeof(px_string),8)) return PX_FALSE;
+	if(!PX_VectorInitialize(mp,&ObjectData->v,sizeof(PX_3D_ObjectData_v),8)) return PX_FALSE;
+	if(!PX_VectorInitialize(mp,&ObjectData->vt,sizeof(PX_3D_ObjectData_vt),8)) return PX_FALSE;
+	if(!PX_VectorInitialize(mp,&ObjectData->vn,sizeof(PX_3D_ObjectData_vn),8)) return PX_FALSE;
+	if(!PX_VectorInitialize(mp,&ObjectData->face,sizeof(PX_3D_ObjectDataFace),8)) return PX_FALSE;
+	if(!PX_VectorInitialize(mp,&ObjectData->mtlFile,sizeof(px_string),8)) return PX_FALSE;
+	if(!PX_VectorInitialize(mp,&ObjectData->mtlName,sizeof(px_string),8)) return PX_FALSE;
 	return PX_TRUE;
 }
 

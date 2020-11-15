@@ -49,7 +49,7 @@ PX_LEXER_LEXEME_TYPE PX_ScriptTranslatorNextTokenSN(px_lexer *lexer)
 px_bool PX_ScriptCompilerInit(PX_SCRIPT_LIBRARY *lib,px_memorypool *mp)
 {
 	lib->mp=mp;
-	PX_VectorInit(mp,&lib->codeLibraries,sizeof(PX_SCRIPT_CODE),1);
+	PX_VectorInitialize(mp,&lib->codeLibraries,sizeof(PX_SCRIPT_CODE),1);
 	return PX_TRUE;
 }
 px_void PX_ScriptCompilerFree(PX_SCRIPT_LIBRARY *lib)
@@ -62,7 +62,7 @@ px_void PX_ScriptCompilerFree(PX_SCRIPT_LIBRARY *lib)
 	}
 	PX_VectorFree(&lib->codeLibraries);
 }
-px_bool PX_ScriptCompilerLoad(PX_SCRIPT_LIBRARY *lib,px_char *code)
+px_bool PX_ScriptCompilerLoad(PX_SCRIPT_LIBRARY *lib,const px_char *code)
 {
 	px_lexer lexer;
 	PX_SCRIPT_CODE scode;
@@ -138,7 +138,7 @@ px_bool PX_ScriptCompilerLoad(PX_SCRIPT_LIBRARY *lib,px_char *code)
 
 	return PX_TRUE;
 }
-static px_bool PX_ScriptParseInclude(px_string *codes,PX_SCRIPT_LIBRARY *lib,px_char *name)
+static px_bool PX_ScriptParseInclude(px_string *codes,PX_SCRIPT_LIBRARY *lib,const px_char *name)
 {
 	px_lexer lexer;
 	PX_LEXER_STATE lexerState;
@@ -288,7 +288,7 @@ typedef struct
 	px_string name;
 	px_string token;
 }PX_SCRIPT_TRANSLATOR_DEFINE_ST;
-static px_bool PX_ScriptParseDefine(px_string *codes,PX_SCRIPT_LIBRARY *lib,px_char *name)
+static px_bool PX_ScriptParseDefine(px_string *codes,PX_SCRIPT_LIBRARY *lib,const px_char *name)
 {
 	px_lexer lexer;
 	px_int startIndex;
@@ -297,7 +297,7 @@ static px_bool PX_ScriptParseDefine(px_string *codes,PX_SCRIPT_LIBRARY *lib,px_c
 	px_vector defines;
 	PX_SCRIPT_TRANSLATOR_DEFINE_ST defst;
 
-	PX_VectorInit(lib->mp,&defines,sizeof(PX_SCRIPT_TRANSLATOR_DEFINE_ST),32);
+	PX_VectorInitialize(lib->mp,&defines,sizeof(PX_SCRIPT_TRANSLATOR_DEFINE_ST),32);
 
 	PX_LexerInit(&lexer,lib->mp);
 	PX_LexerRegisterDelimiter(&lexer,',');
@@ -440,7 +440,7 @@ _ERROR:
 	PX_VectorFree(&defines);
 	return PX_FALSE;
 }
-static px_bool PX_ScriptParsePretreatment(px_string *codes,PX_SCRIPT_LIBRARY *lib,px_char *name)
+static px_bool PX_ScriptParsePretreatment(px_string *codes,PX_SCRIPT_LIBRARY *lib,const px_char *name)
 {
 	
 	if(!PX_ScriptParseInclude(codes,lib,name))
@@ -3458,7 +3458,6 @@ static px_bool PX_ScriptParseLastInstr_IDX(PX_SCRIPT_Analysis *analysis,px_vecto
 		case PX_SCRIPT_AST_OPERAND_TYPE_STRING:
 		case PX_SCRIPT_AST_OPERAND_TYPE_MEMORY:
 			{
-				PX_StringCat(out,"PUSH R2\n");
 				resOperand.bAtomPopIndex=PX_TRUE;
 
 				if(operand1.operandType==PX_SCRIPT_AST_OPERAND_TYPE_MEMORY)
@@ -3468,11 +3467,13 @@ static px_bool PX_ScriptParseLastInstr_IDX(PX_SCRIPT_Analysis *analysis,px_vecto
 
 				if (operand1.region==PX_SCRIPT_VARIABLE_REGION_GLOBAL)
 				{
+					PX_StringCat(out,"PUSH R2\n");
 					PX_StringFormat1(&fmrString,"MOV R2,%1\n",PX_STRINGFORMAT_INT(operand1._oft));
 					PX_StringCat(out,fmrString.buffer);
 				}
 				else if(operand1.region==PX_SCRIPT_VARIABLE_REGION_LOCAL)
 				{
+					PX_StringCat(out,"PUSH R2\n");
 					PX_StringFormat1(&fmrString,"MOV R2,%1\n",PX_STRINGFORMAT_INT(operand1._oft));
 					PX_StringCat(out,fmrString.buffer);
 					PX_StringSet(&fmrString,"ADD R2,BP\n");
@@ -3480,7 +3481,9 @@ static px_bool PX_ScriptParseLastInstr_IDX(PX_SCRIPT_Analysis *analysis,px_vecto
 				}
 				else if(operand1.region==PX_SCRIPT_VARIABLE_REGION_POP)
 				{
+					PX_StringCat(out,"MOV R1,R2\n");
 					PX_StringCat(out,"POP R2\n");
+					PX_StringCat(out,"PUSH R1\n");
 				}
 				else
 				{
@@ -5942,8 +5945,8 @@ static px_bool PX_ScriptParseExpressionStream(PX_SCRIPT_Analysis *analysis,px_ve
 	PX_SCRIPT_FUNCTION *pfunc=PX_NULL;
 	px_int i,LBracketBalance,MBracketBalance,paramBeginIndex[16],paramcount=0;
 	px_string fmrString;
-	PX_VectorInit(analysis->mp,op,sizeof(PX_SCRIPT_AST_OPCODE),16);
-	PX_VectorInit(analysis->mp,tk,sizeof(PX_SCRIPT_AST_OPERAND),16);
+	PX_VectorInitialize(analysis->mp,op,sizeof(PX_SCRIPT_AST_OPCODE),16);
+	PX_VectorInitialize(analysis->mp,tk,sizeof(PX_SCRIPT_AST_OPERAND),16);
 
 	
 
@@ -6616,9 +6619,9 @@ static px_bool PX_ScriptParseExpression(PX_SCRIPT_Analysis *analysis,px_char *ex
 	if(!PX_LexerLoadSourceFromMemory(&lexer,expr))
 		return PX_FALSE;
 
-	PX_VectorInit(analysis->mp,&stream,sizeof(PX_SCRIPT_EXPR_STREAM),32);
-	PX_VectorInit(analysis->mp,&opStack,sizeof(PX_SCRIPT_AST_OPCODE),32);
-	PX_VectorInit(analysis->mp,&tkStack,sizeof(PX_SCRIPT_AST_OPERAND),32);
+	PX_VectorInitialize(analysis->mp,&stream,sizeof(PX_SCRIPT_EXPR_STREAM),32);
+	PX_VectorInitialize(analysis->mp,&opStack,sizeof(PX_SCRIPT_AST_OPCODE),32);
+	PX_VectorInitialize(analysis->mp,&tkStack,sizeof(PX_SCRIPT_AST_OPERAND),32);
 
 	//
 	accept_type=PX_SCRIPT_EXPRESSION_ACCEPT_SINGLE|PX_SCRIPT_EXPRESSION_ACCEPT_TOKEN|PX_SCRIPT_EXPRESSION_ACCEPT_BRACKET_START;
@@ -8135,7 +8138,7 @@ px_bool PX_ScriptParseSetDefine(PX_SCRIPT_Analysis *analysis)
 	
 	PX_StringInit(analysis->mp,&vSet.Name);
 	PX_StringCat(&vSet.Name,analysis->lexer.CurLexeme.buffer);
-	PX_VectorInit(analysis->mp,&vSet.members,sizeof(PX_SCRIPT_SETMEMBER),1);
+	PX_VectorInitialize(analysis->mp,&vSet.members,sizeof(PX_SCRIPT_SETMEMBER),1);
 
 	if ((PX_ScriptTranslatorNextTokenSN(&analysis->lexer))!=PX_LEXER_LEXEME_TYPE_DELIMITER)
 	{
@@ -9311,7 +9314,7 @@ px_bool PX_ScriptParseGetExpression(PX_SCRIPT_Analysis *analysis,px_string *expr
 	}
 	return PX_TRUE;
 }
-px_bool PX_ScriptCompilerCompile(PX_SCRIPT_LIBRARY *lib,px_char *name,px_string *ASM,px_int LocalStackSize)
+px_bool PX_ScriptCompilerCompile(PX_SCRIPT_LIBRARY *lib,const px_char *name,px_string *ASM,px_int LocalStackSize)
 {
 	PX_SCRIPT_SETMEMBER *psetmem;
 	PX_SCRIPT_SET *pset;
@@ -9393,11 +9396,11 @@ px_bool PX_ScriptCompilerCompile(PX_SCRIPT_LIBRARY *lib,px_char *name,px_string 
 	PX_LexerLoadSourceFromMemory(&analysis.lexer,codes.buffer);
 	PX_StringFree(&codes);
 
-	PX_VectorInit(lib->mp,&analysis.v_variablesGlobalTable,sizeof(PX_SCRIPT_VARIABLES),1);
-	PX_VectorInit(lib->mp,&analysis.v_variableStackTable,sizeof(PX_SCRIPT_VARIABLES),1);
-	PX_VectorInit(lib->mp,&analysis.v_sets,sizeof(PX_SCRIPT_SET),1);
-	PX_VectorInit(lib->mp,&analysis.v_functions,sizeof(PX_SCRIPT_FUNCTION),1);
-	PX_VectorInit(lib->mp,&analysis.v_astStructure,sizeof(PX_SCRIPT_AST_STRUCTURE),1);
+	PX_VectorInitialize(lib->mp,&analysis.v_variablesGlobalTable,sizeof(PX_SCRIPT_VARIABLES),1);
+	PX_VectorInitialize(lib->mp,&analysis.v_variableStackTable,sizeof(PX_SCRIPT_VARIABLES),1);
+	PX_VectorInitialize(lib->mp,&analysis.v_sets,sizeof(PX_SCRIPT_SET),1);
+	PX_VectorInitialize(lib->mp,&analysis.v_functions,sizeof(PX_SCRIPT_FUNCTION),1);
+	PX_VectorInitialize(lib->mp,&analysis.v_astStructure,sizeof(PX_SCRIPT_AST_STRUCTURE),1);
 
 	analysis.mp=lib->mp;
 	PX_StringInit(analysis.mp,&analysis.bootCode);
@@ -10342,7 +10345,7 @@ _CONTINUE:
 					}
 				    break;
 					default:
-						goto _ERROR;
+						continue;
 				}
 			}
 			_BREAKOUT:
@@ -10392,7 +10395,7 @@ _CONTINUE:
 					}
 					break;
 					default:
-						goto _ERROR;
+						continue;
 				}
 			}
 _CONTINUEOUT:

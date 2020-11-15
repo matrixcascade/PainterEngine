@@ -426,7 +426,7 @@ px_bool PX_FontModuleInitialize(px_memorypool *mp,PX_FontModule *module,PX_FONTM
 	module->max_BearingY=0;
 	module->max_Height=0;
 	module->max_Width=0;
-	return PX_MapInit(mp,&module->characters_map);
+	return PX_MapInitialize(mp,&module->characters_map);
 }
 
 px_bool PX_FontModuleLoad(PX_FontModule *module,px_byte *buffer,px_int size)

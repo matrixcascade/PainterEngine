@@ -836,6 +836,17 @@ px_double PX_atan2(px_double y, px_double x)
 	}
 
 }
+
+px_double PX_asin(px_double x)
+{
+	return PX_atan2 (x, PX_sqrtd (1.0 - x * x));
+}
+
+px_double PX_acos(px_double x)
+{
+	return PX_atan2 (PX_sqrtd (1.0 - x * x), x);
+}
+
 px_stringformat PX_STRINGFORMAT_INT(px_int _i)
 {
 	px_stringformat fmt;
@@ -1116,6 +1127,18 @@ px_bool PX_MatrixEqual(px_matrix Mat1,px_matrix Mat2)
 		}
 	}
 	return PX_TRUE;
+}
+
+px_void PX_MatrixRotateVector(px_matrix *mat,px_point v_base,px_point v)
+{
+	px_point cross=PX_PointCross(v_base,v);
+	px_float cosv=PX_PointDot(v_base,v)/PX_PointMod(v_base)/PX_PointMod(v);
+	px_float sinv=(px_float)PX_sqrtd(1-cosv*cosv);
+	if(cross.z<0) sinv=-sinv;
+	mat->_11=cosv;		mat->_12=sinv;			mat->_13=0.0f;			mat->_14=0.0f;
+	mat->_21=-sinv;		mat->_22=cosv;			mat->_23=0.0f;			mat->_24=0.0f;
+	mat->_31=0.0f;		mat->_32=0.0f;			mat->_33=1.0f;			mat->_34=0.0f;
+	mat->_41=0.0f;		mat->_42=0.0f;			mat->_43=0.0f;			mat->_44=1.0f;
 }
 
 px_void PX_MatrixTranslation(px_matrix *mat,px_float x,px_float y,px_float z)

@@ -230,6 +230,8 @@ px_float PX_tan_angle(px_float angle);
 px_double PX_atan(px_double x);
 px_double PX_atan2(px_double y, px_double x);
 
+px_double PX_asin(px_double x);
+px_double PX_acos(px_double x);
 px_float PX_Point_sin(px_point v);
 px_float PX_Point_cos(px_point v);
 
@@ -380,6 +382,7 @@ px_matrix PX_MatrixMultiply(px_matrix Mat1,px_matrix Mat2);
 px_matrix PX_MatrixAdd(px_matrix Mat1,px_matrix Mat2);
 px_matrix PX_MatrixSub(px_matrix Mat1,px_matrix Mat2);
 px_bool PX_MatrixEqual(px_matrix Mat1,px_matrix Mat2);
+px_void PX_MatrixRotateVector(px_matrix *mat,px_point v_base,px_point v);
 px_void PX_MatrixTranslation(px_matrix *mat,px_float x,px_float y,px_float z);
 px_void PX_MatrixRotateX(px_matrix *mat,px_float Angle);
 px_void PX_MatrixRotateY(px_matrix *mat,px_float Angle);

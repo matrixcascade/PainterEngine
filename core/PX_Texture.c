@@ -1756,7 +1756,7 @@ px_void PX_TextureFill(px_memorypool *mp,px_texture *ptexture,px_int x,px_int y,
 		px_int x,y;
 	}__PX_POINT;
 	px_vector pstack;
-	PX_VectorInit(mp,&pstack,sizeof(__PX_POINT),8);
+	PX_VectorInitialize(mp,&pstack,sizeof(__PX_POINT),8);
 	
 	do 
 	{

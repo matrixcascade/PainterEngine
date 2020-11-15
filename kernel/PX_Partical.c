@@ -10,7 +10,7 @@ int          launchCount +6;
 }
 */
 
-static px_bool PX_Partical_Rand(PX_ScriptVM_Instance *ins)
+static px_bool PX_Partical_Rand(PX_ScriptVM_Instance *ins,px_void *ptr)
 {
 	PX_ScriptVM_RET(ins,PX_ScriptVM_Variable_float(PX_rand()*1.0f/PX_RAND_MAX));
 	return PX_TRUE;
@@ -97,7 +97,7 @@ px_bool PX_ParticalLauncherCreate(PX_Partical_Launcher *env,px_memorypool *mp,px
 	env->Create_func=PX_NULL;
 	env->Update_func=PX_NULL;
 	
-	if (!PX_ScriptVM_InstanceRunFunction(env->VM_Instance,0,PX_NULL,Initfunc,PX_NULL,0))
+	if (!PX_ScriptVM_InstanceRunFunction(env->VM_Instance,0,Initfunc,PX_NULL,0))
 	{
 		PX_ScriptVM_InstanceFree(env->VM_Instance);
 		return PX_FALSE;
@@ -150,7 +150,7 @@ px_bool PX_ParticalLauncherCreate(PX_Partical_Launcher *env,px_memorypool *mp,px
 	env->ParticalPool=(PX_Partical_Atom *)MP_Malloc(mp,sizeof(PX_Partical_Atom)*env->maxCount);
 	PX_memset(env->ParticalPool,0,sizeof(PX_Partical_Atom)*env->maxCount);
 
-	PX_ScriptVM_RegistryHostFunction(env->VM_Instance,"PARTICAL_RAND",PX_Partical_Rand);
+	PX_ScriptVM_RegistryHostFunction(env->VM_Instance,"PARTICAL_RAND",PX_Partical_Rand,env);
 
 	return PX_TRUE;
 }
@@ -307,7 +307,7 @@ px_void PX_ParticalAtomUpdate(PX_Partical_Launcher *env,PX_Partical_Atom *pAtom,
 				PX_ScriptVM_GLOBAL(env->VM_Instance,memptr.ptr+16)=PX_ScriptVM_Variable_float(pAtom->sizeIncrement);
 				PX_ScriptVM_GLOBAL(env->VM_Instance,memptr.ptr+17)=PX_ScriptVM_Variable_float(pAtom->alphaIncrement);
 				var=PX_ScriptVM_Variable_int(memptr.ptr);
-			if(PX_ScriptVM_InstanceRunFunctionIndex(env->VM_Instance,0,PX_NULL,env->UpdateParitcalFuncIndex,&var,1))
+			if(PX_ScriptVM_InstanceRunFunctionIndex(env->VM_Instance,0,env->UpdateParitcalFuncIndex,&var,1))
 			{
 			  pAtom->size=PX_ParticalVM_ConvertToFloat(PX_ScriptVM_GLOBAL(env->VM_Instance,memptr.ptr+0));
 			  pAtom->rotation=PX_ParticalVM_ConvertToFloat(PX_ScriptVM_GLOBAL(env->VM_Instance,memptr.ptr+1));
@@ -431,7 +431,7 @@ px_bool PX_ParticalLauncherUpdate(PX_Partical_Launcher *env,px_dword elpased)
 						else if (env->CreateParticalFuncIndex!=-1)
 						{
 							var=PX_ScriptVM_Variable_int(env->genIndex);
-							if(PX_ScriptVM_InstanceRunFunctionIndex(env->VM_Instance,0,PX_NULL,env->CreateParticalFuncIndex,&var,1))
+							if(PX_ScriptVM_InstanceRunFunctionIndex(env->VM_Instance,0,env->CreateParticalFuncIndex,&var,1))
 							{
 							/*
 							set PARTICAL_ATOM_INFO

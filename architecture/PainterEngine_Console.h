@@ -5,7 +5,6 @@
 #include "PainterEngine_Runtime.h"
 
 #define PC_CONSOLE_DEFAULT_MAX_COLUMN 48
-#define PC_RESOURCE_PATH "."
 
 typedef px_bool (*console_registry_hostcall)(PX_ScriptVM_Instance *Ins);
 typedef struct

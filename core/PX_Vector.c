@@ -1,6 +1,6 @@
 #include "PX_Vector.h"
 
-px_bool PX_VectorInit(px_memorypool *mp,px_vector *vec,px_int nodeSize,px_int init_size)
+px_bool PX_VectorInitialize(px_memorypool *mp,px_vector *vec,px_int nodeSize,px_int init_size)
 {
 	vec->allocsize=init_size;
 	vec->nodesize=nodeSize;

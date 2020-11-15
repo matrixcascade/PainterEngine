@@ -17,7 +17,7 @@ px_bool PX_AnimationLibraryCreateFromMemory(px_memorypool *mp,PX_Animationlibrar
 	}
 	reservedSize-=sizeof(_header);
 	pbuffer=_2dxBuffer+sizeof(_header);
-	PX_VectorInit(mp,&panimation->animation,sizeof(PX_Animationlibrary_tagInfo),_header.animationCount);
+	PX_VectorInitialize(mp,&panimation->animation,sizeof(PX_Animationlibrary_tagInfo),_header.animationCount);
 	for (i=0;i<(px_int)_header.animationCount;i++)
 	{
 		PX_Animationlibrary_tagInfo tag;
@@ -30,7 +30,7 @@ px_bool PX_AnimationLibraryCreateFromMemory(px_memorypool *mp,PX_Animationlibrar
 	}
 
 
-	PX_VectorInit(mp,&panimation->frames,sizeof(px_texture),_header.framecount);
+	PX_VectorInitialize(mp,&panimation->frames,sizeof(px_texture),_header.framecount);
 	PX_MemoryInit(mp,&panimation->code);
 	for (i=0;i<(px_int)_header.framecount;i++)
 	{
@@ -278,7 +278,7 @@ px_bool PX_AnimationLibrary_CreateEffect_JumpVertical(px_memorypool *mp,PX_Anima
 	px_int eff_height[6],eff_width[6];
 	px_texture tex;
 
-	PX_VectorInit(mp,&panimation->frames,sizeof(px_texture),6);
+	PX_VectorInitialize(mp,&panimation->frames,sizeof(px_texture),6);
 	PX_MemoryInit(mp,&panimation->code);
 	PX_MemoryResize(&panimation->code,sizeof(PX_2DX_INSTR)*13);
 

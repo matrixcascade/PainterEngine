@@ -4,7 +4,7 @@
 #include "PX_Hashmap.h"
 
 
-px_bool PX_MapInit(px_memorypool *mp,px_map *m)
+px_bool PX_MapInitialize(px_memorypool *mp,px_map *m)
 {
 	m->mp=mp;
 	m->root.rb_node = PX_NULL;
