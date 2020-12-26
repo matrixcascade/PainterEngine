@@ -29,17 +29,21 @@ struct _PX_LiveLayer
 	px_vector parent_Nodes;
 	px_vector children_Nodes;
 
-	px_point offset;
-	px_point keyPoint;
-	px_point controlPoint;
+	px_point TextureOffset;//static
+	px_point keyPoint;//static
+	px_point controlPoint;//static
+
+	px_point currentKeyPoint;//dynamic
+	px_point currentControlPoint;//dynamic
 	px_vector vertices;
 	px_vector triangles;
+
+	px_bool showLinker;
+	px_bool showMesh;
+
+
 	PX_LIVE_DATA_TYPE type;
-	union
-	{
-		px_texture texture;
-		PX_Animation animation;
-	};
+	px_void *data;
 };
 typedef struct _PX_LiveLayer PX_LiveLayer;
 

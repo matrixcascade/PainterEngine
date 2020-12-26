@@ -1,5 +1,5 @@
-#ifndef SS_MESSAGEBOX_H
-#define SS_MESSAGEBOX_H
+#ifndef PX_MESSAGEBOX_H
+#define PX_MESSAGEBOX_H
 
 #include "PainterEngine_Runtime.h"
 

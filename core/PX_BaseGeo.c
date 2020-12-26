@@ -19,19 +19,146 @@ static px_void PX_DrawLinePixel_InvRecK(px_surface *psurface,px_int x,px_int y,p
 }
 px_void PX_GeoDrawLine(px_surface *psurface, px_int x0, px_int y0, px_int x1, px_int y1 ,px_int lineWidth, px_color color)
 {
-	px_point Cross2points[2];
-	px_int CrossCount=0;
 	px_int i,len,lm,x,y,temp1,temp2,xleft,xright;
-	px_int trimLX,trimRX,trimTY,trimBY;
-	px_float p0x,p0y,p1x,p1y,p2x,p2y,p3x,p3y,vx,vy,rx,ry,xlen,ylen,S,ftemp,fconst,ryL,ryR,rxL,rxR;
+	px_float p0x,p0y,p1x,p1y,p2x,p2y,p3x,p3y,vx,vy,rx,ry,xlen,ylen,S,ftemp,ryL,ryR,rxL,rxR;
 	px_float k,recK;
 	px_color clr;
 	px_void (*func_DrawPixel)(px_surface *psurface,px_int x,px_int y,px_color color);
 	
-	if (lineWidth==0||PX_ABS(x0-x1)+PX_ABS(y0-y1)==0)
+	if (lineWidth==0)
 	{
 		return;
 	}
+
+	//////////////////////////////////////////////////////////////////////////
+	//Trim
+	do 
+	{
+		px_int trimTop,trimRight,trimLeft,trimBottom;
+		px_int vector_x,vector_y;
+		px_float step;
+		trimTop=0-lineWidth;
+		trimBottom=psurface->height+lineWidth;
+		trimLeft=0-lineWidth;
+		trimRight=psurface->width+lineWidth;
+		
+		//////////////////////////////////////////////////////////////////////////
+		//Trim top/bottom
+		if (y0>y1)
+		{
+			//swap p0<-->p1
+			lm=x0;
+			x0=x1;
+			x1=lm;
+
+			lm=y0;
+			y0=y1;
+			y1=lm;
+		} 
+		//trim top
+		if (y1<trimTop)
+		{
+			return;
+		}
+
+		vector_x=x1-x0;
+		vector_y=y1-y0;
+
+		if (vector_y!=0)
+		{
+			step=(trimTop-y0)*1.0f/vector_y;
+			if (step>0&&step<1)
+			{
+				x0=(px_int)(x0+vector_x*step);
+				y0=(px_int)(y0+vector_y*step);
+			}
+		}
+
+		//trim bottom
+		if (y0>trimBottom)
+		{
+			return;
+		}
+
+		vector_x=x1-x0;
+		vector_y=y1-y0;
+
+		if (vector_y!=0)
+		{
+			step=(trimBottom-y0)*1.0f/vector_y;
+			if (step>0&&step<1)
+			{
+				x1=(px_int)(x1+vector_x*step);
+				y1=(px_int)(y1+vector_y*step);
+			}
+		}
+
+		//////////////////////////////////////////////////////////////////////////
+		//Trim left/right
+		if (x0>x1)
+		{
+			//swap p0<-->p1
+			lm=x0;
+			x0=x1;
+			x1=lm;
+
+			lm=y0;
+			y0=y1;
+			y1=lm;
+		} 
+
+		//trim left
+		if (x1<trimLeft)
+		{
+			return;
+		}
+
+		vector_x=x1-x0;
+		vector_y=y1-y0;
+
+		if (vector_x!=0)
+		{
+			step=(trimLeft-x0)*1.0f/vector_x;
+			if (step>0&&step<1)
+			{
+				x0=(px_int)(x0+vector_x*step);
+				y0=(px_int)(y0+vector_y*step);
+			}
+		}
+
+		//trim right
+		if (x0>trimRight)
+		{
+			return;
+		}
+
+		vector_x=x1-x0;
+		vector_y=y1-y0;
+
+		if (vector_x!=0)
+		{
+			step=(trimRight-x0)*1.0f/vector_x;
+			if (step>0&&step<1)
+			{
+				x1=(px_int)(x0+vector_x*step);
+				y1=(px_int)(y0+vector_y*step);
+			}
+		}
+
+	} while (0);
+
+	//////////////////////////////////////////////////////////////////////////
+
+
+
+	//////////////////////////////////////////////////////////////////////////
+	//Draw Point
+	if (x0==x1&&y0==y1)
+	{
+		PX_SurfaceDrawPixel(psurface,x0,y0,color);
+		return;
+	}
+
 
 	if (x0==x1)
 	{
@@ -111,123 +238,11 @@ px_void PX_GeoDrawLine(px_surface *psurface, px_int x0, px_int y0, px_int x1, px
 		return;
 	}
 
-	if (x0>x1)
-	{
-		lm=x0;
-		x0=x1;
-		x1=lm;
-
-		lm=y0;
-		y0=y1;
-		y1=lm;
-	} 
+	
 
 	k=((px_float)(y1-y0))/(x1-x0);
 	recK=1/k;
 
-	//trim
-	trimLX=0-lineWidth;
-	trimRX=psurface->width+lineWidth;
-	trimTY=0-lineWidth;
-	trimBY=psurface->height+lineWidth;
-
-	
-	
-
-	//calculate c
-	//TrimLX
-	fconst=y0-k*x0;
-	ftemp=trimLX*k+fconst;
-
-	do 
-	{
-		if (ftemp>=trimTY&&ftemp<=trimBY)
-		{
-			Cross2points[CrossCount].x=(px_float)trimLX;
-			Cross2points[CrossCount].y=ftemp;
-			CrossCount++;
-		}
-
-		//TrimRX
-		ftemp=trimRX*k+fconst;
-
-		if (ftemp>=trimTY&&ftemp<=trimBY)
-		{
-			Cross2points[CrossCount].x=(px_float)trimRX;
-			Cross2points[CrossCount].y=ftemp;
-			CrossCount++;
-			if (CrossCount==2)
-			{
-				break;
-			}
-		}
-
-		//trimBY
-		ftemp=(trimBY-fconst)/k;
-		if (ftemp>trimLX&&ftemp<trimRX)
-		{
-			Cross2points[CrossCount].x=ftemp;
-			Cross2points[CrossCount].y=(px_float)trimBY;
-			CrossCount++;
-			if (CrossCount==2)
-			{
-				break;
-			}
-		}
-
-		//trimTY
-		ftemp=(trimTY-fconst)/k;
-		if (ftemp>trimLX&&ftemp<trimRX)
-		{
-			Cross2points[CrossCount].x=ftemp;
-			Cross2points[CrossCount].y=(px_float)trimTY;
-			CrossCount++;
-		}
-	} while (0);
-	
-	if (CrossCount!=2)
-	{
-		return;
-	}
-
-
-	if (Cross2points[0].x>Cross2points[1].x)
-	{
-		ftemp=Cross2points[0].x;
-		Cross2points[0].x=Cross2points[1].x;
-		Cross2points[1].x=ftemp;
-
-		ftemp=Cross2points[0].y;
-		Cross2points[0].y=Cross2points[1].y;
-		Cross2points[1].y=ftemp;
-	}
-
-
-	if (x0<Cross2points[0].x)
-	{
-		x0=(px_int)Cross2points[0].x;
-		y0=(px_int)Cross2points[0].y;
-	}
-	else if(x0>Cross2points[1].x)
-	{
-		return;
-	}
-
-
-	if (x1<Cross2points[0].x)
-	{
-		return;
-	}
-	else if(x1>Cross2points[1].x)
-	{
-		x1=(px_int)Cross2points[1].x;
-		y1=(px_int)Cross2points[1].y;
-	}
-
-	if (x1==x0&&y1==y0)
-	{
-		return;
-	}
 
 
 	if (k>0)
@@ -332,7 +347,6 @@ px_void PX_GeoDrawLine(px_surface *psurface, px_int x0, px_int y0, px_int x1, px
 			for (x=PX_TRUNC(rx)+1;x<=temp1;x++)
 			{
 				func_DrawPixel(psurface,x,y,color);
-
 			}
 			//Draw edge point
 			ftemp=PX_FRAC(rx);
@@ -1416,7 +1430,7 @@ px_void PX_GeoDrawPath(px_surface *psurface, px_point path[],px_int pathCount,px
 	{
 		for (i=0;i<pathCount-1;i++)
 		{
-			px_point path_unit_vector=PX_PointUnit(PX_PointSub(path[i+1],path[i]));
+			px_point path_unit_vector=PX_PointNormalization(PX_PointSub(path[i+1],path[i]));
 			px_int length=(px_int)PX_PointMod(PX_PointSub(path[i+1],path[i]));
 			px_float step=0;
 			do 
@@ -2834,7 +2848,7 @@ px_void PX_GeoDrawBezierCurvePoint(px_surface *rendersurface,px_point pt[],px_in
 	//update path
 	for (i=0;i<pt_count-1;i++)
 	{
-		px_point vector_unit=PX_PointUnit(PX_PointSub(pt[i+1],pt[i]));
+		px_point vector_unit=PX_PointNormalization(PX_PointSub(pt[i+1],pt[i]));
 		px_float distance=PX_PointMod(PX_PointSub(pt[i+1],pt[i]));
 
 		pt[i]=PX_PointAdd(pt[i],PX_PointMul(vector_unit,distance*t));

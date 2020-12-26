@@ -562,6 +562,13 @@ px_void PX_FontModuleTextGetRenderWidthHeight(PX_FontModule *module,const px_cha
 	px_int max_width=0,max_height=0;
 	const px_char *pTextPointer=Text;
 
+	if (module==PX_NULL)
+	{
+		PX_FontTextGetRenderWidthHeight(pTextPointer,width,height);
+		return;
+	}
+
+
 	while (PX_TRUE)
 	{
 		px_dword code=0;
@@ -639,6 +646,12 @@ px_int PX_FontModuleDrawText(px_surface *psurface,PX_FontModule *mod,int x,int y
 		PX_ASSERT();
 		return 0;
 	}
+
+	if (mod==PX_NULL)
+	{
+		return PX_FontDrawText(psurface,x,y,align,Text,Color);
+	}
+
 
 	PX_FontModuleTextGetRenderWidthHeight(mod,Text,&frWidth,&frHeight);
 	

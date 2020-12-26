@@ -180,9 +180,9 @@ px_int PX_ScriptAsmTokenType(PX_SCRIPT_ASM_COMPILER *compiler,px_char *token)
 		bfound=PX_FALSE;
 		for (i=0;i<compiler->assumeTable.size;i++)
 		{
-			if (PX_strequ(((PX_SCRIPT_ASM_ASSUME_NODE *)(PX_ListAt(&compiler->assumeTable,i)->pdata))->name.buffer,token))
+			if (PX_strequ(((PX_SCRIPT_ASM_ASSUME_NODE *)(PX_ListNodeAt(&compiler->assumeTable,i)->pdata))->name.buffer,token))
 			{
-				token=((PX_SCRIPT_ASM_ASSUME_NODE *)(PX_ListAt(&compiler->assumeTable,i)->pdata))->assume.buffer;
+				token=((PX_SCRIPT_ASM_ASSUME_NODE *)(PX_ListNodeAt(&compiler->assumeTable,i)->pdata))->assume.buffer;
 				bfound=PX_TRUE;
 				break;
 			}
@@ -261,7 +261,7 @@ px_int PX_ScriptAsmTokenType(PX_SCRIPT_ASM_COMPILER *compiler,px_char *token)
 
 	for (i=0;i<compiler->LabelTable.size;i++)
 	{
-		if (PX_strequ(((PX_SCRIPT_ASM_LABEL_NODE *)(PX_ListAt(&compiler->LabelTable,i)->pdata))->mnemonic,token))
+		if (PX_strequ(((PX_SCRIPT_ASM_LABEL_NODE *)(PX_ListNodeAt(&compiler->LabelTable,i)->pdata))->mnemonic,token))
 		{
 			return PX_SCRIPT_ASM_OPERAND_ACC_TYPE_LABEL;
 		}
@@ -320,10 +320,10 @@ static px_bool PX_ScriptASMMapAssume(PX_SCRIPT_ASM_COMPILER *compiler,px_string 
 		bfound=PX_FALSE;
 		for (i=0;i<compiler->assumeTable.size;i++)
 		{
-			if (PX_strequ(((PX_SCRIPT_ASM_ASSUME_NODE *)(PX_ListAt(&compiler->assumeTable,i)->pdata))->name.buffer,mnenonic->buffer))
+			if (PX_strequ(((PX_SCRIPT_ASM_ASSUME_NODE *)(PX_ListNodeAt(&compiler->assumeTable,i)->pdata))->name.buffer,mnenonic->buffer))
 			{
 			
-				PX_StringCopy(mnenonic,&(((PX_SCRIPT_ASM_ASSUME_NODE *)PX_ListAt(&compiler->assumeTable,i)->pdata)->assume));
+				PX_StringCopy(mnenonic,&(((PX_SCRIPT_ASM_ASSUME_NODE *)PX_ListNodeAt(&compiler->assumeTable,i)->pdata)->assume));
 
 				bfound=PX_TRUE;
 				break;
@@ -524,7 +524,7 @@ px_void PX_ScriptAsmUpdateAssumeTable(PX_SCRIPT_ASM_COMPILER *compiler,px_char *
 	PX_SCRIPT_ASM_ASSUME_NODE newNode;
 	for (i=0;i<compiler->assumeTable.size;i++)
 	{
-		if (PX_strequ(((PX_SCRIPT_ASM_ASSUME_NODE *)(PX_ListAt(&compiler->assumeTable,i)->pdata))->name.buffer,name))
+		if (PX_strequ(((PX_SCRIPT_ASM_ASSUME_NODE *)(PX_ListNodeAt(&compiler->assumeTable,i)->pdata))->name.buffer,name))
 		{
 			PX_StringClear(&PX_LISTAT(PX_SCRIPT_ASM_ASSUME_NODE,&compiler->assumeTable,i)->assume);
 			PX_StringCat(&PX_LISTAT(PX_SCRIPT_ASM_ASSUME_NODE,&compiler->assumeTable,i)->assume,assume);
@@ -562,9 +562,9 @@ px_bool PX_ScriptAsmUpdateLabelAddr(PX_SCRIPT_ASM_COMPILER *compiler,px_char *Na
 	px_int i;
 	for (i=0;i<compiler->LabelTable.size;i++)
 	{
-		if (PX_strequ(((PX_SCRIPT_ASM_LABEL_NODE *)(PX_ListAt(&compiler->LabelTable,i)->pdata))->mnemonic,Name))
+		if (PX_strequ(((PX_SCRIPT_ASM_LABEL_NODE *)(PX_ListNodeAt(&compiler->LabelTable,i)->pdata))->mnemonic,Name))
 		{
-			((PX_SCRIPT_ASM_LABEL_NODE *)(PX_ListAt(&compiler->LabelTable,i)->pdata))->binaddr=addr;
+			((PX_SCRIPT_ASM_LABEL_NODE *)(PX_ListNodeAt(&compiler->LabelTable,i)->pdata))->binaddr=addr;
 			return PX_TRUE;
 		}
 	}
@@ -604,7 +604,7 @@ px_int PX_ScriptAsmStringSize(PX_SCRIPT_ASM_COMPILER *compiler)
 	px_int size=0;
 	for (i=0;i<compiler->StringTable.size;i++)
 	{
-		size+= (PX_strlen(((PX_SCRIPT_ASM_STRING_NODE *)(PX_ListAt(&compiler->StringTable,i)->pdata))->str.buffer))+1;
+		size+= (PX_strlen(((PX_SCRIPT_ASM_STRING_NODE *)(PX_ListNodeAt(&compiler->StringTable,i)->pdata))->str.buffer))+1;
 	}
 	return size;
 }
@@ -626,7 +626,7 @@ px_void PX_ScriptAsmAddStringConst(PX_SCRIPT_ASM_COMPILER *compiler,px_char *Str
 	PX_SCRIPT_ASM_STRING_NODE stringNode,*pLastNode;
 	for (i=0;i<compiler->StringTable.size;i++)
 	{
-		if (PX_strequ(((PX_SCRIPT_ASM_STRING_NODE *)(PX_ListAt(&compiler->StringTable,i)->pdata))->str.buffer,Str))
+		if (PX_strequ(((PX_SCRIPT_ASM_STRING_NODE *)(PX_ListNodeAt(&compiler->StringTable,i)->pdata))->str.buffer,Str))
 		{
 			return;
 		}
@@ -634,7 +634,7 @@ px_void PX_ScriptAsmAddStringConst(PX_SCRIPT_ASM_COMPILER *compiler,px_char *Str
 	PX_StringInit(compiler->mp,&stringNode.str);
 	if(compiler->StringTable.size!=0)
 	{
-		pLastNode=(PX_SCRIPT_ASM_STRING_NODE *)(PX_ListAt(&compiler->StringTable,compiler->StringTable.size-1)->pdata);
+		pLastNode=(PX_SCRIPT_ASM_STRING_NODE *)(PX_ListNodeAt(&compiler->StringTable,compiler->StringTable.size-1)->pdata);
 		stringNode.addr=pLastNode->addr+PX_strlen(pLastNode->str.buffer)+1;
 	}
 	else
@@ -691,9 +691,9 @@ px_dword PX_ScriptAsmGetStringAddr(PX_SCRIPT_ASM_COMPILER *compiler,px_char *Str
 	px_int i;
 	for (i=0;i<compiler->StringTable.size;i++)
 	{
-		if (PX_strequ(((PX_SCRIPT_ASM_STRING_NODE *)(PX_ListAt(&compiler->StringTable,i)->pdata))->str.buffer,Str))
+		if (PX_strequ(((PX_SCRIPT_ASM_STRING_NODE *)(PX_ListNodeAt(&compiler->StringTable,i)->pdata))->str.buffer,Str))
 		{
-			return ((PX_SCRIPT_ASM_STRING_NODE *)(PX_ListAt(&compiler->StringTable,i)->pdata))->addr;
+			return ((PX_SCRIPT_ASM_STRING_NODE *)(PX_ListNodeAt(&compiler->StringTable,i)->pdata))->addr;
 		}
 	}
 	return 0;
@@ -749,7 +749,7 @@ px_void PX_ScriptAsmAddHost(PX_SCRIPT_ASM_COMPILER *compiler,px_char *Str)
 	PX_SCRIPT_ASM_HOST_NODE Host;
 	for (i=0;i<compiler->HostTable.size;i++)
 	{
-		if (PX_strequ(((PX_SCRIPT_ASM_HOST_NODE *)(PX_ListAt(&compiler->HostTable,i)->pdata))->name,Str))
+		if (PX_strequ(((PX_SCRIPT_ASM_HOST_NODE *)(PX_ListNodeAt(&compiler->HostTable,i)->pdata))->name,Str))
 		{
 			return;
 		}
@@ -765,7 +765,7 @@ px_int PX_ScriptAsmGetHostIndex(PX_SCRIPT_ASM_COMPILER *compiler,px_char *Str)
 	px_int i;
 	for (i=0;i<compiler->HostTable.size;i++)
 	{
-		if (PX_strequ(((PX_SCRIPT_ASM_HOST_NODE *)(PX_ListAt(&compiler->HostTable,i)->pdata))->name,Str))
+		if (PX_strequ(((PX_SCRIPT_ASM_HOST_NODE *)(PX_ListNodeAt(&compiler->HostTable,i)->pdata))->name,Str))
 		{
 			return i;
 		}
@@ -1281,7 +1281,7 @@ px_bool PX_ScriptAsmCc(PX_SCRIPT_ASM_COMPILER *compiler)
 				for (i=0;i<compiler->GrammarInstrTable.size;i++)
 				{
 					PX_memset(&instrbin,0,sizeof(instrbin));
-					pinstr=(PX_SCRIPT_ASM_GRAMMAR_INSTR *)PX_ListAt(&compiler->GrammarInstrTable,i)->pdata;
+					pinstr=(PX_SCRIPT_ASM_GRAMMAR_INSTR *)PX_ListNodeAt(&compiler->GrammarInstrTable,i)->pdata;
 					if (PX_strequ(pinstr->mnemonic,pLexeme))
 					{
 						instrbin.opCode=pinstr->opcode;

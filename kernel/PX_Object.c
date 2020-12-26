@@ -18,6 +18,28 @@ PX_Object  * PX_ObjectGetChild( PX_Object *Object,px_int Index )
 
 }
 
+PX_Object_Event PX_Object_Event_CursorOffset(PX_Object_Event e,px_point offset)
+{
+	switch(e.Event)
+	{
+	case PX_OBJECT_EVENT_CURSORMOVE:
+	case PX_OBJECT_EVENT_CURSORUP:
+	case PX_OBJECT_EVENT_CURSORRDOWN:
+	case PX_OBJECT_EVENT_CURSORDOWN:
+	case PX_OBJECT_EVENT_CURSORRUP:
+	case PX_OBJECT_EVENT_CURSOROVER:
+	case PX_OBJECT_EVENT_CURSOROUT:
+	case PX_OBJECT_EVENT_CURSORWHEEL:
+	case PX_OBJECT_EVENT_CURSORCLICK:
+	case PX_OBJECT_EVENT_CURSORDRAG:
+		PX_Object_Event_SetCursorX(&e,PX_Object_Event_GetCursorX(e)+offset.x);
+		PX_Object_Event_SetCursorY(&e,PX_Object_Event_GetCursorY(e)+offset.y);
+		return e;
+	default:
+		return e;
+	}
+}
+
 px_float PX_Object_Event_GetCursorX(PX_Object_Event e)
 {
 	return e.Param_float[0];

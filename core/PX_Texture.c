@@ -333,6 +333,41 @@ px_void PX_TextureCover(px_surface *psurface,px_texture *tex,px_int x,px_int y,P
 
 }
 
+px_void PX_TextureGetVisibleRange(px_texture *ptexture,px_int *pLeft,px_int *pRight,px_int *pTop,px_int *pBottom)
+{
+	px_int x=0,y=0;
+	px_int left=ptexture->width-1,right=0,top=ptexture->height-1,bottom=0;
+	for (y=0;y<ptexture->height-1;y++)
+	{
+		for (x=0;x<ptexture->width-1;x++)
+		{
+			if (PX_SurfaceGetPixel(ptexture,x,y)._argb.a)
+			{
+				if (x<left)
+				{
+					left=x;
+				}
+				if (x>right)
+				{
+					right=x;
+				}
+				if (y<top)
+				{
+					top=y;
+				}
+				if (y>bottom)
+				{
+					bottom=y;
+				}
+			}
+		}
+	}
+	*pLeft=left;
+	*pRight=right;
+	*pTop=top;
+	*pBottom=bottom;
+}
+
 px_void PX_TextureRenderPixelShader(px_surface *psurface,px_texture *tex,px_int x,px_int y,PX_TEXTURERENDER_REFPOINT refPoint,PX_TexturePixelShader shader,px_void *ptr)
 {
 	px_int left,right,top,bottom,i,j;
@@ -1875,6 +1910,144 @@ px_void PX_TextureFill(px_memorypool *mp,px_texture *ptexture,px_int x,px_int y,
 		}
 	}
 
+}
+
+px_void PX_TextureRegionRender(px_surface *psurface,px_texture *resTexture,px_int x,px_int y,px_int oft_left,px_int oft_top,px_int oft_right,px_int oft_bottom,PX_TEXTURERENDER_REFPOINT refPoint,PX_TEXTURERENDER_BLEND *blend)
+{
+	px_int left,right,top,bottom,i,j;
+	px_int bR,bG,bB,bA;
+	px_color *pdata;
+	px_color clr;
+	px_int width=oft_right-oft_left+1;
+	px_int height=oft_bottom-oft_top+1;
+
+	pdata=(px_color *)resTexture->surfaceBuffer;
+
+	switch (refPoint)
+	{
+	case PX_TEXTURERENDER_REFPOINT_LEFTTOP:
+		break;
+	case PX_TEXTURERENDER_REFPOINT_MIDTOP:
+		x-=width/2;
+		break;
+	case PX_TEXTURERENDER_REFPOINT_RIGHTTOP:
+		x-=width;
+		break;
+	case PX_TEXTURERENDER_REFPOINT_LEFTMID:
+		y-=height/2;
+		break;
+	case PX_TEXTURERENDER_REFPOINT_CENTER:
+		y-=height/2;
+		x-=width/2;
+		break;
+	case PX_TEXTURERENDER_REFPOINT_RIGHTMID:
+		y-=height/2;
+		x-=width;
+		break;
+	case PX_TEXTURERENDER_REFPOINT_LEFTBOTTOM:
+		y-=height;
+		break;
+	case PX_TEXTURERENDER_REFPOINT_MIDBOTTOM:
+		y-=height;
+		x-=width/2;
+		break;
+	case PX_TEXTURERENDER_REFPOINT_RIGHTBOTTOM:
+		y-=height;
+		x-=width;
+		break;
+	}
+
+
+	if (x<-width)
+	{
+		return;
+	}
+	if (x>psurface->width-1)
+	{
+		return;
+	}
+	if (y<-height)
+	{
+		return;
+	}
+	if (y>psurface->height-1)
+	{
+		return;
+	}
+
+	if (x<0)
+	{
+		left=-x;
+	}
+	else
+	{
+		left=0;
+	}
+
+	if (x+width>psurface->width)
+	{
+		right=psurface->width-x-1;
+	}
+	else
+	{
+		right=width-1;
+	}
+
+	if (y<0)
+	{
+		top=-y;
+	}
+	else
+	{
+		top=0;
+	}
+
+	if (y+height>psurface->height)
+	{
+		bottom=psurface->height-y-1;
+	}
+	else
+	{
+		bottom=height-1;
+	}
+
+
+	if (blend)
+	{	
+		px_int Ab=(px_int)(blend->alpha*1000);
+		px_int Rb=(px_int)(blend->hdr_R*1000);
+		px_int Gb=(px_int)(blend->hdr_G*1000);
+		px_int Bb=(px_int)(blend->hdr_B*1000);
+
+		for (j=top;j<=bottom;j++)
+		{
+			for (i=left;i<=right;i++)
+			{
+				clr=pdata[(j+oft_top)*resTexture->width+i+oft_left];
+				bA=(px_int)(clr._argb.a*Ab/1000);
+				bR=(px_int)(clr._argb.r*Rb/1000);
+				bG=(px_int)(clr._argb.g*Gb/1000);
+				bB=(px_int)(clr._argb.b*Bb/1000);
+
+				clr._argb.a=bA>255?255:(px_uchar)bA;
+				clr._argb.r=bR>255?255:(px_uchar)bR;
+				clr._argb.g=bG>255?255:(px_uchar)bG;
+				clr._argb.b=bB>255?255:(px_uchar)bB;
+				PX_SurfaceDrawPixel(psurface,x+i,y+j,clr);
+			}
+		}
+	}
+	else
+	{
+		for (j=top;j<=bottom;j++)
+		{
+			for (i=left;i<=right;i++)
+			{
+				clr=pdata[(j+oft_top)*resTexture->width+i+oft_left];
+				PX_SurfaceDrawPixel(psurface,x+i,y+j,clr);
+			}
+		}
+	}
 }
 
 px_bool PX_ShapeCreate(px_memorypool *mp,px_shape *shape,px_int width,px_int height)

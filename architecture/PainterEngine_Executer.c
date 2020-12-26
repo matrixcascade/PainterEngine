@@ -1,6 +1,6 @@
 #include "PainterEngine_Executer.h"
 
-static char const fox_executer_logo[]=\
+static char const fox_executer_logo[]=
 {
 #include "PainterEngine_FoxLogo.h"
 };
@@ -402,7 +402,7 @@ px_bool PX_ExecuterInitialize(PX_Runtime *runtime,PX_Executer *pExecute)
 	PX_Object_ScrollAreaSetBkColor(pExecute->Area,PX_COLOR(255,0,0,0));
 	pExecute->id=1;
 
-	PX_VectorInit(&pExecute->runtime->mp_ui,&pExecute->pObjects,sizeof(PX_ExecuterColumn),PX_EXECUTER_DEFAULT_MAX_COLUMN);
+	PX_VectorInitialize(&pExecute->runtime->mp_ui,&pExecute->pObjects,sizeof(PX_ExecuterColumn),PX_EXECUTER_DEFAULT_MAX_COLUMN);
 
 
 	//////////////////////////////////////////////////////////////////////////

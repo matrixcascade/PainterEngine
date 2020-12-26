@@ -18,11 +18,11 @@
 #define PX_OBJECT_EVENT_CURSOROVER			6
 #define PX_OBJECT_EVENT_CURSOROUT			7
 #define PX_OBJECT_EVENT_CURSORWHEEL         8
-#define PX_OBJECT_EVENT_STRING				9
-#define PX_OBJECT_EVENT_EXECUTE				10
-#define PX_OBJECT_EVENT_CURSORCLICK			11
-#define PX_OBJECT_EVENT_CURSORDRAG			12
-#define PX_OBJECT_EVENT_VALUECHANGED			13
+#define PX_OBJECT_EVENT_CURSORCLICK			9
+#define PX_OBJECT_EVENT_CURSORDRAG			10
+#define PX_OBJECT_EVENT_STRING				11
+#define PX_OBJECT_EVENT_EXECUTE				12
+#define PX_OBJECT_EVENT_VALUECHANGED		13
 #define PX_OBJECT_EVENT_DRAGFILE			14
 #define PX_OBJECT_EVENT_KEYDOWN				15
 #define PX_OBJECT_EVENT_IMPACT				16
@@ -191,6 +191,8 @@ typedef struct _PX_Object_Event
 
 //////////////////////////////////////////////////////////////////////////
 //EVENT params
+PX_Object_Event PX_Object_Event_CursorOffset(PX_Object_Event e,px_point offset);
+
 px_float PX_Object_Event_GetCursorX(PX_Object_Event e);
 px_float PX_Object_Event_GetCursorY(PX_Object_Event e);
 px_float PX_Object_Event_GetCursorZ(PX_Object_Event e);

@@ -426,7 +426,7 @@ px_point4D PX_Point4DCross(px_point4D p1,px_point4D p2);
 px_point PX_PointInverse(px_point p1);
 px_float PX_PointMod(px_point p);
 px_float PX_PointSquare(px_point p);
-px_point PX_PointUnit(px_point p);
+px_point PX_PointNormalization(px_point p);
 px_point4D PX_Point4DUnit(px_point4D p);
 px_point PX_PointReflectX(px_point vector_refer,px_point respoint);
 

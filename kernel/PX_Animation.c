@@ -232,6 +232,18 @@ px_void PX_AnimationRender_vector(px_surface *psurface,PX_Animation *animation,p
 	}
 }
 
+
+px_int PX_AnimationLibraryGetFrameWidth(PX_Animationlibrary *panimationLib,px_int frameIndex)
+{
+	return PX_VECTORAT(px_texture,&panimationLib->frames,frameIndex)->width;
+}
+
+
+px_int PX_AnimationLibraryGetFrameHeight(PX_Animationlibrary *panimationLib,px_int frameIndex)
+{
+	return PX_VECTORAT(px_texture,&panimationLib->frames,frameIndex)->height;
+}
+
 px_bool PX_AnimationCreate(PX_Animation *animation,PX_Animationlibrary *linker)
 {
 	animation->elpased=0;
@@ -370,6 +382,11 @@ px_rect PX_AnimationGetSize(PX_Animation *panimation)
 	return rect;
 }
 
+
+px_texture * PX_AnimationGetCurrentTexture(PX_Animation *panimation)
+{
+	return PX_VECTORAT(px_texture,&panimation->linker->frames,panimation->reg_currentFrameIndex);
+}
 
 px_void PX_AnimationRenderRotation(px_surface *psurface,PX_Animation *animation,px_point position,px_int angle,PX_TEXTURERENDER_REFPOINT refPoint,PX_TEXTURERENDER_BLEND *blend)
 {

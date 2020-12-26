@@ -388,33 +388,7 @@ px_double PX_cosd(px_double radius)
 
 px_float PX_sin_radian(px_float radius)
 {
-	px_int radIndex;
-	radIndex=PX_TRUNC(radius*1000)%6282;
-	if (radIndex<0)
-	{
-		radIndex+=6282;
-	}
-	if (radIndex>3141)
-	{
-		radIndex-=3141;
-		if(radIndex<1571)
-		{
-			return -px_sinx_radius[radIndex%1572];
-		}
-		else
-		{
-			return -px_sinx_radius[1570-(radIndex%1571)];
-		}
-	}
-
-	if(radIndex<1571)
-	{
-		return px_sinx_radius[radIndex%1572];
-	}
-	else
-	{
-		return px_sinx_radius[1570-(radIndex%1571)];
-	}
+	return (px_float)PX_sind(radius);
 }
 
 
@@ -431,7 +405,7 @@ px_float PX_tan_radian(px_float radius)
 px_float PX_sin_angle(px_float angle)
 {
 	angle-=((px_int)angle/360)*360;
-	return PX_sin_radian((angle*0.0174532925f));
+	return (px_float)PX_sin_radian((angle*0.0174532925f));
 }
 px_float PX_cos_angle(px_float angle)
 {
@@ -1520,7 +1494,7 @@ px_float  PX_PointSquare(px_point p)
 	return (p.x*p.x+p.y*p.y+p.z*p.z);
 }
 
-px_point PX_PointUnit(px_point p)
+px_point PX_PointNormalization(px_point p)
 {
 	if (p.x||p.y||p.z)
 	{
