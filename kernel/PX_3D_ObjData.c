@@ -64,7 +64,7 @@ px_bool PX_3D_ObjectDataLoad(PX_3D_ObjectData *ObjectData,const px_byte *data,px
 				if (type==PX_LEXER_LEXEME_TYPE_TOKEN)
 				{
 					px_string strName;
-					if(!PX_StringInit(ObjectData->mp,&strName))
+					if(!PX_StringInitialize(ObjectData->mp,&strName))
 					{
 						goto _ERROR;
 					}
@@ -85,7 +85,7 @@ px_bool PX_3D_ObjectDataLoad(PX_3D_ObjectData *ObjectData,const px_byte *data,px
 				if (type==PX_LEXER_LEXEME_TYPE_TOKEN)
 				{
 					px_string strName;
-					if(!PX_StringInit(ObjectData->mp,&strName))
+					if(!PX_StringInitialize(ObjectData->mp,&strName))
 					{
 						goto _ERROR;
 					}

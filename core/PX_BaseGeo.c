@@ -3048,3 +3048,349 @@ px_void PX_GeoDrawBresenhamLine(px_surface *psurface,int x0, int y0, int x1, int
 	} while (0);
 	
 }
+
+px_void PX_GeoDrawTriangle(px_surface *psurface,px_point2D p0,px_point2D p1,px_point2D p2,px_color color)
+{
+	px_int ix,iy;
+	px_bool  k01infinite=PX_FALSE;
+	px_bool  k02infinite=PX_FALSE;
+	px_bool  k12infinite=PX_FALSE;
+	px_float k01,b01,k02,b02,k12,b12;
+
+	px_float lAlpha=1,rAlpha=1;
+
+	px_float x0;
+	px_float y0;
+
+	px_float x1;
+	px_float y1;
+
+	px_float x2;
+	px_float y2;
+
+
+
+	px_float x, y, xleft, xright; 
+	px_float btmy,midy;
+
+	px_float a,b,c;
+	a=(px_float)PX_sqrtd((p1.x-p2.x)*(p1.x-p2.x));
+	b=(px_float)PX_sqrtd((p0.x-p2.x)*(p0.x-p2.x));
+	c=(px_float)PX_sqrtd((p1.x-p0.x)*(p1.x-p0.x));
+
+	x=(a*p0.x+b*p1.x+c*p2.x)/(a+b+c);
+	y=(a*p0.y+b*p1.y+c*p2.y)/(a+b+c);
+
+	//    p0
+	// p1   p2
+
+	if (p1.y<p0.y)
+	{
+		px_point2D t;
+		t=p1;
+		p1=p0;
+		p0=t;
+	}
+
+	if (p2.y<p0.y)
+	{
+		px_point2D t;
+		t=p2;
+		p2=p0;
+		p0=t;
+	}
+
+	btmy=p1.y;
+	midy=p2.y;
+	if (p2.y>btmy)
+	{
+		midy=p1.y;
+		btmy=p2.y;
+	}
+
+
+
+	do 
+	{
+		px_float x01m;
+
+		x0=p0.x;
+		y0=p0.y;
+		x1=p1.x;
+		y1=p1.y;
+		x2=p2.x;
+		y2=p2.y;
+
+
+		if (x0==x1)
+		{
+			x01m=x0;
+		}
+		else
+		{
+			k01=(y0-y1)/(x0-x1);
+			b01=y0-k01*x0;
+			x01m=(y2-b01)/k01;
+		}
+
+		if (x01m>x2)
+		{
+			px_point2D t;
+			t=p2;
+			p2=p1;
+			p1=t;
+		}
+	} while (0);
+
+
+
+	x0=p0.x;
+	y0=p0.y;
+
+	x1=p1.x;
+	y1=p1.y;
+
+	x2=p2.x;
+	y2=p2.y;
+
+
+	k01infinite=PX_FALSE;
+	k02infinite=PX_FALSE;
+	k12infinite=PX_FALSE;
+	if (x0==x1)
+	{
+		k01infinite=PX_TRUE;
+		b01=x0;
+	}
+	else
+	{
+		k01=(y0-y1)/(x0-x1);
+		b01=y0-k01*x0;
+	}
+
+	if (x0==x2)
+	{
+		k02infinite=PX_TRUE;
+		b02=x0;
+	}
+	else
+	{
+		k02=(y0-y2)/(x0-x2);
+		b02=y0-k02*x0;
+	}
+
+	if (x1==x2)
+	{
+		k12infinite=PX_TRUE;
+		b12=x0;
+	}
+	else
+	{
+		k12=(y1-y2)/(x1-x2);
+		b12=y1-k12*x1;
+	}
+
+
+	for(y = (px_int)(y0+0.5f)+0.5f; y <=midy; y++)
+	{
+		if (k01infinite)
+		{
+			xleft=b01;
+			lAlpha=1;
+		}
+		else
+		{
+			xleft = (y-b01)/k01;
+			lAlpha=PX_ABS_FRAC(xleft);
+		}
+
+		if (k02infinite)
+		{
+			xright=b02;
+			rAlpha=1;
+		}
+		else
+		{
+			xright = (y-b02)/k02;
+			rAlpha=PX_ABS_FRAC(xright);
+		}
+
+		ix = (px_int)xleft;
+		iy=(px_int)y;
+		do 
+		{
+			px_color aClr=color;
+			aClr._argb.a=(px_byte)(aClr._argb.a*lAlpha);
+			PX_SurfaceDrawPixel(psurface,ix,iy,color);
+		} while (0);
+		
+		for(ix = (px_int)xleft+1;ix < (px_int)xright; ++ix)
+		{
+			PX_SurfaceDrawPixel(psurface,ix,iy,color);
+		}
+
+		do 
+		{
+			px_color aClr=color;
+			aClr._argb.a=(px_byte)(aClr._argb.a*rAlpha);
+			PX_SurfaceDrawPixel(psurface,ix,iy,color);
+		} while (0);
+	}
+
+	// p1   p2
+	//    p0
+	if (p1.y>p0.y)
+	{
+		px_point2D t;
+		t=p1;
+		p1=p0;
+		p0=t;
+	}
+
+	if (p2.y>p0.y)
+	{
+		px_point2D t;
+		t=p2;
+		p2=p0;
+		p0=t;
+	}
+
+	btmy=p1.y;
+	midy=p2.y;
+	if (p2.y<btmy)
+	{
+		midy=p1.y;
+		btmy=p2.y;
+	}
+
+
+
+	do 
+	{
+		px_float x01m;
+
+		x0=p0.x;
+		y0=p0.y;
+		x1=p1.x;
+		y1=p1.y;
+		x2=p2.x;
+		y2=p2.y;
+
+
+		if (x0==x1)
+		{
+			x01m=x0;
+		}
+		else
+		{
+			k01=(y0-y1)/(x0-x1);
+			b01=y0-k01*x0;
+			x01m=(y2-b01)/k01;
+		}
+
+		if (x01m>x2)
+		{
+			px_point2D t;
+			t=p2;
+			p2=p1;
+			p1=t;
+		}
+	} while (0);
+
+
+
+	x0=p0.x;
+	y0=p0.y;
+
+	x1=p1.x;
+	y1=p1.y;
+
+	x2=p2.x;
+	y2=p2.y;
+
+
+	k01infinite=PX_FALSE;
+	k02infinite=PX_FALSE;
+	k12infinite=PX_FALSE;
+	if (x0==x1)
+	{
+		k01infinite=PX_TRUE;
+		b01=x0;
+	}
+	else
+	{
+		k01=(y0-y1)/(x0-x1);
+		b01=y0-k01*x0;
+	}
+
+	if (x0==x2)
+	{
+		k02infinite=PX_TRUE;
+		b02=x0;
+	}
+	else
+	{
+		k02=(y0-y2)/(x0-x2);
+		b02=y0-k02*x0;
+	}
+
+	if (x1==x2)
+	{
+		k12infinite=PX_TRUE;
+		b12=x0;
+	}
+	else
+	{
+		k12=(y1-y2)/(x1-x2);
+		b12=y1-k12*x1;
+	}
+
+
+	for(y = (px_int)(midy+0.5f)+0.5f; y < y0; y++)
+	{
+		if (k01infinite)
+		{
+			xleft=b01;
+			lAlpha=1;
+		}
+		else
+		{
+			xleft = (y-b01)/k01;
+			lAlpha=PX_ABS_FRAC(xleft);
+		}
+
+		if (k02infinite)
+		{
+			xright=b02;
+			rAlpha=1;
+		}
+		else
+		{
+			xright = (y-b02)/k02;
+			rAlpha=PX_ABS_FRAC(xright);
+		}
+
+		ix = (px_int)xleft;
+		iy=(px_int)y;
+		do 
+		{
+			px_color aClr=color;
+			aClr._argb.a=(px_byte)(aClr._argb.a*lAlpha);
+			PX_SurfaceDrawPixel(psurface,ix,iy,color);
+		} while (0);
+
+		for(ix = (px_int)xleft+1;ix < (px_int)xright; ++ix)
+		{
+			PX_SurfaceDrawPixel(psurface,ix,iy,color);
+		}
+
+		do 
+		{
+			px_color aClr=color;
+			aClr._argb.a=(px_byte)(aClr._argb.a*rAlpha);
+			PX_SurfaceDrawPixel(psurface,ix,iy,color);
+		} while (0);
+	}
+	
+}
+

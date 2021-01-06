@@ -16,6 +16,7 @@
 #include "PX_Animation.h"
 #include "PX_World.h"
 #include "PX_Sync.h"
+#include "PX_MQTT.h"
 #include "PX_Object.h"
 #include "PX_Json.h"
 #include "PX_3D_ObjData.h"

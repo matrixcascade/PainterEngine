@@ -23,7 +23,7 @@ px_bool PX_AnimationLibraryCreateFromMemory(px_memorypool *mp,PX_Animationlibrar
 		PX_Animationlibrary_tagInfo tag;
 		tag.ip=*(px_dword *)pbuffer;
 		pbuffer+=sizeof(px_dword);
-		PX_StringInit(mp,&tag.name);
+		PX_StringInitialize(mp,&tag.name);
 		PX_StringCat(&tag.name,(px_char *)pbuffer);
 		pbuffer+=PX_strlen((px_char *)pbuffer)+1;
 		PX_VectorPushback(&panimation->animation,&tag);
@@ -31,7 +31,7 @@ px_bool PX_AnimationLibraryCreateFromMemory(px_memorypool *mp,PX_Animationlibrar
 
 
 	PX_VectorInitialize(mp,&panimation->frames,sizeof(px_texture),_header.framecount);
-	PX_MemoryInit(mp,&panimation->code);
+	PX_MemoryInitialize(mp,&panimation->code);
 	for (i=0;i<(px_int)_header.framecount;i++)
 	{
 		_trawheader=*(PX_TRaw_Header *)pbuffer;
@@ -291,7 +291,7 @@ px_bool PX_AnimationLibrary_CreateEffect_JumpVertical(px_memorypool *mp,PX_Anima
 	px_texture tex;
 
 	PX_VectorInitialize(mp,&panimation->frames,sizeof(px_texture),6);
-	PX_MemoryInit(mp,&panimation->code);
+	PX_MemoryInitialize(mp,&panimation->code);
 	PX_MemoryResize(&panimation->code,sizeof(PX_2DX_INSTR)*13);
 
 	PX_AnimationLibraryAddInstr(panimation,PX_2DX_OPCODE_FRAME,0);

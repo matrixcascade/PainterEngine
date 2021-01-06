@@ -36,4 +36,5 @@
 #include "PX_KalmanFilter.h"
 #include "PX_SoundModule.h"
 #include "PX_ImageFilter.h"
+#include "PX_Linker.h"
 #endif

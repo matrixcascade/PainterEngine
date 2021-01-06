@@ -216,7 +216,7 @@ px_bool PX_JsonInterpret_Value(PX_Json *pjson,px_lexer *lexer,PX_Json_Value *_va
 
 
 	PX_memset(_value,0,sizeof(PX_Json_Value));
-	PX_StringInit(pjson->mp,&_value->name);
+	PX_StringInitialize(pjson->mp,&_value->name);
 	if (!arrayElement)
 	{
 		type=PX_JsonNextToken(lexer);
@@ -313,7 +313,7 @@ px_bool PX_JsonInterpret_Value(PX_Json *pjson,px_lexer *lexer,PX_Json_Value *_va
 		{
 			px_int i;
 			_value->type=PX_JSON_VALUE_TYPE_STRING;
-			if(!PX_StringInit(pjson->mp,&_value->_string))goto _ERROR;;
+			if(!PX_StringInitialize(pjson->mp,&_value->_string))goto _ERROR;;
 			PX_LexerGetIncludedString(lexer,&lexer->CurLexeme);
 			
 			if(!PX_StringCopy(&_value->_string,&lexer->CurLexeme))
@@ -717,7 +717,7 @@ px_bool PX_JsonCreateObjectValue(px_memorypool *mp,PX_Json_Value *pValue,const p
 	PX_memset(pValue,0,sizeof(PX_Json_Value));
 	pValue->type=PX_JSON_VALUE_TYPE_OBJECT;
 
-	if (!PX_StringInit(mp,&pValue->name))
+	if (!PX_StringInitialize(mp,&pValue->name))
 	{
 		return PX_FALSE;
 	}
@@ -731,13 +731,13 @@ px_bool PX_JsonCreateStringValue(px_memorypool *mp,PX_Json_Value *pValue,const p
 	PX_memset(pValue,0,sizeof(PX_Json_Value));
 	pValue->type=PX_JSON_VALUE_TYPE_STRING;
 
-	if (!PX_StringInit(mp,&pValue->name))
+	if (!PX_StringInitialize(mp,&pValue->name))
 	{
 		return PX_FALSE;
 	}
 	PX_StringSet(&pValue->name,name);
 
-	if (!PX_StringInit(mp,&pValue->_string))
+	if (!PX_StringInitialize(mp,&pValue->_string))
 	{
 		return PX_FALSE;
 	}
@@ -750,7 +750,7 @@ px_bool PX_JsonCreateNumberValue(px_memorypool *mp,PX_Json_Value *pValue,const p
 	PX_memset(pValue,0,sizeof(PX_Json_Value));
 	pValue->type=PX_JSON_VALUE_TYPE_NUMBER;
 
-	if (!PX_StringInit(mp,&pValue->name))
+	if (!PX_StringInitialize(mp,&pValue->name))
 	{
 		return PX_FALSE;
 	}
@@ -765,7 +765,7 @@ px_bool PX_JsonCreateBooleanValue(px_memorypool *mp,PX_Json_Value *pValue,const 
 	PX_memset(pValue,0,sizeof(PX_Json_Value));
 	pValue->type=PX_JSON_VALUE_TYPE_NUMBER;
 
-	if (!PX_StringInit(mp,&pValue->name))
+	if (!PX_StringInitialize(mp,&pValue->name))
 	{
 		return PX_FALSE;
 	}
@@ -780,7 +780,7 @@ px_bool PX_JsonCreateArrayValue(px_memorypool *mp,PX_Json_Value *pValue,const px
 	PX_memset(pValue,0,sizeof(PX_Json_Value));
 	pValue->type=PX_JSON_VALUE_TYPE_ARRAY;
 
-	if (!PX_StringInit(mp,&pValue->name))
+	if (!PX_StringInitialize(mp,&pValue->name))
 	{
 		return PX_FALSE;
 	}

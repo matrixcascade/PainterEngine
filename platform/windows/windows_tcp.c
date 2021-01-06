@@ -10,7 +10,7 @@ int PX_TCPInitialize(PX_TCP *tcp,PX_TCP_IP_TYPE type)
 	int nRecvBuf=1024*1024*2;
 	int nSendBuf=1024*1024*2;
 	int optval=TRUE;
-	int imode=1,rev;
+
 	tcp->type=type;
 
 	wVersionRequested = MAKEWORD( 1, 1 );
@@ -26,27 +26,15 @@ int PX_TCPInitialize(PX_TCP *tcp,PX_TCP_IP_TYPE type)
 			return 0;
 	}
 	//Initialize socket
-	
 
 	if ((tcp->socket=socket(AF_INET,SOCK_STREAM,IPPROTO_TCP))==INVALID_SOCKET)
 	{
 		return 0;
 	}
-	  
-	rev=ioctlsocket(tcp->socket,FIONBIO,(u_long *)&imode);  
-
-	
+	  	
 	setsockopt(tcp->socket,SOL_SOCKET,SO_RCVBUF,(const char*)&nRecvBuf,sizeof(int));
 
 	setsockopt(tcp->socket,SOL_SOCKET,SO_SNDBUF,(const char*)&nSendBuf,sizeof(int));
-
-	if(rev == SOCKET_ERROR)  
-	{  
-		printf("ioctlsocket failed!");  
-		closesocket(tcp->socket);  
-		WSACleanup();  
-		return 0;  
-	}  
 
 	return 1;
 }
@@ -63,42 +51,51 @@ int PX_TCPConnect(PX_TCP *tcp,PX_TCP_ADDR addr)
 	if (ret==0)
 	{
 		tcp->connectAddr=addr;
+		return 1;
 	}
-	return ret;
+	return 0;
 }
 
 int PX_TCPSend(PX_TCP *tcp,void *buffer,int size)
 {
-	
+	char *sendBuffer=(char *)buffer;
 	int length;
 	switch(tcp->type)
 	{
 	case PX_TCP_IP_TYPE_IPV4:
 		{
-			while(size>0)
+			do
 			{
-				
-				if ((length=send(tcp->socket,(const char *)buffer,size,0))==SOCKET_ERROR)
+				if ((length=send(tcp->socket,(const char *)sendBuffer,size,0))==SOCKET_ERROR)
 				{
-					return FALSE;
+					int error=WSAGetLastError();
+					return 0;
 				}
+				sendBuffer+=length;
 				size-=length;
-			}
-			return TRUE;
+			}while(size>0);
+			return 1;
 		}
 		break;
 	case PX_TCP_IP_TYPE_IPV6:
 		{
-			return FALSE;
+			return 0;
 		}
 		break;
 	}
 	return 0;
 }
 
-int PX_TCPReceived(PX_TCP *tcp,void *buffer,int buffersize,int *readsize)
+int PX_TCPReceived(PX_TCP *tcp,void *buffer,int buffersize,int timeout)
 {
 	size_t ReturnSize;
+	int ret =setsockopt(tcp->socket,SOL_SOCKET,SO_RCVTIMEO,(const char *)&timeout,sizeof(timeout));
+
+	if(ret!=0)  
+	{  
+		return 0;  
+	}  
+
 	switch (tcp->type)
 	{
 	case PX_TCP_IP_TYPE_IPV4:
@@ -106,11 +103,13 @@ int PX_TCPReceived(PX_TCP *tcp,void *buffer,int buffersize,int *readsize)
 			int SockAddrSize=sizeof(SOCKADDR);
 			if((ReturnSize=recv(tcp->socket,(char *)buffer,buffersize,0))!=SOCKET_ERROR)
 			{
-				*readsize=ReturnSize;
-				return 1;
+				return ReturnSize;
 			}
 			else
+			{
+				int error=WSAGetLastError();
 				return 0;
+			}
 		}
 		break;
 	case PX_TCP_IP_TYPE_IPV6:
@@ -130,6 +129,44 @@ int PX_TCPAccept(PX_TCP *tcp,unsigned int *socket,PX_TCP_ADDR *fromAddr)
 	return *socket!=INVALID_SOCKET;
 }
 
+
+int PX_TCPIsConnecting(PX_TCP *tcp)
+{
+	char b;
+	int err,ret;
+	int timeout=1;
+	setsockopt(tcp->socket,SOL_SOCKET,SO_RCVTIMEO,(const char *)&timeout,sizeof(timeout));
+	ret=recv(tcp->socket,&b,1,MSG_PEEK);
+	if ((err=WSAGetLastError())==10060)
+	{
+		return 1;
+	}
+	return ret>0;
+}
+
+int PX_TCPKeepConnect(PX_TCP *tcp)
+{
+	if (!PX_TCPIsConnecting(tcp))
+	{
+		return PX_TCPConnect(tcp,tcp->connectAddr);
+	}
+	return 1;
+}
+
+int PX_TCPRecvCacheSize(PX_TCP *tcp)
+{
+	unsigned long bytesToRecv;
+	if (ioctlsocket(tcp->socket, FIONREAD, &bytesToRecv) == 0)
+	{
+		return bytesToRecv;
+	}
+	return 0;
+}
+
+int PX_TCPReConnect(PX_TCP *tcp)
+{
+	return PX_TCPConnect(tcp,tcp->connectAddr);
+}
 
 void PX_TCPFree(PX_TCP *tcp)
 {

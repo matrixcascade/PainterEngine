@@ -41,7 +41,10 @@ int PX_TCPListen(PX_TCP *tcp,unsigned short listenPort);
 int PX_TCPInitialize(PX_TCP *tcp,PX_TCP_IP_TYPE type);
 int PX_TCPConnect(PX_TCP *tcp,PX_TCP_ADDR addr);
 int PX_TCPSend(PX_TCP *tcp,void *buffer,int size);
-int PX_TCPReceived(PX_TCP *tcp,void *buffer,int buffersize,int *readsize);
+int PX_TCPReceived(PX_TCP *tcp,void *buffer,int buffersize,int timeout);
 int PX_TCPAccept(PX_TCP *tcp,unsigned int *socket,PX_TCP_ADDR *fromAddr);
+int PX_TCPIsConnecting(PX_TCP *tcp);
+int PX_TCPKeepConnect(PX_TCP *tcp);
+int PX_TCPRecvCacheSize(PX_TCP *tcp);
 void PX_TCPFree(PX_TCP *tcp);
 #endif

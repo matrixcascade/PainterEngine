@@ -105,8 +105,8 @@ px_bool PX_ScriptCompilerLoad(PX_SCRIPT_LIBRARY *lib,const px_char *code)
 		PX_LexerFree(&lexer);
 		return PX_FALSE;
 	}
-	PX_StringInit(lib->mp,&scode.code);
-	PX_StringInit(lib->mp,&scode.name);
+	PX_StringInitialize(lib->mp,&scode.code);
+	PX_StringInitialize(lib->mp,&scode.name);
 
 	
 	PX_StringCat(&scode.name,lexer.CurLexeme.buffer);
@@ -356,7 +356,7 @@ static px_bool PX_ScriptParseDefine(px_string *codes,PX_SCRIPT_LIBRARY *lib,cons
 
 				
 
-				PX_StringInit(lib->mp,&defst.name);
+				PX_StringInitialize(lib->mp,&defst.name);
 				PX_StringCat(&defst.name,lexer.CurLexeme.buffer);
 				
 				if (PX_LexerGetNextLexeme(&lexer)!=PX_LEXER_LEXEME_TYPE_SPACER)
@@ -365,7 +365,7 @@ static px_bool PX_ScriptParseDefine(px_string *codes,PX_SCRIPT_LIBRARY *lib,cons
 					goto _ERROR;
 				}
 
-				PX_StringInit(lib->mp,&defst.token);
+				PX_StringInitialize(lib->mp,&defst.token);
 
 				if (lexer.Sources[lexer.SourceOffset]==' ')
 				{
@@ -1263,7 +1263,7 @@ static px_bool PX_ScriptParseAST_MapTokenToR2(PX_SCRIPT_Analysis *analysis,PX_SC
 	case PX_SCRIPT_AST_OPERAND_TYPE_MEMORY_PTR://memory var[x]
 	case PX_SCRIPT_AST_OPERAND_TYPE_SET_PTR://set xx var[x]
 		{
-			PX_StringInit(analysis->mp,&fmrString);
+			PX_StringInitialize(analysis->mp,&fmrString);
 
 			if(operand.region==PX_SCRIPT_VARIABLE_REGION_LOCAL)
 			{
@@ -1304,7 +1304,7 @@ static px_bool PX_ScriptParseAST_MapTokenToR2(PX_SCRIPT_Analysis *analysis,PX_SC
 	case PX_SCRIPT_AST_OPERAND_TYPE_MEMORY_PTR_CONST:
 	case PX_SCRIPT_AST_OPERAND_TYPE_SET_PTR_CONST:
 		{
-			PX_StringInit(analysis->mp,&fmrString);
+			PX_StringInitialize(analysis->mp,&fmrString);
 
 			if(operand.region==PX_SCRIPT_VARIABLE_REGION_GLOBAL)
 			{
@@ -1334,7 +1334,7 @@ static px_bool PX_ScriptParseAST_MapTokenToR2(PX_SCRIPT_Analysis *analysis,PX_SC
 
 	case PX_SCRIPT_AST_OPERAND_TYPE_INT_CONST:
 		{
-			PX_StringInit(analysis->mp,&fmrString);
+			PX_StringInitialize(analysis->mp,&fmrString);
 
 			if(operand.region==PX_SCRIPT_VARIABLE_REGION_GLOBAL)
 			{
@@ -1358,7 +1358,7 @@ static px_bool PX_ScriptParseAST_MapTokenToR2(PX_SCRIPT_Analysis *analysis,PX_SC
 
 	case PX_SCRIPT_AST_OPERAND_TYPE_FLOAT_CONST:
 		{
-			PX_StringInit(analysis->mp,&fmrString);
+			PX_StringInitialize(analysis->mp,&fmrString);
 
 			if(operand.region==PX_SCRIPT_VARIABLE_REGION_GLOBAL)
 			{
@@ -1384,7 +1384,7 @@ static px_bool PX_ScriptParseAST_MapTokenToR2(PX_SCRIPT_Analysis *analysis,PX_SC
 		{
 			//////////////////////////////////////////////////////////////////////////
 
-			PX_StringInit(analysis->mp,&fmrString);
+			PX_StringInitialize(analysis->mp,&fmrString);
 
 			if(operand.region==PX_SCRIPT_VARIABLE_REGION_GLOBAL)
 			{
@@ -1414,7 +1414,7 @@ static px_bool PX_ScriptParseAST_MapTokenToR2(PX_SCRIPT_Analysis *analysis,PX_SC
 			{
 			case PX_SCRIPT_VARIABLE_REGION_LOCAL:
 				{
-					PX_StringInit(analysis->mp,&fmrString);
+					PX_StringInitialize(analysis->mp,&fmrString);
 					if(operand.bAtomPopIndex)
 					{
 						PX_StringCat(out,"POP R3\n");
@@ -1431,7 +1431,7 @@ static px_bool PX_ScriptParseAST_MapTokenToR2(PX_SCRIPT_Analysis *analysis,PX_SC
 				break;
 			case PX_SCRIPT_VARIABLE_REGION_GLOBAL:
 				{
-					PX_StringInit(analysis->mp,&fmrString);
+					PX_StringInitialize(analysis->mp,&fmrString);
 					if(operand.bAtomPopIndex)
 					{
 						PX_StringCat(out,"POP R3\n");
@@ -1448,7 +1448,7 @@ static px_bool PX_ScriptParseAST_MapTokenToR2(PX_SCRIPT_Analysis *analysis,PX_SC
 				break;
 			case PX_SCRIPT_VARIABLE_REGION_POP:
 				{
-					PX_StringInit(analysis->mp,&fmrString);
+					PX_StringInitialize(analysis->mp,&fmrString);
 
 					if(operand.bAtomPopIndex)
 					{
@@ -1479,7 +1479,7 @@ static px_bool PX_ScriptParseAST_MapTokenToR2(PX_SCRIPT_Analysis *analysis,PX_SC
 			{
 			case PX_SCRIPT_VARIABLE_REGION_LOCAL:
 				{
-					PX_StringInit(analysis->mp,&fmrString);
+					PX_StringInitialize(analysis->mp,&fmrString);
 					if(operand.bAtomPopIndex)
 					{
 						PX_StringCat(out,"POP R3\n");
@@ -1496,7 +1496,7 @@ static px_bool PX_ScriptParseAST_MapTokenToR2(PX_SCRIPT_Analysis *analysis,PX_SC
 				break;
 			case PX_SCRIPT_VARIABLE_REGION_GLOBAL:
 				{
-					PX_StringInit(analysis->mp,&fmrString);
+					PX_StringInitialize(analysis->mp,&fmrString);
 					if(operand.bAtomPopIndex)
 					{
 						PX_StringCat(out,"POP R3\n");
@@ -1513,7 +1513,7 @@ static px_bool PX_ScriptParseAST_MapTokenToR2(PX_SCRIPT_Analysis *analysis,PX_SC
 				break;
 			case PX_SCRIPT_VARIABLE_REGION_POP:
 				{
-					PX_StringInit(analysis->mp,&fmrString);
+					PX_StringInitialize(analysis->mp,&fmrString);
 
 					if(operand.bAtomPopIndex)
 					{
@@ -1564,7 +1564,7 @@ static px_bool PX_ScriptParseAST_MapTokenToR1(PX_SCRIPT_Analysis *analysis,PX_SC
 	case PX_SCRIPT_AST_OPERAND_TYPE_MEMORY_PTR://memory var[x]
 	case PX_SCRIPT_AST_OPERAND_TYPE_SET_PTR://set xx var[x]
 		{
-			PX_StringInit(analysis->mp,&fmrString);
+			PX_StringInitialize(analysis->mp,&fmrString);
 
 			if(operand.region==PX_SCRIPT_VARIABLE_REGION_LOCAL)
 			{
@@ -1605,7 +1605,7 @@ static px_bool PX_ScriptParseAST_MapTokenToR1(PX_SCRIPT_Analysis *analysis,PX_SC
 	case PX_SCRIPT_AST_OPERAND_TYPE_MEMORY_PTR_CONST:
 	case PX_SCRIPT_AST_OPERAND_TYPE_SET_PTR_CONST:
 		{
-			PX_StringInit(analysis->mp,&fmrString);
+			PX_StringInitialize(analysis->mp,&fmrString);
 
 			if(operand.region==PX_SCRIPT_VARIABLE_REGION_GLOBAL)
 			{
@@ -1635,7 +1635,7 @@ static px_bool PX_ScriptParseAST_MapTokenToR1(PX_SCRIPT_Analysis *analysis,PX_SC
 
 	case PX_SCRIPT_AST_OPERAND_TYPE_INT_CONST:
 		{
-			PX_StringInit(analysis->mp,&fmrString);
+			PX_StringInitialize(analysis->mp,&fmrString);
 
 			if(operand.region==PX_SCRIPT_VARIABLE_REGION_GLOBAL)
 			{
@@ -1659,7 +1659,7 @@ static px_bool PX_ScriptParseAST_MapTokenToR1(PX_SCRIPT_Analysis *analysis,PX_SC
 
 	case PX_SCRIPT_AST_OPERAND_TYPE_FLOAT_CONST:
 		{
-			PX_StringInit(analysis->mp,&fmrString);
+			PX_StringInitialize(analysis->mp,&fmrString);
 
 			if(operand.region==PX_SCRIPT_VARIABLE_REGION_GLOBAL)
 			{
@@ -1685,7 +1685,7 @@ static px_bool PX_ScriptParseAST_MapTokenToR1(PX_SCRIPT_Analysis *analysis,PX_SC
 		{
 			//////////////////////////////////////////////////////////////////////////
 
-			PX_StringInit(analysis->mp,&fmrString);
+			PX_StringInitialize(analysis->mp,&fmrString);
 
 			if(operand.region==PX_SCRIPT_VARIABLE_REGION_GLOBAL)
 			{
@@ -1715,7 +1715,7 @@ static px_bool PX_ScriptParseAST_MapTokenToR1(PX_SCRIPT_Analysis *analysis,PX_SC
 			{
 			case PX_SCRIPT_VARIABLE_REGION_LOCAL:
 				{
-					PX_StringInit(analysis->mp,&fmrString);
+					PX_StringInitialize(analysis->mp,&fmrString);
 					if(operand.bAtomPopIndex)
 					{
 						PX_StringCat(out,"POP R3\n");
@@ -1732,7 +1732,7 @@ static px_bool PX_ScriptParseAST_MapTokenToR1(PX_SCRIPT_Analysis *analysis,PX_SC
 				break;
 			case PX_SCRIPT_VARIABLE_REGION_GLOBAL:
 				{
-					PX_StringInit(analysis->mp,&fmrString);
+					PX_StringInitialize(analysis->mp,&fmrString);
 					if(operand.bAtomPopIndex)
 					{
 						PX_StringCat(out,"POP R3\n");
@@ -1749,7 +1749,7 @@ static px_bool PX_ScriptParseAST_MapTokenToR1(PX_SCRIPT_Analysis *analysis,PX_SC
 				break;
 			case PX_SCRIPT_VARIABLE_REGION_POP:
 				{
-					PX_StringInit(analysis->mp,&fmrString);
+					PX_StringInitialize(analysis->mp,&fmrString);
 
 					if(operand.bAtomPopIndex)
 					{
@@ -1780,7 +1780,7 @@ static px_bool PX_ScriptParseAST_MapTokenToR1(PX_SCRIPT_Analysis *analysis,PX_SC
 			{
 			case PX_SCRIPT_VARIABLE_REGION_LOCAL:
 				{
-					PX_StringInit(analysis->mp,&fmrString);
+					PX_StringInitialize(analysis->mp,&fmrString);
 					if(operand.bAtomPopIndex)
 					{
 						PX_StringCat(out,"POP R3\n");
@@ -1797,7 +1797,7 @@ static px_bool PX_ScriptParseAST_MapTokenToR1(PX_SCRIPT_Analysis *analysis,PX_SC
 				break;
 			case PX_SCRIPT_VARIABLE_REGION_GLOBAL:
 				{
-					PX_StringInit(analysis->mp,&fmrString);
+					PX_StringInitialize(analysis->mp,&fmrString);
 					if(operand.bAtomPopIndex)
 					{
 						PX_StringCat(out,"POP R3\n");
@@ -1814,7 +1814,7 @@ static px_bool PX_ScriptParseAST_MapTokenToR1(PX_SCRIPT_Analysis *analysis,PX_SC
 				break;
 			case PX_SCRIPT_VARIABLE_REGION_POP:
 				{
-					PX_StringInit(analysis->mp,&fmrString);
+					PX_StringInitialize(analysis->mp,&fmrString);
 
 					if(operand.bAtomPopIndex)
 					{
@@ -1865,7 +1865,7 @@ static px_bool PX_ScriptParseLastInstr_DOT(PX_SCRIPT_Analysis *analysis,px_vecto
 
 	if (operand1.region==PX_SCRIPT_VARIABLE_REGION_POP)
 	{
-		PX_StringInit(analysis->mp,&fmrString);
+		PX_StringInitialize(analysis->mp,&fmrString);
 		PX_StringFormat1(&fmrString,"POP R1\nADD R1,%1\nPUSH R1\n",PX_STRINGFORMAT_INT(operand2._oft));
 		PX_StringCat(out,fmrString.buffer);
 		PX_StringFree(&fmrString);
@@ -1938,7 +1938,7 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 					{
 					case PX_SCRIPT_VARIABLE_REGION_LOCAL:
 						{
-							PX_StringInit(analysis->mp,&fmrString);
+							PX_StringInitialize(analysis->mp,&fmrString);
 							PX_StringFormat1(&fmrString,"MOV LOCAL[%1],R2\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 							PX_StringCat(out,fmrString.buffer);
 							PX_StringFormat1(&fmrString,"PUSH LOCAL[%1]\n",PX_STRINGFORMAT_INT(operandLeft._oft));
@@ -1948,7 +1948,7 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 						break;
 					case PX_SCRIPT_VARIABLE_REGION_GLOBAL:
 						{
-							PX_StringInit(analysis->mp,&fmrString);
+							PX_StringInitialize(analysis->mp,&fmrString);
 							PX_StringFormat1(&fmrString,"MOV GLOBAL[%1],R2\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 							PX_StringCat(out,fmrString.buffer);
 							PX_StringFormat1(&fmrString,"PUSH GLOBAL[%1]\n",PX_STRINGFORMAT_INT(operandLeft._oft));
@@ -1958,7 +1958,7 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 						break;
 					case PX_SCRIPT_VARIABLE_REGION_POP:
 						{
-							PX_StringInit(analysis->mp,&fmrString);
+							PX_StringInitialize(analysis->mp,&fmrString);
 							PX_StringCat(out,"POP R1\n");
 							PX_StringSet(&fmrString,"MOV LOCAL[R1],R2\n");
 							PX_StringCat(out,fmrString.buffer);
@@ -1982,7 +1982,7 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 					{
 					case PX_SCRIPT_VARIABLE_REGION_LOCAL:
 						{
-							PX_StringInit(analysis->mp,&fmrString);
+							PX_StringInitialize(analysis->mp,&fmrString);
 							if(operandLeft.bAtomPopIndex)
 							{
 								PX_StringCat(out,"POP R3\n");
@@ -2003,7 +2003,7 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 						break;
 					case PX_SCRIPT_VARIABLE_REGION_GLOBAL:
 						{
-							PX_StringInit(analysis->mp,&fmrString);
+							PX_StringInitialize(analysis->mp,&fmrString);
 							if(operandLeft.bAtomPopIndex)
 							{
 								PX_StringCat(out,"POP R3\n");
@@ -2024,7 +2024,7 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 						break;
 					case PX_SCRIPT_VARIABLE_REGION_POP:
 						{
-							PX_StringInit(analysis->mp,&fmrString);
+							PX_StringInitialize(analysis->mp,&fmrString);
 
 							if(operandLeft.bAtomPopIndex)
 							{
@@ -2061,7 +2061,7 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 					{
 					case PX_SCRIPT_VARIABLE_REGION_LOCAL:
 						{
-							PX_StringInit(analysis->mp,&fmrString);
+							PX_StringInitialize(analysis->mp,&fmrString);
 							if(operandLeft.bAtomPopIndex)
 							{
 								PX_StringCat(out,"POP R3\n");
@@ -2082,7 +2082,7 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 						break;
 					case PX_SCRIPT_VARIABLE_REGION_GLOBAL:
 						{
-							PX_StringInit(analysis->mp,&fmrString);
+							PX_StringInitialize(analysis->mp,&fmrString);
 							if(operandLeft.bAtomPopIndex)
 							{
 								PX_StringCat(out,"POP R3\n");
@@ -2104,7 +2104,7 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 						break;
 					case PX_SCRIPT_VARIABLE_REGION_POP:
 						{
-							PX_StringInit(analysis->mp,&fmrString);
+							PX_StringInitialize(analysis->mp,&fmrString);
 
 							if(operandLeft.bAtomPopIndex)
 							{
@@ -2169,7 +2169,7 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 					{
 					case PX_SCRIPT_VARIABLE_REGION_LOCAL:
 						{
-							PX_StringInit(analysis->mp,&fmrString);
+							PX_StringInitialize(analysis->mp,&fmrString);
 							PX_StringFormat1(&fmrString,"MOV LOCAL[%1],R2\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 							PX_StringCat(out,fmrString.buffer);
 							PX_StringFormat1(&fmrString,"PUSH LOCAL[%1]\n",PX_STRINGFORMAT_INT(operandLeft._oft));
@@ -2179,7 +2179,7 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 						break;
 					case PX_SCRIPT_VARIABLE_REGION_GLOBAL:
 						{
-							PX_StringInit(analysis->mp,&fmrString);
+							PX_StringInitialize(analysis->mp,&fmrString);
 							PX_StringFormat1(&fmrString,"MOV GLOBAL[%1],R2\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 							PX_StringCat(out,fmrString.buffer);
 							PX_StringFormat1(&fmrString,"PUSH GLOBAL[%1]\n",PX_STRINGFORMAT_INT(operandLeft._oft));
@@ -2189,7 +2189,7 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 						break;
 					case PX_SCRIPT_VARIABLE_REGION_POP:
 						{
-							PX_StringInit(analysis->mp,&fmrString);
+							PX_StringInitialize(analysis->mp,&fmrString);
 							PX_StringCat(out,"POP R1\n");
 							PX_StringSet(&fmrString,"MOV GLOBAL[R1],R2\n");
 							PX_StringCat(out,fmrString.buffer);
@@ -2256,7 +2256,7 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 				return PX_FALSE;
 			}
 
-			PX_StringInit(analysis->mp,&fmrString);
+			PX_StringInitialize(analysis->mp,&fmrString);
 
 			if(operandRight.region==PX_SCRIPT_VARIABLE_REGION_LOCAL)
 			{
@@ -2286,7 +2286,7 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 			{
 			case PX_SCRIPT_VARIABLE_REGION_LOCAL:
 				{
-					PX_StringInit(analysis->mp,&fmrString);
+					PX_StringInitialize(analysis->mp,&fmrString);
 					PX_StringFormat1(&fmrString,"MOV LOCAL[%1],R2\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 					PX_StringCat(out,fmrString.buffer);
 					PX_StringFormat1(&fmrString,"PUSH LOCAL[%1]\n",PX_STRINGFORMAT_INT(operandLeft._oft));
@@ -2296,7 +2296,7 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 				break;
 			case PX_SCRIPT_VARIABLE_REGION_GLOBAL:
 				{
-					PX_StringInit(analysis->mp,&fmrString);
+					PX_StringInitialize(analysis->mp,&fmrString);
 					PX_StringFormat1(&fmrString,"MOV GLOBAL[%1],R2\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 					PX_StringCat(out,fmrString.buffer);
 					PX_StringFormat1(&fmrString,"PUSH GLOBAL[%1]\n",PX_STRINGFORMAT_INT(operandLeft._oft));
@@ -2306,7 +2306,7 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 				break;
 			case PX_SCRIPT_VARIABLE_REGION_POP:
 				{
-					PX_StringInit(analysis->mp,&fmrString);
+					PX_StringInitialize(analysis->mp,&fmrString);
 					PX_StringCat(out,"POP R1\n");
 					PX_StringSet(&fmrString,"MOV GLOBAL[R1],R2\n");
 					PX_StringCat(out,fmrString.buffer);
@@ -2333,7 +2333,7 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 			{
 				return PX_FALSE;
 			}
-			PX_StringInit(analysis->mp,&fmrString);
+			PX_StringInitialize(analysis->mp,&fmrString);
 			switch(operandRight.region)
 	        {
 				case PX_SCRIPT_VARIABLE_REGION_GLOBAL:
@@ -2428,7 +2428,7 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 			}
 
 
-			PX_StringInit(analysis->mp,&fmrString);
+			PX_StringInitialize(analysis->mp,&fmrString);
 
 			if(operandRight.region==PX_SCRIPT_VARIABLE_REGION_GLOBAL)
 			{
@@ -2525,7 +2525,7 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 					{
 					case PX_SCRIPT_VARIABLE_REGION_LOCAL:
 						{
-							PX_StringInit(analysis->mp,&fmrString);
+							PX_StringInitialize(analysis->mp,&fmrString);
 							PX_StringFormat1(&fmrString,"MOV LOCAL[%1],R2\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 							PX_StringCat(out,fmrString.buffer);
 							PX_StringFormat1(&fmrString,"PUSH LOCAL[%1]\n",PX_STRINGFORMAT_INT(operandLeft._oft));
@@ -2535,7 +2535,7 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 						break;
 					case PX_SCRIPT_VARIABLE_REGION_GLOBAL:
 						{
-							PX_StringInit(analysis->mp,&fmrString);
+							PX_StringInitialize(analysis->mp,&fmrString);
 							PX_StringFormat1(&fmrString,"MOV GLOBAL[%1],R2\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 							PX_StringCat(out,fmrString.buffer);
 							PX_StringFormat1(&fmrString,"PUSH GLOBAL[%1]\n",PX_STRINGFORMAT_INT(operandLeft._oft));
@@ -2545,7 +2545,7 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 						break;
 					case PX_SCRIPT_VARIABLE_REGION_POP:
 						{
-							PX_StringInit(analysis->mp,&fmrString);
+							PX_StringInitialize(analysis->mp,&fmrString);
 							PX_StringCat(out,"POP R1\n");
 							PX_StringSet(&fmrString,"MOV GLOBAL[R1],R2\n");
 							PX_StringCat(out,fmrString.buffer);
@@ -2569,7 +2569,7 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 					{
 					case PX_SCRIPT_VARIABLE_REGION_LOCAL:
 						{
-							PX_StringInit(analysis->mp,&fmrString);
+							PX_StringInitialize(analysis->mp,&fmrString);
 							if(operandLeft.bAtomPopIndex)
 							{
 								PX_StringCat(out,"POP R3\n");
@@ -2590,7 +2590,7 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 						break;
 					case PX_SCRIPT_VARIABLE_REGION_GLOBAL:
 						{
-							PX_StringInit(analysis->mp,&fmrString);
+							PX_StringInitialize(analysis->mp,&fmrString);
 							if(operandLeft.bAtomPopIndex)
 							{
 								PX_StringCat(out,"POP R3\n");
@@ -2611,7 +2611,7 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 						break;
 					case PX_SCRIPT_VARIABLE_REGION_POP:
 						{
-							PX_StringInit(analysis->mp,&fmrString);
+							PX_StringInitialize(analysis->mp,&fmrString);
 
 							if(operandLeft.bAtomPopIndex)
 							{
@@ -2648,7 +2648,7 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 					{
 					case PX_SCRIPT_VARIABLE_REGION_LOCAL:
 						{
-							PX_StringInit(analysis->mp,&fmrString);
+							PX_StringInitialize(analysis->mp,&fmrString);
 							if(operandLeft.bAtomPopIndex)
 							{
 								PX_StringCat(out,"POP R3\n");
@@ -2669,7 +2669,7 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 						break;
 					case PX_SCRIPT_VARIABLE_REGION_GLOBAL:
 						{
-							PX_StringInit(analysis->mp,&fmrString);
+							PX_StringInitialize(analysis->mp,&fmrString);
 							if(operandLeft.bAtomPopIndex)
 							{
 								PX_StringCat(out,"POP R3\n");
@@ -2690,7 +2690,7 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 						break;
 					case PX_SCRIPT_VARIABLE_REGION_POP:
 						{
-							PX_StringInit(analysis->mp,&fmrString);
+							PX_StringInitialize(analysis->mp,&fmrString);
 
 							if(operandLeft.bAtomPopIndex)
 							{
@@ -2757,7 +2757,7 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 						{
 						case PX_SCRIPT_VARIABLE_REGION_LOCAL:
 							{
-								PX_StringInit(analysis->mp,&fmrString);
+								PX_StringInitialize(analysis->mp,&fmrString);
 								PX_StringFormat1(&fmrString,"MOV LOCAL[%1],R2\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 								PX_StringCat(out,fmrString.buffer);
 								PX_StringFormat1(&fmrString,"PUSH LOCAL[%1]\n",PX_STRINGFORMAT_INT(operandLeft._oft));
@@ -2767,7 +2767,7 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 							break;
 						case PX_SCRIPT_VARIABLE_REGION_GLOBAL:
 							{
-								PX_StringInit(analysis->mp,&fmrString);
+								PX_StringInitialize(analysis->mp,&fmrString);
 								PX_StringFormat1(&fmrString,"MOV GLOBAL[%1],R2\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 								PX_StringCat(out,fmrString.buffer);
 								PX_StringFormat1(&fmrString,"PUSH GLOBAL[%1]\n",PX_STRINGFORMAT_INT(operandLeft._oft));
@@ -2777,7 +2777,7 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 							break;
 						case PX_SCRIPT_VARIABLE_REGION_POP:
 							{
-								PX_StringInit(analysis->mp,&fmrString);
+								PX_StringInitialize(analysis->mp,&fmrString);
 								PX_StringCat(out,"POP R1\n");
 								PX_StringSet(&fmrString,"MOV GLOBAL[R1],R2\n");
 								PX_StringCat(out,fmrString.buffer);
@@ -2814,7 +2814,7 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 					return PX_FALSE;
 				}
 
-				PX_StringInit(analysis->mp,&fmrString);
+				PX_StringInitialize(analysis->mp,&fmrString);
 
 				if(operandRight.region==PX_SCRIPT_VARIABLE_REGION_GLOBAL)
 				{
@@ -2839,7 +2839,7 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 				{
 				case PX_SCRIPT_VARIABLE_REGION_LOCAL:
 					{
-						PX_StringInit(analysis->mp,&fmrString);
+						PX_StringInitialize(analysis->mp,&fmrString);
 						PX_StringFormat1(&fmrString,"MOV LOCAL[%1],R2\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 						PX_StringCat(out,fmrString.buffer);
 						PX_StringFormat1(&fmrString,"PUSH LOCAL[%1]\n",PX_STRINGFORMAT_INT(operandLeft._oft));
@@ -2849,7 +2849,7 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 					break;
 				case PX_SCRIPT_VARIABLE_REGION_GLOBAL:
 					{
-						PX_StringInit(analysis->mp,&fmrString);
+						PX_StringInitialize(analysis->mp,&fmrString);
 						PX_StringFormat1(&fmrString,"MOV GLOBAL[%1],R2\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 						PX_StringCat(out,fmrString.buffer);
 						PX_StringFormat1(&fmrString,"PUSH GLOBAL[%1]\n",PX_STRINGFORMAT_INT(operandLeft._oft));
@@ -2859,7 +2859,7 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 					break;
 				case PX_SCRIPT_VARIABLE_REGION_POP:
 					{
-						PX_StringInit(analysis->mp,&fmrString);
+						PX_StringInitialize(analysis->mp,&fmrString);
 						PX_StringCat(out,"POP R1\n");
 						PX_StringSet(&fmrString,"MOV GLOBAL[R1],R2\n");
 						PX_StringCat(out,fmrString.buffer);
@@ -2897,7 +2897,7 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 					{
 					case PX_SCRIPT_VARIABLE_REGION_LOCAL:
 						{
-							PX_StringInit(analysis->mp,&fmrString);
+							PX_StringInitialize(analysis->mp,&fmrString);
 							PX_StringFormat1(&fmrString,"MOV LOCAL[%1],R2\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 							PX_StringCat(out,fmrString.buffer);
 							PX_StringFormat1(&fmrString,"PUSH LOCAL[%1]\n",PX_STRINGFORMAT_INT(operandLeft._oft));
@@ -2907,7 +2907,7 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 						break;
 					case PX_SCRIPT_VARIABLE_REGION_GLOBAL:
 						{
-							PX_StringInit(analysis->mp,&fmrString);
+							PX_StringInitialize(analysis->mp,&fmrString);
 							PX_StringFormat1(&fmrString,"MOV GLOBAL[%1],R2\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 							PX_StringCat(out,fmrString.buffer);
 							PX_StringFormat1(&fmrString,"PUSH GLOBAL[%1]\n",PX_STRINGFORMAT_INT(operandLeft._oft));
@@ -2917,7 +2917,7 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 						break;
 					case PX_SCRIPT_VARIABLE_REGION_POP:
 						{
-							PX_StringInit(analysis->mp,&fmrString);
+							PX_StringInitialize(analysis->mp,&fmrString);
 							PX_StringCat(out,"POP R1\n");
 							PX_StringSet(&fmrString,"MOV GLOBAL[R1],R2\n");
 							PX_StringCat(out,fmrString.buffer);
@@ -2937,7 +2937,7 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 					{
 					case PX_SCRIPT_VARIABLE_REGION_LOCAL:
 						{
-							PX_StringInit(analysis->mp,&fmrString);
+							PX_StringInitialize(analysis->mp,&fmrString);
 							if(operandLeft.bAtomPopIndex)
 							{
 								PX_StringCat(out,"POP R3\n");
@@ -2958,7 +2958,7 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 						break;
 					case PX_SCRIPT_VARIABLE_REGION_GLOBAL:
 						{
-							PX_StringInit(analysis->mp,&fmrString);
+							PX_StringInitialize(analysis->mp,&fmrString);
 							if(operandLeft.bAtomPopIndex)
 							{
 								PX_StringCat(out,"POP R3\n");
@@ -2979,7 +2979,7 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 						break;
 					case PX_SCRIPT_VARIABLE_REGION_POP:
 						{
-							PX_StringInit(analysis->mp,&fmrString);
+							PX_StringInitialize(analysis->mp,&fmrString);
 
 							if(operandLeft.bAtomPopIndex)
 							{
@@ -3011,7 +3011,7 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 					{
 					case PX_SCRIPT_VARIABLE_REGION_LOCAL:
 						{
-							PX_StringInit(analysis->mp,&fmrString);
+							PX_StringInitialize(analysis->mp,&fmrString);
 							if(operandLeft.bAtomPopIndex)
 							{
 								PX_StringCat(out,"POP R3\n");
@@ -3032,7 +3032,7 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 						break;
 					case PX_SCRIPT_VARIABLE_REGION_GLOBAL:
 						{
-							PX_StringInit(analysis->mp,&fmrString);
+							PX_StringInitialize(analysis->mp,&fmrString);
 							if(operandLeft.bAtomPopIndex)
 							{
 								PX_StringCat(out,"POP R3\n");
@@ -3053,7 +3053,7 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 						break;
 					case PX_SCRIPT_VARIABLE_REGION_POP:
 						{
-							PX_StringInit(analysis->mp,&fmrString);
+							PX_StringInitialize(analysis->mp,&fmrString);
 
 							if(operandLeft.bAtomPopIndex)
 							{
@@ -3104,7 +3104,7 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 						{
 						case PX_SCRIPT_VARIABLE_REGION_LOCAL:
 							{
-								PX_StringInit(analysis->mp,&fmrString);
+								PX_StringInitialize(analysis->mp,&fmrString);
 								PX_StringFormat1(&fmrString,"MOV LOCAL[%1],R2\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 								PX_StringCat(out,fmrString.buffer);
 								PX_StringFormat1(&fmrString,"PUSH LOCAL[%1]\n",PX_STRINGFORMAT_INT(operandLeft._oft));
@@ -3114,7 +3114,7 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 							break;
 						case PX_SCRIPT_VARIABLE_REGION_GLOBAL:
 							{
-								PX_StringInit(analysis->mp,&fmrString);
+								PX_StringInitialize(analysis->mp,&fmrString);
 								PX_StringFormat1(&fmrString,"MOV GLOBAL[%1],R2\n",PX_STRINGFORMAT_INT(operandLeft._oft));
 								PX_StringCat(out,fmrString.buffer);
 								PX_StringFormat1(&fmrString,"PUSH GLOBAL[%1]\n",PX_STRINGFORMAT_INT(operandLeft._oft));
@@ -3124,7 +3124,7 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 							break;
 						case PX_SCRIPT_VARIABLE_REGION_POP:
 							{
-								PX_StringInit(analysis->mp,&fmrString);
+								PX_StringInitialize(analysis->mp,&fmrString);
 								PX_StringCat(out,"POP R1\n");
 								PX_StringSet(&fmrString,"MOV GLOBAL[R1],R2\n");
 								PX_StringCat(out,fmrString.buffer);
@@ -3144,7 +3144,7 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 						{
 						case PX_SCRIPT_VARIABLE_REGION_LOCAL:
 							{
-								PX_StringInit(analysis->mp,&fmrString);
+								PX_StringInitialize(analysis->mp,&fmrString);
 								if(operandLeft.bAtomPopIndex)
 								{
 									PX_StringCat(out,"POP R3\n");
@@ -3165,7 +3165,7 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 							break;
 						case PX_SCRIPT_VARIABLE_REGION_GLOBAL:
 							{
-								PX_StringInit(analysis->mp,&fmrString);
+								PX_StringInitialize(analysis->mp,&fmrString);
 								if(operandLeft.bAtomPopIndex)
 								{
 									PX_StringCat(out,"POP R3\n");
@@ -3186,7 +3186,7 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 							break;
 						case PX_SCRIPT_VARIABLE_REGION_POP:
 							{
-								PX_StringInit(analysis->mp,&fmrString);
+								PX_StringInitialize(analysis->mp,&fmrString);
 
 								if(operandLeft.bAtomPopIndex)
 								{
@@ -3218,7 +3218,7 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 						{
 						case PX_SCRIPT_VARIABLE_REGION_LOCAL:
 							{
-								PX_StringInit(analysis->mp,&fmrString);
+								PX_StringInitialize(analysis->mp,&fmrString);
 								if(operandLeft.bAtomPopIndex)
 								{
 									PX_StringCat(out,"POP R3\n");
@@ -3239,7 +3239,7 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 							break;
 						case PX_SCRIPT_VARIABLE_REGION_GLOBAL:
 							{
-								PX_StringInit(analysis->mp,&fmrString);
+								PX_StringInitialize(analysis->mp,&fmrString);
 								if(operandLeft.bAtomPopIndex)
 								{
 									PX_StringCat(out,"POP R3\n");
@@ -3260,7 +3260,7 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 							break;
 						case PX_SCRIPT_VARIABLE_REGION_POP:
 							{
-								PX_StringInit(analysis->mp,&fmrString);
+								PX_StringInitialize(analysis->mp,&fmrString);
 
 								if(operandLeft.bAtomPopIndex)
 								{
@@ -3311,7 +3311,7 @@ static px_bool PX_ScriptParseLastInstr_IDX(PX_SCRIPT_Analysis *analysis,px_vecto
 	PX_VectorPop(tk);
 	PX_VectorPop(tk);
 
-	PX_StringInit(analysis->mp,&fmrString);
+	PX_StringInitialize(analysis->mp,&fmrString);
 
 	switch(operand2.operandType)
 	{
@@ -3524,7 +3524,7 @@ static px_bool PX_ScriptParseLastInstr_OFT(PX_SCRIPT_Analysis *analysis,px_vecto
 
 	if(!PX_ScriptParseAST_MapTokenToR1(analysis,operand1,out)) return PX_FALSE;
 	
-	PX_StringInit(analysis->mp,&fmrString);
+	PX_StringInitialize(analysis->mp,&fmrString);
 	PX_StringFormat1(&fmrString,"ADD R1,%1\nPUSH R1\n",PX_STRINGFORMAT_INT(operand2._oft));
 	PX_StringCat(out,fmrString.buffer);
 	PX_StringFree(&fmrString);
@@ -3548,7 +3548,7 @@ static px_bool PX_ScriptParseLastInstr_PTR(PX_SCRIPT_Analysis *analysis,px_vecto
 	PX_VectorPop(op);
 	PX_VectorPop(tk);
 
-	PX_StringInit(analysis->mp,&fmrString);
+	PX_StringInitialize(analysis->mp,&fmrString);
 
 	if (operand1.operandType==PX_SCRIPT_AST_OPERAND_TYPE_INT_PTR)
 	{
@@ -3664,7 +3664,7 @@ static px_bool PX_ScriptParseLastInstr_ADR(PX_SCRIPT_Analysis *analysis,px_vecto
 	}
 	else if(operand1.region==PX_SCRIPT_VARIABLE_REGION_LOCAL)
 	{
-		PX_StringInit(analysis->mp,&fmrString);
+		PX_StringInitialize(analysis->mp,&fmrString);
 		PX_StringFormat1(&fmrString,"MOV R1,%1\n",PX_STRINGFORMAT_INT(operand1._oft));
 		PX_StringCat(out,fmrString.buffer);
 		PX_StringSet(&fmrString,"ADD R1,BP\n");
@@ -3919,7 +3919,7 @@ static px_bool PX_ScriptParseLastInstr_ADD(PX_SCRIPT_Analysis *analysis,px_vecto
 				{
 					if(!PX_ScriptParseAST_MapTokenToR2(analysis,operand2,out)) return PX_FALSE;
 					if(!PX_ScriptParseAST_MapTokenToR1(analysis,operand1,out)) return PX_FALSE;
-					PX_StringInit(analysis->mp,&fmrString);
+					PX_StringInitialize(analysis->mp,&fmrString);
 					PX_StringFormat1(&fmrString,"MUL R2,%1\n",PX_STRINGFORMAT_INT(operand1.pSet->size));
 					PX_StringCat(out,fmrString.buffer);
 					PX_StringFree(&fmrString);
@@ -4064,7 +4064,7 @@ static px_bool PX_ScriptParseLastInstr_INC(PX_SCRIPT_Analysis *analysis,px_vecto
 	{
 	case PX_SCRIPT_VARIABLE_REGION_GLOBAL:
 		{
-			PX_StringInit(analysis->mp,&fmrString);
+			PX_StringInitialize(analysis->mp,&fmrString);
 			PX_StringFormat1(&fmrString,"ADD GLOBAL[%1],1\n",PX_STRINGFORMAT_INT(operand1._oft));
 			PX_StringCat(out,fmrString.buffer);
 			PX_StringFree(&fmrString);
@@ -4072,7 +4072,7 @@ static px_bool PX_ScriptParseLastInstr_INC(PX_SCRIPT_Analysis *analysis,px_vecto
 		break;
 	case PX_SCRIPT_VARIABLE_REGION_LOCAL:
 		{
-			PX_StringInit(analysis->mp,&fmrString);
+			PX_StringInitialize(analysis->mp,&fmrString);
 			PX_StringFormat1(&fmrString,"ADD LOCAL[%1],1\n",PX_STRINGFORMAT_INT(operand1._oft));
 			PX_StringCat(out,fmrString.buffer);
 			PX_StringFree(&fmrString);
@@ -4080,7 +4080,7 @@ static px_bool PX_ScriptParseLastInstr_INC(PX_SCRIPT_Analysis *analysis,px_vecto
 		break;
 	case PX_SCRIPT_VARIABLE_REGION_POP:
 		{
-			PX_StringInit(analysis->mp,&fmrString);
+			PX_StringInitialize(analysis->mp,&fmrString);
 			PX_StringCat(out,"POP R1\n");
 			PX_StringSet(&fmrString,"ADD GLOBAL[R1],1\n");
 			PX_StringCat(out,fmrString.buffer);
@@ -4384,7 +4384,7 @@ static px_bool PX_ScriptParseLastInstr_DEC(PX_SCRIPT_Analysis *analysis,px_vecto
 	{
 	case PX_SCRIPT_VARIABLE_REGION_GLOBAL:
 		{
-			PX_StringInit(analysis->mp,&fmrString);
+			PX_StringInitialize(analysis->mp,&fmrString);
 			PX_StringFormat1(&fmrString,"SUB GLOBAL[%1],1\n",PX_STRINGFORMAT_INT(operand1._oft));
 			PX_StringCat(out,fmrString.buffer);
 			PX_StringFree(&fmrString);
@@ -4392,7 +4392,7 @@ static px_bool PX_ScriptParseLastInstr_DEC(PX_SCRIPT_Analysis *analysis,px_vecto
 		break;
 	case PX_SCRIPT_VARIABLE_REGION_LOCAL:
 		{
-			PX_StringInit(analysis->mp,&fmrString);
+			PX_StringInitialize(analysis->mp,&fmrString);
 			PX_StringFormat1(&fmrString,"SUB LOCAL[%1],1\n",PX_STRINGFORMAT_INT(operand1._oft));
 			PX_StringCat(out,fmrString.buffer);
 			PX_StringFree(&fmrString);
@@ -4400,7 +4400,7 @@ static px_bool PX_ScriptParseLastInstr_DEC(PX_SCRIPT_Analysis *analysis,px_vecto
 		break;
 	case PX_SCRIPT_VARIABLE_REGION_POP:
 		{
-			PX_StringInit(analysis->mp,&fmrString);
+			PX_StringInitialize(analysis->mp,&fmrString);
 			PX_StringCat(out,"POP R1\n");
 			PX_StringSet(&fmrString,"SUB GLOBAL[R1],1\n");
 			PX_StringCat(out,fmrString.buffer);
@@ -6314,7 +6314,7 @@ _EXPR_OUT:
 			{
 			case PX_SCRIPT_TRANSLATOR_FUNCTION_TYPE_EXPORT:
 			case PX_SCRIPT_TRANSLATOR_FUNCTION_TYPE_CUSTOM:
-				PX_StringInit(analysis->mp,&fmrString);
+				PX_StringInitialize(analysis->mp,&fmrString);
 				PX_StringFormat1(&fmrString,"CALL %1\n",PX_STRINGFORMAT_STRING(pfunc->name));
 				PX_StringCat(out,fmrString.buffer);
 
@@ -6328,7 +6328,7 @@ _EXPR_OUT:
 				PX_StringFree(&fmrString);
 				break;
 			case PX_SCRIPT_TRANSLATOR_FUNCTION_TYPE_HOST:
-				PX_StringInit(analysis->mp,&fmrString);
+				PX_StringInitialize(analysis->mp,&fmrString);
 				PX_StringFormat1(&fmrString,"CALL $%1\n",PX_STRINGFORMAT_STRING(pfunc->name));
 				PX_StringCat(out,fmrString.buffer);
 				if(pfunc->parametersCount)
@@ -6629,7 +6629,7 @@ static px_bool PX_ScriptParseExpression(PX_SCRIPT_Analysis *analysis,px_char *ex
 	Op.type=PX_SCRIPT_TRANSLATOR_EXPRESSION_OP_LBRACKETBEGIN;
 	Op.opclass=PX_SCRIPT_TRANSLATOR_OP_CLASS_CONTAINER;
 	Op.oplevel=0;
-	PX_StringInit(analysis->mp,&Op.code);
+	PX_StringInitialize(analysis->mp,&Op.code);
 	PX_StringCat(&Op.code,lexer.CurLexeme.buffer);
 	PX_VectorPushback(&stream,&Op);
 
@@ -6659,7 +6659,7 @@ static px_bool PX_ScriptParseExpression(PX_SCRIPT_Analysis *analysis,px_char *ex
 				Op.type=PX_SCRIPT_TRANSLATOR_EXPRESSION_OP_STRLEN;
 				Op.opclass=PX_SCRIPT_TRANSLATOR_OP_CLASS_SINGLE;
 				Op.oplevel=1;
-				PX_StringInit(analysis->mp,&Op.code);
+				PX_StringInitialize(analysis->mp,&Op.code);
 				PX_StringCat(&Op.code,lexer.CurLexeme.buffer);
 				PX_VectorPushback(&stream,&Op);
 			}
@@ -6678,7 +6678,7 @@ static px_bool PX_ScriptParseExpression(PX_SCRIPT_Analysis *analysis,px_char *ex
 				Op.type=PX_SCRIPT_TRANSLATOR_EXPRESSION_OP_MEMLEN;
 				Op.opclass=PX_SCRIPT_TRANSLATOR_OP_CLASS_SINGLE;
 				Op.oplevel=1;
-				PX_StringInit(analysis->mp,&Op.code);
+				PX_StringInitialize(analysis->mp,&Op.code);
 				PX_StringCat(&Op.code,lexer.CurLexeme.buffer);
 				PX_VectorPushback(&stream,&Op);
 			}
@@ -6697,7 +6697,7 @@ static px_bool PX_ScriptParseExpression(PX_SCRIPT_Analysis *analysis,px_char *ex
 				Op.type=PX_SCRIPT_TRANSLATOR_EXPRESSION_OP_SIN;
 				Op.opclass=PX_SCRIPT_TRANSLATOR_OP_CLASS_SINGLE;
 				Op.oplevel=1;
-				PX_StringInit(analysis->mp,&Op.code);
+				PX_StringInitialize(analysis->mp,&Op.code);
 				PX_StringCat(&Op.code,lexer.CurLexeme.buffer);
 				PX_VectorPushback(&stream,&Op);
 			}
@@ -6716,7 +6716,7 @@ static px_bool PX_ScriptParseExpression(PX_SCRIPT_Analysis *analysis,px_char *ex
 				Op.type=PX_SCRIPT_TRANSLATOR_EXPRESSION_OP_COS;
 				Op.opclass=PX_SCRIPT_TRANSLATOR_OP_CLASS_SINGLE;
 				Op.oplevel=1;
-				PX_StringInit(analysis->mp,&Op.code);
+				PX_StringInitialize(analysis->mp,&Op.code);
 				PX_StringCat(&Op.code,lexer.CurLexeme.buffer);
 				PX_VectorPushback(&stream,&Op);
 			}
@@ -6735,7 +6735,7 @@ static px_bool PX_ScriptParseExpression(PX_SCRIPT_Analysis *analysis,px_char *ex
 				Op.type=PX_SCRIPT_TRANSLATOR_EXPRESSION_OP_INT;
 				Op.opclass=PX_SCRIPT_TRANSLATOR_OP_CLASS_SINGLE;
 				Op.oplevel=1;
-				PX_StringInit(analysis->mp,&Op.code);
+				PX_StringInitialize(analysis->mp,&Op.code);
 				PX_StringCat(&Op.code,lexer.CurLexeme.buffer);
 				PX_VectorPushback(&stream,&Op);
 			}
@@ -6754,7 +6754,7 @@ static px_bool PX_ScriptParseExpression(PX_SCRIPT_Analysis *analysis,px_char *ex
 				Op.type=PX_SCRIPT_TRANSLATOR_EXPRESSION_OP_FLOAT;
 				Op.opclass=PX_SCRIPT_TRANSLATOR_OP_CLASS_SINGLE;
 				Op.oplevel=1;
-				PX_StringInit(analysis->mp,&Op.code);
+				PX_StringInitialize(analysis->mp,&Op.code);
 				PX_StringCat(&Op.code,lexer.CurLexeme.buffer);
 				PX_VectorPushback(&stream,&Op);
 			}
@@ -6772,7 +6772,7 @@ static px_bool PX_ScriptParseExpression(PX_SCRIPT_Analysis *analysis,px_char *ex
 				Op.type=PX_SCRIPT_TRANSLATOR_EXPRESSION_OP_STRING;
 				Op.opclass=PX_SCRIPT_TRANSLATOR_OP_CLASS_SINGLE;
 				Op.oplevel=1;
-				PX_StringInit(analysis->mp,&Op.code);
+				PX_StringInitialize(analysis->mp,&Op.code);
 				PX_StringCat(&Op.code,lexer.CurLexeme.buffer);
 				PX_VectorPushback(&stream,&Op);
 			}
@@ -6790,7 +6790,7 @@ static px_bool PX_ScriptParseExpression(PX_SCRIPT_Analysis *analysis,px_char *ex
 				Op.type=PX_SCRIPT_TRANSLATOR_EXPRESSION_OP_MEMORY;
 				Op.opclass=PX_SCRIPT_TRANSLATOR_OP_CLASS_SINGLE;
 				Op.oplevel=1;
-				PX_StringInit(analysis->mp,&Op.code);
+				PX_StringInitialize(analysis->mp,&Op.code);
 				PX_StringCat(&Op.code,lexer.CurLexeme.buffer);
 				PX_VectorPushback(&stream,&Op);
 			}
@@ -6802,7 +6802,7 @@ static px_bool PX_ScriptParseExpression(PX_SCRIPT_Analysis *analysis,px_char *ex
 					goto _CLEAR;
 				}
 
-				PX_StringInit(analysis->mp,&Op.code);
+				PX_StringInitialize(analysis->mp,&Op.code);
 				PX_StringCat(&Op.code,lexer.CurLexeme.buffer);
 
 				state=PX_LexerGetState(&lexer);
@@ -6832,7 +6832,7 @@ static px_bool PX_ScriptParseExpression(PX_SCRIPT_Analysis *analysis,px_char *ex
 				Op.type=PX_SCRIPT_TRANSLATOR_EXPRESSION_TOKEN;
 				Op.opclass=PX_SCRIPT_TRANSLATOR_OP_CLASS_CONST;
 				Op.oplevel=0;
-				PX_StringInit(analysis->mp,&Op.code);
+				PX_StringInitialize(analysis->mp,&Op.code);
 				PX_StringCat(&Op.code,lexer.CurLexeme.buffer);
 				PX_VectorPushback(&stream,&Op);
 			}
@@ -6855,7 +6855,7 @@ static px_bool PX_ScriptParseExpression(PX_SCRIPT_Analysis *analysis,px_char *ex
 				Op.type=PX_SCRIPT_TRANSLATOR_EXPRESSION_TOKEN;
 				Op.opclass=PX_SCRIPT_TRANSLATOR_OP_CLASS_CONST;
 				Op.oplevel=0;
-				PX_StringInit(analysis->mp,&Op.code);
+				PX_StringInitialize(analysis->mp,&Op.code);
 				PX_StringCat(&Op.code,lexer.CurLexeme.buffer);
 				PX_VectorPushback(&stream,&Op);
 			}
@@ -6876,7 +6876,7 @@ static px_bool PX_ScriptParseExpression(PX_SCRIPT_Analysis *analysis,px_char *ex
 			Op.type=PX_SCRIPT_TRANSLATOR_EXPRESSION_TOKEN;
 			Op.opclass=PX_SCRIPT_TRANSLATOR_OP_CLASS_CONTAINER;
 			Op.oplevel=0;
-			PX_StringInit(analysis->mp,&Op.code);
+			PX_StringInitialize(analysis->mp,&Op.code);
 			PX_StringCat(&Op.code,lexer.CurLexeme.buffer);
 			PX_VectorPushback(&stream,&Op);
 			accept_type=PX_SCRIPT_EXPRESSION_ACCEPT_BINARY|PX_SCRIPT_EXPRESSION_ACCEPT_BRACKET_END;
@@ -6901,7 +6901,7 @@ static px_bool PX_ScriptParseExpression(PX_SCRIPT_Analysis *analysis,px_char *ex
 							Op.type=PX_SCRIPT_TRANSLATOR_EXPRESSION_OP_INC;
 							Op.opclass=PX_SCRIPT_TRANSLATOR_OP_CLASS_SINGLE;
 							Op.oplevel=PX_ScriptParseGetOpLevel("++",PX_FALSE);
-							PX_StringInit(analysis->mp,&Op.code);
+							PX_StringInitialize(analysis->mp,&Op.code);
 							PX_StringCat(&Op.code,"++");
 							PX_VectorPushback(&stream,&Op);
 							accept_type=PX_SCRIPT_EXPRESSION_ACCEPT_BINARY|PX_SCRIPT_EXPRESSION_ACCEPT_BRACKET_END;
@@ -6921,7 +6921,7 @@ static px_bool PX_ScriptParseExpression(PX_SCRIPT_Analysis *analysis,px_char *ex
 							Op.type=PX_SCRIPT_TRANSLATOR_EXPRESSION_OP_ADD;
 							Op.opclass=PX_SCRIPT_TRANSLATOR_OP_CLASS_BINARY;
 							Op.oplevel=PX_ScriptParseGetOpLevel("+",PX_TRUE);
-							PX_StringInit(analysis->mp,&Op.code);
+							PX_StringInitialize(analysis->mp,&Op.code);
 							PX_StringCat(&Op.code,"+");
 							PX_VectorPushback(&stream,&Op);
 							accept_type=PX_SCRIPT_EXPRESSION_ACCEPT_TOKEN|PX_SCRIPT_EXPRESSION_ACCEPT_LBRACKET_START|PX_SCRIPT_EXPRESSION_ACCEPT_SINGLE;
@@ -6931,7 +6931,7 @@ static px_bool PX_ScriptParseExpression(PX_SCRIPT_Analysis *analysis,px_char *ex
 							Op.type=PX_SCRIPT_TRANSLATOR_EXPRESSION_OP_POSITIVE;
 							Op.opclass=PX_SCRIPT_TRANSLATOR_OP_CLASS_SINGLE;
 							Op.oplevel=PX_ScriptParseGetOpLevel("+",PX_FALSE);
-							PX_StringInit(analysis->mp,&Op.code);
+							PX_StringInitialize(analysis->mp,&Op.code);
 							PX_StringCat(&Op.code,"+");
 							PX_VectorPushback(&stream,&Op);
 							accept_type=PX_SCRIPT_EXPRESSION_ACCEPT_TOKEN|PX_SCRIPT_EXPRESSION_ACCEPT_LBRACKET_START;
@@ -6959,7 +6959,7 @@ static px_bool PX_ScriptParseExpression(PX_SCRIPT_Analysis *analysis,px_char *ex
 							Op.type=PX_SCRIPT_TRANSLATOR_EXPRESSION_OP_OFT;
 							Op.opclass=PX_SCRIPT_TRANSLATOR_OP_CLASS_BINARY;
 							Op.oplevel=PX_ScriptParseGetOpLevel("->",PX_TRUE);
-							PX_StringInit(analysis->mp,&Op.code);
+							PX_StringInitialize(analysis->mp,&Op.code);
 							PX_StringCat(&Op.code,"->");
 							PX_VectorPushback(&stream,&Op);
 							accept_type=PX_SCRIPT_EXPRESSION_ACCEPT_TOKEN;
@@ -6977,7 +6977,7 @@ static px_bool PX_ScriptParseExpression(PX_SCRIPT_Analysis *analysis,px_char *ex
 							Op.type=PX_SCRIPT_TRANSLATOR_EXPRESSION_OP_DEC;
 							Op.opclass=PX_SCRIPT_TRANSLATOR_OP_CLASS_SINGLE;
 							Op.oplevel=PX_ScriptParseGetOpLevel("--",PX_FALSE);
-							PX_StringInit(analysis->mp,&Op.code);
+							PX_StringInitialize(analysis->mp,&Op.code);
 							PX_StringCat(&Op.code,"--");
 							PX_VectorPushback(&stream,&Op);
 							accept_type=PX_SCRIPT_EXPRESSION_ACCEPT_BINARY|PX_SCRIPT_EXPRESSION_ACCEPT_BRACKET_END;
@@ -6996,7 +6996,7 @@ static px_bool PX_ScriptParseExpression(PX_SCRIPT_Analysis *analysis,px_char *ex
 							Op.type=PX_SCRIPT_TRANSLATOR_EXPRESSION_OP_SUB;
 							Op.opclass=PX_SCRIPT_TRANSLATOR_OP_CLASS_BINARY;
 							Op.oplevel=PX_ScriptParseGetOpLevel("-",PX_TRUE);
-							PX_StringInit(analysis->mp,&Op.code);
+							PX_StringInitialize(analysis->mp,&Op.code);
 							PX_StringCat(&Op.code,"-");
 							PX_VectorPushback(&stream,&Op);
 							accept_type=PX_SCRIPT_EXPRESSION_ACCEPT_TOKEN|PX_SCRIPT_EXPRESSION_ACCEPT_LBRACKET_START|PX_SCRIPT_EXPRESSION_ACCEPT_SINGLE;
@@ -7006,7 +7006,7 @@ static px_bool PX_ScriptParseExpression(PX_SCRIPT_Analysis *analysis,px_char *ex
 							Op.type=PX_SCRIPT_TRANSLATOR_EXPRESSION_OP_NEGATIVE;
 							Op.opclass=PX_SCRIPT_TRANSLATOR_OP_CLASS_SINGLE;
 							Op.oplevel=PX_ScriptParseGetOpLevel("-",PX_FALSE);
-							PX_StringInit(analysis->mp,&Op.code);
+							PX_StringInitialize(analysis->mp,&Op.code);
 							PX_StringCat(&Op.code,"-");
 							PX_VectorPushback(&stream,&Op);
 							accept_type=PX_SCRIPT_EXPRESSION_ACCEPT_TOKEN|PX_SCRIPT_EXPRESSION_ACCEPT_LBRACKET_START;
@@ -7029,7 +7029,7 @@ static px_bool PX_ScriptParseExpression(PX_SCRIPT_Analysis *analysis,px_char *ex
 						Op.type=PX_SCRIPT_TRANSLATOR_EXPRESSION_OP_MUL;
 						Op.opclass=PX_SCRIPT_TRANSLATOR_OP_CLASS_BINARY;
 						Op.oplevel=PX_ScriptParseGetOpLevel("*",PX_TRUE);
-						PX_StringInit(analysis->mp,&Op.code);
+						PX_StringInitialize(analysis->mp,&Op.code);
 						PX_StringCat(&Op.code,"*");
 						PX_VectorPushback(&stream,&Op);
 						accept_type=PX_SCRIPT_EXPRESSION_ACCEPT_TOKEN|PX_SCRIPT_EXPRESSION_ACCEPT_LBRACKET_START|PX_SCRIPT_EXPRESSION_ACCEPT_SINGLE;
@@ -7039,7 +7039,7 @@ static px_bool PX_ScriptParseExpression(PX_SCRIPT_Analysis *analysis,px_char *ex
 						Op.type=PX_SCRIPT_TRANSLATOR_EXPRESSION_OP_PTR;
 						Op.opclass=PX_SCRIPT_TRANSLATOR_OP_CLASS_SINGLE;
 						Op.oplevel=PX_ScriptParseGetOpLevel("*",PX_FALSE);
-						PX_StringInit(analysis->mp,&Op.code);
+						PX_StringInitialize(analysis->mp,&Op.code);
 						PX_StringCat(&Op.code,"*");
 						PX_VectorPushback(&stream,&Op);
 						accept_type=PX_SCRIPT_EXPRESSION_ACCEPT_TOKEN|PX_SCRIPT_EXPRESSION_ACCEPT_LBRACKET_START;
@@ -7060,7 +7060,7 @@ static px_bool PX_ScriptParseExpression(PX_SCRIPT_Analysis *analysis,px_char *ex
 					Op.type=PX_SCRIPT_TRANSLATOR_EXPRESSION_OP_DIV;
 					Op.opclass=PX_SCRIPT_TRANSLATOR_OP_CLASS_BINARY;
 					Op.oplevel=PX_ScriptParseGetOpLevel("/",PX_TRUE);
-					PX_StringInit(analysis->mp,&Op.code);
+					PX_StringInitialize(analysis->mp,&Op.code);
 					PX_StringCat(&Op.code,"/");
 					PX_VectorPushback(&stream,&Op);
 					accept_type=PX_SCRIPT_EXPRESSION_ACCEPT_TOKEN|PX_SCRIPT_EXPRESSION_ACCEPT_LBRACKET_START|PX_SCRIPT_EXPRESSION_ACCEPT_SINGLE;
@@ -7078,7 +7078,7 @@ static px_bool PX_ScriptParseExpression(PX_SCRIPT_Analysis *analysis,px_char *ex
 					Op.type=PX_SCRIPT_TRANSLATOR_EXPRESSION_OP_MBRACKETBEGIN;
 					Op.opclass=PX_SCRIPT_TRANSLATOR_OP_CLASS_CONTAINER;
 					Op.oplevel=PX_ScriptParseGetOpLevel("[",PX_FALSE);
-					PX_StringInit(analysis->mp,&Op.code);
+					PX_StringInitialize(analysis->mp,&Op.code);
 					PX_StringCat(&Op.code,"[");
 					PX_VectorPushback(&stream,&Op);
 					accept_type=PX_SCRIPT_EXPRESSION_ACCEPT_TOKEN|PX_SCRIPT_EXPRESSION_ACCEPT_BRACKET_START|PX_SCRIPT_EXPRESSION_ACCEPT_SINGLE;
@@ -7096,7 +7096,7 @@ static px_bool PX_ScriptParseExpression(PX_SCRIPT_Analysis *analysis,px_char *ex
 					Op.type=PX_SCRIPT_TRANSLATOR_EXPRESSION_OP_MBRACKETEND;
 					Op.opclass=PX_SCRIPT_TRANSLATOR_OP_CLASS_CONTAINER;
 					Op.oplevel=PX_ScriptParseGetOpLevel("]",PX_FALSE);
-					PX_StringInit(analysis->mp,&Op.code);
+					PX_StringInitialize(analysis->mp,&Op.code);
 					PX_StringCat(&Op.code,"]");
 					PX_VectorPushback(&stream,&Op);
 					accept_type=PX_SCRIPT_EXPRESSION_ACCEPT_BINARY|PX_SCRIPT_EXPRESSION_ACCEPT_BRACKET_END;
@@ -7115,7 +7115,7 @@ static px_bool PX_ScriptParseExpression(PX_SCRIPT_Analysis *analysis,px_char *ex
 					Op.type=PX_SCRIPT_TRANSLATOR_EXPRESSION_OP_LBRACKETBEGIN;
 					Op.opclass=PX_SCRIPT_TRANSLATOR_OP_CLASS_CONTAINER;
 					Op.oplevel=PX_ScriptParseGetOpLevel("(",PX_FALSE);
-					PX_StringInit(analysis->mp,&Op.code);
+					PX_StringInitialize(analysis->mp,&Op.code);
 					PX_StringCat(&Op.code,"(");
 					PX_VectorPushback(&stream,&Op);
 					accept_type=PX_SCRIPT_EXPRESSION_ACCEPT_TOKEN|PX_SCRIPT_EXPRESSION_ACCEPT_LBRACKET_START|PX_SCRIPT_EXPRESSION_ACCEPT_LBRACKET_END|PX_SCRIPT_EXPRESSION_ACCEPT_SINGLE;
@@ -7133,7 +7133,7 @@ static px_bool PX_ScriptParseExpression(PX_SCRIPT_Analysis *analysis,px_char *ex
 					Op.type=PX_SCRIPT_TRANSLATOR_EXPRESSION_OP_LBRACKETEND;
 					Op.opclass=PX_SCRIPT_TRANSLATOR_OP_CLASS_CONTAINER;
 					Op.oplevel=PX_ScriptParseGetOpLevel(")",PX_FALSE);
-					PX_StringInit(analysis->mp,&Op.code);
+					PX_StringInitialize(analysis->mp,&Op.code);
 					PX_StringCat(&Op.code,")");
 					PX_VectorPushback(&stream,&Op);
 					accept_type=PX_SCRIPT_EXPRESSION_ACCEPT_BINARY|PX_SCRIPT_EXPRESSION_ACCEPT_BRACKET_END|PX_SCRIPT_EXPRESSION_ACCEPT_MBRACKET_START;
@@ -7151,7 +7151,7 @@ static px_bool PX_ScriptParseExpression(PX_SCRIPT_Analysis *analysis,px_char *ex
 					Op.type=PX_SCRIPT_TRANSLATOR_EXPRESSION_OP_DOT;
 					Op.opclass=PX_SCRIPT_TRANSLATOR_OP_CLASS_SINGLE;
 					Op.oplevel=PX_ScriptParseGetOpLevel(lexer.CurLexeme.buffer,PX_FALSE);
-					PX_StringInit(analysis->mp,&Op.code);
+					PX_StringInitialize(analysis->mp,&Op.code);
 					PX_StringCat(&Op.code,".");
 					PX_VectorPushback(&stream,&Op);
 					accept_type=PX_SCRIPT_EXPRESSION_ACCEPT_TOKEN;
@@ -7175,7 +7175,7 @@ static px_bool PX_ScriptParseExpression(PX_SCRIPT_Analysis *analysis,px_char *ex
 						Op.type=PX_SCRIPT_TRANSLATOR_EXPRESSION_OP_NOT;
 						Op.opclass=PX_SCRIPT_TRANSLATOR_OP_CLASS_SINGLE;
 						Op.oplevel=PX_ScriptParseGetOpLevel("!",PX_FALSE);
-						PX_StringInit(analysis->mp,&Op.code);
+						PX_StringInitialize(analysis->mp,&Op.code);
 						PX_StringCat(&Op.code,"!");
 						PX_VectorPushback(&stream,&Op);
 						accept_type=PX_SCRIPT_EXPRESSION_ACCEPT_LBRACKET_START|PX_SCRIPT_EXPRESSION_ACCEPT_TOKEN;
@@ -7191,7 +7191,7 @@ static px_bool PX_ScriptParseExpression(PX_SCRIPT_Analysis *analysis,px_char *ex
 						Op.type=PX_SCRIPT_TRANSLATOR_EXPRESSION_OP_UNEQU;
 						Op.opclass=PX_SCRIPT_TRANSLATOR_OP_CLASS_BINARY;
 						Op.oplevel=PX_ScriptParseGetOpLevel("!=",PX_TRUE);
-						PX_StringInit(analysis->mp,&Op.code);
+						PX_StringInitialize(analysis->mp,&Op.code);
 						PX_StringCat(&Op.code,"!=");
 						PX_VectorPushback(&stream,&Op);
 						accept_type=PX_SCRIPT_EXPRESSION_ACCEPT_LBRACKET_START|PX_SCRIPT_EXPRESSION_ACCEPT_TOKEN|PX_SCRIPT_EXPRESSION_ACCEPT_SINGLE;
@@ -7209,7 +7209,7 @@ static px_bool PX_ScriptParseExpression(PX_SCRIPT_Analysis *analysis,px_char *ex
 						Op.type=PX_SCRIPT_TRANSLATOR_EXPRESSION_OP_NOT;
 						Op.opclass=PX_SCRIPT_TRANSLATOR_OP_CLASS_SINGLE;
 						Op.oplevel=PX_ScriptParseGetOpLevel("!",PX_FALSE);
-						PX_StringInit(analysis->mp,&Op.code);
+						PX_StringInitialize(analysis->mp,&Op.code);
 						PX_StringCat(&Op.code,"!");
 						PX_VectorPushback(&stream,&Op);
 						accept_type=PX_SCRIPT_EXPRESSION_ACCEPT_LBRACKET_START|PX_SCRIPT_EXPRESSION_ACCEPT_TOKEN;
@@ -7235,7 +7235,7 @@ static px_bool PX_ScriptParseExpression(PX_SCRIPT_Analysis *analysis,px_char *ex
 					Op.type=PX_SCRIPT_TRANSLATOR_EXPRESSION_OP_INV;
 					Op.opclass=PX_SCRIPT_TRANSLATOR_OP_CLASS_SINGLE;
 					Op.oplevel=PX_ScriptParseGetOpLevel("~",PX_FALSE);
-					PX_StringInit(analysis->mp,&Op.code);
+					PX_StringInitialize(analysis->mp,&Op.code);
 					PX_StringCat(&Op.code,"~");
 					PX_VectorPushback(&stream,&Op);
 					accept_type=PX_SCRIPT_EXPRESSION_ACCEPT_LBRACKET_START|PX_SCRIPT_EXPRESSION_ACCEPT_TOKEN;
@@ -7253,7 +7253,7 @@ static px_bool PX_ScriptParseExpression(PX_SCRIPT_Analysis *analysis,px_char *ex
 					Op.type=PX_SCRIPT_TRANSLATOR_EXPRESSION_OP_XOR;
 					Op.opclass=PX_SCRIPT_TRANSLATOR_OP_CLASS_BINARY;
 					Op.oplevel=PX_ScriptParseGetOpLevel("^",PX_TRUE);
-					PX_StringInit(analysis->mp,&Op.code);
+					PX_StringInitialize(analysis->mp,&Op.code);
 					PX_StringCat(&Op.code,"^");
 					PX_VectorPushback(&stream,&Op);
 					accept_type=PX_SCRIPT_EXPRESSION_ACCEPT_LBRACKET_START|PX_SCRIPT_EXPRESSION_ACCEPT_TOKEN|PX_SCRIPT_EXPRESSION_ACCEPT_SINGLE;
@@ -7271,7 +7271,7 @@ static px_bool PX_ScriptParseExpression(PX_SCRIPT_Analysis *analysis,px_char *ex
 					Op.type=PX_SCRIPT_TRANSLATOR_EXPRESSION_OP_MOD;
 					Op.opclass=PX_SCRIPT_TRANSLATOR_OP_CLASS_SINGLE;
 					Op.oplevel=PX_ScriptParseGetOpLevel(lexer.CurLexeme.buffer,PX_TRUE);
-					PX_StringInit(analysis->mp,&Op.code);
+					PX_StringInitialize(analysis->mp,&Op.code);
 					PX_StringCat(&Op.code,"%");
 					PX_VectorPushback(&stream,&Op);
 					accept_type=PX_SCRIPT_EXPRESSION_ACCEPT_LBRACKET_START|PX_SCRIPT_EXPRESSION_ACCEPT_TOKEN|PX_SCRIPT_EXPRESSION_ACCEPT_SINGLE;
@@ -7297,7 +7297,7 @@ static px_bool PX_ScriptParseExpression(PX_SCRIPT_Analysis *analysis,px_char *ex
 						Op.type=PX_SCRIPT_TRANSLATOR_EXPRESSION_OP_LESS;
 						Op.opclass=PX_SCRIPT_TRANSLATOR_OP_CLASS_BINARY;
 						Op.oplevel=PX_ScriptParseGetOpLevel("<",PX_TRUE);
-						PX_StringInit(analysis->mp,&Op.code);
+						PX_StringInitialize(analysis->mp,&Op.code);
 						PX_StringCat(&Op.code,"<");
 						PX_VectorPushback(&stream,&Op);
 						accept_type=PX_SCRIPT_EXPRESSION_ACCEPT_LBRACKET_START|PX_SCRIPT_EXPRESSION_ACCEPT_TOKEN|PX_SCRIPT_EXPRESSION_ACCEPT_SINGLE;
@@ -7307,7 +7307,7 @@ static px_bool PX_ScriptParseExpression(PX_SCRIPT_Analysis *analysis,px_char *ex
 						Op.type=PX_SCRIPT_TRANSLATOR_EXPRESSION_OP_SHL;
 						Op.opclass=PX_SCRIPT_TRANSLATOR_OP_CLASS_BINARY;
 						Op.oplevel=PX_ScriptParseGetOpLevel("<<",PX_TRUE);
-						PX_StringInit(analysis->mp,&Op.code);
+						PX_StringInitialize(analysis->mp,&Op.code);
 						PX_StringCat(&Op.code,"<<");
 						PX_VectorPushback(&stream,&Op);
 						accept_type=PX_SCRIPT_EXPRESSION_ACCEPT_LBRACKET_START|PX_SCRIPT_EXPRESSION_ACCEPT_TOKEN|PX_SCRIPT_EXPRESSION_ACCEPT_SINGLE;
@@ -7317,7 +7317,7 @@ static px_bool PX_ScriptParseExpression(PX_SCRIPT_Analysis *analysis,px_char *ex
 						Op.type=PX_SCRIPT_TRANSLATOR_EXPRESSION_OP_LESSEQU;
 						Op.opclass=PX_SCRIPT_TRANSLATOR_OP_CLASS_BINARY;
 						Op.oplevel=PX_ScriptParseGetOpLevel("<=",PX_TRUE);
-						PX_StringInit(analysis->mp,&Op.code);
+						PX_StringInitialize(analysis->mp,&Op.code);
 						PX_StringCat(&Op.code,"<=");
 						PX_VectorPushback(&stream,&Op);
 						accept_type=PX_SCRIPT_EXPRESSION_ACCEPT_LBRACKET_START|PX_SCRIPT_EXPRESSION_ACCEPT_TOKEN|PX_SCRIPT_EXPRESSION_ACCEPT_SINGLE;
@@ -7350,7 +7350,7 @@ static px_bool PX_ScriptParseExpression(PX_SCRIPT_Analysis *analysis,px_char *ex
 						Op.type=PX_SCRIPT_TRANSLATOR_EXPRESSION_OP_LARGE;
 						Op.opclass=PX_SCRIPT_TRANSLATOR_OP_CLASS_BINARY;
 						Op.oplevel=PX_ScriptParseGetOpLevel(">",PX_TRUE);
-						PX_StringInit(analysis->mp,&Op.code);
+						PX_StringInitialize(analysis->mp,&Op.code);
 						PX_StringCat(&Op.code,">");
 						PX_VectorPushback(&stream,&Op);
 						accept_type=PX_SCRIPT_EXPRESSION_ACCEPT_LBRACKET_START|PX_SCRIPT_EXPRESSION_ACCEPT_TOKEN|PX_SCRIPT_EXPRESSION_ACCEPT_SINGLE;
@@ -7360,7 +7360,7 @@ static px_bool PX_ScriptParseExpression(PX_SCRIPT_Analysis *analysis,px_char *ex
 						Op.type=PX_SCRIPT_TRANSLATOR_EXPRESSION_OP_SHR;
 						Op.opclass=PX_SCRIPT_TRANSLATOR_OP_CLASS_BINARY;
 						Op.oplevel=PX_ScriptParseGetOpLevel(">>",PX_TRUE);
-						PX_StringInit(analysis->mp,&Op.code);
+						PX_StringInitialize(analysis->mp,&Op.code);
 						PX_StringCat(&Op.code,">>");
 						PX_VectorPushback(&stream,&Op);
 						accept_type=PX_SCRIPT_EXPRESSION_ACCEPT_LBRACKET_START|PX_SCRIPT_EXPRESSION_ACCEPT_TOKEN|PX_SCRIPT_EXPRESSION_ACCEPT_SINGLE;
@@ -7370,7 +7370,7 @@ static px_bool PX_ScriptParseExpression(PX_SCRIPT_Analysis *analysis,px_char *ex
 						Op.type=PX_SCRIPT_TRANSLATOR_EXPRESSION_OP_LARGEEUQ;
 						Op.opclass=PX_SCRIPT_TRANSLATOR_OP_CLASS_BINARY;
 						Op.oplevel=PX_ScriptParseGetOpLevel(">=",PX_TRUE);
-						PX_StringInit(analysis->mp,&Op.code);
+						PX_StringInitialize(analysis->mp,&Op.code);
 						PX_StringCat(&Op.code,">=");
 						PX_VectorPushback(&stream,&Op);
 						accept_type=PX_SCRIPT_EXPRESSION_ACCEPT_LBRACKET_START|PX_SCRIPT_EXPRESSION_ACCEPT_TOKEN|PX_SCRIPT_EXPRESSION_ACCEPT_SINGLE;
@@ -7401,7 +7401,7 @@ static px_bool PX_ScriptParseExpression(PX_SCRIPT_Analysis *analysis,px_char *ex
 						Op.type=PX_SCRIPT_TRANSLATOR_EXPRESSION_OP_LGEQU;
 						Op.opclass=PX_SCRIPT_TRANSLATOR_OP_CLASS_BINARY;
 						Op.oplevel=PX_ScriptParseGetOpLevel("==",PX_TRUE);
-						PX_StringInit(analysis->mp,&Op.code);
+						PX_StringInitialize(analysis->mp,&Op.code);
 						PX_StringCat(&Op.code,"==");
 						PX_VectorPushback(&stream,&Op);
 						accept_type=PX_SCRIPT_EXPRESSION_ACCEPT_LBRACKET_START|PX_SCRIPT_EXPRESSION_ACCEPT_TOKEN|PX_SCRIPT_EXPRESSION_ACCEPT_SINGLE;
@@ -7412,7 +7412,7 @@ static px_bool PX_ScriptParseExpression(PX_SCRIPT_Analysis *analysis,px_char *ex
 						Op.type=PX_SCRIPT_TRANSLATOR_EXPRESSION_OP_EQU;
 						Op.opclass=PX_SCRIPT_TRANSLATOR_OP_CLASS_BINARY;
 						Op.oplevel=PX_ScriptParseGetOpLevel("=",PX_TRUE);
-						PX_StringInit(analysis->mp,&Op.code);
+						PX_StringInitialize(analysis->mp,&Op.code);
 						PX_StringCat(&Op.code,"=");
 						PX_VectorPushback(&stream,&Op);
 						accept_type=PX_SCRIPT_EXPRESSION_ACCEPT_LBRACKET_START|PX_SCRIPT_EXPRESSION_ACCEPT_TOKEN|PX_SCRIPT_EXPRESSION_ACCEPT_SINGLE;
@@ -7447,7 +7447,7 @@ static px_bool PX_ScriptParseExpression(PX_SCRIPT_Analysis *analysis,px_char *ex
 							Op.type=PX_SCRIPT_TRANSLATOR_EXPRESSION_OP_AND;
 							Op.opclass=PX_SCRIPT_TRANSLATOR_OP_CLASS_BINARY;
 							Op.oplevel=PX_ScriptParseGetOpLevel("&",PX_TRUE);
-							PX_StringInit(analysis->mp,&Op.code);
+							PX_StringInitialize(analysis->mp,&Op.code);
 							PX_StringCat(&Op.code,"&");
 							PX_VectorPushback(&stream,&Op);
 							accept_type=PX_SCRIPT_EXPRESSION_ACCEPT_LBRACKET_START|PX_SCRIPT_EXPRESSION_ACCEPT_TOKEN|PX_SCRIPT_EXPRESSION_ACCEPT_SINGLE;
@@ -7462,7 +7462,7 @@ static px_bool PX_ScriptParseExpression(PX_SCRIPT_Analysis *analysis,px_char *ex
 							Op.type=PX_SCRIPT_TRANSLATOR_EXPRESSION_OP_LAND;
 							Op.opclass=PX_SCRIPT_TRANSLATOR_OP_CLASS_BINARY;
 							Op.oplevel=PX_ScriptParseGetOpLevel("&&",PX_TRUE);
-							PX_StringInit(analysis->mp,&Op.code);
+							PX_StringInitialize(analysis->mp,&Op.code);
 							PX_StringCat(&Op.code,"&&");
 							PX_VectorPushback(&stream,&Op);
 							accept_type=PX_SCRIPT_EXPRESSION_ACCEPT_LBRACKET_START|PX_SCRIPT_EXPRESSION_ACCEPT_TOKEN|PX_SCRIPT_EXPRESSION_ACCEPT_SINGLE;
@@ -7480,7 +7480,7 @@ static px_bool PX_ScriptParseExpression(PX_SCRIPT_Analysis *analysis,px_char *ex
 							Op.type=PX_SCRIPT_TRANSLATOR_EXPRESSION_OP_AND;
 							Op.opclass=PX_SCRIPT_TRANSLATOR_OP_CLASS_BINARY;
 							Op.oplevel=PX_ScriptParseGetOpLevel("&",PX_TRUE);
-							PX_StringInit(analysis->mp,&Op.code);
+							PX_StringInitialize(analysis->mp,&Op.code);
 							PX_StringCat(&Op.code,"&");
 							PX_VectorPushback(&stream,&Op);
 							accept_type=PX_SCRIPT_EXPRESSION_ACCEPT_LBRACKET_START|PX_SCRIPT_EXPRESSION_ACCEPT_TOKEN|PX_SCRIPT_EXPRESSION_ACCEPT_SINGLE;
@@ -7497,7 +7497,7 @@ static px_bool PX_ScriptParseExpression(PX_SCRIPT_Analysis *analysis,px_char *ex
 						Op.type=PX_SCRIPT_TRANSLATOR_EXPRESSION_OP_ADR;
 						Op.opclass=PX_SCRIPT_TRANSLATOR_OP_CLASS_SINGLE;
 						Op.oplevel=PX_ScriptParseGetOpLevel("&",PX_FALSE);
-						PX_StringInit(analysis->mp,&Op.code);
+						PX_StringInitialize(analysis->mp,&Op.code);
 						PX_StringCat(&Op.code,"&");
 						PX_VectorPushback(&stream,&Op);
 						accept_type=PX_SCRIPT_EXPRESSION_ACCEPT_TOKEN;
@@ -7525,7 +7525,7 @@ static px_bool PX_ScriptParseExpression(PX_SCRIPT_Analysis *analysis,px_char *ex
 						Op.type=PX_SCRIPT_TRANSLATOR_EXPRESSION_OP_OR;
 						Op.opclass=PX_SCRIPT_TRANSLATOR_OP_CLASS_BINARY;
 						Op.oplevel=PX_ScriptParseGetOpLevel("|",PX_TRUE);
-						PX_StringInit(analysis->mp,&Op.code);
+						PX_StringInitialize(analysis->mp,&Op.code);
 						PX_StringCat(&Op.code,"|");
 						PX_VectorPushback(&stream,&Op);
 						accept_type=PX_SCRIPT_EXPRESSION_ACCEPT_LBRACKET_START|PX_SCRIPT_EXPRESSION_ACCEPT_TOKEN|PX_SCRIPT_EXPRESSION_ACCEPT_SINGLE;
@@ -7535,7 +7535,7 @@ static px_bool PX_ScriptParseExpression(PX_SCRIPT_Analysis *analysis,px_char *ex
 						Op.type=PX_SCRIPT_TRANSLATOR_EXPRESSION_OP_LAND;
 						Op.opclass=PX_SCRIPT_TRANSLATOR_OP_CLASS_BINARY;
 						Op.oplevel=PX_ScriptParseGetOpLevel("||",PX_TRUE);
-						PX_StringInit(analysis->mp,&Op.code);
+						PX_StringInitialize(analysis->mp,&Op.code);
 						PX_StringCat(&Op.code,"||");
 						PX_VectorPushback(&stream,&Op);
 						accept_type=PX_SCRIPT_EXPRESSION_ACCEPT_LBRACKET_START|PX_SCRIPT_EXPRESSION_ACCEPT_TOKEN|PX_SCRIPT_EXPRESSION_ACCEPT_SINGLE;
@@ -7546,7 +7546,7 @@ static px_bool PX_ScriptParseExpression(PX_SCRIPT_Analysis *analysis,px_char *ex
 						Op.type=PX_SCRIPT_TRANSLATOR_EXPRESSION_OP_OR;
 						Op.opclass=PX_SCRIPT_TRANSLATOR_OP_CLASS_BINARY;
 						Op.oplevel=PX_ScriptParseGetOpLevel("|",PX_TRUE);
-						PX_StringInit(analysis->mp,&Op.code);
+						PX_StringInitialize(analysis->mp,&Op.code);
 						PX_StringCat(&Op.code,"|");
 						PX_VectorPushback(&stream,&Op);
 						accept_type=PX_SCRIPT_EXPRESSION_ACCEPT_LBRACKET_START|PX_SCRIPT_EXPRESSION_ACCEPT_TOKEN|PX_SCRIPT_EXPRESSION_ACCEPT_SINGLE;
@@ -7573,7 +7573,7 @@ static px_bool PX_ScriptParseExpression(PX_SCRIPT_Analysis *analysis,px_char *ex
 						Op.type=PX_SCRIPT_TRANSLATOR_EXPRESSION_OP_COMMA;
 						Op.opclass=PX_SCRIPT_TRANSLATOR_OP_CLASS_BINARY;
 						Op.oplevel=PX_ScriptParseGetOpLevel(",",PX_TRUE);
-						PX_StringInit(analysis->mp,&Op.code);
+						PX_StringInitialize(analysis->mp,&Op.code);
 						PX_StringCat(&Op.code,",");
 						PX_VectorPushback(&stream,&Op);
 						accept_type=PX_SCRIPT_EXPRESSION_ACCEPT_LBRACKET_START|PX_SCRIPT_EXPRESSION_ACCEPT_TOKEN|PX_SCRIPT_EXPRESSION_ACCEPT_SINGLE;
@@ -7586,7 +7586,7 @@ static px_bool PX_ScriptParseExpression(PX_SCRIPT_Analysis *analysis,px_char *ex
 	Op.type=PX_SCRIPT_TRANSLATOR_EXPRESSION_OP_LBRACKETEND;
 	Op.opclass=PX_SCRIPT_TRANSLATOR_OP_CLASS_CONTAINER;
 	Op.oplevel=0;
-	PX_StringInit(analysis->mp,&Op.code);
+	PX_StringInitialize(analysis->mp,&Op.code);
 	PX_StringCat(&Op.code,lexer.CurLexeme.buffer);
 	PX_VectorPushback(&stream,&Op);
 	PX_StringCat(out,";--------");
@@ -7723,7 +7723,7 @@ static px_bool PX_ScriptParseVar(PX_SCRIPT_Analysis *analysis)
 			goto _ERROR;
 		}
 
-		PX_StringInit(analysis->mp,&variable.Mnemonic);
+		PX_StringInitialize(analysis->mp,&variable.Mnemonic);
 		PX_StringCat(&variable.Mnemonic,analysis->lexer.CurLexeme.buffer);
 
 		type=PX_ScriptTranslatorNextToken(&analysis->lexer);
@@ -7802,7 +7802,7 @@ static px_bool PX_ScriptParseVar(PX_SCRIPT_Analysis *analysis)
 		{
 			variable.size=1;
 			variable.bInitialized=PX_TRUE;
-			PX_StringInit(analysis->mp,&variable.GlobalInitializeValue);
+			PX_StringInitialize(analysis->mp,&variable.GlobalInitializeValue);
 			while(PX_TRUE)
 			{
 				type=PX_ScriptTranslatorNextToken(&analysis->lexer);
@@ -7960,7 +7960,7 @@ static px_bool PX_ScriptParseSet(PX_SCRIPT_Analysis *analysis)
 			goto _ERROR;
 		}
 
-		PX_StringInit(analysis->mp,&variable.Mnemonic);
+		PX_StringInitialize(analysis->mp,&variable.Mnemonic);
 		PX_StringCat(&variable.Mnemonic,analysis->lexer.CurLexeme.buffer);
 
 
@@ -8136,7 +8136,7 @@ px_bool PX_ScriptParseSetDefine(PX_SCRIPT_Analysis *analysis)
 		return PX_FALSE;
 	}
 	
-	PX_StringInit(analysis->mp,&vSet.Name);
+	PX_StringInitialize(analysis->mp,&vSet.Name);
 	PX_StringCat(&vSet.Name,analysis->lexer.CurLexeme.buffer);
 	PX_VectorInitialize(analysis->mp,&vSet.members,sizeof(PX_SCRIPT_SETMEMBER),1);
 
@@ -8195,7 +8195,7 @@ px_bool PX_ScriptParseSetDefine(PX_SCRIPT_Analysis *analysis)
 						goto _ERROR;
 					}
 
-					PX_StringInit(analysis->mp,&member.defvar.Mnemonic);
+					PX_StringInitialize(analysis->mp,&member.defvar.Mnemonic);
 					PX_StringCat(&member.defvar.Mnemonic,analysis->lexer.CurLexeme.buffer);
 					
 					type=PX_ScriptTranslatorNextToken(&analysis->lexer);
@@ -8381,7 +8381,7 @@ px_bool PX_ScriptParseSetDefine(PX_SCRIPT_Analysis *analysis)
 				goto _ERROR;
 				}
 
-				PX_StringInit(analysis->mp,&member.defvar.Mnemonic);
+				PX_StringInitialize(analysis->mp,&member.defvar.Mnemonic);
 				PX_StringCat(&member.defvar.Mnemonic,analysis->lexer.CurLexeme.buffer);
 				member.defvar.bInitialized=PX_FALSE;
 			
@@ -8732,7 +8732,7 @@ px_bool PX_ScriptParseFunctionDefined(PX_SCRIPT_Analysis *analysis,PX_SCRIPT_TRA
 
 		fvar.bInitialized=PX_FALSE;
 		fvar.BeginIndex=0;
-		PX_StringInit(analysis->mp,&fvar.Mnemonic);
+		PX_StringInitialize(analysis->mp,&fvar.Mnemonic);
 		PX_StringCat(&fvar.Mnemonic,analysis->lexer.CurLexeme.buffer);
 	
 		
@@ -8836,7 +8836,7 @@ px_bool PX_ScriptParseFunctionGuiderCode(PX_SCRIPT_Analysis *analysis)
 	PX_StringCat(&analysis->code,":\n");
 
 	//generate codes
-	PX_StringInit(analysis->mp,&code);
+	PX_StringInitialize(analysis->mp,&code);
 	if(stacksize-analysis->currentFunc.parametersCount!=0)
 	{
 	PX_StringFormat1(&code,"SUB SP,%1\n",PX_STRINGFORMAT_INT(stacksize-analysis->currentFunc.parametersCount-1));
@@ -8891,8 +8891,8 @@ px_bool PX_ScriptParseFunctionGuiderCode(PX_SCRIPT_Analysis *analysis)
 		pvar=PX_VECTORAT(PX_SCRIPT_VARIABLES,&analysis->v_variableStackTable,i);
 		if(pvar->bInitialized)
 		{
-		PX_StringInit(analysis->mp,&code);
-		PX_StringInit(analysis->mp,&exprgen);
+		PX_StringInitialize(analysis->mp,&code);
+		PX_StringInitialize(analysis->mp,&exprgen);
 		PX_StringFormat2(&code,"%1=%2",PX_STRINGFORMAT_STRING(pvar->Mnemonic.buffer),PX_STRINGFORMAT_STRING(pvar->GlobalInitializeValue.buffer));
 		if (!PX_ScriptParseExpression(analysis,code.buffer,&exprgen,&retOperand))
 		{
@@ -8919,8 +8919,8 @@ px_bool PX_ScriptParseBootCode(PX_SCRIPT_Analysis *analysis)
 		pvar=PX_VECTORAT(PX_SCRIPT_VARIABLES,&analysis->v_variablesGlobalTable,i);
 		if(pvar->bInitialized)
 		{
-			PX_StringInit(analysis->mp,&code);
-			PX_StringInit(analysis->mp,&exprgen);
+			PX_StringInitialize(analysis->mp,&code);
+			PX_StringInitialize(analysis->mp,&exprgen);
 			PX_StringFormat2(&code,"%1=%2\n",PX_STRINGFORMAT_STRING(pvar->Mnemonic.buffer),PX_STRINGFORMAT_STRING(pvar->GlobalInitializeValue.buffer));
 			if (!PX_ScriptParseExpression(analysis,code.buffer,&exprgen,&retOperand))
 			{
@@ -8938,7 +8938,7 @@ px_bool PX_ScriptParseBootCode(PX_SCRIPT_Analysis *analysis)
 px_bool PX_ScriptParseFunctionReturn(PX_SCRIPT_Analysis *analysis)
 {
 	px_string code;
-	PX_StringInit(analysis->mp,&code);
+	PX_StringInitialize(analysis->mp,&code);
 
 	if(analysis->currentFunc.LocalSize!=0)
 	{
@@ -9062,7 +9062,7 @@ px_bool PX_ScriptParseLastCodeblockEnd(PX_SCRIPT_Analysis *analysis)
 			if (type==PX_LEXER_LEXEME_TYPE_TOKEN&&PX_strequ(analysis->lexer.CurLexeme.buffer,PX_SCRIPT_TRANSLATOR_KEYWORD_ELSE))
 			{
 				//generate code
-				PX_StringInit(analysis->mp,&fmrString);
+				PX_StringInitialize(analysis->mp,&fmrString);
 				PX_StringFormat1(&fmrString,"JMP _ELSE_%1\n",PX_STRINGFORMAT_INT(astStruct._if.elseflag));
 				PX_StringCat(&analysis->code,fmrString.buffer);
 				PX_StringFree(&fmrString);
@@ -9083,7 +9083,7 @@ px_bool PX_ScriptParseLastCodeblockEnd(PX_SCRIPT_Analysis *analysis)
 				}
 				PX_VectorPushback(&analysis->v_astStructure,&buildastStruct);
 
-				PX_StringInit(analysis->mp,&fmrString);
+				PX_StringInitialize(analysis->mp,&fmrString);
 				PX_StringFormat1(&fmrString,"_IF_%1:\n",PX_STRINGFORMAT_INT(astStruct._if.ifflag));
 				PX_StringCat(&analysis->code,fmrString.buffer);
 				PX_StringFree(&fmrString);
@@ -9092,7 +9092,7 @@ px_bool PX_ScriptParseLastCodeblockEnd(PX_SCRIPT_Analysis *analysis)
 			{
 				PX_LexerSetState(state);
 
-				PX_StringInit(analysis->mp,&fmrString);
+				PX_StringInitialize(analysis->mp,&fmrString);
 				PX_StringFormat1(&fmrString,"_IF_%1:\n",PX_STRINGFORMAT_INT(astStruct._if.ifflag));
 				PX_StringCat(&analysis->code,fmrString.buffer);
 				PX_StringFree(&fmrString);
@@ -9109,7 +9109,7 @@ px_bool PX_ScriptParseLastCodeblockEnd(PX_SCRIPT_Analysis *analysis)
 	case PX_SCRIPT_AST_STRUCTURE_TYPE_ELSE:
 		{
 			//
-			PX_StringInit(analysis->mp,&fmrString);
+			PX_StringInitialize(analysis->mp,&fmrString);
 			PX_StringFormat1(&fmrString,"_ELSE_%1:\n",PX_STRINGFORMAT_INT(astStruct._else.elseflag));
 			PX_StringCat(&analysis->code,fmrString.buffer);
 			PX_StringFree(&fmrString);
@@ -9122,7 +9122,7 @@ px_bool PX_ScriptParseLastCodeblockEnd(PX_SCRIPT_Analysis *analysis)
 		break;
 	case PX_SCRIPT_AST_STRUCTURE_TYPE_WHILE:
 		{
-			PX_StringInit(analysis->mp,&fmrString);
+			PX_StringInitialize(analysis->mp,&fmrString);
 			PX_StringFormat1(&fmrString,"JMP _WHILE_%1\n",PX_STRINGFORMAT_INT(astStruct._while.loopflag));
 			PX_StringCat(&analysis->code,fmrString.buffer);
 			PX_StringFormat1(&fmrString,"_WHILE_%1:\n",PX_STRINGFORMAT_INT(astStruct._while.endflag));
@@ -9137,7 +9137,7 @@ px_bool PX_ScriptParseLastCodeblockEnd(PX_SCRIPT_Analysis *analysis)
 		break;
 	case PX_SCRIPT_AST_STRUCTURE_TYPE_FOR:
 		{
-			PX_StringInit(analysis->mp,&fmrString);
+			PX_StringInitialize(analysis->mp,&fmrString);
 			PX_StringFormat1(&fmrString,"JMP _FOR_%1\n",PX_STRINGFORMAT_INT(astStruct._for.additionFlag));
 			PX_StringCat(&analysis->code,fmrString.buffer);
 			//endflag
@@ -9154,7 +9154,7 @@ px_bool PX_ScriptParseLastCodeblockEnd(PX_SCRIPT_Analysis *analysis)
 
 	case PX_SCRIPT_AST_STRUCTURE_TYPE_COMPARE:
 		{
-			PX_StringInit(analysis->mp,&fmrString);
+			PX_StringInitialize(analysis->mp,&fmrString);
 			//endflag
 			PX_StringFormat1(&fmrString,"_COMPARE_%1:\n",PX_STRINGFORMAT_INT(astStruct._compare.endFlag));
 			PX_StringCat(&analysis->code,fmrString.buffer);
@@ -9173,7 +9173,7 @@ px_bool PX_ScriptParseLastCodeblockEnd(PX_SCRIPT_Analysis *analysis)
 
 	case PX_SCRIPT_AST_STRUCTURE_TYPE_WITH:
 		{
-			PX_StringInit(analysis->mp,&fmrString);
+			PX_StringInitialize(analysis->mp,&fmrString);
 			//endflag
 			PX_StringFormat1(&fmrString,"_WITH_%1:\n",PX_STRINGFORMAT_INT(astStruct._compare.endFlag));
 			PX_StringCat(&analysis->code,fmrString.buffer);
@@ -9338,7 +9338,7 @@ px_bool PX_ScriptCompilerCompile(PX_SCRIPT_LIBRARY *lib,const px_char *name,px_s
 
 	//////////////////////////////////////////////////////////////////////////
 
-	PX_StringInit(lib->mp,&codes);
+	PX_StringInitialize(lib->mp,&codes);
 
 	for (i=0;i<lib->codeLibraries.size;i++)
 	{
@@ -9403,8 +9403,8 @@ px_bool PX_ScriptCompilerCompile(PX_SCRIPT_LIBRARY *lib,const px_char *name,px_s
 	PX_VectorInitialize(lib->mp,&analysis.v_astStructure,sizeof(PX_SCRIPT_AST_STRUCTURE),1);
 
 	analysis.mp=lib->mp;
-	PX_StringInit(analysis.mp,&analysis.bootCode);
-	PX_StringInit(analysis.mp,&analysis.code);
+	PX_StringInitialize(analysis.mp,&analysis.bootCode);
+	PX_StringInitialize(analysis.mp,&analysis.code);
 
 
 	//////////////////////////////////////////////////////////////////////////
@@ -9742,8 +9742,8 @@ px_bool PX_ScriptCompilerCompile(PX_SCRIPT_LIBRARY *lib,const px_char *name,px_s
 			}
 
 			//condition expression
-			PX_StringInit(analysis.mp,&expression);
-			PX_StringInit(analysis.mp,&expCode);
+			PX_StringInitialize(analysis.mp,&expression);
+			PX_StringInitialize(analysis.mp,&expCode);
 
 			if(!PX_ScriptParseGetExpression(&analysis,&expression,')'))
 			{
@@ -9786,7 +9786,7 @@ px_bool PX_ScriptCompilerCompile(PX_SCRIPT_LIBRARY *lib,const px_char *name,px_s
 			}
 			PX_VectorPushback(&analysis.v_astStructure,&buildAstStruct);
 
-			PX_StringInit(analysis.mp,&expression);
+			PX_StringInitialize(analysis.mp,&expression);
 			PX_StringFormat1(&expression,"JE R1,0,_IF_%1\n",PX_STRINGFORMAT_INT(buildAstStruct._if.ifflag));
 			PX_StringCat(&analysis.code,expression.buffer);
 			PX_StringFree(&expression);
@@ -9811,8 +9811,8 @@ px_bool PX_ScriptCompilerCompile(PX_SCRIPT_LIBRARY *lib,const px_char *name,px_s
 			}
 
 			//condition expression
-			PX_StringInit(analysis.mp,&expression);
-			PX_StringInit(analysis.mp,&expCode);
+			PX_StringInitialize(analysis.mp,&expression);
+			PX_StringInitialize(analysis.mp,&expCode);
 
 			if(!PX_ScriptParseGetExpression(&analysis,&expression,')'))
 			{
@@ -9825,7 +9825,7 @@ px_bool PX_ScriptCompilerCompile(PX_SCRIPT_LIBRARY *lib,const px_char *name,px_s
 			buildAstStruct._while.loopflag=analysis._jFlag++;
 			buildAstStruct._while.endflag=analysis._jFlag++;
 
-			PX_StringInit(analysis.mp,&fmrString);
+			PX_StringInitialize(analysis.mp,&fmrString);
 			PX_StringFormat1(&fmrString,"_WHILE_%1:\n",PX_STRINGFORMAT_INT(buildAstStruct._while.loopflag));
 			PX_StringCat(&analysis.code,fmrString.buffer);
 			PX_StringFree(&fmrString);
@@ -9862,7 +9862,7 @@ px_bool PX_ScriptCompilerCompile(PX_SCRIPT_LIBRARY *lib,const px_char *name,px_s
 			}
 			PX_VectorPushback(&analysis.v_astStructure,&buildAstStruct);
 
-			PX_StringInit(analysis.mp,&expression);
+			PX_StringInitialize(analysis.mp,&expression);
 			PX_StringFormat1(&expression,"JE R1,0,_WHILE_%1\n",PX_STRINGFORMAT_INT(buildAstStruct._while.endflag));
 			PX_StringCat(&analysis.code,expression.buffer);
 			PX_StringFree(&expression);
@@ -9885,8 +9885,8 @@ px_bool PX_ScriptCompilerCompile(PX_SCRIPT_LIBRARY *lib,const px_char *name,px_s
 				goto _ERROR;
 			}
 
-			PX_StringInit(analysis.mp,&codes);
-			PX_StringInit(analysis.mp,&fmrString);
+			PX_StringInitialize(analysis.mp,&codes);
+			PX_StringInitialize(analysis.mp,&fmrString);
 			while (PX_TRUE)
 			{
 				type=PX_LexerGetNextLexeme(&analysis.lexer);
@@ -9956,10 +9956,10 @@ _CONTINUE:
 			//condition expression
 			PX_StringCat(&analysis.code,";--------FOR (INIT;CONDITION;ADDITION) \n");
 
-			PX_StringInit(analysis.mp,&expression);
-			PX_StringInit(analysis.mp,&expCode);
-			PX_StringInit(analysis.mp,&fmrString);
-			PX_StringInit(analysis.mp,&condCodes);
+			PX_StringInitialize(analysis.mp,&expression);
+			PX_StringInitialize(analysis.mp,&expCode);
+			PX_StringInitialize(analysis.mp,&fmrString);
+			PX_StringInitialize(analysis.mp,&condCodes);
 			//INIT code
 			if(!PX_ScriptParseGetExpression(&analysis,&expression,';'))
 			{
@@ -10094,8 +10094,8 @@ _CONTINUE:
 			PX_StringCat(&analysis.code,";--------COMPARE (ORIGINAL) \n");
 
 			//condition expression
-			PX_StringInit(analysis.mp,&expression);
-			PX_StringInit(analysis.mp,&expCode);
+			PX_StringInitialize(analysis.mp,&expression);
+			PX_StringInitialize(analysis.mp,&expCode);
 
 			if(!PX_ScriptParseGetExpression(&analysis,&expression,')'))
 			{
@@ -10174,8 +10174,8 @@ _CONTINUE:
 			PX_StringCat(&analysis.code,";--------WITH (CONDITION) \n");
 			
 			//condition expression
-			PX_StringInit(analysis.mp,&expression);
-			PX_StringInit(analysis.mp,&expCode);
+			PX_StringInitialize(analysis.mp,&expression);
+			PX_StringInitialize(analysis.mp,&expCode);
 
 			PX_StringCat(&analysis.code,"MOV R3,0\n");
 			PX_StringCat(&analysis.code,"MOV R2,GLOBAL[SP]\n");
@@ -10319,7 +10319,7 @@ _CONTINUE:
 				{
 				case PX_SCRIPT_AST_STRUCTURE_TYPE_WHILE:
 					{
-						PX_StringInit(analysis.mp,&fmrString);
+						PX_StringInitialize(analysis.mp,&fmrString);
 						PX_StringFormat1(&fmrString,"JMP _WHILE_%1\n",PX_STRINGFORMAT_INT(astStruct._while.endflag));
 						PX_StringCat(&analysis.code,fmrString.buffer);
 						PX_StringFree(&fmrString);
@@ -10328,7 +10328,7 @@ _CONTINUE:
 					break;
 				case PX_SCRIPT_AST_STRUCTURE_TYPE_FOR:
 					{
-						PX_StringInit(analysis.mp,&fmrString);
+						PX_StringInitialize(analysis.mp,&fmrString);
 						PX_StringFormat1(&fmrString,"JMP _FOR_%1\n",PX_STRINGFORMAT_INT(astStruct._for.endFlag));
 						PX_StringCat(&analysis.code,fmrString.buffer);
 						PX_StringFree(&fmrString);
@@ -10337,7 +10337,7 @@ _CONTINUE:
 					break;
 				case PX_SCRIPT_AST_STRUCTURE_TYPE_COMPARE:
 					{
-						PX_StringInit(analysis.mp,&fmrString);
+						PX_StringInitialize(analysis.mp,&fmrString);
 						PX_StringFormat1(&fmrString,"JMP _COMPARE_%1\n",PX_STRINGFORMAT_INT(astStruct._compare.endFlag));
 						PX_StringCat(&analysis.code,fmrString.buffer);
 						PX_StringFree(&fmrString);
@@ -10378,7 +10378,7 @@ _CONTINUE:
 				{
 				case PX_SCRIPT_AST_STRUCTURE_TYPE_WHILE:
 					{
-						PX_StringInit(analysis.mp,&fmrString);
+						PX_StringInitialize(analysis.mp,&fmrString);
 						PX_StringFormat1(&fmrString,"JMP _WHILE_%1\n",PX_STRINGFORMAT_INT(astStruct._while.loopflag));
 						PX_StringCat(&analysis.code,fmrString.buffer);
 						PX_StringFree(&fmrString);
@@ -10387,7 +10387,7 @@ _CONTINUE:
 					break;
 				case PX_SCRIPT_AST_STRUCTURE_TYPE_FOR:
 					{
-						PX_StringInit(analysis.mp,&fmrString);
+						PX_StringInitialize(analysis.mp,&fmrString);
 						PX_StringFormat1(&fmrString,"JMP _FOR_%1\n",PX_STRINGFORMAT_INT(astStruct._for.additionFlag));
 						PX_StringCat(&analysis.code,fmrString.buffer);
 						PX_StringFree(&fmrString);
@@ -10418,8 +10418,8 @@ _CONTINUEOUT:
 				goto _ERROR;
 			}
 			//custom expression
-			PX_StringInit(analysis.mp,&expression);
-			PX_StringInit(analysis.mp,&expCode);
+			PX_StringInitialize(analysis.mp,&expression);
+			PX_StringInitialize(analysis.mp,&expCode);
 
 			if(!PX_ScriptParseGetExpression(&analysis,&expression,';'))
 			{
@@ -10562,8 +10562,8 @@ _CONTINUEOUT:
 				//custom expression
 				PX_LexerSetState(state);
 
-				PX_StringInit(analysis.mp,&expression);
-				PX_StringInit(analysis.mp,&expCode);
+				PX_StringInitialize(analysis.mp,&expression);
+				PX_StringInitialize(analysis.mp,&expCode);
 
 				if(!PX_ScriptParseGetExpression(&analysis,&expression,';'))
 				{
@@ -10609,14 +10609,14 @@ _CONTINUEOUT:
 		globalSize+=PX_VECTORAT(PX_SCRIPT_VARIABLES,&analysis.v_variablesGlobalTable,i)->size;
 	}
 
-	PX_StringInit(analysis.mp,&fmrString);
+	PX_StringInitialize(analysis.mp,&fmrString);
 	PX_StringFormat3(&fmrString,".GLOBAL %1\n.STACK %2\n.THREAD %3\n",PX_STRINGFORMAT_INT(globalSize),PX_STRINGFORMAT_INT(LocalStackSize),PX_STRINGFORMAT_INT(thread));
 	PX_StringCat(ASM,fmrString.buffer);
 	PX_StringFree(&fmrString);
 
 	PX_StringCat(ASM,"EXPORT FUNCTION _BOOT:\n");
 
-	PX_StringInit(analysis.mp,&fmrString);
+	PX_StringInitialize(analysis.mp,&fmrString);
 	for (i=0;i<analysis.v_variablesGlobalTable.size;i++)
 	{
 		pvar=PX_VECTORAT(PX_SCRIPT_VARIABLES,&analysis.v_variablesGlobalTable,i);

@@ -384,8 +384,8 @@ px_bool PX_ConsoleExecute(PX_Console *pc,char *pshellstr)
 	if(mp_calc.StartAddr==PX_NULL) return PX_FALSE;
 	PX_ConsolePrintText(pc,pshellstr);
 	MP_Reset(&mp_calc);
-	PX_MemoryInit(&mp_calc,&bin);
-	PX_StringInit(&mp_calc,&shell);
+	PX_MemoryInitialize(&mp_calc,&bin);
+	PX_StringInitialize(&mp_calc,&shell);
 	PX_StringCat(&shell,(char *)PC_ScriptPreload);
 	if(pc->script_header_append)
 	PX_StringCat(&shell,(char *)pc->script_header_append);
@@ -407,7 +407,7 @@ px_bool PX_ConsoleExecute(PX_Console *pc,char *pshellstr)
 
 	PX_StringFree(&shell);
 
-	PX_StringInit(&mp_calc,&asmcodeString);
+	PX_StringInitialize(&mp_calc,&asmcodeString);
 	if(PX_ScriptCompilerCompile(&lib,"shell",&asmcodeString,32))
 	{
 		PX_ScriptAsmOptimization(&asmcodeString);

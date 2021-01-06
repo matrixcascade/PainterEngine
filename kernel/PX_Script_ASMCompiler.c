@@ -345,7 +345,7 @@ static px_bool PX_ScriptASMMapAssume(PX_SCRIPT_ASM_COMPILER *compiler,px_string 
 static px_bool PX_ScriptAsmLocalType(PX_SCRIPT_ASM_COMPILER *compiler,px_char *Token,px_char *type,px_dword *index)
 {
 	px_string TempTokenString;
-	PX_StringInit(compiler->mp,&TempTokenString);
+	PX_StringInitialize(compiler->mp,&TempTokenString);
 	PX_StringCat(&TempTokenString,Token);
 
 	PX_StringTrimLeft(&TempTokenString,PX_strlen("LOCAL["));
@@ -408,7 +408,7 @@ static px_bool PX_ScriptAsmLocalType(PX_SCRIPT_ASM_COMPILER *compiler,px_char *T
 static px_bool PX_ScriptAsmGlobalType(PX_SCRIPT_ASM_COMPILER *compiler,px_char *Token,px_char *type,px_dword *index)
 {
 	px_string TempTokenString;
-	PX_StringInit(compiler->mp,&TempTokenString);
+	PX_StringInitialize(compiler->mp,&TempTokenString);
 
 	PX_StringCat(&TempTokenString,Token);
 
@@ -531,8 +531,8 @@ px_void PX_ScriptAsmUpdateAssumeTable(PX_SCRIPT_ASM_COMPILER *compiler,px_char *
 			return;
 		}
 	}
-	PX_StringInit(compiler->mp,&newNode.assume);
-	PX_StringInit(compiler->mp,&newNode.name);
+	PX_StringInitialize(compiler->mp,&newNode.assume);
+	PX_StringInitialize(compiler->mp,&newNode.name);
 	PX_StringCat(&newNode.assume,assume);
 	PX_StringCat(&newNode.name,name);
 
@@ -631,7 +631,7 @@ px_void PX_ScriptAsmAddStringConst(PX_SCRIPT_ASM_COMPILER *compiler,px_char *Str
 			return;
 		}
 	}
-	PX_StringInit(compiler->mp,&stringNode.str);
+	PX_StringInitialize(compiler->mp,&stringNode.str);
 	if(compiler->StringTable.size!=0)
 	{
 		pLastNode=(PX_SCRIPT_ASM_STRING_NODE *)(PX_ListNodeAt(&compiler->StringTable,compiler->StringTable.size-1)->pdata);
@@ -658,7 +658,7 @@ px_bool PX_ScriptAsmAddMemoryConst(PX_SCRIPT_ASM_COMPILER *compiler,px_char *Str
 		return PX_FALSE;
 	}
 
-	PX_MemoryInit(compiler->mp,&memoryNode.mem);
+	PX_MemoryInitialize(compiler->mp,&memoryNode.mem);
 	
 	if(!PX_MemoryAlloc(&memoryNode.mem,PX_strlen(StringMap)>>1))
 		return PX_FALSE;
@@ -712,7 +712,7 @@ px_dword PX_ScriptAsmGetMemoryAddr(PX_SCRIPT_ASM_COMPILER *compiler,px_char *Str
 		return PX_FALSE;
 	}
 
-	PX_MemoryInit(compiler->mp,&memoryNode.mem);
+	PX_MemoryInitialize(compiler->mp,&memoryNode.mem);
 	PX_MemoryAlloc(&memoryNode.mem,PX_strlen(StringMap)>>1);
 	while (*StringMap)
 	{
@@ -783,8 +783,8 @@ px_bool PX_ScriptAsmScan(PX_SCRIPT_ASM_COMPILER *compiler)
 	px_bool hasMatched;
 	px_char *pLexeme;
 
-	PX_StringInit(compiler->mp,&assumeName);
-	PX_StringInit(compiler->mp,&assumeString);
+	PX_StringInitialize(compiler->mp,&assumeName);
+	PX_StringInitialize(compiler->mp,&assumeString);
 
 	while ((type=PX_ScriptAsmNexLexeme (&compiler->lexer))!=PX_LEXER_LEXEME_TYPE_END)
 	{
@@ -1056,7 +1056,7 @@ px_bool PX_ScriptAsmScan(PX_SCRIPT_ASM_COMPILER *compiler)
 
 								if (PX_ScriptAsmTokenType(compiler,compiler->lexer.CurLexeme.buffer)==PX_SCRIPT_ASM_OPERAND_ACC_TYPE_STRING)
 								{
-									PX_StringInit(compiler->mp,&includeStr);
+									PX_StringInitialize(compiler->mp,&includeStr);
 									PX_LexerGetIncludedString(&compiler->lexer,&includeStr);
 									PX_ScriptAsmStringConvert(&includeStr);
 									PX_ScriptAsmAddStringConst(compiler,includeStr.buffer);
@@ -1065,7 +1065,7 @@ px_bool PX_ScriptAsmScan(PX_SCRIPT_ASM_COMPILER *compiler)
 
 								if (PX_ScriptAsmTokenType(compiler,compiler->lexer.CurLexeme.buffer)==PX_SCRIPT_ASM_OPERAND_ACC_TYPE_MEMORY)
 								{
-									PX_StringInit(compiler->mp,&includeStr);
+									PX_StringInitialize(compiler->mp,&includeStr);
 									PX_LexerGetIncludedString(&compiler->lexer,&includeStr);
 									if(!PX_ScriptAsmAddMemoryConst(compiler,includeStr.buffer))
 									{
@@ -1140,9 +1140,9 @@ px_bool PX_ScriptAsmCc(PX_SCRIPT_ASM_COMPILER *compiler)
 	px_char *pLexeme;
 	px_string strInc;
 
-	PX_StringInit(compiler->mp,&ParamMne);
-	PX_StringInit(compiler->mp,&assumeName);
-	PX_StringInit(compiler->mp,&assumeString);
+	PX_StringInitialize(compiler->mp,&ParamMne);
+	PX_StringInitialize(compiler->mp,&assumeName);
+	PX_StringInitialize(compiler->mp,&assumeString);
 
 	
 	while ((type=PX_ScriptAsmNexLexeme (&compiler->lexer))!=PX_LEXER_LEXEME_TYPE_END)
@@ -1322,14 +1322,14 @@ px_bool PX_ScriptAsmCc(PX_SCRIPT_ASM_COMPILER *compiler)
 											break;
 
 								case PX_SCRIPT_ASM_OPTYPE_MEMORY:
-									PX_StringInit(compiler->mp,&strInc);
+									PX_StringInitialize(compiler->mp,&strInc);
 									PX_StringCat(&strInc,ParamMne.buffer);
 									PX_LexerGetIncludedString(&compiler->lexer,&strInc);
 									instrbin.param[j]=PX_ScriptAsmGetMemoryAddr(compiler,strInc.buffer);
 									PX_StringFree(&strInc);
 									break;
 								case PX_SCRIPT_ASM_OPTYPE_STRING:
-									PX_StringInit(compiler->mp,&strInc);
+									PX_StringInitialize(compiler->mp,&strInc);
 									PX_StringCat(&strInc,ParamMne.buffer);
 									PX_LexerGetIncludedString(&compiler->lexer,&strInc);
 									PX_ScriptAsmStringConvert(&strInc);

@@ -29,6 +29,9 @@
 #define PX_OBJECT_EVENT_ONFOCUSCHANGED		17
 #define PX_OBJECT_EVENT_SCALE               18
 #define PX_OBJECT_EVENT_WINDOWRESIZE        19
+#define PX_OBJECT_EVENT_ONFOCUS				20
+#define PX_OBJECT_EVENT_LOSTFOCUS           21
+
 
 //////////////////////////////////////////////////////////////////////////////
 //    Type of Controls
@@ -56,6 +59,8 @@ enum PX_OBJECT_TYPE
   PX_OBJECT_TYPE_FILTEREDITOR   ,
   PX_OBJECT_TYPE_CHECKBOX		,
   PX_OBJECT_TYPE_ROTATION		,
+  PX_OBJECT_TYPE_MENU			,
+  PX_OBJECT_TYPE_SELECTBAR		,
 };
 
 
@@ -107,6 +112,7 @@ typedef px_void  (*Function_ObjectFree)(PX_Object *);
 
 struct _PX_Object
 {
+	px_int id;
 	px_float x;
 	px_float y;
 	px_float z;
@@ -114,6 +120,7 @@ struct _PX_Object
 	px_float Height;
 	px_float Length;
 	px_float diameter;//if the member is not zero,The Object is round shape
+	px_bool OnFocus;
 	px_bool Enabled;
 	px_bool Visible;
 	px_bool ReceiveEvents;
@@ -200,6 +207,7 @@ px_int PX_Object_Event_GetCursorIndex(PX_Object_Event e);
 
 px_float PX_Object_Event_GetWidth(PX_Object_Event e);
 px_float PX_Object_Event_GetHeight(PX_Object_Event e);
+px_int PX_Object_Event_GetIndex(PX_Object_Event e);
 
 px_void PX_Object_Event_SetWidth(PX_Object_Event *e,px_float w);
 px_void PX_Object_Event_SetHeight(PX_Object_Event *e,px_float h);
@@ -220,6 +228,7 @@ px_uint PX_Object_Event_GetKeyDown(PX_Object_Event e);
 px_void PX_Object_Event_SetKeyDown(PX_Object_Event *e,px_uint key);
 px_char* PX_Object_Event_GetStringPtr(PX_Object_Event e);
 px_void PX_Object_Event_SetStringPtr(PX_Object_Event *e,px_void *ptr);
+px_void PX_Object_Event_SetIndex(PX_Object_Event *e,px_int index);
 struct _PX_Object_EventAction
 {
 	px_uint EventAction;
@@ -977,4 +986,71 @@ px_void PX_Object_RotationSetSpeed(PX_Object *rot,px_int Angle_per_second);
 px_void PX_Object_RotationStop(PX_Object *rot,px_bool bstop);
 px_void PX_Object_RotationRender(px_surface *psurface, PX_Object *Obj,px_uint elpased);
 
+
+#define PX_MENU_CONTENT_MAX_LEN 48
+#define PX_MENU_ITEM_SPACER_SIZE 2
+typedef px_void (*PX_MenuExecuteFunc)(px_void *userPtr);
+
+
+typedef struct _PX_Object_Menu_Item
+{
+	struct _PX_Object_Menu_Item *pParent;
+	px_int  x,y,width,height;
+	px_char Text[PX_MENU_CONTENT_MAX_LEN];
+	px_bool onCursor;
+	px_bool Activated;
+	px_list Items;
+	PX_MenuExecuteFunc func_callback;
+	px_void *user_ptr;
+};
+typedef struct _PX_Object_Menu_Item PX_Object_Menu_Item;
+
+typedef struct
+{
+	px_memorypool *mp;
+	px_bool OnFocus;
+	px_int minimumSize;
+	PX_Object_Menu_Item root;
+	PX_FontModule *fontmodule;
+	px_color backgroundColor;
+	px_color fontColor;
+	px_color cursorColor;
+}PX_Object_Menu;
+
+
+PX_Object * PX_Object_MenuCreate(px_memorypool *mp,PX_Object *Parent,px_int x,int y,px_int width,PX_FontModule *fontmodule);
+PX_Object_Menu_Item * PX_Object_MenuGetRootItem(PX_Object *pMenuObject);
+PX_Object_Menu_Item * PX_Object_MenuAddItem(PX_Object *pMenuObject,PX_Object_Menu_Item *parent,const px_char Text[],PX_MenuExecuteFunc _callback,px_void *ptr);
+
+
+
+typedef struct
+{
+	px_char Text[PX_MENU_CONTENT_MAX_LEN];
+	px_bool onCursor;
+}PX_Object_SelectBar_Item;;
+
+typedef struct
+{
+	px_memorypool *mp;
+	px_int	maxDisplayCount;
+	px_int  currentDisplayOffsetIndex;
+	px_int  ItemHeight;
+	px_bool activating;
+	px_bool onCursor;
+	px_vector Items;//PX_Object_SelectBar_Item;
+	PX_FontModule *fontmodule;
+	px_color backgroundColor;
+	px_color fontColor;
+	px_color cursorColor;
+	px_color borderColor;
+	px_int   selectIndex;
+	PX_Object *sliderBar;
+}PX_Object_SelectBar;
+
+PX_Object_SelectBar *PX_Object_GetSelectBar(PX_Object *pSelecrBar);
+PX_Object * PX_Object_SelectBarCreate(px_memorypool *mp,PX_Object *Parent,px_int x,int y,px_int width,px_int height,PX_FontModule *fontmodule);
+px_int  PX_Object_SelectBarAddItem(PX_Object *PX_Object_SelectBar,const px_char Text[]);
+px_void PX_Object_SelectBarRemoveItem(PX_Object *PX_Object_SelectBar,px_int index);
+px_int PX_Object_SelectBarGetItemIndexByText(PX_Object *pObject,const px_char Text[]);
 #endif

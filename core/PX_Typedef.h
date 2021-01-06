@@ -409,6 +409,7 @@ px_bool  PX_ColorEqual(px_color color1,px_color color2);
 //////////////////////////////////////////////////////////////////////////
 //point
 px_point PX_POINT(px_float x,px_float y,px_float z);
+px_point2D PX_POINT2D(px_float x,px_float y);
 px_point4D PX_POINT4D(px_float x,px_float y,px_float z);
 px_point PX_PointRotate(px_point p,px_float angle);
 px_float PX_PointDistance(px_point p1,px_point p2);

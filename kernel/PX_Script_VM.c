@@ -153,7 +153,7 @@ PX_SCRIPTVM_VARIABLE PX_SCRIPTVM_VaribaleCopy(PX_ScriptVM_Instance *Ins,PX_SCRIP
 
 	if (var.type==PX_SCRIPTVM_VARIABLE_TYPE_STRING)
 	{
-		if(!PX_StringInit(Ins->mp,&cpyVar._string)) 
+		if(!PX_StringInitialize(Ins->mp,&cpyVar._string)) 
 		{
 			cpyVar.type=PX_SCRIPTVM_VARIABLE_TYPE_INT;
 			*bOutOfMemory=PX_TRUE;
@@ -169,7 +169,7 @@ PX_SCRIPTVM_VARIABLE PX_SCRIPTVM_VaribaleCopy(PX_ScriptVM_Instance *Ins,PX_SCRIP
 	}
 	else if (var.type==PX_SCRIPTVM_VARIABLE_TYPE_MEMORY)
 	{
-		PX_MemoryInit(Ins->mp,&cpyVar._memory);
+		PX_MemoryInitialize(Ins->mp,&cpyVar._memory);
 		if(!PX_MemoryCat(&cpyVar._memory,var._memory.buffer,var._memory.usedsize))
 		{
 			cpyVar.type=PX_SCRIPTVM_VARIABLE_TYPE_INT;
@@ -828,7 +828,7 @@ PX_SCRIPTVM_RUNRETURN PX_ScriptVM_InstanceRunThread(PX_ScriptVM_Instance *Ins,px
 			
 			if (cVar.type==PX_SCRIPTVM_VARIABLE_TYPE_STRING)
 			{
-				if(!PX_StringInit(Ins->mp,&pVar->_string)) 
+				if(!PX_StringInitialize(Ins->mp,&pVar->_string)) 
 				{
 					PX_ScriptVM_Error(Ins,"MOV crash.");
 					goto _ERROR;
@@ -842,7 +842,7 @@ PX_SCRIPTVM_RUNRETURN PX_ScriptVM_InstanceRunThread(PX_ScriptVM_Instance *Ins,px
 			}
 			else if (cVar.type==PX_SCRIPTVM_VARIABLE_TYPE_MEMORY)
 			{
-				PX_MemoryInit(Ins->mp,&pVar->_memory);
+				PX_MemoryInitialize(Ins->mp,&pVar->_memory);
 				if(!PX_MemoryAlloc(&pVar->_memory,cVar._memory.usedsize)) 
 				{
 					PX_ScriptVM_Error(Ins,"MOV crash.");
@@ -1506,7 +1506,7 @@ PX_SCRIPTVM_RUNRETURN PX_ScriptVM_InstanceRunThread(PX_ScriptVM_Instance *Ins,px
 			}
 
 			pVar->type=PX_SCRIPTVM_VARIABLE_TYPE_STRING;
-			PX_StringInit(Ins->mp,&pVar->_string);
+			PX_StringInitialize(Ins->mp,&pVar->_string);
 			if(cVar.type==PX_SCRIPTVM_VARIABLE_TYPE_INT)
 			PX_itoa(cVar._int,numOut,sizeof(numOut),10);
 			else
@@ -1531,7 +1531,7 @@ PX_SCRIPTVM_RUNRETURN PX_ScriptVM_InstanceRunThread(PX_ScriptVM_Instance *Ins,px
 			}
 
 			pVar->type=PX_SCRIPTVM_VARIABLE_TYPE_STRING;
-			PX_StringInit(Ins->mp,&pVar->_string);
+			PX_StringInitialize(Ins->mp,&pVar->_string);
 			numOut[0]=0;
 			if(cVar.type==PX_SCRIPTVM_VARIABLE_TYPE_INT)
 				PX_ftoa((px_float)cVar._int,numOut,sizeof(numOut),PX_SCRIPTVM_DEFALUT_FLOAT_PRECCISION);
@@ -1547,7 +1547,7 @@ PX_SCRIPTVM_RUNRETURN PX_ScriptVM_InstanceRunThread(PX_ScriptVM_Instance *Ins,px
 			pVar=PX_SCRIPT_VM_GetVariablePointer(Ins,opType[0],PX_SCRIPT_VM_PARAM(0));
 			if (pVar->type==PX_SCRIPTVM_VARIABLE_TYPE_STRING)
 			{
-				PX_MemoryInit(Ins->mp,&cVar._memory);
+				PX_MemoryInitialize(Ins->mp,&cVar._memory);
 				if(!PX_MemoryCat(&cVar._memory,pVar->_string.buffer,pVar->_string.bufferlen)) goto _ERROR;
 				PX_StringFree(&pVar->_string);
 				pVar->type=PX_SCRIPTVM_VARIABLE_TYPE_MEMORY;
@@ -1579,7 +1579,7 @@ PX_SCRIPTVM_RUNRETURN PX_ScriptVM_InstanceRunThread(PX_ScriptVM_Instance *Ins,px
 					else
 					{
 						pVar->type=PX_SCRIPTVM_VARIABLE_TYPE_STRING;
-						PX_StringInit(Ins->mp,&pVar->_string);
+						PX_StringInitialize(Ins->mp,&pVar->_string);
 					}
 			}
 
@@ -1693,7 +1693,7 @@ PX_SCRIPTVM_RUNRETURN PX_ScriptVM_InstanceRunThread(PX_ScriptVM_Instance *Ins,px
 				else
 				{
 					pVar->type=PX_SCRIPTVM_VARIABLE_TYPE_MEMORY;
-					PX_MemoryInit(Ins->mp,&pVar->_memory);
+					PX_MemoryInitialize(Ins->mp,&pVar->_memory);
 				}
 			}
 
@@ -1833,7 +1833,7 @@ PX_SCRIPTVM_RUNRETURN PX_ScriptVM_InstanceRunThread(PX_ScriptVM_Instance *Ins,px
 			{
 				if (pVar->_memory.usedsize==0)
 				{
-					PX_StringInit(Ins->mp,&cVar._string);
+					PX_StringInitialize(Ins->mp,&cVar._string);
 					PX_MemoryFree(&pVar->_memory);
 					pVar->type=PX_SCRIPTVM_VARIABLE_TYPE_STRING;
 					pVar->_string=cVar._string;
@@ -1844,7 +1844,7 @@ PX_SCRIPTVM_RUNRETURN PX_ScriptVM_InstanceRunThread(PX_ScriptVM_Instance *Ins,px
 					
 					pVar->_memory.buffer[pVar->_memory.usedsize-1]=0;
 					
-					PX_StringInit(Ins->mp,&cVar._string);
+					PX_StringInitialize(Ins->mp,&cVar._string);
 					
 					if(!PX_StringCat(&cVar._string,(px_char *)pVar->_memory.buffer)) {
 						PX_ScriptVM_Error(Ins,"memstr crash.");
@@ -2615,13 +2615,13 @@ PX_SCRIPTVM_RUNRETURN PX_ScriptVM_InstanceRunThread(PX_ScriptVM_Instance *Ins,px
 
 			if (cVar.type==PX_SCRIPTVM_VARIABLE_TYPE_STRING)
 			{
-				if(!PX_StringInit(Ins->mp,&pVar->_string)) goto _ERROR;
+				if(!PX_StringInitialize(Ins->mp,&pVar->_string)) goto _ERROR;
 				if(!PX_StringCat(&pVar->_string,cVar._string.buffer)) goto _ERROR;
 				pVar->type=cVar.type;
 			}
 			else if (cVar.type==PX_SCRIPTVM_VARIABLE_TYPE_MEMORY)
 			{
-				PX_MemoryInit(Ins->mp,&pVar->_memory);
+				PX_MemoryInitialize(Ins->mp,&pVar->_memory);
 				if(!PX_MemoryAlloc(&pVar->_memory,cVar._memory.usedsize)) goto _ERROR;
 				if(!PX_MemoryCat(&pVar->_memory,cVar._memory.buffer,cVar._memory.usedsize)) goto _ERROR;
 				pVar->type=cVar.type;
@@ -3207,13 +3207,13 @@ px_void PX_ScriptVM_RET(PX_ScriptVM_Instance *Ins,PX_SCRIPTVM_VARIABLE cVar)
 	
 	if (cVar.type==PX_SCRIPTVM_VARIABLE_TYPE_STRING)
 	{
-		PX_StringInit(Ins->mp,&pVar->_string);
+		PX_StringInitialize(Ins->mp,&pVar->_string);
 		PX_StringCat(&pVar->_string,cVar._string.buffer);
 		pVar->type=cVar.type;
 	}
 	else if (cVar.type==PX_SCRIPTVM_VARIABLE_TYPE_MEMORY)
 	{
-		PX_MemoryInit(Ins->mp,&pVar->_memory);
+		PX_MemoryInitialize(Ins->mp,&pVar->_memory);
 		PX_MemoryAlloc(&pVar->_memory,cVar._memory.usedsize);
 		PX_MemoryCat(&pVar->_memory,cVar._memory.buffer,cVar._memory.usedsize);
 		pVar->type=cVar.type;
@@ -3250,13 +3250,13 @@ px_void PX_ScriptVM_PUSH(PX_ScriptVM_Instance *Ins,PX_SCRIPTVM_VARIABLE cVar)
 
 	if (cVar.type==PX_SCRIPTVM_VARIABLE_TYPE_STRING)
 	{
-		PX_StringInit(Ins->mp,&pVar->_string);
+		PX_StringInitialize(Ins->mp,&pVar->_string);
 		PX_StringCat(&pVar->_string,cVar._string.buffer);
 		pVar->type=cVar.type;
 	}
 	else if (cVar.type==PX_SCRIPTVM_VARIABLE_TYPE_MEMORY)
 	{
-		PX_MemoryInit(Ins->mp,&pVar->_memory);
+		PX_MemoryInitialize(Ins->mp,&pVar->_memory);
 		PX_MemoryAlloc(&pVar->_memory,cVar._memory.usedsize);
 		PX_MemoryCat(&pVar->_memory,cVar._memory.buffer,cVar._memory.usedsize);
 		pVar->type=cVar.type;

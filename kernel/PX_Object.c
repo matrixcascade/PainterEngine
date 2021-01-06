@@ -18,6 +18,15 @@ PX_Object  * PX_ObjectGetChild( PX_Object *Object,px_int Index )
 
 }
 
+PX_Object * PX_ObjectGetRoot(PX_Object *Object)
+{
+	while(Object->pParent)
+	{
+		Object=Object->pParent;
+	}
+	return Object;
+}
+
 PX_Object_Event PX_Object_Event_CursorOffset(PX_Object_Event e,px_point offset)
 {
 	switch(e.Event)
@@ -69,6 +78,11 @@ px_float PX_Object_Event_GetWidth(PX_Object_Event e)
 px_float PX_Object_Event_GetHeight(PX_Object_Event e)
 {
 	return e.Param_float[1];
+}
+
+px_int PX_Object_Event_GetIndex(PX_Object_Event e)
+{
+	return e.Param_int[0];
 }
 
 px_void PX_Object_Event_SetWidth(PX_Object_Event *e,px_float w)
@@ -149,6 +163,11 @@ px_char* PX_Object_Event_GetStringPtr(PX_Object_Event e)
 px_void PX_Object_Event_SetStringPtr(PX_Object_Event *e,px_void *ptr)
 {
 	e->Param_ptr[0]=ptr;
+}
+
+px_void PX_Object_Event_SetIndex(PX_Object_Event *e,px_int index)
+{
+	e->Param_int[0]=index;
 }
 
 PX_Object * PX_ObjectCreate(px_memorypool *mp,PX_Object *Parent,px_float x,px_float y,px_float z,px_float Width,px_float Height,px_float Lenght)
@@ -406,7 +425,7 @@ px_void PX_ObjectInit(px_memorypool *mp,PX_Object *pObject,PX_Object *Parent,px_
 	PX_Object *pLinker;
 	pObject->pParent=Parent;
 
-
+	pObject->id=0;
 	pObject->x=x;
 	pObject->y=y;
 	pObject->z=z;
@@ -428,7 +447,7 @@ px_void PX_ObjectInit(px_memorypool *mp,PX_Object *pObject,PX_Object *Parent,px_
 	pObject->User_int=0;
 	pObject->diameter=0;
 	pObject->User_ptr=PX_NULL;
-
+	pObject->OnFocus=PX_FALSE;
 	pObject->mp=mp;
 	pObject->Func_ObjectFree=PX_NULL;
 	pObject->Func_ObjectRender=PX_NULL;
@@ -564,7 +583,7 @@ px_void PX_ObjectPostEvent( PX_Object *pPost,PX_Object_Event Event )
 		PX_ObjectPostEvent(pPost->pNextBrother,Event);
 		return;
 	}
-	
+
 
 	EventAction=pPost->pEventActions;
 	while(EventAction)
@@ -1233,7 +1252,7 @@ PX_Object * PX_Object_SliderBarCreate(px_memorypool *mp,PX_Object *Parent,px_int
 	pSliderbar->status=PX_OBJECT_SLIDERBAR_STATUS_NORMAL;
 	pSliderbar->Type=Type;
 	pSliderbar->color=PX_COLOR(255,80,80,80);
-	pSliderbar->BackgroundColor=PX_COLOR(0,0,0,0);
+	pSliderbar->BackgroundColor=PX_COLOR(255,255,255,255);
 	pSliderbar->btnDownX=0;
 	pSliderbar->btnDownY=0;
 	pSliderbar->DargButtonX=0;
@@ -2145,7 +2164,7 @@ PX_Object* PX_Object_EditCreate(px_memorypool *mp, PX_Object *Parent,px_int x,px
 
 
 
-	PX_StringInit(mp,&pEdit->text);
+	PX_StringInitialize(mp,&pEdit->text);
 
 
 	pEdit->TextColor=TextColor;
@@ -3150,7 +3169,7 @@ PX_Object * PX_Object_AutoTextCreate(px_memorypool *mp,PX_Object *Parent,px_int 
 	PX_Object *pObject;
 
 	PX_Object_AutoText *pAt=(PX_Object_AutoText *)MP_Malloc(mp,sizeof(PX_Object_AutoText));
-	PX_StringInit(mp,&pAt->text);
+	PX_StringInitialize(mp,&pAt->text);
 	if (pAt==PX_NULL)
 	{
 		return PX_NULL;
@@ -7638,4 +7657,792 @@ px_void PX_Object_RotationStop(PX_Object *rot,px_bool bstop)
 	{
 		pRot->bstop=bstop;
 	}
+}
+
+static PX_Object_Menu *PX_Object_GetMenu(PX_Object *pMenuObject)
+{
+	if (pMenuObject->Type==PX_OBJECT_TYPE_MENU)
+	{
+		return (PX_Object_Menu *)pMenuObject->pObject;
+	}
+	return PX_NULL;
+}
+static px_void PX_MenuSubMenuUpdateEx(PX_Object_Menu *pMenu,PX_Object_Menu_Item *pItem,px_int startX,px_int startY)
+{
+	px_int index=0;
+	px_int maxWidth=0,maxHeight=0;
+	px_list_node *pNode=PX_NULL;
+
+
+	for (pNode=PX_ListNodeAt(&pItem->Items,0);pNode;pNode=PX_ListNodeNext(pNode))
+	{
+		px_int cWidth,cHeight;
+		PX_Object_Menu_Item *pSubItem=PX_LIST_NODETDATA(PX_Object_Menu_Item,pNode);
+		PX_FontModuleTextGetRenderWidthHeight(pMenu->fontmodule,pSubItem->Text,&cWidth,&cHeight);
+		if (cWidth>maxWidth)
+		{
+			maxWidth=cWidth;
+		}
+		if (cHeight>maxHeight)
+		{
+			maxHeight=cHeight;
+		}
+	}
+
+	maxWidth+=PX_MENU_ITEM_SPACER_SIZE*2+16;
+	maxHeight+=PX_MENU_ITEM_SPACER_SIZE*2;
+
+
+	if (maxWidth<pMenu->minimumSize)
+	{
+		maxWidth=pMenu->minimumSize;
+	}
+
+	for (pNode=PX_ListNodeAt(&pItem->Items,0);pNode;pNode=PX_ListNodeNext(pNode))
+	{
+		PX_Object_Menu_Item *pSubItem=PX_LIST_NODETDATA(PX_Object_Menu_Item,pNode);
+		pSubItem->x=startX;
+		pSubItem->y=startY+index*maxHeight;
+		pSubItem->width=maxWidth;
+		pSubItem->height=maxHeight;
+		index++;
+	}
+
+
+	for (pNode=PX_ListNodeAt(&pItem->Items,0);pNode;pNode=PX_ListNodeNext(pNode))
+	{
+		PX_Object_Menu_Item *pSubItem=PX_LIST_NODETDATA(PX_Object_Menu_Item,pNode);
+		PX_MenuSubMenuUpdateEx(pMenu,pSubItem,pSubItem->x+pSubItem->width,pSubItem->y);
+	}
+}
+static px_void PX_MenuSubMenuUpdate(px_int x,px_int y,PX_Object_Menu *pMenu)
+{
+	px_int index=0;
+	px_int maxWidth=0,maxHeight=0;
+	px_list_node *pNode=PX_NULL;
+
+
+	for (pNode=PX_ListNodeAt(&pMenu->root.Items,0);pNode;pNode=PX_ListNodeNext(pNode))
+	{
+		px_int cWidth,cHeight;
+		PX_Object_Menu_Item *pSubItem=PX_LIST_NODETDATA(PX_Object_Menu_Item,pNode);
+		PX_FontModuleTextGetRenderWidthHeight(pMenu->fontmodule,pSubItem->Text,&cWidth,&cHeight);
+		if (cWidth>maxWidth)
+		{
+			maxWidth=cWidth;
+		}
+		if (cHeight>maxHeight)
+		{
+			maxHeight=cHeight;
+		}
+	}
+
+	maxWidth+=PX_MENU_ITEM_SPACER_SIZE*2;
+	maxHeight+=PX_MENU_ITEM_SPACER_SIZE*2;
+
+
+	if (maxWidth<pMenu->minimumSize)
+	{
+		maxWidth=pMenu->minimumSize;
+	}
+
+	for (pNode=PX_ListNodeAt(&pMenu->root.Items,0);pNode;pNode=PX_ListNodeNext(pNode))
+	{
+		PX_Object_Menu_Item *pSubItem=PX_LIST_NODETDATA(PX_Object_Menu_Item,pNode);
+		pSubItem->x=x+index*maxWidth;
+		pSubItem->y=y;
+		pSubItem->width=maxWidth;
+		pSubItem->height=maxHeight;
+		index++;
+	}
+
+
+	for (pNode=PX_ListNodeAt(&pMenu->root.Items,0);pNode;pNode=PX_ListNodeNext(pNode))
+	{
+		PX_Object_Menu_Item *pSubItem=PX_LIST_NODETDATA(PX_Object_Menu_Item,pNode);
+		PX_MenuSubMenuUpdateEx(pMenu,pSubItem,pSubItem->x,pSubItem->y+pSubItem->height);
+	}
+}
+static px_bool PX_Object_MenuInitialize(px_memorypool *mp,PX_Object_Menu *pMenu,px_int x,int y,px_int width,PX_FontModule *fontmodule)
+{
+	PX_memset(pMenu,0,sizeof(PX_Object_Menu));
+	pMenu->fontmodule=fontmodule;
+	pMenu->minimumSize=width;
+	pMenu->mp=mp;
+	pMenu->OnFocus=PX_FALSE;
+	pMenu->backgroundColor=PX_COLOR(255,255,255,255);
+	pMenu->cursorColor=PX_COLOR(255,192,192,192);
+	pMenu->fontColor=PX_COLOR(255,0,0,0);
+	PX_ListInitialize(mp,&pMenu->root.Items);
+	pMenu->root.Activated=PX_TRUE;
+	return PX_TRUE;
+}
+typedef enum
+{
+	PX_MENU_CURSORACTION_MOVE,
+	PX_MENU_CURSORACTION_DOWN,
+}PX_MENU_CURSORACTION;
+static px_void PX_MenuClearParent(PX_Object_Menu *pMenu,PX_Object_Menu_Item *pItem)
+{
+	px_list_node *pNode=PX_NULL;
+
+	for (pNode=PX_ListNodeAt(&pItem->pParent->Items,0);pNode;pNode=PX_ListNodeNext(pNode))
+	{
+		PX_Object_Menu_Item *pSubItem=PX_LIST_NODETDATA(PX_Object_Menu_Item,pNode);
+		pSubItem->onCursor=PX_FALSE;
+		pSubItem->Activated=PX_FALSE;
+	}
+}
+static px_void PX_MenuClearChild(PX_Object_Menu *pMenu,PX_Object_Menu_Item *pItem)
+{
+	px_list_node *pNode=PX_NULL;
+
+	for (pNode=PX_ListNodeAt(&pItem->Items,0);pNode;pNode=PX_ListNodeNext(pNode))
+	{
+		PX_Object_Menu_Item *pSubItem=PX_LIST_NODETDATA(PX_Object_Menu_Item,pNode);
+		pSubItem->onCursor=PX_FALSE;
+		pSubItem->Activated=PX_FALSE;
+	}
+}
+static px_void PX_MenuClearState(PX_Object *pMenuObject)
+{
+	PX_Object_Menu *pMenu=PX_Object_GetMenu(pMenuObject);
+	px_list_node *pNode=PX_NULL;
+
+	for (pNode=PX_ListNodeAt(&pMenu->root.Items,0);pNode;pNode=PX_ListNodeNext(pNode))
+	{
+		PX_Object_Menu_Item *pSubItem=PX_LIST_NODETDATA(PX_Object_Menu_Item,pNode);
+		pSubItem->onCursor=PX_FALSE;
+		pSubItem->Activated=PX_FALSE;
+	}
+	pMenuObject->OnFocus=PX_FALSE;
+	pMenu->OnFocus=PX_FALSE;
+}
+px_bool PX_Menu_CursorAction(PX_Object *pObject,PX_Object_Menu_Item *pItem,px_float x,px_float y,PX_MENU_CURSORACTION action)
+{
+	px_list_node *pNode=PX_NULL;
+	PX_Object_Menu *pMenu=PX_Object_GetMenu(pObject);
+
+	if (PX_isXYInRegion(x,y,(px_float)pItem->x,(px_float)pItem->y,(px_float)pItem->width,(px_float)pItem->height))
+	{
+		PX_MenuClearParent(pMenu,pItem);
+		switch (action)
+		{
+		case PX_MENU_CURSORACTION_MOVE:
+			{
+				pItem->onCursor=PX_TRUE;
+				if (pMenu->OnFocus&&pItem->Items.size!=0)
+				{
+					pItem->Activated=PX_TRUE;
+					PX_MenuClearChild(pMenu,pItem);
+				}
+			}
+			break;
+		case PX_MENU_CURSORACTION_DOWN:
+			{
+				pItem->onCursor=PX_TRUE;
+				pItem->Activated=PX_TRUE;
+
+				if (pItem->func_callback)
+				{
+					pItem->func_callback(pItem->user_ptr);
+				}
+				if (pItem->Items.size==0)
+				{
+					PX_MenuClearState(pObject);
+				}
+				else
+				{
+					PX_MenuClearChild(pMenu,pItem);
+				}
+				return PX_TRUE;
+			}
+			break;
+		}
+	}
+	else
+	{
+		pItem->onCursor=PX_FALSE;
+	}
+
+	if (!pItem->Activated)
+	{
+		return PX_FALSE;
+	}
+
+	for (pNode=PX_ListNodeAt(&pItem->Items,0);pNode;pNode=PX_ListNodeNext(pNode))
+	{
+		PX_Object_Menu_Item *pSubItem=PX_LIST_NODETDATA(PX_Object_Menu_Item,pNode);
+		if(PX_Menu_CursorAction(pObject,pSubItem,x,y,action))
+			return PX_TRUE;
+	}
+	return PX_FALSE;
+}
+px_void PX_MenuPostEvent_OnCursorDown(PX_Object *pObject,PX_Object_Event e)
+{
+	px_list_node *pNode=PX_NULL;
+	px_float x=PX_Object_Event_GetCursorX(e);
+	px_float y=PX_Object_Event_GetCursorY(e);
+	PX_Object_Menu *pMenu=PX_Object_GetMenu(pObject);
+
+	if (!pMenu->OnFocus)
+	{
+		for (pNode=PX_ListNodeAt(&pMenu->root.Items,0);pNode;pNode=PX_ListNodeNext(pNode))
+		{
+			PX_Object_Menu_Item *pSubItem=PX_LIST_NODETDATA(PX_Object_Menu_Item,pNode);
+			if (PX_isXYInRegion(x,y,(px_float)pSubItem->x,(px_float)pSubItem->y,(px_float)pSubItem->width,(px_float)pSubItem->height))
+			{
+				pMenu->OnFocus=PX_TRUE;
+				pObject->OnFocus=PX_TRUE;
+				pSubItem->Activated=PX_TRUE;
+				PX_MenuClearChild(pMenu,pSubItem);
+				return;
+			}
+		}
+		pObject->OnFocus=PX_TRUE;
+		pMenu->OnFocus=PX_FALSE;
+		return;
+	}
+	else
+	{
+		if (!PX_Menu_CursorAction(pObject,&pMenu->root,x,y,PX_MENU_CURSORACTION_DOWN))
+		{
+			PX_MenuClearState(pObject);
+		}
+	}
+}
+px_void PX_MenuPostEvent_OnCursorMove(PX_Object *pObject,PX_Object_Event e)
+{
+	PX_Object_Menu *pMenu=PX_Object_GetMenu(pObject);
+	px_float x=PX_Object_Event_GetCursorX(e);
+	px_float y=PX_Object_Event_GetCursorY(e);
+	PX_Menu_CursorAction(pObject,&pMenu->root,x,y,PX_MENU_CURSORACTION_MOVE);	
+}
+px_void PX_Object_MenuOnCursorEventEx(PX_Object *pObject,PX_Object_Event e)
+{
+	
+	switch(e.Event)
+	{
+	case PX_OBJECT_EVENT_CURSORMOVE:
+	case PX_OBJECT_EVENT_CURSORDRAG:
+		{
+			PX_MenuPostEvent_OnCursorMove(pObject,e);
+		}
+		break;
+	case PX_OBJECT_EVENT_CURSORDOWN:
+		{
+			PX_MenuPostEvent_OnCursorDown(pObject,e);
+		}
+		break;
+	default:
+		break;
+	}
+
+}
+static px_void PX_MenuRenderItem(px_surface *pSurface,PX_Object_Menu *pMenu,PX_Object_Menu_Item *pItem,px_bool broot,px_dword elpased)
+{
+	if (pItem->width&&pItem->height)
+	{
+		if (pItem->onCursor||pItem->Activated)
+		{
+			PX_GeoDrawRect(pSurface,pItem->x,pItem->y,pItem->x+pItem->width-1,pItem->y+pItem->height-1,pMenu->cursorColor);
+		}
+		else
+		{
+			PX_GeoDrawRect(pSurface,pItem->x,pItem->y,pItem->x+pItem->width-1,pItem->y+pItem->height-1,pMenu->backgroundColor);
+		}
+
+		if (broot)
+			PX_FontModuleDrawText(pSurface,pMenu->fontmodule,pItem->x+pItem->width/2,pItem->y+pItem->height/2,PX_FONT_ALIGN_CENTER,pItem->Text,pMenu->fontColor);
+		else
+		{
+			PX_FontModuleDrawText(pSurface,pMenu->fontmodule,pItem->x,pItem->y+pItem->height/2,PX_FONT_ALIGN_LEFTMID,pItem->Text,pMenu->fontColor);
+			if (pItem->Items.size!=0)
+			{
+				PX_GeoDrawTriangle(pSurface,
+					PX_POINT2D((px_float)(pItem->x+pItem->width-6),(px_float)(pItem->y+pItem->height/2)),
+					PX_POINT2D((px_float)(pItem->x+pItem->width-12),(px_float)(pItem->y+pItem->height/2-4)),
+					PX_POINT2D((px_float)(pItem->x+pItem->width-12),(px_float)(pItem->y+pItem->height/2+4)),
+					pMenu->fontColor);
+			}
+		}
+
+	}
+
+
+	if (pItem->Activated)
+	{
+		if(pItem->Items.size)
+		{
+			px_list_node *pNode=PX_NULL;
+			for (pNode=PX_ListNodeAt(&pItem->Items,0);pNode;pNode=PX_ListNodeNext(pNode))
+			{
+				PX_Object_Menu_Item *pSubItem=PX_LIST_NODETDATA(PX_Object_Menu_Item,pNode);
+				PX_MenuRenderItem(pSurface,pMenu,pSubItem,PX_FALSE,elpased);
+			}
+		}
+	}
+}
+px_void PX_Object_MenuRenderEx(px_surface *pSurface,PX_Object_Menu *pMenu,px_dword elpased)
+{
+	px_list_node *pNode=PX_NULL;
+
+	for (pNode=PX_ListNodeAt(&pMenu->root.Items,0);pNode;pNode=PX_ListNodeNext(pNode))
+	{
+		PX_Object_Menu_Item *pSubItem=PX_LIST_NODETDATA(PX_Object_Menu_Item,pNode);
+		PX_MenuRenderItem(pSurface,pMenu,pSubItem,PX_TRUE,elpased);
+	}
+
+}
+static px_void PX_MenuItemFree(PX_Object_Menu_Item *pItem)
+{
+	px_list_node *pNode=PX_NULL;
+
+	for (pNode=PX_ListNodeAt(&pItem->Items,0);pNode;pNode=PX_ListNodeNext(pNode))
+	{
+		PX_Object_Menu_Item *pSubItem=PX_LIST_NODETDATA(PX_Object_Menu_Item,pNode);
+		PX_MenuItemFree(pSubItem);
+	}
+	PX_ListFree(&pItem->Items);
+}
+px_void PX_Object_MenuFreeEx(PX_Object_Menu *pMenu)
+{
+	PX_MenuItemFree(&pMenu->root);
+}
+PX_Object_Menu_Item * PX_Object_MenuAddItem(PX_Object *pObject,PX_Object_Menu_Item *parent,const px_char Text[],PX_MenuExecuteFunc _callback,px_void *ptr)
+{
+	PX_Object_Menu_Item item,*ret;
+	PX_Object_Menu *pMenu=PX_Object_GetMenu(pObject);
+	PX_memset(&item,0,sizeof(PX_Object_Menu_Item));
+	PX_strcpy(item.Text,Text,sizeof(item.Text));
+	item.func_callback=_callback;
+	PX_ListInitialize(pMenu->mp,&item.Items);
+	item.pParent=parent;
+	item.user_ptr=ptr;
+	ret=(PX_Object_Menu_Item *)PX_ListPush(&parent->Items,&item,sizeof(item));
+	if (ret!=PX_NULL)
+	{
+		PX_MenuSubMenuUpdate((px_int)pObject->x,(px_int)pObject->y,pMenu);
+	}
+	return ret;
+}
+
+
+
+px_void PX_Object_MenuFree(PX_Object *Obj)
+{
+	PX_Object_MenuFreeEx(PX_Object_GetMenu(Obj));
+}
+
+px_void PX_Object_MenuRender(px_surface *psurface, PX_Object *Obj,px_uint elpased)
+{
+	PX_Object_MenuRenderEx(psurface,PX_Object_GetMenu(Obj),elpased);
+}
+
+px_void PX_Object_MenuOnCursorEvent(PX_Object *pObject,PX_Object_Event e,px_void *ptr)
+{
+	PX_Object_MenuOnCursorEventEx(pObject,e);
+}
+
+PX_Object * PX_Object_MenuCreate(px_memorypool *mp,PX_Object *Parent,px_int x,int y,px_int width,PX_FontModule *fontmodule)
+{
+	PX_Object *pObject;
+	PX_Object_Menu *pMenu=(PX_Object_Menu *)MP_Malloc(mp,sizeof(PX_Object_Menu));
+	
+	if (pMenu==PX_NULL)
+	{
+		return PX_NULL;
+	}
+
+	if (!PX_Object_MenuInitialize(mp,pMenu,x,y,width,fontmodule))
+	{
+		return PX_NULL;
+	}
+
+
+	pObject=PX_ObjectCreate(mp,Parent,(px_float)x,(px_float)y,0,0,0,0);
+	if (pObject==PX_NULL)
+	{
+		MP_Free(pObject->mp,pMenu);
+		return PX_NULL;
+	}
+	
+
+	pObject->pObject=pMenu;
+	pObject->Enabled=PX_TRUE;
+	pObject->Visible=PX_TRUE;
+	pObject->Type=PX_OBJECT_TYPE_MENU;
+	pObject->Func_ObjectFree=PX_Object_MenuFree;
+	pObject->Func_ObjectRender=PX_Object_MenuRender;
+	
+	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_CURSORDOWN,PX_Object_MenuOnCursorEvent,PX_NULL);
+	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_CURSORMOVE,PX_Object_MenuOnCursorEvent,PX_NULL);
+	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_CURSORDRAG,PX_Object_MenuOnCursorEvent,PX_NULL);
+	return pObject;
+}
+
+PX_Object_Menu_Item * PX_Object_MenuGetRootItem(PX_Object *pMenuObject)
+{
+	return &PX_Object_GetMenu(pMenuObject)->root;
+}
+
+//////////////////////////////////////////////////////////////////////////
+//
+PX_Object_SelectBar *PX_Object_GetSelectBar(PX_Object *pSelecrBar)
+{
+	if (pSelecrBar->Type==PX_OBJECT_TYPE_SELECTBAR)
+	{
+		return (PX_Object_SelectBar *)pSelecrBar->pObject;
+	}
+	return PX_NULL;
+}
+static px_void PX_SelecrbarClearCurrentCursor(PX_Object_SelectBar *pSelectbar)
+{
+	px_int i;
+	for (i=0;i<pSelectbar->Items.size;i++)
+	{
+		PX_VECTORAT(PX_Object_SelectBar_Item,&pSelectbar->Items,i)->onCursor=PX_FALSE;
+	}
+}
+static px_void PX_SelectbarOnCursorMove(PX_Object *pSelectBarObject,px_float x,px_float y)
+{
+	PX_Object_SelectBar *pSelectbar=PX_Object_GetSelectBar(pSelectBarObject);
+	if(pSelectbar->activating)
+	{
+		px_int index;
+		if (pSelectbar->Items.size>pSelectbar->maxDisplayCount)
+		{
+			if (x<pSelectBarObject->x||x>pSelectBarObject->x+pSelectBarObject->Width-16)
+			{
+				return;
+			}
+		}
+		else
+		{
+			if (x<pSelectBarObject->x||x>pSelectBarObject->x+pSelectBarObject->Width)
+			{
+				return;
+			}
+		}
+		
+		index=(px_int)((y-pSelectBarObject->y-pSelectBarObject->Height)/pSelectbar->ItemHeight);
+		PX_SelecrbarClearCurrentCursor(pSelectbar);
+
+		if (index<0||index>=pSelectbar->maxDisplayCount||index>=pSelectbar->Items.size)
+		{
+			return;
+		}
+		else
+		{
+			PX_VECTORAT(PX_Object_SelectBar_Item,&pSelectbar->Items,index+pSelectbar->currentDisplayOffsetIndex)->onCursor=PX_TRUE;
+		}
+	}
+	else
+	{
+		if(PX_isPointInRect(PX_POINT(x,y,0),PX_RECT(pSelectBarObject->x,pSelectBarObject->y,pSelectBarObject->Width,pSelectBarObject->Height)))
+		{
+			pSelectbar->onCursor=PX_TRUE;
+		}
+		else
+		{
+			pSelectbar->onCursor=PX_FALSE;
+		}
+	}
+}
+static px_void PX_SelectbarOnCursorDown(PX_Object *pSelectBarObject,px_float x,px_float y)
+{
+	PX_Object_SelectBar *pSelectbar=PX_Object_GetSelectBar(pSelectBarObject);
+	if(pSelectbar->activating)
+	{
+		px_int index;
+		if (pSelectbar->Items.size>pSelectbar->maxDisplayCount)
+		{
+			if (x<pSelectBarObject->x||x>pSelectBarObject->x+pSelectBarObject->Width)
+			{
+				PX_SelecrbarClearCurrentCursor(pSelectbar);
+				pSelectbar->onCursor=PX_FALSE;
+				pSelectbar->activating=PX_FALSE;
+				return;
+			}
+			if (x>=pSelectBarObject->x+pSelectBarObject->Width-16&&x<=pSelectBarObject->x+pSelectBarObject->Width)
+			{
+				return;
+			}
+		}
+		else
+		{
+			if (x<pSelectBarObject->x||x>pSelectBarObject->x+pSelectBarObject->Width)
+			{
+				PX_SelecrbarClearCurrentCursor(pSelectbar);
+				pSelectbar->activating=PX_FALSE;
+				pSelectbar->onCursor=PX_FALSE;
+				return;
+			}
+		}
+
+		index=(px_int)((y-pSelectBarObject->y-pSelectBarObject->Height)/pSelectbar->ItemHeight);
+		PX_SelecrbarClearCurrentCursor(pSelectbar);
+		if (index<0||index>=pSelectbar->maxDisplayCount||index>=pSelectbar->Items.size)
+		{
+			pSelectbar->activating=PX_FALSE;
+			pSelectbar->onCursor=PX_FALSE;
+			return;
+		}
+		else
+		{
+			pSelectbar->activating=PX_FALSE;
+			pSelectbar->selectIndex=index+pSelectbar->currentDisplayOffsetIndex;
+			do 
+			{
+				PX_Object_Event e;
+				e.Event=PX_OBJECT_EVENT_VALUECHANGED;
+				PX_Object_Event_SetIndex(&e,index);
+				PX_ObjectPostEvent(pSelectBarObject,e);
+			} while (0);
+		}
+		pSelectbar->onCursor=PX_FALSE;
+	}
+	else
+	{
+		if(PX_isPointInRect(PX_POINT(x,y,0),PX_RECT(pSelectBarObject->x,pSelectBarObject->y,pSelectBarObject->Width,pSelectBarObject->Height)))
+		{
+			pSelectbar->activating=PX_TRUE;
+		}
+		else
+		{
+			pSelectbar->activating=PX_FALSE;
+		}
+	}
+	
+}
+static px_void PX_SelectbarOnCursorEvent(PX_Object *pSelectBarObject,PX_Object_Event e,px_void *ptr)
+{
+	switch(e.Event)
+	{
+	case PX_OBJECT_EVENT_CURSORMOVE:
+	case PX_OBJECT_EVENT_CURSORDRAG:
+		{
+			PX_SelectbarOnCursorMove(pSelectBarObject,PX_Object_Event_GetCursorX(e),PX_Object_Event_GetCursorY(e));
+		}
+		break;
+	case PX_OBJECT_EVENT_CURSORDOWN:
+		{
+			PX_SelectbarOnCursorDown(pSelectBarObject,PX_Object_Event_GetCursorX(e),PX_Object_Event_GetCursorY(e));
+		}
+		break;
+	default:
+		break;
+	}
+}
+static px_void PX_SelectbarFree(PX_Object *pObject)
+{
+	PX_VectorFree(&PX_Object_GetSelectBar(pObject)->Items);
+}
+static px_void PX_SelectbarRender(px_surface *pRenderSurface,PX_Object *pObject,px_dword elpase)
+{
+	PX_Object_SelectBar *pSelectBar=PX_Object_GetSelectBar(pObject);
+
+	//background
+	if (pSelectBar->onCursor)
+	{
+		PX_GeoDrawRect(pRenderSurface,(px_int)pObject->x,(px_int)pObject->y,(px_int)(pObject->x+pObject->Width-1),(px_int)(pObject->y+pObject->Height-1),pSelectBar->cursorColor);
+	}
+	else
+	{
+		PX_GeoDrawRect(pRenderSurface,(px_int)pObject->x,(px_int)pObject->y,(px_int)(pObject->x+pObject->Width-1),(px_int)(pObject->y+pObject->Height-1),pSelectBar->backgroundColor);
+	}
+
+	//border
+	PX_GeoDrawBorder(pRenderSurface,(px_int)pObject->x,(px_int)pObject->y,(px_int)(pObject->x+pObject->Width-1),(px_int)(pObject->y+pObject->Height-1),1,pSelectBar->borderColor);
+
+	//font
+	do 
+	{
+		if (pSelectBar->selectIndex>=0&&pSelectBar->selectIndex<pSelectBar->Items.size)
+		{
+			PX_Object_SelectBar_Item *pItem=PX_VECTORAT(PX_Object_SelectBar_Item,&pSelectBar->Items,pSelectBar->selectIndex);
+			PX_FontModuleDrawText(pRenderSurface,pSelectBar->fontmodule,(px_int)pObject->x+2,(px_int)(pObject->y+pObject->Height/2),PX_FONT_ALIGN_LEFTMID,pItem->Text,pSelectBar->fontColor);
+		}
+	} while (0);
+	
+	//triangle
+	PX_GeoDrawTriangle(pRenderSurface,
+		PX_POINT2D(pObject->x+pObject->Width-16,pObject->y+pObject->Height/2-3),
+		PX_POINT2D(pObject->x+pObject->Width-4,pObject->y+pObject->Height/2-3),
+		PX_POINT2D(pObject->x+pObject->Width-10,pObject->y+pObject->Height/2+3),
+		pSelectBar->borderColor
+		);
+
+	if (pSelectBar->activating)
+	{
+		px_int i;
+		px_int count=pSelectBar->maxDisplayCount>pSelectBar->Items.size?pSelectBar->Items.size:pSelectBar->maxDisplayCount;
+
+		for (i=0;i<count;i++)
+		{
+			PX_Object_SelectBar_Item *pItem=PX_VECTORAT(PX_Object_SelectBar_Item,&pSelectBar->Items,i+pSelectBar->currentDisplayOffsetIndex);
+			
+			if (pItem->onCursor)
+			{
+				PX_GeoDrawRect(pRenderSurface,
+					(px_int)(pObject->x),
+					(px_int)(pObject->y+pObject->Height+i*pSelectBar->ItemHeight),
+					(px_int)(pObject->x+pObject->Width),
+					(px_int)(pObject->y+pObject->Height+(i+1)*pSelectBar->ItemHeight),
+					pSelectBar->cursorColor
+					);
+			}
+			else
+			{
+				PX_GeoDrawRect(pRenderSurface,
+					(px_int)(pObject->x),
+					(px_int)(pObject->y+pObject->Height+i*pSelectBar->ItemHeight),
+					(px_int)(pObject->x+pObject->Width),
+					(px_int)(pObject->y+pObject->Height+(i+1)*pSelectBar->ItemHeight),
+					pSelectBar->backgroundColor
+					);
+			}
+			
+			PX_FontModuleDrawText(pRenderSurface,pSelectBar->fontmodule,(px_int)(pObject->x+2),
+				(px_int)(pObject->y+pObject->Height+(i*pSelectBar->ItemHeight)+pSelectBar->ItemHeight/2),
+				PX_FONT_ALIGN_LEFTMID,
+				pItem->Text,
+				pSelectBar->fontColor
+				);
+		}
+		PX_GeoDrawBorder(pRenderSurface,
+			(px_int)pObject->x,
+			(px_int)(pObject->y+pObject->Height),
+			(px_int)(pObject->x+pObject->Width-1),
+			(px_int)(pObject->y+pObject->Height+count*pSelectBar->ItemHeight),
+			1,
+			pSelectBar->borderColor
+			);
+
+		if (pSelectBar->Items.size>pSelectBar->maxDisplayCount)
+		{
+			pSelectBar->sliderBar->Visible=PX_TRUE;
+			pSelectBar->sliderBar->x=pObject->x+pObject->Width-16;
+			pSelectBar->sliderBar->y=pObject->y+pObject->Height;
+			pSelectBar->sliderBar->Width=16;
+			pSelectBar->sliderBar->Height=count*pSelectBar->ItemHeight*1.0f;
+			PX_Object_SliderBarSetMax(pSelectBar->sliderBar,pSelectBar->Items.size-pSelectBar->maxDisplayCount);
+			PX_Object_SliderBarSetSliderButtonLength(pSelectBar->sliderBar,(px_int)(pSelectBar->sliderBar->Height*pSelectBar->maxDisplayCount/pSelectBar->Items.size));
+		}
+		else
+		{
+			pSelectBar->sliderBar->Visible=PX_FALSE;
+		}
+	}
+	else
+	{
+		pSelectBar->sliderBar->Visible=PX_FALSE;
+	}
+
+}
+
+px_void PX_Object_SelectBarSliderOnChanged(PX_Object *pObject,PX_Object_Event e,px_void *ptr)
+{
+	PX_Object_SelectBar *pSelectbar=(PX_Object_SelectBar *)ptr;
+	pSelectbar->currentDisplayOffsetIndex=PX_Object_SliderBarGetValue(pObject);
+}
+
+PX_Object * PX_Object_SelectBarCreate(px_memorypool *mp,PX_Object *Parent,px_int x,int y,px_int width,px_int height,PX_FontModule *fontmodule)
+{
+	PX_Object *pObject;
+	PX_Object_SelectBar *pSelectbar=(PX_Object_SelectBar *)MP_Malloc(mp,sizeof(PX_Object_SelectBar));
+
+	if (pSelectbar==PX_NULL)
+	{
+		return PX_NULL;
+	}
+
+	PX_memset(pSelectbar,0,sizeof(PX_Object_SelectBar));
+	pSelectbar->fontmodule=fontmodule;
+	pSelectbar->mp=mp;
+	pSelectbar->activating=PX_FALSE;
+	pSelectbar->currentDisplayOffsetIndex=0;
+	if (fontmodule)
+	{
+		pSelectbar->ItemHeight=fontmodule->max_Height;
+	}
+	else
+	{
+		pSelectbar->ItemHeight=__PX_FONT_HEIGHT;
+	}
+	
+	pSelectbar->maxDisplayCount=16;
+	pSelectbar->backgroundColor=PX_COLOR(255,255,255,255);
+	pSelectbar->cursorColor=PX_COLOR(255,192,192,192);
+	pSelectbar->fontColor=PX_COLOR(255,0,0,0);
+	pSelectbar->borderColor=PX_COLOR(255,0,0,0);
+	pSelectbar->activating=PX_FALSE;
+	PX_VectorInitialize(mp,&pSelectbar->Items,sizeof(PX_Object_SelectBar_Item),16);
+	
+
+	pObject=PX_ObjectCreate(mp,Parent,(px_float)x,(px_float)y,0,(px_float)width,(px_float)height,0);
+	if (pObject==PX_NULL)
+	{
+		MP_Free(pObject->mp,pSelectbar);
+		return PX_NULL;
+	}
+
+
+	pObject->pObject=pSelectbar;
+	pObject->Enabled=PX_TRUE;
+	pObject->Visible=PX_TRUE;
+	pObject->Type=PX_OBJECT_TYPE_SELECTBAR;
+	pObject->Func_ObjectFree=PX_SelectbarFree;
+	pObject->Func_ObjectRender=PX_SelectbarRender;
+
+
+	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_CURSORDOWN,PX_SelectbarOnCursorEvent,PX_NULL);
+	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_CURSORMOVE,PX_SelectbarOnCursorEvent,PX_NULL);
+	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_CURSORDRAG,PX_SelectbarOnCursorEvent,PX_NULL);
+
+	pSelectbar->sliderBar=PX_Object_SliderBarCreate(mp,pObject,0,0,0,0,PX_OBJECT_SLIDERBAR_TYPE_VERTICAL,PX_OBJECT_SLIDERBAR_STYLE_BOX);
+
+	if (!pSelectbar->sliderBar)
+	{
+		PX_ObjectDelete(pObject);
+		return PX_NULL;
+	}
+	PX_ObjectRegisterEvent(pSelectbar->sliderBar,PX_OBJECT_EVENT_VALUECHANGED,PX_Object_SelectBarSliderOnChanged,pSelectbar);
+	return pObject;
+}
+
+px_int PX_Object_SelectBarAddItem(PX_Object *pSelectBarObject,const px_char Text[])
+{
+	PX_Object_SelectBar *pSelectBar=PX_Object_GetSelectBar(pSelectBarObject);
+	PX_Object_SelectBar_Item item;
+	PX_strcpy(item.Text,Text,sizeof(item.Text));
+	item.onCursor=PX_FALSE;
+	if(PX_VectorPushback(&pSelectBar->Items,&item))
+		return pSelectBar->Items.size-1;
+	else
+		return -1;
+}
+
+px_void PX_Object_SelectBarRemoveItem(PX_Object *pObject,px_int index)
+{
+	PX_Object_SelectBar *pSelectBar=PX_Object_GetSelectBar(pObject);
+	if (index>0&&index<pSelectBar->Items.size)
+	{
+		PX_VectorErase(&pSelectBar->Items,index);
+	}
+}
+
+px_int PX_Object_SelectBarGetItemIndexByText(PX_Object *pObject,const px_char Text[])
+{
+	PX_Object_SelectBar *pSelectBar=PX_Object_GetSelectBar(pObject);
+	px_int i;
+	for (i=0;i<pSelectBar->Items.size;i++)
+	{
+		PX_Object_SelectBar_Item *pItem=PX_VECTORAT(PX_Object_SelectBar_Item,&pSelectBar->Items,i);
+		if (PX_strequ(Text,pItem->Text))
+		{
+			return i;
+		}
+	}
+	return -1;
 }

@@ -2965,6 +2965,13 @@ px_point PX_POINT(px_float x,px_float y,px_float z)
 	return p;
 }
 
+px_point2D PX_POINT2D(px_float x,px_float y)
+{
+	px_point2D p;
+	p.x=x;
+	p.y=y;
+	return p;
+}
 
 px_point4D PX_POINT4D(px_float x,px_float y,px_float z)
 {

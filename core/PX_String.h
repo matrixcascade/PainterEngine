@@ -12,7 +12,7 @@ typedef struct __px_string
 
 #define PX_STRING_DATA(x) (x->buffer)
 
-px_bool PX_StringInit(px_memorypool *mp,px_string *str);
+px_bool PX_StringInitialize(px_memorypool *mp,px_string *str);
 px_void PX_StringInitFromConst(px_string *str,const px_char *constchar);
 px_int PX_StringToInteger(px_string *str);
 px_float PX_StringToFloat(px_string *str);

@@ -258,7 +258,7 @@ px_void PX_LexerInit(px_lexer *lexer,px_memorypool *mp)
 	lexer->mp=mp;
 	lexer->lexemeTokenCase=PX_LEXER_LEXEME_CASE_NORMAL;
 	lexer->NumericMath=PX_FALSE;
-	PX_StringInit(mp,&lexer->CurLexeme);
+	PX_StringInitialize(mp,&lexer->CurLexeme);
 	PX_memset(lexer->Delimiter,0,sizeof(lexer->Delimiter));
 	PX_memset(lexer->Spacer,0,sizeof(lexer->Spacer));
 	PX_memset(lexer->Container,0,sizeof(lexer->Container));

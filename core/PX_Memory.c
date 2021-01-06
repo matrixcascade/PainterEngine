@@ -1,5 +1,5 @@
 #include "PX_Memory.h"
-px_void PX_MemoryInit(px_memorypool *mp,px_memory *memory)
+px_void PX_MemoryInitialize(px_memorypool *mp,px_memory *memory)
 {
 	memory->buffer=PX_NULL;
 	memory->allocsize=0;
@@ -7,7 +7,7 @@ px_void PX_MemoryInit(px_memorypool *mp,px_memory *memory)
 	memory->mp=mp;
 }
 
-px_bool PX_MemoryCat(px_memory *memory,px_void *buffer,px_int size)
+px_bool PX_MemoryCat(px_memory *memory,const px_void *buffer,px_int size)
 {
 	px_byte *old;
 	px_int length,shl;
@@ -68,7 +68,7 @@ px_bool PX_MemoryResize(px_memory *memory,px_int size)
 }
 
 
-px_byte *PX_MemoryFine(px_memory *memory,px_void *buffer,px_int size)
+px_byte *PX_MemoryFine(px_memory *memory,const px_void *buffer,px_int size)
 {
 	px_int offest;
 	if (memory->usedsize<size)
@@ -85,12 +85,23 @@ px_byte *PX_MemoryFine(px_memory *memory,px_void *buffer,px_int size)
 	return PX_NULL;
 }
 
+
+px_void PX_MemoryRemove(px_memory *memory,px_int start,px_int end)
+{
+	if (start<0||start<end||end>=memory->usedsize)
+	{
+		return;
+	}
+	PX_memcpy(memory->buffer+start,memory->buffer+end+1,start-end+1);
+}
+
+
 px_void PX_MemoryClear(px_memory *memory)
 {
 	memory->usedsize=0;
 }
 
-px_bool PX_MemoryCopy(px_memory *memory,px_void *buffer,px_int startoffset,px_int size)
+px_bool PX_MemoryCopy(px_memory *memory,const px_void *buffer,px_int startoffset,px_int size)
 {
 	px_byte *old;
 	px_int length,shl;

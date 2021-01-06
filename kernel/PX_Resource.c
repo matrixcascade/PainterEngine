@@ -147,7 +147,7 @@ px_bool PX_ResourceLibraryLoad(PX_ResourceLibrary *lib,PX_RESOURCE_TYPE type,px_
 		}
 		break;
 	case PX_RESOURCE_TYPE_DATA:
-		PX_MemoryInit(lib->mp,&res.data);
+		PX_MemoryInitialize(lib->mp,&res.data);
 		if (!PX_MemoryCat(&res.data,data,datasize))
 		{
 			PX_MemoryFree(&res.data);
