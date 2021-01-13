@@ -94,8 +94,8 @@ PX_Object * PX_ConsolePrintImage(PX_Console *pc,px_char *res_image_key)
 	{
 		if (pimageRes->Type==PX_RESOURCE_TYPE_TEXTURE)
 		{
-			pObject=PX_Object_ImageCreate(&pc->runtime->mp_ui,PX_Object_ScrollAreaGetIncludedObjects(pc->Area),0,0,&pimageRes->texture);
-			PX_Object_ImageSetAlign(pObject,PX_OBJECT_ALIGN_TOP|PX_OBJECT_ALIGN_LEFT);
+			pObject=PX_Object_ImageCreate(&pc->runtime->mp_ui,PX_Object_ScrollAreaGetIncludedObjects(pc->Area),0,0,pimageRes->texture.width,pimageRes->texture.height,&pimageRes->texture);
+			PX_Object_ImageSetAlign(pObject,PX_ALIGN_LEFTTOP);
 			PX_ObjectSetSize(pObject,(px_float)pimageRes->texture.width,(px_float)pimageRes->texture.height,0);
 			obj.Object=pObject;
 			obj.id=pc->id++;
@@ -127,7 +127,7 @@ PX_Object * PX_ConsolePrintAnimation(PX_Console *pc,px_char *res_animation_key)
 		if (pAnimationRes->Type==PX_RESOURCE_TYPE_ANIMATIONLIBRARY)
 		{
 			pObject=PX_Object_AnimationCreate(&pc->runtime->mp_ui,PX_Object_ScrollAreaGetIncludedObjects(pc->Area),0,0,&pAnimationRes->animationlibrary);
-			PX_Object_AnimationSetAlign(pObject,PX_OBJECT_ALIGN_TOP|PX_OBJECT_ALIGN_LEFT);
+			PX_Object_AnimationSetAlign(pObject,PX_ALIGN_LEFTTOP);
 			rect=PX_AnimationGetSize(&PX_Object_GetAnimation(pObject)->animation);
 			PX_ObjectSetSize(pObject,(px_float)rect.width,(px_float)rect.height,0);
 			obj.Object=pObject;
@@ -159,8 +159,8 @@ PX_Object * PX_ConsoleShowImage(PX_Console *pc,px_char *res_image_key)
 	{
 		if (pimageRes->Type==PX_RESOURCE_TYPE_TEXTURE)
 		{
-			pObject=PX_Object_ImageCreate(&pc->runtime->mp_ui,PX_Object_ScrollAreaGetIncludedObjects(pc->Area),0,0,&pimageRes->texture);
-			PX_Object_ImageSetAlign(pObject,PX_OBJECT_ALIGN_TOP|PX_OBJECT_ALIGN_LEFT);
+			pObject=PX_Object_ImageCreate(&pc->runtime->mp_ui,PX_Object_ScrollAreaGetIncludedObjects(pc->Area),0,0,pimageRes->texture.width,pimageRes->texture.height,&pimageRes->texture);
+			PX_Object_ImageSetAlign(pObject,PX_ALIGN_LEFTTOP);
 			obj.Object=pObject;
 			obj.id=pc->id++;
 			PX_VectorPushback(&pc->pObjects,&obj);

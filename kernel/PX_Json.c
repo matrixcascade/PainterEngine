@@ -130,8 +130,10 @@ PX_Json_Value * PX_JsonGetArrayValue(PX_Json_Value *value,px_int i)
 
 px_bool PX_JsonInitialize(px_memorypool *mp,PX_Json *pjson)
 {
+	PX_memset(pjson,0,sizeof(PX_Json));
 	pjson->mp=mp;
 	pjson->rootValue.type=PX_JSON_VALUE_TYPE_OBJECT;
+	PX_StringInitialize(mp,&pjson->rootValue.name);
 	PX_ListInitialize(pjson->mp,&pjson->rootValue._object.values);
 	return PX_TRUE;	
 }

@@ -61,17 +61,9 @@ enum PX_OBJECT_TYPE
   PX_OBJECT_TYPE_ROTATION		,
   PX_OBJECT_TYPE_MENU			,
   PX_OBJECT_TYPE_SELECTBAR		,
+  PX_OBJECT_TYPE_RADIOBOX		,
 };
 
-
-#define  PX_OBJECT_ALIGN_HCENTER		1
-#define  PX_OBJECT_ALIGN_VCENTER		2
-#define  PX_OBJECT_ALIGN_LEFT			4
-#define  PX_OBJECT_ALIGN_RIGHT			8
-#define  PX_OBJECT_ALIGN_TOP			16
-#define  PX_OBJECT_ALIGN_BOTTOM			32
-
-#define  PX_OBJECT_ALIGN_CENTER     (PX_OBJECT_ALIGN_HCENTER|PX_OBJECT_ALIGN_VCENTER)
 
 //////////////////////////////////////////////////////////////////////////
 //
@@ -107,8 +99,11 @@ struct _PX_Object;
 typedef struct _PX_Object PX_Object;
 
 typedef px_void  (*Function_ObjectUpdate)(PX_Object *,px_uint elpased);
+typedef px_void  (*Function_ObjectBeginRender)(px_surface *,PX_Object *,px_dword);
 typedef px_void  (*Function_ObjectRender)(px_surface *psurface,PX_Object *,px_uint elpased);
+typedef px_void  (*Function_ObjectEndRender)(px_surface *,PX_Object *,px_dword);
 typedef px_void  (*Function_ObjectFree)(PX_Object *);
+typedef px_void  (*Function_ObjectLinkChild)(PX_Object *parent,PX_Object *child);
 
 struct _PX_Object
 {
@@ -121,6 +116,7 @@ struct _PX_Object
 	px_float Length;
 	px_float diameter;//if the member is not zero,The Object is round shape
 	px_bool OnFocus;
+	px_bool OnLostFocusReleaseEvent;
 	px_bool Enabled;
 	px_bool Visible;
 	px_bool ReceiveEvents;
@@ -144,7 +140,9 @@ struct _PX_Object
 	Function_ObjectUpdate Func_ObjectUpdate;
 	Function_ObjectRender Func_ObjectRender;
 	Function_ObjectFree   Func_ObjectFree;
-	
+	Function_ObjectLinkChild Func_ObjectLinkChild;
+	Function_ObjectBeginRender Func_ObjectBeginRender;
+	Function_ObjectEndRender Func_ObjectEndRender;
 };
 
 
@@ -166,7 +164,7 @@ typedef struct
 
 typedef struct 
 {
-	px_dword Align;
+	PX_ALIGN Align;
 	PX_Animation animation;
 }PX_Object_Animation;
 
@@ -251,7 +249,7 @@ PX_Object *PX_ObjectCreateEx(px_memorypool *mp,PX_Object *Parent,\
 	px_void *desc,\
 	px_int size
 	);
-
+px_void    PX_ObjectGetInheritXY(PX_Object *Object,px_float *x,px_float *y);
 px_void	   PX_ObjectInit(px_memorypool *mp,PX_Object *Object,PX_Object *Parent,px_float x,px_float y,px_float z,px_float Width,px_float Height,px_float Lenght);
 px_void    PX_ObjectSetUserCode(PX_Object *pObject,px_int user_int);
 px_void    PX_ObjectSetUserPointer(PX_Object *pObject,px_void *user_ptr);
@@ -261,6 +259,8 @@ px_void	   PX_ObjectSetPosition(PX_Object *Object,px_float x,px_float y,px_float
 px_void    PX_ObjectSetSize(PX_Object *Object,px_float Width,px_float Height,px_float length);
 px_void	   PX_ObjectSetVisible(PX_Object *Object,px_bool visible);
 PX_Object  *PX_ObjectGetChild(PX_Object *Object,px_int Index);
+px_void     PX_ObjectSetFocus(PX_Object *Object);
+px_void     PX_ObjectClearFocus(PX_Object *Object);
 px_bool		PX_ObjectIsPointInRegion(PX_Object *Object,px_float x,px_float y);
 px_bool		PX_ObjectIsCursorInRegion(PX_Object *Object,PX_Object_Event e);
 px_float	PX_ObjectGetHeight(PX_Object *Object);
@@ -279,8 +279,7 @@ px_void PX_ObjectExecuteEvent(PX_Object *pPost,PX_Object_Event Event);
 
 typedef struct  
 {
-	PX_FONT_ALIGN Align;
-
+	PX_ALIGN Align;
 	px_color TextColor;
 	px_color BackgroundColor;
 	PX_FontModule *fontModule;
@@ -290,12 +289,10 @@ typedef struct
 PX_Object *	PX_Object_LabelCreate(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y,px_int Width,px_int Height,const px_char *Text,PX_FontModule *fm,px_color Color);
 PX_Object_Label  *	PX_Object_GetLabel(PX_Object *Object);
 px_char	  * PX_Object_LabelGetText(PX_Object *Label);
-px_void		PX_Object_LabelSetText(PX_Object *pLabel,px_char *Text);
+px_void		PX_Object_LabelSetText(PX_Object *pLabel,const px_char *Text);
 px_void		PX_Object_LabelSetTextColor(PX_Object *pLabel,px_color Color);
 px_void		PX_Object_LabelSetBackgroundColor(PX_Object *pLabel,px_color Color);
-px_void		PX_Object_LabelSetAlign(PX_Object *pLabel,PX_FONT_ALIGN Align);
-px_void		PX_Object_LabelRender(px_surface *psurface,PX_Object *pLabel,px_uint elpased);    
-px_void		PX_Object_LabelFree(PX_Object *pLabel);
+px_void		PX_Object_LabelSetAlign(PX_Object *pLabel,PX_ALIGN Align);
 
 //////////////////////////////////////////////////////////////////////////
 //ProcessBar
@@ -311,11 +308,11 @@ typedef struct
 PX_Object *	PX_Object_ProcessBarCreate(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y,px_int Width,px_int Height);
 PX_Object_ProcessBar *PX_Object_GetProcessBar(PX_Object *Object);
 px_void		PX_Object_ProcessBarSetColor(PX_Object *pProcessBar,px_color Color);
+px_void		PX_Object_ProcessBarSetBackgroundColor(PX_Object *pProcessBar,px_color Color);
 px_void		PX_Object_ProcessBarSetValue(PX_Object *pProcessBar,px_int Value);
 px_void		PX_Object_ProcessBarSetMax(PX_Object *pProcessBar,px_int Max);
-px_void		PX_Object_ProcessBarRender(px_surface *psurface,PX_Object *pProcessBar,px_uint elpased);
 px_int		PX_Object_ProcessBarGetValue(PX_Object *pProcessBar);
-px_void		PX_Object_ProcessBarFree(PX_Object *pProcessBar);
+
 
 //////////////////////////////////////////////////////////////////////////
 //Image
@@ -323,40 +320,40 @@ px_void		PX_Object_ProcessBarFree(PX_Object *pProcessBar);
 
 typedef struct 
 {
-	px_dword Align;
+	PX_ALIGN Align;
 	px_texture *pTexture;
 	px_texture *pmask;
 }PX_Object_Image;
 
-PX_Object *PX_Object_ImageCreate(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y,px_texture *ptex);
+PX_Object * PX_Object_ImageCreate(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y,px_int width,px_int height,px_texture *ptex );
 PX_Object_Image *PX_Object_GetImage(PX_Object *Object);
-px_void	   PX_Object_ImageSetAlign(PX_Object *pImage,px_dword Align);
+px_void	   PX_Object_ImageSetAlign(PX_Object *pImage,PX_ALIGN Align);
 px_void	   PX_Object_ImageSetMask(PX_Object *pImage,px_texture *pmask);
-px_void	   PX_Object_ImageRender(px_surface *psurface,PX_Object *pImage,px_uint elpased);
-px_void	   PX_Object_ImageFree(PX_Object *pImage);
 px_void	   PX_Object_ImageFreeWithTexture(PX_Object *pImage);
 
 //////////////////////////////////////////////////////////////////////////
 //SliderBar
 //////////////////////////////////////////////////////////////////////////
 
-enum PX_OBJECT_SLIDERBAR_TYPE
+typedef enum 
 {
 	PX_OBJECT_SLIDERBAR_TYPE_HORIZONTAL		,
-	PX_OBJECT_SLIDERBAR_TYPE_VERTICAL			,
-};
+	PX_OBJECT_SLIDERBAR_TYPE_VERTICAL		,
+}PX_OBJECT_SLIDERBAR_TYPE;
 
-enum PX_OBJECT_SLIDERBAR_STYLE
+typedef enum  
 {
 	PX_OBJECT_SLIDERBAR_STYLE_BOX			,
 	PX_OBJECT_SLIDERBAR_STYLE_LINER			,
-};
+}PX_OBJECT_SLIDERBAR_STYLE;
 
-enum PX_OBJECT_SLIDERBAR_STATUS
+typedef enum 
 {
 	PX_OBJECT_SLIDERBAR_STATUS_ONDRAG		,
 	PX_OBJECT_SLIDERBAR_STATUS_NORMAL		,
-};
+}PX_OBJECT_SLIDERBAR_STATUS;
+
+
 typedef struct 
 {
 	enum PX_OBJECT_SLIDERBAR_TYPE Type;
@@ -364,6 +361,7 @@ typedef struct
 	enum PX_OBJECT_SLIDERBAR_STATUS status;
 	px_float btnDownX,btnDownY;
 	px_float DargButtonX,DargButtonY;
+	px_int Min;
 	px_int Max;
 	px_int lastValue;
 	px_int Value;
@@ -375,7 +373,7 @@ typedef struct
 PX_Object *PX_Object_SliderBarCreate(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y,px_int Width,px_int Height,enum PX_OBJECT_SLIDERBAR_TYPE Type,enum PX_OBJECT_SLIDERBAR_STYLE style);
 PX_Object_SliderBar *PX_Object_GetSliderBar(PX_Object *Object);
 px_void	   PX_Object_SliderBarSetValue(PX_Object *pSliderBar,px_int Value);
-px_void	   PX_Object_SliderBarSetMax(PX_Object *pSliderBar,px_int Max);
+px_void	   PX_Object_SliderBarSetRange(PX_Object *pSliderBar,px_int Min,px_int Max);
 px_int	   PX_Object_SliderBarGetMax( PX_Object *pSliderBar );
 px_int	   PX_Object_SliderBarGetValue(PX_Object *pSliderBar);
 px_void	   PX_Object_SliderBarRender(px_surface *psurface,PX_Object *pSliderBar,px_uint elpased);
@@ -605,12 +603,12 @@ typedef struct
 PX_Object_ListItem * PX_Object_GetListItem( PX_Object *Object );
 PX_Object * PX_Object_ListCreate(px_memorypool *mp, PX_Object *Parent,px_int x,px_int y,px_int Width,px_int Height,px_int ItemHeight,PX_Object_ListItemOnCreate _CreateFunc);
 px_void PX_Object_ListClear(PX_Object *pListObj);
-px_void PX_Object_ListAdd(PX_Object *pListObj,px_void *ptr);
+px_int PX_Object_ListAdd(PX_Object *pListObj,px_void *ptr);
+px_void *PX_Object_ListGetItem(PX_Object *pListObject,px_int index);
+px_void PX_Object_ListRemoveItem(PX_Object *pListObject,px_int index);
 px_void PX_Object_ListSetBackgroundColor(PX_Object *pListObject,px_color color);
 px_void PX_Object_ListSetBorderColor(PX_Object *pListObject,px_color color);
-px_int PX_Object_ListAddItemDesc(PX_Object *pListObject,px_void *desc);
-px_void *PX_Object_ListGetItemDesc(PX_Object *pListObject,px_int index);
-px_void PX_Object_ListRemoveItemDesc(PX_Object *pListObject,px_int index);
+
 
 //////////////////////////////////////////////////////////////////////////
 //
@@ -1008,7 +1006,7 @@ typedef struct _PX_Object_Menu_Item PX_Object_Menu_Item;
 typedef struct
 {
 	px_memorypool *mp;
-	px_bool OnFocus;
+	px_bool activating;
 	px_int minimumSize;
 	PX_Object_Menu_Item root;
 	PX_FontModule *fontmodule;
@@ -1053,4 +1051,47 @@ PX_Object * PX_Object_SelectBarCreate(px_memorypool *mp,PX_Object *Parent,px_int
 px_int  PX_Object_SelectBarAddItem(PX_Object *PX_Object_SelectBar,const px_char Text[]);
 px_void PX_Object_SelectBarRemoveItem(PX_Object *PX_Object_SelectBar,px_int index);
 px_int PX_Object_SelectBarGetItemIndexByText(PX_Object *pObject,const px_char Text[]);
+px_void PX_Object_SelectBarSetDisplayCount(PX_Object *pObject,px_int count);
+
+px_void PX_Object_SelectBarSetFontColor(PX_Object *pObject,px_color color);
+px_void PX_Object_SelectBarSetCursorColor(PX_Object *pObject,px_color color);
+px_void PX_Object_SelectBarSetBorderColor(PX_Object *pObject,px_color color);
+px_void PX_Object_SelectBarSetBackgroundColor(PX_Object *pObject,px_color color);
+
+
+typedef enum
+{
+	PX_OBJECT_RADIOBOX_STATE_ONCURSOR,
+	PX_OBJECT_RADIOBOX_STATE_ONPUSH,
+	PX_OBJECT_RADIOBOX_STATE_NORMAL,
+}PX_Object_RADIOBOX_STATE;
+
+typedef struct  
+{
+	PX_ALIGN Align;
+	px_bool Border;
+	px_color TextColor;
+	px_color BorderColor;
+	px_color BackgroundColor;
+	px_color CursorColor;
+	px_color PushColor;
+	px_char Text[PX_OBJECT_CHECKBOX_MAX_CONTENT];
+	px_bool bCheck;
+	PX_FontModule *fm;
+	PX_Object_RADIOBOX_STATE state;
+}PX_Object_RadioBox;
+
+PX_Object_RadioBox *PX_Object_GetRadioBox(PX_Object *Object);
+PX_Object * PX_Object_RadioBoxCreate(px_memorypool *mp, PX_Object *Parent,px_int x,px_int y,px_int Width,px_int Height,const char text[],PX_FontModule *fm);
+px_bool PX_Object_RadioBoxGetCheck(PX_Object *Object);
+px_void PX_Object_RadioBoxSetBackgroundColor(PX_Object *Object,px_color clr);
+px_void PX_Object_RadioBoxSetBorderColor(PX_Object *Object,px_color clr);
+px_void PX_Object_RadioBoxSetPushColor(PX_Object *Object,px_color clr);
+px_void PX_Object_RadioBoxSetCursorColor(PX_Object *Object,px_color clr);
+px_void PX_Object_RadioBoxSetText(PX_Object *Object,const px_char text[]);
+px_void PX_Object_RadioBoxSetTextColor(PX_Object *Object,px_color clr);
+px_void PX_Object_RadioBoxSetCheck(PX_Object *Object,px_bool check);
+
+
+
 #endif

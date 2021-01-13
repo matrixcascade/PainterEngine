@@ -25,16 +25,6 @@
 #define PX_DEBUG_MODE _DEBUG
 #endif
 
-// 
-// typedef char * _px_va_list;
-// 
-// #define __PX_INTSIZEOF(n) ( (sizeof(n) + sizeof(int) - 1) & ~(sizeof(int) - 1) )
-// #define _px_va_start(ap,v) ( ap = (_px_va_list)&v + __PX_INTSIZEOF(v) )
-// #define _px_va_arg(ap,t) ( *(t *)((ap += __PX_INTSIZEOF(t)) - __PX_INTSIZEOF(t)) )
-// #define _px_va_end(ap) ( ap = (_px_va_list)0 )
-
-
-
 
 #define PX_COUNTOF(x) (sizeof(x)/sizeof(x[0]))
 
@@ -82,6 +72,20 @@ typedef struct
 #define PX_STRUCT_OFFSET(t,m)    ((((t *)0)->m-(px_byte *)0))
 #define BigLittleSwap16(A)  ((((px_word)(A) & 0xff00) >> 8)|(((px_word)(A) & 0x00ff) << 8))
 #define BigLittleSwap32(A)  ((((px_dword)(A) & 0xff000000) >> 24)|(((px_dword)(A) & 0x00ff0000) >> 8)|(((px_dword)(A) & 0x0000ff00) << 8)|(((px_dword)(A) & 0x000000ff)<<24))
+
+
+typedef enum
+{
+	PX_ALIGN_LEFTTOP,
+	PX_ALIGN_MIDTOP,
+	PX_ALIGN_RIGHTTOP,
+	PX_ALIGN_LEFTMID,
+	PX_ALIGN_CENTER,
+	PX_ALIGN_RIGHTMID,
+	PX_ALIGN_LEFTBOTTOM,
+	PX_ALIGN_MIDBOTTOM,
+	PX_ALIGN_RIGHTBOTTOM,
+}PX_ALIGN;
 
 
 typedef struct _px_matrix 

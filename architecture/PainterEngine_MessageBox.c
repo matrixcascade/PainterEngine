@@ -195,30 +195,12 @@ px_void PX_MessageBoxRender(px_surface *pSurface,PX_MessageBox *pm,px_dword elpa
 		if (pm->edit_inputbox->Visible)
 		{
 			//inputbox mode
-			if (pm->fontmodule)
-			{
-				PX_FontModuleDrawText(pSurface,pm->fontmodule,pm->window_Width/2-108,pm->window_Height/2,PX_FONT_ALIGN_RIGHTMID,pm->Message,frontColor);
-			}
-			else
-			{
-				PX_FontDrawText(pSurface,pm->window_Width/2-108,pm->window_Height/2,PX_FONT_ALIGN_RIGHTMID,pm->Message,frontColor);
-			}
+			PX_FontModuleDrawText(pSurface,pm->fontmodule,pm->window_Width/2-108,pm->window_Height/2,PX_ALIGN_RIGHTMID,pm->Message,frontColor);
 		}
 		else
 		{
-			if (pm->fontmodule)
-			{
-				PX_FontModuleDrawText(pSurface,pm->fontmodule,pm->window_Width/2,pm->window_Height/2,PX_FONT_ALIGN_CENTER,pm->Message,frontColor);
-			}
-			else
-			{
-				PX_FontDrawText(pSurface,pm->window_Width/2,pm->window_Height/2,PX_FONT_ALIGN_CENTER,pm->Message,frontColor);
-			}
+			PX_FontModuleDrawText(pSurface,pm->fontmodule,pm->window_Width/2,pm->window_Height/2,PX_ALIGN_CENTER,pm->Message,frontColor);
 		}
-
-
-		
-
 		PX_ObjectRender(pSurface,pm->root,elpased);
 	}
 

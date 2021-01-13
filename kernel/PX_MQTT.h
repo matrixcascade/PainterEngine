@@ -35,9 +35,6 @@ typedef enum
 #define PX_MQTT_FIXERHEADER_CONTROLLERTYPE_DISCONNECT   14
 #define PX_MQTT_FIXERHEADER_CONTROLLERTYPE_RESERVED1	15
 
-typedef px_bool (*px_mqtt_client_write)(struct _PX_MQTT *mqtt,px_void *userPtr,px_void *data,px_int size);
-typedef px_bool (*px_mqtt_client_read)(struct _PX_MQTT *mqtt,px_void *userPtr,px_void *data,px_int buffersize,px_int *readsize,px_dword timeout);
-
 typedef enum
 {
 	PX_MQTT_STATUS_DISCONNECT,

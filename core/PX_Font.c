@@ -228,7 +228,7 @@ px_int PX_FontDrawChar(px_surface *psurface, px_int x,px_int y,px_uchar ASCI,px_
 	return 16;
 }
 
-px_int PX_FontDrawText(px_surface *psurface,px_int x,px_int y,PX_FONT_ALIGN align,const px_char *Text,px_color Color)
+px_int PX_FontDrawText(px_surface *psurface,px_int x,px_int y,PX_ALIGN align,const px_char *Text,px_color Color)
 {
 	px_uchar TempChar;
 	px_int resX=x;
@@ -240,33 +240,33 @@ px_int PX_FontDrawText(px_surface *psurface,px_int x,px_int y,PX_FONT_ALIGN alig
 
 	switch (align)
 	{
-	case PX_FONT_ALIGN_LEFTTOP:
+	case PX_ALIGN_LEFTTOP:
 		break;
-	case PX_FONT_ALIGN_MIDTOP:
+	case PX_ALIGN_MIDTOP:
 		x-=frWidth/2;
 		break;
-	case PX_FONT_ALIGN_RIGHTTOP:
+	case PX_ALIGN_RIGHTTOP:
 		x-=frWidth;
 		break;
-	case PX_FONT_ALIGN_LEFTMID:
+	case PX_ALIGN_LEFTMID:
 		y-=frHeight/2;
 		break;
-	case PX_FONT_ALIGN_CENTER:
+	case PX_ALIGN_CENTER:
 		y-=frHeight/2;
 		x-=frWidth/2;
 		break;
-	case PX_FONT_ALIGN_RIGHTMID:
+	case PX_ALIGN_RIGHTMID:
 		y-=frHeight/2;
 		x-=frWidth;
 		break;
-	case PX_FONT_ALIGN_LEFTBOTTOM:
+	case PX_ALIGN_LEFTBOTTOM:
 		y-=frHeight;
 		break;
-	case PX_FONT_ALIGN_MIDBOTTOM:
+	case PX_ALIGN_MIDBOTTOM:
 		y-=frHeight;
 		x-=frWidth/2;
 		break;
-	case PX_FONT_ALIGN_RIGHTBOTTOM:
+	case PX_ALIGN_RIGHTBOTTOM:
 		y-=frHeight;
 		x-=frWidth;
 		break;
@@ -635,7 +635,7 @@ px_int PX_FontModuleDrawCharacter(px_surface *psurface,PX_FontModule *mod,int x,
 	return 0;
 }
 
-px_int PX_FontModuleDrawText(px_surface *psurface,PX_FontModule *mod,int x,int y,PX_FONT_ALIGN align,const px_char *Text,px_color Color)
+px_int PX_FontModuleDrawText(px_surface *psurface,PX_FontModule *mod,int x,int y,PX_ALIGN align,const px_char *Text,px_color Color)
 {
 	px_int dx,dy,content_width=0;
 	px_int frWidth,frHeight;
@@ -657,33 +657,33 @@ px_int PX_FontModuleDrawText(px_surface *psurface,PX_FontModule *mod,int x,int y
 	
 	switch (align)
 	{
-	case PX_FONT_ALIGN_LEFTTOP:
+	case PX_ALIGN_LEFTTOP:
 		break;
-	case PX_FONT_ALIGN_MIDTOP:
+	case PX_ALIGN_MIDTOP:
 		x-=frWidth/2;
 		break;
-	case PX_FONT_ALIGN_RIGHTTOP:
+	case PX_ALIGN_RIGHTTOP:
 		x-=frWidth;
 		break;
-	case PX_FONT_ALIGN_LEFTMID:
+	case PX_ALIGN_LEFTMID:
 		y-=frHeight/2;
 		break;
-	case PX_FONT_ALIGN_CENTER:
+	case PX_ALIGN_CENTER:
 		y-=frHeight/2;
 		x-=frWidth/2;
 		break;
-	case PX_FONT_ALIGN_RIGHTMID:
+	case PX_ALIGN_RIGHTMID:
 		y-=frHeight/2;
 		x-=frWidth;
 		break;
-	case PX_FONT_ALIGN_LEFTBOTTOM:
+	case PX_ALIGN_LEFTBOTTOM:
 		y-=frHeight;
 		break;
-	case PX_FONT_ALIGN_MIDBOTTOM:
+	case PX_ALIGN_MIDBOTTOM:
 		y-=frHeight;
 		x-=frWidth/2;
 		break;
-	case PX_FONT_ALIGN_RIGHTBOTTOM:
+	case PX_ALIGN_RIGHTBOTTOM:
 		y-=frHeight;
 		x-=frWidth;
 		break;

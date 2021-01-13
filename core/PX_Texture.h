@@ -37,6 +37,7 @@ typedef struct
 	px_memorypool *MP;
 }px_shape;
 
+
 px_bool PX_TextureCreate(px_memorypool *mp,px_texture *tex,px_int width,px_int height);
 px_bool PX_TextureCreateFromMemory(px_memorypool *mp,px_void *data,px_int size,px_texture *tex);
 px_bool PX_TextureCopy(px_memorypool *mp,px_texture *restexture,px_texture *dest);

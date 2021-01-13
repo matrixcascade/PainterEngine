@@ -1,21 +1,30 @@
-#ifndef PAINTERENGINE_RUNTIME_H
-#define PAINTERENGINE_RUNTIME_H
+#ifndef PX_UI_H
+#define PX_UI_H
 
-#include "../kernel/PX_Json.h"
-#include "../kernel/PX_Object.h"
-
-
+#include "PX_Json.h"
+#include "PX_Object.h"
 
 typedef struct
 {
-	px_int allocID;
-	px_float z;
-	px_vector Objects;//PX_Object *
+	px_memorypool *mp,*ui_mp;
+	px_map ObjectMap;
+	px_vector infos;
+	PX_FontModule *fontmodule;
 }PX_UI;
 
-px_bool PX_UIInitialize(px_memorypool *mp,PX_UI *ui);
-px_void PX_UIUpdate(PX_UI *ui,px_dword elpased);
-px_void PX_UIRender(px_surface *psurface,PX_UI *ui,px_dword elpased);
+
+typedef PX_Object * (*PX_UI_ControllerCreate)(PX_UI *ui,PX_Object *parent,PX_Json_Value *value);
+
+typedef struct  
+{
+	px_char Type[32];
+	PX_UI_ControllerCreate create_func;
+}PX_UI_ControllerInfo;
+
+px_bool PX_UIInitialize(px_memorypool *mp,px_memorypool *ui_mp,PX_UI *ui,PX_FontModule *fontmodule);
+px_bool PX_UIAddControllerInfo(PX_UI *ui,const px_char controllertype[],PX_UI_ControllerCreate _func);
+PX_Object *PX_UICreate(PX_UI *ui,PX_Object *parent,PX_Json_Value *ui_json);
+PX_Object *PX_UIGetObjectByID(PX_UI *ui,const px_char id[]);
 px_void PX_UIFree(PX_UI *ui);
 
 #endif
