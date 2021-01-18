@@ -147,7 +147,20 @@ px_bool PX_UI_GetBool(PX_Json_Value *json_value,const px_char name[],px_bool *b)
 	}
 	return PX_FALSE;
 }
-
+px_bool PX_UI_GetNumber(PX_Json_Value *json_value,const px_char name[],px_double *number)
+{
+	PX_Json_Value *pSubValue=PX_NULL;
+	pSubValue=PX_JsonGetObjectValue(json_value,name);
+	if (pSubValue)
+	{
+		if (pSubValue->type==PX_JSON_VALUE_TYPE_NUMBER)
+		{
+			*number=pSubValue->_number;
+			return PX_TRUE;
+		}
+	}
+	return PX_FALSE;
+}
 px_bool PX_UI_GetString(PX_Json_Value *json_value,const px_char name[],px_char str[],px_int size)
 {
 	PX_Json_Value *pSubValue=PX_NULL;
@@ -401,7 +414,7 @@ PX_Object * PX_UI_CreateEdit(PX_UI *ui,PX_Object *parent,PX_Json_Value *json_val
 	px_bool b;
 	PX_Json_Value *pSubValue=PX_NULL;
 	px_color fontColor,Color;
-
+	px_char style[8];
 	baseInfo=PX_UIGetBaseInfo(json_value,width,height);
 	fontColor=PX_COLOR(255,0,0,0);
 
@@ -436,6 +449,14 @@ PX_Object * PX_UI_CreateEdit(PX_UI *ui,PX_Object *parent,PX_Json_Value *json_val
 	if (PX_UI_GetBool(json_value,"autonewline",&b))
 	{
 		PX_Object_EditAutoNewLine(pObject,b,16);
+	}
+
+	if (PX_UI_GetString(json_value,"style",style,sizeof(style)))
+	{
+		if (PX_strequ(style,"round"))
+		{
+			PX_Object_EditSetStyle(pObject,PX_OBJECT_EDIT_STYLE_ROUNDRECT);
+		}
 	}
 
 	return pObject;
@@ -706,6 +727,7 @@ PX_Object * PX_UI_CreateSelectBar(PX_UI *ui,PX_Object *parent,PX_Json_Value *jso
 	PX_Json_Value *pSubValue=PX_NULL;
 	px_color Color;
 	px_char style[8];
+	px_double number;
 
 	baseInfo=PX_UIGetBaseInfo(json_value,width,height);
 
@@ -739,6 +761,14 @@ PX_Object * PX_UI_CreateSelectBar(PX_UI *ui,PX_Object *parent,PX_Json_Value *jso
 		}
 	}
 
+	if (PX_UI_GetNumber(json_value,"displaycount",&number))
+	{
+		if (number<1)
+		{
+			number=1;
+		}
+		PX_Object_SelectBarSetDisplayCount(pObject,(px_int)number);
+	}
 
 	pSubValue=PX_JsonGetObjectValue(json_value,"items");
 	if (pSubValue&&pSubValue->type==PX_JSON_VALUE_TYPE_ARRAY)
@@ -887,6 +917,31 @@ _ERROR:
 	}
 	return PX_NULL;
 
+}
+
+px_void PX_UIUpdateObjectsPostions(PX_UI *ui,PX_Object *pObject,PX_Json_Value *json_value,px_int width,px_int height)
+{
+	PX_UiBaseInfo baseInfo;
+	PX_Json_Value *pSubValue=PX_NULL;
+	PX_Object *pChildObject;
+	px_int i;
+	baseInfo=PX_UIGetBaseInfo(json_value,width,height);
+	pObject->x=baseInfo.x;
+	pObject->y=baseInfo.y;
+	pObject->Height=baseInfo.height;
+	pObject->Width=baseInfo.width;
+	if (json_value->type==PX_JSON_VALUE_TYPE_OBJECT)
+	{
+		for (i=0;i<json_value->_object.values.size;i++)
+		{
+			pSubValue=PX_JsonGetObjectValueByIndex(json_value,i);
+			pChildObject=PX_ObjectGetChild(pObject,i);
+			if (pChildObject)
+			{
+				PX_UIUpdateObjectsPostions(ui,pChildObject,pSubValue,width,height);
+			}
+		}
+	}
 }
 
 PX_Object * PX_UIGetObjectByID(PX_UI *ui,const px_char id[])

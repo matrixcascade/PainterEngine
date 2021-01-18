@@ -3,7 +3,7 @@
 #include "PainterEngine_Application.h"
 
 #ifdef PX_APPLICATION_WINDOWS
-#include "../../../PainterEngine/platform/windows/windows_display.h"
+#include "platform/windows/windows_display.h"
 //mouse informations
 POINT main_zoomPoint;
 px_int main_ZoomRegion;

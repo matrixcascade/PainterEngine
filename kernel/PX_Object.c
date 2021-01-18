@@ -1598,7 +1598,14 @@ px_void PX_Object_SliderBarSetValue( PX_Object *pSliderBar,px_int Value )
 	PX_Object_SliderBar *SliderBar=PX_Object_GetSliderBar(pSliderBar);
 	if (SliderBar!=PX_NULL)
 	{
-		
+		if (Value>SliderBar->Max)
+		{
+			Value=SliderBar->Max;
+		}
+		if (Value<SliderBar->Min)
+		{
+			Value=SliderBar->Min;
+		}
 		SliderBar->Value=Value;
 	}
 }
@@ -2546,7 +2553,7 @@ PX_Object* PX_Object_EditCreate(px_memorypool *mp, PX_Object *Parent,px_int x,px
 	pEdit->max_length=-1;
 	pEdit->fontModule=fontModule;
 	pEdit->AutoNewLineSpacing=__PX_FONT_ASCSIZE+2;
-
+	pEdit->style=PX_OBJECT_EDIT_STYLE_RECT;
 	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_CURSORMOVE,PX_Object_EditOnMouseMove,PX_NULL);
 	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_CURSORDOWN,PX_Object_EditOnMouseLButtonDown,PX_NULL);
 	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_STRING,PX_Object_EditOnKeyboardString,PX_NULL);
@@ -2670,6 +2677,15 @@ px_void PX_Object_EditSetLimit(PX_Object *pObject,const px_char *Limit)
 	if (pEdit)
 	{
 		pEdit->Limit=Limit;
+	}
+}
+
+px_void PX_Object_EditSetStyle(PX_Object *pObject,PX_OBJECT_EDIT_STYLE style)
+{
+	PX_Object_Edit * pEdit=PX_Object_GetEdit(pObject);
+	if (pEdit)
+	{
+		pEdit->style=style;
 	}
 }
 
@@ -2979,16 +2995,33 @@ px_void PX_Object_EditRender(px_surface *psurface, PX_Object *pObject,px_uint el
 		}
 	}
 
-
-	//clear
-	PX_SurfaceClear(&pEdit->EditSurface,0,0,(px_int)objWidth-1,(px_int)objHeight-1,pEdit->BackgroundColor);
-	if (pEdit->Border)
+	
+	if (pEdit->style==PX_OBJECT_EDIT_STYLE_RECT)
 	{
-		if(pEdit->state==PX_OBJECT_EDIT_STATE_NORMAL)
-			PX_GeoDrawBorder(&pEdit->EditSurface,0,0,(px_int)objWidth-1,(px_int)objHeight-1,1,pEdit->BorderColor);
-		else
-			PX_GeoDrawBorder(&pEdit->EditSurface,0,0,(px_int)objWidth-1,(px_int)objHeight-1,1,pEdit->CursorColor);
+		//clear
+		PX_SurfaceClear(&pEdit->EditSurface,0,0,(px_int)objWidth-1,(px_int)objHeight-1,pEdit->BackgroundColor);
+		if (pEdit->Border)
+		{
+			if(pEdit->state==PX_OBJECT_EDIT_STATE_NORMAL)
+				PX_GeoDrawBorder(&pEdit->EditSurface,0,0,(px_int)objWidth-1,(px_int)objHeight-1,1,pEdit->BorderColor);
+			else
+				PX_GeoDrawBorder(&pEdit->EditSurface,0,0,(px_int)objWidth-1,(px_int)objHeight-1,1,pEdit->CursorColor);
+		}
 	}
+	else if(pEdit->style==PX_OBJECT_EDIT_STYLE_ROUNDRECT)
+	{
+		PX_SurfaceClear(&pEdit->EditSurface,0,0,(px_int)objWidth-1,(px_int)objHeight-1,PX_COLOR(0,0,0,0));
+		PX_GeoDrawSolidRoundRect(&pEdit->EditSurface,0,0,(px_int)objWidth-1,(px_int)objHeight-1,objHeight/2,pEdit->BackgroundColor);
+		if (pEdit->Border)
+		{
+			if(pEdit->state==PX_OBJECT_EDIT_STATE_NORMAL)
+				PX_GeoDrawRoundRect(&pEdit->EditSurface,0,0,(px_int)objWidth-1,(px_int)objHeight-1,objHeight/2,1,pEdit->BorderColor);
+			else
+				PX_GeoDrawRoundRect(&pEdit->EditSurface,0,0,(px_int)objWidth-1,(px_int)objHeight-1,objHeight/2,1,pEdit->CursorColor);
+		}
+	}
+
+
 
 	x=pEdit->HorizontalOffset;
 	y=pEdit->VerticalOffset;
@@ -8930,6 +8963,11 @@ static px_void PX_SelectbarOnCursorDown(PX_Object *pObject,px_float x,px_float y
 	}
 	else
 	{
+		if (pSelectbar->Items.size==0)
+		{
+			return;
+		}
+		
 		if(PX_isPointInRect(PX_POINT(x,y,0),PX_RECT(objx,objy,objWidth,objHeight)))
 		{
 			pSelectbar->activating=PX_TRUE;
@@ -8942,6 +8980,25 @@ static px_void PX_SelectbarOnCursorDown(PX_Object *pObject,px_float x,px_float y
 		}
 	}
 	
+}
+
+static px_void PX_SelectbarOnCursorWheel(PX_Object *pObject,px_float z)
+{
+	PX_Object_SelectBar *pSelectbar=PX_Object_GetSelectBar(pObject);
+	if (pSelectbar->activating)
+	{
+		if (pSelectbar->Items.size>pSelectbar->maxDisplayCount)
+		{
+			if (z<0)
+			{
+				PX_Object_SliderBarSetValue(pSelectbar->sliderBar,PX_Object_SliderBarGetValue(pSelectbar->sliderBar)+1);
+			}
+			else
+			{
+				PX_Object_SliderBarSetValue(pSelectbar->sliderBar,PX_Object_SliderBarGetValue(pSelectbar->sliderBar)-1);
+			}
+		}
+	}
 }
 static px_void PX_SelectbarOnCursorEvent(PX_Object *pSelectBarObject,PX_Object_Event e,px_void *ptr)
 {
@@ -8956,6 +9013,11 @@ static px_void PX_SelectbarOnCursorEvent(PX_Object *pSelectBarObject,PX_Object_E
 	case PX_OBJECT_EVENT_CURSORDOWN:
 		{
 			PX_SelectbarOnCursorDown(pSelectBarObject,PX_Object_Event_GetCursorX(e),PX_Object_Event_GetCursorY(e));
+		}
+		break;
+	case PX_OBJECT_EVENT_CURSORWHEEL:
+		{
+			PX_SelectbarOnCursorWheel(pSelectBarObject,PX_Object_Event_GetCursorZ(e));
 		}
 		break;
 	default:
@@ -9002,14 +9064,14 @@ static px_void PX_SelectbarRender(px_surface *pRenderSurface,PX_Object *pObject,
 	{
 		if (pSelectBar->onCursor)
 		{
-			PX_GeoDrawSolidRoundRect(pRenderSurface,(px_int)objx,(px_int)objy,(px_int)(objx+objWidth-1),(px_int)(objy+objHeight-1),objHeight/2-2,pSelectBar->cursorColor);
+			PX_GeoDrawSolidRoundRect(pRenderSurface,(px_int)objx,(px_int)objy,(px_int)(objx+objWidth-1),(px_int)(objy+objHeight-1),objHeight/2,pSelectBar->cursorColor);
 		}
 		else
 		{
-			PX_GeoDrawSolidRoundRect(pRenderSurface,(px_int)objx,(px_int)objy,(px_int)(objx+objWidth-1),(px_int)(objy+objHeight-1),objHeight/2-2,pSelectBar->backgroundColor);
+			PX_GeoDrawSolidRoundRect(pRenderSurface,(px_int)objx,(px_int)objy,(px_int)(objx+objWidth-1),(px_int)(objy+objHeight-1),objHeight/2,pSelectBar->backgroundColor);
 		}
 
-		PX_GeoDrawRoundRect(pRenderSurface,(px_int)objx,(px_int)objy,(px_int)(objx+objWidth-1),(px_int)(objy+objHeight-1),objHeight/2-2,1,pSelectBar->borderColor);
+		PX_GeoDrawRoundRect(pRenderSurface,(px_int)objx,(px_int)objy,(px_int)(objx+objWidth-1),(px_int)(objy+objHeight-1),objHeight/2,1,pSelectBar->borderColor);
 	}
 
 	//font
@@ -9018,7 +9080,7 @@ static px_void PX_SelectbarRender(px_surface *pRenderSurface,PX_Object *pObject,
 		if (pSelectBar->selectIndex>=0&&pSelectBar->selectIndex<pSelectBar->Items.size)
 		{
 			PX_Object_SelectBar_Item *pItem=PX_VECTORAT(PX_Object_SelectBar_Item,&pSelectBar->Items,pSelectBar->selectIndex);
-			PX_FontModuleDrawText(pRenderSurface,pSelectBar->fontmodule,(px_int)objx+8,(px_int)(objy+objHeight/2),PX_ALIGN_LEFTMID,pItem->Text,pSelectBar->fontColor);
+			PX_FontModuleDrawText(pRenderSurface,pSelectBar->fontmodule,(px_int)(objx+objHeight/2+1),(px_int)(objy+objHeight/2),PX_ALIGN_LEFTMID,pItem->Text,pSelectBar->fontColor);
 		}
 	} while (0);
 	
@@ -9060,7 +9122,7 @@ static px_void PX_SelectbarRender(px_surface *pRenderSurface,PX_Object *pObject,
 					);
 			}
 			
-			PX_FontModuleDrawText(pRenderSurface,pSelectBar->fontmodule,(px_int)(objx+8),
+			PX_FontModuleDrawText(pRenderSurface,pSelectBar->fontmodule,(px_int)(objx+objHeight/2+1),
 				(px_int)(objy+objHeight+(i*pSelectBar->ItemHeight)+pSelectBar->ItemHeight/2),
 				PX_ALIGN_LEFTMID,
 				pItem->Text,
@@ -9079,10 +9141,12 @@ static px_void PX_SelectbarRender(px_surface *pRenderSurface,PX_Object *pObject,
 		if (pSelectBar->Items.size>pSelectBar->maxDisplayCount)
 		{
 			pSelectBar->sliderBar->Visible=PX_TRUE;
-			pSelectBar->sliderBar->x=objx+objWidth-16;
-			pSelectBar->sliderBar->y=objy+objHeight;
+			pSelectBar->sliderBar->x=objWidth-16;
+			pSelectBar->sliderBar->y=objHeight;
 			pSelectBar->sliderBar->Width=16;
 			pSelectBar->sliderBar->Height=count*pSelectBar->ItemHeight*1.0f;
+			PX_Object_SliderBarSetBackgroundColor(pSelectBar->sliderBar,pSelectBar->backgroundColor);
+			PX_Object_SliderBarSetColor(pSelectBar->sliderBar,pSelectBar->borderColor);
 			PX_Object_SliderBarSetRange(pSelectBar->sliderBar,0,pSelectBar->Items.size-pSelectBar->maxDisplayCount);
 			PX_Object_SliderBarSetSliderButtonLength(pSelectBar->sliderBar,(px_int)(pSelectBar->sliderBar->Height*pSelectBar->maxDisplayCount/pSelectBar->Items.size));
 		}
@@ -9157,6 +9221,7 @@ PX_Object * PX_Object_SelectBarCreate(px_memorypool *mp,PX_Object *Parent,px_int
 	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_CURSORDOWN,PX_SelectbarOnCursorEvent,PX_NULL);
 	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_CURSORMOVE,PX_SelectbarOnCursorEvent,PX_NULL);
 	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_CURSORDRAG,PX_SelectbarOnCursorEvent,PX_NULL);
+	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_CURSORWHEEL,PX_SelectbarOnCursorEvent,PX_NULL);
 
 	pSelectbar->sliderBar=PX_Object_SliderBarCreate(mp,pObject,0,0,0,0,PX_OBJECT_SLIDERBAR_TYPE_VERTICAL,PX_OBJECT_SLIDERBAR_STYLE_BOX);
 
@@ -9212,6 +9277,16 @@ px_void PX_Object_SelectBarSetDisplayCount(PX_Object *pObject,px_int count)
 	{
 		pSelectBar->maxDisplayCount=count;
 	}
+}
+
+px_int PX_Object_SelectBarGetCurrentIndex(PX_Object *pObject)
+{
+	PX_Object_SelectBar *pSelectBar=PX_Object_GetSelectBar(pObject);
+	if (pSelectBar)
+	{
+		return pSelectBar->selectIndex;
+	}
+	return -1;
 }
 
 px_void PX_Object_SelectBarSetStyle(PX_Object *pObject,PX_OBJECT_SELECTBAR_STYLE style)

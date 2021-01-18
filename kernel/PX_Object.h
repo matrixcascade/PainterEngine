@@ -436,6 +436,11 @@ typedef enum
 	PX_OBJECT_EDIT_STATE_NORMAL,
 }PX_OBJECT_EDIT_STATE;
 
+typedef enum
+{
+	PX_OBJECT_EDIT_STYLE_RECT,
+	PX_OBJECT_EDIT_STYLE_ROUNDRECT,
+}PX_OBJECT_EDIT_STYLE;
 
 typedef struct 
 {
@@ -459,6 +464,7 @@ typedef struct
 	PX_FontModule *fontModule;
 	const px_char *Limit;
 	PX_OBJECT_EDIT_STATE state;
+	PX_OBJECT_EDIT_STYLE style;
 }PX_Object_Edit;
 
 PX_Object* PX_Object_EditCreate(px_memorypool *mp, PX_Object *Parent,px_int x,px_int y,px_int Width,px_int Height,PX_FontModule *fontModule,px_color TextColor );
@@ -473,6 +479,7 @@ px_void PX_Object_EditSetBorderColor( PX_Object *pObject,px_color Color );
 px_void PX_Object_EditSetCursorColor( PX_Object *pObject,px_color Color );
 px_void PX_Object_EditSetTextColor( PX_Object *pObject,px_color Color );
 px_void PX_Object_EditSetLimit(PX_Object *pObject,const px_char *Limit);
+px_void PX_Object_EditSetStyle(PX_Object *pObject,PX_OBJECT_EDIT_STYLE style);
 px_void PX_Object_EditSetBorder( PX_Object *pObj,px_bool Border );
 px_void PX_Object_EditRender(px_surface *psurface, PX_Object *pObject,px_uint elpased);
 px_void PX_Object_EditFree( PX_Object *pObject );
@@ -1038,7 +1045,7 @@ px_int  PX_Object_SelectBarAddItem(PX_Object *PX_Object_SelectBar,const px_char 
 px_void PX_Object_SelectBarRemoveItem(PX_Object *PX_Object_SelectBar,px_int index);
 px_int PX_Object_SelectBarGetItemIndexByText(PX_Object *pObject,const px_char Text[]);
 px_void PX_Object_SelectBarSetDisplayCount(PX_Object *pObject,px_int count);
-
+px_int  PX_Object_SelectBarGetCurrentIndex(PX_Object *pObject);
 px_void PX_Object_SelectBarSetStyle(PX_Object *pObject,PX_OBJECT_SELECTBAR_STYLE style);
 px_void PX_Object_SelectBarSetFontColor(PX_Object *pObject,px_color color);
 px_void PX_Object_SelectBarSetCursorColor(PX_Object *pObject,px_color color);

@@ -2572,6 +2572,10 @@ px_void PX_GeoDrawSolidRoundRect(px_surface *psurface, px_int left, px_int top, 
 	{
 		return;
 	}
+	if (roundRaduis<0)
+	{
+		roundRaduis=0;
+	}
 
 	if (left>right)
 	{

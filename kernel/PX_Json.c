@@ -31,6 +31,15 @@ PX_Json_Value * PX_JsonGetObjectValue(PX_Json_Value *json_value,const px_char na
 	return PX_NULL;
 }
 
+PX_Json_Value * PX_JsonGetObjectValueByIndex(PX_Json_Value *json_value,px_int i)
+{
+	if (i<0||i>=json_value->_object.values.size)
+	{
+		return PX_NULL;
+	}
+	return PX_LISTAT(PX_Json_Value,&json_value->_object.values,i);
+}
+
 PX_Json_Value * PX_JsonGetValue(PX_Json *json,const px_char _payload[])
 {
 	px_int r_offset=0;
