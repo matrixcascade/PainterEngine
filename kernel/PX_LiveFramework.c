@@ -629,6 +629,9 @@ px_void PX_LiveFrameworkRender(px_surface *psurface,PX_LiveFramework *plive,px_i
 				pTexture=PX_AnimationGetCurrentTexture((PX_Animation *)pLayer->data);
 				if(!pTexture) continue;
 				break;
+			default:
+				pTexture=PX_NULL;
+				break;
 			}
 
 			if (pLayer->keyPoint.x!=pLayer->controlPoint.x||pLayer->keyPoint.y!=pLayer->controlPoint.y)
