@@ -1,6 +1,6 @@
 #include "PX_Resource.h"
 
-px_bool PX_ResourceLibraryInit(px_memorypool *mp,PX_ResourceLibrary *lib)
+px_bool PX_ResourceLibraryInitialize(px_memorypool *mp,PX_ResourceLibrary *lib)
 {
 	lib->mp=mp;
 	PX_MapInitialize(mp,&lib->map);

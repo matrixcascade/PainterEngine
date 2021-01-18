@@ -13,7 +13,7 @@ typedef struct
 }PX_UI;
 
 
-typedef PX_Object * (*PX_UI_ControllerCreate)(PX_UI *ui,PX_Object *parent,PX_Json_Value *value);
+typedef PX_Object * (*PX_UI_ControllerCreate)(PX_UI *ui,PX_Object *parent,PX_Json_Value *value,px_int width,px_int height);
 
 typedef struct  
 {
@@ -23,7 +23,7 @@ typedef struct
 
 px_bool PX_UIInitialize(px_memorypool *mp,px_memorypool *ui_mp,PX_UI *ui,PX_FontModule *fontmodule);
 px_bool PX_UIAddControllerInfo(PX_UI *ui,const px_char controllertype[],PX_UI_ControllerCreate _func);
-PX_Object *PX_UICreate(PX_UI *ui,PX_Object *parent,PX_Json_Value *ui_json);
+PX_Object * PX_UICreate(PX_UI *ui,PX_Object *parent,PX_Json_Value *json_value,px_int width,px_int height);
 PX_Object *PX_UIGetObjectByID(PX_UI *ui,const px_char id[]);
 px_void PX_UIFree(PX_UI *ui);
 

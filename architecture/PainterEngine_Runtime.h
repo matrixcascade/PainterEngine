@@ -22,6 +22,7 @@ typedef struct
 
 px_bool PX_RuntimeInitialize(PX_Runtime *pe,px_int surface_width,px_int surface_height,px_int window_width,px_int window_height,px_void *runtime_memoryPtr,px_uint size,px_uint ui_size,px_uint resource_size,px_uint game_size);
 px_bool PX_RuntimeResize(PX_Runtime *pe,px_int surface_width,px_int surface_height,px_int window_width,px_int window_height);
+px_void PX_RuntimeReset(PX_Runtime *pe);
 px_memorypool PX_RuntimeCreateCalcMemoryPool(PX_Runtime *pe);
 px_void PX_RuntimeFreeCalcMemoryPool(PX_Runtime *pe,px_memorypool mp);
 px_surface *PX_RuntimeGetRenderSurface(PX_Runtime *pe);

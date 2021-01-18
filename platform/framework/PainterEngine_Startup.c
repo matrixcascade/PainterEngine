@@ -149,7 +149,7 @@ px_bool PX_LoadScriptInstanceFromFile(px_memorypool *mp,PX_ScriptVM_Instance *in
 	{
 		return PX_FALSE;
 	}
-	if(!PX_ScriptVM_InstanceInit(ins,mp,io.buffer,io.size))
+	if(!PX_ScriptVM_InstanceInitialize(ins,mp,io.buffer,io.size))
 		goto _ERROR;
 
 	PX_FreeIOData(&io);

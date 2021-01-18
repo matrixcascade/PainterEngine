@@ -433,6 +433,13 @@ px_bool PX_FontModuleLoad(PX_FontModule *module,px_byte *buffer,px_int size)
 {
 	px_int offset=0;
 	PX_FontModule_Charactor *cpy;
+
+	if(module->mp==PX_NULL)
+	{
+		PX_ASSERT();
+		return PX_FALSE;
+	}
+	
 	while (offset<size)
 	{
 		px_char hex[16]={0};

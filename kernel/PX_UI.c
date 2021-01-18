@@ -1,12 +1,28 @@
 #include "PX_UI.h"
 
+typedef enum
+{
+	PX_UI_HALIGN_LEFT,
+	PX_UI_HALIGN_MID,
+	PX_UI_HALIGN_RIGHT,
+}PX_UI_HALIGN;
+
+typedef enum
+{
+	PX_UI_VALIGN_TOP,
+	PX_UI_VALIGN_MID,
+	PX_UI_VALIGN_BOTTOM,
+}PX_UI_VALIGN;
+
 typedef struct
 {
 	px_char id[32];
 	px_float x,y,z,height,width,length;
+	PX_UI_HALIGN halign;
+	PX_UI_VALIGN valign;
 }PX_UiBaseInfo;
 
-PX_UiBaseInfo PX_UIGetBaseInfo(PX_Json_Value *json_value)
+PX_UiBaseInfo PX_UIGetBaseInfo(PX_Json_Value *json_value,px_int width,px_int height)
 {
 	PX_UiBaseInfo baseInfo;
 	PX_Json_Value *pSubValue=PX_NULL;
@@ -46,6 +62,40 @@ PX_UiBaseInfo PX_UIGetBaseInfo(PX_Json_Value *json_value)
 	{
 		PX_strcpy(baseInfo.id,pSubValue->_string.buffer,sizeof(baseInfo.id));
 	}
+	pSubValue=PX_JsonGetObjectValue(json_value,"halign");
+	if (pSubValue&&pSubValue->type==PX_JSON_VALUE_TYPE_STRING)
+	{
+		if(PX_strequ(pSubValue->_string.buffer,"left"))
+		{
+			//
+		}
+		if(PX_strequ(pSubValue->_string.buffer,"mid"))
+		{
+			baseInfo.x+=width/2;
+		}
+		if(PX_strequ(pSubValue->_string.buffer,"right"))
+		{
+			baseInfo.x+=width;
+		}
+	}
+
+	pSubValue=PX_JsonGetObjectValue(json_value,"valign");
+	if (pSubValue&&pSubValue->type==PX_JSON_VALUE_TYPE_STRING)
+	{
+		if(PX_strequ(pSubValue->_string.buffer,"top"))
+		{
+			//
+		}
+		if(PX_strequ(pSubValue->_string.buffer,"mid"))
+		{
+			baseInfo.y+=height/2;
+		}
+		if(PX_strequ(pSubValue->_string.buffer,"bottom"))
+		{
+			baseInfo.y+=height;
+		}
+	}
+
 	return baseInfo;
 }
 
@@ -83,8 +133,37 @@ px_bool PX_UI_GetColor(PX_Json_Value *json_value,const px_char name[],px_color *
 	}
 	return PX_FALSE;
 }
+px_bool PX_UI_GetBool(PX_Json_Value *json_value,const px_char name[],px_bool *b)
+{
+	PX_Json_Value *pSubValue=PX_NULL;
+	pSubValue=PX_JsonGetObjectValue(json_value,name);
+	if (pSubValue)
+	{
+		if (pSubValue->type==PX_JSON_VALUE_TYPE_BOOLEAN)
+		{
+			*b=pSubValue->_boolean;
+			return PX_TRUE;
+		}
+	}
+	return PX_FALSE;
+}
 
-PX_Object * PX_UI_CreateLabel(PX_UI *ui,PX_Object *parent,PX_Json_Value *json_value)
+px_bool PX_UI_GetString(PX_Json_Value *json_value,const px_char name[],px_char str[],px_int size)
+{
+	PX_Json_Value *pSubValue=PX_NULL;
+	pSubValue=PX_JsonGetObjectValue(json_value,name);
+	if (pSubValue)
+	{
+		if (pSubValue->type==PX_JSON_VALUE_TYPE_STRING)
+		{
+			PX_strcpy(str,pSubValue->_string.buffer,size);
+			return PX_TRUE;
+		}
+	}
+	return PX_FALSE;
+}
+
+PX_Object * PX_UI_CreateLabel(PX_UI *ui,PX_Object *parent,PX_Json_Value *json_value,px_int width,px_int height)
 {
 	PX_Object *pObject;
 	PX_UiBaseInfo baseInfo;
@@ -97,7 +176,7 @@ PX_Object * PX_UI_CreateLabel(PX_UI *ui,PX_Object *parent,PX_Json_Value *json_va
 		text=pSubValue->_string.buffer;
 	}
 
-	baseInfo=PX_UIGetBaseInfo(json_value);
+	baseInfo=PX_UIGetBaseInfo(json_value,width,height);
 	fontColor=PX_COLOR(255,0,0,0);
 	backgroundColor=PX_COLOR(0,0,0,0);
 
@@ -149,7 +228,7 @@ PX_Object * PX_UI_CreateLabel(PX_UI *ui,PX_Object *parent,PX_Json_Value *json_va
 
 	return pObject;
 }
-PX_Object * PX_UI_CreateProcessbar(PX_UI *ui,PX_Object *parent,PX_Json_Value *json_value)
+PX_Object * PX_UI_CreateProcessbar(PX_UI *ui,PX_Object *parent,PX_Json_Value *json_value,px_int width,px_int height)
 {
 	PX_Object *pObject;
 	PX_UiBaseInfo baseInfo;
@@ -157,7 +236,7 @@ PX_Object * PX_UI_CreateProcessbar(PX_UI *ui,PX_Object *parent,PX_Json_Value *js
 	PX_Json_Value *pSubValue=PX_NULL;
 	px_color Color,backgroundColor;
 	
-	baseInfo=PX_UIGetBaseInfo(json_value);
+	baseInfo=PX_UIGetBaseInfo(json_value,width,height);
 	Color=PX_COLOR(255,0,0,0);
 	backgroundColor=PX_COLOR(0,0,0,0);
 
@@ -184,20 +263,20 @@ PX_Object * PX_UI_CreateProcessbar(PX_UI *ui,PX_Object *parent,PX_Json_Value *js
 
 	return pObject;
 }
-PX_Object * PX_UI_CreateImage(PX_UI *ui,PX_Object *parent,PX_Json_Value *json_value)
+PX_Object * PX_UI_CreateImage(PX_UI *ui,PX_Object *parent,PX_Json_Value *json_value,px_int width,px_int height)
 {
 	PX_Object *pObject;
 	PX_UiBaseInfo baseInfo;
 	px_int max=100;
 	PX_Json_Value *pSubValue=PX_NULL;
 
-	baseInfo=PX_UIGetBaseInfo(json_value);
+	baseInfo=PX_UIGetBaseInfo(json_value,width,height);
 
 	pObject=PX_Object_ImageCreate(ui->ui_mp,parent,(px_int)baseInfo.x,(px_int)baseInfo.y,(px_int)baseInfo.width,(px_int)baseInfo.height,PX_NULL);
 
 	return pObject;
 }
-PX_Object * PX_UI_CreateSliderbar(PX_UI *ui,PX_Object *parent,PX_Json_Value *json_value)
+PX_Object * PX_UI_CreateSliderbar(PX_UI *ui,PX_Object *parent,PX_Json_Value *json_value,px_int width,px_int height)
 {
 	PX_Object *pObject;
 	PX_UiBaseInfo baseInfo;
@@ -208,7 +287,7 @@ PX_Object * PX_UI_CreateSliderbar(PX_UI *ui,PX_Object *parent,PX_Json_Value *jso
 	PX_OBJECT_SLIDERBAR_TYPE type=PX_OBJECT_SLIDERBAR_TYPE_HORIZONTAL;
 	PX_OBJECT_SLIDERBAR_STYLE style=PX_OBJECT_SLIDERBAR_STYLE_BOX;
 
-	baseInfo=PX_UIGetBaseInfo(json_value);
+	baseInfo=PX_UIGetBaseInfo(json_value,width,height);
 
 	pSubValue=PX_JsonGetObjectValue(json_value,"max");
 	if (pSubValue&&pSubValue->type==PX_JSON_VALUE_TYPE_NUMBER)
@@ -258,6 +337,426 @@ PX_Object * PX_UI_CreateSliderbar(PX_UI *ui,PX_Object *parent,PX_Json_Value *jso
 
 	return pObject;
 }
+PX_Object * PX_UI_CreateButton(PX_UI *ui,PX_Object *parent,PX_Json_Value *json_value,px_int width,px_int height)
+{
+	PX_Object *pObject;
+	PX_UiBaseInfo baseInfo;
+	const px_char *text="";
+	px_char style[32];
+	px_bool border;
+	PX_Json_Value *pSubValue=PX_NULL;
+	px_color fontColor,Color;
+	pSubValue=PX_JsonGetObjectValue(json_value,"text");
+	if (pSubValue&&pSubValue->type==PX_JSON_VALUE_TYPE_STRING)
+	{
+		text=pSubValue->_string.buffer;
+	}
+
+	baseInfo=PX_UIGetBaseInfo(json_value,width,height);
+	fontColor=PX_COLOR(255,0,0,0);
+
+	PX_UI_GetColor(json_value,"fontcolor",&fontColor);
+
+	pObject=PX_Object_PushButtonCreate(ui->ui_mp,parent,(px_int)baseInfo.x,(px_int)baseInfo.y,(px_int)baseInfo.width,(px_int)baseInfo.height,text,ui->fontmodule,fontColor);
+
+	if (PX_UI_GetColor(json_value,"backgroundcolor",&Color))
+	{
+		PX_Object_PushButtonSetBackgroundColor(pObject,Color);
+	}
+
+	if (PX_UI_GetColor(json_value,"cursorcolor",&Color))
+	{
+		PX_Object_PushButtonSetCursorColor(pObject,Color);
+	}
+
+	if (PX_UI_GetColor(json_value,"pushcolor",&Color))
+	{
+		PX_Object_PushButtonSetPushColor(pObject,Color);
+	}
+
+	if (PX_UI_GetColor(json_value,"bordercolor",&Color))
+	{
+		PX_Object_PushButtonSetBorderColor(pObject,Color);
+	}
+
+	if (PX_UI_GetString(json_value,"style",style,sizeof(style)))
+	{
+		if (PX_strequ(style,"round"))
+		{
+			PX_Object_PushButtonSetStyle(pObject,PX_OBJECT_PUSHBUTTON_STYLE_ROUNDRECT);
+		}
+	}
+
+	if (PX_UI_GetBool(json_value,"border",&border))
+	{
+		PX_Object_PushButtonSetBorder(pObject,border);
+	}
+	return pObject;
+}
+PX_Object * PX_UI_CreateEdit(PX_UI *ui,PX_Object *parent,PX_Json_Value *json_value,px_int width,px_int height)
+{
+	PX_Object *pObject;
+	PX_UiBaseInfo baseInfo;
+	const px_char *text="";
+	px_bool b;
+	PX_Json_Value *pSubValue=PX_NULL;
+	px_color fontColor,Color;
+
+	baseInfo=PX_UIGetBaseInfo(json_value,width,height);
+	fontColor=PX_COLOR(255,0,0,0);
+
+	PX_UI_GetColor(json_value,"fontcolor",&fontColor);
+	pObject=PX_Object_EditCreate(ui->ui_mp,parent,(px_int)baseInfo.x,(px_int)baseInfo.y,(px_int)baseInfo.width,(px_int)baseInfo.height,ui->fontmodule,fontColor);
+
+	if (PX_UI_GetColor(json_value,"backgroundcolor",&Color))
+	{
+		PX_Object_EditSetBackgroundColor(pObject,Color);
+	}
+
+	if (PX_UI_GetColor(json_value,"cursorcolor",&Color))
+	{
+		PX_Object_EditSetCursorColor(pObject,Color);
+	}
+
+	if (PX_UI_GetColor(json_value,"bordercolor",&Color))
+	{
+		PX_Object_EditSetBorderColor(pObject,Color);
+	}
+
+	if (PX_UI_GetBool(json_value,"border",&b))
+	{
+		PX_Object_EditSetBorder(pObject,b);
+	}
+
+	if (PX_UI_GetBool(json_value,"passwordstyle",&b))
+	{
+		PX_Object_EditSetPasswordStyle(pObject,b);
+	}
+
+	if (PX_UI_GetBool(json_value,"autonewline",&b))
+	{
+		PX_Object_EditAutoNewLine(pObject,b,16);
+	}
+
+	return pObject;
+}
+PX_Object * PX_UI_CreateScrollArea(PX_UI *ui,PX_Object *parent,PX_Json_Value *json_value,px_int width,px_int height)
+{
+	PX_Object *pObject;
+	PX_UiBaseInfo baseInfo;
+	px_bool b;
+	px_color Color;
+
+
+	baseInfo=PX_UIGetBaseInfo(json_value,width,height);
+
+	pObject=PX_Object_ScrollAreaCreate(ui->ui_mp,parent,(px_int)baseInfo.x,(px_int)baseInfo.y,(px_int)baseInfo.width,(px_int)baseInfo.height);
+
+	if (PX_UI_GetColor(json_value,"bordercolor",&Color))
+	{
+		PX_Object_EditSetBorderColor(pObject,Color);
+	}
+
+	if (PX_UI_GetBool(json_value,"border",&b))
+	{
+		PX_Object_EditSetBorder(pObject,b);
+	}
+	return pObject;
+}
+PX_Object * PX_UI_CreateAutoText(PX_UI *ui,PX_Object *parent,PX_Json_Value *json_value,px_int width,px_int height)
+{
+	PX_Object *pObject;
+	PX_UiBaseInfo baseInfo;
+	const px_char *text="";
+	PX_Json_Value *pSubValue=PX_NULL;
+	px_color Color;
+
+	baseInfo=PX_UIGetBaseInfo(json_value,width,height);
+
+	pObject=PX_Object_AutoTextCreate(ui->ui_mp,parent,(px_int)baseInfo.x,(px_int)baseInfo.y,(px_int)baseInfo.width,ui->fontmodule);
+
+	pSubValue=PX_JsonGetObjectValue(json_value,"text");
+	if (pSubValue&&pSubValue->type==PX_JSON_VALUE_TYPE_STRING)
+	{
+		text=pSubValue->_string.buffer;
+		PX_Object_AutoTextSetText(pObject,text);
+	}
+
+	if (PX_UI_GetColor(json_value,"fontcolor",&Color))
+	{
+		PX_Object_AutoTextSetTextColor(pObject,Color);
+	}
+
+	return pObject;
+}
+PX_Object * PX_UI_CreateCursorButton(PX_UI *ui,PX_Object *parent,PX_Json_Value *json_value,px_int width,px_int height)
+{
+	PX_Object *pObject;
+	PX_UiBaseInfo baseInfo;
+	const px_char *text="";
+	px_char style[32];
+	px_bool border;
+	PX_Json_Value *pSubValue=PX_NULL;
+	px_color fontColor,Color;
+	pSubValue=PX_JsonGetObjectValue(json_value,"text");
+	if (pSubValue&&pSubValue->type==PX_JSON_VALUE_TYPE_STRING)
+	{
+		text=pSubValue->_string.buffer;
+	}
+
+	baseInfo=PX_UIGetBaseInfo(json_value,width,height);
+	fontColor=PX_COLOR(255,0,0,0);
+
+	PX_UI_GetColor(json_value,"fontcolor",&fontColor);
+
+	pObject=PX_Object_CursorButtonCreate(ui->ui_mp,parent,(px_int)baseInfo.x,(px_int)baseInfo.y,(px_int)baseInfo.width,(px_int)baseInfo.height,text,ui->fontmodule,fontColor);
+
+	if (PX_UI_GetColor(json_value,"backgroundcolor",&Color))
+	{
+		PX_Object_PushButtonSetBackgroundColor(PX_Object_GetCursorButton(pObject)->pushbutton,Color);
+	}
+
+	if (PX_UI_GetColor(json_value,"cursorcolor",&Color))
+	{
+		PX_Object_PushButtonSetCursorColor(PX_Object_GetCursorButton(pObject)->pushbutton,Color);
+	}
+
+	if (PX_UI_GetColor(json_value,"pushcolor",&Color))
+	{
+		PX_Object_PushButtonSetPushColor(PX_Object_GetCursorButton(pObject)->pushbutton,Color);
+	}
+
+	if (PX_UI_GetColor(json_value,"bordercolor",&Color))
+	{
+		PX_Object_PushButtonSetBorderColor(PX_Object_GetCursorButton(pObject)->pushbutton,Color);
+	}
+
+	if (PX_UI_GetString(json_value,"style",style,sizeof(style)))
+	{
+		if (PX_strequ(style,"round"))
+		{
+			PX_Object_PushButtonSetStyle(PX_Object_GetCursorButton(pObject)->pushbutton,PX_OBJECT_PUSHBUTTON_STYLE_ROUNDRECT);
+		}
+	}
+
+	if (PX_UI_GetBool(json_value,"border",&border))
+	{
+		PX_Object_PushButtonSetBorder(PX_Object_GetCursorButton(pObject)->pushbutton,border);
+	}
+	return pObject;
+}
+PX_Object * PX_UI_CreateVirtualKeyboard(PX_UI *ui,PX_Object *parent,PX_Json_Value *json_value,px_int width,px_int height)
+{
+	PX_Object *pObject;
+	PX_UiBaseInfo baseInfo;
+	PX_Json_Value *pSubValue=PX_NULL;
+	px_color Color;
+
+	baseInfo=PX_UIGetBaseInfo(json_value,width,height);
+
+	pObject=PX_Object_VirtualKeyBoardCreate(ui->ui_mp,parent,(px_int)baseInfo.x,(px_int)baseInfo.y,(px_int)baseInfo.width,(px_int)baseInfo.height);
+
+	if (PX_UI_GetColor(json_value,"backgroundcolor",&Color))
+	{
+		PX_Object_VirtualKeyBoardSetBackgroundColor(pObject,Color);
+	}
+
+	if (PX_UI_GetColor(json_value,"cursorcolor",&Color))
+	{
+		PX_Object_VirtualKeyBoardSetCursorColor(pObject,Color);
+	}
+
+	if (PX_UI_GetColor(json_value,"pushcolor",&Color))
+	{
+		PX_Object_VirtualKeyBoardSetPushColor(pObject,Color);
+	}
+
+	if (PX_UI_GetColor(json_value,"bordercolor",&Color))
+	{
+		PX_Object_VirtualKeyBoardSetBorderColor(pObject,Color);
+	}
+
+	return pObject;
+}
+PX_Object * PX_UI_CreateVirtualNumberKeyboard(PX_UI *ui,PX_Object *parent,PX_Json_Value *json_value,px_int width,px_int height)
+{
+	PX_Object *pObject;
+	PX_UiBaseInfo baseInfo;
+	PX_Json_Value *pSubValue=PX_NULL;
+	px_color Color;
+
+	baseInfo=PX_UIGetBaseInfo(json_value,width,height);
+
+	pObject=PX_Object_VirtualNumberKeyBoardCreate(ui->ui_mp,parent,(px_int)baseInfo.x,(px_int)baseInfo.y,(px_int)baseInfo.width,(px_int)baseInfo.height);
+
+	if (PX_UI_GetColor(json_value,"backgroundcolor",&Color))
+	{
+		PX_Object_VirtualNumberKeyBoardSetBackgroundColor(pObject,Color);
+	}
+
+	if (PX_UI_GetColor(json_value,"cursorcolor",&Color))
+	{
+		PX_Object_VirtualNumberKeyBoardSetCursorColor(pObject,Color);
+	}
+
+	if (PX_UI_GetColor(json_value,"pushcolor",&Color))
+	{
+		PX_Object_VirtualNumberKeyBoardSetPushColor(pObject,Color);
+	}
+
+	if (PX_UI_GetColor(json_value,"bordercolor",&Color))
+	{
+		PX_Object_VirtualNumberKeyBoardSetBorderColor(pObject,Color);
+	}
+
+	return pObject;
+}
+PX_Object * PX_UI_CreateCheckBox(PX_UI *ui,PX_Object *parent,PX_Json_Value *json_value,px_int width,px_int height)
+{
+	PX_Object *pObject;
+	PX_UiBaseInfo baseInfo;
+	const px_char *text="";
+	PX_Json_Value *pSubValue=PX_NULL;
+	px_color Color;
+	pSubValue=PX_JsonGetObjectValue(json_value,"text");
+	if (pSubValue&&pSubValue->type==PX_JSON_VALUE_TYPE_STRING)
+	{
+		text=pSubValue->_string.buffer;
+	}
+
+	baseInfo=PX_UIGetBaseInfo(json_value,width,height);
+
+	pObject=PX_Object_CheckBoxCreate(ui->ui_mp,parent,(px_int)baseInfo.x,(px_int)baseInfo.y,(px_int)baseInfo.width,(px_int)baseInfo.height,text,ui->fontmodule);
+
+	if (PX_UI_GetColor(json_value,"fontcolor",&Color))
+	{
+		PX_Object_CheckBoxSetTextColor(pObject,Color);
+	}
+
+	if (PX_UI_GetColor(json_value,"backgroundcolor",&Color))
+	{
+		PX_Object_CheckBoxSetBackgroundColor(pObject,Color);
+	}
+
+	if (PX_UI_GetColor(json_value,"cursorcolor",&Color))
+	{
+		PX_Object_CheckBoxSetCursorColor(pObject,Color);
+	}
+
+	if (PX_UI_GetColor(json_value,"pushcolor",&Color))
+	{
+		PX_Object_CheckBoxSetPushColor(pObject,Color);
+	}
+
+	if (PX_UI_GetColor(json_value,"bordercolor",&Color))
+	{
+		PX_Object_CheckBoxSetBorderColor(pObject,Color);
+	}
+
+	return pObject;
+}
+PX_Object * PX_UI_CreateRadioBox(PX_UI *ui,PX_Object *parent,PX_Json_Value *json_value,px_int width,px_int height)
+{
+	PX_Object *pObject;
+	PX_UiBaseInfo baseInfo;
+	const px_char *text="";
+	PX_Json_Value *pSubValue=PX_NULL;
+	px_color Color;
+	pSubValue=PX_JsonGetObjectValue(json_value,"text");
+	if (pSubValue&&pSubValue->type==PX_JSON_VALUE_TYPE_STRING)
+	{
+		text=pSubValue->_string.buffer;
+	}
+
+	baseInfo=PX_UIGetBaseInfo(json_value,width,height);
+
+	pObject=PX_Object_RadioBoxCreate(ui->ui_mp,parent,(px_int)baseInfo.x,(px_int)baseInfo.y,(px_int)baseInfo.width,(px_int)baseInfo.height,text,ui->fontmodule);
+
+	if (PX_UI_GetColor(json_value,"fontcolor",&Color))
+	{
+		PX_Object_RadioBoxSetTextColor(pObject,Color);
+	}
+
+	if (PX_UI_GetColor(json_value,"backgroundcolor",&Color))
+	{
+		PX_Object_RadioBoxSetBackgroundColor(pObject,Color);
+	}
+
+	if (PX_UI_GetColor(json_value,"cursorcolor",&Color))
+	{
+		PX_Object_RadioBoxSetCursorColor(pObject,Color);
+	}
+
+	if (PX_UI_GetColor(json_value,"pushcolor",&Color))
+	{
+		PX_Object_RadioBoxSetPushColor(pObject,Color);
+	}
+
+	if (PX_UI_GetColor(json_value,"bordercolor",&Color))
+	{
+		PX_Object_RadioBoxSetBorderColor(pObject,Color);
+	}
+
+	return pObject;
+}
+PX_Object * PX_UI_CreateSelectBar(PX_UI *ui,PX_Object *parent,PX_Json_Value *json_value,px_int width,px_int height)
+{
+	PX_Object *pObject;
+	PX_UiBaseInfo baseInfo;
+	PX_Json_Value *pSubValue=PX_NULL;
+	px_color Color;
+	px_char style[8];
+
+	baseInfo=PX_UIGetBaseInfo(json_value,width,height);
+
+	pObject=PX_Object_SelectBarCreate(ui->ui_mp,parent,(px_int)baseInfo.x,(px_int)baseInfo.y,(px_int)baseInfo.width,(px_int)baseInfo.height,ui->fontmodule);
+
+	if (PX_UI_GetColor(json_value,"fontcolor",&Color))
+	{
+		PX_Object_SelectBarSetFontColor(pObject,Color);
+	}
+
+	if (PX_UI_GetColor(json_value,"backgroundcolor",&Color))
+	{
+		PX_Object_SelectBarSetBackgroundColor(pObject,Color);
+	}
+
+	if (PX_UI_GetColor(json_value,"cursorcolor",&Color))
+	{
+		PX_Object_SelectBarSetCursorColor(pObject,Color);
+	}
+
+	if (PX_UI_GetColor(json_value,"bordercolor",&Color))
+	{
+		PX_Object_SelectBarSetBorderColor(pObject,Color);
+	}
+
+	if (PX_UI_GetString(json_value,"style",style,sizeof(style)))
+	{
+		if (PX_strequ(style,"round"))
+		{
+			PX_Object_SelectBarSetStyle(pObject,PX_OBJECT_SELECTBAR_STYLE_ROUNDRECT);
+		}
+	}
+
+
+	pSubValue=PX_JsonGetObjectValue(json_value,"items");
+	if (pSubValue&&pSubValue->type==PX_JSON_VALUE_TYPE_ARRAY)
+	{
+		px_int i;
+		PX_Json_Value *pArrayValue;
+		for (i=0;i<pSubValue->_array.size;i++)
+		{
+			pArrayValue=PX_JsonGetArrayValue(pSubValue,i);
+			if (pArrayValue&&pArrayValue->type==PX_JSON_VALUE_TYPE_STRING)
+			{
+				PX_Object_SelectBarAddItem(pObject,pArrayValue->_string.buffer);
+			}
+		}
+	}
+	return pObject;
+}
+
 px_bool PX_UIInitialize(px_memorypool *mp,px_memorypool *ui_mp,PX_UI *ui,PX_FontModule *fontmodule)
 {
 	PX_memset(ui,0,sizeof(PX_UI));
@@ -275,6 +774,16 @@ px_bool PX_UIInitialize(px_memorypool *mp,px_memorypool *ui_mp,PX_UI *ui,PX_Font
 	if(!PX_UIAddControllerInfo(ui,"processbar",PX_UI_CreateProcessbar)) goto _ERROR;
 	if(!PX_UIAddControllerInfo(ui,"image",PX_UI_CreateImage)) goto _ERROR;
 	if(!PX_UIAddControllerInfo(ui,"sliderbar",PX_UI_CreateSliderbar)) goto _ERROR;
+	if(!PX_UIAddControllerInfo(ui,"pushbutton",PX_UI_CreateButton)) goto _ERROR;
+	if(!PX_UIAddControllerInfo(ui,"edit",PX_UI_CreateEdit)) goto _ERROR;
+	if(!PX_UIAddControllerInfo(ui,"scrollarea",PX_UI_CreateScrollArea)) goto _ERROR;
+	if(!PX_UIAddControllerInfo(ui,"text",PX_UI_CreateAutoText)) goto _ERROR;
+	if(!PX_UIAddControllerInfo(ui,"cursorbutton",PX_UI_CreateCursorButton)) goto _ERROR;
+	if(!PX_UIAddControllerInfo(ui,"virtualkeyboard",PX_UI_CreateVirtualKeyboard)) goto _ERROR;
+	if(!PX_UIAddControllerInfo(ui,"virtualnumberkeyboard",PX_UI_CreateVirtualNumberKeyboard)) goto _ERROR;
+	if(!PX_UIAddControllerInfo(ui,"checkbox",PX_UI_CreateCheckBox)) goto _ERROR;
+	if(!PX_UIAddControllerInfo(ui,"radiobox",PX_UI_CreateRadioBox)) goto _ERROR;
+	if(!PX_UIAddControllerInfo(ui,"selectbar",PX_UI_CreateSelectBar)) goto _ERROR;
 	return PX_TRUE;
 _ERROR:
 
@@ -289,7 +798,7 @@ px_bool PX_UIAddControllerInfo(PX_UI *ui,const px_char controllertype[],PX_UI_Co
 	return PX_VectorPushback(&ui->infos,&info);
 }
 
-PX_Object * PX_UICreate(PX_UI *ui,PX_Object *parent,PX_Json_Value *json_value)
+PX_Object * PX_UICreate(PX_UI *ui,PX_Object *parent,PX_Json_Value *json_value,px_int width,px_int height)
 {
 	//key properties
 	//type   default root 
@@ -312,7 +821,7 @@ PX_Object * PX_UICreate(PX_UI *ui,PX_Object *parent,PX_Json_Value *json_value)
 			{
 				if (pInfo->create_func)
 				{
-					pNewObject=pInfo->create_func(ui,parent,json_value);
+					pNewObject=pInfo->create_func(ui,parent,json_value,width,height);
 					if (!pNewObject)
 					{
 						goto _ERROR;
@@ -331,7 +840,7 @@ PX_Object * PX_UICreate(PX_UI *ui,PX_Object *parent,PX_Json_Value *json_value)
 	{
 		//root object
 		PX_UiBaseInfo baseInfo;
-		baseInfo=PX_UIGetBaseInfo(json_value);
+		baseInfo=PX_UIGetBaseInfo(json_value,width,height);
 
 		pNewObject=PX_ObjectCreate(ui->ui_mp,parent,baseInfo.x,baseInfo.y,baseInfo.z,baseInfo.width,baseInfo.height,baseInfo.length);
 		if (!pNewObject)
@@ -361,7 +870,7 @@ PX_Object * PX_UICreate(PX_UI *ui,PX_Object *parent,PX_Json_Value *json_value)
 			PX_Json_Value *pvalue=PX_LIST_NODETDATA(PX_Json_Value,pNode);
 			if (pvalue->type==PX_JSON_VALUE_TYPE_OBJECT)
 			{
-				if(!PX_UICreate(ui,pNewObject,pvalue))
+				if(!PX_UICreate(ui,pNewObject,pvalue,width,height))
 				{
 					goto _ERROR;
 				}

@@ -152,15 +152,6 @@ struct _PX_Object
 
 
 
-typedef struct 
-{
-	px_float oftx,ofty;
-	px_bool bBorder;
-	px_surface surface;
-	px_color BackgroundColor;
-	px_color borderColor;
-	PX_Object *Object;
-}PX_Object_ScrollArea;
 
 typedef struct 
 {
@@ -327,9 +318,10 @@ typedef struct
 
 PX_Object * PX_Object_ImageCreate(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y,px_int width,px_int height,px_texture *ptex );
 PX_Object_Image *PX_Object_GetImage(PX_Object *Object);
-px_void	   PX_Object_ImageSetAlign(PX_Object *pImage,PX_ALIGN Align);
-px_void	   PX_Object_ImageSetMask(PX_Object *pImage,px_texture *pmask);
-px_void	   PX_Object_ImageFreeWithTexture(PX_Object *pImage);
+px_void	   PX_Object_ImageSetAlign(PX_Object *pObject,PX_ALIGN Align);
+px_void	   PX_Object_ImageSetMask(PX_Object *pObject,px_texture *pmask);
+px_void    PX_Object_ImageSetTexture(PX_Object *pObject,px_texture *pTex);
+px_void	   PX_Object_ImageFreeWithTexture(PX_Object *pObject);
 
 //////////////////////////////////////////////////////////////////////////
 //SliderBar
@@ -489,7 +481,17 @@ px_void PX_Object_EditBackspace(PX_Object *pObject);
 px_void PX_Object_EditAutoNewLine(PX_Object *pObject,px_bool b,px_int AutoNewLineSpacing);
 px_void PX_Object_EditSetOffset(PX_Object *pObject,px_int TopOffset,px_int LeftOffset);
 
+/////////////////////////////////////////////////////////////////////////////////////////
 
+typedef struct 
+{
+	px_bool bBorder;
+	px_surface surface;
+	px_color BackgroundColor;
+	px_color borderColor;
+	PX_Object *root;
+	PX_Object *hscroll,*vscroll;
+}PX_Object_ScrollArea;
 
 
 PX_Object *PX_Object_ScrollAreaCreate(px_memorypool *mp,PX_Object *Parent,int x,int y,int height,int width);
@@ -497,7 +499,8 @@ PX_Object_ScrollArea * PX_Object_GetScrollArea( PX_Object *Object );
 PX_Object * PX_Object_ScrollAreaGetIncludedObjects(PX_Object *pObj);
 px_void PX_Object_ScrollAreaMoveToBottom(PX_Object *pObject);
 px_void PX_Object_ScrollAreaMoveToTop(PX_Object *pObject);
-px_void PX_Object_ScrollAreaGetWidthHeight(PX_Object *pObject,px_int *Width,px_int *Height);
+px_void PX_Object_ScrollAreaGetRegion(PX_Object *pObject,px_float *left,px_float *top,px_float *right,px_float *bottom);
+px_void PX_Object_ScrollAreaUpdateRange( PX_Object *pObject);
 px_void PX_Object_ScrollAreaRender(px_surface *psurface, PX_Object *pObject,px_uint elpased);
 px_void PX_Object_ScrollAreaSetBkColor(PX_Object *pObj,px_color bkColor);
 px_void PX_Object_ScrollAreaSetBorder( PX_Object *pObj,px_bool Border );
@@ -505,7 +508,7 @@ px_void PX_Object_ScrollAreaSetBorderColor(PX_Object *pObj,px_color borderColor)
 px_void PX_Object_ScrollAreaFree(PX_Object *pObj);
 
 
-//////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////
 //AutoText
 typedef struct 
 {
@@ -553,19 +556,7 @@ PX_Object_CursorButton * PX_Object_GetCursorButton( PX_Object *Object );
 PX_Object * PX_Object_GetCursorButtonPushButton(PX_Object *Object);
 
 //////////////////////////////////////////////////////////////////////////
-//Partical
-//////////////////////////////////////////////////////////////////////////
-typedef struct 
-{
-	PX_Partical_Launcher launcher;
-}PX_Object_Partical;
-
-PX_Object *PX_Object_ParticalCreateEx(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y,px_int z,PX_ParticalLauncher_InitializeInfo info);
-PX_Object *PX_Object_ParticalCreate(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y,px_int z,px_texture *pTexture,PX_ScriptVM_Instance *pIns,px_char *_init,px_char *_create,px_char *_update);
-PX_Object_Partical *PX_Object_GetPartical(PX_Object *Object);
-px_void    PX_Object_ParticalSetDirection(PX_Object *pObject,px_point direction);
-px_void	   PX_Object_ParticalRender(px_surface *psurface,PX_Object *pObject,px_uint elpased);
-px_void	   PX_Object_ParticalFree(PX_Object *pObject);
+//list
 //////////////////////////////////////////////////////////////////////////
 
 typedef px_bool (*PX_Object_ListItemOnCreate)(px_memorypool *mp,PX_Object *ItemObject);
@@ -631,15 +622,17 @@ typedef struct
 	px_color cursorColor;
 	px_color pushColor;
 	px_char functionCode;
+	PX_Object *LinkerObject;
 	px_bool bTab,bUpper,bShift,bCtrl,bAlt;
 }PX_Object_VirtualKeyBoard;
 
 PX_Object* PX_Object_VirtualKeyBoardCreate(px_memorypool *mp, PX_Object *Parent,px_int x,px_int y,px_int width,px_int height);
 px_void PX_Object_VirtualKeyBoardSetBackgroundColor( PX_Object *pObject,px_color Color );
 px_void PX_Object_VirtualKeyBoardSetBorderColor( PX_Object *pObject,px_color Color );
-px_void PX_Object_VirtualKeyBoardCursorColor( PX_Object *pObject,px_color Color );
-px_void PX_Object_VirtualKeyBoardPushColor( PX_Object *pObject,px_color Color );
+px_void PX_Object_VirtualKeyBoardSetCursorColor( PX_Object *pObject,px_color Color );
+px_void PX_Object_VirtualKeyBoardSetPushColor( PX_Object *pObject,px_color Color );
 px_char PX_Object_VirtualKeyBoardGetCode(PX_Object *pObject);
+px_void PX_Object_VirtualKeyBoardSetLinkerObject(PX_Object *pObject,PX_Object *linker);
 
 typedef struct
 {
@@ -649,15 +642,16 @@ typedef struct
 	px_color cursorColor;
 	px_color pushColor;
 	px_char functionCode;
+	PX_Object *LinkerObject;
 }PX_Object_VirtualNumberKeyBoard;
 
 PX_Object* PX_Object_VirtualNumberKeyBoardCreate(px_memorypool *mp, PX_Object *Parent,px_int x,px_int y,px_int width,px_int height);
 px_void PX_Object_VirtualNumberKeyBoardSetBackgroundColor( PX_Object *pObject,px_color Color );
 px_void PX_Object_VirtualNumberKeyBoardSetBorderColor( PX_Object *pObject,px_color Color );
-px_void PX_Object_VirtualNumberKeyBoardCursorColor( PX_Object *pObject,px_color Color );
-px_void PX_Object_VirtualNumberKeyBoardPushColor( PX_Object *pObject,px_color Color );
+px_void PX_Object_VirtualNumberKeyBoardSetCursorColor( PX_Object *pObject,px_color Color );
+px_void PX_Object_VirtualNumberKeyBoardSetPushColor( PX_Object *pObject,px_color Color );
 px_char PX_Object_VirtualNumberKeyBoardGetCode(PX_Object *pObject);
-
+px_void PX_Object_VirtualNumberKeyBoardSetLinkerObject(PX_Object *pObject,PX_Object *linker);
 //////////////////////////////////////////////////////////////////////////
 
 #define  PX_OBJECT_COORDINATEDATA_MAP_LEFT  0
@@ -969,21 +963,6 @@ px_void PX_Object_CheckBoxSetCheck(PX_Object *Object,px_bool check);
 
 
 
-typedef struct 
-{
-	px_int angle_per_second;
-	px_float angle;
-	px_bool bstop;
-	px_texture *pTexture;
-}PX_Object_Rotation;
-
-
-PX_Object *PX_Object_RotationCreate(px_memorypool *mp,PX_Object *Parent,px_int angle_per_second,px_int x,px_int y,px_texture *ptexture);
-PX_Object_Rotation * PX_Object_GetRotation( PX_Object *Object );
-px_void PX_Object_RotationSetSpeed(PX_Object *rot,px_int Angle_per_second);
-px_void PX_Object_RotationStop(PX_Object *rot,px_bool bstop);
-px_void PX_Object_RotationRender(px_surface *psurface, PX_Object *Obj,px_uint elpased);
-
 
 #define PX_MENU_CONTENT_MAX_LEN 48
 #define PX_MENU_ITEM_SPACER_SIZE 2
@@ -1021,6 +1000,12 @@ PX_Object_Menu_Item * PX_Object_MenuGetRootItem(PX_Object *pMenuObject);
 PX_Object_Menu_Item * PX_Object_MenuAddItem(PX_Object *pMenuObject,PX_Object_Menu_Item *parent,const px_char Text[],PX_MenuExecuteFunc _callback,px_void *ptr);
 
 
+typedef enum
+{
+	PX_OBJECT_SELECTBAR_STYLE_RECT,
+	PX_OBJECT_SELECTBAR_STYLE_ROUNDRECT,
+}PX_OBJECT_SELECTBAR_STYLE;
+
 
 typedef struct
 {
@@ -1044,6 +1029,7 @@ typedef struct
 	px_color borderColor;
 	px_int   selectIndex;
 	PX_Object *sliderBar;
+	PX_OBJECT_SELECTBAR_STYLE style;
 }PX_Object_SelectBar;
 
 PX_Object_SelectBar *PX_Object_GetSelectBar(PX_Object *pSelecrBar);
@@ -1053,6 +1039,7 @@ px_void PX_Object_SelectBarRemoveItem(PX_Object *PX_Object_SelectBar,px_int inde
 px_int PX_Object_SelectBarGetItemIndexByText(PX_Object *pObject,const px_char Text[]);
 px_void PX_Object_SelectBarSetDisplayCount(PX_Object *pObject,px_int count);
 
+px_void PX_Object_SelectBarSetStyle(PX_Object *pObject,PX_OBJECT_SELECTBAR_STYLE style);
 px_void PX_Object_SelectBarSetFontColor(PX_Object *pObject,px_color color);
 px_void PX_Object_SelectBarSetCursorColor(PX_Object *pObject,px_color color);
 px_void PX_Object_SelectBarSetBorderColor(PX_Object *pObject,px_color color);

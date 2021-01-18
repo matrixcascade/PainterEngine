@@ -99,8 +99,8 @@ PX_Object * PX_ExecuterPrintImage(PX_Executer *pExecute,const px_char *res_image
 	{
 		if (pimageRes->Type==PX_RESOURCE_TYPE_TEXTURE)
 		{
-			pObject=PX_Object_ImageCreate(&pExecute->runtime->mp_ui,PX_Object_ScrollAreaGetIncludedObjects(pExecute->Area),0,0,&pimageRes->texture);
-			PX_Object_ImageSetAlign(pObject,PX_OBJECT_ALIGN_TOP|PX_OBJECT_ALIGN_LEFT);
+			pObject=PX_Object_ImageCreate(&pExecute->runtime->mp_ui,pExecute->Area,0,0,pimageRes->texture.width,pimageRes->texture.height,&pimageRes->texture);
+			PX_Object_ImageSetAlign(pObject,PX_ALIGN_LEFTTOP);
 			PX_ObjectSetSize(pObject,(px_float)pimageRes->texture.width,(px_float)pimageRes->texture.height,0);
 			obj.Object=pObject;
 			obj.id=pExecute->id++;
@@ -222,7 +222,7 @@ px_bool PX_ExecuterRunScipt(PX_Executer *pExecute,const px_char *pshellstr)
 	mp_calc=MP_Create(MP_Malloc(&pExecute->runtime->mp,PE_MEMORY_CALC_SIZE),PE_MEMORY_CALC_SIZE);
 	if(mp_calc.StartAddr==PX_NULL) return PX_FALSE;
 	MP_Reset(&mp_calc);
-	PX_MemoryInit(&mp_calc,&bin);
+	PX_MemoryInitialize(&mp_calc,&bin);
 
 	if(!PX_ScriptCompilerInit(&lib,&mp_calc))
 	{
@@ -237,7 +237,7 @@ px_bool PX_ExecuterRunScipt(PX_Executer *pExecute,const px_char *pshellstr)
 	}
 
 
-	PX_StringInit(&mp_calc,&asmcodeString);
+	PX_StringInitialize(&mp_calc,&asmcodeString);
 	if(PX_ScriptCompilerCompile(&lib,"main",&asmcodeString,128))
 	{
 		PX_ScriptAsmOptimization(&asmcodeString);
@@ -355,8 +355,8 @@ PX_Object * PX_ExecuterShowImage(PX_Executer *pExecute,const px_char *res_image_
 	{
 		if (pimageRes->Type==PX_RESOURCE_TYPE_TEXTURE)
 		{
-			pObject=PX_Object_ImageCreate(&pExecute->runtime->mp_ui,PX_Object_ScrollAreaGetIncludedObjects(pExecute->Area),0,0,&pimageRes->texture);
-			PX_Object_ImageSetAlign(pObject,PX_OBJECT_ALIGN_TOP|PX_OBJECT_ALIGN_LEFT);
+			pObject=PX_Object_ImageCreate(&pExecute->runtime->mp_ui,PX_Object_ScrollAreaGetIncludedObjects(pExecute->Area),0,0,pimageRes->texture.width,pimageRes->texture.height,&pimageRes->texture);
+			PX_Object_ImageSetAlign(pObject,PX_ALIGN_LEFTTOP);
 			obj.Object=pObject;
 			obj.id=pExecute->id++;
 			PX_VectorPushback(&pExecute->pObjects,&obj);

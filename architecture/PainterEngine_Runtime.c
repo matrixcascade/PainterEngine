@@ -37,7 +37,7 @@ px_bool PX_RuntimeInitialize(PX_Runtime *pe,px_int surface_width,px_int surface_
 	MP_ErrorCatch(&pe->mp_game,PE_MP_ErrorCall);
 
 	//resources
-	if(!PX_ResourceLibraryInit(&pe->mp_resources,&pe->ResourceLibrary))return PX_FALSE;
+	if(!PX_ResourceLibraryInitialize(&pe->mp_resources,&pe->ResourceLibrary))return PX_FALSE;
 	//surface
 	if (pe->surface_width==0||pe->surface_height==0)
 	{
@@ -81,6 +81,16 @@ px_bool PX_RuntimeResize(PX_Runtime *pe,px_int surface_width,px_int surface_heig
 	PX_SurfaceClear(&pe->RenderSurface,0,0,pe->RenderSurface.width-1,pe->RenderSurface.height-1,PX_COLOR(255,255,255,255));
 
 	return PX_TRUE;
+}
+
+
+px_void PX_RuntimeReset(PX_Runtime *pe)
+{
+	MP_Reset(&pe->mp_game);
+	MP_Reset(&pe->mp_resources);
+	MP_Reset(&pe->mp_ui);
+	PX_ResourceLibraryInitialize(&pe->mp_resources,&pe->ResourceLibrary);
+	PX_SurfaceClear(&pe->RenderSurface,0,0,pe->RenderSurface.width-1,pe->RenderSurface.height-1,PX_COLOR(0,0,0,0));
 }
 
 px_memorypool PX_RuntimeCreateCalcMemoryPool(PX_Runtime *pe)
