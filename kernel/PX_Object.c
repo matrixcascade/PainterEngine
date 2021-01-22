@@ -767,6 +767,18 @@ px_void PX_Object_LabelRender(px_surface *psurface, PX_Object *pObject,px_uint e
 	h=(px_int)pObject->Height;
 
 	PX_GeoDrawRect(psurface,x,y,x+w,y+h-1,pLabel->BackgroundColor);
+	if (pLabel->bBorder)
+	{
+		switch(pLabel->style)
+		{
+		case PX_OBJECT_LABEL_STYLE_ROUNDRECT:
+			PX_GeoDrawRoundRect(psurface,x,y,x+w,y+h-1,h/2-2.0f,1,pLabel->borderColor);
+			break;
+		default:
+			PX_GeoDrawBorder(psurface,x,y,x+w,y+h-1,1,pLabel->borderColor);
+		}
+	}
+	
 	limitInfo=PX_SurfaceGetLimit(psurface);
 	PX_SurfaceSetLimit(psurface,x,y,x+w-1,y+h-1);
 
@@ -854,7 +866,10 @@ PX_Object* PX_Object_LabelCreate(px_memorypool *mp,PX_Object *Parent,px_int x,px
 	pLable->TextColor=Color;
 	pLable->BackgroundColor=PX_COLOR(0,0,0,0);
 	pLable->Align=PX_ALIGN_LEFTMID;
+	pLable->bBorder=PX_FALSE;
+	pLable->borderColor=PX_COLOR(255,0,0,0);
 	pLable->fontModule=fm;
+	pLable->style=PX_OBJECT_LABEL_STYLE_RECT;
 	return pObject;
 }
 
@@ -937,6 +952,33 @@ px_void PX_Object_LabelSetAlign( PX_Object *pObject,PX_ALIGN Align )
 }
 
 
+
+px_void PX_Object_LabelSetBorder(PX_Object *pObject,px_bool b)
+{
+	PX_Object_Label * pLabel=PX_Object_GetLabel(pObject);
+	if (pLabel)
+	{
+		pLabel->bBorder=b;
+	}
+}
+
+px_void PX_Object_LabelSetBorderColor(PX_Object *pObject,px_color color)
+{
+	PX_Object_Label * pLabel=PX_Object_GetLabel(pObject);
+	if (pLabel)
+	{
+		pLabel->borderColor=color;
+	}
+}
+
+px_void PX_Object_LabelSetStyle(PX_Object *pObject,PX_OBJECT_LABEL_STYLE style)
+{
+	PX_Object_Label * pLabel=PX_Object_GetLabel(pObject);
+	if (pLabel)
+	{
+		pLabel->style=style;
+	}
+}
 
 px_void PX_Object_ProcessBarRender(px_surface *psurface, PX_Object *pObject,px_uint elpased)
 {
@@ -1543,7 +1585,7 @@ px_void PX_Object_SliderBarOnCursorDrag(PX_Object *pObject,PX_Object_Event e,px_
 }
 
 
-PX_Object * PX_Object_SliderBarCreate(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y,px_int Width,px_int Height,enum PX_OBJECT_SLIDERBAR_TYPE Type,enum PX_OBJECT_SLIDERBAR_STYLE style)
+PX_Object * PX_Object_SliderBarCreate(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y,px_int Width,px_int Height,PX_OBJECT_SLIDERBAR_TYPE Type,PX_OBJECT_SLIDERBAR_STYLE style)
 {
 	PX_Object *pObject;
 	PX_Object_SliderBar *pSliderbar=(PX_Object_SliderBar *)MP_Malloc(mp,sizeof(PX_Object_SliderBar));
@@ -3042,7 +3084,7 @@ px_void PX_Object_EditRender(px_surface *psurface, PX_Object *pObject,px_uint el
 			{
 				if (pEdit->fontModule)
 				{
-					PX_GeoDrawRect(&pEdit->EditSurface,x_draw_oft+1,y_draw_oft,x_draw_oft,y_draw_oft+pEdit->fontModule->max_Height,pEdit->CursorColor);
+					PX_GeoDrawRect(&pEdit->EditSurface,x_draw_oft+1,y_draw_oft,x_draw_oft,y_draw_oft+pEdit->fontModule->max_Height-2,pEdit->CursorColor);
 				}
 				else
 				{
@@ -3466,7 +3508,7 @@ px_void PX_Object_ScrollAreaMoveToBottom(PX_Object *pObject)
 		PX_Object_ScrollAreaGetRegion(psa->root,&left,&top,&right,&bottom);
 		if (bottom-top>=pObject->Height)
 		{
-			psa->root->y=bottom-pObject->Height+1;
+			psa->root->y=-(bottom-top-pObject->Height);
 		}
 		else
 		{

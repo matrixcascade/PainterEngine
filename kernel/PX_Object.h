@@ -268,11 +268,20 @@ px_void PX_ObjectExecuteEvent(PX_Object *pPost,PX_Object_Event Event);
 //Label
 //////////////////////////////////////////////////////////////////////////
 
+typedef enum
+{
+	PX_OBJECT_LABEL_STYLE_RECT,
+	PX_OBJECT_LABEL_STYLE_ROUNDRECT,
+}PX_OBJECT_LABEL_STYLE;
+
 typedef struct  
 {
 	PX_ALIGN Align;
+	px_color borderColor;
 	px_color TextColor;
 	px_color BackgroundColor;
+	px_bool  bBorder;
+	PX_OBJECT_LABEL_STYLE style;
 	PX_FontModule *fontModule;
 	px_char *Text;
 }PX_Object_Label;
@@ -284,7 +293,9 @@ px_void		PX_Object_LabelSetText(PX_Object *pLabel,const px_char *Text);
 px_void		PX_Object_LabelSetTextColor(PX_Object *pLabel,px_color Color);
 px_void		PX_Object_LabelSetBackgroundColor(PX_Object *pLabel,px_color Color);
 px_void		PX_Object_LabelSetAlign(PX_Object *pLabel,PX_ALIGN Align);
-
+px_void		PX_Object_LabelSetBorder(PX_Object *pLabel,px_bool b);
+px_void		PX_Object_LabelSetBorderColor(PX_Object *pLabel,px_color color);
+px_void		PX_Object_LabelSetStyle(PX_Object *pLabel,PX_OBJECT_LABEL_STYLE style);
 //////////////////////////////////////////////////////////////////////////
 //ProcessBar
 //////////////////////////////////////////////////////////////////////////
@@ -348,9 +359,9 @@ typedef enum
 
 typedef struct 
 {
-	enum PX_OBJECT_SLIDERBAR_TYPE Type;
-	enum PX_OBJECT_SLIDERBAR_STYLE style;
-	enum PX_OBJECT_SLIDERBAR_STATUS status;
+	PX_OBJECT_SLIDERBAR_TYPE Type;
+	PX_OBJECT_SLIDERBAR_STYLE style;
+	PX_OBJECT_SLIDERBAR_STATUS status;
 	px_float btnDownX,btnDownY;
 	px_float DargButtonX,DargButtonY;
 	px_int Min;
@@ -362,7 +373,7 @@ typedef struct
 	px_color BackgroundColor;
 }PX_Object_SliderBar;
 
-PX_Object *PX_Object_SliderBarCreate(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y,px_int Width,px_int Height,enum PX_OBJECT_SLIDERBAR_TYPE Type,enum PX_OBJECT_SLIDERBAR_STYLE style);
+PX_Object *PX_Object_SliderBarCreate(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y,px_int Width,px_int Height,PX_OBJECT_SLIDERBAR_TYPE Type,PX_OBJECT_SLIDERBAR_STYLE style);
 PX_Object_SliderBar *PX_Object_GetSliderBar(PX_Object *Object);
 px_void	   PX_Object_SliderBarSetValue(PX_Object *pSliderBar,px_int Value);
 px_void	   PX_Object_SliderBarSetRange(PX_Object *pSliderBar,px_int Min,px_int Max);
@@ -976,7 +987,7 @@ px_void PX_Object_CheckBoxSetCheck(PX_Object *Object,px_bool check);
 typedef px_void (*PX_MenuExecuteFunc)(px_void *userPtr);
 
 
-typedef struct _PX_Object_Menu_Item
+struct _PX_Object_Menu_Item
 {
 	struct _PX_Object_Menu_Item *pParent;
 	px_int  x,y,width,height;

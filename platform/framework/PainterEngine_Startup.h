@@ -3,28 +3,8 @@
 
 //////////////////////////////////////////////////////////////////////////
 //Configures
-#include "PainterEngine_platform.h"
-
-/*windows platform*/
-#ifdef PX_APPLICATION_WINDOWS
-#include "platform/windows/windows_file.h"
-#endif
-
-
-/*android platform*/
-#ifdef PX_APPLICATION_ANDROID
-#include "platform/android/android_file.h"
-#endif
-
-
-/*linux os*/
-#ifdef PX_APPLICATION_LINUX
-#include "platform/linux/linux_file.h"
-#endif
-
-
 #define PX_APPLICATION_NAME "PainterEngine"
-#define PX_APPLICATION_SURFACE_SIZE 800
+#define PX_APPLICATION_SURFACE_SIZE 600
 
 #define PX_APPLICATION_MEMORYPOOL_UI_SIZE 1024*1024*16
 #define PX_APPLICATION_MEMORYPOOL_RESOURCES_SIZE 1024*1024*96
@@ -33,14 +13,10 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "architecture/PainterEngine_Runtime.h"
-
-
-#ifdef PAINTERENGINE_FILE_H
-
-
 px_bool PX_ApplicationInitializeDefault(PX_Runtime *runtime, px_int screen_width, px_int screen_height);
 px_void PX_ApplicationEventDefault(PX_Runtime *runtime,PX_Object_Event e);
 
+#ifdef PAINTERENGINE_FILE_H
 px_bool PX_LoadTextureFromFile(px_memorypool *mp,px_texture *tex,const px_char path[]);
 px_bool PX_LoadShapeFromFile(px_memorypool *mp,px_shape *shape,const px_char path[]);
 px_bool PX_LoadSoundFromFile(px_memorypool *mp,px_shape *shape,const px_char path[]);
@@ -55,7 +31,6 @@ px_bool PX_LoadScriptToResource(PX_ResourceLibrary *presourcelib,const px_char P
 px_bool PX_LoadSoundToResource(PX_ResourceLibrary *presourcelib,const px_char Path[],const px_char key[]);
 px_bool PX_LoadFontModuleFromFile(PX_FontModule *fm,const px_char Path[]);
 px_bool PX_LoadJsonFromFile(PX_Json *json,const px_char *path);
-
 #endif
 
 

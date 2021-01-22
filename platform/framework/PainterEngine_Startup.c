@@ -3,34 +3,19 @@
 
 //////////////////////////////////////////////////////////////////////////
 //Functions
-
-
-#ifdef PAINTERENGIN_FILE_SUPPORT
 static px_byte PX_ApplicationRuntime[PX_APPLICATION_MEMORYPOOL_UI_SIZE+PX_APPLICATION_MEMORYPOOL_RESOURCES_SIZE+PX_APPLICATION_MEMORYPOOL_GAME_SIZE+PX_APPLICATION_MEMORYPOOL_SPACE_SIZE];
 px_bool PX_ApplicationInitializeDefault(PX_Runtime *runtime, px_int screen_width, px_int screen_height)
 {
 	px_int surface_width=0,surface_height=0;
 	px_int window_width=0,window_height=0;
 	px_double wdh;
-	if (screen_width<screen_height)
-	{
-		px_int tmp=screen_height;
-		screen_height=screen_width;
-		screen_width=tmp;
-	}
 	wdh=screen_width*1.0/screen_height;
 	surface_height=(px_int)(PX_sqrtd(PX_APPLICATION_SURFACE_SIZE*PX_APPLICATION_SURFACE_SIZE/wdh));
 	surface_width=(px_int)(surface_height*wdh);
 
-#ifdef PX_APPLICATION_WINDOWS
+
 	window_width=screen_width/2;
 	window_height=screen_height/2;
-#endif
-
-#ifdef PX_APPLICATION_ANDROID
-	window_width=screen_width;
-	window_height=screen_height;
-#endif
 
 
 	if(!PX_RuntimeInitialize(runtime,surface_width,surface_height,window_width,window_height,PX_ApplicationRuntime,sizeof(PX_ApplicationRuntime),PX_APPLICATION_MEMORYPOOL_UI_SIZE,PX_APPLICATION_MEMORYPOOL_RESOURCES_SIZE,PX_APPLICATION_MEMORYPOOL_GAME_SIZE))
@@ -52,6 +37,9 @@ px_void PX_ApplicationEventDefault(PX_Runtime *runtime,PX_Object_Event e)
 		return;
 	}
 }
+
+#ifdef PAINTERENGIN_FILE_SUPPORT
+
 px_bool PX_LoadTextureFromFile(px_memorypool *mp,px_texture *tex,const px_char path[])
 {
 	PX_IO_Data io;

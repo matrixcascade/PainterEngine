@@ -2,7 +2,7 @@
 #define PAINTERENGINE_APPLICATION_H
 
 #include "PainterEngine_Startup.h"
-
+#include "./architecture/PainterEngine_Console.h"
 typedef struct
 {
 	PX_Runtime runtime;

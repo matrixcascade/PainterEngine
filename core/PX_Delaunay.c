@@ -94,7 +94,7 @@ px_void PX_DelaunaryTriangleSwitch(PX_Delaunay_Triangle *t1,PX_Delaunay_Triangle
 {
 	px_int c1_3[3];
 	px_int c2_3[3];
-	px_int c[2],d[2];
+	px_int c[3],d[3];
 	px_int j,k;
 	c1_3[0]=t1->index1;
 	c1_3[1]=t1->index2;

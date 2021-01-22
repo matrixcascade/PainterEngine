@@ -11,12 +11,8 @@ char const PC_ScriptPreload[]="#name \"shell\"\r\n\
 							  host int printimage(string s);\r\n\
 							  host int printanimation(string s);\r\n\
 							  host int playanimation(int id,string s);\r\n\
-							  host int setimagemask(int id,string s);\r\n\
 							  host int runscriptfunction(string key,string func);\r\n\
-							  host int close();\r\n\
-							  host int loadtexture(string path,string key);\r\n\
-							  host int loadanimation(string path,string key);\r\n\
-							  host int loadscript(string path,string key);\r\n";
+							  host int close();\r\n";
 
 
 
@@ -69,7 +65,7 @@ px_void PX_ConsoleUpdateEx(PX_Console *pc)
 PX_Object * PX_ConsolePrintText(PX_Console *pc,const px_char *text)
 {
 	PX_ConsoleColumn obj;
-	PX_Object *pObject=PX_Object_AutoTextCreate(&pc->runtime->mp_ui,PX_Object_ScrollAreaGetIncludedObjects(pc->Area),0,0,pc->runtime->surface_width-1,PX_NULL);
+	PX_Object *pObject=PX_Object_AutoTextCreate(&pc->runtime->mp_ui,pc->Area,0,0,pc->runtime->surface_width-1,PX_NULL);
 
 	if (pObject)
 	{
@@ -94,7 +90,7 @@ PX_Object * PX_ConsolePrintImage(PX_Console *pc,px_char *res_image_key)
 	{
 		if (pimageRes->Type==PX_RESOURCE_TYPE_TEXTURE)
 		{
-			pObject=PX_Object_ImageCreate(&pc->runtime->mp_ui,PX_Object_ScrollAreaGetIncludedObjects(pc->Area),0,0,pimageRes->texture.width,pimageRes->texture.height,&pimageRes->texture);
+			pObject=PX_Object_ImageCreate(&pc->runtime->mp_ui,pc->Area,0,0,pimageRes->texture.width,pimageRes->texture.height,&pimageRes->texture);
 			PX_Object_ImageSetAlign(pObject,PX_ALIGN_LEFTTOP);
 			PX_ObjectSetSize(pObject,(px_float)pimageRes->texture.width,(px_float)pimageRes->texture.height,0);
 			obj.Object=pObject;
@@ -126,7 +122,7 @@ PX_Object * PX_ConsolePrintAnimation(PX_Console *pc,px_char *res_animation_key)
 	{
 		if (pAnimationRes->Type==PX_RESOURCE_TYPE_ANIMATIONLIBRARY)
 		{
-			pObject=PX_Object_AnimationCreate(&pc->runtime->mp_ui,PX_Object_ScrollAreaGetIncludedObjects(pc->Area),0,0,&pAnimationRes->animationlibrary);
+			pObject=PX_Object_AnimationCreate(&pc->runtime->mp_ui,pc->Area,0,0,&pAnimationRes->animationlibrary);
 			PX_Object_AnimationSetAlign(pObject,PX_ALIGN_LEFTTOP);
 			rect=PX_AnimationGetSize(&PX_Object_GetAnimation(pObject)->animation);
 			PX_ObjectSetSize(pObject,(px_float)rect.width,(px_float)rect.height,0);
@@ -159,7 +155,7 @@ PX_Object * PX_ConsoleShowImage(PX_Console *pc,px_char *res_image_key)
 	{
 		if (pimageRes->Type==PX_RESOURCE_TYPE_TEXTURE)
 		{
-			pObject=PX_Object_ImageCreate(&pc->runtime->mp_ui,PX_Object_ScrollAreaGetIncludedObjects(pc->Area),0,0,pimageRes->texture.width,pimageRes->texture.height,&pimageRes->texture);
+			pObject=PX_Object_ImageCreate(&pc->runtime->mp_ui,pc->Area,0,0,pimageRes->texture.width,pimageRes->texture.height,&pimageRes->texture);
 			PX_Object_ImageSetAlign(pObject,PX_ALIGN_LEFTTOP);
 			obj.Object=pObject;
 			obj.id=pc->id++;
@@ -290,26 +286,6 @@ px_bool PX_ConsoleVM_PlayAnimation(PX_ScriptVM_Instance *Ins,px_void *userptr)
 	return PX_TRUE;
 }
 
-px_bool PX_ConsoleVM_SetImageMask(PX_ScriptVM_Instance *Ins,px_void *userptr)
-{
-	PX_Console *pc=(PX_Console *)userptr;
-
-	if (PX_ScriptVM_STACK(Ins,0).type!=PX_SCRIPTVM_VARIABLE_TYPE_INT)
-	{
-		PX_ScriptVM_RET(Ins,PX_ScriptVM_Variable_int(0));
-		return PX_TRUE;
-	}
-
-	if (PX_ScriptVM_STACK(Ins,1).type!=PX_SCRIPTVM_VARIABLE_TYPE_STRING)
-	{
-		PX_ScriptVM_RET(Ins,PX_ScriptVM_Variable_int(0));
-		return PX_TRUE;
-	}
-
-	PX_ConsoleSetImageMask(pc,PX_ScriptVM_STACK(Ins,0)._int,PX_ScriptVM_STACK(Ins,1)._string.buffer);
-
-	return PX_TRUE;
-}
 
 px_bool PX_ConsoleVM_Close(PX_ScriptVM_Instance *Ins,px_void *userptr)
 {
@@ -438,7 +414,6 @@ px_bool PX_ConsoleExecute(PX_Console *pc,char *pshellstr)
 	PX_ScriptVM_RegistryHostFunction(&Ins,"PRINTIMAGE",PX_ConsoleVM_PrintImage,pc);//Print Image
 	PX_ScriptVM_RegistryHostFunction(&Ins,"PRINTANIMATION",PX_ConsoleVM_PrintAnimation,pc);//Print Animation
 	PX_ScriptVM_RegistryHostFunction(&Ins,"PLAYANIMATION",PX_ConsoleVM_PlayAnimation,pc);//play Animation
-	PX_ScriptVM_RegistryHostFunction(&Ins,"SETIMAGEMASK",PX_ConsoleVM_SetImageMask,pc);//SetImage Mask
 	PX_ScriptVM_RegistryHostFunction(&Ins,"RUNSCRIPTFUNCTION",PC_ConsoleVM_RunScriptFunction,pc);//Load PatricalScript
 	PX_ScriptVM_RegistryHostFunction(&Ins,"CLOSE",PX_ConsoleVM_Close,pc);//close
 	if (pc->registry_call)
@@ -533,8 +508,9 @@ px_bool PC_ConsoleInit(PX_Console *pc)
 	if(!PX_ResourceLibraryLoad(&pc->runtime->ResourceLibrary,PX_RESOURCE_TYPE_TEXTURE,(px_byte *)fox_console_logo,sizeof(fox_console_logo),"console_logo"))return PX_FALSE;
 	
 	PX_ConsoleShowImage(pc,"console_logo");
-	PX_ConsolePrintText(pc,"             PainterEngine JIT Compilation Console\n            StoryScript  Shell For StoryVM\n                Code By DBinary Build on 2019\n             Refer To:www.GitHub.com/matrixcascade\n");
-	
+	PX_ConsolePrintText(pc,"----------------------------------------");
+	PX_ConsolePrintText(pc,"-PainterEngine JIT Compilation Console -\n-Code By DBinary Build on 2019         -\n-Refer To:www.GitHub.com/matrixcascade -");
+	PX_ConsolePrintText(pc,"----------------------------------------");
 	return PX_TRUE;
 }
 

@@ -54,7 +54,7 @@ px_void PX_ExecuterUpdateEx(PX_Executer *pExecute)
 PX_Object * PX_ExecuterPrintText(PX_Executer *pExecute,const px_char *text)
 {
 	PX_ExecuterColumn obj;
-	PX_Object *pObject=PX_Object_AutoTextCreate(&pExecute->runtime->mp_ui,PX_Object_ScrollAreaGetIncludedObjects(pExecute->Area),0,0,pExecute->runtime->surface_width-1,PX_NULL);
+	PX_Object *pObject=PX_Object_AutoTextCreate(&pExecute->runtime->mp_ui,(pExecute->Area),0,0,pExecute->runtime->surface_width-1,PX_NULL);
 
 	if (pObject)
 	{
@@ -393,7 +393,7 @@ px_bool PX_ExecuterInitialize(PX_Runtime *runtime,PX_Executer *pExecute)
 	PX_ObjectRegisterEvent(pExecute->Area,PX_OBJECT_EVENT_KEYDOWN,PX_ExecuterOnEnter,PX_NULL);
 	PX_ObjectRegisterEvent(pExecute->Area,PX_OBJECT_EVENT_CURSORDOWN,PX_ExecuterOnMouseDown,PX_NULL);
 	PX_Object_ScrollAreaSetBorder(pExecute->Area,PX_FALSE);
-	if(!(pExecute->Input=PX_Object_EditCreate(&pExecute->runtime->mp_ui,PX_Object_ScrollAreaGetIncludedObjects(pExecute->Area),0,0,pExecute->runtime->surface_width-1,PX_FontGetCharactorHeight()+4,PX_NULL,PX_COLOR(255,0,255,0)))) return PX_FALSE;
+	if(!(pExecute->Input=PX_Object_EditCreate(&pExecute->runtime->mp_ui,(pExecute->Area),0,0,pExecute->runtime->surface_width-1,PX_FontGetCharactorHeight()+4,PX_NULL,PX_COLOR(255,0,255,0)))) return PX_FALSE;
 	PX_Object_EditSetCursorColor(pExecute->Input,PX_COLOR(255,0,255,0));
 	PX_Object_EditSetTextColor(pExecute->Input,PX_COLOR(255,0,255,0));
 	PX_Object_EditSetBorderColor(pExecute->Input,PX_COLOR(255,0,255,0));
@@ -411,7 +411,10 @@ px_bool PX_ExecuterInitialize(PX_Runtime *runtime,PX_Executer *pExecute)
 	if(!PX_ResourceLibraryLoad(&pExecute->runtime->ResourceLibrary,PX_RESOURCE_TYPE_TEXTURE,(px_byte *)fox_executer_logo,sizeof(fox_executer_logo),"fox_executer_logo"))return PX_FALSE;
 
 	PX_ExecuterShowImage(pExecute,"fox_executer_logo");
-	PX_ExecuterPrintText(pExecute,"          PainterEngine Story Executer\n\n          Code By DBinary Build on 2020\n        Refer To:www.GitHub.com/matrixcascade\n");
+	PX_ExecuterShowImage(pExecute,"console_logo");
+	PX_ExecuterPrintText(pExecute,"----------------------------------------");
+	PX_ExecuterPrintText(pExecute,"-PainterEngine Script Executer         -\n-Code By DBinary Build on 2019         -\n-Refer To:www.GitHub.com/matrixcascade -");
+	PX_ExecuterPrintText(pExecute,"----------------------------------------");
 
 
 	return PX_TRUE;

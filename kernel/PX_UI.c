@@ -181,8 +181,10 @@ PX_Object * PX_UI_CreateLabel(PX_UI *ui,PX_Object *parent,PX_Json_Value *json_va
 	PX_Object *pObject;
 	PX_UiBaseInfo baseInfo;
 	const px_char *text="";
+	px_char style[8];
+	px_bool border;
 	PX_Json_Value *pSubValue=PX_NULL;
-	px_color fontColor,backgroundColor;
+	px_color fontColor,backgroundColor,Color;
 	pSubValue=PX_JsonGetObjectValue(json_value,"text");
 	if (pSubValue&&pSubValue->type==PX_JSON_VALUE_TYPE_STRING)
 	{
@@ -197,6 +199,24 @@ PX_Object * PX_UI_CreateLabel(PX_UI *ui,PX_Object *parent,PX_Json_Value *json_va
 	PX_UI_GetColor(json_value,"backgroundcolor",&backgroundColor);
 	pObject=PX_Object_LabelCreate(ui->ui_mp,parent,(px_int)baseInfo.x,(px_int)baseInfo.y,(px_int)baseInfo.width,(px_int)baseInfo.height,text,ui->fontmodule,fontColor);
 	PX_Object_LabelSetBackgroundColor(pObject,backgroundColor);
+
+	if (PX_UI_GetColor(json_value,"bordercolor",&Color))
+	{
+		PX_Object_LabelSetBorderColor(pObject,Color);
+	}
+
+	if (PX_UI_GetString(json_value,"style",style,sizeof(style)))
+	{
+		if (PX_strequ(style,"round"))
+		{
+			PX_Object_LabelSetStyle(pObject,PX_OBJECT_LABEL_STYLE_ROUNDRECT);
+		}
+	}
+
+	if (PX_UI_GetBool(json_value,"border",&border))
+	{
+		PX_Object_LabelSetBorder(pObject,border);
+	}
 
 	pSubValue=PX_JsonGetObjectValue(json_value,"align");
 	if (pSubValue&&pSubValue->type==PX_JSON_VALUE_TYPE_STRING)
@@ -263,7 +283,7 @@ PX_Object * PX_UI_CreateProcessbar(PX_UI *ui,PX_Object *parent,PX_Json_Value *js
 		PX_Object_ProcessBarSetMax(pObject,max);
 	}
 
-	if(PX_UI_GetColor(json_value,"color",&Color))
+	if(PX_UI_GetColor(json_value,"bordercolor",&Color))
 	{
 		PX_Object_ProcessBarSetColor(pObject,Color);
 	}
