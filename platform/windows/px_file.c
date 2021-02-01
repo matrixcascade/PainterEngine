@@ -17,7 +17,7 @@ int PX_SaveDataToFile(void *buffer,int size,const char path[])
 	{
 		strcpy_s(_path,sizeof(_path),path);
 	}
-	pf=fopen(_path,"rb");
+	fopen_s(&pf,_path,"rb");
 	if (pf)
 	{
 		fwrite(buffer,1,size,pf);
@@ -45,7 +45,7 @@ PX_IO_Data PX_LoadFileToIOData(const char path[])
 			strcpy_s(_path,sizeof(_path),path);
 		}
 
-		pf=fopen(_path,"rb");
+		fopen_s(&pf,_path,"rb");
 		if (!pf)
 		{
 			goto _ERROR;
@@ -99,7 +99,7 @@ int PX_FileExist(const char path[])
 		strcpy_s(_path,sizeof(_path),path);
 	}
 
-	pf= fopen(_path,"rb");;
+	fopen_s(&pf,_path,"rb");;
 	if (pf)
 	{
 		fclose(pf);
@@ -115,7 +115,7 @@ int PX_FileGetDirectoryFileCount(const char path[],PX_FILEENUM_TYPE type,const c
 {
 	HANDLE hFind;
 	int count=0;
-    WIN32_FIND_DATA FindFileData;
+    WIN32_FIND_DATAA FindFileData;
 	char _findpath[MAX_PATH];
 	
 	if (path[0]==0||(path[0]=='\\'&&path[1]=='\0')||(path[0]=='/'&&path[1]=='\0'))
@@ -128,7 +128,7 @@ int PX_FileGetDirectoryFileCount(const char path[],PX_FILEENUM_TYPE type,const c
 		{
 			char drivers[128];
 			int index=0;
-			if(GetLogicalDriveStrings(128,drivers))
+			if(GetLogicalDriveStringsA(128,drivers))
 			{
 				while (drivers[index])
 				{
@@ -154,7 +154,7 @@ int PX_FileGetDirectoryFileCount(const char path[],PX_FILEENUM_TYPE type,const c
 	}
 	strcat_s(_findpath,sizeof(_findpath),"*.*");
 
-	hFind = FindFirstFile(_findpath,&FindFileData);
+	hFind = FindFirstFileA(_findpath,&FindFileData);
 	if (hFind==INVALID_HANDLE_VALUE)
 	{
 		return 0;
@@ -215,7 +215,7 @@ int PX_FileGetDirectoryFileCount(const char path[],PX_FILEENUM_TYPE type,const c
 		default:
 			break;
 		}
-	} while (FindNextFile(hFind,&FindFileData));
+	} while (FindNextFileA(hFind,&FindFileData));
 	FindClose(hFind);
 	return count;
 }
@@ -224,7 +224,7 @@ int PX_FileGetDirectoryFileName(const char path[],int count,char FileName[][260]
 {
 	HANDLE hFind;
 	int index=0;
-	WIN32_FIND_DATA FindFileData;
+	WIN32_FIND_DATAA FindFileData;
 	static char _findpath[MAX_PATH];
 
 	if (path[0]==0||(path[0]=='\\'&&path[1]=='\0')||(path[0]=='/'&&path[1]=='\0'))
@@ -238,7 +238,7 @@ int PX_FileGetDirectoryFileName(const char path[],int count,char FileName[][260]
 		{
 			char drivers[128];
 			int index=0;
-			if(GetLogicalDriveStrings(128,drivers))
+			if(GetLogicalDriveStringsA(128,drivers))
 			{
 				while (drivers[index])
 				{
@@ -266,7 +266,7 @@ int PX_FileGetDirectoryFileName(const char path[],int count,char FileName[][260]
 	}
 	strcat_s(_findpath,sizeof(_findpath),"*.*");
 
-	hFind = FindFirstFile(_findpath,&FindFileData);
+	hFind = FindFirstFileA(_findpath,&FindFileData);
 	if (hFind==INVALID_HANDLE_VALUE)
 	{
 		return 0;
@@ -338,7 +338,7 @@ int PX_FileGetDirectoryFileName(const char path[],int count,char FileName[][260]
 		default:
 			break;
 		}
-	} while (FindNextFile(hFind,&FindFileData));
+	} while (FindNextFileA(hFind,&FindFileData));
 	FindClose(hFind);
 	return index;
 }

@@ -199,17 +199,30 @@ BOOL PX_CreateWindow( int surfaceWidth,int surfaceHeight,int windowWidth,int win
 	////////////////////////////////////////////////////////////////////////////
 	//Create window
 	////////////////////////////////////////////////////////////////////////////
+#ifdef _UNICODE
+	do 
+	{
+		WCHAR wname[128]={0};
+		MultiByteToWideChar(CP_ACP, 0,name, strlen(name), wname,128);
+		Win_Hwnd = CreateWindowA("WindowCls", (LPCSTR)wname,
+			WS_OVERLAPPED|WS_SYSMENU|WS_MAXIMIZEBOX|WS_SIZEBOX,
+			CW_USEDEFAULT, CW_USEDEFAULT,
+			Win_Width, Win_Height,
+			NULL, NULL, GetModuleHandle(NULL), NULL);
+	} while (0);
+#else
 	Win_Hwnd = CreateWindowA("WindowCls", name,
 		WS_OVERLAPPED|WS_SYSMENU|WS_MAXIMIZEBOX|WS_SIZEBOX,
 		CW_USEDEFAULT, CW_USEDEFAULT,
 		Win_Width, Win_Height,
 		NULL, NULL, GetModuleHandle(NULL), NULL);
-
+#endif
+	
 	
 
 	if(!Win_Hwnd)
 	{
-		MessageBox(0,"create window failed","error",MB_OK);
+		MessageBoxA(0,"create window failed","error",MB_OK);
 		return FALSE;
 	}
 	
@@ -230,7 +243,7 @@ BOOL PX_CreateWindow( int surfaceWidth,int surfaceHeight,int windowWidth,int win
 	hr = D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED,&D2D_pDirect2dFactory);
 	if (FAILED(hr))
 	{
-		MessageBox(0,"could not create d2d factory","error",MB_OK);
+		MessageBoxA(0,"could not create d2d factory","error",MB_OK);
 		return FALSE;
 	}
 	
@@ -250,7 +263,7 @@ BOOL PX_CreateWindow( int surfaceWidth,int surfaceHeight,int windowWidth,int win
 
 	if (FAILED(hr))
 	{
-		MessageBox(0,"could not create d2d render target","error",MB_OK);
+		MessageBoxA(0,"could not create d2d render target","error",MB_OK);
 		return FALSE;
 	}
 
@@ -288,7 +301,7 @@ BOOL PX_CreateWindow( int surfaceWidth,int surfaceHeight,int windowWidth,int win
 
 	if (FAILED(hr))
 	{
-		MessageBox(0,"could not create d2d bitmap","error",MB_OK);
+		MessageBoxA(0,"could not create d2d bitmap","error",MB_OK);
 		return FALSE;
 	}
 
