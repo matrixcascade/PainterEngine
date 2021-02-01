@@ -248,7 +248,7 @@ px_float PX_Point_cos(px_point v);
 //////////////////////////////////////////////////////////////////////////
 //string to others
 px_void PX_BufferToHexString(px_byte data[],px_int size,px_char hex_str[]);
-px_bool PX_HexStringToBuffer(const px_char hex_str[],px_byte data[]);
+px_int PX_HexStringToBuffer(const px_char hex_str[],px_byte data[]);
 px_uint PX_htoi(const px_char hex_str[]);
 px_int  PX_atoi(const px_char str[]);
 px_float PX_atof(px_char fstr[]);

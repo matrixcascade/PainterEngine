@@ -1,21 +1,8 @@
 #include "PX_Script_Interpreter.h"
 
-static px_char *PX_Script_Keywords[]={"IF","ELSE","COMPARE","WITH","WHILE","FOR","BREAK","RETURN","SET","FUNCTION","EXPORT","HOST","INT","FLOAT","STRING","MEMORY","_BOOT","RETURN","SIZEOF","_ASM"};
+static px_char *PX_Script_Keywords[]={"IF","ELSE","COMPARE","WITH","WHILE","FOR","BREAK","RETURN","STRUCT","FUNCTION","EXPORT","HOST","INT","FLOAT","STRING","MEMORY","_BOOT","RETURN","SIZEOF","_ASM"};
 static px_char PX_Script_InterpreterError[256];
-px_void PX_ScriptParserClearStackVariables(PX_SCRIPT_Analysis *analysis)
-{
-	int i;
-	PX_SCRIPT_VARIABLES *pvar;
-	for (i=0;i<analysis->v_variableStackTable.size;i++)
-	{
-		pvar=PX_VECTORAT(PX_SCRIPT_VARIABLES,&analysis->v_variableStackTable,i);
-		if(pvar->bInitialized)
-		PX_StringFree(&pvar->GlobalInitializeValue);
-		
-		PX_StringFree(&pvar->Mnemonic);
-	}
-	PX_VectorClear(&analysis->v_variableStackTable);
-}
+
 px_void PX_ScriptTranslatorError(px_lexer *lexer,px_char *info)
 {
 	if (lexer)
@@ -33,6 +20,22 @@ px_void PX_ScriptTranslatorError(px_lexer *lexer,px_char *info)
 	}
 	PX_LOG(info);
 }
+
+px_void PX_ScriptParserClearStackVariables(PX_SCRIPT_Analysis *analysis)
+{
+	int i;
+	PX_SCRIPT_VARIABLES *pvar;
+	for (i=0;i<analysis->v_variablesStackTable.size;i++)
+	{
+		pvar=PX_VECTORAT(PX_SCRIPT_VARIABLES,&analysis->v_variablesStackTable,i);
+		if(pvar->bInitialized)
+			PX_StringFree(&pvar->GlobalInitializeValue);
+
+		PX_StringFree(&pvar->Mnemonic);
+	}
+	PX_VectorClear(&analysis->v_variablesStackTable);
+}
+
 PX_LEXER_LEXEME_TYPE PX_ScriptTranslatorNextToken(px_lexer *lexer)
 {
 	PX_LEXER_LEXEME_TYPE type;
@@ -46,7 +49,7 @@ PX_LEXER_LEXEME_TYPE PX_ScriptTranslatorNextTokenSN(px_lexer *lexer)
 
 	return type;
 }
-px_bool PX_ScriptCompilerInit(PX_SCRIPT_LIBRARY *lib,px_memorypool *mp)
+px_bool PX_ScriptCompilerInitialize(PX_SCRIPT_LIBRARY *lib,px_memorypool *mp)
 {
 	lib->mp=mp;
 	PX_VectorInitialize(mp,&lib->codeLibraries,sizeof(PX_SCRIPT_CODE),1);
@@ -524,14 +527,14 @@ static px_bool PX_ScriptParseCheckBrackets(px_char *pstr)
 	}
 	return PX_TRUE;
 }
-static PX_SCRIPT_SET *PX_ScriptParseGetSetByIndex(PX_SCRIPT_Analysis *analysis,px_int index)
+static PX_SCRIPT_STRUCT *PX_ScriptParseGetStructByIndex(PX_SCRIPT_Analysis *analysis,px_int index)
 {
-	if (index>=analysis->v_sets.size||index<0)
+	if (index>=analysis->v_struct.size||index<0)
 	{
 		return PX_NULL;
 	}
 
-	return PX_VECTORAT(PX_SCRIPT_SET,&analysis->v_sets,index);
+	return PX_VECTORAT(PX_SCRIPT_STRUCT,&analysis->v_struct,index);
 }
 static px_char PX_ScriptParseGetOpLevel(px_char *op,px_bool binary)
 {
@@ -626,14 +629,14 @@ static px_char PX_ScriptParseGetOpLevel(px_char *op,px_bool binary)
 	}
 	return -1;
 }
-static px_bool PX_ScriptParse_AST_PushToken(PX_SCRIPT_Analysis *analysis,px_vector *op,px_vector *tk,PX_SCRIPT_EXPR_STREAM atom,PX_SCRIPT_SET *_inset,PX_SCRIPT_SET **_outset)
+static px_bool PX_ScriptParse_AST_PushToken(PX_SCRIPT_Analysis *analysis,px_vector *op,px_vector *tk,PX_SCRIPT_EXPR_STREAM atom,PX_SCRIPT_STRUCT *_inset,PX_SCRIPT_STRUCT **_outset)
 {
 	px_int i;
 	PX_SCRIPT_VARIABLES *pvar;
 	PX_SCRIPT_AST_OPERAND operand;
 	PX_SCRIPT_SETMEMBER *psetmem;
 
-	//Set offset
+	//Struct offset
 	if (_inset!=PX_NULL)
 	{
 		for (i=0;i<_inset->members.size;i++)
@@ -680,11 +683,11 @@ static px_bool PX_ScriptParse_AST_PushToken(PX_SCRIPT_Analysis *analysis,px_vect
 							return PX_TRUE;
 						}
 						break;
-					case PX_SCRIPT_PARSER_VAR_TYPE_SET:
+					case PX_SCRIPT_PARSER_VAR_TYPE_STRUCT:
 						{
-							operand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_SET;
+							operand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_STRUCT;
 							operand._oft=psetmem->offset;
-							operand.pSet=PX_ScriptParseGetSetByIndex(analysis,psetmem->defvar.setIndex);
+							operand.pSet=PX_ScriptParseGetStructByIndex(analysis,psetmem->defvar.setIndex);
 							*_outset=operand.pSet;
 							PX_VectorPushback(tk,&operand);
 							return PX_TRUE;
@@ -731,7 +734,7 @@ static px_bool PX_ScriptParse_AST_PushToken(PX_SCRIPT_Analysis *analysis,px_vect
 
 							operand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_SET_PTR_CONST;
 							operand._oft=psetmem->offset;
-							operand.pSet=PX_ScriptParseGetSetByIndex(analysis,psetmem->defvar.setIndex);
+							operand.pSet=PX_ScriptParseGetStructByIndex(analysis,psetmem->defvar.setIndex);
 							*_outset=operand.pSet;
 							PX_VectorPushback(tk,&operand);
 							return PX_TRUE;
@@ -773,11 +776,11 @@ static px_bool PX_ScriptParse_AST_PushToken(PX_SCRIPT_Analysis *analysis,px_vect
 							return PX_TRUE;
 						}
 						break;
-					case PX_SCRIPT_PARSER_VAR_TYPE_SET_PTR:
+					case PX_SCRIPT_PARSER_VAR_TYPE_STRUCT_PTR:
 						{
 							operand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_MEMORY_PTR;
 							operand._oft=psetmem->offset;
-							operand.pSet=PX_ScriptParseGetSetByIndex(analysis,psetmem->defvar.setIndex);
+							operand.pSet=PX_ScriptParseGetStructByIndex(analysis,psetmem->defvar.setIndex);
 							*_outset=operand.pSet;
 							PX_VectorPushback(tk,&operand);
 							return PX_TRUE;
@@ -797,9 +800,9 @@ static px_bool PX_ScriptParse_AST_PushToken(PX_SCRIPT_Analysis *analysis,px_vect
 	if (atom.opclass==PX_SCRIPT_TRANSLATOR_OP_CLASS_VAR)
 	{
 
-			for (i=0;i<analysis->v_variableStackTable.size;i++)
+			for (i=0;i<analysis->v_variablesStackTable.size;i++)
 			{
-				pvar=PX_VECTORAT(PX_SCRIPT_VARIABLES,&analysis->v_variableStackTable,i);
+				pvar=PX_VECTORAT(PX_SCRIPT_VARIABLES,&analysis->v_variablesStackTable,i);
 				if (PX_strequ(pvar->Mnemonic.buffer,atom.code.buffer))
 				{
 					operand.region=PX_SCRIPT_VARIABLE_REGION_LOCAL;
@@ -853,12 +856,12 @@ static px_bool PX_ScriptParse_AST_PushToken(PX_SCRIPT_Analysis *analysis,px_vect
 				PX_VectorPushback(tk,&operand);
 			}
 			break;
-		case PX_SCRIPT_PARSER_VAR_TYPE_SET:
+		case PX_SCRIPT_PARSER_VAR_TYPE_STRUCT:
 			{
-				*_outset=PX_ScriptParseGetSetByIndex(analysis,pvar->setIndex);
-				operand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_SET;
+				*_outset=PX_ScriptParseGetStructByIndex(analysis,pvar->setIndex);
+				operand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_STRUCT;
 				operand._oft=pvar->BeginIndex;
-				operand.pSet=PX_ScriptParseGetSetByIndex(analysis,pvar->setIndex);
+				operand.pSet=PX_ScriptParseGetStructByIndex(analysis,pvar->setIndex);
 				PX_VectorPushback(tk,&operand);
 			}
 			break;
@@ -897,10 +900,10 @@ static px_bool PX_ScriptParse_AST_PushToken(PX_SCRIPT_Analysis *analysis,px_vect
 			break;
 		case PX_SCRIPT_PARSER_VAR_TYPE_SET_ARRAY:
 			{
-				*_outset=PX_ScriptParseGetSetByIndex(analysis,pvar->setIndex);
+				*_outset=PX_ScriptParseGetStructByIndex(analysis,pvar->setIndex);
 				operand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_SET_PTR_CONST;
 				operand._oft=pvar->BeginIndex;
-				operand.pSet=PX_ScriptParseGetSetByIndex(analysis,pvar->setIndex);
+				operand.pSet=PX_ScriptParseGetStructByIndex(analysis,pvar->setIndex);
 				PX_VectorPushback(tk,&operand);
 			}
 			break;
@@ -940,12 +943,12 @@ static px_bool PX_ScriptParse_AST_PushToken(PX_SCRIPT_Analysis *analysis,px_vect
 				PX_VectorPushback(tk,&operand);
 			}
 			break;
-		case PX_SCRIPT_PARSER_VAR_TYPE_SET_PTR:
+		case PX_SCRIPT_PARSER_VAR_TYPE_STRUCT_PTR:
 			{
-				*_outset=PX_ScriptParseGetSetByIndex(analysis,pvar->setIndex);
-				operand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_SET_PTR;
+				*_outset=PX_ScriptParseGetStructByIndex(analysis,pvar->setIndex);
+				operand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR;
 				operand._oft=pvar->BeginIndex;
-				operand.pSet=PX_ScriptParseGetSetByIndex(analysis,pvar->setIndex);
+				operand.pSet=PX_ScriptParseGetStructByIndex(analysis,pvar->setIndex);
 				PX_VectorPushback(tk,&operand);
 			}
 			break;
@@ -1169,13 +1172,13 @@ static px_bool PX_ScriptParseIsOperandNumericType(PX_SCRIPT_AST_OPERAND ope)
 	}
 	return PX_FALSE;
 }
-static PX_SCRIPT_SET *PX_ScriptParseGetSetInfo(PX_SCRIPT_Analysis *analysis,px_char *name)
+static PX_SCRIPT_STRUCT *PX_ScriptParseGetStructInfo(PX_SCRIPT_Analysis *analysis,px_char *name)
 {
 	px_int i;
-	PX_SCRIPT_SET *pset;
-	for (i=0;i<analysis->v_sets.size;i++)
+	PX_SCRIPT_STRUCT *pset;
+	for (i=0;i<analysis->v_struct.size;i++)
 	{
-		pset=PX_VECTORAT(PX_SCRIPT_SET,&analysis->v_sets,i);
+		pset=PX_VECTORAT(PX_SCRIPT_STRUCT,&analysis->v_struct,i);
 		if (PX_strequ(name,pset->Name.buffer))
 		{
 			return pset;
@@ -1186,10 +1189,10 @@ static PX_SCRIPT_SET *PX_ScriptParseGetSetInfo(PX_SCRIPT_Analysis *analysis,px_c
 static px_int PX_ScriptParseGetSetIndex(PX_SCRIPT_Analysis *analysis,px_char *name)
 {
 	px_int i;
-	PX_SCRIPT_SET *pset;
-	for (i=0;i<analysis->v_sets.size;i++)
+	PX_SCRIPT_STRUCT *pset;
+	for (i=0;i<analysis->v_struct.size;i++)
 	{
-		pset=PX_VECTORAT(PX_SCRIPT_SET,&analysis->v_sets,i);
+		pset=PX_VECTORAT(PX_SCRIPT_STRUCT,&analysis->v_struct,i);
 		if (PX_strequ(name,pset->Name.buffer))
 		{
 			return i;
@@ -1231,7 +1234,7 @@ static px_bool PX_ScriptParseIsCompareAbleOperand(PX_SCRIPT_AST_OPERAND operand1
 				}
 			}
 			break;
-		case PX_SCRIPT_AST_OPERAND_TYPE_SET:
+		case PX_SCRIPT_AST_OPERAND_TYPE_STRUCT:
 			return PX_FALSE;
 		default:
 			if (operand1.operandType!=operand2.operandType)
@@ -1261,7 +1264,7 @@ static px_bool PX_ScriptParseAST_MapTokenToR2(PX_SCRIPT_Analysis *analysis,PX_SC
 	case PX_SCRIPT_AST_OPERAND_TYPE_FLOAT_PTR://float var[x]
 	case PX_SCRIPT_AST_OPERAND_TYPE_STRING_PTR://string var[x]
 	case PX_SCRIPT_AST_OPERAND_TYPE_MEMORY_PTR://memory var[x]
-	case PX_SCRIPT_AST_OPERAND_TYPE_SET_PTR://set xx var[x]
+	case PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR://struct xx var[x]
 		{
 			PX_StringInitialize(analysis->mp,&fmrString);
 
@@ -1292,9 +1295,33 @@ static px_bool PX_ScriptParseAST_MapTokenToR2(PX_SCRIPT_Analysis *analysis,PX_SC
 		}
 		break;
 
-	case PX_SCRIPT_AST_OPERAND_TYPE_SET:
+	case PX_SCRIPT_AST_OPERAND_TYPE_STRUCT:
 		{
-			return PX_FALSE;
+			PX_StringInitialize(analysis->mp,&fmrString);
+
+			if(operand.region==PX_SCRIPT_VARIABLE_REGION_LOCAL)
+			{
+				PX_StringFormat1(&fmrString,"MOV R2,BP\nSUB R2,%1\n",PX_STRINGFORMAT_INT(operand._oft));
+				PX_StringCat(out,fmrString.buffer);
+			}
+			else if(operand.region==PX_SCRIPT_VARIABLE_REGION_GLOBAL)
+			{
+				PX_StringFormat1(&fmrString,"MOV R2,%1\n",PX_STRINGFORMAT_INT(operand._oft));
+				PX_StringCat(out,fmrString.buffer);
+			}
+			else if(operand.region==PX_SCRIPT_VARIABLE_REGION_POP)
+			{
+				PX_StringSet(&fmrString,"POP R2\n");
+				PX_StringCat(out,fmrString.buffer);
+			}
+			else
+			{
+				PX_StringFree(&fmrString);
+				return PX_FALSE;
+			}
+
+			PX_StringFree(&fmrString);
+			return PX_TRUE;
 		}
 		break;
 
@@ -1313,9 +1340,8 @@ static px_bool PX_ScriptParseAST_MapTokenToR2(PX_SCRIPT_Analysis *analysis,PX_SC
 			}
 			else if(operand.region==PX_SCRIPT_VARIABLE_REGION_LOCAL)
 			{
-				PX_StringFormat1(&fmrString,"MOV R2,%1\n",PX_STRINGFORMAT_INT(operand._oft));
+				PX_StringFormat1(&fmrString,"MOV R2,BP\nSUB R2,%1\n",PX_STRINGFORMAT_INT(operand._oft));//
 				PX_StringCat(out,fmrString.buffer);
-				PX_StringCat(out,"ADD R2,BP\n");
 			}
 			else if(operand.region==PX_SCRIPT_VARIABLE_REGION_POP)
 			{
@@ -1562,7 +1588,7 @@ static px_bool PX_ScriptParseAST_MapTokenToR1(PX_SCRIPT_Analysis *analysis,PX_SC
 	case PX_SCRIPT_AST_OPERAND_TYPE_FLOAT_PTR://float var[x]
 	case PX_SCRIPT_AST_OPERAND_TYPE_STRING_PTR://string var[x]
 	case PX_SCRIPT_AST_OPERAND_TYPE_MEMORY_PTR://memory var[x]
-	case PX_SCRIPT_AST_OPERAND_TYPE_SET_PTR://set xx var[x]
+	case PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR://struct xx var[x]
 		{
 			PX_StringInitialize(analysis->mp,&fmrString);
 
@@ -1593,9 +1619,33 @@ static px_bool PX_ScriptParseAST_MapTokenToR1(PX_SCRIPT_Analysis *analysis,PX_SC
 		}
 		break;
 
-	case PX_SCRIPT_AST_OPERAND_TYPE_SET:
+	case PX_SCRIPT_AST_OPERAND_TYPE_STRUCT:
 		{
-			return PX_FALSE;
+			PX_StringInitialize(analysis->mp,&fmrString);
+
+			if(operand.region==PX_SCRIPT_VARIABLE_REGION_LOCAL)
+			{
+				PX_StringFormat1(&fmrString,"MOV R1,BP\nSUB R1,%1\n",PX_STRINGFORMAT_INT(operand._oft));
+				PX_StringCat(out,fmrString.buffer);
+			}
+			else if(operand.region==PX_SCRIPT_VARIABLE_REGION_GLOBAL)
+			{
+				PX_StringFormat1(&fmrString,"MOV R1,%1\n",PX_STRINGFORMAT_INT(operand._oft));
+				PX_StringCat(out,fmrString.buffer);
+			}
+			else if(operand.region==PX_SCRIPT_VARIABLE_REGION_POP)
+			{
+				PX_StringSet(&fmrString,"POP R1\n");
+				PX_StringCat(out,fmrString.buffer);
+			}
+			else
+			{
+				PX_StringFree(&fmrString);
+				return PX_FALSE;
+			}
+
+			PX_StringFree(&fmrString);
+			return PX_TRUE;
 		}
 		break;
 
@@ -1614,9 +1664,8 @@ static px_bool PX_ScriptParseAST_MapTokenToR1(PX_SCRIPT_Analysis *analysis,PX_SC
 			}
 			else if(operand.region==PX_SCRIPT_VARIABLE_REGION_LOCAL)
 			{
-				PX_StringFormat1(&fmrString,"MOV R2,%1\n",PX_STRINGFORMAT_INT(operand._oft));
+				PX_StringFormat1(&fmrString,"MOV R1,BP\nSUB R1,%1\n",PX_STRINGFORMAT_INT(operand._oft));//
 				PX_StringCat(out,fmrString.buffer);
-				PX_StringCat(out,"ADD R2,BP\n");
 			}
 			else if(operand.region==PX_SCRIPT_VARIABLE_REGION_POP)
 			{
@@ -1858,7 +1907,7 @@ static px_bool PX_ScriptParseLastInstr_DOT(PX_SCRIPT_Analysis *analysis,px_vecto
 
 	PX_VectorPop(op);
 
-	if (operand1.operandType!=PX_SCRIPT_AST_OPERAND_TYPE_SET)
+	if (operand1.operandType!=PX_SCRIPT_AST_OPERAND_TYPE_STRUCT)
 	{
 		return PX_FALSE;
 	}
@@ -1872,10 +1921,19 @@ static px_bool PX_ScriptParseLastInstr_DOT(PX_SCRIPT_Analysis *analysis,px_vecto
 		operand2._oft=0;
 		operand2.region=operand1.region;
 	}
-	else
+	else if (operand1.region==PX_SCRIPT_VARIABLE_REGION_GLOBAL)
 	{
 		operand2._oft+=operand1._oft;
 		operand2.region=operand1.region;
+	}
+	else if (operand1.region==PX_SCRIPT_VARIABLE_REGION_LOCAL)
+	{
+		operand2._oft=operand1._oft-operand2._oft;
+		operand2.region=operand1.region;
+	}
+	else
+	{
+		return PX_FALSE;
 	}
 
 	
@@ -2216,7 +2274,7 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 	case PX_SCRIPT_AST_OPERAND_TYPE_FLOAT_PTR://float var[x]
 	case PX_SCRIPT_AST_OPERAND_TYPE_STRING_PTR://string var[x]
 	case PX_SCRIPT_AST_OPERAND_TYPE_MEMORY_PTR://memory var[x]
-	case PX_SCRIPT_AST_OPERAND_TYPE_SET_PTR://set xx var[x]
+	case PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR://struct xx var[x]
 		{
 			if (operandLeft.operandType==PX_SCRIPT_AST_OPERAND_TYPE_STRING)
 			{
@@ -2323,7 +2381,7 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 		}
 		break;
 
-	case PX_SCRIPT_AST_OPERAND_TYPE_SET:
+	case PX_SCRIPT_AST_OPERAND_TYPE_STRUCT:
 		{
 			if (operandLeft.operandType!=operandRight.operandType)
 			{
@@ -2334,66 +2392,23 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 				return PX_FALSE;
 			}
 			PX_StringInitialize(analysis->mp,&fmrString);
-			switch(operandRight.region)
-	        {
-				case PX_SCRIPT_VARIABLE_REGION_GLOBAL:
-				{
-				PX_StringFormat1(&fmrString,"MOV R2,%1\n",PX_STRINGFORMAT_INT(operandRight._int));
-				PX_StringCat(out,fmrString.buffer);
-				}
-				break;
-			case PX_SCRIPT_VARIABLE_REGION_LOCAL:
-				{
-				PX_StringFormat1(&fmrString,"MOV R2,%1\nADD R2,BP\n",PX_STRINGFORMAT_INT(operandRight._int));
-				PX_StringCat(out,fmrString.buffer);
-				}
-				break;
-			case PX_SCRIPT_VARIABLE_REGION_POP:
-				{
-				PX_StringSet(&fmrString,"POP R2\n");
-				PX_StringCat(out,fmrString.buffer);
-				}
-				break;
-			default:
-				{
-				PX_StringFree(&fmrString);
+			
+			if (!PX_ScriptParseAST_MapTokenToR2(analysis,operandRight,out))
+			{
 				return PX_FALSE;
-				}
+			}
+			if (!PX_ScriptParseAST_MapTokenToR1(analysis,operandLeft,out))
+			{
+				return PX_FALSE;
 			}
 
-			switch(operandLeft.region)
-			{
-			case PX_SCRIPT_VARIABLE_REGION_GLOBAL:
-				{
-					PX_StringFormat1(&fmrString,"MOV R1,%1\n",PX_STRINGFORMAT_INT(operandLeft._int));
-					PX_StringCat(out,fmrString.buffer);
-				}
-				break;
-			case PX_SCRIPT_VARIABLE_REGION_LOCAL:
-				{
-					PX_StringFormat1(&fmrString,"MOV R1,%1\nADD R1,BP\n",PX_STRINGFORMAT_INT(operandLeft._int));
-					PX_StringCat(out,fmrString.buffer);
-				}
-				break;
-			case PX_SCRIPT_VARIABLE_REGION_POP:
-				{
-					PX_StringSet(&fmrString,"POP R1\n");
-					PX_StringCat(out,fmrString.buffer);
-				}
-				break;
-			default:
-				{
-					PX_StringFree(&fmrString);
-					return PX_FALSE;
-				}
-			}
 
 			PX_StringFormat1(&fmrString,"DATACPY R1,R2,%1\n",PX_STRINGFORMAT_INT(operandLeft.pSet->size));
 			PX_StringCat(out,fmrString.buffer);
 			PX_StringSet(&fmrString,"PUSH R1\n");
 			PX_StringCat(out,fmrString.buffer);
 			PX_StringFree(&fmrString);
-			pTop->operandType=PX_SCRIPT_AST_OPERAND_TYPE_SET;
+			pTop->operandType=PX_SCRIPT_AST_OPERAND_TYPE_STRUCT;
 			pTop->region=PX_SCRIPT_VARIABLE_REGION_POP;
 			pTop->_oft=0;
 			pTop->pSet=operandLeft.pSet;
@@ -2422,7 +2437,7 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 			{
 				return PX_FALSE;
 			}
-			if (operandRight.operandType==PX_SCRIPT_AST_OPERAND_TYPE_SET_PTR_CONST&&operandLeft.operandType!=PX_SCRIPT_AST_OPERAND_TYPE_SET_PTR)
+			if (operandRight.operandType==PX_SCRIPT_AST_OPERAND_TYPE_SET_PTR_CONST&&operandLeft.operandType!=PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR)
 			{
 				return PX_FALSE;
 			}
@@ -2437,9 +2452,8 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 			}
 			else if(operandRight.region==PX_SCRIPT_VARIABLE_REGION_LOCAL)
 			{
-				PX_StringFormat1(&fmrString,"MOV R2,%1\n",PX_STRINGFORMAT_INT(operandRight._oft));
+				PX_StringFormat1(&fmrString,"MOV R2,BP\nSUB R2,%1\n",PX_STRINGFORMAT_INT(operandRight._oft));//
 				PX_StringCat(out,fmrString.buffer);
-				PX_StringCat(out,"ADD R2,BP\n");
 			}
 			else if(operandRight.region==PX_SCRIPT_VARIABLE_REGION_POP)
 			{
@@ -3339,7 +3353,7 @@ static px_bool PX_ScriptParseLastInstr_IDX(PX_SCRIPT_Analysis *analysis,px_vecto
 	case PX_SCRIPT_AST_OPERAND_TYPE_FLOAT_PTR:
 	case PX_SCRIPT_AST_OPERAND_TYPE_MEMORY_PTR:
 	case PX_SCRIPT_AST_OPERAND_TYPE_STRING_PTR:
-	case PX_SCRIPT_AST_OPERAND_TYPE_SET_PTR:
+	case PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR:
 		{
 			if (operand1.operandType==PX_SCRIPT_AST_OPERAND_TYPE_INT_PTR)
 			{
@@ -3361,9 +3375,9 @@ static px_bool PX_ScriptParseLastInstr_IDX(PX_SCRIPT_Analysis *analysis,px_vecto
 				resOperand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_MEMORY;
 				resOperand.pSet=PX_NULL;
 			}
-			if (operand1.operandType==PX_SCRIPT_AST_OPERAND_TYPE_SET_PTR)
+			if (operand1.operandType==PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR)
 			{
-				resOperand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_SET;
+				resOperand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_STRUCT;
 				resOperand.pSet=operand1.pSet;
 				PX_StringFormat1(&fmrString,"MUL R2,%1\n",PX_STRINGFORMAT_INT(operand1.pSet->size));
 				PX_StringCat(out,fmrString.buffer);
@@ -3378,7 +3392,6 @@ static px_bool PX_ScriptParseLastInstr_IDX(PX_SCRIPT_Analysis *analysis,px_vecto
 			{
 				PX_StringFormat1(&fmrString,"ADD R2,LOCAL[%1]\n",PX_STRINGFORMAT_INT(operand1._oft));
 				PX_StringCat(out,fmrString.buffer);
-				PX_StringCat(out,"ADD R2,BP\n");
 			}
 			else if(operand1.region==PX_SCRIPT_VARIABLE_REGION_POP)
 			{
@@ -3422,7 +3435,7 @@ static px_bool PX_ScriptParseLastInstr_IDX(PX_SCRIPT_Analysis *analysis,px_vecto
 				}
 				if (operand1.operandType==PX_SCRIPT_AST_OPERAND_TYPE_SET_PTR_CONST)
 				{
-					resOperand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_SET;
+					resOperand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_STRUCT;
 					resOperand.pSet=operand1.pSet;
 					PX_StringFormat1(&fmrString,"MUL R2,%1\n",PX_STRINGFORMAT_INT(operand1.pSet->size));
 					PX_StringCat(out,fmrString.buffer);
@@ -3436,9 +3449,7 @@ static px_bool PX_ScriptParseLastInstr_IDX(PX_SCRIPT_Analysis *analysis,px_vecto
 				}
 				else if(operand1.region==PX_SCRIPT_VARIABLE_REGION_LOCAL)
 				{
-					PX_StringSet(&fmrString,"ADD R2,BP\n");
-					PX_StringCat(out,fmrString.buffer);
-					PX_StringFormat1(&fmrString,"ADD R2,%1\n",PX_STRINGFORMAT_INT(operand1._oft));
+					PX_StringFormat1(&fmrString,"SUB R2,%1\nADD R2,BP\n",PX_STRINGFORMAT_INT(operand1._oft));//
 					PX_StringCat(out,fmrString.buffer);
 				}
 				else if(operand1.region==PX_SCRIPT_VARIABLE_REGION_POP)
@@ -3474,9 +3485,7 @@ static px_bool PX_ScriptParseLastInstr_IDX(PX_SCRIPT_Analysis *analysis,px_vecto
 				else if(operand1.region==PX_SCRIPT_VARIABLE_REGION_LOCAL)
 				{
 					PX_StringCat(out,"PUSH R2\n");
-					PX_StringFormat1(&fmrString,"MOV R2,%1\n",PX_STRINGFORMAT_INT(operand1._oft));
-					PX_StringCat(out,fmrString.buffer);
-					PX_StringSet(&fmrString,"ADD R2,BP\n");
+					PX_StringFormat1(&fmrString,"MOV R2,BP\nSUB R2,%1\n",PX_STRINGFORMAT_INT(operand1._oft));//
 					PX_StringCat(out,fmrString.buffer);
 				}
 				else if(operand1.region==PX_SCRIPT_VARIABLE_REGION_POP)
@@ -3570,9 +3579,9 @@ static px_bool PX_ScriptParseLastInstr_PTR(PX_SCRIPT_Analysis *analysis,px_vecto
 		resOperand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_MEMORY;
 		resOperand.pSet=PX_NULL;
 	}
-	else if (operand1.operandType==PX_SCRIPT_AST_OPERAND_TYPE_SET_PTR)
+	else if (operand1.operandType==PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR)
 	{
-		resOperand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_SET;
+		resOperand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_STRUCT;
 		resOperand.pSet=operand1.pSet;
 	}
 
@@ -3598,7 +3607,7 @@ static px_bool PX_ScriptParseLastInstr_PTR(PX_SCRIPT_Analysis *analysis,px_vecto
 	}
 	else if (operand1.operandType==PX_SCRIPT_AST_OPERAND_TYPE_SET_PTR_CONST)
 	{
-		resOperand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_SET;
+		resOperand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_STRUCT;
 		resOperand.pSet=operand1.pSet;
 
 	}
@@ -3649,7 +3658,7 @@ static px_bool PX_ScriptParseLastInstr_ADR(PX_SCRIPT_Analysis *analysis,px_vecto
 	case PX_SCRIPT_AST_OPERAND_TYPE_MEMORY:
 		pTop->operandType=PX_SCRIPT_AST_OPERAND_TYPE_MEMORY_PTR_CONST;
 		break;
-	case PX_SCRIPT_AST_OPERAND_TYPE_SET:
+	case PX_SCRIPT_AST_OPERAND_TYPE_STRUCT:
 		pTop->operandType=PX_SCRIPT_AST_OPERAND_TYPE_SET_PTR_CONST;
 		break;
 	default:
@@ -3665,9 +3674,7 @@ static px_bool PX_ScriptParseLastInstr_ADR(PX_SCRIPT_Analysis *analysis,px_vecto
 	else if(operand1.region==PX_SCRIPT_VARIABLE_REGION_LOCAL)
 	{
 		PX_StringInitialize(analysis->mp,&fmrString);
-		PX_StringFormat1(&fmrString,"MOV R1,%1\n",PX_STRINGFORMAT_INT(operand1._oft));
-		PX_StringCat(out,fmrString.buffer);
-		PX_StringSet(&fmrString,"ADD R1,BP\n");
+		PX_StringFormat1(&fmrString,"MOV R1,BP\nSUB R1,%1\n",PX_STRINGFORMAT_INT(operand1._oft));//
 		PX_StringCat(out,fmrString.buffer);
 		PX_StringSet(&fmrString,"PUSH R1\n");
 		PX_StringCat(out,fmrString.buffer);
@@ -4011,7 +4018,7 @@ static px_bool PX_ScriptParseLastInstr_ADD(PX_SCRIPT_Analysis *analysis,px_vecto
 		}
 		break;
 
-	case PX_SCRIPT_AST_OPERAND_TYPE_SET_PTR:
+	case PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR:
 	case PX_SCRIPT_AST_OPERAND_TYPE_SET_PTR_CONST:
 		{
 			switch(operand2.operandType)
@@ -4056,7 +4063,7 @@ static px_bool PX_ScriptParseLastInstr_INC(PX_SCRIPT_Analysis *analysis,px_vecto
 	operand1=*((PX_SCRIPT_AST_OPERAND *)PX_VECTORAT(PX_SCRIPT_AST_OPERAND,tk,tk->size-1));
 
 	PX_VectorPop(op);
-	if (operand1.operandType!=PX_SCRIPT_AST_OPERAND_TYPE_INT&&operand1.operandType!=PX_SCRIPT_AST_OPERAND_TYPE_INT_PTR&&operand1.operandType!=PX_SCRIPT_AST_OPERAND_TYPE_FLOAT_PTR&&operand1.operandType!=PX_SCRIPT_AST_OPERAND_TYPE_STRING_PTR&&operand1.operandType!=PX_SCRIPT_AST_OPERAND_TYPE_MEMORY_PTR&&operand1.operandType!=PX_SCRIPT_AST_OPERAND_TYPE_SET_PTR)
+	if (operand1.operandType!=PX_SCRIPT_AST_OPERAND_TYPE_INT&&operand1.operandType!=PX_SCRIPT_AST_OPERAND_TYPE_INT_PTR&&operand1.operandType!=PX_SCRIPT_AST_OPERAND_TYPE_FLOAT_PTR&&operand1.operandType!=PX_SCRIPT_AST_OPERAND_TYPE_STRING_PTR&&operand1.operandType!=PX_SCRIPT_AST_OPERAND_TYPE_MEMORY_PTR&&operand1.operandType!=PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR)
 	{
 		return PX_FALSE;
 	}
@@ -4331,7 +4338,7 @@ static px_bool PX_ScriptParseLastInstr_SUB(PX_SCRIPT_Analysis *analysis,px_vecto
 		}
 		break;
 
-	case PX_SCRIPT_AST_OPERAND_TYPE_SET_PTR:
+	case PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR:
 	case PX_SCRIPT_AST_OPERAND_TYPE_SET_PTR_CONST:
 		{
 			switch(operand2.operandType)
@@ -4376,7 +4383,7 @@ static px_bool PX_ScriptParseLastInstr_DEC(PX_SCRIPT_Analysis *analysis,px_vecto
 
 	PX_VectorPop(op);
 
-	if (operand1.operandType!=PX_SCRIPT_AST_OPERAND_TYPE_INT&&operand1.operandType!=PX_SCRIPT_AST_OPERAND_TYPE_INT_PTR&&operand1.operandType!=PX_SCRIPT_AST_OPERAND_TYPE_FLOAT_PTR&&operand1.operandType!=PX_SCRIPT_AST_OPERAND_TYPE_STRING_PTR&&operand1.operandType!=PX_SCRIPT_AST_OPERAND_TYPE_MEMORY_PTR&&operand1.operandType!=PX_SCRIPT_AST_OPERAND_TYPE_SET_PTR)
+	if (operand1.operandType!=PX_SCRIPT_AST_OPERAND_TYPE_INT&&operand1.operandType!=PX_SCRIPT_AST_OPERAND_TYPE_INT_PTR&&operand1.operandType!=PX_SCRIPT_AST_OPERAND_TYPE_FLOAT_PTR&&operand1.operandType!=PX_SCRIPT_AST_OPERAND_TYPE_STRING_PTR&&operand1.operandType!=PX_SCRIPT_AST_OPERAND_TYPE_MEMORY_PTR&&operand1.operandType!=PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR)
 	{
 		return PX_FALSE;
 	}
@@ -5640,8 +5647,8 @@ static px_bool PX_ScriptParseLastInstr_LGEQU(PX_SCRIPT_Analysis *analysis,px_vec
 				}
 			}
 			break;
-		case PX_SCRIPT_AST_OPERAND_TYPE_SET:
-			PX_ScriptTranslatorError(&analysis->lexer,"Set-type could not be compared.");
+		case PX_SCRIPT_AST_OPERAND_TYPE_STRUCT:
+			PX_ScriptTranslatorError(&analysis->lexer,"Struct-type could not be compared.");
 			return PX_FALSE;
 		default:
 			if (operand1.operandType!=operand2.operandType)
@@ -5706,8 +5713,8 @@ static px_bool PX_ScriptParseLastInstr_UNEQU(PX_SCRIPT_Analysis *analysis,px_vec
 				}
 			}
 			break;
-		case PX_SCRIPT_AST_OPERAND_TYPE_SET:
-			PX_ScriptTranslatorError(&analysis->lexer,"Set-type could not be compared.");
+		case PX_SCRIPT_AST_OPERAND_TYPE_STRUCT:
+			PX_ScriptTranslatorError(&analysis->lexer,"Struct-type could not be compared.");
 			return PX_FALSE;
 		default:
 			if (operand1.operandType!=operand2.operandType)
@@ -5939,7 +5946,7 @@ static px_bool PX_ScriptParseExpressionStream(PX_SCRIPT_Analysis *analysis,px_ve
 	px_vector *tk=&vTk;
 	PX_SCRIPT_AST_OPERAND retOperand;
 	PX_SCRIPT_AST_OPCODE *plastop=PX_NULL;
-	PX_SCRIPT_SET *pcurrentSet=PX_NULL;
+	PX_SCRIPT_STRUCT *pcurrentSet=PX_NULL;
 	px_int level=PX_SCRIPT_OPCODE_LEVEL_BOTTOM;
 	PX_SCRIPT_EXPR_STREAM *pVec=(PX_SCRIPT_EXPR_STREAM *)(stream->data);
 	PX_SCRIPT_FUNCTION *pfunc=PX_NULL;
@@ -5957,7 +5964,10 @@ static px_bool PX_ScriptParseExpressionStream(PX_SCRIPT_Analysis *analysis,px_ve
 			while(op->size)
 			{
 				if(!PX_ScriptParseLastInstr(analysis,op,tk,out))
-				goto _ERROR;
+				{
+					PX_ScriptTranslatorError(&analysis->lexer,"Function error.");
+					goto _ERROR;
+				}
 			}
 			*pretOperand=*(PX_VECTORAT(PX_SCRIPT_AST_OPERAND,tk,0));
 			
@@ -5968,13 +5978,15 @@ static px_bool PX_ScriptParseExpressionStream(PX_SCRIPT_Analysis *analysis,px_ve
 		case PX_SCRIPT_TRANSLATOR_EXPRESSION_TOKEN:
 		{
 			if(!PX_ScriptParse_AST_PushToken(analysis,op,tk,pVec[*offset],pcurrentSet,&pcurrentSet)) 
+			{
+				PX_ScriptTranslatorError(&analysis->lexer,"Function error.");
 				goto _ERROR;
+			}
 		}
 		break;
 		case PX_SCRIPT_TRANSLATOR_EXPRESSION_OP_FUNCTION:
 		{
 			//call func
-			PX_StringCat(out,"PUSH BP\n");
 			for (i=0;i<analysis->v_functions.size;i++)
 			{
 				pfunc=PX_VECTORAT(PX_SCRIPT_FUNCTION,&analysis->v_functions,i);
@@ -6017,6 +6029,7 @@ static px_bool PX_ScriptParseExpressionStream(PX_SCRIPT_Analysis *analysis,px_ve
 				{
 					if (*offset==stream->size)
 					{
+						PX_ScriptTranslatorError(&analysis->lexer,"Function parse error.");
 						goto _ERROR;
 					}
 					switch(pVec[*offset].type)
@@ -6066,140 +6079,32 @@ _EXPR_OUT:
 			}
 			if (paramcount!=pfunc->parametersCount)
 			{
+				PX_ScriptTranslatorError(&analysis->lexer,"Function parameter-count error.");
 				goto _ERROR;
 			}
 
-			if(paramcount)
+
+			for (i=paramcount-1;i>=0;i--)
+			//for (i=0;i<paramcount;i++)
 			{
-				if (!PX_ScriptParseExpressionStream(analysis,stream,&paramBeginIndex[paramcount-1],&retOperand,PX_SCRIPT_TRANSLATOR_EXPRESSION_OP_LBRACKETEND,out))
+				if (i==paramcount-1)
 				{
-				goto _ERROR;
+					if (!PX_ScriptParseExpressionStream(analysis,stream,&paramBeginIndex[paramcount-1],&retOperand,PX_SCRIPT_TRANSLATOR_EXPRESSION_OP_LBRACKETEND,out))
+					{
+						PX_ScriptTranslatorError(&analysis->lexer,"Function left-bracket-end missing.");
+						goto _ERROR;
+					}
 				}
-
-				if (retOperand.operandType==PX_SCRIPT_AST_OPERAND_TYPE_SET||retOperand.operandType==PX_SCRIPT_AST_OPERAND_TYPE_SET_PTR||retOperand.operandType==PX_SCRIPT_AST_OPERAND_TYPE_SET_PTR_CONST)
+				else
 				{
-					pcurrentSet=retOperand.pSet;
+					if (!PX_ScriptParseExpressionStream(analysis,stream,&paramBeginIndex[i],&retOperand,PX_SCRIPT_TRANSLATOR_EXPRESSION_OP_COMMA,out))
+					{
+						PX_ScriptTranslatorError(&analysis->lexer,"Function comma missing.");
+						goto _ERROR;
+					}
 				}
-
-				i=paramcount-1;
-
-				switch (retOperand.operandType)
-				{
-				case PX_SCRIPT_AST_OPERAND_TYPE_INT:
-				case PX_SCRIPT_AST_OPERAND_TYPE_INT_CONST:
-				case PX_SCRIPT_AST_OPERAND_TYPE_STRING_IDX:
-				case PX_SCRIPT_AST_OPERAND_TYPE_MEMORY_IDX:
-// 					if (pfunc->parameters[i].type!=PX_SCRIPT_PARSER_VAR_TYPE_INT)
-// 					{
-// 						PX_ScriptTranslatorError(&analysis->lexer,"Parameter not matched.");
-// 						goto _ERROR;
-// 					}
-// 					break;
-				case PX_SCRIPT_AST_OPERAND_TYPE_FLOAT:
-				case PX_SCRIPT_AST_OPERAND_TYPE_FLOAT_CONST:
-					if (pfunc->parameters[i].type!=PX_SCRIPT_PARSER_VAR_TYPE_FLOAT&&pfunc->parameters[i].type!=PX_SCRIPT_PARSER_VAR_TYPE_INT)
-					{
-						PX_ScriptTranslatorError(&analysis->lexer,"Parameter not matched.");
-						goto _ERROR;
-					}
-					break;
-				case PX_SCRIPT_AST_OPERAND_TYPE_STRING:
-				case PX_SCRIPT_AST_OPERAND_TYPE_STRING_CONST:
-					if (pfunc->parameters[i].type!=PX_SCRIPT_PARSER_VAR_TYPE_STRING)
-					{
-						PX_ScriptTranslatorError(&analysis->lexer,"Parameter not matched.");
-						goto _ERROR;
-					}
-					break;
-				case PX_SCRIPT_AST_OPERAND_TYPE_MEMORY:
-				case PX_SCRIPT_AST_OPERAND_TYPE_MEMORY_CONST:
-					if (pfunc->parameters[i].type!=PX_SCRIPT_PARSER_VAR_TYPE_MEMORY)
-					{
-						PX_ScriptTranslatorError(&analysis->lexer,"Parameter not matched.");
-						goto _ERROR;
-					}
-					break;
-				case PX_SCRIPT_AST_OPERAND_TYPE_INT_PTR:
-				case PX_SCRIPT_AST_OPERAND_TYPE_INT_PTR_CONST:
-					if (pfunc->parameters[i].type!=PX_SCRIPT_PARSER_VAR_TYPE_INT_ARRAY&&pfunc->parameters[i].type!=PX_SCRIPT_PARSER_VAR_TYPE_INT_PTR)
-					{
-						PX_ScriptTranslatorError(&analysis->lexer,"Parameter not matched.");
-						goto _ERROR;
-					}
-					break;
-				case PX_SCRIPT_AST_OPERAND_TYPE_FLOAT_PTR:
-				case PX_SCRIPT_AST_OPERAND_TYPE_FLOAT_PTR_CONST:
-					if (pfunc->parameters[i].type!=PX_SCRIPT_PARSER_VAR_TYPE_FLOAT_ARRAY&&pfunc->parameters[i].type!=PX_SCRIPT_PARSER_VAR_TYPE_FLOAT_PTR)
-					{
-						PX_ScriptTranslatorError(&analysis->lexer,"Parameter not matched.");
-						goto _ERROR;
-					}
-					break;
-				case PX_SCRIPT_AST_OPERAND_TYPE_STRING_PTR:
-				case PX_SCRIPT_AST_OPERAND_TYPE_STRING_PTR_CONST:
-					if (pfunc->parameters[i].type!=PX_SCRIPT_PARSER_VAR_TYPE_STRING_ARRAY&&pfunc->parameters[i].type!=PX_SCRIPT_PARSER_VAR_TYPE_STRING_PTR)
-					{
-						PX_ScriptTranslatorError(&analysis->lexer,"Parameter not matched.");
-						goto _ERROR;
-					}
-					break;
-				case PX_SCRIPT_AST_OPERAND_TYPE_MEMORY_PTR:
-				case PX_SCRIPT_AST_OPERAND_TYPE_MEMORY_PTR_CONST:
-					if (pfunc->parameters[i].type!=PX_SCRIPT_PARSER_VAR_TYPE_MEMORY_ARRAY&&pfunc->parameters[i].type!=PX_SCRIPT_PARSER_VAR_TYPE_MEMORY_PTR)
-					{
-						PX_ScriptTranslatorError(&analysis->lexer,"Parameter not matched.");
-						goto _ERROR;
-					}
-					break;
-				case PX_SCRIPT_AST_OPERAND_TYPE_SET_PTR:
-				case PX_SCRIPT_AST_OPERAND_TYPE_SET_PTR_CONST:
-					if (pfunc->parameters[i].type!=PX_SCRIPT_PARSER_VAR_TYPE_SET_PTR||PX_ScriptParseGetSetByIndex(analysis,pfunc->parameters[i].setIndex)!=retOperand.pSet)
-					{
-						PX_ScriptTranslatorError(&analysis->lexer,"Parameter not matched.");
-						goto _ERROR;
-					}
-					break;
-				default:
-					goto _ERROR;
-				}
-
-				if(retOperand.operandType!=PX_SCRIPT_AST_OPERAND_TYPE_SET)
-				{
-					if (!PX_ScriptParseAST_MapTokenToR1(analysis,retOperand,out))
-					{
-						goto _ERROR;
-					}
-
-					if (retOperand.operandType==PX_SCRIPT_AST_OPERAND_TYPE_FLOAT||retOperand.operandType==PX_SCRIPT_AST_OPERAND_TYPE_FLOAT_CONST)
-					{
-						if (pfunc->parameters[i].type==PX_SCRIPT_PARSER_VAR_TYPE_INT)
-						{
-							PX_StringCat(out,"INT R1\n");
-						}
-					}
-
-					if (retOperand.operandType==PX_SCRIPT_AST_OPERAND_TYPE_INT||retOperand.operandType==PX_SCRIPT_AST_OPERAND_TYPE_INT_CONST\
-						||retOperand.operandType==PX_SCRIPT_AST_OPERAND_TYPE_STRING_IDX||retOperand.operandType==PX_SCRIPT_AST_OPERAND_TYPE_MEMORY_IDX)
-					{
-						if (pfunc->parameters[i].type==PX_SCRIPT_PARSER_VAR_TYPE_FLOAT)
-						{
-							PX_StringCat(out,"FLT R1\n");
-						}
-					}
-
-					PX_StringCat(out,"PUSH R1\n");
-				}
-
-		    }
-
-
-			for (i=paramcount-2;i>=0;i--)
-			{
-				if (!PX_ScriptParseExpressionStream(analysis,stream,&paramBeginIndex[i],&retOperand,PX_SCRIPT_TRANSLATOR_EXPRESSION_OP_COMMA,out))
-				{
-					goto _ERROR;
-				}
-				if (retOperand.operandType==PX_SCRIPT_AST_OPERAND_TYPE_SET||retOperand.operandType==PX_SCRIPT_AST_OPERAND_TYPE_SET_PTR||retOperand.operandType==PX_SCRIPT_AST_OPERAND_TYPE_SET_PTR_CONST)
+				
+				if (retOperand.operandType==PX_SCRIPT_AST_OPERAND_TYPE_STRUCT||retOperand.operandType==PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR||retOperand.operandType==PX_SCRIPT_AST_OPERAND_TYPE_SET_PTR_CONST)
 				{
 					pcurrentSet=retOperand.pSet;
 				}
@@ -6272,15 +6177,16 @@ _EXPR_OUT:
 						goto _ERROR;
 					}
 					break;
-				case PX_SCRIPT_AST_OPERAND_TYPE_SET_PTR:
+				case PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR:
 				case PX_SCRIPT_AST_OPERAND_TYPE_SET_PTR_CONST:
-					if (pfunc->parameters[i].type!=PX_SCRIPT_PARSER_VAR_TYPE_SET_PTR||PX_ScriptParseGetSetByIndex(analysis,pfunc->parameters[i].setIndex)!=retOperand.pSet)
+					if (pfunc->parameters[i].type!=PX_SCRIPT_PARSER_VAR_TYPE_STRUCT_PTR||PX_ScriptParseGetStructByIndex(analysis,pfunc->parameters[i].setIndex)!=retOperand.pSet)
 					{
 						PX_ScriptTranslatorError(&analysis->lexer,"Parameter not matched.");
 						goto _ERROR;
 					}
 					break;
 				default:
+					PX_ScriptTranslatorError(&analysis->lexer,"unexpected error.");
 					goto _ERROR;
 				}
 				if (!PX_ScriptParseAST_MapTokenToR1(analysis,retOperand,out))
@@ -6323,7 +6229,7 @@ _EXPR_OUT:
 					PX_StringFormat1(&fmrString,"POPN %1\n",PX_STRINGFORMAT_INT(pfunc->parametersSize));
 					PX_StringCat(out,fmrString.buffer);
 				}
-				PX_StringCat(out,"POP BP\n");
+				
 
 				PX_StringFree(&fmrString);
 				break;
@@ -6336,7 +6242,7 @@ _EXPR_OUT:
 					PX_StringFormat1(&fmrString,"POPN %1\n",PX_STRINGFORMAT_INT(pfunc->parametersSize));
 					PX_StringCat(out,fmrString.buffer);
 				}
-				PX_StringCat(out,"POP BP\n");
+
 				PX_StringFree(&fmrString);
 				break;
 			}
@@ -6370,9 +6276,9 @@ _EXPR_OUT:
 			case PX_SCRIPT_PARSER_VAR_TYPE_MEMORY_PTR:
 				retOperand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_MEMORY_PTR_CONST;
 				break;
-			case PX_SCRIPT_PARSER_VAR_TYPE_SET_PTR:
+			case PX_SCRIPT_PARSER_VAR_TYPE_STRUCT_PTR:
 				retOperand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_SET_PTR_CONST;
-				retOperand.pSet=PX_ScriptParseGetSetByIndex(analysis,pfunc->retSetIndex);
+				retOperand.pSet=PX_ScriptParseGetStructByIndex(analysis,pfunc->retSetIndex);
 				break;
 			case PX_SCRIPT_PARSER_VAR_TYPE_VOID:
 				retOperand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_INT_CONST;
@@ -6402,7 +6308,7 @@ _EXPR_OUT:
 				goto _ERROR;
 
 				PX_VectorPushback(tk,&retOperand);
-				if (retOperand.operandType==PX_SCRIPT_AST_OPERAND_TYPE_SET||retOperand.operandType==PX_SCRIPT_AST_OPERAND_TYPE_SET_PTR||retOperand.operandType==PX_SCRIPT_AST_OPERAND_TYPE_SET_PTR_CONST)
+				if (retOperand.operandType==PX_SCRIPT_AST_OPERAND_TYPE_STRUCT||retOperand.operandType==PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR||retOperand.operandType==PX_SCRIPT_AST_OPERAND_TYPE_SET_PTR_CONST)
 				{
 					pcurrentSet=retOperand.pSet;
 				}
@@ -6438,7 +6344,7 @@ _EXPR_OUT:
 
 			PX_VectorPushback(tk,&retOperand);
 
-			if (retOperand.operandType==PX_SCRIPT_AST_OPERAND_TYPE_SET||retOperand.operandType==PX_SCRIPT_AST_OPERAND_TYPE_SET_PTR||retOperand.operandType==PX_SCRIPT_AST_OPERAND_TYPE_SET_PTR_CONST)
+			if (retOperand.operandType==PX_SCRIPT_AST_OPERAND_TYPE_STRUCT||retOperand.operandType==PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR||retOperand.operandType==PX_SCRIPT_AST_OPERAND_TYPE_SET_PTR_CONST)
 			{
 				pcurrentSet=retOperand.pSet;
 			}
@@ -7602,14 +7508,13 @@ static px_bool PX_ScriptParseExpression(PX_SCRIPT_Analysis *analysis,px_char *ex
 	{
 		ret=PX_FALSE;
 	}
-	if (operand.operandType!=PX_SCRIPT_AST_OPERAND_TYPE_SET)
+
+	if (!PX_ScriptParseAST_MapTokenToR1(analysis,operand,out))
 	{
-		if (!PX_ScriptParseAST_MapTokenToR1(analysis,operand,out))
-		{
-			ret=PX_FALSE;
-			goto _CLEAR;
-		}
+		ret=PX_FALSE;
+		goto _CLEAR;
 	}
+	
 	*retOperand=operand;
 _CLEAR:
 
@@ -7831,6 +7736,7 @@ static px_bool PX_ScriptParseVar(PX_SCRIPT_Analysis *analysis)
 				PX_StringFree(&variable.GlobalInitializeValue);
 				goto _ERROR;
 			}
+
 		}
 		else
 		{
@@ -7841,9 +7747,9 @@ static px_bool PX_ScriptParseVar(PX_SCRIPT_Analysis *analysis)
 		if (analysis->functionInside)
 		{
 
-			for (i=0;i<analysis->v_variableStackTable.size;i++)
+			for (i=0;i<analysis->v_variablesStackTable.size;i++)
 			{
-				if (PX_strequ(variable.Mnemonic.buffer,PX_VECTORAT(PX_SCRIPT_VARIABLES,&analysis->v_variableStackTable,i)->Mnemonic.buffer))
+				if (PX_strequ(variable.Mnemonic.buffer,PX_VECTORAT(PX_SCRIPT_VARIABLES,&analysis->v_variablesStackTable,i)->Mnemonic.buffer))
 				{
 					PX_ScriptTranslatorError(&analysis->lexer,"variable redefined.");
 					PX_StringFree(&variable.Mnemonic);
@@ -7853,7 +7759,33 @@ static px_bool PX_ScriptParseVar(PX_SCRIPT_Analysis *analysis)
 				}
 			}
 
-			PX_VectorPushback(&analysis->v_variableStackTable,&variable);
+			pvar=PX_VECTORAT(PX_SCRIPT_VARIABLES,&analysis->v_variablesStackTable,analysis->v_variablesStackTable.size-1);
+			variable.BeginIndex=pvar->BeginIndex+variable.size;
+
+			PX_VectorPushback(&analysis->v_variablesStackTable,&variable);
+
+			//////////////////////////////////////////////////////////////////////////
+			if(variable.bInitialized)
+			{
+				px_string code;
+				px_string exprgen;
+				PX_SCRIPT_AST_OPERAND retOperand;
+				PX_StringInitialize(analysis->mp,&code);
+				PX_StringInitialize(analysis->mp,&exprgen);
+				PX_StringFormat2(&code,"%1=%2",PX_STRINGFORMAT_STRING(variable.Mnemonic.buffer),PX_STRINGFORMAT_STRING(variable.GlobalInitializeValue.buffer));
+				if (!PX_ScriptParseExpression(analysis,code.buffer,&exprgen,&retOperand))
+				{
+					PX_StringFree(&code);
+					PX_StringFree(&exprgen);
+					return PX_FALSE;
+				}
+				PX_StringCat(&analysis->code,exprgen.buffer);
+				PX_StringFree(&exprgen);
+				PX_StringFree(&code);
+
+			};
+
+			//////////////////////////////////////////////////////////////////////////
 		}
 		else
 		{
@@ -7903,18 +7835,18 @@ static px_bool PX_ScriptParseVar(PX_SCRIPT_Analysis *analysis)
 _ERROR:
 	return PX_FALSE;
 }
-static px_bool PX_ScriptParseSet(PX_SCRIPT_Analysis *analysis)
+static px_bool PX_ScriptParseStruct(PX_SCRIPT_Analysis *analysis)
 {
 	PX_LEXER_LEXEME_TYPE type;
 	PX_SCRIPT_VARIABLES variable,*pvar;
-	PX_SCRIPT_SET *pset;
+	PX_SCRIPT_STRUCT *pset;
 	PX_LEXER_STATE state;
 	px_int i;
 	variable.bParam=PX_FALSE;
 	variable.bInitialized=PX_FALSE;
 	variable.BeginIndex=-1;
 	variable.size=-1;
-	variable.type=PX_SCRIPT_PARSER_VAR_TYPE_SET;
+	variable.type=PX_SCRIPT_PARSER_VAR_TYPE_STRUCT;
 
 
 	type=PX_ScriptTranslatorNextToken(&analysis->lexer);
@@ -7926,13 +7858,13 @@ static px_bool PX_ScriptParseSet(PX_SCRIPT_Analysis *analysis)
 
 	if (!PX_ScriptParseIsValidToken(analysis->lexer.CurLexeme.buffer))
 	{
-		PX_ScriptTranslatorError(&analysis->lexer,"Invalid set name");
+		PX_ScriptTranslatorError(&analysis->lexer,"Invalid struct name");
 		goto _ERROR;
 	}
 
-	if (!(pset=PX_ScriptParseGetSetInfo(analysis,analysis->lexer.CurLexeme.buffer)))
+	if (!(pset=PX_ScriptParseGetStructInfo(analysis,analysis->lexer.CurLexeme.buffer)))
 	{
-		PX_ScriptTranslatorError(&analysis->lexer,"Invalid set type");
+		PX_ScriptTranslatorError(&analysis->lexer,"Invalid struct type");
 		goto _ERROR;
 	}
 
@@ -7945,7 +7877,7 @@ static px_bool PX_ScriptParseSet(PX_SCRIPT_Analysis *analysis)
 		if (type==PX_LEXER_LEXEME_TYPE_DELIMITER&&analysis->lexer.Symbol=='*')
 		{
 			variable.size=1;
-			variable.type=PX_SCRIPT_PARSER_VAR_TYPE_SET_PTR;
+			variable.type=PX_SCRIPT_PARSER_VAR_TYPE_STRUCT_PTR;
 			type=PX_ScriptTranslatorNextToken(&analysis->lexer);
 		}
 
@@ -7956,7 +7888,7 @@ static px_bool PX_ScriptParseSet(PX_SCRIPT_Analysis *analysis)
 
 		if (!PX_ScriptParseIsValidToken(analysis->lexer.CurLexeme.buffer))
 		{
-			PX_ScriptTranslatorError(&analysis->lexer,"Invalid set name");
+			PX_ScriptTranslatorError(&analysis->lexer,"Invalid struct name");
 			goto _ERROR;
 		}
 
@@ -7978,9 +7910,9 @@ static px_bool PX_ScriptParseSet(PX_SCRIPT_Analysis *analysis)
 		
 		if (analysis->lexer.Symbol=='[')
 		{
-			if (variable.type==PX_SCRIPT_PARSER_VAR_TYPE_SET_PTR)
+			if (variable.type==PX_SCRIPT_PARSER_VAR_TYPE_STRUCT_PTR)
 			{
-				PX_ScriptTranslatorError(&analysis->lexer,"Array of set pointers is not support.");
+				PX_ScriptTranslatorError(&analysis->lexer,"Array of struct pointers is not support.");
 				PX_StringFree(&variable.Mnemonic);
 				goto _ERROR;
 			}
@@ -8000,7 +7932,7 @@ static px_bool PX_ScriptParseSet(PX_SCRIPT_Analysis *analysis)
 			}
 
 
-			if(variable.type==PX_SCRIPT_PARSER_VAR_TYPE_SET_PTR)
+			if(variable.type==PX_SCRIPT_PARSER_VAR_TYPE_STRUCT_PTR)
 				variable.size=PX_atoi(analysis->lexer.CurLexeme.buffer);
 			else
 				variable.size=PX_atoi(analysis->lexer.CurLexeme.buffer)*pset->size;
@@ -8025,7 +7957,7 @@ static px_bool PX_ScriptParseSet(PX_SCRIPT_Analysis *analysis)
 		}
 		else
 		{
-			if(variable.type==PX_SCRIPT_PARSER_VAR_TYPE_SET_PTR)
+			if(variable.type==PX_SCRIPT_PARSER_VAR_TYPE_STRUCT_PTR)
 			variable.size=1;
 			else
 			variable.size=pset->size;
@@ -8034,10 +7966,10 @@ static px_bool PX_ScriptParseSet(PX_SCRIPT_Analysis *analysis)
 
 		if (analysis->functionInside)
 		{
-
-			for (i=0;i<analysis->v_variableStackTable.size;i++)
+			PX_SCRIPT_VARIABLES *pvar;
+			for (i=0;i<analysis->v_variablesStackTable.size;i++)
 			{
-				if (PX_strequ(variable.Mnemonic.buffer,PX_VECTORAT(PX_SCRIPT_VARIABLES,&analysis->v_variableStackTable,i)->Mnemonic.buffer))
+				if (PX_strequ(variable.Mnemonic.buffer,PX_VECTORAT(PX_SCRIPT_VARIABLES,&analysis->v_variablesStackTable,i)->Mnemonic.buffer))
 				{
 					PX_ScriptTranslatorError(&analysis->lexer,"variable redefined.");
 					PX_StringFree(&variable.Mnemonic);
@@ -8047,17 +7979,11 @@ static px_bool PX_ScriptParseSet(PX_SCRIPT_Analysis *analysis)
 				}
 			}
 			
-			if (analysis->v_variableStackTable.size==0)
-			{
-				variable.BeginIndex=0;
-			}
-			else
-			{
-				variable.BeginIndex=PX_VECTORAT(PX_SCRIPT_VARIABLES,&analysis->v_variableStackTable,analysis->v_variableStackTable.size-1)->BeginIndex+\
-					PX_VECTORAT(PX_SCRIPT_VARIABLES,&analysis->v_variableStackTable,analysis->v_variableStackTable.size-1)->size;
-			}
-
-			PX_VectorPushback(&analysis->v_variableStackTable,&variable);
+			pvar=PX_VECTORLAST(PX_SCRIPT_VARIABLES,&analysis->v_variablesStackTable);
+			variable.BeginIndex=pvar->BeginIndex+variable.size;
+			
+			
+			PX_VectorPushback(&analysis->v_variablesStackTable,&variable);
 		}
 		else
 		{
@@ -8115,10 +8041,10 @@ static px_bool PX_ScriptParseSet(PX_SCRIPT_Analysis *analysis)
 _ERROR:
 	return PX_FALSE;
 }
-px_bool PX_ScriptParseSetDefine(PX_SCRIPT_Analysis *analysis)
+px_bool PX_ScriptParseStructDefine(PX_SCRIPT_Analysis *analysis)
 {
 	PX_SCRIPT_SETMEMBER member,*pmember;
-	PX_SCRIPT_SET vSet,*pSet;
+	PX_SCRIPT_STRUCT vSet,*pSet;
 	PX_LEXER_LEXEME_TYPE type;
 	px_int i;
 
@@ -8168,7 +8094,7 @@ px_bool PX_ScriptParseSetDefine(PX_SCRIPT_Analysis *analysis)
 			goto _ERROR;
 		}
 
-		if((pSet=PX_ScriptParseGetSetInfo(analysis,analysis->lexer.CurLexeme.buffer))!=PX_NULL)
+		if((pSet=PX_ScriptParseGetStructInfo(analysis,analysis->lexer.CurLexeme.buffer))!=PX_NULL)
 		{
 				member.defvar.setIndex=PX_ScriptParseGetSetIndex(analysis,analysis->lexer.CurLexeme.buffer);
 
@@ -8179,7 +8105,7 @@ px_bool PX_ScriptParseSetDefine(PX_SCRIPT_Analysis *analysis)
 
 					if (type==PX_LEXER_LEXEME_TYPE_DELIMITER&&analysis->lexer.Symbol=='*')
 					{
-						member.defvar.type=PX_SCRIPT_PARSER_VAR_TYPE_SET_PTR;
+						member.defvar.type=PX_SCRIPT_PARSER_VAR_TYPE_STRUCT_PTR;
 						type=PX_ScriptTranslatorNextToken(&analysis->lexer);
 					}
 
@@ -8210,9 +8136,9 @@ px_bool PX_ScriptParseSetDefine(PX_SCRIPT_Analysis *analysis)
 
 					if (analysis->lexer.Symbol=='[')
 					{
-						if (member.defvar.type==PX_SCRIPT_PARSER_VAR_TYPE_SET_PTR)
+						if (member.defvar.type==PX_SCRIPT_PARSER_VAR_TYPE_STRUCT_PTR)
 						{
-							PX_ScriptTranslatorError(&analysis->lexer,"Array of set is not support.");
+							PX_ScriptTranslatorError(&analysis->lexer,"Array of struct is not support.");
 							PX_StringFree(&member.defvar.Mnemonic);
 							goto _ERROR;
 						}
@@ -8283,7 +8209,7 @@ px_bool PX_ScriptParseSetDefine(PX_SCRIPT_Analysis *analysis)
 					else if(analysis->lexer.Symbol==';')
 					{
 						member.offset=vSet.size;
-						member.defvar.type=PX_SCRIPT_PARSER_VAR_TYPE_SET;
+						member.defvar.type=PX_SCRIPT_PARSER_VAR_TYPE_STRUCT;
 						vSet.size+=pSet->size;
 						PX_VectorPushback(&vSet.members,&member);
 						break;
@@ -8291,7 +8217,7 @@ px_bool PX_ScriptParseSetDefine(PX_SCRIPT_Analysis *analysis)
 					else if(analysis->lexer.Symbol==',')
 					{
 						member.offset=vSet.size;
-						member.defvar.type=PX_SCRIPT_PARSER_VAR_TYPE_SET;
+						member.defvar.type=PX_SCRIPT_PARSER_VAR_TYPE_STRUCT;
 						vSet.size+=pSet->size;
 						PX_VectorPushback(&vSet.members,&member);
 						continue;
@@ -8525,10 +8451,10 @@ px_bool PX_ScriptParseSetDefine(PX_SCRIPT_Analysis *analysis)
 	}
 	if (vSet.size==0)
 	{
-		PX_ScriptTranslatorError(&analysis->lexer,"Zero size of set");
+		PX_ScriptTranslatorError(&analysis->lexer,"Zero size of struct");
 		goto _ERROR;
 	}
-	PX_VectorPushback(&analysis->v_sets,&vSet);
+	PX_VectorPushback(&analysis->v_struct,&vSet);
 	return PX_TRUE;
 _ERROR:
 	PX_StringFree(&vSet.Name);
@@ -8549,7 +8475,7 @@ px_bool PX_ScriptParseFunctionDefined(PX_SCRIPT_Analysis *analysis,PX_SCRIPT_TRA
 {
 	PX_SCRIPT_FUNCTION func,*pfunc=PX_NULL;
 	PX_SCRIPT_VARIABLES fvar;
-	px_int count=0,i,j;
+	px_int count=0,i=0,j=0;
 	PX_LEXER_LEXEME_TYPE type;
 	fvar.bParam=PX_TRUE;
 	func.retSetIndex=-1;
@@ -8581,7 +8507,7 @@ px_bool PX_ScriptParseFunctionDefined(PX_SCRIPT_Analysis *analysis,PX_SCRIPT_TRA
 	}
 	else if ((func.retSetIndex=PX_ScriptParseGetSetIndex(analysis,analysis->lexer.CurLexeme.buffer))!=-1)
 	{
-		func.retType=PX_SCRIPT_PARSER_VAR_TYPE_SET;
+		func.retType=PX_SCRIPT_PARSER_VAR_TYPE_STRUCT;
 	}
 	else
 	{
@@ -8591,7 +8517,7 @@ px_bool PX_ScriptParseFunctionDefined(PX_SCRIPT_Analysis *analysis,PX_SCRIPT_TRA
 	//function Name
 	PX_ScriptParserClearStackVariables(analysis);
 	func.parametersSize=0;
-	func.LocalSize=0;
+	
 	type=PX_ScriptTranslatorNextToken(&analysis->lexer);
 
 	if (type==PX_LEXER_LEXEME_TYPE_DELIMITER&&analysis->lexer.Symbol=='*')
@@ -8610,17 +8536,17 @@ px_bool PX_ScriptParseFunctionDefined(PX_SCRIPT_Analysis *analysis,PX_SCRIPT_TRA
 			case PX_SCRIPT_PARSER_VAR_TYPE_MEMORY:
 				func.retType=PX_SCRIPT_PARSER_VAR_TYPE_MEMORY_PTR;
 				break;
-			case PX_SCRIPT_PARSER_VAR_TYPE_SET:
-				func.retType=PX_SCRIPT_PARSER_VAR_TYPE_SET_PTR;
+			case PX_SCRIPT_PARSER_VAR_TYPE_STRUCT:
+				func.retType=PX_SCRIPT_PARSER_VAR_TYPE_STRUCT_PTR;
 				break;
 			default:
 				goto _ERROR;
 		}
 		type=PX_ScriptTranslatorNextToken(&analysis->lexer);
 	}
-	if (func.retType==PX_SCRIPT_PARSER_VAR_TYPE_SET)
+	if (func.retType==PX_SCRIPT_PARSER_VAR_TYPE_STRUCT)
 	{
-		PX_ScriptTranslatorError(&analysis->lexer,"Could not return a set-type");
+		PX_ScriptTranslatorError(&analysis->lexer,"Could not return a struct-type");
 		goto _ERROR;
 	}
 	if (type!=PX_LEXER_LEXEME_TYPE_TOKEN)
@@ -8672,9 +8598,9 @@ px_bool PX_ScriptParseFunctionDefined(PX_SCRIPT_Analysis *analysis,PX_SCRIPT_TRA
 		{
 			fvar.type=PX_SCRIPT_PARSER_VAR_TYPE_MEMORY;
 		}
-		else if (PX_ScriptParseGetSetInfo(analysis,analysis->lexer.CurLexeme.buffer))
+		else if (PX_ScriptParseGetStructInfo(analysis,analysis->lexer.CurLexeme.buffer))
 		{
-			fvar.type=PX_SCRIPT_PARSER_VAR_TYPE_SET;
+			fvar.type=PX_SCRIPT_PARSER_VAR_TYPE_STRUCT;
 
 			if ((fvar.setIndex=PX_ScriptParseGetSetIndex(analysis,analysis->lexer.CurLexeme.buffer))==-1)
 			{
@@ -8706,8 +8632,8 @@ px_bool PX_ScriptParseFunctionDefined(PX_SCRIPT_Analysis *analysis,PX_SCRIPT_TRA
 			case PX_SCRIPT_PARSER_VAR_TYPE_MEMORY:
 				fvar.type=PX_SCRIPT_PARSER_VAR_TYPE_MEMORY_PTR;
 				break;
-			case PX_SCRIPT_PARSER_VAR_TYPE_SET:
-				fvar.type=PX_SCRIPT_PARSER_VAR_TYPE_SET_PTR;
+			case PX_SCRIPT_PARSER_VAR_TYPE_STRUCT:
+				fvar.type=PX_SCRIPT_PARSER_VAR_TYPE_STRUCT_PTR;
 				break;
 			default:
 				goto _ERROR;
@@ -8715,9 +8641,9 @@ px_bool PX_ScriptParseFunctionDefined(PX_SCRIPT_Analysis *analysis,PX_SCRIPT_TRA
 			type=PX_ScriptTranslatorNextToken(&analysis->lexer);
 		}
 		
-		if (fvar.type==PX_SCRIPT_PARSER_VAR_TYPE_SET)
+		if (fvar.type==PX_SCRIPT_PARSER_VAR_TYPE_STRUCT)
 		{
-			PX_ScriptTranslatorError(&analysis->lexer,"Could not use a set for parameter.consider use a set pointer.");
+			PX_ScriptTranslatorError(&analysis->lexer,"Could not use a struct for parameter.consider use a struct pointer.");
 			goto _ERROR;
 		}
 
@@ -8731,18 +8657,28 @@ px_bool PX_ScriptParseFunctionDefined(PX_SCRIPT_Analysis *analysis,PX_SCRIPT_TRA
 		}
 
 		fvar.bInitialized=PX_FALSE;
-		fvar.BeginIndex=0;
+		if (analysis->v_variablesStackTable.size==0)
+		{
+			fvar.BeginIndex=-2;
+		}
+		else
+		{
+			PX_SCRIPT_VARIABLES *plastvar=PX_VECTORLAST(PX_SCRIPT_VARIABLES,&analysis->v_variablesStackTable);
+			fvar.BeginIndex=plastvar->BeginIndex-plastvar->size;
+		}
+		
+
 		PX_StringInitialize(analysis->mp,&fvar.Mnemonic);
 		PX_StringCat(&fvar.Mnemonic,analysis->lexer.CurLexeme.buffer);
 	
 		
-		if (count==PX_SCRIPT_FUNCTION_MAX_PARAM)
+		if (count>=PX_SCRIPT_FUNCTION_MAX_PARAM)
 		{
 			goto _ERROR;
 		}
 
 		func.parameters[count]=fvar;
-		PX_VectorPushback(&analysis->v_variableStackTable,&fvar);
+		PX_VectorPushback(&analysis->v_variablesStackTable,&fvar);
 		count++;
 		
 		if ((PX_ScriptTranslatorNextToken(&analysis->lexer))!=PX_LEXER_LEXEME_TYPE_DELIMITER||analysis->lexer.Symbol!=',')
@@ -8754,6 +8690,21 @@ px_bool PX_ScriptParseFunctionDefined(PX_SCRIPT_Analysis *analysis,PX_SCRIPT_TRA
 			goto _ERROR;
 		}
 	}
+
+	do 
+	{
+		PX_SCRIPT_VARIABLES _ret_bp;
+		PX_memset(&_ret_bp,0,sizeof(_ret_bp));
+		_ret_bp.BeginIndex=0;
+		_ret_bp.bInitialized=PX_FALSE;
+		_ret_bp.bParam=PX_TRUE;
+		PX_StringInitialize(analysis->mp,&_ret_bp.Mnemonic);
+		_ret_bp.size=2;
+		_ret_bp.type=PX_SCRIPT_PARSER_VAR_TYPE_INT_ARRAY;
+		PX_VectorPushback(&analysis->v_variablesStackTable,&_ret_bp);
+	} while (0);
+
+
 	func.parametersCount=count;
 	func.type=functype;
 	
@@ -8791,76 +8742,60 @@ _ERROR:
 }
 px_bool PX_ScriptParseFunctionGuiderCode(PX_SCRIPT_Analysis *analysis)
 {
-	int stacksize,i,j,oftIndex;
+	int stacksize,i,j;
 	PX_SCRIPT_VARIABLES *pvar;
 	px_string code;
-	px_string exprgen;
-	PX_SCRIPT_AST_OPERAND retOperand;
-	PX_SCRIPT_SET *pset;
-	oftIndex=0;
+	PX_SCRIPT_STRUCT *pset;
+	px_string guiderCode;
+
+	if(!PX_StringInitialize(analysis->mp,&guiderCode))return PX_FALSE;
+
 	stacksize=0;
-	for (i=0;i<analysis->v_variableStackTable.size;i++)
+	for (i=0;i<analysis->v_variablesStackTable.size;i++)
 	{
-		pvar=PX_VECTORAT(PX_SCRIPT_VARIABLES,&analysis->v_variableStackTable,i);
-		stacksize+=pvar->size;
+		pvar=PX_VECTORAT(PX_SCRIPT_VARIABLES,&analysis->v_variablesStackTable,i);
+		if (!pvar->bParam)
+		{
+			stacksize+=pvar->size;
+		}
 	}
-	stacksize+=1;//for CALL IP
-	//ip
-	oftIndex=stacksize-analysis->currentFunc.parametersSize-1;
-	//param
-	oftIndex=stacksize-analysis->currentFunc.parametersSize;
-
-	for (i=0;i<analysis->currentFunc.parametersCount;i++)
-	{
-		pvar=PX_VECTORAT(PX_SCRIPT_VARIABLES,&analysis->v_variableStackTable,i);
-		pvar->BeginIndex=oftIndex;
-		oftIndex+=pvar->size;
-	}
-
-	//stack
-	oftIndex=0;
-	for (i=analysis->currentFunc.parametersCount;i<analysis->v_variableStackTable.size;i++)
-	{
-		pvar=PX_VECTORAT(PX_SCRIPT_VARIABLES,&analysis->v_variableStackTable,i);
-		pvar->BeginIndex=oftIndex;
-		oftIndex+=pvar->size;
-	}
-
 	if (analysis->currentFunc.type==PX_SCRIPT_TRANSLATOR_FUNCTION_TYPE_EXPORT)
 	{
-		PX_StringCat(&analysis->code,"EXPORT ");
+		PX_StringCat(&guiderCode,"EXPORT ");
 	}
 
-	PX_StringCat(&analysis->code,"FUNCTION ");
-	PX_StringCat(&analysis->code,analysis->currentFunc.name);
-	PX_StringCat(&analysis->code,":\n");
+	PX_StringCat(&guiderCode,"FUNCTION ");
+	PX_StringCat(&guiderCode,analysis->currentFunc.name);
+	PX_StringCat(&guiderCode,":\n");
 
 	//generate codes
 	PX_StringInitialize(analysis->mp,&code);
-	if(stacksize-analysis->currentFunc.parametersCount!=0)
-	{
-	PX_StringFormat1(&code,"SUB SP,%1\n",PX_STRINGFORMAT_INT(stacksize-analysis->currentFunc.parametersCount-1));
-	PX_StringCat(&analysis->code,code.buffer);
-	}
-	PX_StringSet(&code,"MOV BP,SP\n");
-	PX_StringCat(&analysis->code,code.buffer);
 
-	for (i=0;i<analysis->v_variableStackTable.size;i++)
+	PX_StringCat(&guiderCode,"PUSH BP\nMOV BP,SP\n");
+
+	if(stacksize!=0)
 	{
-		pvar=PX_VECTORAT(PX_SCRIPT_VARIABLES,&analysis->v_variableStackTable,i);
+	PX_StringFormat1(&code,"SUB SP,%1\n",PX_STRINGFORMAT_INT(stacksize));
+	PX_StringCat(&guiderCode,code.buffer);
+	}
+	
+
+	for (i=0;i<analysis->v_variablesStackTable.size;i++)
+	{
+		pvar=PX_VECTORAT(PX_SCRIPT_VARIABLES,&analysis->v_variablesStackTable,i);
 		if (!pvar->bParam&&pvar->type==PX_SCRIPT_PARSER_VAR_TYPE_STRING)
 		{
 			PX_StringFormat1(&code,"MOV LOCAL[%1],\"\"\n",PX_STRINGFORMAT_INT(pvar->BeginIndex));
-			PX_StringCat(&analysis->code,code.buffer);
+			PX_StringCat(&guiderCode,code.buffer);
 		}
 		if (!pvar->bParam&&pvar->type==PX_SCRIPT_PARSER_VAR_TYPE_MEMORY)
 		{
 			PX_StringFormat1(&code,"MOV LOCAL[%1],@00@\n",PX_STRINGFORMAT_INT(pvar->BeginIndex));
-			PX_StringCat(&analysis->code,code.buffer);
+			PX_StringCat(&guiderCode,code.buffer);
 		}
-		if (!pvar->bParam&&pvar->type==PX_SCRIPT_PARSER_VAR_TYPE_SET)
+		if (!pvar->bParam&&pvar->type==PX_SCRIPT_PARSER_VAR_TYPE_STRUCT)
 		{
-			pset=PX_ScriptParseGetSetByIndex(analysis,pvar->setIndex);
+			pset=PX_ScriptParseGetStructByIndex(analysis,pvar->setIndex);
 			if (pset)
 			{
 				for (j=0;j<pset->members.size;j++)
@@ -8870,12 +8805,12 @@ px_bool PX_ScriptParseFunctionGuiderCode(PX_SCRIPT_Analysis *analysis)
 					if (!pvar->bParam&&pvar->type==PX_SCRIPT_PARSER_VAR_TYPE_STRING)
 					{
 						PX_StringFormat1(&code,"MOV LOCAL[%1],\"\"\n",PX_STRINGFORMAT_INT(pvar->BeginIndex));
-						PX_StringCat(&analysis->code,code.buffer);
+						PX_StringCat(&guiderCode,code.buffer);
 					}
 					if (!pvar->bParam&&pvar->type==PX_SCRIPT_PARSER_VAR_TYPE_MEMORY)
 					{
 						PX_StringFormat1(&code,"MOV LOCAL[%1],@00@\n",PX_STRINGFORMAT_INT(pvar->BeginIndex));
-						PX_StringCat(&analysis->code,code.buffer);
+						PX_StringCat(&guiderCode,code.buffer);
 					}
 				}
 			}
@@ -8883,28 +8818,21 @@ px_bool PX_ScriptParseFunctionGuiderCode(PX_SCRIPT_Analysis *analysis)
 	}
 
 	PX_StringFree(&code);
-	analysis->currentFunc.LocalSize=stacksize-analysis->currentFunc.parametersSize-1;
+	
 
-	//Local variables initialize
-	for (i=0;i<analysis->v_variableStackTable.size;i++)
+	if (analysis->functionguider!=-1)
 	{
-		pvar=PX_VECTORAT(PX_SCRIPT_VARIABLES,&analysis->v_variableStackTable,i);
-		if(pvar->bInitialized)
-		{
-		PX_StringInitialize(analysis->mp,&code);
-		PX_StringInitialize(analysis->mp,&exprgen);
-		PX_StringFormat2(&code,"%1=%2",PX_STRINGFORMAT_STRING(pvar->Mnemonic.buffer),PX_STRINGFORMAT_STRING(pvar->GlobalInitializeValue.buffer));
-		if (!PX_ScriptParseExpression(analysis,code.buffer,&exprgen,&retOperand))
-		{
-			PX_StringFree(&code);
-			PX_StringFree(&exprgen);
-			return PX_FALSE;
-		}
-		PX_StringCat(&analysis->code,exprgen.buffer);
-		PX_StringFree(&exprgen);
-		PX_StringFree(&code);
-		}
+		if(!PX_StringInsert(&analysis->code,analysis->functionguider,guiderCode.buffer))return PX_FALSE;
 	}
+	else
+	{
+		PX_ASSERT();
+		PX_StringFree(&guiderCode);
+		return PX_FALSE;
+	}
+	
+	analysis->functionguider=-1;
+	PX_StringFree(&guiderCode);
 	return PX_TRUE;
 }
 px_bool PX_ScriptParseBootCode(PX_SCRIPT_Analysis *analysis)
@@ -8938,14 +8866,24 @@ px_bool PX_ScriptParseBootCode(PX_SCRIPT_Analysis *analysis)
 px_bool PX_ScriptParseFunctionReturn(PX_SCRIPT_Analysis *analysis)
 {
 	px_string code;
+	int stacksize=0,i;
 	PX_StringInitialize(analysis->mp,&code);
 
-	if(analysis->currentFunc.LocalSize!=0)
+	stacksize=0;
+	for (i=0;i<analysis->v_variablesStackTable.size;i++)
 	{
-		PX_StringFormat1(&code,"POPN %1\n",PX_STRINGFORMAT_INT(analysis->currentFunc.LocalSize));
+		PX_SCRIPT_VARIABLES *pvar=PX_VECTORAT(PX_SCRIPT_VARIABLES,&analysis->v_variablesStackTable,i);
+		if (!pvar->bParam)
+		{
+			stacksize+=pvar->size;
+		}
+	}
+	if(stacksize!=0)
+	{
+		PX_StringFormat1(&code,"POPN %1\n",PX_STRINGFORMAT_INT(stacksize));
 		PX_StringCat(&analysis->code,code.buffer);
 	}
-	PX_StringCat(&analysis->code,"RET\n");
+	PX_StringCat(&analysis->code,"POP BP\nRET\n");
 	PX_StringFree(&code);
 	return PX_TRUE;
 }
@@ -9045,7 +8983,16 @@ px_bool PX_ScriptParseLastCodeblockEnd(PX_SCRIPT_Analysis *analysis)
 	{
 	case PX_SCRIPT_AST_STRUCTURE_TYPE_FUNCTION:
 		{
+			//////////////////////////////////////////////////////////////////////////
+			//Function Guider
+			//////////////////////////////////////////////////////////////////////////
+			if(!PX_ScriptParseFunctionGuiderCode(analysis)) return PX_FALSE;
+
+
+			//////////////////////////////////////////////////////////////////////////
+			//Function Clear
 			if(!PX_ScriptParseFunctionReturn(analysis)) return PX_FALSE;
+			
 			analysis->functionInside=PX_FALSE;
 		}
 		break;
@@ -9317,7 +9264,7 @@ px_bool PX_ScriptParseGetExpression(PX_SCRIPT_Analysis *analysis,px_string *expr
 px_bool PX_ScriptCompilerCompile(PX_SCRIPT_LIBRARY *lib,const px_char *name,px_string *ASM,px_int LocalStackSize)
 {
 	PX_SCRIPT_SETMEMBER *psetmem;
-	PX_SCRIPT_SET *pset;
+	PX_SCRIPT_STRUCT *pset;
 	px_string codes;
 	PX_LEXER_STATE state;
 	px_int i,j,globalSize;
@@ -9328,7 +9275,7 @@ px_bool PX_ScriptCompilerCompile(PX_SCRIPT_LIBRARY *lib,const px_char *name,px_s
 	PX_SCRIPT_AST_STRUCTURE astStruct;
 	px_string expression,fmrString,condCodes;
 	px_string expCode;
-	px_bool isBeginExpression=PX_FALSE,hasLastReturn=PX_FALSE;
+	px_bool hasLastReturn=PX_FALSE;
 	PX_SCRIPT_AST_OPERAND retOperand;
 	int mBracket=0,lBracket=0;
 	PX_SCRIPT_VARIABLES *pvar;
@@ -9358,6 +9305,8 @@ px_bool PX_ScriptCompilerCompile(PX_SCRIPT_LIBRARY *lib,const px_char *name,px_s
 
 	if(!PX_ScriptParsePretreatment(&codes,lib,name))
 		return PX_FALSE;
+
+	PX_memset(&analysis,0,sizeof(analysis));
 
 	analysis.functionInside=PX_FALSE;
 	analysis.functionReturn=PX_FALSE;
@@ -9397,8 +9346,8 @@ px_bool PX_ScriptCompilerCompile(PX_SCRIPT_LIBRARY *lib,const px_char *name,px_s
 	PX_StringFree(&codes);
 
 	PX_VectorInitialize(lib->mp,&analysis.v_variablesGlobalTable,sizeof(PX_SCRIPT_VARIABLES),1);
-	PX_VectorInitialize(lib->mp,&analysis.v_variableStackTable,sizeof(PX_SCRIPT_VARIABLES),1);
-	PX_VectorInitialize(lib->mp,&analysis.v_sets,sizeof(PX_SCRIPT_SET),1);
+	PX_VectorInitialize(lib->mp,&analysis.v_variablesStackTable,sizeof(PX_SCRIPT_VARIABLES),1);
+	PX_VectorInitialize(lib->mp,&analysis.v_struct,sizeof(PX_SCRIPT_STRUCT),1);
 	PX_VectorInitialize(lib->mp,&analysis.v_functions,sizeof(PX_SCRIPT_FUNCTION),1);
 	PX_VectorInitialize(lib->mp,&analysis.v_astStructure,sizeof(PX_SCRIPT_AST_STRUCTURE),1);
 
@@ -9480,7 +9429,7 @@ px_bool PX_ScriptCompilerCompile(PX_SCRIPT_LIBRARY *lib,const px_char *name,px_s
 		//////////////////////////////////////////////////////////////////////////
 		///VAR
 		//////////////////////////////////////////////////////////////////////////
-		if ((pset=PX_ScriptParseGetSetInfo(&analysis,analysis.lexer.CurLexeme.buffer))!=PX_NULL||\
+		if ((pset=PX_ScriptParseGetStructInfo(&analysis,analysis.lexer.CurLexeme.buffer))!=PX_NULL||\
 			PX_strequ(analysis.lexer.CurLexeme.buffer,PX_SCRIPT_TRANSLATOR_KEYWORD_VAR_INT)||\
 			PX_strequ(analysis.lexer.CurLexeme.buffer,PX_SCRIPT_TRANSLATOR_KEYWORD_VAR_FLOAT)||\
 			PX_strequ(analysis.lexer.CurLexeme.buffer,PX_SCRIPT_TRANSLATOR_KEYWORD_VAR_STRING)||\
@@ -9488,10 +9437,7 @@ px_bool PX_ScriptCompilerCompile(PX_SCRIPT_LIBRARY *lib,const px_char *name,px_s
 			PX_strequ(analysis.lexer.CurLexeme.buffer,PX_SCRIPT_TRANSLATOR_KEYWORD_VAR_MEMORY)
 			)
 		{	
-			if (isBeginExpression&&analysis.functionInside)
-			{
-				goto _ERROR;
-			}
+			
 			type=PX_ScriptTranslatorNextToken(&analysis.lexer);
 
 			if (type==PX_LEXER_LEXEME_TYPE_DELIMITER&&analysis.lexer.Symbol=='*')
@@ -9529,7 +9475,7 @@ px_bool PX_ScriptCompilerCompile(PX_SCRIPT_LIBRARY *lib,const px_char *name,px_s
 					buildAstStruct.type=PX_SCRIPT_AST_STRUCTURE_TYPE_FUNCTION;
 					PX_strcpy(buildAstStruct._func.name,analysis.currentFunc.name,sizeof(analysis.currentFunc.name));
 					PX_VectorPushback(&analysis.v_astStructure,&buildAstStruct);
-					isBeginExpression=PX_FALSE;
+					analysis.functionguider=PX_StringLen(&analysis.code);
 					continue;
 				}
 				else if (analysis.lexer.Symbol==';')
@@ -9548,26 +9494,26 @@ px_bool PX_ScriptCompilerCompile(PX_SCRIPT_LIBRARY *lib,const px_char *name,px_s
 				if (pset)
 				{	
 					//////////////////////////////////////////////////////////////////////////
-					//SET VARIALBE
+					//STRUCT VARIALBE
 					//////////////////////////////////////////////////////////////////////////
-					if (isBeginExpression)
-					{
-						goto _ERROR;
-					}
+					//if (isBeginExpression)
+					//{
+					//	goto _ERROR;
+					//}
 
 					PX_LexerSetState(state);
-					if(!PX_ScriptParseSet(&analysis)) goto _ERROR;
+					if(!PX_ScriptParseStruct(&analysis)) goto _ERROR;
 				}
 				else
 				{
 					//var
 					PX_LexerSetState(state);
-
-					if (isBeginExpression)
-					{
-						PX_ScriptTranslatorError(&analysis.lexer,"Define variable before expression");
-						goto _ERROR;
-					}
+// 
+// 					if (isBeginExpression)
+// 					{
+// 						PX_ScriptTranslatorError(&analysis.lexer,"Define variable before expression");
+// 						goto _ERROR;
+// 					}
 					if(!PX_ScriptParseVar(&analysis)) goto _ERROR;
 				}
 				continue;
@@ -9578,9 +9524,9 @@ px_bool PX_ScriptCompilerCompile(PX_SCRIPT_LIBRARY *lib,const px_char *name,px_s
 
 
 		//////////////////////////////////////////////////////////////////////////
-		///SET DEFINE
+		///STRUCT DEFINE
 		//////////////////////////////////////////////////////////////////////////
-		if (PX_strequ(analysis.lexer.CurLexeme.buffer,PX_SCRIPT_TRANSLATOR_KEYWORD_VAR_SET))
+		if (PX_strequ(analysis.lexer.CurLexeme.buffer,PX_SCRIPT_TRANSLATOR_KEYWORD_VAR_STRUCT))
 		{	
 			if (analysis.functionInside)
 			{
@@ -9596,7 +9542,7 @@ px_bool PX_ScriptCompilerCompile(PX_SCRIPT_LIBRARY *lib,const px_char *name,px_s
 			if ((type=PX_ScriptTranslatorNextTokenSN(&analysis.lexer))==PX_LEXER_LEXEME_TYPE_DELIMITER&&analysis.lexer.Symbol=='{')
 			{
 				PX_LexerSetState(state);
-				{if(!PX_ScriptParseSetDefine(&analysis)) goto _ERROR;}
+				{if(!PX_ScriptParseStructDefine(&analysis)) goto _ERROR;}
 			}
 			else
 			{
@@ -9625,7 +9571,7 @@ px_bool PX_ScriptCompilerCompile(PX_SCRIPT_LIBRARY *lib,const px_char *name,px_s
 				PX_strequ(analysis.lexer.CurLexeme.buffer,PX_SCRIPT_TRANSLATOR_KEYWORD_VAR_STRING)||\
 				PX_strequ(analysis.lexer.CurLexeme.buffer,PX_SCRIPT_TRANSLATOR_KEYWORD_VAR_MEMORY)||\
 				PX_strequ(analysis.lexer.CurLexeme.buffer,PX_SCRIPT_TRANSLATOR_KEYWORD_VAR_VOID)||\
-				PX_ScriptParseGetSetInfo(&analysis,analysis.lexer.CurLexeme.buffer)!=PX_NULL
+				PX_ScriptParseGetStructInfo(&analysis,analysis.lexer.CurLexeme.buffer)!=PX_NULL
 				)
 			{
 				PX_LexerSetState(state);
@@ -9676,7 +9622,7 @@ px_bool PX_ScriptCompilerCompile(PX_SCRIPT_LIBRARY *lib,const px_char *name,px_s
 				PX_strequ(analysis.lexer.CurLexeme.buffer,PX_SCRIPT_TRANSLATOR_KEYWORD_VAR_STRING)||\
 				PX_strequ(analysis.lexer.CurLexeme.buffer,PX_SCRIPT_TRANSLATOR_KEYWORD_VAR_MEMORY)||\
 				PX_strequ(analysis.lexer.CurLexeme.buffer,PX_SCRIPT_TRANSLATOR_KEYWORD_VAR_VOID)||\
-				PX_ScriptParseGetSetInfo(&analysis,analysis.lexer.CurLexeme.buffer)!=PX_NULL
+				PX_ScriptParseGetStructInfo(&analysis,analysis.lexer.CurLexeme.buffer)!=PX_NULL
 				)
 			{
 				PX_LexerSetState(state);
@@ -9696,7 +9642,7 @@ px_bool PX_ScriptCompilerCompile(PX_SCRIPT_LIBRARY *lib,const px_char *name,px_s
 				buildAstStruct.type=PX_SCRIPT_AST_STRUCTURE_TYPE_FUNCTION;
 				PX_strcpy(buildAstStruct._func.name,analysis.currentFunc.name,sizeof(analysis.currentFunc.name));
 				PX_VectorPushback(&analysis.v_astStructure,&buildAstStruct);
-				isBeginExpression=PX_FALSE;
+				analysis.functionguider=PX_StringLen(&analysis.code);
 				continue;
 			}
 			else if (analysis.lexer.Symbol==';')
@@ -9710,20 +9656,7 @@ px_bool PX_ScriptCompilerCompile(PX_SCRIPT_LIBRARY *lib,const px_char *name,px_s
 		}
 		//////////////////////////////////////////////////////////////////////////
 
-		
 
-		//////////////////////////////////////////////////////////////////////////
-		//Expression
-		//////////////////////////////////////////////////////////////////////////
-		if (analysis.functionInside)
-		{
-			if (!isBeginExpression)
-			{
-				isBeginExpression=PX_TRUE;
-				if(!PX_ScriptParseFunctionGuiderCode(&analysis)) goto _ERROR;
-			}
-		}
-		
 
 		//////////////////////////////////////////////////////////////////////////
 		//IF
@@ -9896,9 +9829,9 @@ px_bool PX_ScriptCompilerCompile(PX_SCRIPT_LIBRARY *lib,const px_char *name,px_s
 					break;
 				}
 
-				for (i=0;i<analysis.v_variableStackTable.size;i++)
+				for (i=0;i<analysis.v_variablesStackTable.size;i++)
 				{
-					pvar=PX_VECTORAT(PX_SCRIPT_VARIABLES,&analysis.v_variableStackTable,i);
+					pvar=PX_VECTORAT(PX_SCRIPT_VARIABLES,&analysis.v_variablesStackTable,i);
 					if(pvar->type==PX_SCRIPT_PARSER_VAR_TYPE_INT||pvar->type==PX_SCRIPT_PARSER_VAR_TYPE_FLOAT||pvar->type==PX_SCRIPT_PARSER_VAR_TYPE_STRING||pvar->type==PX_SCRIPT_PARSER_VAR_TYPE_MEMORY)
 					if (PX_strequ(pvar->Mnemonic.buffer,analysis.lexer.CurLexeme.buffer))
 					{
@@ -10517,13 +10450,13 @@ _CONTINUEOUT:
 						goto _ERROR;
 				}
 				break;
-			case PX_SCRIPT_PARSER_VAR_TYPE_SET_PTR:
-				if (retOperand.operandType!=PX_SCRIPT_AST_OPERAND_TYPE_SET_PTR&&retOperand.operandType!=PX_SCRIPT_AST_OPERAND_TYPE_SET_PTR_CONST)
+			case PX_SCRIPT_PARSER_VAR_TYPE_STRUCT_PTR:
+				if (retOperand.operandType!=PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR&&retOperand.operandType!=PX_SCRIPT_AST_OPERAND_TYPE_SET_PTR_CONST)
 				{
 					PX_ScriptTranslatorError(&analysis.lexer,"Return-type not matched.");
 						goto _ERROR;
 				}
-				if (retOperand.pSet!=PX_ScriptParseGetSetByIndex(&analysis,analysis.currentFunc.retSetIndex))
+				if (retOperand.pSet!=PX_ScriptParseGetStructByIndex(&analysis,analysis.currentFunc.retSetIndex))
 				{
 					PX_ScriptTranslatorError(&analysis.lexer,"Return-type not matched.");
 						goto _ERROR;
@@ -10551,11 +10484,6 @@ _CONTINUEOUT:
 			if (type==PX_LEXER_LEXEME_TYPE_DELIMITER&&analysis.lexer.Symbol=='}')
 			{
 				if(!PX_ScriptParseLastCodeblockEnd(&analysis)) goto _ERROR;
-
-				if (!analysis.functionInside)
-				{
-					isBeginExpression=PX_FALSE;
-				}
 			}
 			else
 			{
@@ -10656,9 +10584,9 @@ _CONTINUEOUT:
 		}
 	}
 
-	for (i=0;i<analysis.v_variableStackTable.size;i++)
+	for (i=0;i<analysis.v_variablesStackTable.size;i++)
 	{
-		PX_SCRIPT_VARIABLES *pvar=PX_VECTORAT(PX_SCRIPT_VARIABLES,&analysis.v_variableStackTable,i);
+		PX_SCRIPT_VARIABLES *pvar=PX_VECTORAT(PX_SCRIPT_VARIABLES,&analysis.v_variablesStackTable,i);
 		PX_StringFree(&pvar->Mnemonic);
 		if (pvar->bInitialized)
 		{
@@ -10666,10 +10594,10 @@ _CONTINUEOUT:
 		}
 	}
 
-	//set
-	for (i=0;i<analysis.v_sets.size;i++)
+	//struct
+	for (i=0;i<analysis.v_struct.size;i++)
 	{
-		pset=PX_VECTORAT(PX_SCRIPT_SET,&analysis.v_sets,i);
+		pset=PX_VECTORAT(PX_SCRIPT_STRUCT,&analysis.v_struct,i);
 		for (j=0;j<pset->members.size;j++)
 		{
 			psetmem=PX_VECTORAT(PX_SCRIPT_SETMEMBER,&pset->members,j);
@@ -10688,8 +10616,8 @@ _CONTINUEOUT:
 
 	PX_VectorFree(&analysis.v_astStructure);
 	PX_VectorFree(&analysis.v_variablesGlobalTable);
-	PX_VectorFree(&analysis.v_variableStackTable);
-	PX_VectorFree(&analysis.v_sets);
+	PX_VectorFree(&analysis.v_variablesStackTable);
+	PX_VectorFree(&analysis.v_struct);
 	PX_VectorFree(&analysis.v_functions);
 
 	PX_StringFree(&analysis.bootCode);
@@ -10717,19 +10645,19 @@ _ERROR:
 		}
 	}
 
-	for (i=0;i<analysis.v_variableStackTable.size;i++)
+	for (i=0;i<analysis.v_variablesStackTable.size;i++)
 	{
-		PX_StringFree(&PX_VECTORAT(PX_SCRIPT_VARIABLES,&analysis.v_variableStackTable,i)->Mnemonic);
-		if (PX_VECTORAT(PX_SCRIPT_VARIABLES,&analysis.v_variableStackTable,i)->bInitialized)
+		PX_StringFree(&PX_VECTORAT(PX_SCRIPT_VARIABLES,&analysis.v_variablesStackTable,i)->Mnemonic);
+		if (PX_VECTORAT(PX_SCRIPT_VARIABLES,&analysis.v_variablesStackTable,i)->bInitialized)
 		{
-			PX_StringFree(&PX_VECTORAT(PX_SCRIPT_VARIABLES,&analysis.v_variableStackTable,i)->GlobalInitializeValue);
+			PX_StringFree(&PX_VECTORAT(PX_SCRIPT_VARIABLES,&analysis.v_variablesStackTable,i)->GlobalInitializeValue);
 		}
 	}
 
-	//set
-	for (i=0;i<analysis.v_sets.size;i++)
+	//struct
+	for (i=0;i<analysis.v_struct.size;i++)
 	{
-		pset=PX_VECTORAT(PX_SCRIPT_SET,&analysis.v_sets,i);
+		pset=PX_VECTORAT(PX_SCRIPT_STRUCT,&analysis.v_struct,i);
 		for (j=0;j<pset->members.size;j++)
 		{
 			psetmem=PX_VECTORAT(PX_SCRIPT_SETMEMBER,&pset->members,j);
@@ -10748,8 +10676,8 @@ _ERROR:
 
 	PX_VectorFree(&analysis.v_astStructure);
 	PX_VectorFree(&analysis.v_variablesGlobalTable);
-	PX_VectorFree(&analysis.v_variableStackTable);
-	PX_VectorFree(&analysis.v_sets);
+	PX_VectorFree(&analysis.v_variablesStackTable);
+	PX_VectorFree(&analysis.v_struct);
 	PX_VectorFree(&analysis.v_functions);
 
 	PX_StringFree(&analysis.bootCode);

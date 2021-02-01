@@ -44,7 +44,7 @@ px_void PX_MessageBox_EditOnEnter(PX_Object *pObject,PX_Object_Event e,px_void *
 
 px_bool PX_MessageBoxInitialize(PX_Runtime *runtime,px_memorypool *mp,PX_MessageBox *pm,PX_FontModule *fontmodule)
 {
-
+	PX_memset(pm,0,sizeof(PX_MessageBox));
 	pm->schedule=0;
 	pm->runtime=runtime;
 	pm->window_Width=runtime->surface_width;
@@ -64,7 +64,7 @@ px_bool PX_MessageBoxInitialize(PX_Runtime *runtime,px_memorypool *mp,PX_Message
 	PX_ObjectSetVisible(pm->edit_inputbox,PX_FALSE);
 
 
-	pm->Message=PX_NULL;
+
 	pm->show=PX_FALSE;
 	pm->fontmodule=fontmodule;
 
@@ -211,7 +211,7 @@ px_void PX_MessageBoxAlertOk(PX_MessageBox *pm,const px_char *message)
 {
 	pm->schedule=0;
 	pm->show=PX_TRUE;
-	pm->Message=message;
+	PX_strcpy(pm->Message,message,sizeof(pm->Message));
 	pm->mode=PX_MESSAGEBOX_MODE_EXPAND;
 	pm->btn_Cancel->Visible=PX_FALSE;
 	pm->btn_Ok->Visible=PX_TRUE;
@@ -229,7 +229,7 @@ px_void PX_MessageBoxAlertOkEx(PX_MessageBox *pm,const px_char *message,PX_Messa
 
 	pm->schedule=0;
 	pm->show=PX_TRUE;
-	pm->Message=message;
+	PX_strcpy(pm->Message,message,sizeof(pm->Message));
 	pm->mode=PX_MESSAGEBOX_MODE_EXPAND;
 	pm->btn_Cancel->Visible=PX_FALSE;
 	pm->btn_Ok->Visible=PX_TRUE;
@@ -239,9 +239,13 @@ px_void PX_MessageBoxAlertOkEx(PX_MessageBox *pm,const px_char *message,PX_Messa
 
 px_void PX_MessageBoxAlert(PX_MessageBox *pm,const px_char *message)
 {
-	pm->schedule=0;
-	pm->show=PX_TRUE;
-	pm->Message=message;
+	if (!pm->show)
+	{
+		pm->schedule=0;
+		pm->show=PX_TRUE;
+	}
+	
+	PX_strcpy(pm->Message,message,sizeof(pm->Message));
 	pm->mode=PX_MESSAGEBOX_MODE_EXPAND;
 	pm->btn_Cancel->Visible=PX_FALSE;
 	pm->btn_Ok->Visible=PX_FALSE;
@@ -258,7 +262,7 @@ px_void PX_MessageBoxAlertYesNo(PX_MessageBox *pm,const char *message)
 {
 	pm->schedule=0;
 	pm->show=PX_TRUE;
-	pm->Message=message;
+	PX_strcpy(pm->Message,message,sizeof(pm->Message));
 	pm->mode=PX_MESSAGEBOX_MODE_EXPAND;
 	pm->btn_Cancel->Visible=PX_TRUE;
 	pm->btn_Ok->Visible=PX_TRUE;
@@ -277,7 +281,7 @@ px_void PX_MessageBoxAlertYesNoEx(PX_MessageBox *pm,const char *Message,PX_Messa
 
 	pm->schedule=0;
 	pm->show=PX_TRUE;
-	pm->Message=Message;
+	PX_strcpy(pm->Message,Message,sizeof(pm->Message));
 	pm->mode=PX_MESSAGEBOX_MODE_EXPAND;
 	pm->btn_Cancel->Visible=PX_TRUE;
 	pm->btn_Ok->Visible=PX_TRUE;
@@ -294,7 +298,7 @@ px_void PX_MessageBoxInputBox(PX_MessageBox *pm,const char *Message,PX_MessageBo
 
 	pm->schedule=0;
 	pm->show=PX_TRUE;
-	pm->Message=Message;
+	PX_strcpy(pm->Message,Message,sizeof(pm->Message));
 	pm->mode=PX_MESSAGEBOX_MODE_EXPAND;
 	pm->btn_Cancel->Visible=PX_TRUE;
 	pm->btn_Ok->Visible=PX_TRUE;

@@ -3,7 +3,8 @@
 #include "stdio.h"
 #include "stdlib.h"
 #include "string.h"
-#include "windows.h"
+#include <errno.h>
+#include "dirent.h"
 
 int PX_SaveDataToFile(void *buffer,int size,const char path[])
 {
@@ -18,10 +19,10 @@ int PX_SaveDataToFile(void *buffer,int size,const char path[])
 }
 
 
-
 PX_IO_Data PX_LoadFileToIOData(const char path[])
 {
-	PX_IO_Data io;
+	
+		PX_IO_Data io;
 		int fileoft=0;
 		FILE *pf=fopen(path,"rb");
 		int filesize;
@@ -47,10 +48,6 @@ PX_IO_Data PX_LoadFileToIOData(const char path[])
 
 		io.buffer[filesize]='\0';
 		io.size=filesize;
-		return io;
-_ERROR:
-		io.buffer=0;
-		io.size=0;
 		return io;
 }
 
@@ -80,153 +77,189 @@ int PX_FileExist(const char path[])
 
 int PX_GetDirectoryFileCount(const char path[],PX_FILEENUM_TYPE type,const char *filter)
 {
-	HANDLE hFind;
-	int count=0;
-    WIN32_FIND_DATA FindFileData;
-	hFind = FindFirstFile(path,&FindFileData);
-	if (hFind==INVALID_HANDLE_VALUE)
-	{
-		return 0;
-	}
-	do 
-	{
-		switch (type)
-		{
-		case PX_FILEENUM_TYPE_ANY:
-			{
-				if (filter)
-				{
-					if (strstr(FindFileData.cFileName,filter))
-					{
-						count++;
-					}
-				} else
-				{
-					count++;
-				}
-			}
-			break;
-		case PX_FILEENUM_TYPE_DEVICE:
-		case PX_FILEENUM_TYPE_FILE:
-			{
-				if (FindFileData.dwFileAttributes !=FILE_ATTRIBUTE_DIRECTORY)
-				{
-					if (filter)
-					{
-						if (strstr(FindFileData.cFileName,filter))
-						{
-							count++;
-						}
-					} else
-					{
-						count++;
-					}
-				}
-			}
-			break;
-		case PX_FILEENUM_TYPE_FOLDER:
-			{
-				if (FindFileData.dwFileAttributes ==FILE_ATTRIBUTE_DIRECTORY)
-				{
-					if (filter)
-					{
-						if (strstr(FindFileData.cFileName,filter))
-						{
-							count++;
-						}
-					} else
-					{
-						count++;
-					}
-				}
-			}
-			break;
-		default:
-			break;
-		}
-	} while (FindNextFile(hFind,&FindFileData));
-	FindClose(hFind);
-	return count;
+    struct dirent* ent = NULL;
+    int count=0;
+    DIR *pDir;
+
+    if( (pDir=opendir(path)) == NULL)
+    {
+        return 0;
+    }
+
+    while( (ent=readdir(pDir)) != NULL )
+    {
+        switch (type)
+        {
+            case PX_FILEENUM_TYPE_ANY:
+            {
+                if (filter)
+                {
+                    if (strstr(ent->d_name,filter))
+                    {
+                        count++;
+                    }
+                } else
+                {
+                    count++;
+                }
+            }
+                break;
+            case PX_FILEENUM_TYPE_FILE:
+            {
+                if (ent->d_type==DT_REG)
+                {
+                    if (filter)
+                    {
+                        if (strstr(ent->d_name,filter))
+                        {
+                            count++;
+                        }
+                    } else
+                    {
+                        count++;
+                    }
+                }
+            }
+                break;
+            case PX_FILEENUM_TYPE_FOLDER:
+            {
+                if (ent->d_type==DT_DIR)
+                {
+                    if (filter)
+                    {
+                        if (strstr(ent->d_name,filter))
+                        {
+                            count++;
+                        }
+                    } else
+                    {
+                        count++;
+                    }
+                }
+            }
+                break;
+            case PX_FILEENUM_TYPE_DEVICE:
+            {
+                if (ent->d_type==DT_CHR)
+                {
+                    if (filter)
+                    {
+                        if (strstr(ent->d_name,filter))
+                        {
+                            count++;
+                        }
+                    } else
+                    {
+                        count++;
+                    }
+                }
+            }
+                break;
+            default:
+                break;
+        }
+    }
+    closedir(pDir);
+    return  count;
 }
 
 int PX_GetDirectoryFileName(const char path[],int count,char *FileName[260],PX_FILEENUM_TYPE type,const char *filter)
 {
-	HANDLE hFind;
-	int index=0;
-	WIN32_FIND_DATA FindFileData;
-	hFind = FindFirstFile(path,&FindFileData);
-	if (hFind==INVALID_HANDLE_VALUE)
-	{
-		return 0;
-	}
-	do 
-	{
-		if (index>=count)
-		{
-			return index;
-		}
+    struct dirent* ent = NULL;
+    int index=0;
+    DIR *pDir;
 
-		switch (type)
-		{
-		case PX_FILEENUM_TYPE_ANY:
-			{
-				if (filter)
-				{
-					if (strstr(FindFileData.cFileName,filter))
-					{
-						strcpy_s(FileName[index],260,FindFileData.cFileName);
-						index++;
-					}
-				} else
-				{
-					strcpy_s(FileName[index],260,FindFileData.cFileName);
-					index++;
-				}
-			}
-			break;
-		case PX_FILEENUM_TYPE_DEVICE:
-		case PX_FILEENUM_TYPE_FILE:
-			{
-				if (FindFileData.dwFileAttributes !=FILE_ATTRIBUTE_DIRECTORY)
-				{
-					if (filter)
-					{
-						if (strstr(FindFileData.cFileName,filter))
-						{
-							strcpy_s(FileName[index],260,FindFileData.cFileName);
-							index++;
-						}
-					} else
-					{
-						strcpy_s(FileName[index],260,FindFileData.cFileName);
-						index++;
-					}
-				}
-			}
-			break;
-		case PX_FILEENUM_TYPE_FOLDER:
-			{
-				if (FindFileData.dwFileAttributes ==FILE_ATTRIBUTE_DIRECTORY)
-				{
-					if (filter)
-					{
-						if (strstr(FindFileData.cFileName,filter))
-						{
-							strcpy_s(FileName[index],260,FindFileData.cFileName);
-							index++;
-						}
-					} else
-					{
-						strcpy_s(FileName[index],260,FindFileData.cFileName);
-						index++;
-					}
-				}
-			}
-			break;
-		default:
-			break;
-		}
-	} while (FindNextFile(hFind,&FindFileData));
-	FindClose(hFind);
-	return index;
+    if( (pDir=opendir(path)) == NULL)
+    {
+        return 0;
+    }
+
+    while( (ent=readdir(pDir)) != NULL )
+    {
+        if (index>=count)
+        {
+            return index;
+        }
+
+        switch (type)
+        {
+            case PX_FILEENUM_TYPE_ANY:
+            {
+                if (filter)
+                {
+                    if (strstr(ent->d_name,filter))
+                    {
+                        strcpy(FileName[index],ent->d_name);
+                        index++;
+                    }
+                } else
+                {
+                    strcpy(FileName[index],ent->d_name);
+                    index++;
+                }
+            }
+                break;
+            case PX_FILEENUM_TYPE_FILE:
+            {
+                if (ent->d_type==DT_REG)
+                {
+                    if (filter)
+                    {
+                        if (strstr(ent->d_name,filter))
+                        {
+                            strcpy(FileName[index],ent->d_name);
+                            index++;
+                        }
+                    } else
+                    {
+                        strcpy(FileName[index],ent->d_name);
+                        index++;
+                    }
+                }
+            }
+                break;
+            case PX_FILEENUM_TYPE_FOLDER:
+            {
+                if (ent->d_type==DT_DIR)
+                {
+                    if (filter)
+                    {
+                        if (strstr(ent->d_name,filter))
+                        {
+                            strcpy(FileName[index],ent->d_name);
+                            index++;
+                        }
+                    } else
+                    {
+                        strcpy(FileName[index],ent->d_name);
+                        index++;
+                    }
+                }
+            }
+                break;
+            case PX_FILEENUM_TYPE_DEVICE:
+            {
+                if (ent->d_type==DT_CHR)
+                {
+                    if (filter)
+                    {
+                        if (strstr(ent->d_name,filter))
+                        {
+                            strcpy(FileName[index],ent->d_name);
+                            index++;
+                        }
+                    } else
+                    {
+                        strcpy(FileName[index],ent->d_name);
+                        index++;
+                    }
+                }
+            }
+                break;
+            default:
+                break;
+        }
+    }
+    closedir(pDir);
+    return  index;
 }

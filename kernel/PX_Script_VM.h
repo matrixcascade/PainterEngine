@@ -97,8 +97,8 @@ px_bool PX_ScriptVM_RegistryHostFunction(PX_ScriptVM_Instance *Ins,const px_char
 px_bool PX_ScriptVM_InstanceFree(PX_ScriptVM_Instance *Ins);
 
 #define  PX_ScriptVM_STACK(Ins,i) ((Ins)->_mem[(Ins)->pThread[(Ins)->T].SP+i])
-#define  PX_ScriptVM_HOSTPARAM(Ins,i) ((Ins)->_mem[(Ins)->pThread[(Ins)->T].SP+i])
-#define  PX_ScriptVM_LOCALPARAM(Ins,i) ((Ins)->_mem[(Ins)->pThread[(Ins)->T].BP+i])
+#define  PX_ScriptVM_HOSTPARAM(Ins,i) PX_ScriptVM_STACK(Ins,i)
+#define  PX_ScriptVM_LOCALPARAM(Ins,i) ((Ins)->_mem[(Ins)->pThread[(Ins)->T].BP-i])
 #define  PX_ScriptVM_GLOBAL(Ins,i) ((Ins)->_mem[i])
 #define  PX_ScriptVM_RETURN_POINTER(Ins,oft) ((Ins)->_mem[((Ins)->pThread[(Ins)->T].R[1])._int+(oft)])
 #define  PX_ScriptVM_REG_RETURN(Ins)   ((Ins)->pThread[(Ins)->T].R[1])
@@ -109,7 +109,7 @@ px_void  PX_ScriptVM_PUSH(PX_ScriptVM_Instance *Ins,PX_SCRIPTVM_VARIABLE val);
 PX_SCRIPTVM_VARIABLE PX_ScriptVM_Variable_int(px_int _int);
 PX_SCRIPTVM_VARIABLE PX_ScriptVM_Variable_float(px_float _float);
 PX_SCRIPTVM_VARIABLE PX_ScriptVM_Variable_string(px_string _ref_string);
-PX_SCRIPTVM_VARIABLE PX_ScriptVM_Variable_memory(px_memory _ref_memory);
+PX_SCRIPTVM_VARIABLE PX_ScriptVM_Variable_memory(px_byte *buffer,px_int _size);
 PX_SCRIPTVM_VARIABLE PX_ScriptVM_Variable_const_string(px_char *buffer);
 PX_SCRIPTVM_VARIABLE PX_ScriptVM_Variable_const_memory(px_byte *buffer,px_int _size);
 PX_SCRIPTVM_VARIABLE PX_SCRIPTVM_VaribaleCopy(PX_ScriptVM_Instance *Ins,PX_SCRIPTVM_VARIABLE var,px_bool *bOutofMemory);

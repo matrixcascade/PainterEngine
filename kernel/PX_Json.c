@@ -1087,6 +1087,36 @@ px_bool PX_JsonAddObject(PX_Json *pjson,const px_char parent_payload[],const px_
 	return PX_FALSE;
 }
 
+const px_char * PX_JsonGetString(PX_Json *pjson,const px_char payload[])
+{
+	PX_Json_Value *pValue=PX_JsonGetValue(pjson,payload);
+	if (pValue&&pValue->type==PX_JSON_VALUE_TYPE_STRING)
+	{
+		return pValue->_string.buffer;
+	}
+	return "";
+}
+
+px_double PX_JsonGetNumber(PX_Json *pjson,const px_char payload[])
+{
+	PX_Json_Value *pValue=PX_JsonGetValue(pjson,payload);
+	if (pValue&&pValue->type==PX_JSON_VALUE_TYPE_NUMBER)
+	{
+		return pValue->_number;
+	}
+	return 0;
+}
+
+px_bool PX_JsonGetBoolean(PX_Json *pjson,const px_char payload[])
+{
+	PX_Json_Value *pValue=PX_JsonGetValue(pjson,payload);
+	if (pValue&&pValue->type==PX_JSON_VALUE_TYPE_BOOLEAN)
+	{
+		return pValue->_boolean;
+	}
+	return 0;
+}
+
 px_bool PX_JsonSetString(PX_Json *pjson,const px_char payload[],const px_char text[])
 {
 	PX_Json_Value *pValue=PX_JsonGetValue(pjson,payload);

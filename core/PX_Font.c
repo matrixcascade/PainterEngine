@@ -414,15 +414,18 @@ px_int PX_FontModuleGetCharacterCode(PX_FONTMODULE_CODEPAGE codePage,const px_ch
 			return 2;
 		}
 		break;
+	default:
+		return 0;
+		break;
 	}
 	*code=0;
 	return 0;
 }
 
-px_bool PX_FontModuleInitialize(px_memorypool *mp,PX_FontModule *module,PX_FONTMODULE_CODEPAGE codepage)
+px_bool PX_FontModuleInitialize(px_memorypool *mp,PX_FontModule *module)
 {
 	module->mp=mp;
-	module->codePage=codepage;
+	module->codePage=PX_FONTMODULE_CODEPAGE_UNDEFINED;
 	module->max_BearingY=0;
 	module->max_Height=0;
 	module->max_Width=0;
@@ -457,11 +460,19 @@ px_bool PX_FontModuleLoad(PX_FontModule *module,px_byte *buffer,px_int size)
 		if(pcHeader->c_magic[3]!='M')  
 			goto _ERROR;
 
-		if (pcHeader->codePage!=module->codePage)
+		if (module->codePage==PX_FONTMODULE_CODEPAGE_UNDEFINED)
 		{
-			offset+=pcHeader->Font_Width*pcHeader->Font_Height;
-			continue;
+			module->codePage=(PX_FONTMODULE_CODEPAGE)pcHeader->codePage;
 		}
+		else
+		{
+			if (pcHeader->codePage!=module->codePage)
+			{
+				offset+=pcHeader->Font_Width*pcHeader->Font_Height;
+				continue;
+			}
+		}
+		
 
 		PX_Base64Encode((px_byte *)&pcHeader->charactor_code,sizeof(pcHeader->charactor_code),hex);
 

@@ -46,13 +46,29 @@ const BOOL PX_SerialPortInitialize(PX_SerialPort *com,const char *name,unsigned 
 	COMMTIMEOUTS  CommTimeouts;  
 	DCB  dcb; 
 
-	com->Handle=(long long)CreateFileA(name, 
-		GENERIC_READ | GENERIC_WRITE,   
-		0,                            /** Share mode,No share if zero */   
-		NULL,                         /** */   
-		OPEN_EXISTING,                /** This device should be existing */   
-		0,      
-		0);      
+	if (strlen(name)>4&&strlen(name)<6)
+	{
+		char comName[16]="\\\\.\\";
+		strcat_s(comName,16,name);
+		com->Handle=(long long)CreateFileA(comName, 
+			GENERIC_READ | GENERIC_WRITE,   
+			0,                            /** Share mode,No share if zero */   
+			NULL,                         /** */   
+			OPEN_EXISTING,                /** This device should be existing */   
+			0,      
+			0); 
+	}
+	else
+	{
+		com->Handle=(long long)CreateFileA(name, 
+			GENERIC_READ | GENERIC_WRITE,   
+			0,                            /** Share mode,No share if zero */   
+			NULL,                         /** */   
+			OPEN_EXISTING,                /** This device should be existing */   
+			0,      
+			0); 
+	}
+	     
 
 	if (com->Handle==-1)
 	{
@@ -77,10 +93,31 @@ const BOOL PX_SerialPortInitialize(PX_SerialPort *com,const char *name,unsigned 
 	}
 
 	//Setup BCD
+	dcb.DCBlength = sizeof(DCB);
 	dcb.ByteSize=DataBits;
 	dcb.BaudRate=baudRate;
 	dcb.StopBits=stopBit-1;
-	dcb.Parity=ParityType;
+	switch (ParityType)
+	{
+	default:
+	case 'N':
+	case 'n':
+		dcb.Parity=NOPARITY ;
+		break;
+	case 'O':
+	case 'o':
+		dcb.Parity=ODDPARITY;
+		break;
+	case 'E':
+	case 'e':
+		dcb.Parity=EVENPARITY;
+		break;
+	case 'M':
+	case 'm':
+		dcb.Parity=MARKPARITY;
+		break;
+	}
+	
 	dcb.fRtsControl = RTS_CONTROL_ENABLE;   
 
 	com->BaudRate=baudRate;
@@ -169,7 +206,7 @@ const int PX_SerialPortWrite(PX_SerialPort *com,void *data,int size)
 	return WriteSize;
 }
 
-const BOOL PX_SerialPortRead(PX_SerialPort *com,void *data,int size)
+const int PX_SerialPortRead(PX_SerialPort *com,void *data,int size)
 {
 	int     Offset;
 	int	QueSize;

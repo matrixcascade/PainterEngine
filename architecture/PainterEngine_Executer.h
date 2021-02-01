@@ -19,7 +19,7 @@ typedef struct
 	px_char Input_Content[PX_EXECUTER_INPUT_CONTENT_SIZE];
 	px_dword *Sleep;
 	px_bool bInput;
-	PX_ScriptVM_Instance Instance;
+	PX_ScriptVM_Instance VM_Instance;
 }PX_Executer;
 
 typedef struct

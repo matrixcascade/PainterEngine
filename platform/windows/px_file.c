@@ -1,21 +1,23 @@
 
 #include "../modules/px_file.h"
-
-FILE *PX_Windows_fopen(const char path[], const char mode[])
-{
-	FILE *pf;
-	errno_t err;
-	err = fopen_s(&pf, path, mode);
-	if (err != 0)
-		return 0;
-	else
-		return pf;
-}
-
+#include "stdio.h"
+#include "stdlib.h"
+#include "string.h"
+#include "windows.h"
 
 int PX_SaveDataToFile(void *buffer,int size,const char path[])
 {
-	FILE *pf= PX_Windows_fopen(path,"wb");
+	char _path[MAX_PATH];
+	FILE *pf;
+	if (path[0]=='\\'||path[0]=='//')
+	{
+		strcpy_s(_path,sizeof(_path),path+1);
+	}
+	else
+	{
+		strcpy_s(_path,sizeof(_path),path);
+	}
+	pf=fopen(_path,"rb");
 	if (pf)
 	{
 		fwrite(buffer,1,size,pf);
@@ -25,86 +27,53 @@ int PX_SaveDataToFile(void *buffer,int size,const char path[])
 	return 0;
 }
 
+
+
 PX_IO_Data PX_LoadFileToIOData(const char path[])
 {
 	PX_IO_Data io;
-	int fileoft=0;
-	FILE *pf= PX_Windows_fopen(path,"rb");
-	int filesize;
-	if (!pf)
-	{
-		goto _ERROR;
-	}
-	fseek(pf,0,SEEK_END);
-	filesize=ftell(pf);
-	fseek(pf,0,SEEK_SET);
-
-	io.buffer=(unsigned char *)malloc(filesize+1);
-	if (!io.buffer)
-	{
-		goto _ERROR;
-	}
-
-	while (!feof(pf))
-	{
-		fileoft+=(int)fread(io.buffer+fileoft,1,1024,pf);
-	}
-	fclose(pf);
-
-	io.buffer[filesize]='\0';
-	io.size=filesize;
-	return io;
-_ERROR:
-	io.buffer=0;
-	io.size=0;
-	return io;
-}
-
-int PX_CopyFile(const char respath[],const char destpath[])
-{
-	PX_IO_Data io;
-	if (strcmp(respath,destpath)==0)
-	{
-		return 1;
-	}
-	io=PX_LoadFileToIOData(respath);
-	if (io.size==0)
-	{
-		return 0;
-	}
-	if (PX_SaveDataToFile(io.buffer,io.size,destpath))
-	{
-		PX_FreeIOData(&io);
-		return 1;
-	}
-	PX_FreeIOData(&io);
-	return 0;
-}
-
-const char * PX_GetFileName(const char filePath[])
-{
-	int offset=strlen(filePath)-1;
-	while (offset)
-	{
-		if (filePath[offset]=='/'||filePath[offset]=='\\')
+		int fileoft=0;
+		FILE *pf;
+		int filesize;
+		char _path[MAX_PATH];
+		if (path[0]=='\\'||path[0]=='//')
 		{
-			offset++;
-			break;
+			strcpy_s(_path,sizeof(_path),path+1);
 		}
-		offset--;
-	}
-	return (char *)filePath+offset;
-}
+		else
+		{
+			strcpy_s(_path,sizeof(_path),path);
+		}
 
-int PX_FileExist(const char path[])
-{
-	FILE *pf= PX_Windows_fopen(path,"rb");
-	if (pf)
-	{
+		pf=fopen(_path,"rb");
+		if (!pf)
+		{
+			goto _ERROR;
+		}
+		
+		fseek(pf,0,SEEK_END);
+		filesize=ftell(pf);
+		fseek(pf,0,SEEK_SET);
+
+		io.buffer=(unsigned char *)malloc(filesize+1);
+		if (!io.buffer)
+		{
+			goto _ERROR;
+		}
+
+		while (!feof(pf))
+		{
+			fileoft+=(int)fread(io.buffer+fileoft,1,1024,pf);
+		}
 		fclose(pf);
-		return 1;
-	}
-	return 0;
+
+		io.buffer[filesize]='\0';
+		io.size=filesize;
+		return io;
+_ERROR:
+		io.buffer=0;
+		io.size=0;
+		return io;
 }
 
 void PX_FreeIOData(PX_IO_Data *io)
@@ -115,4 +84,261 @@ void PX_FreeIOData(PX_IO_Data *io)
 		io->size=0;
 		io->buffer=0;
 	}
+}
+
+int PX_FileExist(const char path[])
+{
+	char _path[MAX_PATH];
+	FILE *pf;
+	if (path[0]=='\\'||path[0]=='//')
+	{
+		strcpy_s(_path,sizeof(_path),path+1);
+	}
+	else
+	{
+		strcpy_s(_path,sizeof(_path),path);
+	}
+
+	pf= fopen(_path,"rb");;
+	if (pf)
+	{
+		fclose(pf);
+		return 1;
+	}
+	return 0;
+}
+
+
+
+
+int PX_FileGetDirectoryFileCount(const char path[],PX_FILEENUM_TYPE type,const char *filter)
+{
+	HANDLE hFind;
+	int count=0;
+    WIN32_FIND_DATA FindFileData;
+	char _findpath[MAX_PATH];
+	
+	if (path[0]==0||(path[0]=='\\'&&path[1]=='\0')||(path[0]=='/'&&path[1]=='\0'))
+	{
+		if (type==PX_FILEENUM_TYPE_FILE)
+		{
+			return 0;
+		}
+		if (type==PX_FILEENUM_TYPE_FOLDER)
+		{
+			char drivers[128];
+			int index=0;
+			if(GetLogicalDriveStrings(128,drivers))
+			{
+				while (drivers[index])
+				{
+					count++;
+					index+=strlen(drivers)+1;
+				}
+			}
+			return count;
+		}
+	}
+	if (path[0]=='\\'||path[0]=='//')
+	{
+		strcpy_s(_findpath,sizeof(_findpath),path+1);
+	}
+	else
+	{
+		strcpy_s(_findpath,sizeof(_findpath),path);
+	}
+	
+	if (_findpath[strlen(path)-1]!='/'&&_findpath[strlen(path)-1]!='\\')
+	{
+		strcat_s(_findpath,sizeof(_findpath),"/");
+	}
+	strcat_s(_findpath,sizeof(_findpath),"*.*");
+
+	hFind = FindFirstFile(_findpath,&FindFileData);
+	if (hFind==INVALID_HANDLE_VALUE)
+	{
+		return 0;
+	}
+	do 
+	{
+		switch (type)
+		{
+		case PX_FILEENUM_TYPE_ANY:
+			{
+				if (filter)
+				{
+					if (strstr(FindFileData.cFileName,filter))
+					{
+						count++;
+					}
+				} else
+				{
+					count++;
+				}
+			}
+			break;
+		case PX_FILEENUM_TYPE_DEVICE:
+		case PX_FILEENUM_TYPE_FILE:
+			{
+				if (FindFileData.dwFileAttributes !=FILE_ATTRIBUTE_DIRECTORY)
+				{
+					if (filter)
+					{
+						if (strstr(FindFileData.cFileName,filter))
+						{
+							count++;
+						}
+					} else
+					{
+						count++;
+					}
+				}
+			}
+			break;
+		case PX_FILEENUM_TYPE_FOLDER:
+			{
+				if (FindFileData.dwFileAttributes ==FILE_ATTRIBUTE_DIRECTORY)
+				{
+					if (filter)
+					{
+						if (strstr(FindFileData.cFileName,filter))
+						{
+							count++;
+						}
+					} else
+					{
+						count++;
+					}
+				}
+			}
+			break;
+		default:
+			break;
+		}
+	} while (FindNextFile(hFind,&FindFileData));
+	FindClose(hFind);
+	return count;
+}
+
+int PX_FileGetDirectoryFileName(const char path[],int count,char FileName[][260],PX_FILEENUM_TYPE type,const char *filter)
+{
+	HANDLE hFind;
+	int index=0;
+	WIN32_FIND_DATA FindFileData;
+	static char _findpath[MAX_PATH];
+
+	if (path[0]==0||(path[0]=='\\'&&path[1]=='\0')||(path[0]=='/'&&path[1]=='\0'))
+	{
+		int dcount=0;
+		if (type==PX_FILEENUM_TYPE_FILE)
+		{
+			return 0;
+		}
+		if (type==PX_FILEENUM_TYPE_FOLDER)
+		{
+			char drivers[128];
+			int index=0;
+			if(GetLogicalDriveStrings(128,drivers))
+			{
+				while (drivers[index])
+				{
+					strcpy_s(FileName[dcount],260,drivers+index);
+					dcount++;
+					index+=strlen(drivers)+1;
+				}
+			}
+			return dcount;
+		}
+	}
+
+	if (path[0]=='\\'||path[0]=='//')
+	{
+		strcpy_s(_findpath,sizeof(_findpath),path+1);
+	}
+	else
+	{
+		strcpy_s(_findpath,sizeof(_findpath),path);
+	}
+
+	if (_findpath[strlen(path)-1]!='/'&&_findpath[strlen(path)-1]!='\\')
+	{
+		strcat_s(_findpath,sizeof(_findpath),"/");
+	}
+	strcat_s(_findpath,sizeof(_findpath),"*.*");
+
+	hFind = FindFirstFile(_findpath,&FindFileData);
+	if (hFind==INVALID_HANDLE_VALUE)
+	{
+		return 0;
+	}
+	do 
+	{
+		if (index>=count)
+		{
+			break;
+		}
+
+		switch (type)
+		{
+		case PX_FILEENUM_TYPE_ANY:
+			{
+				if (filter)
+				{
+					if (strstr(FindFileData.cFileName,filter))
+					{
+						strcpy_s(FileName[index],260,FindFileData.cFileName);
+						index++;
+					}
+				} else
+				{
+					strcpy_s(FileName[index],260,FindFileData.cFileName);
+					index++;
+				}
+			}
+			break;
+		case PX_FILEENUM_TYPE_DEVICE:
+		case PX_FILEENUM_TYPE_FILE:
+			{
+				if (FindFileData.dwFileAttributes !=FILE_ATTRIBUTE_DIRECTORY)
+				{
+					if (filter)
+					{
+						if (strstr(FindFileData.cFileName,filter))
+						{
+							strcpy_s(FileName[index],260,FindFileData.cFileName);
+							index++;
+						}
+					} else
+					{
+						strcpy_s(FileName[index],260,FindFileData.cFileName);
+						index++;
+					}
+				}
+			}
+			break;
+		case PX_FILEENUM_TYPE_FOLDER:
+			{
+				if (FindFileData.dwFileAttributes ==FILE_ATTRIBUTE_DIRECTORY)
+				{
+					if (filter)
+					{
+						if (strstr(FindFileData.cFileName,filter))
+						{
+							strcpy_s(FileName[index],260,FindFileData.cFileName);
+							index++;
+						}
+					} else
+					{
+						strcpy_s(FileName[index],260,FindFileData.cFileName);
+						index++;
+					}
+				}
+			}
+			break;
+		default:
+			break;
+		}
+	} while (FindNextFile(hFind,&FindFileData));
+	FindClose(hFind);
+	return index;
 }

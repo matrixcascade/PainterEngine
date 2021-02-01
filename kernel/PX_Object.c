@@ -18,13 +18,28 @@ PX_Object  * PX_ObjectGetChild( PX_Object *Object,px_int Index )
 
 }
 
-px_void PX_ObjectSetFocus(PX_Object *Object)
+px_void PX_ObjectSetFocusEx(PX_Object *Object)
 {
-	
+
 	while(Object)
 	{
 		Object->OnFocus=PX_TRUE;
 		Object=Object->pParent;
+	}
+}
+
+
+px_void PX_ObjectSetFocus(PX_Object *Object)
+{
+	PX_Object *pRoot=Object;
+	while(pRoot->pParent)pRoot=pRoot->pParent;
+	if (pRoot->OnFocus)
+	{
+		return;
+	}
+	else
+	{
+		PX_ObjectSetFocusEx(Object);
 	}
 }
 
@@ -56,6 +71,11 @@ static px_bool PX_ObjectChildHasFocus(PX_Object *Object)
 
 px_void PX_ObjectClearFocus(PX_Object *Object)
 {
+	if (!Object->OnFocus)
+	{
+		return;
+	}
+
 	if (!PX_ObjectChildHasFocus(Object->pChilds))
 	{
 		while(Object)
@@ -208,7 +228,18 @@ px_char* PX_Object_Event_GetStringPtr(PX_Object_Event e)
 	return (px_char *)e.Param_ptr[0];
 }
 
+px_void* PX_Object_Event_GetDataPtr(PX_Object_Event e)
+{
+	return (px_void *)e.Param_ptr[0];
+}
+
+
 px_void PX_Object_Event_SetStringPtr(PX_Object_Event *e,px_void *ptr)
+{
+	e->Param_ptr[0]=ptr;
+}
+
+px_void PX_Object_Event_SetDataPtr(PX_Object_Event *e,px_void *ptr)
 {
 	e->Param_ptr[0]=ptr;
 }
@@ -1541,9 +1572,14 @@ px_void PX_Object_SliderBarOnCursorDrag(PX_Object *pObject,PX_Object_Event e,px_
 
 		if(pSliderBar->Type==PX_OBJECT_SLIDERBAR_TYPE_HORIZONTAL)
 		{
-			if (x<objx||x>objx+objWidth)
+			if (x<objx)
 			{
-				pSliderBar->btnDownX=x;
+				pSliderBar->DargButtonX=0;
+				return;
+			}
+			if (x>objx+objWidth)
+			{
+				pSliderBar->DargButtonX=objWidth-pSliderBar->SliderButtonLength;
 				return;
 			}
 
@@ -1562,9 +1598,14 @@ px_void PX_Object_SliderBarOnCursorDrag(PX_Object *pObject,PX_Object_Event e,px_
 
 		if (pSliderBar->Type==PX_OBJECT_SLIDERBAR_TYPE_VERTICAL)
 		{
-			if (y<objy||y>objy+objHeight)
+			if (y<objy)
 			{
-				pSliderBar->btnDownY=y;
+				pSliderBar->DargButtonY=0;
+				return;
+			}
+			if (y>objy+objHeight)
+			{
+				pSliderBar->DargButtonY=objHeight-pSliderBar->SliderButtonLength;
 				return;
 			}
 
@@ -1677,6 +1718,14 @@ px_int PX_Object_SliderBarGetValue( PX_Object *pSliderBar )
 	PX_Object_SliderBar *SliderBar=PX_Object_GetSliderBar(pSliderBar);
 	if (SliderBar!=PX_NULL)
 	{
+		if (SliderBar->Value>SliderBar->Max)
+		{
+			SliderBar->Value=SliderBar->Max;
+		}
+		if (SliderBar->Value<SliderBar->Min)
+		{
+			SliderBar->Value=SliderBar->Min;
+		}
 		return SliderBar->Value;
 	}
 	return 0;
@@ -1747,6 +1796,10 @@ px_void PX_Object_SliderBarRender(px_surface *psurface, PX_Object *pObject,px_ui
 	{
 	case PX_OBJECT_SLIDERBAR_STATUS_NORMAL:
 		{
+			if (pObject->OnFocus)
+			{
+				PX_ObjectClearFocus(pObject);
+			}
 			if (pSliderBar->Value>pSliderBar->Max)
 			{
 				pSliderBar->Value=pSliderBar->Max;
@@ -1836,6 +1889,10 @@ px_void PX_Object_SliderBarRender(px_surface *psurface, PX_Object *pObject,px_ui
 		break;
 	case PX_OBJECT_SLIDERBAR_STATUS_ONDRAG:
 		{
+			if (!pObject->OnFocus)
+			{
+				PX_ObjectSetFocus(pObject);
+			}
 			if(pSliderBar->Type==PX_OBJECT_SLIDERBAR_TYPE_HORIZONTAL)
 			{
 				switch(pSliderBar->style)
@@ -2644,6 +2701,16 @@ px_void PX_Object_EditSetText( PX_Object *pObject,const px_char *Text )
 	}
 }
 
+px_void PX_Object_EditAppendText(PX_Object *pObject,const px_char *Text)
+{
+	PX_Object_Edit *pEdit=PX_Object_GetEdit(pObject);
+	if(pEdit)
+	{
+		PX_StringCat(&pEdit->text,Text);
+		pEdit->cursor_index=PX_strlen(Text);
+	}
+}
+
 px_void PX_Object_EditSetFocus(PX_Object *pObject,px_bool OnFocus)
 {
 	PX_Object_Edit *pEdit=PX_Object_GetEdit(pObject);
@@ -2718,7 +2785,7 @@ px_void PX_Object_EditSetLimit(PX_Object *pObject,const px_char *Limit)
 	PX_Object_Edit * pEdit=PX_Object_GetEdit(pObject);
 	if (pEdit)
 	{
-		pEdit->Limit=Limit;
+		PX_strcpy(pEdit->Limit,Limit,sizeof(pEdit->Limit));
 	}
 }
 
@@ -3197,7 +3264,7 @@ px_void PX_Object_EditAddString(PX_Object *pObject,px_char *Text)
 
 			if(*Text!=8)
 			{
-				if (pEdit->Limit)
+				if (pEdit->Limit[0])
 				{
 					px_bool bMatch=PX_FALSE;
 					const px_char *limitFilter=pEdit->Limit;
@@ -3342,6 +3409,11 @@ px_void PX_Object_EditBackspace(PX_Object *pObject)
 			}
 			break;
 		case PX_FONTMODULE_CODEPAGE_UTF16:
+			{
+				//not support
+			}
+			break;
+		default:
 			{
 				//not support
 			}
@@ -9015,11 +9087,6 @@ static px_void PX_SelectbarOnCursorDown(PX_Object *pObject,px_float x,px_float y
 			pSelectbar->activating=PX_TRUE;
 			PX_ObjectSetFocus(pObject);
 		}
-		else
-		{
-			pSelectbar->activating=PX_FALSE;
-			PX_ObjectClearFocus(pObject);
-		}
 	}
 	
 }
@@ -9312,6 +9379,16 @@ px_int PX_Object_SelectBarGetItemIndexByText(PX_Object *pObject,const px_char Te
 	return -1;
 }
 
+const px_char * PX_Object_SelectBarGetCurrentText(PX_Object *pObject)
+{
+	PX_Object_SelectBar *pSelectBar=PX_Object_GetSelectBar(pObject);
+	if (pSelectBar)
+	{
+		return PX_VECTORAT(PX_Object_SelectBar_Item,&pSelectBar->Items,pSelectBar->selectIndex)->Text;
+	}
+	return "";
+}
+
 px_void PX_Object_SelectBarSetDisplayCount(PX_Object *pObject,px_int count)
 {
 	PX_Object_SelectBar *pSelectBar=PX_Object_GetSelectBar(pObject);
@@ -9329,6 +9406,18 @@ px_int PX_Object_SelectBarGetCurrentIndex(PX_Object *pObject)
 		return pSelectBar->selectIndex;
 	}
 	return -1;
+}
+
+px_void PX_Object_SelectBarSetCurrentIndex(PX_Object *pObject,px_int index)
+{
+	PX_Object_SelectBar *pSelectBar=PX_Object_GetSelectBar(pObject);
+	if (pSelectBar)
+	{
+		if (index>0&&index<pSelectBar->Items.size)
+		{
+			pSelectBar->selectIndex=index;
+		}
+	}
 }
 
 px_void PX_Object_SelectBarSetStyle(PX_Object *pObject,PX_OBJECT_SELECTBAR_STYLE style)
@@ -9634,4 +9723,581 @@ px_void PX_Object_RadioBoxSetTextColor(PX_Object *Object,px_color clr)
 px_void PX_Object_RadioBoxSetCheck(PX_Object *Object,px_bool check)
 {
 	PX_Object_GetRadioBox(Object)->bCheck=check;
+}
+//////////////////////////////////////////////////////////////////////////
+//explorer
+
+PX_Object_Explorer * PX_Object_GetExplorer(PX_Object *Object)
+{
+	if(Object->Type==PX_OBJECT_TYPE_EXPLORER)
+	{
+		return (PX_Object_Explorer *)Object->pObject;
+	}
+	return PX_NULL;
+}
+
+px_void PX_Object_ExplorerOnCursorMove(PX_Object *pObject,PX_Object_Event e,px_void *ptr)
+{
+	px_float x,y;
+	px_float objx,objy,objWidth,objHeight;
+	px_float inheritX,inheritY;
+	
+	PX_Object_Explorer *pExp=PX_Object_GetExplorer(pObject);
+	PX_ObjectGetInheritXY(pObject,&inheritX,&inheritY);
+
+	objx=(pObject->x+inheritX);
+	objy=(pObject->y+inheritY);
+	objWidth=pObject->Width;
+	objHeight=pObject->Height;
+
+	x=PX_Object_Event_GetCursorX(e);
+	y=PX_Object_Event_GetCursorY(e);
+	if (PX_isXYInRegion(x,y,objx,objy+PX_OBJECT_EXPOLRER_MENU_HEIGHT,objWidth-PX_OBJECT_EXPOLRER_SLIDERBAR_WIDTH,objHeight-PX_OBJECT_EXPOLRER_MENU_HEIGHT*2))
+	{
+		//get cursor index
+		px_int i;
+		px_int ofty;
+		px_int index;
+		ofty=PX_Object_SliderBarGetValue(pExp->SliderBar);
+		index=(px_int)(y+ofty-objy-PX_OBJECT_EXPOLRER_MENU_HEIGHT)/PX_OBJECT_EXPOLRER_ITEM_HEIGHT;
+		//clear
+		for (i=0;i<pExp->ItemCount;i++)
+		{
+			pExp->Items[i].bcursor=PX_FALSE;
+		}
+		if (index<pExp->ItemCount)
+		{
+			pExp->Items[index].bcursor=PX_TRUE;
+		}
+	}
+}
+
+px_void PX_Object_ExplorerOnButtonBack(PX_Object *pObject,PX_Object_Event e,px_void *ptr)
+{
+	px_char path[260];
+	px_int index;
+	PX_Object_Explorer *pExp=PX_Object_GetExplorer((PX_Object *)ptr);
+	PX_strcpy(path,PX_Object_EditGetText(pExp->edit_Path),sizeof(path));
+	index=PX_strlen(path);
+	while (index)
+	{
+		if (path[index]=='/'||path[index]=='\\')
+		{
+			break;
+		}
+		index--;
+	}
+	path[index]='\0';
+	PX_Object_EditSetText(pExp->edit_Path,path);
+	PX_Object_ExplorerRefresh((PX_Object *)ptr);
+}
+px_void PX_Object_ExplorerOnButtonGo(PX_Object *pObject,PX_Object_Event e,px_void *ptr)
+{
+	PX_Object_ExplorerRefresh((PX_Object *)ptr);
+}
+px_void PX_Object_ExplorerOnButtonOk(PX_Object *pObject,PX_Object_Event e,px_void *ptr)
+{
+	PX_Object_Explorer *pExp=PX_Object_GetExplorer((PX_Object *)ptr);
+	PX_ObjectClearFocus((PX_Object *)ptr);
+	pExp->returnType=PX_OBJECT_EXPLORER_RETURN_CONFIRM;
+	PX_ObjectExecuteEvent((PX_Object *)ptr,e);
+	((PX_Object *)ptr)->Visible=PX_FALSE;
+	
+}
+px_void PX_Object_ExplorerOnButtonCancel(PX_Object *pObject,PX_Object_Event e,px_void *ptr)
+{
+	PX_Object_Explorer *pExp=PX_Object_GetExplorer((PX_Object *)ptr);
+	PX_ObjectClearFocus((PX_Object *)ptr);
+	pExp->returnType=PX_OBJECT_EXPLORER_RETURN_CANCEL;
+	((PX_Object *)ptr)->Visible=PX_FALSE;
+}
+
+px_void PX_Object_ExplorerOnCursorDown(PX_Object *pObject,PX_Object_Event e,px_void *ptr)
+{
+	px_float x,y;
+	px_float objx,objy,objWidth,objHeight;
+	px_float inheritX,inheritY;
+	PX_Object_Explorer *pExp=PX_Object_GetExplorer(pObject);
+	PX_ObjectGetInheritXY(pObject,&inheritX,&inheritY);
+
+	objx=(pObject->x+inheritX);
+	objy=(pObject->y+inheritY);
+	objWidth=pObject->Width;
+	objHeight=pObject->Height;
+
+	x=PX_Object_Event_GetCursorX(e);
+	y=PX_Object_Event_GetCursorY(e);
+	if (PX_isXYInRegion(x,y,objx,objy+PX_OBJECT_EXPOLRER_MENU_HEIGHT,objWidth-PX_OBJECT_EXPOLRER_SLIDERBAR_WIDTH,objHeight-PX_OBJECT_EXPOLRER_MENU_HEIGHT*2))
+	{
+		px_int i=0,selectcount=0;
+		px_int ofty;
+		//get cursor index
+		
+		px_int index;
+		ofty=PX_Object_SliderBarGetValue(pExp->SliderBar);
+		index=(px_int)(y+ofty-objy-PX_OBJECT_EXPOLRER_MENU_HEIGHT)/PX_OBJECT_EXPOLRER_ITEM_HEIGHT;
+		if (index<pExp->ItemCount)
+		{
+			if (pExp->Items[index].bselect&&pExp->Items[index].bFolder)
+			{
+
+				//enter path
+				px_char *pEditPath=PX_Object_EditGetText(pExp->edit_Path);
+				if (pEditPath[PX_strlen(pEditPath)-1]!='/'&&pEditPath[PX_strlen(pEditPath)-1]!='\\')
+				{
+					PX_Object_EditAppendText(pExp->edit_Path,"\\");
+				}
+				PX_Object_EditAppendText(pExp->edit_Path,pExp->Items[index].name);
+
+				PX_Object_ExplorerRefresh(pObject);
+			}
+			else
+			{
+				if (pExp->MaxSelectedCount!=1)
+				{
+					for (i=0;i<pExp->ItemCount;i++)
+					{
+						if(pExp->Items[i].bselect)
+						{
+							selectcount++;
+						}
+					}
+					if (pExp->Items[index].bselect)
+					{
+						pExp->Items[index].bselect=PX_FALSE;
+					}
+					else
+					{
+						if (selectcount<pExp->MaxSelectedCount)
+						{
+							pExp->Items[index].bselect=PX_TRUE;
+						}
+					}
+					
+				}
+				else
+				{
+					if (pExp->Items[index].bselect)
+					{
+						pExp->Items[index].bselect=PX_FALSE;
+					}
+					else
+					{
+						for (i=0;i<pExp->ItemCount;i++)
+						{
+							if(pExp->Items[i].bselect)
+							{
+								pExp->Items[i].bselect=PX_FALSE;
+							}
+						}
+						pExp->Items[index].bselect=PX_TRUE;
+					}
+					
+				}
+				
+			}
+			
+		}
+	}
+}
+
+static px_void PX_Object_ExplorerOnCursorWheel(PX_Object *pObject,PX_Object_Event e,px_void *ptr)
+{
+	PX_Object_Explorer *pExp=PX_Object_GetExplorer(pObject);
+	px_float x=PX_Object_Event_GetCursorX(e);
+	px_float y=PX_Object_Event_GetCursorY(e);
+	px_float z=PX_Object_Event_GetCursorZ(e);
+	px_float objx,objy,objWidth,objHeight;
+	px_float inheritX,inheritY;
+
+	PX_ObjectGetInheritXY(pObject,&inheritX,&inheritY);
+
+	objx=(pObject->x+inheritX);
+	objy=(pObject->y+inheritY);
+	objWidth=pObject->Width;
+	objHeight=pObject->Height;
+
+	if (PX_isXYInRegion(x,y,objx,objy+PX_OBJECT_EXPOLRER_MENU_HEIGHT,objWidth-PX_OBJECT_EXPOLRER_SLIDERBAR_WIDTH,objHeight-PX_OBJECT_EXPOLRER_MENU_HEIGHT*2))
+	{
+		if (z<0)
+		{
+			PX_Object_SliderBarSetValue(pExp->SliderBar,PX_Object_SliderBarGetValue(pExp->SliderBar)+PX_OBJECT_EXPOLRER_ITEM_HEIGHT/2);
+		}
+		else
+		{
+			PX_Object_SliderBarSetValue(pExp->SliderBar,PX_Object_SliderBarGetValue(pExp->SliderBar)-PX_OBJECT_EXPOLRER_ITEM_HEIGHT/2);
+		}
+	}
+	
+}
+
+
+px_void PX_Object_ExplorerRender(px_surface *psurface, PX_Object *pObject,px_uint elpased)
+{
+	PX_Object_Explorer *pExp=PX_Object_GetExplorer(pObject);
+	//background
+	px_float objx,objy,objWidth,objHeight;
+	px_float inheritX,inheritY;
+	px_int val,ofty;
+
+	if (pObject->Width<256)
+	{
+		pObject->Width=256;
+	}
+	if (pObject->Height<128)
+	{
+		pObject->Height=128;
+	}
+
+
+	PX_ObjectGetInheritXY(pObject,&inheritX,&inheritY);
+
+	objx=(pObject->x+inheritX);
+	objy=(pObject->y+inheritY);
+	objWidth=pObject->Width;
+	objHeight=pObject->Height;
+
+	val=PX_Object_SliderBarGetValue(pExp->SliderBar);
+	ofty=PX_Object_SliderBarGetValue(pExp->SliderBar);
+
+	PX_GeoDrawRect(psurface,(px_int)objx,(px_int)objy,(px_int)(objx+objWidth),(px_int)(objy+objHeight),pExp->backgroundcolor);
+
+	//button back
+	pExp->btn_Back->x=8;
+	pExp->btn_Back->y=8;
+	pExp->btn_Back->Width=PX_OBJECT_EXPOLRER_BUTTON_WIDTH;
+	pExp->btn_Back->Height=32;
+	PX_Object_PushButtonSetBackgroundColor(pExp->btn_Back,pExp->backgroundcolor);
+	PX_Object_PushButtonSetBorderColor(pExp->btn_Back,pExp->bordercolor);
+	PX_Object_PushButtonSetTextColor(pExp->btn_Back,pExp->fontcolor);
+	PX_Object_PushButtonSetCursorColor(pExp->btn_Back,pExp->cursorcolor);
+	PX_Object_PushButtonSetPushColor(pExp->btn_Back,pExp->pushcolor);
+
+	pExp->edit_Path->x=PX_OBJECT_EXPOLRER_BUTTON_WIDTH+8+8;
+	pExp->edit_Path->Width=objWidth-PX_OBJECT_EXPOLRER_BUTTON_WIDTH-PX_OBJECT_EXPOLRER_BUTTON_WIDTH-8*4;
+	if (pExp->fontmodule)
+	{
+		pExp->edit_Path->Height=pExp->fontmodule->max_Height+6.0f;
+	}
+	else
+	{
+		pExp->edit_Path->Height=20;
+	}
+	pExp->edit_Path->y=24-pExp->edit_Path->Height/2;
+	PX_Object_EditSetBackgroundColor(pExp->edit_Path,pExp->backgroundcolor);
+	PX_Object_EditSetBorderColor(pExp->edit_Path,pExp->bordercolor);
+	PX_Object_EditSetTextColor(pExp->edit_Path,pExp->fontcolor);
+	PX_Object_EditSetCursorColor(pExp->edit_Path,pExp->fontcolor);
+
+	pExp->btn_go->x=objWidth-8-PX_OBJECT_EXPOLRER_BUTTON_WIDTH;
+	pExp->btn_go->y=8;
+	pExp->btn_go->Width=PX_OBJECT_EXPOLRER_BUTTON_WIDTH;
+	pExp->btn_go->Height=32;
+	PX_Object_PushButtonSetBackgroundColor(pExp->btn_go,pExp->backgroundcolor);
+	PX_Object_PushButtonSetBorderColor(pExp->btn_go,pExp->bordercolor);
+	PX_Object_PushButtonSetTextColor(pExp->btn_go,pExp->fontcolor);
+	PX_Object_PushButtonSetCursorColor(pExp->btn_go,pExp->cursorcolor);
+	PX_Object_PushButtonSetPushColor(pExp->btn_go,pExp->pushcolor);
+
+	
+	pExp->SliderBar->x=objx+objWidth-24;
+	pExp->SliderBar->Width=24;
+	pExp->SliderBar->y=PX_OBJECT_EXPOLRER_MENU_HEIGHT;
+	pExp->SliderBar->Height=objHeight-PX_OBJECT_EXPOLRER_MENU_HEIGHT-PX_OBJECT_EXPOLRER_MENU_HEIGHT;
+	PX_Object_SliderBarSetBackgroundColor(pExp->SliderBar,pExp->backgroundcolor);
+	PX_Object_SliderBarSetColor(pExp->SliderBar,pExp->bordercolor);
+	if (pExp->ItemCount*PX_OBJECT_EXPOLRER_ITEM_HEIGHT>objHeight-PX_OBJECT_EXPOLRER_MENU_HEIGHT-PX_OBJECT_EXPOLRER_MENU_HEIGHT)
+	{
+		pExp->SliderBar->Visible=PX_TRUE;
+		PX_Object_SliderBarSetRange(pExp->SliderBar,0,pExp->ItemCount*PX_OBJECT_EXPOLRER_ITEM_HEIGHT-((px_int)objHeight-PX_OBJECT_EXPOLRER_MENU_HEIGHT-PX_OBJECT_EXPOLRER_MENU_HEIGHT));
+		PX_Object_SliderBarSetSliderButtonLength(pExp->SliderBar,(px_int)(pExp->SliderBar->Height*pExp->SliderBar->Height/pExp->ItemCount/PX_OBJECT_EXPOLRER_ITEM_HEIGHT));
+	}
+	else
+	{
+		PX_Object_SliderBarSetRange(pExp->SliderBar,0,0);
+		pExp->SliderBar->Visible=PX_FALSE;
+	}
+	
+
+	do 
+	{
+		PX_SurfaceLimitInfo lmInfo;
+		px_int startIndex=ofty/PX_OBJECT_EXPOLRER_ITEM_HEIGHT;
+		px_int drawy=PX_OBJECT_EXPOLRER_MENU_HEIGHT-(ofty)%PX_OBJECT_EXPOLRER_ITEM_HEIGHT;
+		lmInfo=PX_SurfaceGetLimit(psurface);
+		PX_SurfaceSetLimit(psurface,(px_int)objx,(px_int)objy+PX_OBJECT_EXPOLRER_MENU_HEIGHT,(px_int)(objx+objWidth),(px_int)(objy+objHeight-PX_OBJECT_EXPOLRER_MENU_HEIGHT));
+		while (startIndex<pExp->ItemCount&&drawy<objHeight-PX_OBJECT_EXPOLRER_MENU_HEIGHT)
+		{
+			PX_Object_Explorer_Item *pItem=&pExp->Items[startIndex];
+			
+			if (pItem->bcursor)
+			{
+				PX_GeoDrawRect(psurface,(px_int)objx,(px_int)objy+drawy,(px_int)(objx+objWidth),(px_int)objy+drawy+PX_OBJECT_EXPOLRER_ITEM_HEIGHT-1,pExp->cursorcolor);
+			}
+
+			if (pItem->bFolder)
+			{
+				PX_ShapeRender(psurface,&pExp->folder,(px_int)objx+16+3,(px_int)objy+drawy+PX_OBJECT_EXPOLRER_ITEM_HEIGHT/2,PX_TEXTURERENDER_REFPOINT_CENTER,pExp->fontcolor);
+			}
+			else
+			{
+				PX_ShapeRender(psurface,&pExp->file,(px_int)objx+16+3,(px_int)objy+drawy+PX_OBJECT_EXPOLRER_ITEM_HEIGHT/2,PX_TEXTURERENDER_REFPOINT_CENTER,pExp->fontcolor);
+			}
+			
+			PX_FontModuleDrawText(psurface,pExp->fontmodule,(px_int)objx+32+8,(px_int)objy+drawy+PX_OBJECT_EXPOLRER_ITEM_HEIGHT/2,PX_ALIGN_LEFTMID,pItem->name,pExp->fontcolor);
+
+			if (pItem->bselect)
+			{
+				PX_GeoDrawSolidCircle(psurface,(px_int)(objx+objWidth)-24-16,(px_int)objy+drawy+PX_OBJECT_EXPOLRER_ITEM_HEIGHT/2,8,pExp->fontcolor);
+			}
+			
+			drawy+=PX_OBJECT_EXPOLRER_ITEM_HEIGHT;
+			startIndex++;
+		}
+
+		PX_SurfaceSetLimitInfo(psurface,lmInfo);
+
+	} while (0);
+
+
+	PX_GeoDrawLine(psurface,(px_int)objx,PX_OBJECT_EXPOLRER_MENU_HEIGHT,(px_int)(objx+objWidth),PX_OBJECT_EXPOLRER_MENU_HEIGHT,1,pExp->fontcolor);
+	PX_GeoDrawLine(psurface,(px_int)objx,(px_int)(objy+objHeight-PX_OBJECT_EXPOLRER_MENU_HEIGHT),(px_int)(objx+objWidth),(px_int)(objy+objHeight-PX_OBJECT_EXPOLRER_MENU_HEIGHT),1,pExp->fontcolor);
+
+	pExp->btn_Ok->x=objWidth-8-PX_OBJECT_EXPOLRER_BUTTON_WIDTH-8-PX_OBJECT_EXPOLRER_BUTTON_WIDTH;
+	pExp->btn_Ok->y=objHeight-40;
+	pExp->btn_Ok->Width=PX_OBJECT_EXPOLRER_BUTTON_WIDTH;
+	pExp->btn_Ok->Height=32;
+	PX_Object_PushButtonSetBackgroundColor(pExp->btn_Ok,pExp->backgroundcolor);
+	PX_Object_PushButtonSetBorderColor(pExp->btn_Ok,pExp->bordercolor);
+	PX_Object_PushButtonSetTextColor(pExp->btn_Ok,pExp->fontcolor);
+	PX_Object_PushButtonSetCursorColor(pExp->btn_Ok,pExp->cursorcolor);
+	PX_Object_PushButtonSetPushColor(pExp->btn_Ok,pExp->pushcolor);
+
+	pExp->btn_Cancel->x=objx+objWidth-8-PX_OBJECT_EXPOLRER_BUTTON_WIDTH;
+	pExp->btn_Cancel->y=objHeight-40;
+	pExp->btn_Cancel->Width=PX_OBJECT_EXPOLRER_BUTTON_WIDTH;
+	pExp->btn_Cancel->Height=32;
+	PX_Object_PushButtonSetBackgroundColor(pExp->btn_Cancel,pExp->backgroundcolor);
+	PX_Object_PushButtonSetBorderColor(pExp->btn_Cancel,pExp->bordercolor);
+	PX_Object_PushButtonSetTextColor(pExp->btn_Cancel,pExp->fontcolor);
+	PX_Object_PushButtonSetCursorColor(pExp->btn_Cancel,pExp->cursorcolor);
+	PX_Object_PushButtonSetPushColor(pExp->btn_Cancel,pExp->pushcolor);
+}
+
+px_void PX_Object_ExplorerFree(PX_Object *pObject)
+{
+	PX_Object_Explorer *pExp=PX_Object_GetExplorer(pObject);
+	PX_ShapeFree(&pExp->file);
+	PX_ShapeFree(&pExp->folder);
+}
+
+px_byte PX_Object_Explorer_fileLogoData[]={
+#include "PX_object_explorer_filelogo.h"
+};
+
+px_byte PX_Object_Explorer_folderLogoData[]={
+#include "PX_object_explorer_folderlogo.h"
+};
+
+PX_Object * PX_Object_ExplorerCreate(px_memorypool *mp, PX_Object *Parent,px_int x,px_int y,px_int Width,px_int Height,PX_FontModule *fm, PX_ExplorerGetPathFolderCount _func_gpfdc, PX_ExplorerGetPathFileCount _func_gpfec, PX_ExplorerGetPathFolderName _func_gpfdn, PX_ExplorerGetPathFileName _func_gpfcn,const px_char path[])
+{
+	PX_Object_Explorer explorer;
+	PX_Object *pObject;
+	PX_memset(&explorer,0,sizeof(explorer));
+	if (Width<256)
+	{
+		Width=256;
+	}
+	if (Height<128)
+	{
+		Height=128;
+	}
+	explorer.backgroundcolor=PX_COLOR(255,64,64,64);
+	explorer.cursorcolor=PX_COLOR(255,32,32,32);
+	explorer.fontcolor=PX_COLOR(255,192,192,192);
+	explorer.bordercolor=PX_COLOR(255,255,255,255);
+
+	explorer.func_getpathfilecount=_func_gpfec;
+	explorer.func_getpathfilename=_func_gpfcn;
+	explorer.func_getpathfoldercount=_func_gpfdc;
+	explorer.func_getpathfoldername=_func_gpfdn;
+	explorer.returnType=PX_OBJECT_EXPLORER_RETURN_CANCEL;
+	explorer.MaxSelectedCount=1;
+	explorer.fontmodule=fm;
+
+	if(!PX_ShapeCreateFromMemory(mp,PX_Object_Explorer_fileLogoData,sizeof(PX_Object_Explorer_fileLogoData),&explorer.file))return PX_NULL;
+	if(!PX_ShapeCreateFromMemory(mp,PX_Object_Explorer_folderLogoData,sizeof(PX_Object_Explorer_folderLogoData),&explorer.folder))return PX_NULL;
+
+	pObject=PX_ObjectCreateEx(mp,Parent,(px_float)x,(px_float)y,0,(px_float)Width,(px_float)Height,0,PX_OBJECT_TYPE_EXPLORER,PX_NULL,PX_Object_ExplorerRender,PX_Object_ExplorerFree,&explorer,sizeof(PX_Object_Explorer));
+
+	if (!pObject)
+	{
+		return PX_NULL;
+	}
+
+	do 
+	{
+		PX_Object_Explorer *pExp=PX_Object_GetExplorer(pObject);
+		pExp->btn_Back=PX_Object_PushButtonCreate(mp,pObject,0,0,1,1,"<-Back",pExp->fontmodule,pExp->fontcolor);
+		pExp->btn_go=PX_Object_PushButtonCreate(mp,pObject,0,0,1,1,"Go->",pExp->fontmodule,pExp->fontcolor);
+		pExp->btn_Ok=PX_Object_PushButtonCreate(mp,pObject,0,0,1,1,"Ok",pExp->fontmodule,pExp->fontcolor);
+		pExp->btn_Cancel=PX_Object_PushButtonCreate(mp,pObject,0,0,1,1,"Cancel",pExp->fontmodule,pExp->fontcolor);
+		pExp->edit_Path=PX_Object_EditCreate(mp,pObject,0,0,1,1,pExp->fontmodule,pExp->fontcolor);
+		PX_Object_EditSetText(pExp->edit_Path,path);
+		pExp->SliderBar=PX_Object_SliderBarCreate(mp,pObject,0,0,24,24,PX_OBJECT_SLIDERBAR_TYPE_VERTICAL,PX_OBJECT_SLIDERBAR_STYLE_BOX);
+
+		PX_ObjectRegisterEvent(pExp->btn_Back,PX_OBJECT_EVENT_EXECUTE,PX_Object_ExplorerOnButtonBack,pObject);
+		PX_ObjectRegisterEvent(pExp->btn_go,PX_OBJECT_EVENT_EXECUTE,PX_Object_ExplorerOnButtonGo,pObject);
+		PX_ObjectRegisterEvent(pExp->btn_Ok,PX_OBJECT_EVENT_EXECUTE,PX_Object_ExplorerOnButtonOk,pObject);
+		PX_ObjectRegisterEvent(pExp->btn_Cancel,PX_OBJECT_EVENT_EXECUTE,PX_Object_ExplorerOnButtonCancel,pObject);
+
+		PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_CURSORMOVE,PX_Object_ExplorerOnCursorMove,pObject);
+		PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_CURSORDOWN,PX_Object_ExplorerOnCursorDown,pObject);
+		PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_CURSORWHEEL,PX_Object_ExplorerOnCursorWheel,pObject);
+	} while (0);
+
+	PX_Object_ExplorerRefresh(pObject);
+	pObject->Visible=PX_FALSE;
+	pObject->OnLostFocusReleaseEvent=PX_TRUE;
+	return pObject;
+}
+
+px_void PX_Object_ExplorerSetBorderColor(PX_Object *Object,px_color clr)
+{
+	PX_Object_Explorer *pExp=PX_Object_GetExplorer(Object);
+	if (pExp)
+	{
+		pExp->bordercolor=clr;
+	}
+}
+
+px_void PX_Object_ExplorerSetPushColor(PX_Object *Object,px_color clr)
+{
+	PX_Object_Explorer *pExp=PX_Object_GetExplorer(Object);
+	if (pExp)
+	{
+		pExp->pushcolor=clr;
+	}
+}
+
+px_void PX_Object_ExplorerSetCursorColor(PX_Object *Object,px_color clr)
+{
+	PX_Object_Explorer *pExp=PX_Object_GetExplorer(Object);
+	if (pExp)
+	{
+		pExp->cursorcolor=clr;
+	}
+}
+
+px_void PX_Object_ExplorerSetTextColor(PX_Object *Object,px_color clr)
+{
+	PX_Object_Explorer *pExp=PX_Object_GetExplorer(Object);
+	if (pExp)
+	{
+		pExp->fontcolor=clr;
+	}
+}
+
+
+px_void PX_Object_ExplorerRefresh(PX_Object *Object)
+{
+	PX_Object_Explorer *pExp=PX_Object_GetExplorer(Object);
+	px_char FileNames[PX_EXPLORER_MAX_ITEMS][260];
+	
+	if (pExp)
+	{
+		px_int i;
+		px_int count;
+		px_char *path=PX_Object_EditGetText(pExp->edit_Path);
+
+		if (!pExp->func_getpathfilecount||!pExp->func_getpathfilename||!pExp->func_getpathfoldercount||!pExp->func_getpathfoldername)
+		{
+			return;
+		}
+
+		
+		pExp->ItemCount=0;
+
+		//folder
+		count=pExp->func_getpathfoldercount(path,pExp->filter);
+		if (count>PX_EXPLORER_MAX_ITEMS)
+		{
+			count=PX_EXPLORER_MAX_ITEMS;
+		}
+		pExp->func_getpathfoldername(path,count,FileNames,pExp->filter);
+		for (i=0;i<count;i++)
+		{
+			pExp->Items[i].bcursor=PX_FALSE;
+			pExp->Items[i].bFolder=PX_TRUE;
+			pExp->Items[i].bselect=PX_FALSE;
+			PX_strcpy(pExp->Items[i].name,FileNames[i],sizeof(pExp->Items[i].name));
+		}
+		pExp->ItemCount+=count;
+
+		count=pExp->func_getpathfilecount(path,pExp->filter);
+		if (count>PX_EXPLORER_MAX_ITEMS-pExp->ItemCount)
+		{
+			count=PX_EXPLORER_MAX_ITEMS-pExp->ItemCount;
+		}
+		pExp->func_getpathfilename(path,count,FileNames,pExp->filter);
+		for (i=0;i<count;i++)
+		{
+			pExp->Items[pExp->ItemCount+i].bcursor=PX_FALSE;
+			pExp->Items[pExp->ItemCount+i].bFolder=PX_FALSE;
+			pExp->Items[pExp->ItemCount+i].bselect=PX_FALSE;
+			PX_strcpy(pExp->Items[pExp->ItemCount+i].name,FileNames[i],sizeof(pExp->Items[0].name));
+		}
+		pExp->ItemCount+=count;
+		PX_Object_SliderBarSetValue(pExp->SliderBar,0);
+	}
+}
+
+px_void PX_Object_ExplorerGetPath(PX_Object *Object,px_char path[PX_EXPLORER_MAX_PATH_LEN],px_int index)
+{
+	PX_Object_Explorer *pExp=PX_Object_GetExplorer(Object);
+	px_int selectCount=0,selectIndex=0;
+	px_int i;
+	for (i=0;i<pExp->ItemCount;i++)
+	{
+		if (pExp->Items[i].bselect)
+		{
+			selectCount++;
+		}
+	}
+	if (index<selectCount)
+	{
+		for (i=0;i<pExp->ItemCount;i++)
+		{
+			if (pExp->Items[i].bselect)
+			{
+				if (selectIndex==index)
+				{
+					PX_strcpy(path,PX_Object_EditGetText(pExp->edit_Path),PX_EXPLORER_MAX_PATH_LEN);
+					if (path[PX_strlen(path)-1]!='/'&&path[PX_strlen(path)-1]!='\\')
+					{
+						PX_strcat(path,"/");
+					}
+					PX_strcat(path,pExp->Items[i].name);
+				}
+				selectIndex++;
+			}
+		}
+	}
+	else
+	{
+		path[0]='\0';
+	}
+
+}
+
+px_void PX_Object_ExplorerOpen(PX_Object *Object)
+{
+	PX_ObjectSetFocus(Object);
+	Object->Visible=PX_TRUE;
+}
+
+px_void PX_Object_ExplorerClose(PX_Object *Object)
+{
+	PX_ObjectClearFocus(Object);
+	Object->Visible=PX_FALSE;
 }

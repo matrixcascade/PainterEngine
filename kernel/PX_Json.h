@@ -69,6 +69,10 @@ px_bool PX_JsonAddBoolean(PX_Json *pjson,const px_char parent_payload[],const px
 px_bool PX_JsonAddArray(PX_Json *pjson,const px_char parent_payload[],const px_char name[]);
 px_bool PX_JsonAddObject(PX_Json *pjson,const px_char parent_payload[],const px_char name[]);
 
+const px_char *PX_JsonGetString(PX_Json *pjson,const px_char payload[]);
+px_double PX_JsonGetNumber(PX_Json *pjson,const px_char payload[]);
+px_bool  PX_JsonGetBoolean(PX_Json *pjson,const px_char payload[]);
+
 px_bool PX_JsonSetString(PX_Json *pjson,const px_char payload[],const px_char text[]);
 px_bool PX_JsonSetNumber(PX_Json *pjson,const px_char payload[],const px_double number);
 px_bool PX_JsonSetBoolean(PX_Json *pjson,const px_char payload[],const px_bool b);

@@ -48,6 +48,7 @@ typedef enum
 	PX_FONTMODULE_CODEPAGE_GBK,
 	PX_FONTMODULE_CODEPAGE_UTF8,
 	PX_FONTMODULE_CODEPAGE_UTF16,
+	PX_FONTMODULE_CODEPAGE_UNDEFINED,
 }PX_FONTMODULE_CODEPAGE;
 
 typedef struct  
@@ -70,7 +71,7 @@ px_void PX_FontTextGetRenderWidthHeight(const px_char *Text,px_int *width,px_int
 
 
 px_int PX_FontModuleGetCharacterCode(PX_FONTMODULE_CODEPAGE codePage,const px_char *Text,px_dword *code);
-px_bool PX_FontModuleInitialize(px_memorypool *mp,PX_FontModule *module,PX_FONTMODULE_CODEPAGE codepage);
+px_bool PX_FontModuleInitialize(px_memorypool *mp,PX_FontModule *module);
 px_bool PX_FontModuleLoad(PX_FontModule *module,px_byte *buffer,px_int size);
 px_void PX_FontModuleFree(PX_FontModule *module);
 px_int PX_FontModuleGetCharacterDesc(PX_FontModule *module,const px_char *Text,px_dword *code,px_int *width,px_int *height);

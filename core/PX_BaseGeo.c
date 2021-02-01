@@ -1010,19 +1010,36 @@ px_void PX_GeoDrawRect(px_surface *psurface, px_int left, px_int top, px_int rig
 	{
 		left=0;
 	}
+	if (left<psurface->limit_left)
+	{
+		left=psurface->limit_left;
+	}
+
 	if (top<0)
 	{
 		top=0;
+	}
+	if (top<psurface->limit_top)
+	{
+		top=psurface->limit_top;
 	}
 
 	if (right>psurface->width-1)
 	{
 		right=psurface->width-1;
 	}
+	if (right>psurface->limit_right)
+	{
+		right=psurface->limit_right;
+	}
 
 	if (bottom>psurface->height-1)
 	{
 		bottom=psurface->height-1;
+	}
+	if (bottom>psurface->limit_bottom)
+	{
+		bottom=psurface->limit_bottom;
 	}
 
 	if (left>psurface->width-1)

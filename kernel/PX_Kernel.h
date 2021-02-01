@@ -23,4 +23,5 @@
 #include "PX_MODBUS.h"
 #include "PX_LiveFramework.h"
 #include "PX_UI.h"
+#include "PX_Compiler.h"
 #endif

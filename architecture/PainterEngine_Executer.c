@@ -212,19 +212,34 @@ px_bool PX_ExecuterVM_Clear(PX_ScriptVM_Instance *Ins,px_void *userptr)
 
 
 
+
 px_bool PX_ExecuterRunScipt(PX_Executer *pExecute,const px_char *pshellstr)
 {
 	px_memory bin;
 	PX_SCRIPT_LIBRARY lib;
 	px_string asmcodeString;
 	px_memorypool mp_calc;
-
+	const px_char stdio[]="#name \"stdio.h\"\n\
+						 host int print(string s);\n\
+						 host int printImage(string key);\n\
+						 host string gets();\n\
+						 host void clear();\n\
+						 host void sleep(int millionsecond);\n\
+						 host int rand();\n\
+						 host int lastprint(string s);\n\
+						  ";
 	mp_calc=MP_Create(MP_Malloc(&pExecute->runtime->mp,PE_MEMORY_CALC_SIZE),PE_MEMORY_CALC_SIZE);
 	if(mp_calc.StartAddr==PX_NULL) return PX_FALSE;
 	MP_Reset(&mp_calc);
 	PX_MemoryInitialize(&mp_calc,&bin);
 
-	if(!PX_ScriptCompilerInit(&lib,&mp_calc))
+	if(!PX_ScriptCompilerInitialize(&lib,&mp_calc))
+	{
+		MP_Free(&pExecute->runtime->mp,mp_calc.StartAddr);
+		return PX_FALSE;
+	}
+
+	if(!PX_ScriptCompilerLoad(&lib,stdio))
 	{
 		MP_Free(&pExecute->runtime->mp,mp_calc.StartAddr);
 		return PX_FALSE;
@@ -258,7 +273,7 @@ px_bool PX_ExecuterRunScipt(PX_Executer *pExecute,const px_char *pshellstr)
 	PX_ScriptCompilerFree(&lib);
 
 	//Load
-	if(!PX_ScriptVM_InstanceInitialize(&pExecute->Instance,&pExecute->runtime->mp_game,bin.buffer,bin.usedsize))
+	if(!PX_ScriptVM_InstanceInitialize(&pExecute->VM_Instance,&pExecute->runtime->mp_game,bin.buffer,bin.usedsize))
 	{
 		MP_Free(&pExecute->runtime->mp,mp_calc.StartAddr);
 		return PX_FALSE;
@@ -267,31 +282,31 @@ px_bool PX_ExecuterRunScipt(PX_Executer *pExecute,const px_char *pshellstr)
 	MP_Free(&pExecute->runtime->mp,mp_calc.StartAddr);
 	//RegistryFunctions
 	
-	PX_ScriptVM_RegistryHostFunction(&pExecute->Instance,"print",PX_ExecuterVM_Print,pExecute);//Print
-	PX_ScriptVM_RegistryHostFunction(&pExecute->Instance,"printImage",PX_ExecuterVM_PrintImage,pExecute);//Print Image
-	PX_ScriptVM_RegistryHostFunction(&pExecute->Instance,"gets",PX_ExecuterVM_Gets,pExecute);//Gets
-	PX_ScriptVM_RegistryHostFunction(&pExecute->Instance,"clear",PX_ExecuterVM_Clear,pExecute);//Clear
-	PX_ScriptVM_RegistryHostFunction(&pExecute->Instance,"sleep",PX_ExecuterVM_Sleep,pExecute);//Sleep
-	PX_ScriptVM_RegistryHostFunction(&pExecute->Instance,"rand",PX_ExecuterVM_Rand,pExecute);//Rand
-	PX_ScriptVM_RegistryHostFunction(&pExecute->Instance,"lastprint",PX_ExecuterVM_LastPrint,pExecute);//lastprint
+	PX_ScriptVM_RegistryHostFunction(&pExecute->VM_Instance,"print",PX_ExecuterVM_Print,pExecute);//Print
+	PX_ScriptVM_RegistryHostFunction(&pExecute->VM_Instance,"printImage",PX_ExecuterVM_PrintImage,pExecute);//Print Image
+	PX_ScriptVM_RegistryHostFunction(&pExecute->VM_Instance,"gets",PX_ExecuterVM_Gets,pExecute);//Gets
+	PX_ScriptVM_RegistryHostFunction(&pExecute->VM_Instance,"clear",PX_ExecuterVM_Clear,pExecute);//Clear
+	PX_ScriptVM_RegistryHostFunction(&pExecute->VM_Instance,"sleep",PX_ExecuterVM_Sleep,pExecute);//Sleep
+	PX_ScriptVM_RegistryHostFunction(&pExecute->VM_Instance,"rand",PX_ExecuterVM_Rand,pExecute);//Rand
+	PX_ScriptVM_RegistryHostFunction(&pExecute->VM_Instance,"lastprint",PX_ExecuterVM_LastPrint,pExecute);//lastprint
 	//////////////////////////////////////////////////////////////////////////
 	//sleep
 	if (pExecute->Sleep)
 	{
 		MP_Free(&pExecute->runtime->mp_game,pExecute->Sleep);
 	}
-	pExecute->Sleep=(px_dword *)MP_Malloc(&pExecute->runtime->mp_game,pExecute->Instance.maxThreadCount*sizeof(px_dword));
+	pExecute->Sleep=(px_dword *)MP_Malloc(&pExecute->runtime->mp_game,pExecute->VM_Instance.maxThreadCount*sizeof(px_dword));
 	
 	
 	//////////////////////////////////////////////////////////////////////////
 
-	if(!PX_ScriptVM_InstanceRunFunction(&pExecute->Instance,0,"_BOOT",PX_NULL,0))
+	if(!PX_ScriptVM_InstanceRunFunction(&pExecute->VM_Instance,0,"_BOOT",PX_NULL,0))
 	{
 		
 		return PX_FALSE;
 	}
 
-	if(!PX_ScriptVM_InstanceBeginThreadFunction(&pExecute->Instance,0,"MAIN",PX_NULL,0))
+	if(!PX_ScriptVM_InstanceBeginThreadFunction(&pExecute->VM_Instance,0,"MAIN",PX_NULL,0))
 	{
 		return PX_FALSE;
 	}
@@ -304,7 +319,7 @@ px_bool PX_ExecuterRunScipt(PX_Executer *pExecute,const px_char *pshellstr)
 
 px_bool PX_ExecuterRegistryHostFunction(PX_Executer *pExecuter,const px_char Name[],PX_ScriptVM_Function_Modules function,px_void *userptr)
 {
-	return PX_ScriptVM_RegistryHostFunction(&pExecuter->Instance,Name,function,userptr);
+	return PX_ScriptVM_RegistryHostFunction(&pExecuter->VM_Instance,Name,function,userptr);
 }
 
 px_void PX_ExecuterOnEnter(PX_Object *Obj,PX_Object_Event e,px_void *user_ptr)
@@ -321,11 +336,11 @@ px_void PX_ExecuterOnEnter(PX_Object *Obj,PX_Object_Event e,px_void *user_ptr)
 	{
 		if (PX_Object_Event_GetKeyDown(e)=='\r')
 		{
-			PX_ScriptVM_RET(&pExecute->Instance,PX_ScriptVM_Variable_const_string(pEdit->text.buffer));
+			PX_ScriptVM_RET(&pExecute->VM_Instance,PX_ScriptVM_Variable_const_string(pEdit->text.buffer));
 			PX_ExecuterPrintText(pExecute,pEdit->text.buffer);
 			PX_Object_EditSetText(pExecute->Input,"");
 			pExecute->bInput=PX_FALSE;
-			pExecute->Instance.pThread[0].suspend=PX_FALSE;
+			pExecute->VM_Instance.pThread[0].suspend=PX_FALSE;
 			
 		}
 	}
@@ -466,26 +481,26 @@ px_void PX_ExecuterUpdate(PX_Executer *pExecute,px_dword elpased)
 		pExecute->Input->Visible=PX_FALSE;
 	}
 
-	if (pExecute->Instance.binsize)
+	if (pExecute->VM_Instance.binsize)
 	{
-		for (i=0;i<pExecute->Instance.maxThreadCount;i++)
+		for (i=0;i<pExecute->VM_Instance.maxThreadCount;i++)
 		{
-			if (pExecute->Instance.pThread[i].Activated)
+			if (pExecute->VM_Instance.pThread[i].Activated)
 			{
 				if (pExecute->Sleep[i]==0)
 				{
-					PX_ScriptVM_InstanceRunThread(&pExecute->Instance,0xffff);
+					PX_ScriptVM_InstanceRunThread(&pExecute->VM_Instance,0xffff);
 				}
 				else
 				{
 					if (pExecute->Sleep[i]<=elpased)
 					{
-						pExecute->Instance.pThread[i].suspend=PX_FALSE;
+						pExecute->VM_Instance.pThread[i].suspend=PX_FALSE;
 						pExecute->Sleep[i]=0;
 					}
 					else
 					{
-						pExecute->Instance.pThread[i].suspend=PX_TRUE;
+						pExecute->VM_Instance.pThread[i].suspend=PX_TRUE;
 						pExecute->Sleep[i]-=elpased;
 					}
 				}

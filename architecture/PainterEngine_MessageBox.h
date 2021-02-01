@@ -7,6 +7,7 @@
 #define PX_MESSAGEBOX_DEFAULT_STAGE_1_TIME 60
 #define PX_MESSAGEBOX_DEFAULT_STAGE_2_HEIGHT 200
 #define PX_MESSAGEBOX_DEFAULT_STAGE_2_TIME 240
+#define PX_MESSAGEBOX_MAX_MESSAGESIZE 128
 
 typedef enum
 {
@@ -45,7 +46,7 @@ typedef struct
 
 	PX_MessageBoxCallBack function_yes,function_no;
 	px_void *function_yes_ptr,*function_no_ptr;
-	const px_char *Message;
+	px_char Message[PX_MESSAGEBOX_MAX_MESSAGESIZE];
 	PX_FontModule *fontmodule;
 	PX_Object *root,*btn_Ok,*btn_Cancel,*edit_inputbox;
 }PX_MessageBox;

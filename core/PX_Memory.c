@@ -12,6 +12,11 @@ px_bool PX_MemoryCat(px_memory *memory,const px_void *buffer,px_int size)
 	px_byte *old;
 	px_int length,shl;
 
+	if (size==0)
+	{
+		return PX_TRUE;
+	}
+
 	if (memory->usedsize+size>memory->allocsize)
 	{
 		shl=0;
@@ -59,7 +64,16 @@ px_bool PX_MemoryAlloc(px_memory *memory,px_int size)
 	PX_MemoryFree(memory);
 	memory->allocsize=size;
 	memory->usedsize=0;
-	return (memory->buffer=(px_byte *)MP_Malloc(memory->mp,size))!=0;
+	if (size==0)
+	{
+		memory->buffer=PX_NULL;
+		return PX_TRUE;
+	}
+	else
+	{
+		return (memory->buffer=(px_byte *)MP_Malloc(memory->mp,size))!=0;
+	}
+	
 }
 
 px_bool PX_MemoryResize(px_memory *memory,px_int size)

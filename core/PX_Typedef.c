@@ -450,7 +450,7 @@ px_void PX_BufferToHexString(px_byte data[],px_int size,px_char hex_str[])
 	hex_str[i*2]=0;
 }
 
-px_bool PX_HexStringToBuffer(const px_char hex_str[],px_byte data[])
+px_int PX_HexStringToBuffer(const px_char hex_str[],px_byte data[])
 {
 	px_int i=0;
 	px_char hex[3]={0};
@@ -474,7 +474,7 @@ px_bool PX_HexStringToBuffer(const px_char hex_str[],px_byte data[])
 		data[i]=PX_htoi(hex);
 		i++;
 	}
-	return PX_TRUE;
+	return i;
 }
 
 static volatile const px_double Tiny =(px_double)2.225073858507201383e-308 ;

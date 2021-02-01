@@ -11,6 +11,7 @@ typedef struct
 	unsigned int StopBit;
 }PX_SerialPort;
 
+
 const char* PX_SerialPortEnumComName(int index);
 const int PX_SerialPortInitialize(PX_SerialPort *com,const char *name,unsigned int baudRate,unsigned int DataBits/*5,6,7,8*/,char ParityType/*'O','E','N'*/,unsigned int stopBit/*0,1,2*/);
 const int PX_SerialPortReset(PX_SerialPort *com,unsigned int baudRate,unsigned int DataBits/*5,6,7,8*/,char ParityType/*'O','E','N'*/,unsigned int stopBit/*0,1,2*/);

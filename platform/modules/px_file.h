@@ -30,8 +30,8 @@ int PX_CopyFile(const char respath[],const char destpath[]);
 int PX_SaveDataToFile(void *buffer,int size,const char path[]);
 void PX_FreeIOData(PX_IO_Data *io);
 
-int PX_GetDirectoryFileCount(const char path[],PX_FILEENUM_TYPE type,const char *filter);
-int PX_GetDirectoryFileName(const char path[],int count,char *FileName[260],PX_FILEENUM_TYPE type,const char *filter);
+int PX_FileGetDirectoryFileCount(const char path[],PX_FILEENUM_TYPE type,const char *filter);
+int PX_FileGetDirectoryFileName(const char path[],int count,char FileName[][260],PX_FILEENUM_TYPE type,const char *filter);
 
 #endif
 

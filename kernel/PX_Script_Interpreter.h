@@ -22,7 +22,7 @@ typedef enum
 	PX_SCRIPT_PARSER_VAR_TYPE_FLOAT,
 	PX_SCRIPT_PARSER_VAR_TYPE_MEMORY,
 	PX_SCRIPT_PARSER_VAR_TYPE_VOID,
-	PX_SCRIPT_PARSER_VAR_TYPE_SET,
+	PX_SCRIPT_PARSER_VAR_TYPE_STRUCT,
 
 	PX_SCRIPT_PARSER_VAR_TYPE_INT_ARRAY,
 	PX_SCRIPT_PARSER_VAR_TYPE_STRING_ARRAY,
@@ -34,7 +34,7 @@ typedef enum
 	PX_SCRIPT_PARSER_VAR_TYPE_STRING_PTR,
 	PX_SCRIPT_PARSER_VAR_TYPE_FLOAT_PTR,
 	PX_SCRIPT_PARSER_VAR_TYPE_MEMORY_PTR,
-	PX_SCRIPT_PARSER_VAR_TYPE_SET_PTR,
+	PX_SCRIPT_PARSER_VAR_TYPE_STRUCT_PTR,
 
 }PX_SCRIPT_PARSER_VAR_TYPE;
 
@@ -148,7 +148,7 @@ typedef enum
 	PX_SCRIPT_AST_OPERAND_TYPE_FLOAT,  //float var
 	PX_SCRIPT_AST_OPERAND_TYPE_STRING, //string var
 	PX_SCRIPT_AST_OPERAND_TYPE_MEMORY,//memory var
-	PX_SCRIPT_AST_OPERAND_TYPE_SET,   //set xx var
+	PX_SCRIPT_AST_OPERAND_TYPE_STRUCT,   //set xx var
 
 	PX_SCRIPT_AST_OPERAND_TYPE_INT_CONST,//int const
 	PX_SCRIPT_AST_OPERAND_TYPE_FLOAT_CONST,//float const
@@ -159,7 +159,7 @@ typedef enum
 	PX_SCRIPT_AST_OPERAND_TYPE_FLOAT_PTR,//float var[x]
 	PX_SCRIPT_AST_OPERAND_TYPE_STRING_PTR,//string var[x]
 	PX_SCRIPT_AST_OPERAND_TYPE_MEMORY_PTR,//memory var[x]
-	PX_SCRIPT_AST_OPERAND_TYPE_SET_PTR,//set xx var[x]
+	PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR,//set xx var[x]
 
 	PX_SCRIPT_AST_OPERAND_TYPE_INT_PTR_CONST, //int var[] 
 	PX_SCRIPT_AST_OPERAND_TYPE_FLOAT_PTR_CONST,//float var[]
@@ -206,7 +206,7 @@ typedef enum
 #define PX_SCRIPT_TRANSLATOR_KEYWORD_VAR_MEMORY "MEMORY"
 #define PX_SCRIPT_TRANSLATOR_KEYWORD_VAR_FLOAT "FLOAT"
 #define PX_SCRIPT_TRANSLATOR_KEYWORD_VAR_VOID "VOID"
-#define PX_SCRIPT_TRANSLATOR_KEYWORD_VAR_SET "SET"
+#define PX_SCRIPT_TRANSLATOR_KEYWORD_VAR_STRUCT "STRUCT"
 #define PX_SCRIPT_TRANSLATOR_KEYWORD_RETURN "RETURN"
 #define PX_SCRIPT_TRANSLATOR_KEYWORD_VAR_SIZEOF "SIZEOF"
 
@@ -242,7 +242,7 @@ typedef struct
 	px_string Name;
 	px_vector members;
 	px_int size;
-}PX_SCRIPT_SET;
+}PX_SCRIPT_STRUCT;
 
 typedef struct  
 {
@@ -279,7 +279,7 @@ typedef struct
 {
 	PX_SCRIPT_AST_OPERAND_TYPE operandType;
 	PX_SCRIPT_VARIABLE_REGION region;
-	PX_SCRIPT_SET *pSet;
+	PX_SCRIPT_STRUCT *pSet;
 	union
 	{
 		px_int	_oft;
@@ -311,7 +311,7 @@ typedef struct
 	PX_SCRIPT_VARIABLES parameters[PX_SCRIPT_FUNCTION_MAX_PARAM];
 	px_int parametersCount;
 	px_int parametersSize;
-	px_int LocalSize;
+
 	PX_SCRIPT_PARSER_VAR_TYPE retType;
 	px_int retSetIndex;
 }PX_SCRIPT_FUNCTION;
@@ -409,17 +409,18 @@ typedef struct
 	px_lexer  lexer;
 	px_bool functionInside;
 	px_bool functionReturn;
-	px_int functionlable;
+	px_int	functionlable;
+	px_int  functionguider;
 	PX_SCRIPT_FUNCTION currentFunc;
-	px_vector v_sets;
+	px_vector v_struct;
 	px_vector v_functions;
 	px_vector v_variablesGlobalTable;
-	px_vector v_variableStackTable;
+	px_vector v_variablesStackTable;
 	px_vector v_astStructure;
 	px_int _jFlag;
 }PX_SCRIPT_Analysis;
 
-px_bool PX_ScriptCompilerInit(PX_SCRIPT_LIBRARY *lib,px_memorypool *mp);
+px_bool PX_ScriptCompilerInitialize(PX_SCRIPT_LIBRARY *lib,px_memorypool *mp);
 px_bool PX_ScriptCompilerLoad(PX_SCRIPT_LIBRARY *lib,const px_char *code);
 px_bool PX_ScriptCompilerCompile(PX_SCRIPT_LIBRARY *lib,const px_char *name,px_string *ASM,px_int StackSize);
 px_void PX_ScriptCompilerFree(PX_SCRIPT_LIBRARY *lib);

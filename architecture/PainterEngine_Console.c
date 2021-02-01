@@ -369,7 +369,7 @@ px_bool PX_ConsoleExecute(PX_Console *pc,char *pshellstr)
 	PX_StringCat(&shell,pshellstr);
 	PX_StringCat(&shell,"\r\n}");
 
-	if(!PX_ScriptCompilerInit(&lib,&mp_calc))
+	if(!PX_ScriptCompilerInitialize(&lib,&mp_calc))
 	{
 		MP_Free(&pc->runtime->mp,mp_calc.StartAddr);
 		return PX_FALSE;

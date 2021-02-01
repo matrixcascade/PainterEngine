@@ -416,6 +416,17 @@ px_void PX_StringReplace(px_string *str,px_char *source,px_char *replaceto)
 	PX_StringFree(&tempstr);
 }
 
+px_bool PX_StringInsert(px_string *str,px_int insertIndex,const px_char *InstrString)
+{
+	px_int length=PX_strlen(InstrString);
+	px_int resLen=PX_strlen(str->buffer+insertIndex);
+	if(!PX_StringCat(str,InstrString)) return PX_FALSE;
+	PX_memcpy(str->buffer+insertIndex+length,str->buffer+insertIndex,resLen);
+	PX_memcpy(str->buffer+insertIndex,InstrString,length);
+	return PX_TRUE;
+}
+
+
 px_void PX_StringReplaceRange(px_string *str,px_int startindex,px_int endindex,px_char *replaceto)
 {
 	px_string tempStr;

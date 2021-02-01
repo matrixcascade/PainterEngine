@@ -176,6 +176,11 @@ px_bool PX_UI_GetString(PX_Json_Value *json_value,const px_char name[],px_char s
 	return PX_FALSE;
 }
 
+PX_Object * PX_UI_CreateNode(PX_UI *ui,PX_Object *parent,PX_Json_Value *json_value,px_int width,px_int height)
+{
+	return PX_ObjectCreate(ui->ui_mp,parent,0,0,0,0,0,0);
+}
+
 PX_Object * PX_UI_CreateLabel(PX_UI *ui,PX_Object *parent,PX_Json_Value *json_value,px_int width,px_int height)
 {
 	PX_Object *pObject;
@@ -435,6 +440,9 @@ PX_Object * PX_UI_CreateEdit(PX_UI *ui,PX_Object *parent,PX_Json_Value *json_val
 	PX_Json_Value *pSubValue=PX_NULL;
 	px_color fontColor,Color;
 	px_char style[8];
+	px_char str[128];
+	px_double number;
+
 	baseInfo=PX_UIGetBaseInfo(json_value,width,height);
 	fontColor=PX_COLOR(255,0,0,0);
 
@@ -469,6 +477,16 @@ PX_Object * PX_UI_CreateEdit(PX_UI *ui,PX_Object *parent,PX_Json_Value *json_val
 	if (PX_UI_GetBool(json_value,"autonewline",&b))
 	{
 		PX_Object_EditAutoNewLine(pObject,b,16);
+	}
+
+	if (PX_UI_GetString(json_value,"limit",str,sizeof(str)))
+	{
+		PX_Object_EditSetLimit(pObject,str);
+	}
+
+	if (PX_UI_GetNumber(json_value,"maxlength",&number))
+	{
+		PX_Object_EditSetMaxTextLength(pObject,(px_int)number);
 	}
 
 	if (PX_UI_GetString(json_value,"style",style,sizeof(style)))
@@ -696,6 +714,27 @@ PX_Object * PX_UI_CreateCheckBox(PX_UI *ui,PX_Object *parent,PX_Json_Value *json
 
 	return pObject;
 }
+
+px_bool PX_UI_IsValidUIObject(PX_UI *ui,PX_Json_Value *json_value)
+{
+	if (json_value->type==PX_JSON_VALUE_TYPE_OBJECT)
+	{
+		if (json_value->name.buffer&&json_value->name.buffer[0])
+		{
+			px_int i;
+			for (i=0;i<ui->infos.size;i++)
+			{
+				PX_UI_ControllerInfo *pInfo=PX_VECTORAT(PX_UI_ControllerInfo,&ui->infos,i);
+				if (PX_strequ(pInfo->Type,json_value->name.buffer))
+				{
+					return PX_TRUE;
+				}
+			}
+		}
+	}
+	return PX_FALSE;
+}
+
 PX_Object * PX_UI_CreateRadioBox(PX_UI *ui,PX_Object *parent,PX_Json_Value *json_value,px_int width,px_int height)
 {
 	PX_Object *pObject;
@@ -790,6 +829,7 @@ PX_Object * PX_UI_CreateSelectBar(PX_UI *ui,PX_Object *parent,PX_Json_Value *jso
 		PX_Object_SelectBarSetDisplayCount(pObject,(px_int)number);
 	}
 
+
 	pSubValue=PX_JsonGetObjectValue(json_value,"items");
 	if (pSubValue&&pSubValue->type==PX_JSON_VALUE_TYPE_ARRAY)
 	{
@@ -804,6 +844,12 @@ PX_Object * PX_UI_CreateSelectBar(PX_UI *ui,PX_Object *parent,PX_Json_Value *jso
 			}
 		}
 	}
+
+	if (PX_UI_GetNumber(json_value,"currentindex",&number))
+	{
+		PX_Object_SelectBarSetCurrentIndex(pObject,(px_int)number);
+	}
+
 	return pObject;
 }
 
@@ -819,7 +865,7 @@ px_bool PX_UIInitialize(px_memorypool *mp,px_memorypool *ui_mp,PX_UI *ui,PX_Font
 		PX_VectorFree(&ui->infos);
 		return PX_FALSE;
 	}
-
+	if(!PX_UIAddControllerInfo(ui,"node",PX_UI_CreateNode)) goto _ERROR;
 	if(!PX_UIAddControllerInfo(ui,"label",PX_UI_CreateLabel)) goto _ERROR;
 	if(!PX_UIAddControllerInfo(ui,"processbar",PX_UI_CreateProcessbar)) goto _ERROR;
 	if(!PX_UIAddControllerInfo(ui,"image",PX_UI_CreateImage)) goto _ERROR;
@@ -918,7 +964,7 @@ PX_Object * PX_UICreate(PX_UI *ui,PX_Object *parent,PX_Json_Value *json_value,px
 		while (pNode)
 		{
 			PX_Json_Value *pvalue=PX_LIST_NODETDATA(PX_Json_Value,pNode);
-			if (pvalue->type==PX_JSON_VALUE_TYPE_OBJECT)
+			if (PX_UI_IsValidUIObject(ui,pvalue))
 			{
 				if(!PX_UICreate(ui,pNewObject,pvalue,width,height))
 				{
@@ -945,6 +991,8 @@ px_void PX_UIUpdateObjectsPostions(PX_UI *ui,PX_Object *pObject,PX_Json_Value *j
 	PX_Json_Value *pSubValue=PX_NULL;
 	PX_Object *pChildObject;
 	px_int i;
+	px_int index=0;
+
 	baseInfo=PX_UIGetBaseInfo(json_value,width,height);
 	pObject->x=baseInfo.x;
 	pObject->y=baseInfo.y;
@@ -955,11 +1003,16 @@ px_void PX_UIUpdateObjectsPostions(PX_UI *ui,PX_Object *pObject,PX_Json_Value *j
 		for (i=0;i<json_value->_object.values.size;i++)
 		{
 			pSubValue=PX_JsonGetObjectValueByIndex(json_value,i);
-			pChildObject=PX_ObjectGetChild(pObject,i);
-			if (pChildObject)
+			if (PX_UI_IsValidUIObject(ui,pSubValue))
 			{
-				PX_UIUpdateObjectsPostions(ui,pChildObject,pSubValue,width,height);
+				pChildObject=PX_ObjectGetChild(pObject,index);
+				if (pChildObject)
+				{
+					PX_UIUpdateObjectsPostions(ui,pChildObject,pSubValue,width,height);
+				}
+				index++;
 			}
+			
 		}
 	}
 }

@@ -277,8 +277,8 @@ static PX_SCRIPTVM_VARIABLE  PX_SCRIPT_VM_GetParamConst(PX_ScriptVM_Instance *In
 		break;
 	case PX_SCRIPT_ASM_OPTYPE_LOCAL_CONST:
 		{
-			if(pT->BP+param<Ins->VM_memsize)
-				return PX_SCRIPTVM_VaribaleCopy(Ins,Ins->_mem[pT->BP+param],bOutofMemory);
+			if(pT->BP-param>0&&pT->BP-param<Ins->VM_memsize)
+				return PX_SCRIPTVM_VaribaleCopy(Ins,Ins->_mem[pT->BP-param],bOutofMemory);
 			else
 				goto _ERROR;
 		}
@@ -290,9 +290,9 @@ static PX_SCRIPTVM_VARIABLE  PX_SCRIPT_VM_GetParamConst(PX_ScriptVM_Instance *In
 				rVar=pT->R[param];
 				if (rVar.type==PX_SCRIPTVM_VARIABLE_TYPE_INT)
 				{
-					if (rVar._int+pT->BP<Ins->VM_memsize)
+					if (pT->BP-rVar._int>0&&pT->BP-rVar._int<Ins->VM_memsize)
 					{
-						return PX_SCRIPTVM_VaribaleCopy(Ins,Ins->_mem[pT->BP+rVar._int],bOutofMemory);
+						return PX_SCRIPTVM_VaribaleCopy(Ins,Ins->_mem[rVar._int-pT->BP],bOutofMemory);
 					}
 					else
 					{
@@ -318,9 +318,9 @@ static PX_SCRIPTVM_VARIABLE  PX_SCRIPT_VM_GetParamConst(PX_ScriptVM_Instance *In
 				rVar=Ins->_mem[param];
 				if (rVar.type==PX_SCRIPTVM_VARIABLE_TYPE_INT)
 				{
-					if (rVar._int+pT->BP<Ins->VM_memsize)
+					if (pT->BP-rVar._int>0&&pT->BP-rVar._int<Ins->VM_memsize)
 					{
-						return PX_SCRIPTVM_VaribaleCopy(Ins,Ins->_mem[pT->BP+rVar._int],bOutofMemory);
+						return PX_SCRIPTVM_VaribaleCopy(Ins,Ins->_mem[pT->BP-rVar._int],bOutofMemory);
 					}
 					else
 					{
@@ -340,14 +340,14 @@ static PX_SCRIPTVM_VARIABLE  PX_SCRIPT_VM_GetParamConst(PX_ScriptVM_Instance *In
 		break;
 	case PX_SCRIPT_ASM_OPTYPE_LOCAL_LOCALREF:
 		{
-			if (param+pT->BP<Ins->VM_memsize)
+			if (pT->BP-param>0&&pT->BP-param<Ins->VM_memsize)
 			{
-				rVar=Ins->_mem[pT->BP+param];
+				rVar=Ins->_mem[pT->BP-param];
 				if (rVar.type==PX_SCRIPTVM_VARIABLE_TYPE_INT)
 				{
-					if (rVar._int+pT->BP<Ins->VM_memsize)
+					if (pT->BP-rVar._int>0&&pT->BP-rVar._int<Ins->VM_memsize)
 					{
-						return PX_SCRIPTVM_VaribaleCopy(Ins,Ins->_mem[pT->BP+rVar._int],bOutofMemory);
+						return PX_SCRIPTVM_VaribaleCopy(Ins,Ins->_mem[pT->BP-rVar._int],bOutofMemory);
 					}
 					else
 					{
@@ -437,9 +437,9 @@ static PX_SCRIPTVM_VARIABLE  PX_SCRIPT_VM_GetParamConst(PX_ScriptVM_Instance *In
 		break;
 	case PX_SCRIPT_ASM_OPTYPE_GLOBAL_LOCALREF:
 		{
-			if (param+pT->BP<Ins->VM_memsize)
+			if (pT->BP-param>0&&pT->BP-param<Ins->VM_memsize)
 			{
-				rVar=Ins->_mem[pT->BP+param];
+				rVar=Ins->_mem[pT->BP-param];
 				if (rVar.type==PX_SCRIPTVM_VARIABLE_TYPE_INT)
 				{
 					if (rVar._int<Ins->VM_memsize)
@@ -494,8 +494,8 @@ static PX_SCRIPTVM_VARIABLE * PX_SCRIPT_VM_GetVariablePointer(PX_ScriptVM_Instan
 		break;
 	case PX_SCRIPT_ASM_OPTYPE_LOCAL_CONST:
 		{
-			if(pT->BP+param<Ins->VM_memsize)
-			return &Ins->_mem[pT->BP+param];
+			if(pT->BP-param>0&&pT->BP-param<Ins->VM_memsize)
+			return &Ins->_mem[pT->BP-param];
 			else
 				goto _ERROR;
 		}
@@ -507,9 +507,9 @@ static PX_SCRIPTVM_VARIABLE * PX_SCRIPT_VM_GetVariablePointer(PX_ScriptVM_Instan
 				rVar=pT->R[param];
 				if (rVar.type==PX_SCRIPTVM_VARIABLE_TYPE_INT)
 				{
-					if (rVar._int+pT->BP<Ins->VM_memsize)
+					if (pT->BP-rVar._int>0&&pT->BP-rVar._int<Ins->VM_memsize)
 					{
-						return &Ins->_mem[pT->BP+rVar._int];
+						return &Ins->_mem[pT->BP-rVar._int];
 					}
 					else
 					{
@@ -535,9 +535,9 @@ static PX_SCRIPTVM_VARIABLE * PX_SCRIPT_VM_GetVariablePointer(PX_ScriptVM_Instan
 				rVar=Ins->_mem[param];
 				if (rVar.type==PX_SCRIPTVM_VARIABLE_TYPE_INT)
 				{
-					if (rVar._int+pT->BP<Ins->VM_memsize)
+					if (pT->BP-rVar._int>0&&pT->BP-rVar._int<Ins->VM_memsize)
 					{
-						return &Ins->_mem[pT->BP+rVar._int];
+						return &Ins->_mem[pT->BP-rVar._int];
 					}
 					else
 					{
@@ -557,14 +557,14 @@ static PX_SCRIPTVM_VARIABLE * PX_SCRIPT_VM_GetVariablePointer(PX_ScriptVM_Instan
 		break;
 	case PX_SCRIPT_ASM_OPTYPE_LOCAL_LOCALREF:
 		{
-			if (param+pT->BP<Ins->VM_memsize)
+			if (pT->BP-param>0&&pT->BP-param<Ins->VM_memsize)
 			{
-				rVar=Ins->_mem[pT->BP+param];
+				rVar=Ins->_mem[pT->BP-param];
 				if (rVar.type==PX_SCRIPTVM_VARIABLE_TYPE_INT)
 				{
-					if (rVar._int+pT->BP<Ins->VM_memsize)
+					if (pT->BP-rVar._int>0&&pT->BP-rVar._int<Ins->VM_memsize)
 					{
-						return &Ins->_mem[pT->BP+rVar._int];
+						return &Ins->_mem[pT->BP-rVar._int];
 					}
 					else
 					{
@@ -656,9 +656,9 @@ static PX_SCRIPTVM_VARIABLE * PX_SCRIPT_VM_GetVariablePointer(PX_ScriptVM_Instan
 		break;
 	case PX_SCRIPT_ASM_OPTYPE_GLOBAL_LOCALREF:
 		{
-			if (param+pT->BP<Ins->VM_memsize)
+			if (pT->BP-param>0&&pT->BP-param<Ins->VM_memsize)
 			{
-				rVar=Ins->_mem[pT->BP+param];
+				rVar=Ins->_mem[pT->BP-param];
 				if (rVar.type==PX_SCRIPTVM_VARIABLE_TYPE_INT)
 				{
 					if (rVar._int<Ins->VM_memsize)
@@ -2734,7 +2734,7 @@ PX_SCRIPTVM_RUNRETURN PX_ScriptVM_InstanceRunThread(PX_ScriptVM_Instance *Ins,px
 				pVar->_int=PX_SCRIPT_VM_PARAM(1);
 				break;
 			case PX_SCRIPT_ASM_OPTYPE_LOCAL:
-				pVar->_int=pT->BP+PX_SCRIPT_VM_PARAM(1);
+				pVar->_int=pT->BP-PX_SCRIPT_VM_PARAM(1);
 				break;
 			case PX_SCRIPT_ASM_OPTYPE_GLOBAL_REGREF:
 				if (pT->R[PX_SCRIPT_VM_PARAM(1)].type!=PX_SCRIPTVM_VARIABLE_TYPE_INT)
@@ -2753,12 +2753,12 @@ PX_SCRIPTVM_RUNRETURN PX_ScriptVM_InstanceRunThread(PX_ScriptVM_Instance *Ins,px
 				pVar->_int=Ins->_mem[PX_SCRIPT_VM_PARAM(1)]._int;
 				break;
 			case PX_SCRIPT_ASM_OPTYPE_GLOBAL_LOCALREF:
-				if (Ins->_mem[pT->BP+PX_SCRIPT_VM_PARAM(1)].type!=PX_SCRIPTVM_VARIABLE_TYPE_INT)
+				if (Ins->_mem[pT->BP-PX_SCRIPT_VM_PARAM(1)].type!=PX_SCRIPTVM_VARIABLE_TYPE_INT)
 				{
 					PX_ScriptVM_Error(Ins,"ADR error");
 					goto _ERROR;
 				}
-				pVar->_int=Ins->_mem[pT->BP+PX_SCRIPT_VM_PARAM(1)]._int;
+				pVar->_int=Ins->_mem[pT->BP-PX_SCRIPT_VM_PARAM(1)]._int;
 				break;
 			case PX_SCRIPT_ASM_OPTYPE_LOCAL_REGREF:
 				if (Ins->_mem[PX_SCRIPT_VM_PARAM(1)].type!=PX_SCRIPTVM_VARIABLE_TYPE_INT)
@@ -2766,7 +2766,7 @@ PX_SCRIPTVM_RUNRETURN PX_ScriptVM_InstanceRunThread(PX_ScriptVM_Instance *Ins,px
 					PX_ScriptVM_Error(Ins,"ADR error");
 					goto _ERROR;
 				}
-				pVar->_int=pT->BP+pT->R[PX_SCRIPT_VM_PARAM(1)]._int;
+				pVar->_int=pT->BP-pT->R[PX_SCRIPT_VM_PARAM(1)]._int;
 				break;
 			case PX_SCRIPT_ASM_OPTYPE_LOCAL_GLOBALREF:
 				if (Ins->_mem[PX_SCRIPT_VM_PARAM(1)].type!=PX_SCRIPTVM_VARIABLE_TYPE_INT)
@@ -2774,15 +2774,15 @@ PX_SCRIPTVM_RUNRETURN PX_ScriptVM_InstanceRunThread(PX_ScriptVM_Instance *Ins,px
 					PX_ScriptVM_Error(Ins,"ADR error");
 					goto _ERROR;
 				}
-				pVar->_int=pT->BP+Ins->_mem[PX_SCRIPT_VM_PARAM(1)]._int;
+				pVar->_int=pT->BP-Ins->_mem[PX_SCRIPT_VM_PARAM(1)]._int;
 				break;
 			case PX_SCRIPT_ASM_OPTYPE_LOCAL_LOCALREF:
-				if (Ins->_mem[pT->BP+PX_SCRIPT_VM_PARAM(1)].type!=PX_SCRIPTVM_VARIABLE_TYPE_INT)
+				if (Ins->_mem[pT->BP-PX_SCRIPT_VM_PARAM(1)].type!=PX_SCRIPTVM_VARIABLE_TYPE_INT)
 				{
 					PX_ScriptVM_Error(Ins,"ADR error");
 					goto _ERROR;
 				}
-				pVar->_int=pT->BP+Ins->_mem[pT->BP+PX_SCRIPT_VM_PARAM(1)]._int;
+				pVar->_int=pT->BP-Ins->_mem[pT->BP-PX_SCRIPT_VM_PARAM(1)]._int;
 				break;
 
 			}
@@ -2792,15 +2792,7 @@ PX_SCRIPTVM_RUNRETURN PX_ScriptVM_InstanceRunThread(PX_ScriptVM_Instance *Ins,px
 
 	case PX_SCRIPT_ASM_INSTR_OPCODE_RET:
 		{
-			cVar=Ins->_mem[pT->SP];
-			if (cVar.type!=PX_SCRIPTVM_VARIABLE_TYPE_INT)
-			{
-				PX_ScriptVM_Error(Ins,"RET error");
-				goto _ERROR;
-			}
-			pT->SP+=1;
-			pT->IP=cVar._int;
-			if (pT->IP==-1)
+			if (pT->SP>=Ins->VM_memsize)
 			{
 				PX_SCRIPTVM_VaribaleFree(Ins,&cVar);
 				PX_SCRIPTVM_VaribaleFree(Ins,&sVar);
@@ -2808,6 +2800,29 @@ PX_SCRIPTVM_RUNRETURN PX_ScriptVM_InstanceRunThread(PX_ScriptVM_Instance *Ins,px
 
 				PX_ScriptVM_ThreadStop(Ins,Ins->T);
 				return PX_SCRIPTVM_RUNRETURN_END;
+			}
+			else
+			{
+				cVar=Ins->_mem[pT->SP];
+				if (cVar.type!=PX_SCRIPTVM_VARIABLE_TYPE_INT)
+				{
+					PX_ScriptVM_Error(Ins,"RET error");
+					goto _ERROR;
+				}
+				pT->SP+=1;
+				if (pT->SP>=Ins->VM_memsize||cVar._int==-1)
+				{
+					PX_SCRIPTVM_VaribaleFree(Ins,&cVar);
+					PX_SCRIPTVM_VaribaleFree(Ins,&sVar);
+					PX_SCRIPTVM_VaribaleFree(Ins,&tVar);
+
+					PX_ScriptVM_ThreadStop(Ins,Ins->T);
+					return PX_SCRIPTVM_RUNRETURN_END;
+				}
+				else
+				{
+					pT->IP=cVar._int;
+				}
 			}
 		}
 		break;
@@ -3319,6 +3334,16 @@ PX_SCRIPTVM_VARIABLE PX_ScriptVM_Variable_string(px_string _string)
 	PX_SCRIPTVM_VARIABLE var;
 	var.type=PX_SCRIPTVM_VARIABLE_TYPE_STRING;
 	var._string=_string;
+	return var;
+}
+
+PX_SCRIPTVM_VARIABLE PX_ScriptVM_Variable_memory(px_byte *buffer,px_int _size)
+{
+	PX_SCRIPTVM_VARIABLE var;
+	var.type=PX_SCRIPTVM_VARIABLE_TYPE_MEMORY;
+	var._memory.allocsize=0;
+	var._memory.buffer=buffer;
+	var._memory.usedsize=_size;
 	return var;
 }
 
@@ -4544,7 +4569,7 @@ static px_bool PX_ScriptVM_DebuggerSolveCmd(PX_ScriptVM_Instance *Ins,px_char *c
 			else
 				break;
 
-			PX_ScriptVM_DebuggerDisplayVariable(Ins,Ins->pThread[Ins->T].BP+u);
+			PX_ScriptVM_DebuggerDisplayVariable(Ins,Ins->pThread[Ins->T].BP-u);
 
 
 			type=PX_LexerGetNextLexeme(&lexer);
