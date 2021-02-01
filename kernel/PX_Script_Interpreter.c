@@ -1,6 +1,6 @@
 #include "PX_Script_Interpreter.h"
 
-static px_char *PX_Script_Keywords[]={"IF","ELSE","COMPARE","WITH","WHILE","FOR","BREAK","RETURN","STRUCT","FUNCTION","EXPORT","HOST","INT","FLOAT","STRING","MEMORY","_BOOT","RETURN","SIZEOF","_ASM"};
+static px_char *PX_Script_Keywords[]={"IF","ELSE","COMPARE","WITH","WHILE","FOR","BREAK","RETURN","STRUCT","FUNCTION","EXPORT","HOST","INT","FLOAT","STRING","MEMORY","_BOOT","RETURN","_ASM"};
 static px_char PX_Script_InterpreterError[256];
 
 px_void PX_ScriptTranslatorError(px_lexer *lexer,px_char *info)
@@ -1142,12 +1142,6 @@ static px_bool PX_ScriptParseAST_PushOpcode(PX_SCRIPT_Analysis *analysis,px_vect
 		break;
 	case PX_SCRIPT_TRANSLATOR_EXPRESSION_OP_MEMLEN:
 		opc.operandType=PX_SCRIPT_AST_OPCODE_TYPE_MEMLEN;
-		break;
-	case PX_SCRIPT_TRANSLATOR_EXPRESSION_OP_COS:
-		opc.operandType=PX_SCRIPT_AST_OPCODE_TYPE_COS;
-		break;
-	case PX_SCRIPT_TRANSLATOR_EXPRESSION_OP_SIN:
-		opc.operandType=PX_SCRIPT_AST_OPCODE_TYPE_SIN;
 		break;
 	default:
 		return PX_FALSE;
@@ -5325,14 +5319,14 @@ static px_bool PX_ScriptParseLastInstr_STRLEN(PX_SCRIPT_Analysis *analysis,px_ve
 	pTop->_oft=0;
 	pTop->pSet=PX_NULL;
 	pTop->_int=0;
-	if(!PX_ScriptParseAST_MapTokenToR1(analysis,operand1,out)) return PX_FALSE;
+	if(!PX_ScriptParseAST_MapTokenToR2(analysis,operand1,out)) return PX_FALSE;
 	pTop->operandType=PX_SCRIPT_AST_OPERAND_TYPE_INT_CONST;
 
 	switch(operand1.operandType)
 	{
 	case PX_SCRIPT_AST_OPERAND_TYPE_STRING:
 	case PX_SCRIPT_AST_OPERAND_TYPE_STRING_CONST:
-		PX_StringCat(out,"STRLEN R1\n");
+		PX_StringCat(out,"STRLEN R1,R2\n");
 		break;
 	default:
 		return PX_FALSE;
@@ -5355,14 +5349,14 @@ static px_bool PX_ScriptParseLastInstr_MEMLEN(PX_SCRIPT_Analysis *analysis,px_ve
 	pTop->_oft=0;
 	pTop->pSet=PX_NULL;
 	pTop->_int=0;
-	if(!PX_ScriptParseAST_MapTokenToR1(analysis,operand1,out)) return PX_FALSE;
+	if(!PX_ScriptParseAST_MapTokenToR2(analysis,operand1,out)) return PX_FALSE;
 	pTop->operandType=PX_SCRIPT_AST_OPERAND_TYPE_INT_CONST;
 
 	switch(operand1.operandType)
 	{
 	case PX_SCRIPT_AST_OPERAND_TYPE_MEMORY:
 	case PX_SCRIPT_AST_OPERAND_TYPE_MEMORY_CONST:
-		PX_StringCat(out,"MEMLEN R1\n");
+		PX_StringCat(out,"MEMLEN R1,R2\n");
 		break;
 	default:
 		return PX_FALSE;
@@ -5370,62 +5364,7 @@ static px_bool PX_ScriptParseLastInstr_MEMLEN(PX_SCRIPT_Analysis *analysis,px_ve
 	PX_StringCat(out,"PUSH R1\n");
 	return PX_TRUE;
 }
-static px_bool PX_ScriptParseLastInstr_SIN(PX_SCRIPT_Analysis *analysis,px_vector *op,px_vector *tk,px_string *out)
-{
-	PX_SCRIPT_AST_OPERAND operand1,*pTop;
 
-	if (tk->size<1)
-	{
-		return PX_FALSE;
-	}
-	operand1=*((PX_SCRIPT_AST_OPERAND *)PX_VECTORAT(PX_SCRIPT_AST_OPERAND,tk,tk->size-1));
-	pTop=PX_VECTORLAST(PX_SCRIPT_AST_OPERAND,tk);
-	PX_VectorPop(op);
-	pTop->region=PX_SCRIPT_VARIABLE_REGION_POP;
-	pTop->_oft=0;
-	pTop->pSet=PX_NULL;
-	pTop->_int=0;
-	if(!PX_ScriptParseAST_MapTokenToR2(analysis,operand1,out)) return PX_FALSE;
-	pTop->operandType=PX_SCRIPT_AST_OPERAND_TYPE_INT_CONST;
-
-	if (PX_ScriptParseIsOperandNumericType(operand1))
-	{
-		PX_StringCat(out,"SIN R1,R2\n");
-	}
-	else
-		return PX_FALSE;
-
-	PX_StringCat(out,"PUSH R1\n");
-	return PX_TRUE;
-}
-static px_bool PX_ScriptParseLastInstr_COS(PX_SCRIPT_Analysis *analysis,px_vector *op,px_vector *tk,px_string *out)
-{
-	PX_SCRIPT_AST_OPERAND operand1,*pTop;
-
-	if (tk->size<1)
-	{
-		return PX_FALSE;
-	}
-	operand1=*((PX_SCRIPT_AST_OPERAND *)PX_VECTORAT(PX_SCRIPT_AST_OPERAND,tk,tk->size-1));
-	pTop=PX_VECTORLAST(PX_SCRIPT_AST_OPERAND,tk);
-	PX_VectorPop(op);
-	pTop->region=PX_SCRIPT_VARIABLE_REGION_POP;
-	pTop->_oft=0;
-	pTop->pSet=PX_NULL;
-	pTop->_int=0;
-	if(!PX_ScriptParseAST_MapTokenToR2(analysis,operand1,out)) return PX_FALSE;
-	pTop->operandType=PX_SCRIPT_AST_OPERAND_TYPE_INT_CONST;
-
-	if (PX_ScriptParseIsOperandNumericType(operand1))
-	{
-		PX_StringCat(out,"COS R1,R2\n");
-	}
-	else
-		return PX_FALSE;
-
-	PX_StringCat(out,"PUSH R1\n");
-	return PX_TRUE;
-}
 static px_bool PX_ScriptParseLastInstr_LARGE(PX_SCRIPT_Analysis *analysis,px_vector *op,px_vector *tk,px_string *out)
 {
 	PX_SCRIPT_AST_OPERAND operand1,operand2,*pTop;
@@ -5923,16 +5862,6 @@ static px_bool PX_ScriptParseLastInstr(PX_SCRIPT_Analysis *analysis,px_vector *o
 			if(!PX_ScriptParseLastInstr_MEMLEN(analysis,op,tk,out)) return PX_FALSE;
 		}
 		break;
-	case PX_SCRIPT_AST_OPCODE_TYPE_SIN:
-		{
-			if(!PX_ScriptParseLastInstr_SIN(analysis,op,tk,out)) return PX_FALSE;
-		}
-		break;
-	case PX_SCRIPT_AST_OPCODE_TYPE_COS:
-		{
-			if(!PX_ScriptParseLastInstr_COS(analysis,op,tk,out)) return PX_FALSE;
-		}
-		break;
 	default:
 		return PX_FALSE;
 	}
@@ -6403,6 +6332,8 @@ _EXPR_OUT:
 		case PX_SCRIPT_TRANSLATOR_EXPRESSION_OP_FLOAT:
 		case PX_SCRIPT_TRANSLATOR_EXPRESSION_OP_STRING:
 		case PX_SCRIPT_TRANSLATOR_EXPRESSION_OP_MEMORY:
+		case PX_SCRIPT_TRANSLATOR_EXPRESSION_OP_MEMLEN:
+		case PX_SCRIPT_TRANSLATOR_EXPRESSION_OP_STRLEN:
 			{
 				if (pVec[*offset].type==PX_SCRIPT_TRANSLATOR_EXPRESSION_OP_DOT||pVec[*offset].type==PX_SCRIPT_TRANSLATOR_EXPRESSION_OP_OFT)
 				{
@@ -6582,44 +6513,6 @@ static px_bool PX_ScriptParseExpression(PX_SCRIPT_Analysis *analysis,px_char *ex
 				}
 
 				Op.type=PX_SCRIPT_TRANSLATOR_EXPRESSION_OP_MEMLEN;
-				Op.opclass=PX_SCRIPT_TRANSLATOR_OP_CLASS_SINGLE;
-				Op.oplevel=1;
-				PX_StringInitialize(analysis->mp,&Op.code);
-				PX_StringCat(&Op.code,lexer.CurLexeme.buffer);
-				PX_VectorPushback(&stream,&Op);
-			}
-			else if (PX_strequ(lexer.CurLexeme.buffer,"SIN"))
-			{
-				if ((accept_type&PX_SCRIPT_EXPRESSION_ACCEPT_SINGLE)==0)
-				{
-					ret=PX_FALSE;
-					goto _CLEAR;
-				}
-				else
-				{
-					accept_type=PX_SCRIPT_EXPRESSION_ACCEPT_LBRACKET_START;
-				}
-
-				Op.type=PX_SCRIPT_TRANSLATOR_EXPRESSION_OP_SIN;
-				Op.opclass=PX_SCRIPT_TRANSLATOR_OP_CLASS_SINGLE;
-				Op.oplevel=1;
-				PX_StringInitialize(analysis->mp,&Op.code);
-				PX_StringCat(&Op.code,lexer.CurLexeme.buffer);
-				PX_VectorPushback(&stream,&Op);
-			}
-			else if (PX_strequ(lexer.CurLexeme.buffer,"COS"))
-			{
-				if ((accept_type&PX_SCRIPT_EXPRESSION_ACCEPT_SINGLE)==0)
-				{
-					ret=PX_FALSE;
-					goto _CLEAR;
-				}
-				else
-				{
-					accept_type=PX_SCRIPT_EXPRESSION_ACCEPT_LBRACKET_START;
-				}
-
-				Op.type=PX_SCRIPT_TRANSLATOR_EXPRESSION_OP_COS;
 				Op.opclass=PX_SCRIPT_TRANSLATOR_OP_CLASS_SINGLE;
 				Op.oplevel=1;
 				PX_StringInitialize(analysis->mp,&Op.code);
@@ -8878,6 +8771,11 @@ px_bool PX_ScriptParseFunctionReturn(PX_SCRIPT_Analysis *analysis)
 			stacksize+=pvar->size;
 		}
 	}
+	
+	PX_StringCat(&analysis->code,"_");
+	PX_StringCat(&analysis->code,analysis->currentFunc.name);
+	PX_StringCat(&analysis->code,"_RET:\n");
+
 	if(stacksize!=0)
 	{
 		PX_StringFormat1(&code,"POPN %1\n",PX_STRINGFORMAT_INT(stacksize));
@@ -10466,11 +10364,12 @@ _CONTINUEOUT:
 					goto _ERROR;
 			}
 
-			if (!PX_ScriptParseFunctionReturn(&analysis))
-			{
-				goto _ERROR;
-			}
-			
+			PX_StringInitialize(analysis.mp,&fmrString);
+			PX_StringFormat1(&fmrString,"JMP _%1_RET\n",PX_STRINGFORMAT_STRING(analysis.currentFunc.name));
+			PX_StringCat(&analysis.code,fmrString.buffer);
+			PX_StringFree(&fmrString);
+
+
 			if(!PX_ScriptParseIfLastAST(&analysis)) goto _ERROR;
 			continue;
 		}
