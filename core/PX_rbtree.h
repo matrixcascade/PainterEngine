@@ -20,7 +20,7 @@
   linux/include/linux/rbtree.h
 
   To use rbtrees you'll have to implement your own insert and search cores.
-  This will avoid us to use callbacks and to drop drammatically performances.
+  This will avoid us to use callbacks and to drop dramatically performances.
   I know it's not the cleaner way,  but in C (not in C++) to get
   performances and genericity...
 
