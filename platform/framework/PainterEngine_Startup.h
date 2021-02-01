@@ -3,6 +3,8 @@
 
 //////////////////////////////////////////////////////////////////////////
 //Configures
+#include "platform/modules/px_file.h"
+
 #define PX_APPLICATION_NAME "PainterEngine"
 #define PX_APPLICATION_SURFACE_SIZE 600
 
