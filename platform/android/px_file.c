@@ -111,13 +111,20 @@ int PX_FileExist(const char path[])
 
 
 
-int PX_GetDirectoryFileCount(const char path[],PX_FILEENUM_TYPE type,const char *filter)
+int PX_FileGetDirectoryFileCount(const char path[],PX_FILEENUM_TYPE type,const char *filter)
 {
     struct dirent* ent = NULL;
     int count=0;
     DIR *pDir;
-
-    if( (pDir=opendir(path)) == NULL)
+    char oPath[260];
+    if(path[0]==0)
+    {
+        strcat(oPath,"/mnt/sdcard/");
+    } else
+    {
+        strcpy(oPath,path);
+    }
+    if( (pDir=opendir(oPath)) == NULL)
     {
         return 0;
     }
@@ -199,13 +206,20 @@ int PX_GetDirectoryFileCount(const char path[],PX_FILEENUM_TYPE type,const char 
     return  count;
 }
 
-int PX_GetDirectoryFileName(const char path[],int count,char *FileName[260],PX_FILEENUM_TYPE type,const char *filter)
+int PX_FileGetDirectoryFileName(const char path[],int count,char FileName[][260],PX_FILEENUM_TYPE type,const char *filter)
 {
     struct dirent* ent = NULL;
     int index=0;
     DIR *pDir;
-
-    if( (pDir=opendir(path)) == NULL)
+    char oPath[260]={0};
+    if(path[0]==0)
+    {
+        strcat(oPath,"/mnt/sdcard/");
+    } else
+    {
+        strcpy(oPath,path);
+    }
+    if( (pDir=opendir(oPath)) == NULL)
     {
         return 0;
     }

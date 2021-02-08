@@ -219,8 +219,8 @@ typedef enum
 #define PX_SCRIPT_TRANSLATOR_KEYWORD_BREAK "BREAK"
 #define PX_SCRIPT_TRANSLATOR_KEYWORD_CONTINUE "CONTINUE"
 
-#define PX_SCRIPT_TRANSLATOR_KEYWORD_COMPARE "COMPARE"
-#define PX_SCRIPT_TRANSLATOR_KEYWORD_WITH "WITH"
+#define PX_SCRIPT_TRANSLATOR_KEYWORD_SWITCH "SWITCH"
+#define PX_SCRIPT_TRANSLATOR_KEYWORD_CASE "CASE"
 
 #define PX_SCRIPT_TRANSLATOR_KEYWORD_HOST "HOST"
 #define PX_SCRIPT_TRANSLATOR_KEYWORD_FUNCTION "FUNCTION"
@@ -246,6 +246,7 @@ typedef struct
 {
 	px_string Mnemonic;
 	PX_SCRIPT_PARSER_VAR_TYPE type;
+	px_int layer;
 	px_int setIndex;
 	px_int BeginIndex;
 	px_int size;
@@ -371,8 +372,8 @@ typedef enum
 	PX_SCRIPT_AST_STRUCTURE_TYPE_ELSE,
 	PX_SCRIPT_AST_STRUCTURE_TYPE_WHILE,
 	PX_SCRIPT_AST_STRUCTURE_TYPE_FOR,
-	PX_SCRIPT_AST_STRUCTURE_TYPE_COMPARE,
-	PX_SCRIPT_AST_STRUCTURE_TYPE_WITH
+	PX_SCRIPT_AST_STRUCTURE_TYPE_SWITCH,
+	PX_SCRIPT_AST_STRUCTURE_TYPE_CASE
 }PX_SCRIPT_AST_STRUCTURE_TYPE;
 
 typedef struct
@@ -414,6 +415,7 @@ typedef struct
 	px_vector v_functions;
 	px_vector v_variablesGlobalTable;
 	px_vector v_variablesStackTable;
+	px_int    currentAllocStackSize;
 	px_vector v_astStructure;
 	px_int _jFlag;
 }PX_SCRIPT_Analysis;

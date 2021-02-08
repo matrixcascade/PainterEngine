@@ -149,7 +149,26 @@ const int PX_SerialPortReset(PX_SerialPort *com,unsigned int baudRate,unsigned i
 	dcb.ByteSize=DataBits;
 	dcb.BaudRate=baudRate;
 	dcb.StopBits=stopBit-1;
-	dcb.Parity=ParityType;
+	switch (ParityType)
+	{
+	default:
+	case 'N':
+	case 'n':
+		dcb.Parity=NOPARITY ;
+		break;
+	case 'O':
+	case 'o':
+		dcb.Parity=ODDPARITY;
+		break;
+	case 'E':
+	case 'e':
+		dcb.Parity=EVENPARITY;
+		break;
+	case 'M':
+	case 'm':
+		dcb.Parity=MARKPARITY;
+		break;
+	}
 	dcb.fRtsControl = RTS_CONTROL_ENABLE;   
 
 	com->BaudRate=baudRate;

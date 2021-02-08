@@ -1451,7 +1451,7 @@ PX_SCRIPTVM_RUNRETURN PX_ScriptVM_InstanceRunThread(PX_ScriptVM_Instance *Ins,px
 			pVar->type=PX_SCRIPTVM_VARIABLE_TYPE_INT;
 
 			if(sVar._int<PX_strlen(cVar._string.buffer))
-			pVar->_int=(px_uchar)cVar._string.buffer[sVar._int];
+				pVar->_int=(px_uchar)cVar._string.buffer[sVar._int];
 			pT->IP+=(4+3*4);
 		}
 		break;
@@ -1668,9 +1668,17 @@ PX_SCRIPTVM_RUNRETURN PX_ScriptVM_InstanceRunThread(PX_ScriptVM_Instance *Ins,px
 				PX_ScriptVM_Error(Ins,"membyte parameters error.");
 				goto _ERROR;
 			}
-
 			pVar->type=PX_SCRIPTVM_VARIABLE_TYPE_INT;
-			pVar->_int=tVar._memory.buffer[sVar._int];
+			if (tVar._int<sVar._memory.usedsize)
+			{
+				pVar->_int=sVar._memory.buffer[tVar._int];
+			}
+			else
+			{
+				pVar->_int=0;
+			}
+
+			
 			pT->IP+=(4+3*4);
 		}
 		break;
@@ -1703,14 +1711,17 @@ PX_SCRIPTVM_RUNRETURN PX_ScriptVM_InstanceRunThread(PX_ScriptVM_Instance *Ins,px
 				goto _ERROR;
 			}
 
-			if (sVar._int<pVar->_memory.allocsize)
+			if (sVar._int>=pVar->_memory.allocsize)
 			{
 				i=1;
-				while(i<sVar._int)
+				while(i<=sVar._int)
 					i<<=1;
 				newBuffer=(px_byte *)MP_Malloc(Ins->mp,i);
 				PX_memcpy(newBuffer,pVar->_memory.buffer,pVar->_memory.usedsize);
-				MP_Free(Ins->mp,pVar->_memory.buffer);
+				if (pVar->_memory.buffer)
+				{
+					MP_Free(Ins->mp,pVar->_memory.buffer);
+				}
 				pVar->_memory.buffer=newBuffer;
 				pVar->_memory.allocsize=i;
 			}

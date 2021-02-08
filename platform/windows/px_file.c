@@ -17,7 +17,7 @@ int PX_SaveDataToFile(void *buffer,int size,const char path[])
 	{
 		strcpy_s(_path,sizeof(_path),path);
 	}
-	fopen_s(&pf,_path,"rb");
+	fopen_s(&pf,_path,"wb");
 	if (pf)
 	{
 		fwrite(buffer,1,size,pf);

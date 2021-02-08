@@ -648,10 +648,7 @@ px_bool PX_ScriptAsmAddMemoryConst(PX_SCRIPT_ASM_COMPILER *compiler,px_char *Str
 	px_char hex[3];
 	px_char _byte;
 	PX_SCRIPT_ASM_MEMORY_NODE memoryNode,*pLastNode;
-	if (PX_strlen(StringMap)==0)
-	{
-		return PX_FALSE;
-	}
+
 	if (PX_strlen(StringMap)&1)
 	{
 		PX_ScriptAsmError(&compiler->lexer,"Invalid binary stream map");

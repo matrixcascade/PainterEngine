@@ -4425,13 +4425,15 @@ px_void PX_Object_ListOnWheel(PX_Object *pObject,PX_Object_Event e,px_void *ptr)
 
 
 
-px_void PX_Object_ListUpdate(PX_Object *pObject,px_uint elpased)
+
+px_void PX_Object_ListRender(px_surface *psurface, PX_Object *pObject,px_uint elpased)
 {
 	PX_Object *pItemObject;
-	PX_Object_ListItem  *pItem;
-	px_int iy;
+	px_int offsetX=0,drawXCenter=0;
 	px_int i;
+	px_int iy;
 	PX_Object_List *pList= PX_Object_GetList(pObject);
+	PX_Object_ListItem *pItem;
 	px_float objx,objy,objWidth,objHeight;
 	px_float inheritX,inheritY;
 
@@ -4442,10 +4444,6 @@ px_void PX_Object_ListUpdate(PX_Object *pObject,px_uint elpased)
 	objWidth=pObject->Width;
 	objHeight=pObject->Height;
 
-	if (!pList)
-	{
-		return;
-	}
 
 	if (pList->ItemHeight*pList->pData.size>objHeight)
 	{
@@ -4464,7 +4462,7 @@ px_void PX_Object_ListUpdate(PX_Object *pObject,px_uint elpased)
 		pList->SliderBar->Visible=PX_FALSE;
 	}
 
-	
+
 	if (pList->offsety<0)
 	{
 		iy=-pList->offsety;
@@ -4476,7 +4474,7 @@ px_void PX_Object_ListUpdate(PX_Object *pObject,px_uint elpased)
 
 	for (i=0;i<pList->Items.size;i++)
 	{
-		
+
 		pItemObject=*PX_VECTORAT(PX_Object *,&pList->Items,i);
 		pItemObject->x=0;
 		pItemObject->y=(px_float)iy;
@@ -4510,38 +4508,18 @@ px_void PX_Object_ListUpdate(PX_Object *pObject,px_uint elpased)
 				pItem->pdata=PX_NULL;
 			}
 		}
-		
-		
 		iy+=(px_int)pItemObject->Height;
 	}
-}
 
-px_void PX_Object_ListRender(px_surface *psurface, PX_Object *pObject,px_uint elpased)
-{
-	PX_Object *pItemObject;
-	px_int offsetX=0,drawXCenter=0;
-	px_int i;
-	PX_Object_List *pList= PX_Object_GetList(pObject);
-	PX_Object_ListItem *pItem;
-	px_float objx,objy,objWidth,objHeight;
-	px_float inheritX,inheritY;
-
-	PX_ObjectGetInheritXY(pObject,&inheritX,&inheritY);
-
-	objx=(pObject->x+inheritX);
-	objy=(pObject->y+inheritY);
-	objWidth=pObject->Width;
-	objHeight=pObject->Height;
 
 	PX_SurfaceClear(&pList->renderSurface,0,0,pList->renderSurface.width-1,pList->renderSurface.height-1,pList->BackgroundColor);
 	for (i=0;i<pList->Items.size;i++)
 	{
 		pItemObject=*PX_VECTORAT(PX_Object *,&pList->Items,i);
-		pItem=PX_Object_GetListItem(pItemObject);
-		if (pItem->pdata)
+		if (pItemObject->y+pItemObject->Height>0&&pItemObject->y<pObject->Height)
 		{
 			PX_ObjectRender(&pList->renderSurface,pItemObject,elpased);
-		}	
+		}
 	}
 	PX_GeoDrawBorder(&pList->renderSurface,0,0,pList->renderSurface.width-1,pList->renderSurface.height-1,1,pList->BorderColor);
 	PX_SurfaceCover(psurface,&pList->renderSurface,(px_int)objx,(px_int)objy,PX_TEXTURERENDER_REFPOINT_LEFTTOP);
@@ -4636,7 +4614,7 @@ PX_Object * PX_Object_ListCreate(px_memorypool *mp, PX_Object *Parent,px_int x,p
 	PX_VectorInitialize(mp,&List.pData,sizeof(px_void *),32);
 	if(!PX_SurfaceCreate(mp,Width,Height,&List.renderSurface)) return PX_NULL;
 
-	if(!(pListObject=PX_ObjectCreateEx(mp,Parent,(px_float)x,(px_float)y,0,(px_float)Width,(px_float)Height,0,PX_OBJECT_TYPE_LIST,PX_Object_ListUpdate,PX_Object_ListRender,PX_Object_ListFree,&List,sizeof(PX_Object_List)))) return PX_NULL;
+	if(!(pListObject=PX_ObjectCreateEx(mp,Parent,(px_float)x,(px_float)y,0,(px_float)Width,(px_float)Height,0,PX_OBJECT_TYPE_LIST,PX_NULL,PX_Object_ListRender,PX_Object_ListFree,&List,sizeof(PX_Object_List)))) return PX_NULL;
 	
 	pList=PX_Object_GetList(pListObject);
 	pList->SliderBar=PX_Object_SliderBarCreate(mp,pListObject,(px_int)pListObject->Width-32,0,32,(px_int)pListObject->Height,PX_OBJECT_SLIDERBAR_TYPE_VERTICAL,PX_OBJECT_SLIDERBAR_STYLE_BOX);
@@ -8987,7 +8965,7 @@ static px_void PX_SelectbarOnCursorMove(PX_Object *pObject,px_float x,px_float y
 		index=(px_int)((y-objy-objHeight)/pSelectbar->ItemHeight);
 		PX_SelecrbarClearCurrentCursor(pSelectbar);
 
-		if (index<0||index>=pSelectbar->maxDisplayCount||index>=pSelectbar->Items.size)
+		if (y<objy+objHeight||index<0||index>=pSelectbar->maxDisplayCount||index>=pSelectbar->Items.size)
 		{
 			return;
 		}
@@ -9053,7 +9031,7 @@ static px_void PX_SelectbarOnCursorDown(PX_Object *pObject,px_float x,px_float y
 
 		index=(px_int)((y-objy-objHeight)/pSelectbar->ItemHeight);
 		PX_SelecrbarClearCurrentCursor(pSelectbar);
-		if (index<0||index>=pSelectbar->maxDisplayCount||index>=pSelectbar->Items.size)
+		if (y<objy+objHeight||index<0||index>=pSelectbar->maxDisplayCount||index>=pSelectbar->Items.size)
 		{
 			pSelectbar->activating=PX_FALSE;
 			PX_ObjectClearFocus(pObject);
@@ -9769,6 +9747,7 @@ px_void PX_Object_ExplorerOnCursorMove(PX_Object *pObject,PX_Object_Event e,px_v
 		{
 			pExp->Items[index].bcursor=PX_TRUE;
 		}
+		
 	}
 }
 
@@ -9897,6 +9876,15 @@ px_void PX_Object_ExplorerOnCursorDown(PX_Object *pObject,PX_Object_Event e,px_v
 				
 			}
 			
+		}
+
+		if (PX_Object_ExplorerGetSelectedCount(pObject)==0)
+		{
+			pExp->btn_Ok->Visible=PX_FALSE;
+		}
+		else
+		{
+			pExp->btn_Ok->Visible=PX_TRUE;
 		}
 	}
 }
@@ -10145,7 +10133,7 @@ PX_Object * PX_Object_ExplorerCreate(px_memorypool *mp, PX_Object *Parent,px_int
 		pExp->edit_Path=PX_Object_EditCreate(mp,pObject,0,0,1,1,pExp->fontmodule,pExp->fontcolor);
 		PX_Object_EditSetText(pExp->edit_Path,path);
 		pExp->SliderBar=PX_Object_SliderBarCreate(mp,pObject,0,0,24,24,PX_OBJECT_SLIDERBAR_TYPE_VERTICAL,PX_OBJECT_SLIDERBAR_STYLE_BOX);
-
+		pExp->btn_Ok->Visible=PX_FALSE;
 		PX_ObjectRegisterEvent(pExp->btn_Back,PX_OBJECT_EVENT_EXECUTE,PX_Object_ExplorerOnButtonBack,pObject);
 		PX_ObjectRegisterEvent(pExp->btn_go,PX_OBJECT_EVENT_EXECUTE,PX_Object_ExplorerOnButtonGo,pObject);
 		PX_ObjectRegisterEvent(pExp->btn_Ok,PX_OBJECT_EVENT_EXECUTE,PX_Object_ExplorerOnButtonOk,pObject);
@@ -10251,7 +10239,20 @@ px_void PX_Object_ExplorerRefresh(PX_Object *Object)
 		PX_Object_SliderBarSetValue(pExp->SliderBar,0);
 	}
 }
-
+px_int PX_Object_ExplorerGetSelectedCount(PX_Object *Object)
+{
+	PX_Object_Explorer *pExp=PX_Object_GetExplorer(Object);
+	px_int selectCount=0;
+	px_int i;
+	for (i=0;i<pExp->ItemCount;i++)
+	{
+		if (pExp->Items[i].bselect)
+		{
+			selectCount++;
+		}
+	}
+	return selectCount;
+}
 px_void PX_Object_ExplorerGetPath(PX_Object *Object,px_char path[PX_EXPLORER_MAX_PATH_LEN],px_int index)
 {
 	PX_Object_Explorer *pExp=PX_Object_GetExplorer(Object);

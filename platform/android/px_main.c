@@ -14,7 +14,7 @@
 #include "kernel/PX_Object.h"
 
 static PX_AndroidEngine engine;
-
+volatile px_bool main_exit=0;
 static px_int PX_AndroidEngine_Input(struct android_app* app, AInputEvent* event) {
     PX_AndroidEngine* engine = (PX_AndroidEngine*)app->userData;
     px_int32 EventType=AInputEvent_getType(event);
@@ -157,5 +157,5 @@ void android_main(struct android_app *pApp)
         }
 
         PX_AndroidEngine_Render(&engine,App.runtime.surface_width,App.runtime.surface_height,(px_byte *)App.runtime.RenderSurface.surfaceBuffer);
-    } while (!pApp->destroyRequested);
+    } while (!pApp->destroyRequested&&!main_exit);
 }

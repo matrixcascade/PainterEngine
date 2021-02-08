@@ -257,6 +257,7 @@ PX_RETURN_STRING PX_itos(px_int num,px_int radix);
 px_void PX_AscToWord(const px_char *asc,px_word *u16);
 px_int PX_ftoa(px_float f, char *outbuf, int maxlen, int precision);
 px_int PX_itoa(px_int num,px_char *str,px_int MaxStrSize,px_int radix);
+px_dword PX_SwapEndian(px_dword val);
 px_char *PX_strchr(const char *s,int ch);
 px_char* PX_strstr(const char* dest, const char* src);
 

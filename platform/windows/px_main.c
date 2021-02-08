@@ -6,6 +6,8 @@
 //mouse informations
 POINT main_zoomPoint;
 px_int main_ZoomRegion;
+
+volatile px_bool main_exit=0;
 //////////////////////////////////////////////////////////////////////////
 DWORD WINAPI DEMO_RenderThreadFunc(LPVOID p)
 {   
@@ -263,7 +265,7 @@ DWORD WINAPI DEMO_RenderThreadFunc(LPVOID p)
 
 	hThread = CreateThread(NULL, 0, DEMO_RenderThreadFunc, 0, 0, &threadId);
 
-	while(PX_SystemLoop()){};
+	while(PX_SystemLoop()&&!main_exit){};
 
 	return 0;
 }

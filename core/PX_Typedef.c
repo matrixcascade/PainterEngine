@@ -40,9 +40,10 @@ px_int PX_atoi(const px_char s[])
 
 px_float PX_atof(px_char fstr[])
 {
-	px_float temp=10;
+	px_double temp=10;
 	px_bool ispnum=PX_TRUE;
-	px_float ans=0;
+	px_double ans=0;
+	px_bool be=PX_FALSE;
 	if(*fstr=='-')
 	{
 		ispnum=PX_FALSE;
@@ -56,17 +57,44 @@ px_float PX_atof(px_char fstr[])
 	while(*fstr!='\0')
 	{
 		if(*fstr=='.'){ fstr++;break;}
+		if(*fstr=='e'||*fstr=='E'){ fstr++;be=PX_TRUE;break;}
 		ans=ans*10+(*fstr-'0');
 		fstr++;
 	}
-	while(*fstr!='\0')
+	if (be)
 	{
-		ans=ans+(*fstr-'0')/temp;
-		temp*=10;
-		fstr++;
+		int e=PX_atoi(fstr);
+		float e10=1;
+		if (e>0)
+		{
+			while (e)
+			{
+				e10*=10;
+				e--;
+			}
+		}
+		else
+		{
+			while(e)
+			{
+				e10/=10;
+				e++;
+			}
+		}
+		ans*=e10;
 	}
-	if(ispnum) return ans;
-	else return ans*(-1);
+	else
+	{
+		while(*fstr!='\0')
+		{
+			ans=ans+(*fstr-'0')/temp;
+			temp*=10;
+			fstr++;
+		}
+	}
+	
+	if(ispnum) return (px_float)ans;
+	else return (px_float)ans*(-1);
 }
 
 
@@ -204,7 +232,15 @@ px_int PX_itoa(px_int num,px_char *str,px_int MaxStrSize,px_int radix)
 	return l; 
 } 
 
+
+
 static px_int32 PX_i32SwapEndian(px_int32 val){
+	val = ((val << 8)&0xFF00FF00) | ((val >> 8)&0x00FF00FF);
+	return (val << 16)|(val >> 16);
+}
+
+px_dword PX_SwapEndian(px_dword val)
+{
 	val = ((val << 8)&0xFF00FF00) | ((val >> 8)&0x00FF00FF);
 	return (val << 16)|(val >> 16);
 }
@@ -895,7 +931,7 @@ px_int PX_sprintf8(px_char *_out_str,px_int str_size,const px_char fmt[], px_str
 				length+=PX_strlen(PX_itos(pstringfmt._int,10).data);
 				break;
 			case PX_STRINGFORMAT_TYPE_FLOAT:
-				length+=PX_strlen(PX_ftos(pstringfmt._float,3).data);
+				length+=PX_strlen(PX_ftos(pstringfmt._float,precision).data);
 				break;
 			case PX_STRINGFORMAT_TYPE_STRING:
 				length+=PX_strlen(pstringfmt._pstring);
