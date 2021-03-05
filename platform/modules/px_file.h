@@ -24,7 +24,6 @@ typedef enum
 
 
 PX_IO_Data PX_LoadFileToIOData(const char path[]);
-const char * PX_GetFileName(const char filePath[]);
 int PX_FileExist(const char respath[]);
 int PX_CopyFile(const char respath[],const char destpath[]);
 int PX_SaveDataToFile(void *buffer,int size,const char path[]);

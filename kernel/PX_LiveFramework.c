@@ -1,6 +1,6 @@
 #include "PX_LiveFramework.h"
 
-static px_void PX_LiveFramework_RenderListPixelShader(px_surface *psurface,px_int x,px_int y,px_float z,px_float u,px_float v,px_point normal,px_texture *pTexture/*px_float *zbuffer,px_int zw*/)
+static px_void PX_LiveFramework_RenderListPixelShader(px_surface *psurface,px_int x,px_int y,px_float z,px_float u,px_float v,px_point normal,px_texture *pTexture,PX_TEXTURERENDER_BLEND *blend)
 {
 	//texture mapping
 	px_double SampleX,SampleY,mapX,mapY;
@@ -95,6 +95,14 @@ static px_void PX_LiveFramework_RenderListPixelShader(px_surface *psurface,px_in
 			mixb+=sampleColor._argb.b*Weight;
 		}
 
+		if (blend)
+		{
+			mixa*=blend->alpha;
+			mixr*=blend->hdr_R;
+			mixg*=blend->hdr_G;
+			mixb*=blend->hdr_B;
+		}
+
 		mixa>255?mixa=255:0;
 		mixr>255?mixr=255:0;
 		mixg>255?mixg=255:0;
@@ -104,7 +112,7 @@ static px_void PX_LiveFramework_RenderListPixelShader(px_surface *psurface,px_in
 
 	}
 }
-static px_void PX_LiveFramework_RenderListRasterization(px_surface *psurface,PX_LiveFramework *pLiveFramework,PX_LiveFramework_Vertex p0,PX_LiveFramework_Vertex p1,PX_LiveFramework_Vertex p2,px_texture *ptexture,px_int view_width,px_int view_height,px_float zbuffer[])
+static px_void PX_LiveFramework_RenderListRasterization(px_surface *psurface,PX_LiveFramework *pLiveFramework,PX_LiveFramework_Vertex p0,PX_LiveFramework_Vertex p1,PX_LiveFramework_Vertex p2,px_texture *ptexture,PX_TEXTURERENDER_BLEND *blend)
 {
 	px_int ix,iy;
 	px_bool  k01infinite=PX_FALSE;
@@ -321,25 +329,6 @@ static px_void PX_LiveFramework_RenderListRasterization(px_surface *psurface,PX_
 			ix=(px_int)x;
 			iy=(px_int)y;
 
-			if (ix>0&&ix<view_width&&iy>=0&&iy<view_height)
-			{
-				if (zbuffer[ix+iy*view_width]!=0&&zbuffer[ix+iy*view_width]<originalZ)
-				{
-					continue;
-				}
-
-				zbuffer[ix+iy*view_width]=originalZ;
-				if (pLiveFramework->pixelShader)
-				{
-					position.z=originalZ;
-					pLiveFramework->pixelShader(psurface,ix,iy,position,s,t,p0.normal,ptexture/*,zbuffer,zw*/);
-				}
-				else
-				{
-					PX_LiveFramework_RenderListPixelShader(psurface,ix,iy,originalZ,s,t,p0.normal,ptexture/*,zbuffer,zw*/);
-				}
-			}
-
 			oneoverz += oneoverz_step;
 			soverz += soverz_step;
 			toverz += toverz_step;
@@ -513,23 +502,14 @@ static px_void PX_LiveFramework_RenderListRasterization(px_surface *psurface,PX_
 			ix=(px_int)x;
 			iy=(px_int)y;
 
-			if (ix>0&&ix<view_width&&iy>=0&&iy<view_height)
+			if (pLiveFramework->pixelShader)
 			{
-				if (zbuffer[ix+iy*view_width]!=0&&zbuffer[ix+iy*view_width]<originalZ)
-				{
-					continue;;
-				}
-
-				zbuffer[ix+iy*view_width]=originalZ;
-				if (pLiveFramework->pixelShader)
-				{
-					position.z=originalZ;
-					pLiveFramework->pixelShader(psurface,ix,iy,position,s,t,p0.normal,ptexture/*,zbuffer,zw*/);
-				}
-				else
-				{
-					PX_LiveFramework_RenderListPixelShader(psurface,ix,iy,originalZ,s,t,p0.normal,ptexture/*,zbuffer,zw*/);
-				}
+				position.z=originalZ;
+				pLiveFramework->pixelShader(psurface,ix,iy,position,s,t,p0.normal,ptexture,blend);
+			}
+			else
+			{
+				PX_LiveFramework_RenderListPixelShader(psurface,ix,iy,originalZ,s,t,p0.normal,ptexture,blend);
 			}
 			oneoverz += oneoverz_step;
 			soverz += soverz_step;
@@ -540,15 +520,12 @@ static px_void PX_LiveFramework_RenderListRasterization(px_surface *psurface,PX_
 }
 
 
-px_bool PX_LiveFrameworkInitialize(px_memorypool *mp,PX_LiveFramework *plive,px_int width,px_int height,px_int surfaceWidth,px_int surfaceHeight)
+px_bool PX_LiveFrameworkInitialize(px_memorypool *mp,PX_LiveFramework *plive,px_int width,px_int height)
 {
 	PX_memset(plive,0,sizeof(PX_LiveFramework));
 	plive->mp=mp;
-	if(!PX_VectorInitialize(mp,&plive->animation,sizeof(PX_LiveAnimation),0))return PX_FALSE;
 	if(!PX_VectorInitialize(mp,&plive->layers,sizeof(PX_LiveLayer),1))return PX_FALSE;
-	plive->zbuffer=(px_float *)MP_Malloc(mp,surfaceWidth*surfaceHeight*sizeof(px_float));
-	plive->surfaceHeight=surfaceHeight;
-	plive->surfaceWidth=surfaceWidth;
+	if(!PX_VectorInitialize(mp,&plive->livetextures,sizeof(PX_LiveTexture),1))return PX_FALSE;
 	plive->width=width;
 	plive->height=height;
 	
@@ -565,95 +542,76 @@ px_void PX_LiveFrameworkUpdate(PX_LiveFramework *plive,px_dword elpased)
 	
 }
 
-px_void PX_LiveFrameworkRender(px_surface *psurface,PX_LiveFramework *plive,px_int x,px_int y,PX_TEXTURERENDER_REFPOINT refPoint,px_dword elpased)
+px_void PX_LiveFrameworkRenderLayer(px_surface *psurface,PX_LiveFramework *plive,PX_LiveLayer *pLayer,px_int x,px_int y,px_dword elpased)
 {
-	px_int i;
-	if (plive->layers.size==0)
+	px_float rotcos;
+	px_float rotsin;
+	px_point offset;
+
+	if (!pLayer->visible)
 	{
 		return;
 	}
 
-	switch (refPoint)
+	offset=PX_PointSub(pLayer->translation,pLayer->keyPoint);
+	if (pLayer->pLiveTexture)
 	{
-	case PX_TEXTURERENDER_REFPOINT_LEFTTOP:
-		break;
-	case PX_TEXTURERENDER_REFPOINT_MIDTOP:
-		x-=plive->width/2;
-		break;
-	case PX_TEXTURERENDER_REFPOINT_RIGHTTOP:
-		x-=plive->width;
-		break;
-	case PX_TEXTURERENDER_REFPOINT_LEFTMID:
-		y-=plive->height/2;
-		break;
-	case PX_TEXTURERENDER_REFPOINT_CENTER:
-		y-=plive->height/2;
-		x-=plive->width/2;
-		break;
-	case PX_TEXTURERENDER_REFPOINT_RIGHTMID:
-		y-=plive->height/2;
-		x-=plive->width;
-		break;
-	case PX_TEXTURERENDER_REFPOINT_LEFTBOTTOM:
-		y-=plive->height;
-		break;
-	case PX_TEXTURERENDER_REFPOINT_MIDBOTTOM:
-		y-=plive->height;
-		x-=plive->width/2;
-		break;
-	case PX_TEXTURERENDER_REFPOINT_RIGHTBOTTOM:
-		y-=plive->height;
-		x-=plive->width;
-		break;
-	}
+		px_texture *pTexture;
+		
+		pTexture=&pLayer->pLiveTexture->Texture;
 
-	//clear zbuffer
-	PX_memset(plive->zbuffer,0,plive->surfaceWidth*plive->surfaceHeight*sizeof(px_float));
-	
-	for (i=0;i<plive->layers.size;i++)
-	{
-		PX_LiveLayer *pLayer=PX_VECTORAT(PX_LiveLayer,&plive->layers,i);
-		px_float rotcos;
-		px_float rotsin;
-		px_point offset=PX_PointSub(pLayer->currentKeyPoint,pLayer->keyPoint);
+		rotcos=(px_float)PX_cosd(pLayer->rotationAngle);
+		rotsin=(px_float)PX_sind(pLayer->rotationAngle);
 
-		if (pLayer->data)
+		if (pLayer->triangles.size&&pLayer->vertices.size)
 		{
-			px_texture *pTexture;
-			switch (pLayer->type)
+			px_int t;
+			PX_Delaunay_Triangle *pTriangleIndex;
+			for (t=0;t<pLayer->triangles.size;t++)
 			{
-			case PX_LIVE_DATA_TYPE_TEXTURE:
-				pTexture=(px_texture *)(pLayer->data);
-				break;
-			case PX_LIVE_DATA_TYPE_ANIMATION:
-				pTexture=PX_AnimationGetCurrentTexture((PX_Animation *)pLayer->data);
-				if(!pTexture) continue;
-				break;
-			default:
-				pTexture=PX_NULL;
-				break;
+				PX_LiveFramework_Vertex v0,v1,v2;
+				px_point p_vector;
+				pTriangleIndex=PX_VECTORAT(PX_Delaunay_Triangle,&pLayer->triangles,t);
+				v0=*PX_VECTORAT(PX_LiveFramework_Vertex,&pLayer->vertices,pTriangleIndex->index1);
+				v1=*PX_VECTORAT(PX_LiveFramework_Vertex,&pLayer->vertices,pTriangleIndex->index2);
+				v2=*PX_VECTORAT(PX_LiveFramework_Vertex,&pLayer->vertices,pTriangleIndex->index3);
+
+				//Transform
+				//v0
+				p_vector.x=v0.position.x-pLayer->keyPoint.x;
+				p_vector.y=v0.position.y-pLayer->keyPoint.y;
+
+				v0.position.x=pLayer->keyPoint.x+p_vector.x*rotcos+p_vector.y*rotsin;
+				v0.position.y=pLayer->keyPoint.y-p_vector.x*rotsin+p_vector.y*rotcos;
+
+				v0.position.x+=x+offset.x;
+				v0.position.y+=y+offset.y;
+
+				//v1
+				p_vector.x=v1.position.x-pLayer->keyPoint.x;
+				p_vector.y=v1.position.y-pLayer->keyPoint.y;
+
+				v1.position.x=pLayer->keyPoint.x+p_vector.x*rotcos+p_vector.y*rotsin;
+				v1.position.y=pLayer->keyPoint.y-p_vector.x*rotsin+p_vector.y*rotcos;
+
+				v1.position.x+=x+offset.x;
+				v1.position.y+=y+offset.y;
+
+				//v2
+				p_vector.x=v2.position.x-pLayer->keyPoint.x;
+				p_vector.y=v2.position.y-pLayer->keyPoint.y;
+
+				v2.position.x=pLayer->keyPoint.x+p_vector.x*rotcos+p_vector.y*rotsin;
+				v2.position.y=pLayer->keyPoint.y-p_vector.x*rotsin+p_vector.y*rotcos;
+
+				v2.position.x+=x+offset.x;
+				v2.position.y+=y+offset.y;
+
+				PX_LiveFramework_RenderListRasterization(psurface,plive,v0,v1,v2,pTexture,&pLayer->blend);
 			}
 
-			if (pLayer->keyPoint.x!=pLayer->controlPoint.x||pLayer->keyPoint.y!=pLayer->controlPoint.y)
+			if (pLayer->showMesh)
 			{
-				px_point sourceVector=PX_PointSub(pLayer->controlPoint,pLayer->keyPoint);
-				px_point currentVector=PX_PointSub(pLayer->currentControlPoint,pLayer->currentKeyPoint);
-				px_float z=PX_PointCross(sourceVector,currentVector).z;
-				
-
-				rotcos=PX_PointDot(sourceVector,currentVector)/PX_PointMod(currentVector)/PX_PointMod(sourceVector);
-				rotsin=z<0?(px_float)PX_sqrtd(1-rotcos*rotcos):-(px_float)PX_sqrtd(1-rotcos*rotcos);
-			}
-			else
-			{
-				rotcos=1;
-				rotsin=0;
-			}
-
-			if (pLayer->triangles.size&&pLayer->vertices.size)
-			{
-				px_int t;
-				PX_Delaunay_Triangle *pTriangleIndex;
 				for (t=0;t<pLayer->triangles.size;t++)
 				{
 					PX_LiveFramework_Vertex v0,v1,v2;
@@ -694,135 +652,128 @@ px_void PX_LiveFrameworkRender(px_surface *psurface,PX_LiveFramework *plive,px_i
 					v2.position.x+=x+offset.x;
 					v2.position.y+=y+offset.y;
 
-					PX_LiveFramework_RenderListRasterization(psurface,plive,v0,v1,v2,pTexture,plive->surfaceWidth,plive->surfaceHeight,plive->zbuffer);
-				}
+					PX_GeoDrawLine(psurface,(px_int)v0.position.x,(px_int)v0.position.y,(px_int)v1.position.x,(px_int)v1.position.y,1,PX_COLOR(128,255,0,0));
+					PX_GeoDrawLine(psurface,(px_int)v0.position.x,(px_int)v0.position.y,(px_int)v2.position.x,(px_int)v2.position.y,1,PX_COLOR(128,255,0,0));
+					PX_GeoDrawLine(psurface,(px_int)v1.position.x,(px_int)v1.position.y,(px_int)v2.position.x,(px_int)v2.position.y,1,PX_COLOR(128,255,0,0));
 
-				if (pLayer->showMesh)
-				{
-					for (t=0;t<pLayer->triangles.size;t++)
-					{
-					PX_LiveFramework_Vertex v0,v1,v2;
-					px_point p_vector;
-					pTriangleIndex=PX_VECTORAT(PX_Delaunay_Triangle,&pLayer->triangles,t);
-					v0=*PX_VECTORAT(PX_LiveFramework_Vertex,&pLayer->vertices,pTriangleIndex->index1);
-					v1=*PX_VECTORAT(PX_LiveFramework_Vertex,&pLayer->vertices,pTriangleIndex->index2);
-					v2=*PX_VECTORAT(PX_LiveFramework_Vertex,&pLayer->vertices,pTriangleIndex->index3);
-
-					//Transform
-					//v0
-					p_vector.x=v0.position.x-pLayer->keyPoint.x;
-					p_vector.y=v0.position.y-pLayer->keyPoint.y;
-
-					v0.position.x=pLayer->keyPoint.x+p_vector.x*rotcos+p_vector.y*rotsin;
-					v0.position.y=pLayer->keyPoint.y-p_vector.x*rotsin+p_vector.y*rotcos;
-
-					v0.position.x+=x+offset.x;
-					v0.position.y+=y+offset.y;
-
-					//v1
-					p_vector.x=v1.position.x-pLayer->keyPoint.x;
-					p_vector.y=v1.position.y-pLayer->keyPoint.y;
-
-					v1.position.x=pLayer->keyPoint.x+p_vector.x*rotcos+p_vector.y*rotsin;
-					v1.position.y=pLayer->keyPoint.y-p_vector.x*rotsin+p_vector.y*rotcos;
-
-					v1.position.x+=x+offset.x;
-					v1.position.y+=y+offset.y;
-
-					//v2
-					p_vector.x=v2.position.x-pLayer->keyPoint.x;
-					p_vector.y=v2.position.y-pLayer->keyPoint.y;
-
-					v2.position.x=pLayer->keyPoint.x+p_vector.x*rotcos+p_vector.y*rotsin;
-					v2.position.y=pLayer->keyPoint.y-p_vector.x*rotsin+p_vector.y*rotcos;
-
-					v2.position.x+=x+offset.x;
-					v2.position.y+=y+offset.y;
-
-					PX_GeoDrawLine(psurface,(px_int)v0.position.x,(px_int)v0.position.y,(px_int)v1.position.x,(px_int)v1.position.y,1,PX_COLOR(255,0,0,0));
-					PX_GeoDrawLine(psurface,(px_int)v0.position.x,(px_int)v0.position.y,(px_int)v2.position.x,(px_int)v2.position.y,1,PX_COLOR(255,0,0,0));
-					PX_GeoDrawLine(psurface,(px_int)v1.position.x,(px_int)v1.position.y,(px_int)v2.position.x,(px_int)v2.position.y,1,PX_COLOR(255,0,0,0));
-
-					PX_GeoDrawSolidCircle(psurface,(px_int)v0.position.x,(px_int)v0.position.y,3,PX_COLOR(255,0,0,0));
-					PX_GeoDrawSolidCircle(psurface,(px_int)v1.position.x,(px_int)v1.position.y,3,PX_COLOR(255,0,0,0));
-					PX_GeoDrawSolidCircle(psurface,(px_int)v2.position.x,(px_int)v2.position.y,3,PX_COLOR(255,0,0,0));
-					}
+					PX_GeoDrawSolidCircle(psurface,(px_int)v0.position.x,(px_int)v0.position.y,3,PX_COLOR(128,255,0,0));
+					PX_GeoDrawSolidCircle(psurface,(px_int)v1.position.x,(px_int)v1.position.y,3,PX_COLOR(128,255,0,0));
+					PX_GeoDrawSolidCircle(psurface,(px_int)v2.position.x,(px_int)v2.position.y,3,PX_COLOR(128,255,0,0));
 				}
 			}
-			else
-			{
-				px_point Centre,newCentre;
+		}
+		else
+		{
+			px_point Centre,newCentre;
 
-				Centre.x=(px_float)pTexture->width/2;
-				Centre.y=(px_float)pTexture->height/2;
-				Centre.z=0;
-				newCentre.x=pLayer->keyPoint.x+(Centre.x-pLayer->keyPoint.x)*rotcos+(Centre.y-pLayer->keyPoint.y)*rotsin;
-				newCentre.y=pLayer->keyPoint.y-(Centre.x-pLayer->keyPoint.x)*rotsin+(Centre.y-pLayer->keyPoint.y)*rotcos;
-				newCentre.z=0;
-				newCentre.x=newCentre.x+(pLayer->currentKeyPoint.x-pLayer->keyPoint.x);
-				newCentre.y=newCentre.y+(pLayer->currentKeyPoint.y-pLayer->keyPoint.y);
+			Centre.x=(px_float)pTexture->width/2;
+			Centre.y=(px_float)pTexture->height/2;
+			Centre.z=0;
+			newCentre.x=pLayer->keyPoint.x+(Centre.x-pLayer->keyPoint.x)*rotcos+(Centre.y-pLayer->keyPoint.y)*rotsin;
+			newCentre.y=pLayer->keyPoint.y-(Centre.x-pLayer->keyPoint.x)*rotsin+(Centre.y-pLayer->keyPoint.y)*rotcos;
+			newCentre.z=0;
+			newCentre.x=newCentre.x+(pLayer->translation.x-pLayer->keyPoint.x);
+			newCentre.y=newCentre.y+(pLayer->translation.y-pLayer->keyPoint.y);
 
-				PX_TextureRenderRotation_sincos(psurface,pTexture,(px_int)(newCentre.x+x+pLayer->TextureOffset.x),
-					(px_int)(newCentre.y+y+pLayer->TextureOffset.y),PX_TEXTURERENDER_REFPOINT_CENTER,PX_NULL,-rotsin,rotcos);
-			}
+			PX_TextureRenderRotation_sincos(psurface,pTexture,(px_int)(newCentre.x+x+pLayer->pLiveTexture->textureOffsetX),
+				(px_int)(newCentre.y+y+pLayer->pLiveTexture->textureOffsetY),PX_TEXTURERENDER_REFPOINT_CENTER,&pLayer->blend,-rotsin,rotcos);
+		}
 
-			if (pLayer->showLinker)
-			{
+		if (pLayer->showLinker)
+		{
 
-				PX_GeoDrawLine(psurface,(px_int)(x+pLayer->keyPoint.x+pLayer->TextureOffset.x),
-					(px_int)(y+pLayer->keyPoint.y+pLayer->TextureOffset.y),
-					(px_int)(x+pLayer->controlPoint.x+pLayer->TextureOffset.x),
-					(px_int)(y+pLayer->controlPoint.y+pLayer->TextureOffset.y),
-					2,
-					PX_COLOR(255,64,128,96));
-				PX_GeoDrawCircle(psurface,(px_int)(x+pLayer->keyPoint.x+pLayer->TextureOffset.x),
-					(px_int)(y+pLayer->keyPoint.y+pLayer->TextureOffset.y),
-					5,
-					1,
-					PX_COLOR(255,0,0,255));
+			PX_GeoDrawCircle(psurface,(px_int)(x+pLayer->keyPoint.x+pLayer->pLiveTexture->textureOffsetX),
+				(px_int)(y+pLayer->keyPoint.y+pLayer->pLiveTexture->textureOffsetY),
+				5,
+				1,
+				PX_COLOR(255,0,0,255));
 
-				PX_GeoDrawSolidCircle(psurface,(px_int)(x+pLayer->keyPoint.x+pLayer->TextureOffset.x),
-					(px_int)(y+pLayer->keyPoint.y+pLayer->TextureOffset.y),
-					3,
-					PX_COLOR(255,0,0,255));
+			PX_GeoDrawSolidCircle(psurface,(px_int)(x+pLayer->keyPoint.x+pLayer->pLiveTexture->textureOffsetX),
+				(px_int)(y+pLayer->keyPoint.y+pLayer->pLiveTexture->textureOffsetY),
+				3,
+				PX_COLOR(255,0,0,255));
 
-				PX_GeoDrawCircle(psurface,(px_int)(x+pLayer->controlPoint.x+pLayer->TextureOffset.x),
-					(px_int)(y+pLayer->controlPoint.y+pLayer->TextureOffset.y),
-					5,1,PX_COLOR(255,255,0,0));
-				PX_GeoDrawSolidCircle(psurface,(px_int)(x+pLayer->controlPoint.x+pLayer->TextureOffset.x),
-					(px_int)(y+pLayer->controlPoint.y+pLayer->TextureOffset.y),
-					3,
-					PX_COLOR(255,255,0,0));
 
-				PX_GeoDrawLine(psurface,(px_int)(x+pLayer->currentKeyPoint.x+pLayer->TextureOffset.x),
-					(px_int)(y+pLayer->currentKeyPoint.y+pLayer->TextureOffset.y),
-					(px_int)(x+pLayer->currentControlPoint.x+pLayer->TextureOffset.x),
-					(px_int)(y+pLayer->currentControlPoint.y+pLayer->TextureOffset.y),
-					2,
-					PX_COLOR(255,255,0,0));
-				PX_GeoDrawCircle(psurface,(px_int)(x+pLayer->currentKeyPoint.x+pLayer->TextureOffset.x),
-					(px_int)(y+pLayer->currentKeyPoint.y+pLayer->TextureOffset.y),
-					5,
-					1,
-					PX_COLOR(255,255,0,255));
-				PX_GeoDrawSolidCircle(psurface,(px_int)(x+pLayer->currentKeyPoint.x+pLayer->TextureOffset.x),
-					(px_int)(y+pLayer->currentKeyPoint.y+pLayer->TextureOffset.y),
-					3,
-					PX_COLOR(255,255,0,255));
+			PX_GeoDrawCircle(psurface,(px_int)(x+pLayer->translation.x+pLayer->pLiveTexture->textureOffsetX),
+				(px_int)(y+pLayer->translation.y+pLayer->pLiveTexture->textureOffsetY),
+				5,
+				1,
+				PX_COLOR(255,255,0,255));
+			PX_GeoDrawSolidCircle(psurface,(px_int)(x+pLayer->translation.x+pLayer->pLiveTexture->textureOffsetX),
+				(px_int)(y+pLayer->translation.y+pLayer->pLiveTexture->textureOffsetY),
+				3,
+				PX_COLOR(255,255,0,255));
 
-				PX_GeoDrawCircle(psurface,(px_int)(x+pLayer->currentControlPoint.x+pLayer->TextureOffset.x),
-					(px_int)(y+pLayer->currentControlPoint.y+pLayer->TextureOffset.y),
-					5,
-					1,
-					PX_COLOR(255,255,0,0));
-				PX_GeoDrawSolidCircle(psurface,(px_int)(x+pLayer->currentControlPoint.x+pLayer->TextureOffset.x),
-					(px_int)(y+pLayer->currentControlPoint.y+pLayer->TextureOffset.y),
-					3,
-					PX_COLOR(255,255,0,0));
-			}
-		
 		}
 	}
+}
+
+px_void PX_LiveFrameworkRender(px_surface *psurface,PX_LiveFramework *plive,px_int x,px_int y,PX_TEXTURERENDER_REFPOINT refPoint,px_dword elpased)
+{
+	PX_QuickSortAtom sAtom[PX_LIVEFRAMEWORK_MAX_SUPPORT_LAYER];
+	px_int i,count;
+	if (plive->layers.size==0)
+	{
+		return;
+	}
+
+	switch (refPoint)
+	{
+	case PX_TEXTURERENDER_REFPOINT_LEFTTOP:
+		break;
+	case PX_TEXTURERENDER_REFPOINT_MIDTOP:
+		x-=plive->width/2;
+		break;
+	case PX_TEXTURERENDER_REFPOINT_RIGHTTOP:
+		x-=plive->width;
+		break;
+	case PX_TEXTURERENDER_REFPOINT_LEFTMID:
+		y-=plive->height/2;
+		break;
+	case PX_TEXTURERENDER_REFPOINT_CENTER:
+		y-=plive->height/2;
+		x-=plive->width/2;
+		break;
+	case PX_TEXTURERENDER_REFPOINT_RIGHTMID:
+		y-=plive->height/2;
+		x-=plive->width;
+		break;
+	case PX_TEXTURERENDER_REFPOINT_LEFTBOTTOM:
+		y-=plive->height;
+		break;
+	case PX_TEXTURERENDER_REFPOINT_MIDBOTTOM:
+		y-=plive->height;
+		x-=plive->width/2;
+		break;
+	case PX_TEXTURERENDER_REFPOINT_RIGHTBOTTOM:
+		y-=plive->height;
+		x-=plive->width;
+		break;
+	}
+
+	//clear zbuffer
+	//PX_memset(plive->zbuffer,0,plive->surfaceWidth*plive->surfaceHeight*sizeof(px_float));
+	
+	for (i=0;i<plive->layers.size;i++)
+	{
+		PX_LiveLayer *pLayer=PX_VECTORAT(PX_LiveLayer,&plive->layers,i);
+		sAtom[i].weight=pLayer->keyPoint.z+pLayer->translation.z;
+		sAtom[i].pData=pLayer;
+		if (i>=PX_LIVEFRAMEWORK_MAX_SUPPORT_LAYER-1)
+		{
+			break;
+		}
+	}
+	count=i;
+	PX_Quicksort_MaxToMin(sAtom,0,count-1);
+
+	for (i=0;i<count;i++)
+	{
+		PX_LiveLayer *pLayer=(PX_LiveLayer *)sAtom[i].pData;
+		PX_LiveFrameworkRenderLayer(psurface,plive,pLayer,x,y,elpased);
+	}
+
+	
 
 	if (plive->showRange)
 	{
@@ -831,14 +782,58 @@ px_void PX_LiveFrameworkRender(px_surface *psurface,PX_LiveFramework *plive,px_i
 
 }
 
+px_int PX_LiveFrameworkGetLayerTextureWidth(PX_LiveLayer *pLayer)
+{
+	if (pLayer->pLiveTexture)
+	{
+		return pLayer->pLiveTexture->Texture.width;
+	}
+	return 0;
+}
+
+px_int PX_LiveFrameworkGetLayerTextureHeight(PX_LiveLayer *pLayer)
+{
+	if (pLayer->pLiveTexture)
+	{
+		return pLayer->pLiveTexture->Texture.height;
+	}
+	return 0;
+}
+
 px_bool PX_LiveFrameworkPlayAnimation(PX_LiveFramework *plive,const px_char name[])
 {
 	return PX_TRUE;
 }
 
-PX_LiveLayer * PX_LiveFrameworkCreateLayer(PX_LiveFramework *plive)
+PX_LiveLayer * PX_LiveFrameworkGetLayerById(PX_LiveFramework *plive,const px_char id[])
+{
+	px_int i;
+	for (i=0;i<plive->layers.size;i++)
+	{
+		PX_LiveLayer *pLayer=PX_LiveFrameworkGetLayer(plive,i);
+		if (pLayer&&PX_memequ(pLayer->id,id,PX_LIVE_ID_MAX_LEN))
+		{
+			return pLayer;
+		}
+	}
+	return PX_NULL;
+}
+
+PX_LiveLayer * PX_LiveFrameworkCreateLayer(PX_LiveFramework *plive,const px_char id[PX_LIVEFRAMEWORK_MAX_SUPPORT_LAYER])
 {
 	PX_LiveLayer layer;
+
+	if (plive->layers.size>=PX_LIVEFRAMEWORK_MAX_SUPPORT_LAYER)
+	{
+		return PX_NULL;
+	}
+
+	if (PX_LiveFrameworkGetLayerById(plive,id))
+	{
+		return PX_NULL;
+	}
+
+
 	PX_memset(&layer,0,sizeof(layer));
 
 	if(!PX_VectorInitialize(plive->mp,&layer.children_Nodes,sizeof(PX_LiveLayer *),0))return PX_FALSE;
@@ -846,8 +841,15 @@ PX_LiveLayer * PX_LiveFrameworkCreateLayer(PX_LiveFramework *plive)
 	if(!PX_VectorInitialize(plive->mp,&layer.triangles,sizeof(PX_Delaunay_Triangle),0))return PX_FALSE;;
 	if(!PX_VectorInitialize(plive->mp,&layer.vertices,sizeof(PX_LiveFramework_Vertex),0))return PX_FALSE;;
 
-	layer.controlPoint.x=0;
-	layer.controlPoint.y=0;
+	layer.rotationAngle=0;
+	layer.visible=PX_TRUE;
+	layer.blend.alpha=1;
+	layer.blend.hdr_B=1;
+	layer.blend.hdr_G=1;
+	layer.blend.hdr_R=1;
+	layer.keyPoint.z=1;
+	PX_strcpy(layer.id,id,sizeof(layer.id));
+
 	if(!PX_VectorPushback(&plive->layers,&layer))
 		return PX_FALSE;
 
@@ -873,8 +875,28 @@ PX_LiveLayer *PX_LiveFrameworkGetLastCreateLayer(PX_LiveFramework *plive)
 	return PX_NULL;
 }
 
+px_bool PX_LiveFrameworkAddLiveTexture(PX_LiveFramework *plive,PX_LiveTexture livetexture)
+{
+	return PX_VectorPushback(&plive->livetextures,&livetexture);
+}
+
+PX_LiveTexture * PX_LiveFrameworkGetLiveTextureById(PX_LiveFramework *plive,const px_char id[])
+{
+	px_int i;
+	for (i=0;i<plive->livetextures.size;i++)
+	{
+		PX_LiveTexture *pTexture=PX_VECTORAT(PX_LiveTexture,&plive->livetextures,i);
+		if (PX_strequ(id,pTexture->id))
+		{
+			return pTexture;
+		}
+	}
+	return PX_NULL;
+}
+
 px_void PX_LiveFrameworkFree(PX_LiveFramework *plive)
 {
-	MP_Free(plive->mp,plive->zbuffer);
+	PX_VectorFree(&plive->layers);
+	PX_VectorFree(&plive->livetextures);
 }
 

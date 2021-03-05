@@ -1,13 +1,13 @@
 #include "PX_PointsMesh.h"
 
 
-px_bool PX_PointsMeshBuild(px_memorypool *mp,px_point2D pt[],px_int count,px_vector *out_triangles,PX_DELAUNAY_RETURN_TYPE type)
+px_bool PX_PointsMeshBuild(px_memorypool *mp,px_point2D limit_line_pt[],px_int line_pt_count,px_point2D pt[],px_int pt_count,px_vector *out_triangles,PX_DELAUNAY_RETURN_TYPE type)
 {
 	px_int i;
 	px_float left=0,top=0,right=0,bottom=0;
 	px_float offsetx,offsety,width,height;
 	px_texture testTexture;
-	if (count<2)
+	if (pt_count<2)
 	{
 		return PX_FALSE;
 	}
@@ -18,7 +18,7 @@ px_bool PX_PointsMeshBuild(px_memorypool *mp,px_point2D pt[],px_int count,px_vec
 	top=pt[0].y;
 
 
-	for (i=0;i<count;i++)
+	for (i=0;i<pt_count;i++)
 	{
 		if (pt[i].x<left)
 		{
@@ -52,14 +52,13 @@ px_bool PX_PointsMeshBuild(px_memorypool *mp,px_point2D pt[],px_int count,px_vec
 
 	
 	PX_TextureCreate(mp,&testTexture,(px_int)(width+1),(px_int)(height+1));
-	for (i=1;i<count;i++)
+	for (i=1;i<line_pt_count;i++)
 	{
-		PX_GeoDrawBresenhamLine(&testTexture,(px_int)(pt[i-1].x+offsetx),(px_int)(pt[i-1].y+offsety),(px_int)(pt[i].x+offsetx),(px_int)(pt[i].y+offsety),PX_COLOR(255,0,0,0));
+		PX_GeoDrawBresenhamLine(&testTexture,(px_int)(limit_line_pt[i-1].x+offsetx),(px_int)(limit_line_pt[i-1].y+offsety),(px_int)(limit_line_pt[i].x+offsetx),(px_int)(limit_line_pt[i].y+offsety),PX_COLOR(255,0,0,0));
 	}
-	PX_GeoDrawBresenhamLine(&testTexture,(px_int)(pt[count-1].x+offsetx),(px_int)(pt[count-1].y+offsety),(px_int)(pt[0].x+offsetx),(px_int)(pt[0].y+offsety),PX_COLOR(255,0,0,0));
 	PX_TextureFill(mp,&testTexture,0,0,PX_COLOR(0,0,0,0),PX_COLOR(0,255,255,255));
 
-	if(!PX_DelaunaryPointsBuild(mp,pt,count,out_triangles,type))
+	if(!PX_DelaunaryPointsBuild(mp,pt,pt_count,out_triangles,type))
 	{
 		PX_TextureFree(&testTexture);
 		return PX_FALSE;

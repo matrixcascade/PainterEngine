@@ -199,6 +199,10 @@ px_double PX_GaussRand();
 //ceil
 px_double PX_Ceil(px_double v);
 
+//////////////////////////////////////////////////////////////////////////
+//file ext
+px_void PX_FileGetName(const px_char filefullName[],px_char _out[],px_int outSize);
+px_void PX_FileGetExt(const px_char filefullName[],px_char _out[],px_int outSize);
 
 //////////////////////////////////////////////////////////////////////////
 //CRC
@@ -264,6 +268,7 @@ px_char* PX_strstr(const char* dest, const char* src);
 ///////////////////////////////////////////////////////////////////////////
 //rectangle circle
 px_bool PX_isPointInCircle(px_point p,px_point circle,px_float radius);
+px_bool PX_isPoint2DInCircle(px_point2D p,px_point2D circle,px_float radius);
 px_bool PX_isPointInRect(px_point p,px_rect rect);
 px_bool PX_isXYInRegion(px_float x,px_float y,px_float rectx,px_float recty,px_float width,px_float height);
 //////////////////////////////////////////////////////////////////////////
@@ -421,18 +426,29 @@ px_float PX_PointDistance(px_point p1,px_point p2);
 
 
 px_point PX_PointAdd(px_point p1,px_point p2);
+px_point2D PX_Point2DAdd(px_point2D p1,px_point2D p2);
 px_point PX_PointSub(px_point p1,px_point p2);
+px_point2D PX_Point2DSub(px_point2D p1,px_point2D p2);
 px_point4D PX_Point4DSub(px_point4D p1,px_point4D p2);
 px_point PX_PointMul(px_point p1,px_float m);
+px_point2D PX_Point2DMul(px_point2D p1,px_float m);
 px_point PX_PointDiv(px_point p1,px_float m);
+
+px_point2D PX_Point2DRrthonormal(px_point2D v);
+px_point2D PX_Point2DBase(px_point2D base1,px_point2D base2,px_point2D target);
+
+px_point2D PX_Point2DDiv(px_point2D p1,px_float m);
 px_float PX_PointDot(px_point p1,px_point p2);
+px_float PX_Point2DDot(px_point2D p1,px_point2D p2);
 px_float PX_Point4DDot(px_point4D p1,px_point4D p2);
 px_point PX_PointCross(px_point p1,px_point p2);
 px_point4D PX_Point4DCross(px_point4D p1,px_point4D p2);
 px_point PX_PointInverse(px_point p1);
 px_float PX_PointMod(px_point p);
+px_float PX_Point2DMod(px_point2D p);
 px_float PX_PointSquare(px_point p);
 px_point PX_PointNormalization(px_point p);
+px_point2D PX_Point2DNormalization(px_point2D p);
 px_point4D PX_Point4DUnit(px_point4D p);
 px_point PX_PointReflectX(px_point vector_refer,px_point respoint);
 

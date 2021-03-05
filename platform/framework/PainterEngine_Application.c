@@ -17,7 +17,7 @@ px_void PX_ApplicationUpdate(PX_Application *pApp,px_dword elpased)
 px_void PX_ApplicationRender(PX_Application *pApp,px_dword elpased)
 {
 	px_surface *pRenderSurface=&pApp->runtime.RenderSurface;
-	PX_RuntimeRenderClear(&pApp->runtime,PX_COLOR(255,255,255,255));
+	PX_RuntimeRenderClear(&pApp->runtime,PX_OBJECT_UI_DEFAULT_BACKGROUNDCOLOR);
 
 }
 

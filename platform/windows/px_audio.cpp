@@ -7,6 +7,7 @@ extern "C"
 {
 	#include "../../core/PX_Sound.h"
 	int PX_AudioInitialize(PX_SoundPlay *soundPlay);
+	int PX_AudioInitializeEx();
 	void PX_AudioSetVolume( unsigned int Vol );
 	void PX_AudioPlay( unsigned long Vol );
 	int  PX_AudioGetStandbyBufferSize();
@@ -63,8 +64,12 @@ DWORD  _stdcall DEMO_DSoundProc(LPVOID p)
 }
 
 extern HWND	Win_Hwnd;
-
 int PX_AudioInitialize(PX_SoundPlay *soundPlay)
+{
+	DSound_soundplay=soundPlay;
+	return 1;
+}
+int PX_AudioInitializeEx()
 {
 	VOID* pDSLockedBuffer =NULL;
 	DWORD dwDSLockedBufferSize =0; 
@@ -73,8 +78,10 @@ int PX_AudioInitialize(PX_SoundPlay *soundPlay)
 	HWND hwnd=Win_Hwnd;
 	BOOL startThread=PX_TRUE;
 	/*Sound Play*/
-
-	DSound_soundplay=soundPlay;
+	if (!DSound_soundplay)
+	{
+		return 1;
+	}
 
 	//DSound created
 	if(DSound_lpds==NULL)

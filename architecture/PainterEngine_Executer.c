@@ -408,7 +408,8 @@ px_bool PX_ExecuterInitialize(PX_Runtime *runtime,PX_Executer *pExecute)
 	PX_ObjectRegisterEvent(pExecute->Area,PX_OBJECT_EVENT_KEYDOWN,PX_ExecuterOnEnter,PX_NULL);
 	PX_ObjectRegisterEvent(pExecute->Area,PX_OBJECT_EVENT_CURSORDOWN,PX_ExecuterOnMouseDown,PX_NULL);
 	PX_Object_ScrollAreaSetBorder(pExecute->Area,PX_FALSE);
-	if(!(pExecute->Input=PX_Object_EditCreate(&pExecute->runtime->mp_ui,(pExecute->Area),0,0,pExecute->runtime->surface_width-1,PX_FontGetCharactorHeight()+4,PX_NULL,PX_COLOR(255,0,255,0)))) return PX_FALSE;
+	if(!(pExecute->Input=PX_Object_EditCreate(&pExecute->runtime->mp_ui,(pExecute->Area),0,0,pExecute->runtime->surface_width-1,PX_FontGetCharactorHeight()+4,PX_NULL))) return PX_FALSE;
+	PX_Object_EditSetTextColor(pExecute->Input,PX_COLOR(255,0,255,0));
 	PX_Object_EditSetCursorColor(pExecute->Input,PX_COLOR(255,0,255,0));
 	PX_Object_EditSetTextColor(pExecute->Input,PX_COLOR(255,0,255,0));
 	PX_Object_EditSetBorderColor(pExecute->Input,PX_COLOR(255,0,255,0));

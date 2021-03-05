@@ -110,6 +110,30 @@ px_bool PX_VectorPop(px_vector *vec)
 	return PX_TRUE;
 }
 
+
+px_bool PX_VectorCopy(px_vector *destvec,px_vector *resvec)
+{
+	if (destvec->nodesize!=resvec->nodesize)
+	{
+		return PX_FALSE;
+	}
+	if (destvec->allocsize<resvec->allocsize)
+	{
+		if (destvec->data)
+		{
+			MP_Free(destvec->mp,destvec->data);
+		}
+		destvec->data=MP_Malloc(destvec->mp,resvec->allocsize);
+		if (!destvec->data)
+		{
+			return PX_FALSE;
+		}
+		PX_memcpy(destvec->data,resvec->data,resvec->nodesize*resvec->size);
+		return PX_TRUE;
+	}
+	return PX_FALSE;
+}
+
 px_bool PX_VectorAllocSize(px_vector *vec,px_int size)
 {
 	if (size<vec->size)

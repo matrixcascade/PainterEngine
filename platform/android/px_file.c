@@ -11,7 +11,7 @@ extern AAssetManager* PX_assetManager;
 
 int PX_SaveDataToFile(void *buffer,int size,const char path[])
 {
-	FILE *pf=fopen(path,"rb");
+	FILE *pf=fopen(path,"wb");
 	if (pf)
 	{
 		fwrite(buffer,1,size,pf);
@@ -116,16 +116,18 @@ int PX_FileGetDirectoryFileCount(const char path[],PX_FILEENUM_TYPE type,const c
     struct dirent* ent = NULL;
     int count=0;
     DIR *pDir;
-    char oPath[260];
+    char oPath[260]={0};
     if(path[0]==0)
     {
-        strcat(oPath,"/mnt/sdcard/");
-    } else
-    {
-        strcpy(oPath,path);
+        if(type==PX_FILEENUM_TYPE_FOLDER)
+            return 1;
+        return 0;
     }
-    if( (pDir=opendir(oPath)) == NULL)
+
+
+    if( (pDir=opendir(path)) == NULL)
     {
+        int err=errno;
         return 0;
     }
 
@@ -211,15 +213,18 @@ int PX_FileGetDirectoryFileName(const char path[],int count,char FileName[][260]
     struct dirent* ent = NULL;
     int index=0;
     DIR *pDir;
-    char oPath[260]={0};
+
     if(path[0]==0)
     {
-        strcat(oPath,"/mnt/sdcard/");
-    } else
-    {
-        strcpy(oPath,path);
+        if(type==PX_FILEENUM_TYPE_FOLDER)
+        {
+            strcpy(FileName[0],"/sdcard");
+            return 1;
+        }
+        return 0;
+        //strcat(oPath,"/sdcard");
     }
-    if( (pDir=opendir(oPath)) == NULL)
+    if( (pDir=opendir(path)) == NULL)
     {
         return 0;
     }

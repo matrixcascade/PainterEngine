@@ -16,6 +16,7 @@ px_bool PX_VectorAllocSize(px_vector *vec,px_int size);
 px_bool PX_VectorPushback(px_vector *vec,px_void *data);
 px_bool PX_VectorErase(px_vector *vec,px_int index);
 px_bool PX_VectorPop(px_vector *vec);
+px_bool PX_VectorCopy(px_vector *destvec,px_vector *resvec);
 #define PX_VectorSize(x) ((x)->size)
 #define PX_VECTORAT(t,vec,i) ((t *)((px_byte *)((vec)->data)+(vec)->nodesize*(i)))
 #define PX_VECTORLAST(t,vec) PX_VECTORAT(t,vec,(vec)->size-1)

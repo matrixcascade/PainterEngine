@@ -36,6 +36,8 @@ typedef struct
 	PX_SoundData *data;
 }PX_Sound;
 
+typedef px_void (*px_soundplay_userread)(px_void *userptr,px_byte *pBuffer,px_int readSize);
+
 typedef struct
 {
 	px_memorypool *mp;
@@ -43,10 +45,13 @@ typedef struct
 	px_bool pause;
 	volatile px_bool bLock;
 	PX_SOUND_MIX_MODE mix_mode;
+	px_soundplay_userread userread;
+	px_void *userptr;
 	PX_Sound Sounds[PX_SOUND_DEFAULT_PARALLEL];
 }PX_SoundPlay;
 
 px_bool PX_SoundPlayInitialize(px_memorypool *mp, PX_SoundPlay *pSoundPlay);
+px_void PX_SoundPlaySetUserRead(PX_SoundPlay *pSoundPlay,px_void (*userread)(px_void *userptr,px_byte *pBuffer,px_int readSize),px_void *ptr);
 px_void PX_SoundPlayPause(PX_SoundPlay *pSoundPlay,px_bool pause);
 px_bool PX_SoundPlayAdd(PX_SoundPlay *pSoundPlay,PX_Sound sound);
 px_bool PX_SoundPlayRead(PX_SoundPlay *pSoundPlay,px_byte *pBuffer,px_int readSize);
@@ -54,6 +59,7 @@ px_void PX_SoundPlayFree(PX_SoundPlay *pSoundPlay);
 px_void PX_SoundPlayClear(PX_SoundPlay *pSoundPlay);
 px_bool PX_SoundPlayGetDataCount(PX_SoundPlay *pSoundPlay);
 PX_Sound PX_SoundCreate(PX_SoundData *data,px_bool loop);
+px_bool PX_SoundStaticDataCopy(px_memorypool *mp,PX_SoundData *resSounddata,PX_SoundData *targetSounddata);
 px_bool PX_SoundStaticDataCreate(PX_SoundData *sounddata,px_memorypool *mp,px_byte *data,px_int datasize);
 px_void PX_SoundStaticDataFree(PX_SoundData *sounddata);
 #endif

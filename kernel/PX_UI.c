@@ -336,7 +336,7 @@ PX_Object * PX_UI_CreateSliderbar(PX_UI *ui,PX_Object *parent,PX_Json_Value *jso
 	pSubValue=PX_JsonGetObjectValue(json_value,"min");
 	if (pSubValue&&pSubValue->type==PX_JSON_VALUE_TYPE_NUMBER)
 	{
-		max=(px_int)pSubValue->_number;
+		min=(px_int)pSubValue->_number;
 	}
 
 	pSubValue=PX_JsonGetObjectValue(json_value,"type");
@@ -391,11 +391,11 @@ PX_Object * PX_UI_CreateButton(PX_UI *ui,PX_Object *parent,PX_Json_Value *json_v
 	}
 
 	baseInfo=PX_UIGetBaseInfo(json_value,width,height);
-	fontColor=PX_COLOR(255,0,0,0);
+	fontColor=PX_OBJECT_UI_DEFAULT_FONTCOLOR;
 
 	PX_UI_GetColor(json_value,"fontcolor",&fontColor);
 
-	pObject=PX_Object_PushButtonCreate(ui->ui_mp,parent,(px_int)baseInfo.x,(px_int)baseInfo.y,(px_int)baseInfo.width,(px_int)baseInfo.height,text,ui->fontmodule,fontColor);
+	pObject=PX_Object_PushButtonCreate(ui->ui_mp,parent,(px_int)baseInfo.x,(px_int)baseInfo.y,(px_int)baseInfo.width,(px_int)baseInfo.height,text,ui->fontmodule);
 
 	if (PX_UI_GetColor(json_value,"backgroundcolor",&Color))
 	{
@@ -438,16 +438,19 @@ PX_Object * PX_UI_CreateEdit(PX_UI *ui,PX_Object *parent,PX_Json_Value *json_val
 	const px_char *text="";
 	px_bool b;
 	PX_Json_Value *pSubValue=PX_NULL;
-	px_color fontColor,Color;
+	px_color Color;
 	px_char style[8];
 	px_char str[128];
 	px_double number;
 
 	baseInfo=PX_UIGetBaseInfo(json_value,width,height);
-	fontColor=PX_COLOR(255,0,0,0);
+	
+	pObject=PX_Object_EditCreate(ui->ui_mp,parent,(px_int)baseInfo.x,(px_int)baseInfo.y,(px_int)baseInfo.width,(px_int)baseInfo.height,ui->fontmodule);
 
-	PX_UI_GetColor(json_value,"fontcolor",&fontColor);
-	pObject=PX_Object_EditCreate(ui->ui_mp,parent,(px_int)baseInfo.x,(px_int)baseInfo.y,(px_int)baseInfo.width,(px_int)baseInfo.height,ui->fontmodule,fontColor);
+	if (PX_UI_GetColor(json_value,"fontcolor",&Color))
+	{
+		PX_Object_EditSetTextColor(pObject,Color);
+	}
 
 	if (PX_UI_GetColor(json_value,"backgroundcolor",&Color))
 	{

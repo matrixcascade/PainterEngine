@@ -4,6 +4,8 @@
 #include "PX_Animation.h"
 #include "PX_Json.h"
 
+#define  PX_LIVE_ID_MAX_LEN 32
+
 typedef struct
 {
 	px_point position;
@@ -17,54 +19,39 @@ typedef struct
 	px_int index3;
 }PX_LiveTriangle;
 
-
-typedef enum 
+typedef struct  
 {
-	PX_LIVE_DATA_TYPE_TEXTURE,
-	PX_LIVE_DATA_TYPE_ANIMATION,
-}PX_LIVE_DATA_TYPE;
+	px_char id[PX_LIVE_ID_MAX_LEN];
+	px_texture Texture;
+	px_int textureOffsetX;
+	px_int textureOffsetY;
+}PX_LiveTexture;
+
 
 struct _PX_LiveLayer
 {
+	px_char id[PX_LIVE_ID_MAX_LEN];
+
 	px_vector parent_Nodes;
 	px_vector children_Nodes;
 
-	px_point TextureOffset;//static
 	px_point keyPoint;//static
-	px_point controlPoint;//static
+	px_point linkPoint;
 
-	px_point currentKeyPoint;//dynamic
-	px_point currentControlPoint;//dynamic
+	px_point translation;//dynamic
+	px_float rotationAngle;
+
 	px_vector vertices;
 	px_vector triangles;
 
+	PX_TEXTURERENDER_BLEND blend;
+	px_bool visible;
 	px_bool showLinker;
 	px_bool showMesh;
 
-
-	PX_LIVE_DATA_TYPE type;
-	px_void *data;
+	PX_LiveTexture *pLiveTexture;
 };
 typedef struct _PX_LiveLayer PX_LiveLayer;
 
-typedef struct
-{
-	px_int root_node;
-	px_point transform;
-	px_float rotation;
-	px_dword elpased;
-}PX_LiveAnimationKey;
-
-typedef struct
-{
-	px_list AnimationKeys;
-}PX_LiveAnimationArray;
-
-typedef struct
-{
-	px_char Name[32];
-	px_vector AnimationArrays;//PX_LiveAnimationKey
-	px_dword elpased;
-}PX_LiveAnimation;
 #endif
 

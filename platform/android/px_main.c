@@ -93,6 +93,8 @@ void PX_AndroidEngine_CMD(struct android_app* app, int32_t cmd)
                     if(!engine->PainterEngineReady)
                     {
                         if(!PX_ApplicationInitialize(&App,engine->width,engine->height)) return ;
+                        App.runtime.window_width=engine->width;
+                        App.runtime.window_height=engine->height;
                     }
                     else
                     {

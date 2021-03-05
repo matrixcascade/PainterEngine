@@ -3,6 +3,7 @@
 #include "PainterEngine_Application.h"
 
 #include "px_display.h"
+
 //mouse informations
 POINT main_zoomPoint;
 px_int main_ZoomRegion;
@@ -254,12 +255,20 @@ DWORD WINAPI DEMO_RenderThreadFunc(LPVOID p)
 	HANDLE hThread;
 	DWORD  threadId;
 
-	PX_srand(314159);
+	PX_srand(time(NULL));
 	if(!PX_ApplicationInitialize(&App,PX_GetScreenWidth(),PX_GetScreenHeight()))return 0;
 	if(!PX_CreateWindow(App.runtime.surface_width,App.runtime.surface_height,App.runtime.window_width,App.runtime.window_height,PX_APPLICATION_NAME)) 
 	{
 		return 0;
 	}
+
+#ifdef PX_AUDIO_H
+	do 
+	{
+		extern int PX_AudioInitializeEx();
+		if(!PX_AudioInitializeEx())return 0;
+	} while (0);
+#endif
 	//////////////////////////////////////////////////////////////////////////
 	//CreateThread
 

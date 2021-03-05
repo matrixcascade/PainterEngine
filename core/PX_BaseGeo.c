@@ -3250,12 +3250,12 @@ px_void PX_GeoDrawTriangle(px_surface *psurface,px_point2D p0,px_point2D p1,px_p
 			PX_SurfaceDrawPixel(psurface,ix,iy,color);
 		}
 
-		do 
-		{
-			px_color aClr=color;
-			aClr._argb.a=(px_byte)(aClr._argb.a*rAlpha);
-			PX_SurfaceDrawPixel(psurface,ix,iy,color);
-		} while (0);
+// 		do 
+// 		{
+// 			px_color aClr=color;
+// 			aClr._argb.a=(px_byte)(aClr._argb.a*rAlpha);
+// 			PX_SurfaceDrawPixel(psurface,ix,iy,color);
+// 		} while (0);
 	}
 
 	// p1   p2
@@ -3405,12 +3405,12 @@ px_void PX_GeoDrawTriangle(px_surface *psurface,px_point2D p0,px_point2D p1,px_p
 			PX_SurfaceDrawPixel(psurface,ix,iy,color);
 		}
 
-		do 
-		{
-			px_color aClr=color;
-			aClr._argb.a=(px_byte)(aClr._argb.a*rAlpha);
-			PX_SurfaceDrawPixel(psurface,ix,iy,color);
-		} while (0);
+// 		do 
+// 		{
+// 			px_color aClr=color;
+// 			aClr._argb.a=(px_byte)(aClr._argb.a*rAlpha);
+// 			PX_SurfaceDrawPixel(psurface,ix,iy,color);
+// 		} while (0);
 	}
 	
 }

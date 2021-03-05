@@ -491,7 +491,8 @@ px_bool PC_ConsoleInit(PX_Console *pc)
 	PX_ObjectRegisterEvent(pc->Area,PX_OBJECT_EVENT_KEYDOWN,PX_ConsoleOnEnter,PX_NULL);
 	PX_ObjectRegisterEvent(pc->Area,PX_OBJECT_EVENT_CURSORDOWN,PX_ConsoleOnMouseDown,PX_NULL);
 	PX_Object_ScrollAreaSetBorder(pc->Area,PX_FALSE);
-	if(!(pc->Input=PX_Object_EditCreate(&pc->runtime->mp_ui,PX_Object_ScrollAreaGetIncludedObjects(pc->Area),0,0,pc->runtime->surface_width-1,PX_FontGetCharactorHeight()+4,PX_NULL,PX_COLOR(255,0,255,0)))) return PX_FALSE;
+	if(!(pc->Input=PX_Object_EditCreate(&pc->runtime->mp_ui,PX_Object_ScrollAreaGetIncludedObjects(pc->Area),0,0,pc->runtime->surface_width-1,PX_FontGetCharactorHeight()+4,PX_NULL))) return PX_FALSE;
+	PX_Object_EditSetTextColor(pc->Input,PX_COLOR(255,0,255,0));
 	PX_Object_EditSetCursorColor(pc->Input,PX_COLOR(255,0,255,0));
 	PX_Object_EditSetTextColor(pc->Input,PX_COLOR(255,0,255,0));
 	PX_Object_EditSetBorderColor(pc->Input,PX_COLOR(255,0,255,0));

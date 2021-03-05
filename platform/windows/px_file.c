@@ -9,7 +9,7 @@ int PX_SaveDataToFile(void *buffer,int size,const char path[])
 {
 	char _path[MAX_PATH];
 	FILE *pf;
-	if (path[0]=='\\'||path[0]=='//')
+	if (path[0]=='\\'||path[0]=='/')
 	{
 		strcpy_s(_path,sizeof(_path),path+1);
 	}
@@ -36,7 +36,7 @@ PX_IO_Data PX_LoadFileToIOData(const char path[])
 		FILE *pf;
 		int filesize;
 		char _path[MAX_PATH];
-		if (path[0]=='\\'||path[0]=='//')
+		if (path[0]=='\\'||path[0]=='/')
 		{
 			strcpy_s(_path,sizeof(_path),path+1);
 		}
@@ -90,7 +90,7 @@ int PX_FileExist(const char path[])
 {
 	char _path[MAX_PATH];
 	FILE *pf;
-	if (path[0]=='\\'||path[0]=='//')
+	if (path[0]=='\\'||path[0]=='/')
 	{
 		strcpy_s(_path,sizeof(_path),path+1);
 	}
@@ -139,7 +139,7 @@ int PX_FileGetDirectoryFileCount(const char path[],PX_FILEENUM_TYPE type,const c
 			return count;
 		}
 	}
-	if (path[0]=='\\'||path[0]=='//')
+	if (path[0]=='\\'||path[0]=='/')
 	{
 		strcpy_s(_findpath,sizeof(_findpath),path+1);
 	}
@@ -165,12 +165,18 @@ int PX_FileGetDirectoryFileCount(const char path[],PX_FILEENUM_TYPE type,const c
 		{
 		case PX_FILEENUM_TYPE_ANY:
 			{
-				if (filter)
+				if (filter[0]&&FindFileData.dwFileAttributes !=FILE_ATTRIBUTE_DIRECTORY)
 				{
-					if (strstr(FindFileData.cFileName,filter))
+					const char *pFilter=filter;
+					while (pFilter[1])
 					{
-						count++;
+						if (strstr(FindFileData.cFileName,filter))
+						{
+							count++;
+						}
+						pFilter+=strlen(pFilter);
 					}
+					
 				} else
 				{
 					count++;
@@ -182,11 +188,16 @@ int PX_FileGetDirectoryFileCount(const char path[],PX_FILEENUM_TYPE type,const c
 			{
 				if (FindFileData.dwFileAttributes !=FILE_ATTRIBUTE_DIRECTORY)
 				{
-					if (filter)
+					if (filter[0])
 					{
-						if (strstr(FindFileData.cFileName,filter))
+						const char *pFilter=filter;
+						while (pFilter[1])
 						{
-							count++;
+							if (strstr(FindFileData.cFileName,filter))
+							{
+								count++;
+							}
+							pFilter+=strlen(pFilter);
 						}
 					} else
 					{
@@ -199,16 +210,7 @@ int PX_FileGetDirectoryFileCount(const char path[],PX_FILEENUM_TYPE type,const c
 			{
 				if (FindFileData.dwFileAttributes ==FILE_ATTRIBUTE_DIRECTORY)
 				{
-					if (filter)
-					{
-						if (strstr(FindFileData.cFileName,filter))
-						{
-							count++;
-						}
-					} else
-					{
-						count++;
-					}
+					count++;
 				}
 			}
 			break;
@@ -251,7 +253,7 @@ int PX_FileGetDirectoryFileName(const char path[],int count,char FileName[][260]
 		}
 	}
 
-	if (path[0]=='\\'||path[0]=='//')
+	if (path[0]=='\\'||path[0]=='/')
 	{
 		strcpy_s(_findpath,sizeof(_findpath),path+1);
 	}
@@ -282,12 +284,17 @@ int PX_FileGetDirectoryFileName(const char path[],int count,char FileName[][260]
 		{
 		case PX_FILEENUM_TYPE_ANY:
 			{
-				if (filter)
+				if (filter[0]&&FindFileData.dwFileAttributes !=FILE_ATTRIBUTE_DIRECTORY)
 				{
-					if (strstr(FindFileData.cFileName,filter))
+					const char *pFilter=filter;
+					while (pFilter[1])
 					{
-						strcpy_s(FileName[index],260,FindFileData.cFileName);
-						index++;
+						if (strstr(FindFileData.cFileName,filter))
+						{
+							strcpy_s(FileName[index],260,FindFileData.cFileName);
+							index++;
+						}
+						pFilter+=strlen(pFilter);
 					}
 				} else
 				{
@@ -301,12 +308,17 @@ int PX_FileGetDirectoryFileName(const char path[],int count,char FileName[][260]
 			{
 				if (FindFileData.dwFileAttributes !=FILE_ATTRIBUTE_DIRECTORY)
 				{
-					if (filter)
+					if (filter[0])
 					{
-						if (strstr(FindFileData.cFileName,filter))
+						const char *pFilter=filter;
+						while (pFilter[1])
 						{
-							strcpy_s(FileName[index],260,FindFileData.cFileName);
-							index++;
+							if (strstr(FindFileData.cFileName,filter))
+							{
+								strcpy_s(FileName[index],260,FindFileData.cFileName);
+								index++;
+							}
+							pFilter+=strlen(pFilter);
 						}
 					} else
 					{
@@ -320,18 +332,8 @@ int PX_FileGetDirectoryFileName(const char path[],int count,char FileName[][260]
 			{
 				if (FindFileData.dwFileAttributes ==FILE_ATTRIBUTE_DIRECTORY)
 				{
-					if (filter)
-					{
-						if (strstr(FindFileData.cFileName,filter))
-						{
-							strcpy_s(FileName[index],260,FindFileData.cFileName);
-							index++;
-						}
-					} else
-					{
-						strcpy_s(FileName[index],260,FindFileData.cFileName);
-						index++;
-					}
+					strcpy_s(FileName[index],260,FindFileData.cFileName);
+					index++;
 				}
 			}
 			break;
