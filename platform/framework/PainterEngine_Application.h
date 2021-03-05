@@ -2,12 +2,9 @@
 #define PAINTERENGINE_APPLICATION_H
 
 #include "PainterEngine_Startup.h"
-#include "./architecture/PainterEngine_Console.h"
+
 typedef struct
 {
-	PX_Json ui_json;
-	PX_UI ui;
-	PX_FontModule font18;
 	PX_Runtime runtime;
 }PX_Application;
 
