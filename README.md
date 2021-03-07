@@ -22,5 +22,6 @@
 
 ```bash
 brew install xmake
+cd platform/macos
 xmake
 ```

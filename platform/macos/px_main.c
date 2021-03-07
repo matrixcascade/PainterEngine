@@ -1,5 +1,5 @@
 //Platform supports
-#include "platform/linux/px_display.h"
+#include "px_display.h"
 #include "PainterEngine_Application.h"
 static px_dword lastupdatetime;
 

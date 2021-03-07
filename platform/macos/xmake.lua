@@ -14,14 +14,13 @@ set_kind("binary")
 set_optimize("faster")
 set_targetdir("$(buildir)/$(mode)")
 
-add_includedirs("$(projectdir)")
-add_includedirs("$(painterengine_dir)")
+add_includedirs(painterengine_dir)
+add_includedirs(painterengine_dir .. "/platform/framework")
 
-add_files("$(projectdir)/*.c")
-
-add_files("$(painterengine_dir)/core/*.c")
-add_files("$(painterengine_dir)/kernel/*.c")
-add_files("$(painterengine_dir)/architecture/*.c")
-add_files("$(painterengine_dir)/platform/macos/*.c")
+add_files(painterengine_dir .. "/core/*.c")
+add_files(painterengine_dir .. "/kernel/*.c")
+add_files(painterengine_dir .. "/architecture/*.c")
+add_files(painterengine_dir .. "/platform/framework/*.c")
+add_files(painterengine_dir .. "/platform/macos/*.c")
 
 add_frameworks("GLUT", "OpenGL")
