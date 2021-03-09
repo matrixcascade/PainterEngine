@@ -121,6 +121,7 @@ struct _PX_Object
 	px_float Length;
 	px_float diameter;//if the member is not zero,The Object is round shape
 	px_bool OnFocus;
+	px_bool OnFocusNode;
 	px_bool OnLostFocusReleaseEvent;
 	px_bool Enabled;
 	px_bool Visible;

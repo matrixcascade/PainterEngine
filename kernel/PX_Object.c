@@ -33,35 +33,46 @@ static px_void PX_ObjectClearFocusEx(PX_Object *pObject)
 	{
 		return;
 	}
-
-	if (pObject->OnFocus)
-	{
-		pObject->OnFocus=PX_FALSE;
-		PX_ObjectClearFocusEx(pObject->pChilds);
-	}
+	pObject->OnFocus=PX_FALSE;
+	pObject->OnFocusNode=PX_FALSE;
+	PX_ObjectClearFocusEx(pObject->pChilds);
 	PX_ObjectClearFocusEx(pObject->pNextBrother);
 }
 
 px_void PX_ObjectClearFocus(PX_Object *pObject)
 {
-	PX_Object *pRoot=pObject;
+	PX_Object *pClearObject=pObject;
 	if (!pObject->OnFocus)
 	{
 		return;
 	}
-	while(pRoot->pParent)pRoot=pRoot->pParent;
-	PX_ObjectClearFocusEx(pRoot);
+	while(pClearObject->pParent)
+	{
+		pClearObject=pClearObject->pParent;
+
+		if (pClearObject->OnFocusNode)
+		{
+			pClearObject=pClearObject->pChilds;
+			break;
+		}
+	}
+	PX_ObjectClearFocusEx(pClearObject);
 }
 
 px_void PX_ObjectSetFocus(PX_Object *pObject)
 {
-	PX_Object *pRoot=pObject;
-	while(pRoot->pParent)pRoot=pRoot->pParent;
-	if (pRoot->OnFocus)
+	PX_Object *pClearObject=pObject;
+	while(pClearObject->pParent)
 	{
-		PX_ObjectClearFocus(pRoot);
+		pClearObject=pClearObject->pParent;
+		if (pClearObject->OnFocusNode)
+		{
+			pClearObject=pClearObject->pChilds;
+			break;
+		}
 	}
-	
+	PX_ObjectClearFocusEx(pClearObject);
+	pObject->OnFocusNode=PX_TRUE;
 	PX_ObjectSetFocusEx(pObject);
 }
 
@@ -466,11 +477,15 @@ px_void PX_ObjectRender(px_surface *pSurface, PX_Object *Object,px_uint elpased 
 			{
 				Object->Func_ObjectBeginRender(pSurface,Object,elpased);
 			}
+			
 			if (Object->Func_ObjectRender!=0)
 			{
 				Object->Func_ObjectRender(pSurface,Object,elpased);
 			}
+
 			PX_ObjectRender(pSurface,Object->pChilds,elpased);
+
+			
 			if (Object->Func_ObjectEndRender)
 			{
 				Object->Func_ObjectEndRender(pSurface,Object,elpased);
