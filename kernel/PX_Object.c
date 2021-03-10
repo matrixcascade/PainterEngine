@@ -673,15 +673,6 @@ px_int PX_ObjectRegisterEvent( PX_Object *Object,px_uint Event,px_void (*Process
 px_void PX_ObjectExecuteEvent(PX_Object *pPost,PX_Object_Event Event)
 {
 	PX_OBJECT_EventAction *EventAction;
-	if (pPost==PX_NULL)
-	{
-		return;
-	}
-
-	if (pPost->Visible==PX_FALSE||pPost->Enabled==PX_FALSE||pPost->ReceiveEvents==PX_FALSE)
-	{
-		return;
-	}
 
 	EventAction=pPost->pEventActions;
 	while(EventAction)
@@ -699,6 +690,12 @@ px_bool PX_ObjectPostEventLink( PX_Object *pPost,PX_Object_Event Event )
 {
 	if (pPost==PX_NULL)
 	{
+		return PX_TRUE;
+	}
+
+	if (pPost->Visible==PX_FALSE||pPost->Enabled==PX_FALSE||pPost->ReceiveEvents==PX_FALSE)
+	{
+		if(PX_ObjectPostEventLink(pPost->pNextBrother,Event)==PX_FALSE) return PX_FALSE;
 		return PX_TRUE;
 	}
 
