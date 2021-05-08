@@ -442,7 +442,7 @@ static px_void PX_3D_RenderListRasterization(px_surface *psurface,PX_3D_RenderLi
 	px_float t2;
 
 
-	px_float x, y, xleft, xright; 
+	px_float y, xleft, xright; 
 	px_float oneoverz_left, oneoverz_right; 
 	px_float oneoverz_top, oneoverz_bottom; 
 	px_float oneoverz, oneoverz_step;   
@@ -624,13 +624,12 @@ static px_void PX_3D_RenderListRasterization(px_surface *psurface,PX_3D_RenderLi
 		toverz_step = (toverz_right-toverz_left) / (xright-xleft);
 		oneoverz = oneoverz_left,soverz = soverz_left, toverz = toverz_left;
 
-		for(x = xleft;x < xright; ++x)
+		for(ix = (px_int)(xleft+0.5);ix < (px_int)(xright+0.5f); ++ix)
 		{
 			s = soverz / oneoverz;
 			t = toverz / oneoverz;
 			originalZ=1.0f/oneoverz;
 
-			ix=(px_int)x;
 			iy=(px_int)y;
 
 			if (ix>0&&ix<view_width&&iy>=0&&iy<view_height)
@@ -816,13 +815,12 @@ static px_void PX_3D_RenderListRasterization(px_surface *psurface,PX_3D_RenderLi
 		toverz_step = (toverz_right-toverz_left) / (xright-xleft);
 		oneoverz = oneoverz_left,soverz = soverz_left, toverz = toverz_left;
 
-		for(x = xleft;x < xright; ++x)
+		for(ix = (px_int)(xleft+0.5);ix < (px_int)(xright+0.5f); ++ix)
 		{
 			s = soverz / oneoverz;
 			t = toverz / oneoverz;
 			originalZ=1.0f/oneoverz;
 
-			ix=(px_int)x;
 			iy=(px_int)y;
 
 			if (ix>0&&ix<view_width&&iy>=0&&iy<view_height)

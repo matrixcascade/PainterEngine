@@ -1,7 +1,7 @@
 #mingw32-64 makefile
 #####################################################
 target :=PainterEngine.exe
-project_path := I:/PainterEngineDEMO
+project_path := I:\PainterEngine\platform\framework
 painterengine_path := I:/PainterEngine
 #####################################################
 

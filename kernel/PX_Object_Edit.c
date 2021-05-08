@@ -617,11 +617,11 @@ px_void PX_Object_EditRender(px_surface *psurface, PX_Object *pObject,px_uint el
 			{
 				if (pEdit->fontModule)
 				{
-					PX_GeoDrawRect(&pEdit->EditSurface,x_draw_oft+1,y_draw_oft,x_draw_oft,y_draw_oft+pEdit->fontModule->max_Height-2,pEdit->CursorColor);
+					PX_GeoDrawRect(&pEdit->EditSurface,x_draw_oft+1,y_draw_oft,x_draw_oft,y_draw_oft+pEdit->fontModule->max_Height-2,pEdit->TextColor);
 				}
 				else
 				{
-					PX_GeoDrawRect(&pEdit->EditSurface,x_draw_oft+1,y_draw_oft,x_draw_oft,y_draw_oft+__PX_FONT_HEIGHT-1,pEdit->CursorColor);
+					PX_GeoDrawRect(&pEdit->EditSurface,x_draw_oft+1,y_draw_oft,x_draw_oft,y_draw_oft+__PX_FONT_HEIGHT-1,pEdit->TextColor);
 				}
 
 			}
@@ -704,7 +704,7 @@ px_void PX_Object_EditRender(px_surface *psurface, PX_Object *pObject,px_uint el
 		cursor+=fsize;
 	}
 
-	PX_SurfaceRender(psurface,&pEdit->EditSurface,(px_int)objx,(px_int)objy,PX_TEXTURERENDER_REFPOINT_LEFTTOP,PX_NULL);
+	PX_SurfaceRender(psurface,&pEdit->EditSurface,(px_int)objx,(px_int)objy,PX_ALIGN_LEFTTOP,PX_NULL);
 }
 
 px_void PX_Object_EditFree( PX_Object *pObject )
@@ -729,6 +729,11 @@ px_void PX_Object_EditAddString(PX_Object *pObject,px_char *Text)
 
 			if(*Text!=8)
 			{
+				if (Text[1]==0&&(*Text=='\r'||*Text=='\n'))
+				{
+					return;
+				}
+
 				if (pEdit->Limit[0])
 				{
 					px_bool bMatch=PX_FALSE;

@@ -104,6 +104,24 @@ px_void PX_Object_ListOnCursorDown(PX_Object *pObject,PX_Object_Event e,px_void 
 	}
 }
 
+px_void PX_Object_ListOnCursorRDown(PX_Object *pObject,PX_Object_Event e,px_void *ptr)
+{
+	PX_Object_List *pList= PX_Object_GetList(pObject);
+	if (!PX_ObjectIsCursorInRegion(pObject,e))
+	{
+		return;
+	}
+
+	if (pList->currentSelectedIndex!=-1)
+	{
+		pList->currentSelectedIndex=-1;
+		e.Event=PX_OBJECT_EVENT_VALUECHANGED;
+		PX_Object_Event_SetIndex(&e,pList->currentSelectedIndex);
+		PX_ObjectExecuteEvent(pObject,e);
+	}
+	
+}
+
 px_void PX_Object_ListOnWheel(PX_Object *pObject,PX_Object_Event e,px_void *ptr)
 {
 	PX_Object_List *pList= PX_Object_GetList(pObject);
@@ -137,6 +155,13 @@ px_void PX_Object_ListOnWheel(PX_Object *pObject,PX_Object_Event e,px_void *ptr)
 	PX_Object_SliderBarSetValue(pList->SliderBar,pList->offsety);
 }
 
+px_void PX_Object_ListMoveToTop(PX_Object *pObject)
+{
+	PX_Object_List *pList= PX_Object_GetList(pObject);
+	pList->offsety=0;
+	PX_Object_SliderBarSetValue(pList->SliderBar,0);
+}
+
 px_void PX_Object_ListRender(px_surface *psurface, PX_Object *pObject,px_uint elpased)
 {
 	PX_Object *pItemObject;
@@ -160,11 +185,11 @@ px_void PX_Object_ListRender(px_surface *psurface, PX_Object *pObject,px_uint el
 	{
 		PX_Object_SliderBar *pSliderBar=PX_Object_GetSliderBar(pList->SliderBar);
 		pList->SliderBar->Visible=PX_TRUE;
-		pList->SliderBar->y=objy;
+		pList->SliderBar->y=0;
 		pList->SliderBar->x=objx+objWidth-32;
 		pSliderBar->SliderButtonLength=(px_int)(pList->SliderBar->Height*objHeight/(pList->ItemHeight*pList->pData.size));
 		if(pSliderBar->SliderButtonLength<32) pSliderBar->SliderButtonLength=32;
-		pSliderBar->Max=(pList->ItemHeight)*pList->pData.size-(px_int)objHeight+32;
+		pSliderBar->Max=(pList->ItemHeight)*pList->pData.size-(px_int)objHeight;
 		PX_Object_SliderBarSetBackgroundColor(pList->SliderBar,pList->BackgroundColor);
 		PX_Object_SliderBarSetColor(pList->SliderBar,pList->BorderColor);
 	}
@@ -242,7 +267,7 @@ px_void PX_Object_ListRender(px_surface *psurface, PX_Object *pObject,px_uint el
 		}
 	}
 	PX_GeoDrawBorder(&pList->renderSurface,0,0,pList->renderSurface.width-1,pList->renderSurface.height-1,1,pList->BorderColor);
-	PX_SurfaceCover(psurface,&pList->renderSurface,(px_int)objx,(px_int)objy,PX_TEXTURERENDER_REFPOINT_LEFTTOP);
+	PX_SurfaceCover(psurface,&pList->renderSurface,(px_int)objx,(px_int)objy,PX_ALIGN_LEFTTOP);
 
 }
 
@@ -251,6 +276,22 @@ px_void PX_Object_ListClear(PX_Object *pListObj)
 	PX_Object_List  *pList=PX_Object_GetList(pListObj);
 	if(pList)
 		PX_VectorClear(&pList->pData);
+}
+
+px_void PX_Object_ListSetCurrentSelectIndex(PX_Object *pObject,px_int index)
+{
+	PX_Object_List  *pList=PX_Object_GetList(pObject);
+	if(pList)
+	{
+		if (index>=0&&index<pList->Items.size)
+		{
+			pList->currentSelectedIndex=index;
+		}
+		else
+		{
+			pList->currentSelectedIndex=-1;
+		}
+	}
 }
 
 px_int PX_Object_ListGetCurrentSelectIndex(PX_Object *pObject)
@@ -312,6 +353,10 @@ px_void PX_Object_ListOnEvent(PX_Object  *Object,PX_Object_Event e,px_void *ptr)
 	case PX_OBJECT_EVENT_CURSORUP:
 	case PX_OBJECT_EVENT_CURSORRUP:
 	case PX_OBJECT_EVENT_CURSORMOVE:
+		if (!PX_ObjectIsPointInRegion(Object,PX_Object_Event_GetCursorX(e),PX_Object_Event_GetCursorY(e)))
+		{
+			return;
+		}
 		PX_Object_Event_SetCursorX(&e,PX_Object_Event_GetCursorX(e)-Object->x);
 		PX_Object_Event_SetCursorY(&e,PX_Object_Event_GetCursorY(e)-Object->y);
 		break;
@@ -343,6 +388,7 @@ PX_Object * PX_Object_ListCreate(px_memorypool *mp, PX_Object *Parent,px_int x,p
 
 	List.offsetx=0;
 	List.currentSelectedIndex=-1;
+	List.currentCursorIndex=-1;
 	List.offsety=0;
 	List.showCursor=PX_TRUE;
 
@@ -363,6 +409,7 @@ PX_Object * PX_Object_ListCreate(px_memorypool *mp, PX_Object *Parent,px_int x,p
 
 	PX_ObjectRegisterEvent(pListObject,PX_OBJECT_EVENT_CURSORWHEEL,PX_Object_ListOnWheel,pListObject);
 	PX_ObjectRegisterEvent(pListObject,PX_OBJECT_EVENT_CURSORDOWN,PX_Object_ListOnCursorDown,pListObject);
+	PX_ObjectRegisterEvent(pListObject,PX_OBJECT_EVENT_CURSORRDOWN,PX_Object_ListOnCursorRDown,pListObject);
 	PX_ObjectRegisterEvent(pListObject,PX_OBJECT_EVENT_CURSORMOVE,PX_Object_ListOnCursorMove,pListObject);
 	PX_ObjectRegisterEvent(pList->SliderBar,PX_OBJECT_EVENT_VALUECHANGED,PX_Object_ListOnSliderValueChanged,pListObject);
 	PX_ObjectRegisterEvent(pListObject,PX_OBJECT_EVENT_ANY,PX_Object_ListOnEvent,pListObject);
@@ -399,9 +446,9 @@ px_void PX_Object_ListSetDoubleClickCancel(PX_Object *pListObject,px_bool b)
 px_void * PX_Object_ListGetItemData(PX_Object *pListObject,px_int index)
 {
 	PX_Object_List *pList=PX_Object_GetList(pListObject);
-	if (index>0&&index<pList->pData.size)
+	if (index>=0&&index<pList->pData.size)
 	{
-		return PX_VECTORAT(px_void *,&pList->pData,index);
+		return *PX_VECTORAT(px_void *,&pList->pData,index);
 	}
 	return PX_NULL;
 }
@@ -409,7 +456,7 @@ px_void * PX_Object_ListGetItemData(PX_Object *pListObject,px_int index)
 px_void PX_Object_ListRemoveItem(PX_Object *pListObject,px_int index)
 {
 	PX_Object_List *pList=PX_Object_GetList(pListObject);
-	if (index>0&&index<pList->pData.size)
+	if (index>=0&&index<pList->pData.size)
 	{
 		PX_VectorErase(&pList->pData,index);
 	}

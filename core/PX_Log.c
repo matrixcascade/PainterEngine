@@ -1,9 +1,10 @@
 #include "PX_Typedef.h"
 
+
 void PX_ASSERT()
 {
 #ifdef PX_DEBUG_MODE
-	__debugbreak();
+*(char *)(0)=1;
 #endif
 }
 

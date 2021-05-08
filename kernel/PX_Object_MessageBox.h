@@ -24,7 +24,7 @@ typedef enum
 
 struct _PX_Object_MessageBox;
 
-typedef px_void  (*PX_Object_MessageBoxCallBack)(struct _PX_Object_MessageBox *pmessagebox, px_void *ptr);
+typedef px_void  (*PX_Object_MessageBoxCallBack)(PX_Object *pmessagebox,PX_Object_Event e, px_void *ptr);
 
 typedef struct _PX_Object_MessageBox
 {
@@ -41,6 +41,8 @@ typedef struct _PX_Object_MessageBox
 	px_char Message[PX_OBJECT_MESSAGEBOX_MAX_MESSAGESIZE];
 	PX_FontModule *fontmodule;
 	PX_Object *btn_Ok,*btn_Cancel,*edit_inputbox;
+
+	px_color fillbackgroundcolor;
 }PX_Object_MessageBox;
 
 

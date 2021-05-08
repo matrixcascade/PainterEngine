@@ -224,8 +224,8 @@ px_double PX_log(px_double __x);
 px_double PX_lg(px_double __x);
 px_double PX_log10(px_double __x);
 
-#define  PX_RadianToAngle(angle) ((angle)*PX_PI/180)
-#define  PX_AngleToRadian(radian) ((radian)*180/PX_PI)
+#define  PX_RadianToAngle(radian) ((radian)*180/PX_PI)
+#define  PX_AngleToRadian(angle) ((angle)*PX_PI/180)
 
 px_double PX_sind(px_double radius);
 px_double PX_cosd(px_double radius);
@@ -422,6 +422,7 @@ px_point PX_POINT(px_float x,px_float y,px_float z);
 px_point2D PX_POINT2D(px_float x,px_float y);
 px_point4D PX_POINT4D(px_float x,px_float y,px_float z);
 px_point PX_PointRotate(px_point p,px_float angle);
+px_point2D PX_Point2DRotate(px_point2D p,px_float angle);
 px_float PX_PointDistance(px_point p1,px_point p2);
 
 
@@ -436,7 +437,6 @@ px_point PX_PointDiv(px_point p1,px_float m);
 
 px_point2D PX_Point2DRrthonormal(px_point2D v);
 px_point2D PX_Point2DBase(px_point2D base1,px_point2D base2,px_point2D target);
-
 px_point2D PX_Point2DDiv(px_point2D p1,px_float m);
 px_float PX_PointDot(px_point p1,px_point p2);
 px_float PX_Point2DDot(px_point2D p1,px_point2D p2);
@@ -452,6 +452,7 @@ px_point2D PX_Point2DNormalization(px_point2D p);
 px_point4D PX_Point4DUnit(px_point4D p);
 px_point PX_PointReflectX(px_point vector_refer,px_point respoint);
 
+px_point2D PX_Point2DMulMatrix(px_point2D p,px_matrix m);
 px_point PX_PointMulMatrix(px_point p,px_matrix m);
 px_point4D PX_Point4DMulMatrix(px_point4D p,px_matrix m);
 

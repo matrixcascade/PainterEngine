@@ -21,6 +21,10 @@ px_bool PX_SurfaceCreate(px_memorypool *mp,px_uint width,px_uint height,px_surfa
 
 px_void PX_SurfaceFree(px_surface *psurface)
 {
+	if (psurface->surfaceBuffer==PX_NULL)
+	{
+		return;
+	}
 	MP_Free(psurface->MP,psurface->surfaceBuffer);
 	psurface->surfaceBuffer=PX_NULL;
 	psurface->MP=0;

@@ -1819,7 +1819,7 @@ static px_void PX_GeoDrawRingPoint(px_surface *psurface, px_int x,px_int y,px_co
 	}
 }
 
-px_void PX_GeoDrawRing(px_surface *psurface, px_int x,px_int y,px_int Radius,px_int lineWidth,px_color color,px_uint start_angle,px_uint end_angle)
+px_void PX_GeoDrawRing(px_surface *psurface, px_int x,px_int y,px_int Radius,px_int lineWidth,px_color color,px_int start_angle,px_int end_angle)
 {
 	px_int s_quadrant,e_quadrant,trim;
 	px_float start_mathRegion,end_mathRegion;
@@ -1838,6 +1838,22 @@ px_void PX_GeoDrawRing(px_surface *psurface, px_int x,px_int y,px_int Radius,px_
 	{
 		return;
 	}
+
+	if (start_angle>end_angle)
+	{
+		px_int temp=start_angle;
+		start_angle=end_angle;
+		end_angle=temp;
+	}
+
+	if (start_angle<0)
+	{
+		repeat=start_angle/360;
+		repeat-=1;
+		start_angle-=repeat*360;
+		end_angle-=repeat*360;
+	}
+
 	repeat=start_angle/360;
 	start_angle-=repeat*360;
 	end_angle-=repeat*360;
@@ -2211,7 +2227,7 @@ px_void PX_GeoDrawRing(px_surface *psurface, px_int x,px_int y,px_int Radius,px_
 
 }
 
-px_void PX_GeoDrawSector(px_surface *psurface, px_int x,px_int y,px_int Radius_outside,px_int Radius_inside,px_color color,px_uint start_angle,px_uint end_angle)
+px_void PX_GeoDrawSector(px_surface *psurface, px_int x,px_int y,px_int Radius_outside,px_int Radius_inside,px_color color,px_int start_angle,px_int end_angle)
 {
 	px_int s_quadrant,e_quadrant,trim;
 	px_float start_mathRegion,end_mathRegion;
@@ -2238,9 +2254,25 @@ px_void PX_GeoDrawSector(px_surface *psurface, px_int x,px_int y,px_int Radius_o
 		return;
 	}
 
+	if (start_angle>end_angle)
+	{
+		px_int temp=start_angle;
+		start_angle=end_angle;
+		end_angle=temp;
+	}
+
+	if (start_angle<0)
+	{
+		repeat=start_angle/360;
+		repeat-=1;
+		start_angle-=repeat*360;
+		end_angle-=repeat*360;
+	}
+
 	repeat=start_angle/360;
 	start_angle-=repeat*360;
 	end_angle-=repeat*360;
+
 
 	s_quadrant=(start_angle%360)/90+1;
 	e_quadrant=(end_angle%360)/90+1;
@@ -3413,5 +3445,34 @@ px_void PX_GeoDrawTriangle(px_surface *psurface,px_point2D p0,px_point2D p1,px_p
 // 		} while (0);
 	}
 	
+}
+
+px_void PX_GeoDrawArrow(px_surface *psurface,px_point2D p0,px_point2D p1,px_float size,px_color color)
+{
+	px_point2D p0_5,v,vn;
+	px_float arrowsize,distance;
+	
+	if (size<1)
+	{
+		return;
+	}
+
+	arrowsize=size*5;
+
+
+
+	//draw line
+	v=PX_Point2DNormalization(PX_Point2DSub(p1,p0));
+	distance=PX_Point2DMod(PX_Point2DSub(p1,p0));
+	distance-=arrowsize;
+	p0_5=PX_Point2DAdd(p0,PX_Point2DMul(v,distance));
+	PX_GeoDrawLine(psurface,(px_int)p0.x,(px_int)p0.y,(px_int)p0_5.x,(px_int)p0_5.y,(px_int)size,color);
+
+	//normal
+	vn.x=-v.y;
+	vn.y=v.x;
+
+	PX_GeoDrawTriangle(psurface,p0_5,p1,PX_Point2DAdd(p0_5,PX_Point2DMul(vn,arrowsize)),color);
+	PX_GeoDrawTriangle(psurface,p0_5,p1,PX_Point2DAdd(p0_5,PX_Point2DMul(vn,-arrowsize)),color);
 }
 

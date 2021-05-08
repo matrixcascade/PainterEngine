@@ -74,47 +74,47 @@ px_void PX_Object_AnimationRender(px_surface *psurface,PX_Object *pObject,px_uin
 		{
 		case PX_ALIGN_LEFTTOP:
 			{
-				PX_AnimationRender(psurface,&pA->animation,(px_int)objx,(px_int)objy,PX_TEXTURERENDER_REFPOINT_LEFTTOP,PX_NULL);
+				PX_AnimationRender(psurface,&pA->animation,(px_int)objx,(px_int)objy,PX_ALIGN_LEFTTOP,PX_NULL);
 			}
 			break;
 		case PX_ALIGN_LEFTMID:
 			{
-				PX_AnimationRender(psurface,&pA->animation,(px_int)objx,(px_int)(objy+objHeight/2),PX_TEXTURERENDER_REFPOINT_LEFTMID,PX_NULL);
+				PX_AnimationRender(psurface,&pA->animation,(px_int)objx,(px_int)(objy+objHeight/2),PX_ALIGN_LEFTMID,PX_NULL);
 			}
 			break;
 		case PX_ALIGN_LEFTBOTTOM:
 			{
-				PX_AnimationRender(psurface,&pA->animation,(px_int)objx,(px_int)(objy+objHeight),PX_TEXTURERENDER_REFPOINT_LEFTBOTTOM,PX_NULL);
+				PX_AnimationRender(psurface,&pA->animation,(px_int)objx,(px_int)(objy+objHeight),PX_ALIGN_LEFTBOTTOM,PX_NULL);
 			}
 			break;
 		case PX_ALIGN_MIDTOP:
 			{
-				PX_AnimationRender(psurface,&pA->animation,(px_int)(objx+objWidth/2),(px_int)(objy),PX_TEXTURERENDER_REFPOINT_MIDTOP,PX_NULL);
+				PX_AnimationRender(psurface,&pA->animation,(px_int)(objx+objWidth/2),(px_int)(objy),PX_ALIGN_MIDTOP,PX_NULL);
 			}
 			break;
 		case PX_ALIGN_CENTER:
 			{
-				PX_AnimationRender(psurface,&pA->animation,(px_int)(objx+objWidth/2),(px_int)(objy+objHeight/2),PX_TEXTURERENDER_REFPOINT_CENTER,PX_NULL);
+				PX_AnimationRender(psurface,&pA->animation,(px_int)(objx+objWidth/2),(px_int)(objy+objHeight/2),PX_ALIGN_CENTER,PX_NULL);
 			}
 			break;
 		case PX_ALIGN_MIDBOTTOM:
 			{
-				PX_AnimationRender(psurface,&pA->animation,(px_int)(objx+objWidth/2),(px_int)(objy+objHeight),PX_TEXTURERENDER_REFPOINT_MIDBOTTOM,PX_NULL);
+				PX_AnimationRender(psurface,&pA->animation,(px_int)(objx+objWidth/2),(px_int)(objy+objHeight),PX_ALIGN_MIDBOTTOM,PX_NULL);
 			}
 			break;
 		case PX_ALIGN_RIGHTTOP:
 			{
-				PX_AnimationRender(psurface,&pA->animation,(px_int)(objx+objWidth),(px_int)(objy),PX_TEXTURERENDER_REFPOINT_RIGHTTOP,PX_NULL);
+				PX_AnimationRender(psurface,&pA->animation,(px_int)(objx+objWidth),(px_int)(objy),PX_ALIGN_RIGHTTOP,PX_NULL);
 			}
 			break;
 		case PX_ALIGN_RIGHTMID:
 			{
-				PX_AnimationRender(psurface,&pA->animation,(px_int)(objx+objWidth),(px_int)(objy+objHeight/2),PX_TEXTURERENDER_REFPOINT_RIGHTMID,PX_NULL);
+				PX_AnimationRender(psurface,&pA->animation,(px_int)(objx+objWidth),(px_int)(objy+objHeight/2),PX_ALIGN_RIGHTMID,PX_NULL);
 			}
 			break;
 		case PX_ALIGN_RIGHTBOTTOM:
 			{
-				PX_AnimationRender(psurface,&pA->animation,(px_int)(objx+objWidth),(px_int)(objy+objHeight),PX_TEXTURERENDER_REFPOINT_RIGHTBOTTOM,PX_NULL);
+				PX_AnimationRender(psurface,&pA->animation,(px_int)(objx+objWidth),(px_int)(objy+objHeight),PX_ALIGN_RIGHTBOTTOM,PX_NULL);
 			}
 			break;
 		}

@@ -47,7 +47,7 @@ typedef struct
 	px_surface *psurface;
 	px_texture *Server;
 	px_int x,y,top,bottom,left,right;
-	PX_TEXTURERENDER_REFPOINT refPoint;
+	PX_ALIGN refPoint;
 	PX_TEXTURERENDER_BLEND *blend;
 }PX_TEXTURERENDER_PARALLEL_DATA;
 
@@ -94,7 +94,7 @@ static px_int PX_TextureRenderParallel(px_void *parallel_data)
 	return 0;
 }
 
-px_void PX_TextureRender(px_surface *psurface,px_texture *tex,px_int x,px_int y,PX_TEXTURERENDER_REFPOINT refPoint,PX_TEXTURERENDER_BLEND *blend)
+px_void PX_TextureRender(px_surface *psurface,px_texture *tex,px_int x,px_int y,PX_ALIGN refPoint,PX_TEXTURERENDER_BLEND *blend)
 {
 	px_int left,right,top,bottom,i,j;
 	px_int bR,bG,bB,bA;
@@ -104,33 +104,33 @@ px_void PX_TextureRender(px_surface *psurface,px_texture *tex,px_int x,px_int y,
 	pdata=(px_color *)tex->surfaceBuffer;
 	switch (refPoint)
 	{
-	case PX_TEXTURERENDER_REFPOINT_LEFTTOP:
+	case PX_ALIGN_LEFTTOP:
 		break;
-	case PX_TEXTURERENDER_REFPOINT_MIDTOP:
+	case PX_ALIGN_MIDTOP:
 		x-=tex->width/2;
 		break;
-	case PX_TEXTURERENDER_REFPOINT_RIGHTTOP:
+	case PX_ALIGN_RIGHTTOP:
 		x-=tex->width;
 		break;
-	case PX_TEXTURERENDER_REFPOINT_LEFTMID:
+	case PX_ALIGN_LEFTMID:
 		y-=tex->height/2;
 		break;
-	case PX_TEXTURERENDER_REFPOINT_CENTER:
+	case PX_ALIGN_CENTER:
 		y-=tex->height/2;
 		x-=tex->width/2;
 		break;
-	case PX_TEXTURERENDER_REFPOINT_RIGHTMID:
+	case PX_ALIGN_RIGHTMID:
 		y-=tex->height/2;
 		x-=tex->width;
 		break;
-	case PX_TEXTURERENDER_REFPOINT_LEFTBOTTOM:
+	case PX_ALIGN_LEFTBOTTOM:
 		y-=tex->height;
 		break;
-	case PX_TEXTURERENDER_REFPOINT_MIDBOTTOM:
+	case PX_ALIGN_MIDBOTTOM:
 		y-=tex->height;
 		x-=tex->width/2;
 		break;
-	case PX_TEXTURERENDER_REFPOINT_RIGHTBOTTOM:
+	case PX_ALIGN_RIGHTBOTTOM:
 		y-=tex->height;
 		x-=tex->width;
 		break;
@@ -232,39 +232,39 @@ px_void PX_TextureRender(px_surface *psurface,px_texture *tex,px_int x,px_int y,
 
 
 
-px_void PX_TextureCover(px_surface *psurface,px_texture *tex,px_int x,px_int y,PX_TEXTURERENDER_REFPOINT refPoint)
+px_void PX_TextureCover(px_surface *psurface,px_texture *tex,px_int x,px_int y,PX_ALIGN refPoint)
 {
 	px_int left,right,top,bottom,j;
 
 	switch (refPoint)
 	{
-	case PX_TEXTURERENDER_REFPOINT_LEFTTOP:
+	case PX_ALIGN_LEFTTOP:
 		break;
-	case PX_TEXTURERENDER_REFPOINT_MIDTOP:
+	case PX_ALIGN_MIDTOP:
 		x-=tex->width/2;
 		break;
-	case PX_TEXTURERENDER_REFPOINT_RIGHTTOP:
+	case PX_ALIGN_RIGHTTOP:
 		x-=tex->width;
 		break;
-	case PX_TEXTURERENDER_REFPOINT_LEFTMID:
+	case PX_ALIGN_LEFTMID:
 		y-=tex->height/2;
 		break;
-	case PX_TEXTURERENDER_REFPOINT_CENTER:
+	case PX_ALIGN_CENTER:
 		y-=tex->height/2;
 		x-=tex->width/2;
 		break;
-	case PX_TEXTURERENDER_REFPOINT_RIGHTMID:
+	case PX_ALIGN_RIGHTMID:
 		y-=tex->height/2;
 		x-=tex->width;
 		break;
-	case PX_TEXTURERENDER_REFPOINT_LEFTBOTTOM:
+	case PX_ALIGN_LEFTBOTTOM:
 		y-=tex->height;
 		break;
-	case PX_TEXTURERENDER_REFPOINT_MIDBOTTOM:
+	case PX_ALIGN_MIDBOTTOM:
 		y-=tex->height;
 		x-=tex->width/2;
 		break;
-	case PX_TEXTURERENDER_REFPOINT_RIGHTBOTTOM:
+	case PX_ALIGN_RIGHTBOTTOM:
 		y-=tex->height;
 		x-=tex->width;
 		break;
@@ -368,7 +368,7 @@ px_void PX_TextureGetVisibleRange(px_texture *ptexture,px_int *pLeft,px_int *pRi
 	*pBottom=bottom;
 }
 
-px_void PX_TextureRenderPixelShader(px_surface *psurface,px_texture *tex,px_int x,px_int y,PX_TEXTURERENDER_REFPOINT refPoint,PX_TexturePixelShader shader,px_void *ptr)
+px_void PX_TextureRenderPixelShader(px_surface *psurface,px_texture *tex,px_int x,px_int y,PX_ALIGN refPoint,PX_TexturePixelShader shader,px_void *ptr)
 {
 	px_int left,right,top,bottom,i,j;
 	px_color *pdata;
@@ -377,33 +377,33 @@ px_void PX_TextureRenderPixelShader(px_surface *psurface,px_texture *tex,px_int 
 	pdata=(px_color *)tex->surfaceBuffer;
 	switch (refPoint)
 	{
-	case PX_TEXTURERENDER_REFPOINT_LEFTTOP:
+	case PX_ALIGN_LEFTTOP:
 		break;
-	case PX_TEXTURERENDER_REFPOINT_MIDTOP:
+	case PX_ALIGN_MIDTOP:
 		x-=tex->width/2;
 		break;
-	case PX_TEXTURERENDER_REFPOINT_RIGHTTOP:
+	case PX_ALIGN_RIGHTTOP:
 		x-=tex->width;
 		break;
-	case PX_TEXTURERENDER_REFPOINT_LEFTMID:
+	case PX_ALIGN_LEFTMID:
 		y-=tex->height/2;
 		break;
-	case PX_TEXTURERENDER_REFPOINT_CENTER:
+	case PX_ALIGN_CENTER:
 		y-=tex->height/2;
 		x-=tex->width/2;
 		break;
-	case PX_TEXTURERENDER_REFPOINT_RIGHTMID:
+	case PX_ALIGN_RIGHTMID:
 		y-=tex->height/2;
 		x-=tex->width;
 		break;
-	case PX_TEXTURERENDER_REFPOINT_LEFTBOTTOM:
+	case PX_ALIGN_LEFTBOTTOM:
 		y-=tex->height;
 		break;
-	case PX_TEXTURERENDER_REFPOINT_MIDBOTTOM:
+	case PX_ALIGN_MIDBOTTOM:
 		y-=tex->height;
 		x-=tex->width/2;
 		break;
-	case PX_TEXTURERENDER_REFPOINT_RIGHTBOTTOM:
+	case PX_ALIGN_RIGHTBOTTOM:
 		y-=tex->height;
 		x-=tex->width;
 		break;
@@ -474,17 +474,17 @@ px_void PX_TextureRenderPixelShader(px_surface *psurface,px_texture *tex,px_int 
 	}
 }
 
-px_void PX_TextureRenderRotation(px_surface *psurface,px_texture *tex,px_int x,px_int y,PX_TEXTURERENDER_REFPOINT refPoint,PX_TEXTURERENDER_BLEND *blend,px_int Angle)
+px_void PX_TextureRenderRotation(px_surface *psurface,px_texture *tex,px_int x,px_int y,PX_ALIGN refPoint,PX_TEXTURERENDER_BLEND *blend,px_int Angle)
 {
 	PX_TextureRenderRotation_sincos(psurface,tex,x,y,refPoint,blend,PX_sin_angle((px_float)Angle),PX_cos_angle((px_float)Angle));
 }
 
-px_void PX_TextureRenderRotation_vector(px_surface *psurface,px_texture *tex,px_int x,px_int y,PX_TEXTURERENDER_REFPOINT refPoint,PX_TEXTURERENDER_BLEND *blend,px_point p_vector)
+px_void PX_TextureRenderRotation_vector(px_surface *psurface,px_texture *tex,px_int x,px_int y,PX_ALIGN refPoint,PX_TEXTURERENDER_BLEND *blend,px_point p_vector)
 {
 	PX_TextureRenderRotation_sincos(psurface,tex,x,y,refPoint,blend,PX_Point_sin(p_vector),PX_Point_cos(p_vector));
 }
 
-px_void PX_TextureRenderRotation_sincos(px_surface *psurface,px_texture *tex,px_int x,px_int y,PX_TEXTURERENDER_REFPOINT refPoint,PX_TEXTURERENDER_BLEND *blend,px_float sinx,px_float cosx)
+px_void PX_TextureRenderRotation_sincos(px_surface *psurface,px_texture *tex,px_int x,px_int y,PX_ALIGN refPoint,PX_TEXTURERENDER_BLEND *blend,px_float sinx,px_float cosx)
 {
 	px_int newheight,newwidth,i,j,resHeight,resWidth;
 	px_point CornerPoint[4];
@@ -546,33 +546,33 @@ px_void PX_TextureRenderRotation_sincos(px_surface *psurface,px_texture *tex,px_
 
 	switch (refPoint)
 	{
-	case PX_TEXTURERENDER_REFPOINT_LEFTTOP:
+	case PX_ALIGN_LEFTTOP:
 		break;
-	case PX_TEXTURERENDER_REFPOINT_MIDTOP:
+	case PX_ALIGN_MIDTOP:
 		x-=newwidth/2;
 		break;
-	case PX_TEXTURERENDER_REFPOINT_RIGHTTOP:
+	case PX_ALIGN_RIGHTTOP:
 		x-=newwidth;
 		break;
-	case PX_TEXTURERENDER_REFPOINT_LEFTMID:
+	case PX_ALIGN_LEFTMID:
 		y-=newheight/2;
 		break;
-	case PX_TEXTURERENDER_REFPOINT_CENTER:
+	case PX_ALIGN_CENTER:
 		y-=newheight/2;
 		x-=newwidth/2;
 		break;
-	case PX_TEXTURERENDER_REFPOINT_RIGHTMID:
+	case PX_ALIGN_RIGHTMID:
 		y-=newheight/2;
 		x-=newwidth;
 		break;
-	case PX_TEXTURERENDER_REFPOINT_LEFTBOTTOM:
+	case PX_ALIGN_LEFTBOTTOM:
 		y-=newheight;
 		break;
-	case PX_TEXTURERENDER_REFPOINT_MIDBOTTOM:
+	case PX_ALIGN_MIDBOTTOM:
 		y-=newheight;
 		x-=newwidth/2;
 		break;
-	case PX_TEXTURERENDER_REFPOINT_RIGHTBOTTOM:
+	case PX_ALIGN_RIGHTBOTTOM:
 		y-=newheight;
 		x-=newwidth;
 		break;
@@ -753,7 +753,7 @@ px_void PX_TextureRenderRotation_sincos(px_surface *psurface,px_texture *tex,px_
 	return;
 }
 
-px_void PX_TextureRenderMask(px_surface *psurface,px_texture *mask_tex,px_texture *map_tex,px_int x,px_int y,PX_TEXTURERENDER_REFPOINT refPoint,PX_TEXTURERENDER_BLEND *blend)
+px_void PX_TextureRenderMask(px_surface *psurface,px_texture *mask_tex,px_texture *map_tex,px_int x,px_int y,PX_ALIGN refPoint,PX_TEXTURERENDER_BLEND *blend)
 {
 	px_int left,right,top,bottom,i,j;
 	px_int bR,bG,bB,bA;
@@ -765,33 +765,33 @@ px_void PX_TextureRenderMask(px_surface *psurface,px_texture *mask_tex,px_textur
 
 	switch (refPoint)
 	{
-	case PX_TEXTURERENDER_REFPOINT_LEFTTOP:
+	case PX_ALIGN_LEFTTOP:
 		break;
-	case PX_TEXTURERENDER_REFPOINT_MIDTOP:
+	case PX_ALIGN_MIDTOP:
 		x-=mask_tex->width/2;
 		break;
-	case PX_TEXTURERENDER_REFPOINT_RIGHTTOP:
+	case PX_ALIGN_RIGHTTOP:
 		x-=mask_tex->width;
 		break;
-	case PX_TEXTURERENDER_REFPOINT_LEFTMID:
+	case PX_ALIGN_LEFTMID:
 		y-=mask_tex->height/2;
 		break;
-	case PX_TEXTURERENDER_REFPOINT_CENTER:
+	case PX_ALIGN_CENTER:
 		y-=mask_tex->height/2;
 		x-=mask_tex->width/2;
 		break;
-	case PX_TEXTURERENDER_REFPOINT_RIGHTMID:
+	case PX_ALIGN_RIGHTMID:
 		y-=mask_tex->height/2;
 		x-=mask_tex->width;
 		break;
-	case PX_TEXTURERENDER_REFPOINT_LEFTBOTTOM:
+	case PX_ALIGN_LEFTBOTTOM:
 		y-=mask_tex->height;
 		break;
-	case PX_TEXTURERENDER_REFPOINT_MIDBOTTOM:
+	case PX_ALIGN_MIDBOTTOM:
 		y-=mask_tex->height;
 		x-=mask_tex->width/2;
 		break;
-	case PX_TEXTURERENDER_REFPOINT_RIGHTBOTTOM:
+	case PX_ALIGN_RIGHTBOTTOM:
 		y-=mask_tex->height;
 		x-=mask_tex->width;
 		break;
@@ -1295,12 +1295,12 @@ px_void PX_TextureFree(px_texture *tex)
 }
 
 
-px_void PX_SurfaceRender(px_surface *psurface,px_surface *surface,px_int x,px_int y,PX_TEXTURERENDER_REFPOINT refPoint,PX_TEXTURERENDER_BLEND *blend)
+px_void PX_SurfaceRender(px_surface *psurface,px_surface *surface,px_int x,px_int y,PX_ALIGN refPoint,PX_TEXTURERENDER_BLEND *blend)
 {
 	PX_TextureRender(psurface,surface,x,y,refPoint,blend);
 }
 
-px_void PX_SurfaceCover(px_surface *pdestSurface,px_surface *pResSurface,px_int x,px_int y,PX_TEXTURERENDER_REFPOINT refPoint)
+px_void PX_SurfaceCover(px_surface *pdestSurface,px_surface *pResSurface,px_int x,px_int y,PX_ALIGN refPoint)
 {
 	PX_TextureCover(pdestSurface,pResSurface,x,y,refPoint);
 }
@@ -1357,7 +1357,7 @@ px_void PX_SurfaceSetRect(px_surface *psurface, px_int left, px_int top, px_int 
 
 
 
-px_void PX_TextureRenderEx(px_surface *psurface,px_texture *resTexture,px_int x,px_int y,PX_TEXTURERENDER_REFPOINT refPoint,PX_TEXTURERENDER_BLEND *blend,px_float scale,px_float Angle)
+px_void PX_TextureRenderEx(px_surface *psurface,px_texture *resTexture,px_int x,px_int y,PX_ALIGN refPoint,PX_TEXTURERENDER_BLEND *blend,px_float scale,px_float Angle)
 {
 	px_int newWidth,newHeight;
 	
@@ -1386,33 +1386,33 @@ px_void PX_TextureRenderEx(px_surface *psurface,px_texture *resTexture,px_int x,
 	//////////////////////////////////////////////////////////////////////////
 	switch (refPoint)
 	{
-	case PX_TEXTURERENDER_REFPOINT_LEFTTOP:
+	case PX_ALIGN_LEFTTOP:
 		break;
-	case PX_TEXTURERENDER_REFPOINT_MIDTOP:
+	case PX_ALIGN_MIDTOP:
 		x-=newWidth/2;
 		break;
-	case PX_TEXTURERENDER_REFPOINT_RIGHTTOP:
+	case PX_ALIGN_RIGHTTOP:
 		x-=newWidth;
 		break;
-	case PX_TEXTURERENDER_REFPOINT_LEFTMID:
+	case PX_ALIGN_LEFTMID:
 		y-=newHeight/2;
 		break;
-	case PX_TEXTURERENDER_REFPOINT_CENTER:
+	case PX_ALIGN_CENTER:
 		y-=newHeight/2;
 		x-=newWidth/2;
 		break;
-	case PX_TEXTURERENDER_REFPOINT_RIGHTMID:
+	case PX_ALIGN_RIGHTMID:
 		y-=newHeight/2;
 		x-=newWidth;
 		break;
-	case PX_TEXTURERENDER_REFPOINT_LEFTBOTTOM:
+	case PX_ALIGN_LEFTBOTTOM:
 		y-=newHeight;
 		break;
-	case PX_TEXTURERENDER_REFPOINT_MIDBOTTOM:
+	case PX_ALIGN_MIDBOTTOM:
 		y-=newHeight;
 		x-=newWidth/2;
 		break;
-	case PX_TEXTURERENDER_REFPOINT_RIGHTBOTTOM:
+	case PX_ALIGN_RIGHTBOTTOM:
 		y-=newHeight;
 		x-=newWidth;
 		break;
@@ -1550,7 +1550,7 @@ px_void PX_TextureRenderEx(px_surface *psurface,px_texture *resTexture,px_int x,
 	}
 }
 
-px_void PX_TextureRenderMaskEx(px_surface *psurface,px_texture *mask_tex,px_texture *map_tex,px_int x,px_int y,PX_TEXTURERENDER_REFPOINT refPoint,PX_TEXTURERENDER_BLEND *blend,px_float scale,px_float Angle)
+px_void PX_TextureRenderMaskEx(px_surface *psurface,px_texture *mask_tex,px_texture *map_tex,px_int x,px_int y,PX_ALIGN refPoint,PX_TEXTURERENDER_BLEND *blend,px_float scale,px_float Angle)
 {
 	px_int newWidth,newHeight;
 
@@ -1584,33 +1584,33 @@ px_void PX_TextureRenderMaskEx(px_surface *psurface,px_texture *mask_tex,px_text
 	//////////////////////////////////////////////////////////////////////////
 	switch (refPoint)
 	{
-	case PX_TEXTURERENDER_REFPOINT_LEFTTOP:
+	case PX_ALIGN_LEFTTOP:
 		break;
-	case PX_TEXTURERENDER_REFPOINT_MIDTOP:
+	case PX_ALIGN_MIDTOP:
 		x-=newWidth/2;
 		break;
-	case PX_TEXTURERENDER_REFPOINT_RIGHTTOP:
+	case PX_ALIGN_RIGHTTOP:
 		x-=newWidth;
 		break;
-	case PX_TEXTURERENDER_REFPOINT_LEFTMID:
+	case PX_ALIGN_LEFTMID:
 		y-=newHeight/2;
 		break;
-	case PX_TEXTURERENDER_REFPOINT_CENTER:
+	case PX_ALIGN_CENTER:
 		y-=newHeight/2;
 		x-=newWidth/2;
 		break;
-	case PX_TEXTURERENDER_REFPOINT_RIGHTMID:
+	case PX_ALIGN_RIGHTMID:
 		y-=newHeight/2;
 		x-=newWidth;
 		break;
-	case PX_TEXTURERENDER_REFPOINT_LEFTBOTTOM:
+	case PX_ALIGN_LEFTBOTTOM:
 		y-=newHeight;
 		break;
-	case PX_TEXTURERENDER_REFPOINT_MIDBOTTOM:
+	case PX_ALIGN_MIDBOTTOM:
 		y-=newHeight;
 		x-=newWidth/2;
 		break;
-	case PX_TEXTURERENDER_REFPOINT_RIGHTBOTTOM:
+	case PX_ALIGN_RIGHTBOTTOM:
 		y-=newHeight;
 		x-=newWidth;
 		break;
@@ -1912,7 +1912,7 @@ px_void PX_TextureFill(px_memorypool *mp,px_texture *ptexture,px_int x,px_int y,
 
 }
 
-px_void PX_TextureRegionRender(px_surface *psurface,px_texture *resTexture,px_int x,px_int y,px_int oft_left,px_int oft_top,px_int oft_right,px_int oft_bottom,PX_TEXTURERENDER_REFPOINT refPoint,PX_TEXTURERENDER_BLEND *blend)
+px_void PX_TextureRegionRender(px_surface *psurface,px_texture *resTexture,px_int x,px_int y,px_int oft_left,px_int oft_top,px_int oft_right,px_int oft_bottom,PX_ALIGN refPoint,PX_TEXTURERENDER_BLEND *blend)
 {
 	px_int left,right,top,bottom,i,j;
 	px_int bR,bG,bB,bA;
@@ -1925,33 +1925,33 @@ px_void PX_TextureRegionRender(px_surface *psurface,px_texture *resTexture,px_in
 
 	switch (refPoint)
 	{
-	case PX_TEXTURERENDER_REFPOINT_LEFTTOP:
+	case PX_ALIGN_LEFTTOP:
 		break;
-	case PX_TEXTURERENDER_REFPOINT_MIDTOP:
+	case PX_ALIGN_MIDTOP:
 		x-=width/2;
 		break;
-	case PX_TEXTURERENDER_REFPOINT_RIGHTTOP:
+	case PX_ALIGN_RIGHTTOP:
 		x-=width;
 		break;
-	case PX_TEXTURERENDER_REFPOINT_LEFTMID:
+	case PX_ALIGN_LEFTMID:
 		y-=height/2;
 		break;
-	case PX_TEXTURERENDER_REFPOINT_CENTER:
+	case PX_ALIGN_CENTER:
 		y-=height/2;
 		x-=width/2;
 		break;
-	case PX_TEXTURERENDER_REFPOINT_RIGHTMID:
+	case PX_ALIGN_RIGHTMID:
 		y-=height/2;
 		x-=width;
 		break;
-	case PX_TEXTURERENDER_REFPOINT_LEFTBOTTOM:
+	case PX_ALIGN_LEFTBOTTOM:
 		y-=height;
 		break;
-	case PX_TEXTURERENDER_REFPOINT_MIDBOTTOM:
+	case PX_ALIGN_MIDBOTTOM:
 		y-=height;
 		x-=width/2;
 		break;
-	case PX_TEXTURERENDER_REFPOINT_RIGHTBOTTOM:
+	case PX_ALIGN_RIGHTBOTTOM:
 		y-=height;
 		x-=width;
 		break;
@@ -2049,6 +2049,143 @@ px_void PX_TextureRegionRender(px_surface *psurface,px_texture *resTexture,px_in
 		}
 	}
 }
+px_void PX_TextureRegionCopy(px_surface *psurface,px_texture *resTexture,px_int x,px_int y,px_int oft_left,px_int oft_top,px_int oft_right,px_int oft_bottom,PX_ALIGN refPoint,PX_TEXTURERENDER_BLEND *blend)
+{
+	px_int left,right,top,bottom,i,j;
+	px_int bR,bG,bB,bA;
+	px_color *pdata;
+	px_color clr;
+	px_int width=oft_right-oft_left+1;
+	px_int height=oft_bottom-oft_top+1;
+
+	pdata=(px_color *)resTexture->surfaceBuffer;
+
+	switch (refPoint)
+	{
+	case PX_ALIGN_LEFTTOP:
+		break;
+	case PX_ALIGN_MIDTOP:
+		x-=width/2;
+		break;
+	case PX_ALIGN_RIGHTTOP:
+		x-=width;
+		break;
+	case PX_ALIGN_LEFTMID:
+		y-=height/2;
+		break;
+	case PX_ALIGN_CENTER:
+		y-=height/2;
+		x-=width/2;
+		break;
+	case PX_ALIGN_RIGHTMID:
+		y-=height/2;
+		x-=width;
+		break;
+	case PX_ALIGN_LEFTBOTTOM:
+		y-=height;
+		break;
+	case PX_ALIGN_MIDBOTTOM:
+		y-=height;
+		x-=width/2;
+		break;
+	case PX_ALIGN_RIGHTBOTTOM:
+		y-=height;
+		x-=width;
+		break;
+	}
+
+
+	if (x<-width)
+	{
+		return;
+	}
+	if (x>psurface->width-1)
+	{
+		return;
+	}
+	if (y<-height)
+	{
+		return;
+	}
+	if (y>psurface->height-1)
+	{
+		return;
+	}
+
+	if (x<0)
+	{
+		left=-x;
+	}
+	else
+	{
+		left=0;
+	}
+
+	if (x+width>psurface->width)
+	{
+		right=psurface->width-x-1;
+	}
+	else
+	{
+		right=width-1;
+	}
+
+	if (y<0)
+	{
+		top=-y;
+	}
+	else
+	{
+		top=0;
+	}
+
+	if (y+height>psurface->height)
+	{
+		bottom=psurface->height-y-1;
+	}
+	else
+	{
+		bottom=height-1;
+	}
+
+
+	if (blend)
+	{	
+		px_int Ab=(px_int)(blend->alpha*1000);
+		px_int Rb=(px_int)(blend->hdr_R*1000);
+		px_int Gb=(px_int)(blend->hdr_G*1000);
+		px_int Bb=(px_int)(blend->hdr_B*1000);
+
+		for (j=top;j<=bottom;j++)
+		{
+			for (i=left;i<=right;i++)
+			{
+				clr=pdata[(j+oft_top)*resTexture->width+i+oft_left];
+				bA=(px_int)(clr._argb.a*Ab/1000);
+				bR=(px_int)(clr._argb.r*Rb/1000);
+				bG=(px_int)(clr._argb.g*Gb/1000);
+				bB=(px_int)(clr._argb.b*Bb/1000);
+
+				clr._argb.a=bA>255?255:(px_uchar)bA;
+				clr._argb.r=bR>255?255:(px_uchar)bR;
+				clr._argb.g=bG>255?255:(px_uchar)bG;
+				clr._argb.b=bB>255?255:(px_uchar)bB;
+				PX_SurfaceSetPixel(psurface,x+i,y+j,clr);
+			}
+		}
+	}
+	else
+	{
+		for (j=top;j<=bottom;j++)
+		{
+			for (i=left;i<=right;i++)
+			{
+				clr=pdata[(j+oft_top)*resTexture->width+i+oft_left];
+				PX_SurfaceSetPixel(psurface,x+i,y+j,clr);
+			}
+		}
+	}
+}
 
 px_bool PX_ShapeCreate(px_memorypool *mp,px_shape *shape,px_int width,px_int height)
 {
@@ -2097,7 +2234,7 @@ px_void PX_ShapeFree(px_shape *shape)
 	MP_Free(shape->MP,shape->alpha);
 }
 
-px_void PX_ShapeRender(px_surface *psurface,px_shape *shape,px_int x,px_int y,PX_TEXTURERENDER_REFPOINT refPoint,px_color blendColor)
+px_void PX_ShapeRender(px_surface *psurface,px_shape *shape,px_int x,px_int y,PX_ALIGN refPoint,px_color blendColor)
 {
 	px_int left,right,top,bottom,i,j;
 	px_uchar *pdata;
@@ -2107,33 +2244,33 @@ px_void PX_ShapeRender(px_surface *psurface,px_shape *shape,px_int x,px_int y,PX
 
 	switch (refPoint)
 	{
-	case PX_TEXTURERENDER_REFPOINT_LEFTTOP:
+	case PX_ALIGN_LEFTTOP:
 		break;
-	case PX_TEXTURERENDER_REFPOINT_MIDTOP:
+	case PX_ALIGN_MIDTOP:
 		x-=shape->width/2;
 		break;
-	case PX_TEXTURERENDER_REFPOINT_RIGHTTOP:
+	case PX_ALIGN_RIGHTTOP:
 		x-=shape->width;
 		break;
-	case PX_TEXTURERENDER_REFPOINT_LEFTMID:
+	case PX_ALIGN_LEFTMID:
 		y-=shape->height/2;
 		break;
-	case PX_TEXTURERENDER_REFPOINT_CENTER:
+	case PX_ALIGN_CENTER:
 		y-=shape->height/2;
 		x-=shape->width/2;
 		break;
-	case PX_TEXTURERENDER_REFPOINT_RIGHTMID:
+	case PX_ALIGN_RIGHTMID:
 		y-=shape->height/2;
 		x-=shape->width;
 		break;
-	case PX_TEXTURERENDER_REFPOINT_LEFTBOTTOM:
+	case PX_ALIGN_LEFTBOTTOM:
 		y-=shape->height;
 		break;
-	case PX_TEXTURERENDER_REFPOINT_MIDBOTTOM:
+	case PX_ALIGN_MIDBOTTOM:
 		y-=shape->height;
 		x-=shape->width/2;
 		break;
-	case PX_TEXTURERENDER_REFPOINT_RIGHTBOTTOM:
+	case PX_ALIGN_RIGHTBOTTOM:
 		y-=shape->height;
 		x-=shape->width;
 		break;
@@ -2211,7 +2348,7 @@ px_void PX_ShapeRender(px_surface *psurface,px_shape *shape,px_int x,px_int y,PX
 
 
 
-px_void PX_ShapeRenderEx(px_surface *psurface,px_shape *shape,px_int x,px_int y,PX_TEXTURERENDER_REFPOINT refPoint,px_color blendColor,px_float scale,px_float Angle)
+px_void PX_ShapeRenderEx(px_surface *psurface,px_shape *shape,px_int x,px_int y,PX_ALIGN refPoint,px_color blendColor,px_float scale,px_float Angle)
 {
 	px_int newWidth,newHeight;
 
@@ -2239,33 +2376,33 @@ px_void PX_ShapeRenderEx(px_surface *psurface,px_shape *shape,px_int x,px_int y,
 	//////////////////////////////////////////////////////////////////////////
 	switch (refPoint)
 	{
-	case PX_TEXTURERENDER_REFPOINT_LEFTTOP:
+	case PX_ALIGN_LEFTTOP:
 		break;
-	case PX_TEXTURERENDER_REFPOINT_MIDTOP:
+	case PX_ALIGN_MIDTOP:
 		x-=newWidth/2;
 		break;
-	case PX_TEXTURERENDER_REFPOINT_RIGHTTOP:
+	case PX_ALIGN_RIGHTTOP:
 		x-=newWidth;
 		break;
-	case PX_TEXTURERENDER_REFPOINT_LEFTMID:
+	case PX_ALIGN_LEFTMID:
 		y-=newHeight/2;
 		break;
-	case PX_TEXTURERENDER_REFPOINT_CENTER:
+	case PX_ALIGN_CENTER:
 		y-=newHeight/2;
 		x-=newWidth/2;
 		break;
-	case PX_TEXTURERENDER_REFPOINT_RIGHTMID:
+	case PX_ALIGN_RIGHTMID:
 		y-=newHeight/2;
 		x-=newWidth;
 		break;
-	case PX_TEXTURERENDER_REFPOINT_LEFTBOTTOM:
+	case PX_ALIGN_LEFTBOTTOM:
 		y-=newHeight;
 		break;
-	case PX_TEXTURERENDER_REFPOINT_MIDBOTTOM:
+	case PX_ALIGN_MIDBOTTOM:
 		y-=newHeight;
 		x-=newWidth/2;
 		break;
-	case PX_TEXTURERENDER_REFPOINT_RIGHTBOTTOM:
+	case PX_ALIGN_RIGHTBOTTOM:
 		y-=newHeight;
 		x-=newWidth;
 		break;
@@ -2394,7 +2531,7 @@ px_bool PX_ShapeCreateFromMemory(px_memorypool *mp,px_void *data,px_int size,px_
 	return PX_TRUE;
 }
 
-px_void PX_ShapeRenderEx_sincos(px_surface *psurface,px_shape *shape,px_int x,px_int y,PX_TEXTURERENDER_REFPOINT refPoint,px_color blendColor,px_float scale,px_float sinx,px_float cosx)
+px_void PX_ShapeRenderEx_sincos(px_surface *psurface,px_shape *shape,px_int x,px_int y,PX_ALIGN refPoint,px_color blendColor,px_float scale,px_float sinx,px_float cosx)
 {
 	px_int newWidth,newHeight;
 
@@ -2422,33 +2559,33 @@ px_void PX_ShapeRenderEx_sincos(px_surface *psurface,px_shape *shape,px_int x,px
 	//////////////////////////////////////////////////////////////////////////
 	switch (refPoint)
 	{
-	case PX_TEXTURERENDER_REFPOINT_LEFTTOP:
+	case PX_ALIGN_LEFTTOP:
 		break;
-	case PX_TEXTURERENDER_REFPOINT_MIDTOP:
+	case PX_ALIGN_MIDTOP:
 		x-=newWidth/2;
 		break;
-	case PX_TEXTURERENDER_REFPOINT_RIGHTTOP:
+	case PX_ALIGN_RIGHTTOP:
 		x-=newWidth;
 		break;
-	case PX_TEXTURERENDER_REFPOINT_LEFTMID:
+	case PX_ALIGN_LEFTMID:
 		y-=newHeight/2;
 		break;
-	case PX_TEXTURERENDER_REFPOINT_CENTER:
+	case PX_ALIGN_CENTER:
 		y-=newHeight/2;
 		x-=newWidth/2;
 		break;
-	case PX_TEXTURERENDER_REFPOINT_RIGHTMID:
+	case PX_ALIGN_RIGHTMID:
 		y-=newHeight/2;
 		x-=newWidth;
 		break;
-	case PX_TEXTURERENDER_REFPOINT_LEFTBOTTOM:
+	case PX_ALIGN_LEFTBOTTOM:
 		y-=newHeight;
 		break;
-	case PX_TEXTURERENDER_REFPOINT_MIDBOTTOM:
+	case PX_ALIGN_MIDBOTTOM:
 		y-=newHeight;
 		x-=newWidth/2;
 		break;
-	case PX_TEXTURERENDER_REFPOINT_RIGHTBOTTOM:
+	case PX_ALIGN_RIGHTBOTTOM:
 		y-=newHeight;
 		x-=newWidth;
 		break;
@@ -2541,12 +2678,12 @@ px_void PX_ShapeRenderEx_sincos(px_surface *psurface,px_shape *shape,px_int x,px
 	}
 }
 
-px_void PX_ShapeRenderEx_vector(px_surface *psurface,px_shape *shape,px_int x,px_int y,PX_TEXTURERENDER_REFPOINT refPoint,px_color blendColor,px_float scale,px_point p_vector)
+px_void PX_ShapeRenderEx_vector(px_surface *psurface,px_shape *shape,px_int x,px_int y,PX_ALIGN refPoint,px_color blendColor,px_float scale,px_point p_vector)
 {
 	PX_ShapeRenderEx_sincos(psurface,shape,x,y,refPoint,blendColor,scale,PX_Point_sin(p_vector),PX_Point_cos(p_vector));
 }
 
-px_void PX_TextureRenderEx_sincos(px_surface *psurface,px_texture *resTexture,px_int x,px_int y,PX_TEXTURERENDER_REFPOINT refPoint,PX_TEXTURERENDER_BLEND *blend,px_float scale,px_float sinx,px_float cosx)
+px_void PX_TextureRenderEx_sincos(px_surface *psurface,px_texture *resTexture,px_int x,px_int y,PX_ALIGN refPoint,PX_TEXTURERENDER_BLEND *blend,px_float scale,px_float sinx,px_float cosx)
 {
 	px_int newWidth,newHeight;
 
@@ -2575,33 +2712,33 @@ px_void PX_TextureRenderEx_sincos(px_surface *psurface,px_texture *resTexture,px
 	//////////////////////////////////////////////////////////////////////////
 	switch (refPoint)
 	{
-	case PX_TEXTURERENDER_REFPOINT_LEFTTOP:
+	case PX_ALIGN_LEFTTOP:
 		break;
-	case PX_TEXTURERENDER_REFPOINT_MIDTOP:
+	case PX_ALIGN_MIDTOP:
 		x-=newWidth/2;
 		break;
-	case PX_TEXTURERENDER_REFPOINT_RIGHTTOP:
+	case PX_ALIGN_RIGHTTOP:
 		x-=newWidth;
 		break;
-	case PX_TEXTURERENDER_REFPOINT_LEFTMID:
+	case PX_ALIGN_LEFTMID:
 		y-=newHeight/2;
 		break;
-	case PX_TEXTURERENDER_REFPOINT_CENTER:
+	case PX_ALIGN_CENTER:
 		y-=newHeight/2;
 		x-=newWidth/2;
 		break;
-	case PX_TEXTURERENDER_REFPOINT_RIGHTMID:
+	case PX_ALIGN_RIGHTMID:
 		y-=newHeight/2;
 		x-=newWidth;
 		break;
-	case PX_TEXTURERENDER_REFPOINT_LEFTBOTTOM:
+	case PX_ALIGN_LEFTBOTTOM:
 		y-=newHeight;
 		break;
-	case PX_TEXTURERENDER_REFPOINT_MIDBOTTOM:
+	case PX_ALIGN_MIDBOTTOM:
 		y-=newHeight;
 		x-=newWidth/2;
 		break;
-	case PX_TEXTURERENDER_REFPOINT_RIGHTBOTTOM:
+	case PX_ALIGN_RIGHTBOTTOM:
 		y-=newHeight;
 		x-=newWidth;
 		break;
@@ -2740,7 +2877,7 @@ px_void PX_TextureRenderEx_sincos(px_surface *psurface,px_texture *resTexture,px
 }
 
 
-px_void PX_TextureRenderEx_vector(px_surface *psurface,px_texture *resTexture,px_int x,px_int y,PX_TEXTURERENDER_REFPOINT refPoint,PX_TEXTURERENDER_BLEND *blend,px_float scale,px_point p_vector)
+px_void PX_TextureRenderEx_vector(px_surface *psurface,px_texture *resTexture,px_int x,px_int y,PX_ALIGN refPoint,PX_TEXTURERENDER_BLEND *blend,px_float scale,px_point p_vector)
 {
 	PX_TextureRenderEx_sincos(psurface,resTexture,x,y,refPoint,blend,scale,PX_Point_sin(p_vector),PX_Point_cos(p_vector));
 }

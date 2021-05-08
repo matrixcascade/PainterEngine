@@ -9,7 +9,7 @@ PX_Object  * PX_ObjectGetChild( PX_Object *Object,px_int Index )
 		return PX_NULL;
 	}
 	pObject=Object->pChilds;
-	while (Index>0&&pObject)
+	while (Index>=0&&pObject)
 	{
 		pObject=pObject->pNextBrother;
 		Index--;
@@ -427,7 +427,7 @@ px_void PX_Object_ObjectLinkerUpdate( PX_Object *Object,px_uint elpased)
 	{
 		return;
 	}
-	if (Object->Visible!=PX_FALSE)
+	if (Object->Enabled)
 	{
 		if (Object->Func_ObjectUpdate!=0)
 		{
@@ -446,7 +446,7 @@ px_void PX_ObjectUpdate(PX_Object *Object,px_uint elpased )
 		PX_ASSERT();
 		return;
 	}
-	if (Object->Visible==PX_FALSE||Object->Enabled==PX_FALSE)
+	if (Object->Enabled==PX_FALSE)
 	{
 		return;
 	}
@@ -722,6 +722,10 @@ px_bool PX_ObjectPostEventLink( PX_Object *pPost,PX_Object_Event Event )
 		if(PX_ObjectPostEventLink(pPost->pNextBrother,Event)==PX_FALSE) return PX_FALSE;
 		if(PX_ObjectPostEventLink(pPost->pChilds,Event)==PX_FALSE) return PX_FALSE;	
 		PX_ObjectExecuteEvent(pPost,Event);
+		if (pPost->OnFocus)
+		{
+			return PX_FALSE;
+		}
 		return PX_TRUE;
 	}
 	

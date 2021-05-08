@@ -492,6 +492,11 @@ PX_Object * PX_UI_CreateEdit(PX_UI *ui,PX_Object *parent,PX_Json_Value *json_val
 		PX_Object_EditSetMaxTextLength(pObject,(px_int)number);
 	}
 
+	if (PX_UI_GetString(json_value,"text",str,sizeof(str)))
+	{
+		PX_Object_EditSetText(pObject,str);
+	}
+
 	if (PX_UI_GetString(json_value,"style",style,sizeof(style)))
 	{
 		if (PX_strequ(style,"round"))
@@ -745,6 +750,7 @@ PX_Object * PX_UI_CreateRadioBox(PX_UI *ui,PX_Object *parent,PX_Json_Value *json
 	const px_char *text="";
 	PX_Json_Value *pSubValue=PX_NULL;
 	px_color Color;
+	px_bool bselect;
 	pSubValue=PX_JsonGetObjectValue(json_value,"text");
 	if (pSubValue&&pSubValue->type==PX_JSON_VALUE_TYPE_STRING)
 	{
@@ -778,6 +784,16 @@ PX_Object * PX_UI_CreateRadioBox(PX_UI *ui,PX_Object *parent,PX_Json_Value *json
 	if (PX_UI_GetColor(json_value,"bordercolor",&Color))
 	{
 		PX_Object_RadioBoxSetBorderColor(pObject,Color);
+	}
+
+	if (PX_UI_GetBool(json_value,"select",&bselect))
+	{
+		PX_Object_RadioBoxSetCheck(pObject,bselect);
+	}
+
+	if (PX_UI_GetBool(json_value,"check",&bselect))
+	{
+		PX_Object_RadioBoxSetCheck(pObject,bselect);
 	}
 
 	return pObject;

@@ -288,12 +288,12 @@ px_void PX_Object_ScrollAreaRender(px_surface *psurface, PX_Object *pObject,px_u
 
 	//draw
 	PX_ObjectRender(&pSA->surface,pSA->root,elpased);
-	PX_SurfaceRender(psurface,&pSA->surface,(px_int)objx,(px_int)objy,PX_TEXTURERENDER_REFPOINT_LEFTTOP,PX_NULL);
+	PX_SurfaceRender(psurface,&pSA->surface,(px_int)objx,(px_int)objy,PX_ALIGN_LEFTTOP,PX_NULL);
 
 	//Draw Border
 	if(pSA->bBorder)
 		PX_GeoDrawBorder(&pSA->surface,0,0,(px_int)objWidth-1,(px_int)objHeight-1,1,pSA->borderColor);
-	PX_SurfaceRender(psurface,&pSA->surface,(px_int)objx,(px_int)objy,PX_TEXTURERENDER_REFPOINT_LEFTTOP,PX_NULL);
+	PX_SurfaceRender(psurface,&pSA->surface,(px_int)objx,(px_int)objy,PX_ALIGN_LEFTTOP,PX_NULL);
 }
 
 px_void PX_Object_ScrollAreaFree(PX_Object *pObj)

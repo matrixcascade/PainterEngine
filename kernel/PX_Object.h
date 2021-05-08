@@ -32,7 +32,7 @@
 #define PX_OBJECT_EVENT_ONFOCUS				20
 #define PX_OBJECT_EVENT_LOSTFOCUS           21
 #define PX_OBJECT_EVENT_CANCEL				22
-
+#define PX_OBJECT_EVENT_CLOSE				23
 //////////////////////////////////////////////////////////////////////////////
 //    Type of Controls
 /////////////////////////////////////////////////////////////////////////////
@@ -66,6 +66,8 @@ enum PX_OBJECT_TYPE
   PX_OBJECT_TYPE_WIDGET			,
   PX_OBJECT_TYPE_SCALEBOX		,
   PX_OBJECT_TYPE_MESSAGEBOX		,
+  PX_OBJECT_TYPE_PROTRACTOR		,
+  PX_OBJECT_TYPE_TRANSFORMADAPTER,
 };
 
 
@@ -374,7 +376,13 @@ px_void PX_ObjectExecuteEvent(PX_Object *pPost,PX_Object_Event Event);
 #include "PX_Object_MessageBox.h"
 
 
+//////////////////////////////////////////////////////////////////////////
+//protractor
+//////////////////////////////////////////////////////////////////////////
+#include "PX_Object_Protractor.h"
 
-
+//////////////////////////////////////////////////////////////////////////
+//transform adapter
+#include "PX_Object_TransformAdapter.h"
 
 #endif

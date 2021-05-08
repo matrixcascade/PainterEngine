@@ -14,6 +14,7 @@ typedef struct
 	px_texture  renderTarget;//optimization for render
 	px_point    lastDragPosition;
 	px_bool     bDraging;
+	px_bool     bmoveable;
 	px_bool     bmodel;
 	px_bool		event_optimization;
 	px_bool     bevent_update;
@@ -21,6 +22,7 @@ typedef struct
 
 px_void PX_Object_WidgetShow(PX_Object *pObject);
 px_void PX_Object_WidgetHide(PX_Object *pObject);
+px_void PX_Object_WidgetShowHideCloseButton(PX_Object *pObject,px_bool show);
 PX_Object * PX_Object_WidgetCreate(px_memorypool *mp,PX_Object *Parent,int x,int y,int width,int height,const px_char title[],PX_FontModule *fontmodule);
 PX_Object_Widget * PX_Object_GetWidget( PX_Object *Object );
 px_void PX_Object_WidgetSetModel(PX_Object *Object,px_bool model);

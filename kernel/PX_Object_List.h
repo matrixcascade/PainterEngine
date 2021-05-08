@@ -32,9 +32,12 @@ typedef struct
 	PX_Object_ListItemOnCreate CreateFunctions;
 }PX_Object_List;
 
+PX_Object_List * PX_Object_GetList( PX_Object *Object );
 PX_Object_ListItem * PX_Object_GetListItem( PX_Object *Object );
 PX_Object * PX_Object_ListCreate(px_memorypool *mp, PX_Object *Parent,px_int x,px_int y,px_int Width,px_int Height,px_int ItemHeight,PX_Object_ListItemOnCreate _CreateFunc,px_void *userptr);
+px_void PX_Object_ListMoveToTop(PX_Object *pObject);
 px_void PX_Object_ListClear(PX_Object *pListObj);
+px_void PX_Object_ListSetCurrentSelectIndex(PX_Object *pObject,px_int index);
 px_int PX_Object_ListGetCurrentSelectIndex(PX_Object *pObject);
 px_int PX_Object_ListAdd(PX_Object *pListObj,px_void *ptr);
 px_void *PX_Object_ListGetItemData(PX_Object *pListObject,px_int index);

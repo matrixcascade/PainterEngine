@@ -1635,6 +1635,8 @@ px_point PX_PointReflectX(px_point vector_refer,px_point respoint)
 	return ret;
 }
 
+
+
 px_bool PX_isRectCrossRect(px_rect rect1,px_rect rect2)
 {
 	px_float disx,disy;
@@ -2365,6 +2367,14 @@ px_void PX_strlwr(px_char *src)
     } 
 }
 
+
+px_point2D PX_Point2DMulMatrix(px_point2D p,px_matrix mat)
+{
+	px_point2D point;
+	point.x=p.x*mat._11+p.y*mat._21+1*mat._41;
+	point.y=p.x*mat._12+p.y*mat._22+1*mat._42;
+	return point;
+}
 
 px_point PX_PointMulMatrix(px_point p,px_matrix mat)
 {
@@ -3719,6 +3729,13 @@ px_point PX_PointRotate(px_point p,px_float angle)
 	px_matrix mat;
 	PX_MatrixRotateZ(&mat,angle);
 	return PX_PointMulMatrix(p,mat);
+}
+
+px_point2D PX_Point2DRotate(px_point2D p,px_float angle)
+{
+	px_matrix mat;
+	PX_MatrixRotateZ(&mat,angle);
+	return PX_Point2DMulMatrix(p,mat);
 }
 
 px_float PX_PointDistance(px_point p1,px_point p2)

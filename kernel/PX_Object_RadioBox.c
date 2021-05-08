@@ -198,7 +198,7 @@ PX_Object * PX_Object_RadioBoxCreate(px_memorypool *mp, PX_Object *Parent,px_int
 	cbx.BackgroundColor=PX_COLOR(0,0,0,0);
 	cbx.bCheck=PX_FALSE;
 	cbx.Border=PX_FALSE;
-	cbx.BorderColor=PX_COLOR(255,0,0,0);
+	cbx.BorderColor=PX_OBJECT_UI_DEFAULT_FONTCOLOR;
 	cbx.CursorColor=PX_COLOR(0,0,0,0);
 	cbx.PushColor=PX_COLOR(0,0,0,0);
 	cbx.fm=fm;

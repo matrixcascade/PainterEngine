@@ -15,7 +15,7 @@ static px_void PX_Object_MessageBox_BtnYesClick(PX_Object *pObject,PX_Object_Eve
 	PX_Object_MessageBoxClose((PX_Object *)user);
 	if (pm->function_yes)
 	{
-		pm->function_yes(pm,pm->function_yes_ptr);
+		pm->function_yes((PX_Object *)user,PX_OBJECT_BUILD_EVENT(PX_OBJECT_EVENT_EXECUTE),pm->function_yes_ptr);
 	}
 
 }
@@ -26,7 +26,7 @@ static px_void PX_Object_MessageBox_BtnNoClick(PX_Object *pObject,PX_Object_Even
 	PX_Object_MessageBoxClose((PX_Object *)user);
 	if (pm->function_no)
 	{
-		pm->function_no(pm,pm->function_yes_ptr);
+		pm->function_no((PX_Object *)user,PX_OBJECT_BUILD_EVENT(PX_OBJECT_EVENT_EXECUTE),pm->function_yes_ptr);
 	}
 }
 
@@ -40,7 +40,7 @@ static px_void PX_Object_MessageBox_EditOnEnter(PX_Object *pObject,PX_Object_Eve
 			PX_Object_MessageBoxClose((PX_Object *)user);
 			if (pm->function_yes)
 			{
-				pm->function_yes(pm,pm->function_yes_ptr);
+				pm->function_yes((PX_Object *)user,PX_OBJECT_BUILD_EVENT(PX_OBJECT_EVENT_EXECUTE),pm->function_yes_ptr);
 			}
 			return;
 		}
@@ -56,6 +56,7 @@ px_void PX_Object_MessageBoxClose(PX_Object *pObject)
 		pMessageBox->mode=PX_OBJECT_MESSAGEBOX_MODE_CLOSE;
 		pMessageBox->btn_Ok->Visible=PX_FALSE;
 		pMessageBox->btn_Cancel->Visible=PX_FALSE;
+		pMessageBox->edit_inputbox->Visible=PX_FALSE;
 	}
 	
 }
@@ -68,6 +69,11 @@ static px_void PX_Object_MessageBoxRender(px_surface *pSurface,PX_Object *pObjec
 	if (elpased>2000)
 	{
 		return;
+	}
+
+	if (pm->fillbackgroundcolor._argb.a)
+	{
+		PX_SurfaceClear(pSurface,0,0,pSurface->width-1,pSurface->height-1,pm->fillbackgroundcolor);
 	}
 
 
@@ -274,7 +280,7 @@ PX_Object * PX_Object_MessageBoxCreate(px_memorypool *mp,PX_Object *parent,PX_Fo
 
 	pm->PX_MESSAGEBOX_STAGE_1_HEIGHT=PX_OBJECT_MESSAGEBOX_DEFAULT_STAGE_1_HEIGHT;
 	pm->PX_MESSAGEBOX_STAGE_2_HEIGHT=PX_OBJECT_MESSAGEBOX_DEFAULT_STAGE_2_HEIGHT;
-
+	pm->fillbackgroundcolor=PX_OBJECT_UI_DEFAULT_BACKGROUNDCOLOR;
 	PX_ObjectRegisterEvent(pm->edit_inputbox,PX_OBJECT_EVENT_KEYDOWN,PX_Object_MessageBox_EditOnEnter,pObject);
 	PX_ObjectRegisterEvent(pm->btn_Ok,PX_OBJECT_EVENT_EXECUTE,PX_Object_MessageBox_BtnYesClick,pObject);
 	PX_ObjectRegisterEvent(pm->btn_Cancel,PX_OBJECT_EVENT_EXECUTE,PX_Object_MessageBox_BtnNoClick,pObject);

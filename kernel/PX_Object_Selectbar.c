@@ -424,7 +424,7 @@ px_int PX_Object_SelectBarAddItem(PX_Object *pSelectBarObject,const px_char Text
 px_void PX_Object_SelectBarRemoveItem(PX_Object *pObject,px_int index)
 {
 	PX_Object_SelectBar *pSelectBar=PX_Object_GetSelectBar(pObject);
-	if (index>0&&index<pSelectBar->Items.size)
+	if (index>=0&&index<pSelectBar->Items.size)
 	{
 		PX_VectorErase(&pSelectBar->Items,index);
 	}
@@ -479,7 +479,7 @@ px_void PX_Object_SelectBarSetCurrentIndex(PX_Object *pObject,px_int index)
 	PX_Object_SelectBar *pSelectBar=PX_Object_GetSelectBar(pObject);
 	if (pSelectBar)
 	{
-		if (index>0&&index<pSelectBar->Items.size)
+		if (index>=0&&index<pSelectBar->Items.size)
 		{
 			pSelectBar->selectIndex=index;
 		}

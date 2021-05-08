@@ -36,10 +36,20 @@ px_void PX_Object_WidgetHide(PX_Object *pObject)
 	}
 }
 
+px_void PX_Object_WidgetShowHideCloseButton(PX_Object *pObject,px_bool show)
+{
+	PX_Object_Widget *pWidget=PX_Object_GetWidget(pObject);
+	if (pWidget)
+	{
+		pWidget->btn_close->Visible=show;
+	}
+}
+
 static px_void PX_Object_WidgetOnButtonClose(PX_Object *pObject,PX_Object_Event e,px_void *ptr)
 {
 	PX_Object *pWidgetObject=(PX_Object *)ptr;
 	PX_Object_WidgetHide(pWidgetObject);
+	PX_ObjectExecuteEvent(pWidgetObject,PX_OBJECT_BUILD_EVENT(PX_OBJECT_EVENT_CLOSE));
 }
 
 px_void PX_Object_Widget_EventDispatcher(PX_Object *pObject,PX_Object_Event e,px_void *ptr)
@@ -71,10 +81,14 @@ px_void PX_Object_Widget_EventDispatcher(PX_Object *pObject,PX_Object_Event e,px
 				{
 					if (x>objx&&x<objx+pObject->Width&&y>objy&&y<=objy+PX_OBJECT_WIDGET_BAR_SIZE)
 					{
-						pwidget->bDraging=PX_TRUE;
-						pwidget->lastDragPosition.x=x;
-						pwidget->lastDragPosition.y=y;
-						pwidget->lastDragPosition.z=0;
+						if (pwidget->bmoveable)
+						{
+							pwidget->bDraging=PX_TRUE;
+							pwidget->lastDragPosition.x=x;
+							pwidget->lastDragPosition.y=y;
+							pwidget->lastDragPosition.z=0;
+						}
+						
 					}
 				}
 				pwidget->bevent_update=PX_TRUE;
@@ -108,6 +122,11 @@ px_void PX_Object_Widget_EventDispatcher(PX_Object *pObject,PX_Object_Event e,px
 				pwidget->lastDragPosition.x=x;
 				pwidget->lastDragPosition.y=y;
 			}
+		}
+		break;
+	default:
+		{
+			
 		}
 		break;
 	}
@@ -154,7 +173,7 @@ px_void PX_Object_WidgetRender(px_surface *psurface, PX_Object *pObject,px_uint 
 		pwidget->bevent_update=PX_FALSE;
 		PX_SurfaceClear(&pwidget->renderTarget,0,0,pwidget->renderTarget.width-1,pwidget->renderTarget.height-1,pwidget->backgroundcolor);
 		PX_ObjectRender(&pwidget->renderTarget,pwidget->root,elpased);
-		PX_SurfaceRender(psurface,&pwidget->renderTarget,(px_int)pObject->x,(px_int)pObject->y+PX_OBJECT_WIDGET_BAR_SIZE,PX_TEXTURERENDER_REFPOINT_LEFTTOP,PX_NULL);
+		PX_SurfaceRender(psurface,&pwidget->renderTarget,(px_int)objx,(px_int)objy+PX_OBJECT_WIDGET_BAR_SIZE,PX_ALIGN_LEFTTOP,PX_NULL);
 	} while (0);
 
 	PX_GeoDrawRect(psurface,(px_int)objx,(px_int)objy,(px_int)(objx+pObject->Width-1),(px_int)objy+PX_OBJECT_WIDGET_BAR_SIZE-1,pwidget->barColor);
@@ -214,6 +233,7 @@ PX_Object * PX_Object_WidgetCreate(px_memorypool *mp,PX_Object *Parent,int x,int
 	pWidget->borderColor=PX_OBJECT_UI_DEFAULT_BORDERCOLOR;
 	pWidget->focusColor=PX_COLOR(255,192,192,192);
 	pWidget->bevent_update=PX_TRUE;
+	pWidget->bmoveable=PX_TRUE;
 
 	PX_ObjectRegisterEvent(pWidget->btn_close,PX_OBJECT_EVENT_EXECUTE,PX_Object_WidgetOnButtonClose,pObject);
 	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_ANY,PX_Object_Widget_EventDispatcher,PX_NULL);

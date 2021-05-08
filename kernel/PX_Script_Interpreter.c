@@ -2013,9 +2013,9 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 						{
 							PX_StringInitialize(analysis->mp,&fmrString);
 							PX_StringCat(out,"POP R1\n");
-							PX_StringSet(&fmrString,"MOV LOCAL[R1],R2\n");
+							PX_StringSet(&fmrString,"MOV GLOBAL[R1],R2\n");
 							PX_StringCat(out,fmrString.buffer);
-							PX_StringSet(&fmrString,"PUSH LOCAL[R1]\n");
+							PX_StringSet(&fmrString,"PUSH GLOBAL[R1]\n");
 							PX_StringCat(out,fmrString.buffer);
 							PX_StringFree(&fmrString);
 						}
@@ -2482,9 +2482,9 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 			case PX_SCRIPT_VARIABLE_REGION_POP:
 				{
 					PX_StringCat(out,"POP R1\n");
-					PX_StringSet(&fmrString,"MOV LOCAL[R1],R2\n");
+					PX_StringSet(&fmrString,"MOV GLOBAL[R1],R2\n");
 					PX_StringCat(out,fmrString.buffer);
-					PX_StringSet(&fmrString,"PUSH LOCAL[R1]\n");
+					PX_StringSet(&fmrString,"PUSH GLOBAL[R1]\n");
 					PX_StringCat(out,fmrString.buffer);
 				}
 				break;

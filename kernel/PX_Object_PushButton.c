@@ -352,11 +352,11 @@ px_void PX_Object_PushButtonRender(px_surface *psurface, PX_Object *pObject,px_u
 
 	if (pPushButton->Texture)
 	{
-		PX_TextureRender(psurface,pPushButton->Texture,(px_int)objx+(px_int)objWidth/2,(px_int)objy+(px_int)objHeight/2,PX_TEXTURERENDER_REFPOINT_CENTER,PX_NULL);
+		PX_TextureRender(psurface,pPushButton->Texture,(px_int)objx+(px_int)objWidth/2,(px_int)objy+(px_int)objHeight/2,PX_ALIGN_CENTER,PX_NULL);
 	}
 	else if (pPushButton->shape)
 	{
-		PX_ShapeRender(psurface,pPushButton->shape,(px_int)objx+(px_int)objWidth/2,(px_int)objy+(px_int)objHeight/2,PX_TEXTURERENDER_REFPOINT_CENTER,pPushButton->TextColor);
+		PX_ShapeRender(psurface,pPushButton->shape,(px_int)objx+(px_int)objWidth/2,(px_int)objy+(px_int)objHeight/2,PX_ALIGN_CENTER,pPushButton->TextColor);
 	}
 
 	if (pPushButton->Border)

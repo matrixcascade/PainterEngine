@@ -646,7 +646,7 @@ px_int PX_FontModuleDrawCharacter(px_surface *psurface,PX_FontModule *mod,int x,
 	pChar=(PX_FontModule_Charactor *)PX_MapGet(&mod->characters_map,hex);
 	if (pChar)
 	{
-		PX_ShapeRender(psurface,&pChar->shape,x+pChar->header.BearingX,y+mod->max_BearingY-pChar->header.BearingY,PX_TEXTURERENDER_REFPOINT_LEFTTOP,Color);
+		PX_ShapeRender(psurface,&pChar->shape,x+pChar->header.BearingX,y+mod->max_BearingY-pChar->header.BearingY,PX_ALIGN_LEFTTOP,Color);
 		return pChar->header.Advance;
 	}
 	
@@ -740,7 +740,7 @@ px_int PX_FontModuleDrawText(px_surface *psurface,PX_FontModule *mod,int x,int y
 			pChar=(PX_FontModule_Charactor *)PX_MapGet(&mod->characters_map,hex);
 			if (pChar)
 			{
-				PX_ShapeRender(psurface,&pChar->shape,dx+pChar->header.BearingX,dy+mod->max_BearingY-pChar->header.BearingY,PX_TEXTURERENDER_REFPOINT_LEFTTOP,Color);
+				PX_ShapeRender(psurface,&pChar->shape,dx+pChar->header.BearingX,dy+mod->max_BearingY-pChar->header.BearingY,PX_ALIGN_LEFTTOP,Color);
 				dx+=pChar->header.Advance;
 			}
 		}

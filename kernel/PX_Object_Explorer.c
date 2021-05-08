@@ -158,7 +158,10 @@ px_void PX_Object_ExplorerOnCursorDown(PX_Object *pObject,PX_Object_Event e,px_v
 				{
 					if (pExp->Items[index].bselect)
 					{
-						pExp->Items[index].bselect=PX_FALSE;
+						PX_ObjectClearFocus(pObject);
+						pExp->returnType=PX_OBJECT_EXPLORER_RETURN_CONFIRM;
+						PX_ObjectExecuteEvent(pObject,PX_OBJECT_BUILD_EVENT(PX_OBJECT_EVENT_EXECUTE));
+						pObject->Visible=PX_FALSE;
 					}
 					else
 					{
@@ -324,11 +327,11 @@ px_void PX_Object_ExplorerRender(px_surface *psurface, PX_Object *pObject,px_uin
 
 			if (pItem->bFolder)
 			{
-				PX_ShapeRender(psurface,&pExp->folder,(px_int)objx+16+3,(px_int)objy+drawy+PX_OBJECT_EXPOLRER_ITEM_HEIGHT/2,PX_TEXTURERENDER_REFPOINT_CENTER,pExp->fontcolor);
+				PX_ShapeRender(psurface,&pExp->folder,(px_int)objx+16+3,(px_int)objy+drawy+PX_OBJECT_EXPOLRER_ITEM_HEIGHT/2,PX_ALIGN_CENTER,pExp->fontcolor);
 			}
 			else
 			{
-				PX_ShapeRender(psurface,&pExp->file,(px_int)objx+16+3,(px_int)objy+drawy+PX_OBJECT_EXPOLRER_ITEM_HEIGHT/2,PX_TEXTURERENDER_REFPOINT_CENTER,pExp->fontcolor);
+				PX_ShapeRender(psurface,&pExp->file,(px_int)objx+16+3,(px_int)objy+drawy+PX_OBJECT_EXPOLRER_ITEM_HEIGHT/2,PX_ALIGN_CENTER,pExp->fontcolor);
 			}
 
 			PX_FontModuleDrawText(psurface,pExp->fontmodule,(px_int)objx+32+8,(px_int)objy+drawy+PX_OBJECT_EXPOLRER_ITEM_HEIGHT/2,PX_ALIGN_LEFTMID,pItem->name,pExp->fontcolor);

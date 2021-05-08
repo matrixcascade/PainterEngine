@@ -566,27 +566,27 @@ px_void PX_ParticalLauncherRender(px_surface *surface,PX_Partical_Launcher *env,
 					continue;
 				}
 				if(env->ParticalPool[i].alpha==1.0&&env->ParticalPool[i].hdrR==1.0f&&env->ParticalPool[i].hdrG==1.0f&&env->ParticalPool[i].hdrB==1.0f)
-					PX_TextureRenderEx(surface,env->texture,(px_int)(pos.x),(px_int)(pos.y),PX_TEXTURERENDER_REFPOINT_CENTER,PX_NULL,env->ParticalPool[i].size,env->ParticalPool[i].rotation);
+					PX_TextureRenderEx(surface,env->texture,(px_int)(pos.x),(px_int)(pos.y),PX_ALIGN_CENTER,PX_NULL,env->ParticalPool[i].size,env->ParticalPool[i].rotation);
 				else
 				{
 					blend.alpha=env->ParticalPool[i].alpha;
 					blend.hdr_R=env->ParticalPool[i].hdrR;
 					blend.hdr_G=env->ParticalPool[i].hdrG;
 					blend.hdr_B=env->ParticalPool[i].hdrB;
-					PX_TextureRenderEx(surface,env->texture,(px_int)(pos.x),(px_int)(pos.y),PX_TEXTURERENDER_REFPOINT_CENTER,&blend,env->ParticalPool[i].size,env->ParticalPool[i].rotation);
+					PX_TextureRenderEx(surface,env->texture,(px_int)(pos.x),(px_int)(pos.y),PX_ALIGN_CENTER,&blend,env->ParticalPool[i].size,env->ParticalPool[i].rotation);
 				}
 			}
 			else
 			{
 				if(env->ParticalPool[i].alpha==1.0&&env->ParticalPool[i].hdrR==1.0f&&env->ParticalPool[i].hdrG==1.0f&&env->ParticalPool[i].hdrB==1.0f)
-					PX_TextureRender(surface,env->texture,(px_int)(pos.x),(px_int)(pos.y),PX_TEXTURERENDER_REFPOINT_CENTER,PX_NULL);
+					PX_TextureRender(surface,env->texture,(px_int)(pos.x),(px_int)(pos.y),PX_ALIGN_CENTER,PX_NULL);
 				else
 				{
 					blend.alpha=env->ParticalPool[i].alpha;
 					blend.hdr_R=env->ParticalPool[i].hdrR;
 					blend.hdr_G=env->ParticalPool[i].hdrG;
 					blend.hdr_B=env->ParticalPool[i].hdrB;
-					PX_TextureRender(surface,env->texture,(px_int)(pos.x),(px_int)(pos.y),PX_TEXTURERENDER_REFPOINT_CENTER,&blend);
+					PX_TextureRender(surface,env->texture,(px_int)(pos.x),(px_int)(pos.y),PX_ALIGN_CENTER,&blend);
 				}
 			}
 		}
