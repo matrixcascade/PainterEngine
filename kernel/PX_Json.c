@@ -147,8 +147,6 @@ px_bool PX_JsonInitialize(px_memorypool *mp,PX_Json *pjson)
 	return PX_TRUE;	
 }
 
-
-
 static px_bool PX_JsonInterpret_Value_Array(PX_Json *pjson,px_lexer *lexer,PX_Json_Value *_value)
 {
 	PX_LEXER_LEXEME_TYPE type;
@@ -215,16 +213,10 @@ _ERROR:
 	return PX_FALSE;
 }
 
-
-
-
-
-
 px_bool PX_JsonInterpret_Value(PX_Json *pjson,px_lexer *lexer,PX_Json_Value *_value,px_bool arrayElement)
 {
 	PX_LEXER_STATE state;
 	PX_LEXER_LEXEME_TYPE type;
-
 
 	PX_memset(_value,0,sizeof(PX_Json_Value));
 	PX_StringInitialize(pjson->mp,&_value->name);
@@ -493,13 +485,24 @@ px_bool PX_JsonBuild_Value(PX_Json_Value *pValue,px_string *_out,px_bool bArrayV
 	case PX_JSON_VALUE_TYPE_ARRAY:
 		{
 			px_int i;
+			px_list_node *node,*ed=pValue->_array.end,*nxt;
 			if(!PX_StringCatChar(_out,'['))return PX_FALSE;
+			for(node=pValue->_array.head;node;node=nxt)
+			{
+				nxt=node->pnext;
+				PX_Json_Value *pv=((PX_Json_Value*)node->pdata);
+				if(!PX_JsonBuild_Value(pv,_out,PX_TRUE))return PX_FALSE;
+				if(nxt)
+					if(!PX_StringCatChar(_out,','))return PX_FALSE;
+			}
+			/*
 			for (i=0;i<pValue->_array.size;i++)
 			{
 				PX_Json_Value *pv=PX_LISTAT(PX_Json_Value,&pValue->_array,i);
 				if(!PX_JsonBuild_Value(pv,_out,PX_TRUE))return PX_FALSE;
 				if(i!=pValue->_array.size-1)if(!PX_StringCatChar(_out,','))return PX_FALSE;
 			}
+			*/
 			if(!PX_StringCatChar(_out,']'))return PX_FALSE;
 		}
 		break;
@@ -535,7 +538,18 @@ px_bool PX_JsonBuild_Value(PX_Json_Value *pValue,px_string *_out,px_bool bArrayV
 	case PX_JSON_VALUE_TYPE_OBJECT:
 		{
 			px_int i;
+			px_list_node *node,*ed=pValue->_object.values.end,*nxt;
 			if(!PX_StringCat(_out,"{\n")) return PX_FALSE;
+			for(node=pValue->_object.values.head;node;node=nxt)
+			{
+				nxt=node->pnext;
+				PX_Json_Value *ptmpValue=((PX_Json_Value*)node->pdata);
+				if(!PX_JsonBuild_Value(ptmpValue,_out,PX_FALSE))return PX_FALSE;
+				if(nxt)
+					if(!PX_StringCat(_out,",")) return PX_FALSE;
+				if(!PX_StringCat(_out,"\n")) return PX_FALSE;
+			}
+			/*
 			for (i=0;i<pValue->_object.values.size;i++)
 			{
 				PX_Json_Value *ptmpValue=PX_LISTAT(PX_Json_Value,&pValue->_object.values,i);
@@ -543,6 +557,7 @@ px_bool PX_JsonBuild_Value(PX_Json_Value *pValue,px_string *_out,px_bool bArrayV
 				if(i!=pValue->_object.values.size-1)if(!PX_StringCat(_out,",")) return PX_FALSE;
 				if(!PX_StringCat(_out,"\n")) return PX_FALSE;
 			}
+			*/
 			if(!PX_StringCat(_out,"}")) return PX_FALSE;
 		}
 		break;
@@ -1167,3 +1182,44 @@ px_bool PX_JsonArrayAddValue(PX_Json_Value *pArray,PX_Json_Value *value)
 	return PX_FALSE;
 }
 
+px_int PX_JsonSortNumberArray(PX_Json_Value *pArray,const px_char Keyword[],const px_bool Symbol)
+{
+	if(pArray->type!=PX_JSON_VALUE_TYPE_ARRAY) return 1;
+	px_list *Array=&pArray->_array;
+	px_int i;
+	px_int siz=PX_ListSize(Array);
+	PX_QuickSortAtom *pool=((PX_QuickSortAtom*)calloc(siz+5,sizeof(PX_QuickSortAtom)));
+	for(i=0;i<siz;++i)
+	{
+		pool[i].pData=PX_ListNodeAt(Array,i)->pdata;
+		if(((PX_Json_Value*)pool[i].pData)->type!=PX_JSON_VALUE_TYPE_NUMBER) return 2;
+		pool[i].weight=((PX_Json_Value*)pool[i].pData)->_number;
+	}
+	Symbol?PX_Quicksort_MaxToMin(pool,0,siz-1):PX_Quicksort_MinToMax(pool,0,siz-1);
+	for(i=0;i<siz;++i) PX_ListNodeAt(Array,i)->pdata=pool[i].pData;
+	return 0;
+}
+
+px_int PX_JsonSortJsonArray(PX_Json_Value *pArray,const px_char Keyword[],const px_bool Symbol)
+{
+	if(pArray->type!=PX_JSON_VALUE_TYPE_ARRAY) return 1;
+	px_list *Array=&pArray->_array;
+	px_list_node *node=Array->head;
+	px_int i;
+	px_int siz=PX_ListSize(Array);
+	PX_QuickSortAtom *pool=((PX_QuickSortAtom*)calloc(siz+5,sizeof(PX_QuickSortAtom)));
+	for(i=0,node=Array->head;i<siz;++i,node=node->pnext)
+	{
+//		pool[i].pData=PX_ListNodeAt(Array,i)->pdata;
+		pool[i].pData=node->pdata;
+		if(((PX_Json_Value*)pool[i].pData)->type!=PX_JSON_VALUE_TYPE_OBJECT) return 2;
+		pool[i].weight=PX_JsonGetObjectValue(((PX_Json_Value*)pool[i].pData),Keyword)->_number;
+	}
+	Symbol?PX_Quicksort_MaxToMin(pool,0,siz-1):PX_Quicksort_MinToMax(pool,0,siz-1);
+	for(i=0,node=Array->head;i<siz;++i,node=node->pnext) 
+	{
+//		PX_ListNodeAt(Array,i)->pdata=pool[i].pData;
+		node->pdata=pool[i].pData;
+	}
+	return 0;
+}

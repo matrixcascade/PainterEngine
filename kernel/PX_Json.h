@@ -1,6 +1,7 @@
 #ifndef PX_JSON_H
 #define PX_JSON_H
 #include "PX_Lexer.h"
+#include <stdlib.h>
 
 
 
@@ -35,7 +36,7 @@ typedef struct
 
 typedef struct _PX_Json_Object PX_Json_Object;
 
-typedef struct  
+typedef struct
 {
 	px_memorypool *mp;
 	PX_Json_Value rootValue;
@@ -79,5 +80,7 @@ px_bool PX_JsonSetBoolean(PX_Json *pjson,const px_char payload[],const px_bool b
 
 px_bool PX_JsonObjectAddValue(PX_Json_Value *pObject,PX_Json_Value *value);
 px_bool PX_JsonArrayAddValue(PX_Json_Value *pArray,PX_Json_Value *value);
+px_int PX_JsonSortJsonArray(PX_Json_Value *pArray,const px_char Keyword[],const px_bool Symbol);
+px_int PX_JsonSortNumberArray(PX_Json_Value *pArray,const px_char Keyword[],const px_bool Symbol);
 
 #endif
