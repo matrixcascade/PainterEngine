@@ -54,3 +54,7 @@ compile_commands.json
 
 # MacOS Cache
 .DS_Store
+
+#Vim Files
+*.swp
+*~
