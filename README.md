@@ -18,14 +18,5 @@
 快速入门教程在PainterEngine/supports/documents中<br/>
 ===========================================================================<br/>
 <br/><br/>
-视频教程正逐步更新中
-
-## build
-
-**macos**
-
-```bash
-brew install xmake
-cd platform/macos
-xmake
-```
+<a href="www.painterengine.com">更多内容请访问 PainterEngine.com</a>
+<br/>
