@@ -49,6 +49,10 @@ PX_IO_Data PX_LoadFileToIOData(const char path[])
 		io.buffer[filesize]='\0';
 		io.size=filesize;
 		return io;
+		_ERROR:
+		io.buffer=0;
+		io.size=0;
+		return io;
 }
 
 void PX_FreeIOData(PX_IO_Data *io)

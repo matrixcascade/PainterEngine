@@ -4,7 +4,6 @@
 #include <sys/socket.h>
 #include <sys/ioctl.h>
 #include <sys/un.h>
-#include <sys/endian.h>
 #include <sys/types.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
