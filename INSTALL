@@ -1,0 +1,6 @@
+1.How to build
+you can execute command like this:
+
+    mkdir build && cd build && cmake ../ 
+
+then you can see some information from build progress
