@@ -19,19 +19,146 @@ static px_void PX_DrawLinePixel_InvRecK(px_surface *psurface,px_int x,px_int y,p
 }
 px_void PX_GeoDrawLine(px_surface *psurface, px_int x0, px_int y0, px_int x1, px_int y1 ,px_int lineWidth, px_color color)
 {
-	px_point Cross2points[2];
-	px_int CrossCount=0;
 	px_int i,len,lm,x,y,temp1,temp2,xleft,xright;
-	px_int trimLX,trimRX,trimTY,trimBY;
-	px_float p0x,p0y,p1x,p1y,p2x,p2y,p3x,p3y,vx,vy,rx,ry,xlen,ylen,S,ftemp,fconst,ryL,ryR,rxL,rxR;
+	px_float p0x,p0y,p1x,p1y,p2x,p2y,p3x,p3y,vx,vy,rx,ry,xlen,ylen,S,ftemp,ryL,ryR,rxL,rxR;
 	px_float k,recK;
 	px_color clr;
 	px_void (*func_DrawPixel)(px_surface *psurface,px_int x,px_int y,px_color color);
 	
-	if (lineWidth==0||PX_ABS(x0-x1)+PX_ABS(y0-y1)==0)
+	if (lineWidth==0)
 	{
 		return;
 	}
+
+	//////////////////////////////////////////////////////////////////////////
+	//Trim
+	do 
+	{
+		px_int trimTop,trimRight,trimLeft,trimBottom;
+		px_int vector_x,vector_y;
+		px_float step;
+		trimTop=0-lineWidth;
+		trimBottom=psurface->height+lineWidth;
+		trimLeft=0-lineWidth;
+		trimRight=psurface->width+lineWidth;
+		
+		//////////////////////////////////////////////////////////////////////////
+		//Trim top/bottom
+		if (y0>y1)
+		{
+			//swap p0<-->p1
+			lm=x0;
+			x0=x1;
+			x1=lm;
+
+			lm=y0;
+			y0=y1;
+			y1=lm;
+		} 
+		//trim top
+		if (y1<trimTop)
+		{
+			return;
+		}
+
+		vector_x=x1-x0;
+		vector_y=y1-y0;
+
+		if (vector_y!=0)
+		{
+			step=(trimTop-y0)*1.0f/vector_y;
+			if (step>0&&step<1)
+			{
+				x0=(px_int)(x0+vector_x*step);
+				y0=(px_int)(y0+vector_y*step);
+			}
+		}
+
+		//trim bottom
+		if (y0>trimBottom)
+		{
+			return;
+		}
+
+		vector_x=x1-x0;
+		vector_y=y1-y0;
+
+		if (vector_y!=0)
+		{
+			step=(trimBottom-y0)*1.0f/vector_y;
+			if (step>0&&step<1)
+			{
+				x1=(px_int)(x1+vector_x*step);
+				y1=(px_int)(y1+vector_y*step);
+			}
+		}
+
+		//////////////////////////////////////////////////////////////////////////
+		//Trim left/right
+		if (x0>x1)
+		{
+			//swap p0<-->p1
+			lm=x0;
+			x0=x1;
+			x1=lm;
+
+			lm=y0;
+			y0=y1;
+			y1=lm;
+		} 
+
+		//trim left
+		if (x1<trimLeft)
+		{
+			return;
+		}
+
+		vector_x=x1-x0;
+		vector_y=y1-y0;
+
+		if (vector_x!=0)
+		{
+			step=(trimLeft-x0)*1.0f/vector_x;
+			if (step>0&&step<1)
+			{
+				x0=(px_int)(x0+vector_x*step);
+				y0=(px_int)(y0+vector_y*step);
+			}
+		}
+
+		//trim right
+		if (x0>trimRight)
+		{
+			return;
+		}
+
+		vector_x=x1-x0;
+		vector_y=y1-y0;
+
+		if (vector_x!=0)
+		{
+			step=(trimRight-x0)*1.0f/vector_x;
+			if (step>0&&step<1)
+			{
+				x1=(px_int)(x0+vector_x*step);
+				y1=(px_int)(y0+vector_y*step);
+			}
+		}
+
+	} while (0);
+
+	//////////////////////////////////////////////////////////////////////////
+
+
+
+	//////////////////////////////////////////////////////////////////////////
+	//Draw Point
+	if (x0==x1&&y0==y1)
+	{
+		PX_SurfaceDrawPixel(psurface,x0,y0,color);
+		return;
+	}
+
 
 	if (x0==x1)
 	{
@@ -111,123 +238,11 @@ px_void PX_GeoDrawLine(px_surface *psurface, px_int x0, px_int y0, px_int x1, px
 		return;
 	}
 
-	if (x0>x1)
-	{
-		lm=x0;
-		x0=x1;
-		x1=lm;
-
-		lm=y0;
-		y0=y1;
-		y1=lm;
-	} 
+	
 
 	k=((px_float)(y1-y0))/(x1-x0);
 	recK=1/k;
 
-	//trim
-	trimLX=0-lineWidth;
-	trimRX=psurface->width+lineWidth;
-	trimTY=0-lineWidth;
-	trimBY=psurface->height+lineWidth;
-
-	
-	
-
-	//calculate c
-	//TrimLX
-	fconst=y0-k*x0;
-	ftemp=trimLX*k+fconst;
-
-	do 
-	{
-		if (ftemp>=trimTY&&ftemp<=trimBY)
-		{
-			Cross2points[CrossCount].x=(px_float)trimLX;
-			Cross2points[CrossCount].y=ftemp;
-			CrossCount++;
-		}
-
-		//TrimRX
-		ftemp=trimRX*k+fconst;
-
-		if (ftemp>=trimTY&&ftemp<=trimBY)
-		{
-			Cross2points[CrossCount].x=(px_float)trimRX;
-			Cross2points[CrossCount].y=ftemp;
-			CrossCount++;
-			if (CrossCount==2)
-			{
-				break;
-			}
-		}
-
-		//trimBY
-		ftemp=(trimBY-fconst)/k;
-		if (ftemp>trimLX&&ftemp<trimRX)
-		{
-			Cross2points[CrossCount].x=ftemp;
-			Cross2points[CrossCount].y=(px_float)trimBY;
-			CrossCount++;
-			if (CrossCount==2)
-			{
-				break;
-			}
-		}
-
-		//trimTY
-		ftemp=(trimTY-fconst)/k;
-		if (ftemp>trimLX&&ftemp<trimRX)
-		{
-			Cross2points[CrossCount].x=ftemp;
-			Cross2points[CrossCount].y=(px_float)trimTY;
-			CrossCount++;
-		}
-	} while (0);
-	
-	if (CrossCount!=2)
-	{
-		return;
-	}
-
-
-	if (Cross2points[0].x>Cross2points[1].x)
-	{
-		ftemp=Cross2points[0].x;
-		Cross2points[0].x=Cross2points[1].x;
-		Cross2points[1].x=ftemp;
-
-		ftemp=Cross2points[0].y;
-		Cross2points[0].y=Cross2points[1].y;
-		Cross2points[1].y=ftemp;
-	}
-
-
-	if (x0<Cross2points[0].x)
-	{
-		x0=(px_int)Cross2points[0].x;
-		y0=(px_int)Cross2points[0].y;
-	}
-	else if(x0>Cross2points[1].x)
-	{
-		return;
-	}
-
-
-	if (x1<Cross2points[0].x)
-	{
-		return;
-	}
-	else if(x1>Cross2points[1].x)
-	{
-		x1=(px_int)Cross2points[1].x;
-		y1=(px_int)Cross2points[1].y;
-	}
-
-	if (x1==x0&&y1==y0)
-	{
-		return;
-	}
 
 
 	if (k>0)
@@ -332,7 +347,6 @@ px_void PX_GeoDrawLine(px_surface *psurface, px_int x0, px_int y0, px_int x1, px
 			for (x=PX_TRUNC(rx)+1;x<=temp1;x++)
 			{
 				func_DrawPixel(psurface,x,y,color);
-
 			}
 			//Draw edge point
 			ftemp=PX_FRAC(rx);
@@ -996,19 +1010,36 @@ px_void PX_GeoDrawRect(px_surface *psurface, px_int left, px_int top, px_int rig
 	{
 		left=0;
 	}
+	if (left<psurface->limit_left)
+	{
+		left=psurface->limit_left;
+	}
+
 	if (top<0)
 	{
 		top=0;
+	}
+	if (top<psurface->limit_top)
+	{
+		top=psurface->limit_top;
 	}
 
 	if (right>psurface->width-1)
 	{
 		right=psurface->width-1;
 	}
+	if (right>psurface->limit_right)
+	{
+		right=psurface->limit_right;
+	}
 
 	if (bottom>psurface->height-1)
 	{
 		bottom=psurface->height-1;
+	}
+	if (bottom>psurface->limit_bottom)
+	{
+		bottom=psurface->limit_bottom;
 	}
 
 	if (left>psurface->width-1)
@@ -1416,7 +1447,7 @@ px_void PX_GeoDrawPath(px_surface *psurface, px_point path[],px_int pathCount,px
 	{
 		for (i=0;i<pathCount-1;i++)
 		{
-			px_point path_unit_vector=PX_PointUnit(PX_PointSub(path[i+1],path[i]));
+			px_point path_unit_vector=PX_PointNormalization(PX_PointSub(path[i+1],path[i]));
 			px_int length=(px_int)PX_PointMod(PX_PointSub(path[i+1],path[i]));
 			px_float step=0;
 			do 
@@ -1788,7 +1819,7 @@ static px_void PX_GeoDrawRingPoint(px_surface *psurface, px_int x,px_int y,px_co
 	}
 }
 
-px_void PX_GeoDrawRing(px_surface *psurface, px_int x,px_int y,px_int Radius,px_int lineWidth,px_color color,px_uint start_angle,px_uint end_angle)
+px_void PX_GeoDrawRing(px_surface *psurface, px_int x,px_int y,px_int Radius,px_int lineWidth,px_color color,px_int start_angle,px_int end_angle)
 {
 	px_int s_quadrant,e_quadrant,trim;
 	px_float start_mathRegion,end_mathRegion;
@@ -1807,6 +1838,22 @@ px_void PX_GeoDrawRing(px_surface *psurface, px_int x,px_int y,px_int Radius,px_
 	{
 		return;
 	}
+
+	if (start_angle>end_angle)
+	{
+		px_int temp=start_angle;
+		start_angle=end_angle;
+		end_angle=temp;
+	}
+
+	if (start_angle<0)
+	{
+		repeat=start_angle/360;
+		repeat-=1;
+		start_angle-=repeat*360;
+		end_angle-=repeat*360;
+	}
+
 	repeat=start_angle/360;
 	start_angle-=repeat*360;
 	end_angle-=repeat*360;
@@ -2180,7 +2227,7 @@ px_void PX_GeoDrawRing(px_surface *psurface, px_int x,px_int y,px_int Radius,px_
 
 }
 
-px_void PX_GeoDrawSector(px_surface *psurface, px_int x,px_int y,px_int Radius_outside,px_int Radius_inside,px_color color,px_uint start_angle,px_uint end_angle)
+px_void PX_GeoDrawSector(px_surface *psurface, px_int x,px_int y,px_int Radius_outside,px_int Radius_inside,px_color color,px_int start_angle,px_int end_angle)
 {
 	px_int s_quadrant,e_quadrant,trim;
 	px_float start_mathRegion,end_mathRegion;
@@ -2207,9 +2254,25 @@ px_void PX_GeoDrawSector(px_surface *psurface, px_int x,px_int y,px_int Radius_o
 		return;
 	}
 
+	if (start_angle>end_angle)
+	{
+		px_int temp=start_angle;
+		start_angle=end_angle;
+		end_angle=temp;
+	}
+
+	if (start_angle<0)
+	{
+		repeat=start_angle/360;
+		repeat-=1;
+		start_angle-=repeat*360;
+		end_angle-=repeat*360;
+	}
+
 	repeat=start_angle/360;
 	start_angle-=repeat*360;
 	end_angle-=repeat*360;
+
 
 	s_quadrant=(start_angle%360)/90+1;
 	e_quadrant=(end_angle%360)/90+1;
@@ -2558,6 +2621,10 @@ px_void PX_GeoDrawSolidRoundRect(px_surface *psurface, px_int left, px_int top, 
 	{
 		return;
 	}
+	if (roundRaduis<0)
+	{
+		roundRaduis=0;
+	}
 
 	if (left>right)
 	{
@@ -2834,7 +2901,7 @@ px_void PX_GeoDrawBezierCurvePoint(px_surface *rendersurface,px_point pt[],px_in
 	//update path
 	for (i=0;i<pt_count-1;i++)
 	{
-		px_point vector_unit=PX_PointUnit(PX_PointSub(pt[i+1],pt[i]));
+		px_point vector_unit=PX_PointNormalization(PX_PointSub(pt[i+1],pt[i]));
 		px_float distance=PX_PointMod(PX_PointSub(pt[i+1],pt[i]));
 
 		pt[i]=PX_PointAdd(pt[i],PX_PointMul(vector_unit,distance*t));
@@ -3034,3 +3101,378 @@ px_void PX_GeoDrawBresenhamLine(px_surface *psurface,int x0, int y0, int x1, int
 	} while (0);
 	
 }
+
+px_void PX_GeoDrawTriangle(px_surface *psurface,px_point2D p0,px_point2D p1,px_point2D p2,px_color color)
+{
+	px_int ix,iy;
+	px_bool  k01infinite=PX_FALSE;
+	px_bool  k02infinite=PX_FALSE;
+	px_bool  k12infinite=PX_FALSE;
+	px_float k01,b01,k02,b02,k12,b12;
+
+	px_float lAlpha=1,rAlpha=1;
+
+	px_float x0;
+	px_float y0;
+
+	px_float x1;
+	px_float y1;
+
+	px_float x2;
+	px_float y2;
+
+
+
+	px_float x, y, xleft, xright; 
+	px_float btmy,midy;
+
+	px_float a,b,c;
+	a=(px_float)PX_sqrtd((p1.x-p2.x)*(p1.x-p2.x));
+	b=(px_float)PX_sqrtd((p0.x-p2.x)*(p0.x-p2.x));
+	c=(px_float)PX_sqrtd((p1.x-p0.x)*(p1.x-p0.x));
+
+	x=(a*p0.x+b*p1.x+c*p2.x)/(a+b+c);
+	y=(a*p0.y+b*p1.y+c*p2.y)/(a+b+c);
+
+	//    p0
+	// p1   p2
+
+	if (p1.y<p0.y)
+	{
+		px_point2D t;
+		t=p1;
+		p1=p0;
+		p0=t;
+	}
+
+	if (p2.y<p0.y)
+	{
+		px_point2D t;
+		t=p2;
+		p2=p0;
+		p0=t;
+	}
+
+	btmy=p1.y;
+	midy=p2.y;
+	if (p2.y>btmy)
+	{
+		midy=p1.y;
+		btmy=p2.y;
+	}
+
+
+
+	do 
+	{
+		px_float x01m;
+
+		x0=p0.x;
+		y0=p0.y;
+		x1=p1.x;
+		y1=p1.y;
+		x2=p2.x;
+		y2=p2.y;
+
+
+		if (x0==x1)
+		{
+			x01m=x0;
+		}
+		else
+		{
+			k01=(y0-y1)/(x0-x1);
+			b01=y0-k01*x0;
+			x01m=(y2-b01)/k01;
+		}
+
+		if (x01m>x2)
+		{
+			px_point2D t;
+			t=p2;
+			p2=p1;
+			p1=t;
+		}
+	} while (0);
+
+
+
+	x0=p0.x;
+	y0=p0.y;
+
+	x1=p1.x;
+	y1=p1.y;
+
+	x2=p2.x;
+	y2=p2.y;
+
+
+	k01infinite=PX_FALSE;
+	k02infinite=PX_FALSE;
+	k12infinite=PX_FALSE;
+	if (x0==x1)
+	{
+		k01infinite=PX_TRUE;
+		b01=x0;
+	}
+	else
+	{
+		k01=(y0-y1)/(x0-x1);
+		b01=y0-k01*x0;
+	}
+
+	if (x0==x2)
+	{
+		k02infinite=PX_TRUE;
+		b02=x0;
+	}
+	else
+	{
+		k02=(y0-y2)/(x0-x2);
+		b02=y0-k02*x0;
+	}
+
+	if (x1==x2)
+	{
+		k12infinite=PX_TRUE;
+		b12=x0;
+	}
+	else
+	{
+		k12=(y1-y2)/(x1-x2);
+		b12=y1-k12*x1;
+	}
+
+
+	for(y = (px_int)(y0+0.5f)+0.5f; y <=midy; y++)
+	{
+		if (k01infinite)
+		{
+			xleft=b01;
+			lAlpha=1;
+		}
+		else
+		{
+			xleft = (y-b01)/k01;
+			lAlpha=PX_ABS_FRAC(xleft);
+		}
+
+		if (k02infinite)
+		{
+			xright=b02;
+			rAlpha=1;
+		}
+		else
+		{
+			xright = (y-b02)/k02;
+			rAlpha=PX_ABS_FRAC(xright);
+		}
+
+		ix = (px_int)xleft;
+		iy=(px_int)y;
+		do 
+		{
+			px_color aClr=color;
+			aClr._argb.a=(px_byte)(aClr._argb.a*lAlpha);
+			PX_SurfaceDrawPixel(psurface,ix,iy,color);
+		} while (0);
+		
+		for(ix = (px_int)xleft+1;ix < (px_int)xright; ++ix)
+		{
+			PX_SurfaceDrawPixel(psurface,ix,iy,color);
+		}
+
+// 		do 
+// 		{
+// 			px_color aClr=color;
+// 			aClr._argb.a=(px_byte)(aClr._argb.a*rAlpha);
+// 			PX_SurfaceDrawPixel(psurface,ix,iy,color);
+// 		} while (0);
+	}
+
+	// p1   p2
+	//    p0
+	if (p1.y>p0.y)
+	{
+		px_point2D t;
+		t=p1;
+		p1=p0;
+		p0=t;
+	}
+
+	if (p2.y>p0.y)
+	{
+		px_point2D t;
+		t=p2;
+		p2=p0;
+		p0=t;
+	}
+
+	btmy=p1.y;
+	midy=p2.y;
+	if (p2.y<btmy)
+	{
+		midy=p1.y;
+		btmy=p2.y;
+	}
+
+
+
+	do 
+	{
+		px_float x01m;
+
+		x0=p0.x;
+		y0=p0.y;
+		x1=p1.x;
+		y1=p1.y;
+		x2=p2.x;
+		y2=p2.y;
+
+
+		if (x0==x1)
+		{
+			x01m=x0;
+		}
+		else
+		{
+			k01=(y0-y1)/(x0-x1);
+			b01=y0-k01*x0;
+			x01m=(y2-b01)/k01;
+		}
+
+		if (x01m>x2)
+		{
+			px_point2D t;
+			t=p2;
+			p2=p1;
+			p1=t;
+		}
+	} while (0);
+
+
+
+	x0=p0.x;
+	y0=p0.y;
+
+	x1=p1.x;
+	y1=p1.y;
+
+	x2=p2.x;
+	y2=p2.y;
+
+
+	k01infinite=PX_FALSE;
+	k02infinite=PX_FALSE;
+	k12infinite=PX_FALSE;
+	if (x0==x1)
+	{
+		k01infinite=PX_TRUE;
+		b01=x0;
+	}
+	else
+	{
+		k01=(y0-y1)/(x0-x1);
+		b01=y0-k01*x0;
+	}
+
+	if (x0==x2)
+	{
+		k02infinite=PX_TRUE;
+		b02=x0;
+	}
+	else
+	{
+		k02=(y0-y2)/(x0-x2);
+		b02=y0-k02*x0;
+	}
+
+	if (x1==x2)
+	{
+		k12infinite=PX_TRUE;
+		b12=x0;
+	}
+	else
+	{
+		k12=(y1-y2)/(x1-x2);
+		b12=y1-k12*x1;
+	}
+
+
+	for(y = (px_int)(midy+0.5f)+0.5f; y < y0; y++)
+	{
+		if (k01infinite)
+		{
+			xleft=b01;
+			lAlpha=1;
+		}
+		else
+		{
+			xleft = (y-b01)/k01;
+			lAlpha=PX_ABS_FRAC(xleft);
+		}
+
+		if (k02infinite)
+		{
+			xright=b02;
+			rAlpha=1;
+		}
+		else
+		{
+			xright = (y-b02)/k02;
+			rAlpha=PX_ABS_FRAC(xright);
+		}
+
+		ix = (px_int)xleft;
+		iy=(px_int)y;
+		do 
+		{
+			px_color aClr=color;
+			aClr._argb.a=(px_byte)(aClr._argb.a*lAlpha);
+			PX_SurfaceDrawPixel(psurface,ix,iy,color);
+		} while (0);
+
+		for(ix = (px_int)xleft+1;ix < (px_int)xright; ++ix)
+		{
+			PX_SurfaceDrawPixel(psurface,ix,iy,color);
+		}
+
+// 		do 
+// 		{
+// 			px_color aClr=color;
+// 			aClr._argb.a=(px_byte)(aClr._argb.a*rAlpha);
+// 			PX_SurfaceDrawPixel(psurface,ix,iy,color);
+// 		} while (0);
+	}
+	
+}
+
+px_void PX_GeoDrawArrow(px_surface *psurface,px_point2D p0,px_point2D p1,px_float size,px_color color)
+{
+	px_point2D p0_5,v,vn;
+	px_float arrowsize,distance;
+	
+	if (size<1)
+	{
+		return;
+	}
+
+	arrowsize=size*5;
+
+
+
+	//draw line
+	v=PX_Point2DNormalization(PX_Point2DSub(p1,p0));
+	distance=PX_Point2DMod(PX_Point2DSub(p1,p0));
+	distance-=arrowsize;
+	p0_5=PX_Point2DAdd(p0,PX_Point2DMul(v,distance));
+	PX_GeoDrawLine(psurface,(px_int)p0.x,(px_int)p0.y,(px_int)p0_5.x,(px_int)p0_5.y,(px_int)size,color);
+
+	//normal
+	vn.x=-v.y;
+	vn.y=v.x;
+
+	PX_GeoDrawTriangle(psurface,p0_5,p1,PX_Point2DAdd(p0_5,PX_Point2DMul(vn,arrowsize)),color);
+	PX_GeoDrawTriangle(psurface,p0_5,p1,PX_Point2DAdd(p0_5,PX_Point2DMul(vn,-arrowsize)),color);
+}
+

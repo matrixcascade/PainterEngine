@@ -1,3 +1,0 @@
-#ifndef PX_APPLICATION_WINDOWS
-#define PX_APPLICATION_WINDOWS
-#endif

@@ -17,21 +17,21 @@ px_bool PX_AnimationLibraryCreateFromMemory(px_memorypool *mp,PX_Animationlibrar
 	}
 	reservedSize-=sizeof(_header);
 	pbuffer=_2dxBuffer+sizeof(_header);
-	PX_VectorInit(mp,&panimation->animation,sizeof(PX_Animationlibrary_tagInfo),_header.animationCount);
+	PX_VectorInitialize(mp,&panimation->animation,sizeof(PX_Animationlibrary_tagInfo),_header.animationCount);
 	for (i=0;i<(px_int)_header.animationCount;i++)
 	{
 		PX_Animationlibrary_tagInfo tag;
 		tag.ip=*(px_dword *)pbuffer;
 		pbuffer+=sizeof(px_dword);
-		PX_StringInit(mp,&tag.name);
+		PX_StringInitialize(mp,&tag.name);
 		PX_StringCat(&tag.name,(px_char *)pbuffer);
 		pbuffer+=PX_strlen((px_char *)pbuffer)+1;
 		PX_VectorPushback(&panimation->animation,&tag);
 	}
 
 
-	PX_VectorInit(mp,&panimation->frames,sizeof(px_texture),_header.framecount);
-	PX_MemoryInit(mp,&panimation->code);
+	PX_VectorInitialize(mp,&panimation->frames,sizeof(px_texture),_header.framecount);
+	PX_MemoryInitialize(mp,&panimation->code);
 	for (i=0;i<(px_int)_header.framecount;i++)
 	{
 		_trawheader=*(PX_TRaw_Header *)pbuffer;
@@ -167,7 +167,7 @@ px_void PX_AnimationUpdate(PX_Animation *panimation,px_uint elpased)
 	}
 }
 
-px_void PX_AnimationRender(px_surface *psurface,PX_Animation *animation,px_point pos,PX_TEXTURERENDER_REFPOINT refPoint,PX_TEXTURERENDER_BLEND *blend)
+px_void PX_AnimationRender(px_surface *psurface,PX_Animation *animation,px_int x,px_int y,PX_ALIGN refPoint,PX_TEXTURERENDER_BLEND *blend)
 {
 	px_texture *pTexture;
 	if (!animation->linker)
@@ -177,11 +177,11 @@ px_void PX_AnimationRender(px_surface *psurface,PX_Animation *animation,px_point
 	if(animation->reg_currentFrameIndex>=0&&animation->reg_currentFrameIndex<animation->linker->frames.size)
 	{
 		pTexture=PX_VECTORAT(px_texture,&animation->linker->frames,animation->reg_currentFrameIndex);
-		PX_TextureRender(psurface,pTexture,(px_int)pos.x,(px_int)pos.y,refPoint,blend);
+		PX_TextureRender(psurface,pTexture,x,y,refPoint,blend);
 	}
 }
 
-px_void PX_AnimationRenderEx(px_surface *psurface,PX_Animation *animation,px_point pos,px_float scale,px_point direction,PX_TEXTURERENDER_REFPOINT refPoint,PX_TEXTURERENDER_BLEND *blend)
+px_void PX_AnimationRenderEx(px_surface *psurface,PX_Animation *animation,px_int x,px_int y,px_float scale,px_point direction,PX_ALIGN refPoint,PX_TEXTURERENDER_BLEND *blend)
 {
 	px_texture *pTexture;
 	if (!animation->linker)
@@ -194,16 +194,16 @@ px_void PX_AnimationRenderEx(px_surface *psurface,PX_Animation *animation,px_poi
 
 		if (scale!=1)
 		{
-			PX_TextureRenderEx_vector(psurface,pTexture,(px_int)pos.x,(px_int)pos.y,refPoint,blend,scale,direction);
+			PX_TextureRenderEx_vector(psurface,pTexture,x,y,refPoint,blend,scale,direction);
 		}
 		else
 		{
-			PX_TextureRenderRotation_vector(psurface,pTexture,(px_int)pos.x,(px_int)pos.y,refPoint,blend,direction);
+			PX_TextureRenderRotation_vector(psurface,pTexture,x,y,refPoint,blend,direction);
 		}
 	}
 }
 
-px_void PX_AnimationRender_scale(px_surface *psurface,PX_Animation *animation,px_point pos,px_float scale,PX_TEXTURERENDER_REFPOINT refPoint,PX_TEXTURERENDER_BLEND *blend)
+px_void PX_AnimationRender_scale(px_surface *psurface,PX_Animation *animation,px_int x,px_int y,px_float scale,PX_ALIGN refPoint,PX_TEXTURERENDER_BLEND *blend)
 {
 	px_texture *pTexture;
 	if (!animation->linker)
@@ -213,12 +213,12 @@ px_void PX_AnimationRender_scale(px_surface *psurface,PX_Animation *animation,px
 	if(animation->reg_currentFrameIndex>=0&&animation->reg_currentFrameIndex<animation->linker->frames.size)
 	{
 		pTexture=PX_VECTORAT(px_texture,&animation->linker->frames,animation->reg_currentFrameIndex);
-		PX_TextureRenderEx(psurface,pTexture,(px_int)pos.x,(px_int)pos.y,refPoint,blend,scale,0);
+		PX_TextureRenderEx(psurface,pTexture,x,y,refPoint,blend,scale,0);
 	}
 }
 
 
-px_void PX_AnimationRender_vector(px_surface *psurface,PX_Animation *animation,px_point pos,px_point direction,PX_TEXTURERENDER_REFPOINT refPoint,PX_TEXTURERENDER_BLEND *blend)
+px_void PX_AnimationRender_vector(px_surface *psurface,PX_Animation *animation,px_int x,px_int y,px_point direction,PX_ALIGN refPoint,PX_TEXTURERENDER_BLEND *blend)
 {
 	px_texture *pTexture;
 	if (!animation->linker)
@@ -228,8 +228,20 @@ px_void PX_AnimationRender_vector(px_surface *psurface,PX_Animation *animation,p
 	if(animation->reg_currentFrameIndex>=0&&animation->reg_currentFrameIndex<animation->linker->frames.size)
 	{
 		pTexture=PX_VECTORAT(px_texture,&animation->linker->frames,animation->reg_currentFrameIndex);
-		PX_TextureRenderRotation_vector(psurface,pTexture,(px_int)pos.x,(px_int)pos.y,refPoint,blend,direction);
+		PX_TextureRenderRotation_vector(psurface,pTexture,x,y,refPoint,blend,direction);
 	}
+}
+
+
+px_int PX_AnimationLibraryGetFrameWidth(PX_Animationlibrary *panimationLib,px_int frameIndex)
+{
+	return PX_VECTORAT(px_texture,&panimationLib->frames,frameIndex)->width;
+}
+
+
+px_int PX_AnimationLibraryGetFrameHeight(PX_Animationlibrary *panimationLib,px_int frameIndex)
+{
+	return PX_VECTORAT(px_texture,&panimationLib->frames,frameIndex)->height;
 }
 
 px_bool PX_AnimationCreate(PX_Animation *animation,PX_Animationlibrary *linker)
@@ -278,8 +290,8 @@ px_bool PX_AnimationLibrary_CreateEffect_JumpVertical(px_memorypool *mp,PX_Anima
 	px_int eff_height[6],eff_width[6];
 	px_texture tex;
 
-	PX_VectorInit(mp,&panimation->frames,sizeof(px_texture),6);
-	PX_MemoryInit(mp,&panimation->code);
+	PX_VectorInitialize(mp,&panimation->frames,sizeof(px_texture),6);
+	PX_MemoryInitialize(mp,&panimation->code);
 	PX_MemoryResize(&panimation->code,sizeof(PX_2DX_INSTR)*13);
 
 	PX_AnimationLibraryAddInstr(panimation,PX_2DX_OPCODE_FRAME,0);
@@ -371,7 +383,12 @@ px_rect PX_AnimationGetSize(PX_Animation *panimation)
 }
 
 
-px_void PX_AnimationRenderRotation(px_surface *psurface,PX_Animation *animation,px_point position,px_int angle,PX_TEXTURERENDER_REFPOINT refPoint,PX_TEXTURERENDER_BLEND *blend)
+px_texture * PX_AnimationGetCurrentTexture(PX_Animation *panimation)
+{
+	return PX_VECTORAT(px_texture,&panimation->linker->frames,panimation->reg_currentFrameIndex);
+}
+
+px_void PX_AnimationRenderRotation(px_surface *psurface,PX_Animation *animation,px_point position,px_int angle,PX_ALIGN refPoint,PX_TEXTURERENDER_BLEND *blend)
 {
 	px_texture *pTexture;
 	if (!animation->linker)

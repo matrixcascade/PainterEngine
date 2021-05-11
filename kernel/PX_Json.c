@@ -31,6 +31,15 @@ PX_Json_Value * PX_JsonGetObjectValue(PX_Json_Value *json_value,const px_char na
 	return PX_NULL;
 }
 
+PX_Json_Value * PX_JsonGetObjectValueByIndex(PX_Json_Value *json_value,px_int i)
+{
+	if (i<0||i>=json_value->_object.values.size)
+	{
+		return PX_NULL;
+	}
+	return PX_LISTAT(PX_Json_Value,&json_value->_object.values,i);
+}
+
 PX_Json_Value * PX_JsonGetValue(PX_Json *json,const px_char _payload[])
 {
 	px_int r_offset=0;
@@ -130,9 +139,11 @@ PX_Json_Value * PX_JsonGetArrayValue(PX_Json_Value *value,px_int i)
 
 px_bool PX_JsonInitialize(px_memorypool *mp,PX_Json *pjson)
 {
+	PX_memset(pjson,0,sizeof(PX_Json));
 	pjson->mp=mp;
 	pjson->rootValue.type=PX_JSON_VALUE_TYPE_OBJECT;
-	PX_ListInit(pjson->mp,&pjson->rootValue._object.values);
+	PX_StringInitialize(mp,&pjson->rootValue.name);
+	PX_ListInitialize(pjson->mp,&pjson->rootValue._object.values);
 	return PX_TRUE;	
 }
 
@@ -216,7 +227,7 @@ px_bool PX_JsonInterpret_Value(PX_Json *pjson,px_lexer *lexer,PX_Json_Value *_va
 
 
 	PX_memset(_value,0,sizeof(PX_Json_Value));
-	PX_StringInit(pjson->mp,&_value->name);
+	PX_StringInitialize(pjson->mp,&_value->name);
 	if (!arrayElement)
 	{
 		type=PX_JsonNextToken(lexer);
@@ -243,7 +254,7 @@ px_bool PX_JsonInterpret_Value(PX_Json *pjson,px_lexer *lexer,PX_Json_Value *_va
 		{
 			PX_LexerSetState(state);
 			_value->type=PX_JSON_VALUE_TYPE_ARRAY;
-			PX_ListInit(pjson->mp,&_value->_array);
+			PX_ListInitialize(pjson->mp,&_value->_array);
 			if(!PX_JsonInterpret_Value_Array(pjson,lexer,_value))
 			{
 				
@@ -313,7 +324,7 @@ px_bool PX_JsonInterpret_Value(PX_Json *pjson,px_lexer *lexer,PX_Json_Value *_va
 		{
 			px_int i;
 			_value->type=PX_JSON_VALUE_TYPE_STRING;
-			if(!PX_StringInit(pjson->mp,&_value->_string))goto _ERROR;;
+			if(!PX_StringInitialize(pjson->mp,&_value->_string))goto _ERROR;;
 			PX_LexerGetIncludedString(lexer,&lexer->CurLexeme);
 			
 			if(!PX_StringCopy(&_value->_string,&lexer->CurLexeme))
@@ -368,7 +379,7 @@ px_bool PX_JsonInterpret_Object(PX_Json *pjson,px_lexer *lexer,PX_Json_Object *j
 	
 	if (!json_Object->values.mp)
 	{
-		PX_ListInit(pjson->mp,&json_Object->values);
+		PX_ListInitialize(pjson->mp,&json_Object->values);
 	}
 	
 
@@ -717,12 +728,12 @@ px_bool PX_JsonCreateObjectValue(px_memorypool *mp,PX_Json_Value *pValue,const p
 	PX_memset(pValue,0,sizeof(PX_Json_Value));
 	pValue->type=PX_JSON_VALUE_TYPE_OBJECT;
 
-	if (!PX_StringInit(mp,&pValue->name))
+	if (!PX_StringInitialize(mp,&pValue->name))
 	{
 		return PX_FALSE;
 	}
 	if(!PX_StringSet(&pValue->name,name)) return PX_FALSE;
-	PX_ListInit(mp,&pValue->_object.values);
+	PX_ListInitialize(mp,&pValue->_object.values);
 	return PX_TRUE;
 }
 
@@ -731,13 +742,13 @@ px_bool PX_JsonCreateStringValue(px_memorypool *mp,PX_Json_Value *pValue,const p
 	PX_memset(pValue,0,sizeof(PX_Json_Value));
 	pValue->type=PX_JSON_VALUE_TYPE_STRING;
 
-	if (!PX_StringInit(mp,&pValue->name))
+	if (!PX_StringInitialize(mp,&pValue->name))
 	{
 		return PX_FALSE;
 	}
 	PX_StringSet(&pValue->name,name);
 
-	if (!PX_StringInit(mp,&pValue->_string))
+	if (!PX_StringInitialize(mp,&pValue->_string))
 	{
 		return PX_FALSE;
 	}
@@ -750,7 +761,7 @@ px_bool PX_JsonCreateNumberValue(px_memorypool *mp,PX_Json_Value *pValue,const p
 	PX_memset(pValue,0,sizeof(PX_Json_Value));
 	pValue->type=PX_JSON_VALUE_TYPE_NUMBER;
 
-	if (!PX_StringInit(mp,&pValue->name))
+	if (!PX_StringInitialize(mp,&pValue->name))
 	{
 		return PX_FALSE;
 	}
@@ -765,7 +776,7 @@ px_bool PX_JsonCreateBooleanValue(px_memorypool *mp,PX_Json_Value *pValue,const 
 	PX_memset(pValue,0,sizeof(PX_Json_Value));
 	pValue->type=PX_JSON_VALUE_TYPE_NUMBER;
 
-	if (!PX_StringInit(mp,&pValue->name))
+	if (!PX_StringInitialize(mp,&pValue->name))
 	{
 		return PX_FALSE;
 	}
@@ -780,12 +791,12 @@ px_bool PX_JsonCreateArrayValue(px_memorypool *mp,PX_Json_Value *pValue,const px
 	PX_memset(pValue,0,sizeof(PX_Json_Value));
 	pValue->type=PX_JSON_VALUE_TYPE_ARRAY;
 
-	if (!PX_StringInit(mp,&pValue->name))
+	if (!PX_StringInitialize(mp,&pValue->name))
 	{
 		return PX_FALSE;
 	}
 	if(!PX_StringSet(&pValue->name,name)) return PX_FALSE;
-	PX_ListInit(mp,&pValue->_array);
+	PX_ListInitialize(mp,&pValue->_array);
 	return PX_TRUE;
 }
 
@@ -1074,6 +1085,36 @@ px_bool PX_JsonAddObject(PX_Json *pjson,const px_char parent_payload[],const px_
 	}
 
 	return PX_FALSE;
+}
+
+const px_char * PX_JsonGetString(PX_Json *pjson,const px_char payload[])
+{
+	PX_Json_Value *pValue=PX_JsonGetValue(pjson,payload);
+	if (pValue&&pValue->type==PX_JSON_VALUE_TYPE_STRING)
+	{
+		return pValue->_string.buffer;
+	}
+	return "";
+}
+
+px_double PX_JsonGetNumber(PX_Json *pjson,const px_char payload[])
+{
+	PX_Json_Value *pValue=PX_JsonGetValue(pjson,payload);
+	if (pValue&&pValue->type==PX_JSON_VALUE_TYPE_NUMBER)
+	{
+		return pValue->_number;
+	}
+	return 0;
+}
+
+px_bool PX_JsonGetBoolean(PX_Json *pjson,const px_char payload[])
+{
+	PX_Json_Value *pValue=PX_JsonGetValue(pjson,payload);
+	if (pValue&&pValue->type==PX_JSON_VALUE_TYPE_BOOLEAN)
+	{
+		return pValue->_boolean;
+	}
+	return 0;
 }
 
 px_bool PX_JsonSetString(PX_Json *pjson,const px_char payload[],const px_char text[])

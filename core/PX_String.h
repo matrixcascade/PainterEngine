@@ -12,7 +12,7 @@ typedef struct __px_string
 
 #define PX_STRING_DATA(x) (x->buffer)
 
-px_bool PX_StringInit(px_memorypool *mp,px_string *str);
+px_bool PX_StringInitialize(px_memorypool *mp,px_string *str);
 px_void PX_StringInitFromConst(px_string *str,const px_char *constchar);
 px_int PX_StringToInteger(px_string *str);
 px_float PX_StringToFloat(px_string *str);
@@ -34,6 +34,7 @@ px_bool PX_StringIsFloat(px_string *str);
 
 //px_void PX_StringFormat(px_string *str,px_char fmt[],...);
 px_void PX_StringReplace(px_string *str,px_char *source,px_char *replaceto);
+px_bool PX_StringInsert(px_string *str,px_int insertIndex,const px_char *InstrString);
 px_bool PX_StringTrimer_Solve(px_string *pstring,px_char *parseCode,px_char *ReplaceCode);
 px_void PX_StringInitAlloc(px_memorypool *mp,px_string *str,px_int allocSize);
 

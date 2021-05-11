@@ -4,8 +4,8 @@
 px_bool PX_WorldInit(px_memorypool *mp,PX_World *World,px_int world_width,px_int world_height,px_int surface_width,px_int surface_height,px_dword calcSize)
 {
 	px_void *ptr;
-	if(!PX_VectorInit(mp,&World->pObjects,sizeof(PX_WorldObject),256)) return PX_FALSE;
-	if(!PX_VectorInit(mp,&World->pNewObjects,sizeof(PX_Object *),128)) return PX_FALSE;
+	if(!PX_VectorInitialize(mp,&World->pObjects,sizeof(PX_WorldObject),256)) return PX_FALSE;
+	if(!PX_VectorInitialize(mp,&World->pNewObjects,sizeof(PX_Object *),128)) return PX_FALSE;
 	World->mp=mp;
 	World->world_height=world_height;
 	World->world_width=world_width;

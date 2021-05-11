@@ -40,9 +40,10 @@ px_int PX_atoi(const px_char s[])
 
 px_float PX_atof(px_char fstr[])
 {
-	px_float temp=10;
+	px_double temp=10;
 	px_bool ispnum=PX_TRUE;
-	px_float ans=0;
+	px_double ans=0;
+	px_bool be=PX_FALSE;
 	if(*fstr=='-')
 	{
 		ispnum=PX_FALSE;
@@ -56,17 +57,44 @@ px_float PX_atof(px_char fstr[])
 	while(*fstr!='\0')
 	{
 		if(*fstr=='.'){ fstr++;break;}
+		if(*fstr=='e'||*fstr=='E'){ fstr++;be=PX_TRUE;break;}
 		ans=ans*10+(*fstr-'0');
 		fstr++;
 	}
-	while(*fstr!='\0')
+	if (be)
 	{
-		ans=ans+(*fstr-'0')/temp;
-		temp*=10;
-		fstr++;
+		int e=PX_atoi(fstr);
+		float e10=1;
+		if (e>0)
+		{
+			while (e)
+			{
+				e10*=10;
+				e--;
+			}
+		}
+		else
+		{
+			while(e)
+			{
+				e10/=10;
+				e++;
+			}
+		}
+		ans*=e10;
 	}
-	if(ispnum) return ans;
-	else return ans*(-1);
+	else
+	{
+		while(*fstr!='\0')
+		{
+			ans=ans+(*fstr-'0')/temp;
+			temp*=10;
+			fstr++;
+		}
+	}
+	
+	if(ispnum) return (px_float)ans;
+	else return (px_float)ans*(-1);
 }
 
 
@@ -204,7 +232,15 @@ px_int PX_itoa(px_int num,px_char *str,px_int MaxStrSize,px_int radix)
 	return l; 
 } 
 
+
+
 static px_int32 PX_i32SwapEndian(px_int32 val){
+	val = ((val << 8)&0xFF00FF00) | ((val >> 8)&0x00FF00FF);
+	return (val << 16)|(val >> 16);
+}
+
+px_dword PX_SwapEndian(px_dword val)
+{
 	val = ((val << 8)&0xFF00FF00) | ((val >> 8)&0x00FF00FF);
 	return (val << 16)|(val >> 16);
 }
@@ -388,33 +424,7 @@ px_double PX_cosd(px_double radius)
 
 px_float PX_sin_radian(px_float radius)
 {
-	px_int radIndex;
-	radIndex=PX_TRUNC(radius*1000)%6282;
-	if (radIndex<0)
-	{
-		radIndex+=6282;
-	}
-	if (radIndex>3141)
-	{
-		radIndex-=3141;
-		if(radIndex<1571)
-		{
-			return -px_sinx_radius[radIndex%1572];
-		}
-		else
-		{
-			return -px_sinx_radius[1570-(radIndex%1571)];
-		}
-	}
-
-	if(radIndex<1571)
-	{
-		return px_sinx_radius[radIndex%1572];
-	}
-	else
-	{
-		return px_sinx_radius[1570-(radIndex%1571)];
-	}
+	return (px_float)PX_sind(radius);
 }
 
 
@@ -431,7 +441,7 @@ px_float PX_tan_radian(px_float radius)
 px_float PX_sin_angle(px_float angle)
 {
 	angle-=((px_int)angle/360)*360;
-	return PX_sin_radian((angle*0.0174532925f));
+	return (px_float)PX_sin_radian((angle*0.0174532925f));
 }
 px_float PX_cos_angle(px_float angle)
 {
@@ -476,7 +486,7 @@ px_void PX_BufferToHexString(px_byte data[],px_int size,px_char hex_str[])
 	hex_str[i*2]=0;
 }
 
-px_bool PX_HexStringToBuffer(const px_char hex_str[],px_byte data[])
+px_int PX_HexStringToBuffer(const px_char hex_str[],px_byte data[])
 {
 	px_int i=0;
 	px_char hex[3]={0};
@@ -500,7 +510,7 @@ px_bool PX_HexStringToBuffer(const px_char hex_str[],px_byte data[])
 		data[i]=PX_htoi(hex);
 		i++;
 	}
-	return PX_TRUE;
+	return i;
 }
 
 static volatile const px_double Tiny =(px_double)2.225073858507201383e-308 ;
@@ -836,6 +846,17 @@ px_double PX_atan2(px_double y, px_double x)
 	}
 
 }
+
+px_double PX_asin(px_double x)
+{
+	return PX_atan2 (x, PX_sqrtd (1.0 - x * x));
+}
+
+px_double PX_acos(px_double x)
+{
+	return PX_atan2 (PX_sqrtd (1.0 - x * x), x);
+}
+
 px_stringformat PX_STRINGFORMAT_INT(px_int _i)
 {
 	px_stringformat fmt;
@@ -910,7 +931,7 @@ px_int PX_sprintf8(px_char *_out_str,px_int str_size,const px_char fmt[], px_str
 				length+=PX_strlen(PX_itos(pstringfmt._int,10).data);
 				break;
 			case PX_STRINGFORMAT_TYPE_FLOAT:
-				length+=PX_strlen(PX_ftos(pstringfmt._float,3).data);
+				length+=PX_strlen(PX_ftos(pstringfmt._float,precision).data);
 				break;
 			case PX_STRINGFORMAT_TYPE_STRING:
 				length+=PX_strlen(pstringfmt._pstring);
@@ -1116,6 +1137,18 @@ px_bool PX_MatrixEqual(px_matrix Mat1,px_matrix Mat2)
 		}
 	}
 	return PX_TRUE;
+}
+
+px_void PX_MatrixRotateVector(px_matrix *mat,px_point v_base,px_point v)
+{
+	px_point cross=PX_PointCross(v_base,v);
+	px_float cosv=PX_PointDot(v_base,v)/PX_PointMod(v_base)/PX_PointMod(v);
+	px_float sinv=(px_float)PX_sqrtd(1-cosv*cosv);
+	if(cross.z<0) sinv=-sinv;
+	mat->_11=cosv;		mat->_12=sinv;			mat->_13=0.0f;			mat->_14=0.0f;
+	mat->_21=-sinv;		mat->_22=cosv;			mat->_23=0.0f;			mat->_24=0.0f;
+	mat->_31=0.0f;		mat->_32=0.0f;			mat->_33=1.0f;			mat->_34=0.0f;
+	mat->_41=0.0f;		mat->_42=0.0f;			mat->_43=0.0f;			mat->_44=1.0f;
 }
 
 px_void PX_MatrixTranslation(px_matrix *mat,px_float x,px_float y,px_float z)
@@ -1417,6 +1450,12 @@ px_point PX_PointAdd(px_point p1,px_point p2)
 	return p1;
 }
 
+px_point2D PX_Point2DAdd(px_point2D p1,px_point2D p2)
+{
+	p1.x+=p2.x;
+	p1.y+=p2.y;
+	return p1;
+}
 
 
 px_point PX_PointSub(px_point p1,px_point p2)
@@ -1424,6 +1463,13 @@ px_point PX_PointSub(px_point p1,px_point p2)
 	p1.x-=p2.x;
 	p1.y-=p2.y;
 	p1.z-=p2.z;
+	return p1;
+}
+
+px_point2D PX_Point2DSub(px_point2D p1,px_point2D p2)
+{
+	p1.x-=p2.x;
+	p1.y-=p2.y;
 	return p1;
 }
 
@@ -1445,6 +1491,14 @@ px_point PX_PointMul(px_point p1,px_float m)
 	p1.z*=m;
 	return p1;
 }
+
+px_point2D PX_Point2DMul(px_point2D p1,px_float m)
+{
+	p1.x*=m;
+	p1.y*=m;
+	return p1;
+}
+
 px_point PX_PointDiv(px_point p1,px_float m)
 {
 	p1.x/=m;
@@ -1453,9 +1507,37 @@ px_point PX_PointDiv(px_point p1,px_float m)
 	return p1;
 }
 
+px_point2D PX_Point2DRrthonormal(px_point2D v)
+{
+	return PX_Point2DNormalization(PX_POINT2D(v.y,-v.x));
+}
+
+px_point2D PX_Point2DBase(px_point2D base1,px_point2D base2,px_point2D target)
+{
+	base1=PX_Point2DNormalization(base1);
+	base2=PX_Point2DNormalization(base2);
+
+	return PX_POINT2D(
+		(target.x*base2.y-base2.x*target.y)/(base1.x*base2.y-base2.x*base1.y),
+		(target.x*base1.y-base1.x*target.y)/(base2.x*base1.y-base1.x*base2.y)
+		);
+}
+
+px_point2D PX_Point2DDiv(px_point2D p1,px_float m)
+{
+	p1.x/=m;
+	p1.y/=m;
+	return p1;
+}
+
 px_float PX_PointDot(px_point p1,px_point p2)
 {
 	return p1.x*p2.x+p1.y*p2.y+p1.z*p2.z;
+}
+
+px_float PX_Point2DDot(px_point2D p1,px_point2D p2)
+{
+	return p1.x*p2.x+p1.y*p2.y;
 }
 
 px_float PX_Point4DDot(px_point4D p1,px_point4D p2)
@@ -1471,6 +1553,7 @@ px_point PX_PointCross(px_point p1,px_point p2)
 	pt.z=p1.x*p2.y-p2.x*p1.y;
 	return pt;
 }
+
 
 px_point4D PX_Point4DCross(px_point4D p1,px_point4D p2)
 {
@@ -1492,12 +1575,18 @@ px_float PX_PointMod(px_point p)
 	return PX_sqrt(p.x*p.x+p.y*p.y+p.z*p.z);
 }
 
+px_float PX_Point2DMod(px_point2D p)
+{
+	return PX_sqrt(p.x*p.x+p.y*p.y);
+}
+
+
 px_float  PX_PointSquare(px_point p)
 {
 	return (p.x*p.x+p.y*p.y+p.z*p.z);
 }
 
-px_point PX_PointUnit(px_point p)
+px_point PX_PointNormalization(px_point p)
 {
 	if (p.x||p.y||p.z)
 	{
@@ -1505,6 +1594,16 @@ px_point PX_PointUnit(px_point p)
 	}
 	return p;
 }
+
+px_point2D PX_Point2DNormalization(px_point2D p)
+{
+	if (p.x||p.y)
+	{
+		return PX_Point2DDiv(p,PX_Point2DMod(p));
+	}
+	return p;
+}
+
 
 
 px_point4D PX_Point4DUnit(px_point4D p)
@@ -1535,6 +1634,8 @@ px_point PX_PointReflectX(px_point vector_refer,px_point respoint)
 	ret.z=respoint.z;
 	return ret;
 }
+
+
 
 px_bool PX_isRectCrossRect(px_rect rect1,px_rect rect2)
 {
@@ -2267,6 +2368,14 @@ px_void PX_strlwr(px_char *src)
 }
 
 
+px_point2D PX_Point2DMulMatrix(px_point2D p,px_matrix mat)
+{
+	px_point2D point;
+	point.x=p.x*mat._11+p.y*mat._21+1*mat._41;
+	point.y=p.x*mat._12+p.y*mat._22+1*mat._42;
+	return point;
+}
+
 px_point PX_PointMulMatrix(px_point p,px_matrix mat)
 {
 	px_point point;
@@ -2968,6 +3077,13 @@ px_point PX_POINT(px_float x,px_float y,px_float z)
 	return p;
 }
 
+px_point2D PX_POINT2D(px_float x,px_float y)
+{
+	px_point2D p;
+	p.x=x;
+	p.y=y;
+	return p;
+}
 
 px_point4D PX_POINT4D(px_float x,px_float y,px_float z)
 {
@@ -3295,6 +3411,75 @@ px_double PX_Ceil(px_double v)
 	return	v-(px_int)v?(px_double)((px_int)(v+1)):v;
 }
 
+px_void PX_FileGetName(const px_char filefullName[],px_char _out[],px_int outSize)
+{
+	px_int s;
+	if (outSize==0)
+	{
+		return;
+	}
+	_out[0]=0;
+	s=PX_strlen(filefullName);
+	if (s==0)
+	{
+		return;
+	}
+	s--;
+	while (s)
+	{
+		if (filefullName[s]=='/'||filefullName[s]=='\\')
+		{
+			s++;
+			break;
+		}
+		s--;
+	}
+
+	while (outSize>1&&filefullName[s]&&filefullName[s]!='.')
+	{
+		outSize--;
+		*_out=filefullName[s++];
+		_out[1]='\0';
+		_out++;
+	}
+
+}
+
+px_void PX_FileGetExt(const px_char filefullName[],px_char _out[],px_int outSize)
+{
+	px_int s;
+	px_bool bDot=PX_FALSE;
+	if (outSize==0)
+	{
+		return;
+	}
+	_out[0]=0;
+	s=PX_strlen(filefullName);
+	if (s==0)
+	{
+		return;
+	}
+	s--;
+	while (s)
+	{
+		if (filefullName[s]=='.')
+		{
+			s++;
+			bDot=PX_TRUE;
+			break;
+		}
+		s--;
+	}
+
+	while (outSize>1&&filefullName[s])
+	{
+		outSize--;
+		*_out=filefullName[s++];
+		_out[1]='\0';
+		_out++;
+	}
+}
+
 static const px_uint32 crc32tab[] = {  
 	0x00000000, 0x77073096, 0xee0e612c, 0x990951ba,  
 	0x076dc419, 0x706af48f, 0xe963a535, 0x9e6495a3,  
@@ -3462,6 +3647,16 @@ px_bool PX_isPointInCircle(px_point p,px_point circle,px_float radius)
 	return PX_FALSE;
 }
 
+
+px_bool PX_isPoint2DInCircle(px_point2D p,px_point2D circle,px_float radius)
+{
+	if ((p.x-circle.x)*(p.x-circle.x)+(p.y-circle.y)*(p.y-circle.y)<=radius*radius)
+	{
+		return PX_TRUE;
+	}
+	return PX_FALSE;
+}
+
 px_dword  PX_inet_addr( const px_char cp[] )
 {
 	px_uchar ipBytes[4]={0};
@@ -3534,6 +3729,13 @@ px_point PX_PointRotate(px_point p,px_float angle)
 	px_matrix mat;
 	PX_MatrixRotateZ(&mat,angle);
 	return PX_PointMulMatrix(p,mat);
+}
+
+px_point2D PX_Point2DRotate(px_point2D p,px_float angle)
+{
+	px_matrix mat;
+	PX_MatrixRotateZ(&mat,angle);
+	return PX_Point2DMulMatrix(p,mat);
 }
 
 px_float PX_PointDistance(px_point p1,px_point p2)

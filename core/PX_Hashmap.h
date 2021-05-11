@@ -40,7 +40,7 @@ typedef struct	__px_map_element{
 
 
 
-px_bool PX_MapInit(px_memorypool *mp,px_map *hashmap);
+px_bool PX_MapInitialize(px_memorypool *mp,px_map *hashmap);
 
 PX_HASHMAP_RETURN PX_MapPut(px_map * m,const px_char stringkey[], px_void * value);
 PX_HASHMAP_RETURN PX_MapPutInt(px_map * m,const px_char stringkey[], px_int value);

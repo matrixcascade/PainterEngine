@@ -25,16 +25,6 @@
 #define PX_DEBUG_MODE _DEBUG
 #endif
 
-// 
-// typedef char * _px_va_list;
-// 
-// #define __PX_INTSIZEOF(n) ( (sizeof(n) + sizeof(int) - 1) & ~(sizeof(int) - 1) )
-// #define _px_va_start(ap,v) ( ap = (_px_va_list)&v + __PX_INTSIZEOF(v) )
-// #define _px_va_arg(ap,t) ( *(t *)((ap += __PX_INTSIZEOF(t)) - __PX_INTSIZEOF(t)) )
-// #define _px_va_end(ap) ( ap = (_px_va_list)0 )
-
-
-
 
 #define PX_COUNTOF(x) (sizeof(x)/sizeof(x[0]))
 
@@ -82,6 +72,20 @@ typedef struct
 #define PX_STRUCT_OFFSET(t,m)    ((((t *)0)->m-(px_byte *)0))
 #define BigLittleSwap16(A)  ((((px_word)(A) & 0xff00) >> 8)|(((px_word)(A) & 0x00ff) << 8))
 #define BigLittleSwap32(A)  ((((px_dword)(A) & 0xff000000) >> 24)|(((px_dword)(A) & 0x00ff0000) >> 8)|(((px_dword)(A) & 0x0000ff00) << 8)|(((px_dword)(A) & 0x000000ff)<<24))
+
+
+typedef enum
+{
+	PX_ALIGN_LEFTTOP,
+	PX_ALIGN_MIDTOP,
+	PX_ALIGN_RIGHTTOP,
+	PX_ALIGN_LEFTMID,
+	PX_ALIGN_CENTER,
+	PX_ALIGN_RIGHTMID,
+	PX_ALIGN_LEFTBOTTOM,
+	PX_ALIGN_MIDBOTTOM,
+	PX_ALIGN_RIGHTBOTTOM,
+}PX_ALIGN;
 
 
 typedef struct _px_matrix 
@@ -195,6 +199,10 @@ px_double PX_GaussRand();
 //ceil
 px_double PX_Ceil(px_double v);
 
+//////////////////////////////////////////////////////////////////////////
+//file ext
+px_void PX_FileGetName(const px_char filefullName[],px_char _out[],px_int outSize);
+px_void PX_FileGetExt(const px_char filefullName[],px_char _out[],px_int outSize);
 
 //////////////////////////////////////////////////////////////////////////
 //CRC
@@ -216,8 +224,8 @@ px_double PX_log(px_double __x);
 px_double PX_lg(px_double __x);
 px_double PX_log10(px_double __x);
 
-#define  PX_RadianToAngle(angle) ((angle)*PX_PI/180)
-#define  PX_AngleToRadian(radian) ((radian)*180/PX_PI)
+#define  PX_RadianToAngle(radian) ((radian)*180/PX_PI)
+#define  PX_AngleToRadian(angle) ((angle)*PX_PI/180)
 
 px_double PX_sind(px_double radius);
 px_double PX_cosd(px_double radius);
@@ -230,6 +238,8 @@ px_float PX_tan_angle(px_float angle);
 px_double PX_atan(px_double x);
 px_double PX_atan2(px_double y, px_double x);
 
+px_double PX_asin(px_double x);
+px_double PX_acos(px_double x);
 px_float PX_Point_sin(px_point v);
 px_float PX_Point_cos(px_point v);
 
@@ -242,7 +252,7 @@ px_float PX_Point_cos(px_point v);
 //////////////////////////////////////////////////////////////////////////
 //string to others
 px_void PX_BufferToHexString(px_byte data[],px_int size,px_char hex_str[]);
-px_bool PX_HexStringToBuffer(const px_char hex_str[],px_byte data[]);
+px_int PX_HexStringToBuffer(const px_char hex_str[],px_byte data[]);
 px_uint PX_htoi(const px_char hex_str[]);
 px_int  PX_atoi(const px_char str[]);
 px_float PX_atof(px_char fstr[]);
@@ -251,12 +261,14 @@ PX_RETURN_STRING PX_itos(px_int num,px_int radix);
 px_void PX_AscToWord(const px_char *asc,px_word *u16);
 px_int PX_ftoa(px_float f, char *outbuf, int maxlen, int precision);
 px_int PX_itoa(px_int num,px_char *str,px_int MaxStrSize,px_int radix);
+px_dword PX_SwapEndian(px_dword val);
 px_char *PX_strchr(const char *s,int ch);
 px_char* PX_strstr(const char* dest, const char* src);
 
 ///////////////////////////////////////////////////////////////////////////
 //rectangle circle
 px_bool PX_isPointInCircle(px_point p,px_point circle,px_float radius);
+px_bool PX_isPoint2DInCircle(px_point2D p,px_point2D circle,px_float radius);
 px_bool PX_isPointInRect(px_point p,px_rect rect);
 px_bool PX_isXYInRegion(px_float x,px_float y,px_float rectx,px_float recty,px_float width,px_float height);
 //////////////////////////////////////////////////////////////////////////
@@ -380,6 +392,7 @@ px_matrix PX_MatrixMultiply(px_matrix Mat1,px_matrix Mat2);
 px_matrix PX_MatrixAdd(px_matrix Mat1,px_matrix Mat2);
 px_matrix PX_MatrixSub(px_matrix Mat1,px_matrix Mat2);
 px_bool PX_MatrixEqual(px_matrix Mat1,px_matrix Mat2);
+px_void PX_MatrixRotateVector(px_matrix *mat,px_point v_base,px_point v);
 px_void PX_MatrixTranslation(px_matrix *mat,px_float x,px_float y,px_float z);
 px_void PX_MatrixRotateX(px_matrix *mat,px_float Angle);
 px_void PX_MatrixRotateY(px_matrix *mat,px_float Angle);
@@ -406,27 +419,40 @@ px_bool  PX_ColorEqual(px_color color1,px_color color2);
 //////////////////////////////////////////////////////////////////////////
 //point
 px_point PX_POINT(px_float x,px_float y,px_float z);
+px_point2D PX_POINT2D(px_float x,px_float y);
 px_point4D PX_POINT4D(px_float x,px_float y,px_float z);
 px_point PX_PointRotate(px_point p,px_float angle);
+px_point2D PX_Point2DRotate(px_point2D p,px_float angle);
 px_float PX_PointDistance(px_point p1,px_point p2);
 
 
 px_point PX_PointAdd(px_point p1,px_point p2);
+px_point2D PX_Point2DAdd(px_point2D p1,px_point2D p2);
 px_point PX_PointSub(px_point p1,px_point p2);
+px_point2D PX_Point2DSub(px_point2D p1,px_point2D p2);
 px_point4D PX_Point4DSub(px_point4D p1,px_point4D p2);
 px_point PX_PointMul(px_point p1,px_float m);
+px_point2D PX_Point2DMul(px_point2D p1,px_float m);
 px_point PX_PointDiv(px_point p1,px_float m);
+
+px_point2D PX_Point2DRrthonormal(px_point2D v);
+px_point2D PX_Point2DBase(px_point2D base1,px_point2D base2,px_point2D target);
+px_point2D PX_Point2DDiv(px_point2D p1,px_float m);
 px_float PX_PointDot(px_point p1,px_point p2);
+px_float PX_Point2DDot(px_point2D p1,px_point2D p2);
 px_float PX_Point4DDot(px_point4D p1,px_point4D p2);
 px_point PX_PointCross(px_point p1,px_point p2);
 px_point4D PX_Point4DCross(px_point4D p1,px_point4D p2);
 px_point PX_PointInverse(px_point p1);
 px_float PX_PointMod(px_point p);
+px_float PX_Point2DMod(px_point2D p);
 px_float PX_PointSquare(px_point p);
-px_point PX_PointUnit(px_point p);
+px_point PX_PointNormalization(px_point p);
+px_point2D PX_Point2DNormalization(px_point2D p);
 px_point4D PX_Point4DUnit(px_point4D p);
 px_point PX_PointReflectX(px_point vector_refer,px_point respoint);
 
+px_point2D PX_Point2DMulMatrix(px_point2D p,px_matrix m);
 px_point PX_PointMulMatrix(px_point p,px_matrix m);
 px_point4D PX_Point4DMulMatrix(px_point4D p,px_matrix m);
 

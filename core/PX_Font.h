@@ -48,6 +48,7 @@ typedef enum
 	PX_FONTMODULE_CODEPAGE_GBK,
 	PX_FONTMODULE_CODEPAGE_UTF8,
 	PX_FONTMODULE_CODEPAGE_UTF16,
+	PX_FONTMODULE_CODEPAGE_UNDEFINED,
 }PX_FONTMODULE_CODEPAGE;
 
 typedef struct  
@@ -62,33 +63,21 @@ typedef struct
 }PX_FontModule;
 
 
-typedef enum
-{
-	PX_FONT_ALIGN_LEFTTOP,
-	PX_FONT_ALIGN_MIDTOP,
-	PX_FONT_ALIGN_RIGHTTOP,
-	PX_FONT_ALIGN_LEFTMID,
-	PX_FONT_ALIGN_CENTER,
-	PX_FONT_ALIGN_RIGHTMID,
-	PX_FONT_ALIGN_LEFTBOTTOM,
-	PX_FONT_ALIGN_MIDBOTTOM,
-	PX_FONT_ALIGN_RIGHTBOTTOM,
-}PX_FONT_ALIGN;
 
 px_int PX_FontDrawChar(px_surface *psurface, px_int x,px_int y,px_uchar chr,px_color Color );
-px_int PX_FontDrawText(px_surface *psurface,int x,int y,PX_FONT_ALIGN align,const px_char *Text,px_color Color);
+px_int PX_FontDrawText(px_surface *psurface,int x,int y,PX_ALIGN align,const px_char *Text,px_color Color);
 px_void PX_FontTextGetRenderWidthHeight(const px_char *Text,px_int *width,px_int *height);
 
 
 
 px_int PX_FontModuleGetCharacterCode(PX_FONTMODULE_CODEPAGE codePage,const px_char *Text,px_dword *code);
-px_bool PX_FontModuleInitialize(px_memorypool *mp,PX_FontModule *module,PX_FONTMODULE_CODEPAGE codepage);
+px_bool PX_FontModuleInitialize(px_memorypool *mp,PX_FontModule *module);
 px_bool PX_FontModuleLoad(PX_FontModule *module,px_byte *buffer,px_int size);
 px_void PX_FontModuleFree(PX_FontModule *module);
 px_int PX_FontModuleGetCharacterDesc(PX_FontModule *module,const px_char *Text,px_dword *code,px_int *width,px_int *height);
 px_void PX_FontModuleTextGetRenderWidthHeight(PX_FontModule *module,const px_char *Text,px_int *advance,px_int *height);
 px_int PX_FontModuleDrawCharacter(px_surface *psurface,PX_FontModule *mod,int x,int y,const px_dword code,px_color Color);
-px_int PX_FontModuleDrawText(px_surface *psurface,PX_FontModule *mod,int x,int y,PX_FONT_ALIGN align,const px_char *Text,px_color Color);
+px_int PX_FontModuleDrawText(px_surface *psurface,PX_FontModule *mod,int x,int y,PX_ALIGN align,const px_char *Text,px_color Color);
 
 
 #endif

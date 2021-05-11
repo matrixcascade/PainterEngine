@@ -2,6 +2,7 @@
 
 px_bool PX_SoundPlayInitialize(px_memorypool *mp, PX_SoundPlay *pSoundPlay)
 {
+	PX_memset(pSoundPlay,0,sizeof(PX_SoundPlay));
     pSoundPlay->mp=mp;
     pSoundPlay->bLock=PX_FALSE;
     pSoundPlay->mix_mode=PX_SOUND_MIX_MODE_PARALLEL;
@@ -11,6 +12,12 @@ px_bool PX_SoundPlayInitialize(px_memorypool *mp, PX_SoundPlay *pSoundPlay)
 	return PX_TRUE;
 }
 
+
+px_void PX_SoundPlaySetUserRead(PX_SoundPlay *pSoundPlay,px_void (*userread)(px_void *userptr,px_byte *pBuffer,px_int readSize),px_void *ptr)
+{
+	pSoundPlay->userread=userread;
+	pSoundPlay->userptr=ptr;
+}
 
 px_void PX_SoundPlayPause(PX_SoundPlay *pSoundPlay,px_bool pause)
 {
@@ -72,6 +79,12 @@ px_bool PX_SoundPlayRead(PX_SoundPlay *pSoundPlay,px_byte *pBuffer,px_int readSi
 	if (readSize%4)
 	{
 		return PX_FALSE;
+	}
+
+	if (pSoundPlay->userread)
+	{
+		pSoundPlay->userread(pSoundPlay->userptr,pBuffer,readSize);
+		return PX_TRUE;
 	}
 
 	while(pSoundPlay->bLock);
@@ -224,6 +237,11 @@ px_void PX_SoundPlayClear(PX_SoundPlay *pSoundPlay)
 px_bool PX_SoundPlayGetDataCount(PX_SoundPlay *pSoundPlay)
 {
 	px_int count=0,j;
+	if (pSoundPlay->userread)
+	{
+		return 1;
+	}
+
 	for (j=0;j<PX_COUNTOF(pSoundPlay->Sounds);j++)
 	{
 		if (pSoundPlay->Sounds[j].data)
@@ -241,6 +259,21 @@ PX_Sound PX_SoundCreate(PX_SoundData *data,px_bool loop)
 	sound.offset=0;
 	sound.loop=loop;
 	return sound;
+}
+
+
+px_bool PX_SoundStaticDataCopy(px_memorypool *mp,PX_SoundData *resSounddata,PX_SoundData *targetSounddata)
+{
+	targetSounddata->buffer=(px_byte *)MP_Malloc(mp,resSounddata->size);
+	if(!targetSounddata->buffer)
+	{
+		return PX_FALSE;
+	}
+	targetSounddata->channel=resSounddata->channel;
+	targetSounddata->mp=mp;
+	targetSounddata->size=resSounddata->size;
+	PX_memcpy(targetSounddata->buffer,resSounddata->buffer,resSounddata->size);
+	return PX_TRUE;
 }
 
 px_bool PX_SoundStaticDataCreate(PX_SoundData *sounddata,px_memorypool *mp,px_byte *data,px_int datasize)

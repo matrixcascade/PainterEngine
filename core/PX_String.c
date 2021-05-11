@@ -91,7 +91,7 @@ px_void PX_StringFree(px_string *str)
 	str->bufferlen=0;
 }
 
-px_bool PX_StringInit(px_memorypool *mp,px_string *str)
+px_bool PX_StringInitialize(px_memorypool *mp,px_string *str)
 {
 	str->buffer=(px_char *)MP_Malloc(mp,16);
 	if(!str->buffer)return PX_FALSE;
@@ -396,7 +396,7 @@ px_void PX_StringReplace(px_string *str,px_char *source,px_char *replaceto)
 	{
 		return;   
 	}
-	PX_StringInit(str->mp,&tempstr);
+	PX_StringInitialize(str->mp,&tempstr);
 	PX_StringCopy(&tempstr,str);
 	PX_StringClear(str);
 
@@ -416,6 +416,17 @@ px_void PX_StringReplace(px_string *str,px_char *source,px_char *replaceto)
 	PX_StringFree(&tempstr);
 }
 
+px_bool PX_StringInsert(px_string *str,px_int insertIndex,const px_char *InstrString)
+{
+	px_int length=PX_strlen(InstrString);
+	px_int resLen=PX_strlen(str->buffer+insertIndex);
+	if(!PX_StringCat(str,InstrString)) return PX_FALSE;
+	PX_memcpy(str->buffer+insertIndex+length,str->buffer+insertIndex,resLen);
+	PX_memcpy(str->buffer+insertIndex,InstrString,length);
+	return PX_TRUE;
+}
+
+
 px_void PX_StringReplaceRange(px_string *str,px_int startindex,px_int endindex,px_char *replaceto)
 {
 	px_string tempStr;
@@ -432,7 +443,7 @@ px_void PX_StringReplaceRange(px_string *str,px_int startindex,px_int endindex,p
 		return;
 	}
 
-	PX_StringInit(str->mp,&tempStr);
+	PX_StringInitialize(str->mp,&tempStr);
 	PX_StringCopy(&tempStr,str);
 
 	PX_StringClear(str);
@@ -457,11 +468,11 @@ px_bool PX_StringTrimer_Solve(px_string *pstring,px_char *parseCode,px_char *Rep
 	ret=PX_FALSE;
 	for (oft=0;oft<PX_STRING_TRIMER_REG_COUNT;oft++)
 	{
-		PX_StringInit(pstring->mp,reg+oft);
+		PX_StringInitialize(pstring->mp,reg+oft);
 		mark[oft]=PX_FALSE;
 	}
 
-	PX_StringInit(pstring->mp,&matchedString);
+	PX_StringInitialize(pstring->mp,&matchedString);
 
 	oft=0;
 	
@@ -567,7 +578,7 @@ px_bool PX_StringTrimer_Solve(px_string *pstring,px_char *parseCode,px_char *Rep
 
 		if (matchd)
 		{
-			PX_StringInit(pstring->mp,&replaceString);
+			PX_StringInitialize(pstring->mp,&replaceString);
 			j=0;
 			k=0;
 			while(PX_TRUE)

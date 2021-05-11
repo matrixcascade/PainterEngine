@@ -228,7 +228,7 @@ px_int PX_FontDrawChar(px_surface *psurface, px_int x,px_int y,px_uchar ASCI,px_
 	return 16;
 }
 
-px_int PX_FontDrawText(px_surface *psurface,px_int x,px_int y,PX_FONT_ALIGN align,const px_char *Text,px_color Color)
+px_int PX_FontDrawText(px_surface *psurface,px_int x,px_int y,PX_ALIGN align,const px_char *Text,px_color Color)
 {
 	px_uchar TempChar;
 	px_int resX=x;
@@ -240,33 +240,33 @@ px_int PX_FontDrawText(px_surface *psurface,px_int x,px_int y,PX_FONT_ALIGN alig
 
 	switch (align)
 	{
-	case PX_FONT_ALIGN_LEFTTOP:
+	case PX_ALIGN_LEFTTOP:
 		break;
-	case PX_FONT_ALIGN_MIDTOP:
+	case PX_ALIGN_MIDTOP:
 		x-=frWidth/2;
 		break;
-	case PX_FONT_ALIGN_RIGHTTOP:
+	case PX_ALIGN_RIGHTTOP:
 		x-=frWidth;
 		break;
-	case PX_FONT_ALIGN_LEFTMID:
+	case PX_ALIGN_LEFTMID:
 		y-=frHeight/2;
 		break;
-	case PX_FONT_ALIGN_CENTER:
+	case PX_ALIGN_CENTER:
 		y-=frHeight/2;
 		x-=frWidth/2;
 		break;
-	case PX_FONT_ALIGN_RIGHTMID:
+	case PX_ALIGN_RIGHTMID:
 		y-=frHeight/2;
 		x-=frWidth;
 		break;
-	case PX_FONT_ALIGN_LEFTBOTTOM:
+	case PX_ALIGN_LEFTBOTTOM:
 		y-=frHeight;
 		break;
-	case PX_FONT_ALIGN_MIDBOTTOM:
+	case PX_ALIGN_MIDBOTTOM:
 		y-=frHeight;
 		x-=frWidth/2;
 		break;
-	case PX_FONT_ALIGN_RIGHTBOTTOM:
+	case PX_ALIGN_RIGHTBOTTOM:
 		y-=frHeight;
 		x-=frWidth;
 		break;
@@ -414,25 +414,35 @@ px_int PX_FontModuleGetCharacterCode(PX_FONTMODULE_CODEPAGE codePage,const px_ch
 			return 2;
 		}
 		break;
+	default:
+		return 0;
+		break;
 	}
 	*code=0;
 	return 0;
 }
 
-px_bool PX_FontModuleInitialize(px_memorypool *mp,PX_FontModule *module,PX_FONTMODULE_CODEPAGE codepage)
+px_bool PX_FontModuleInitialize(px_memorypool *mp,PX_FontModule *module)
 {
 	module->mp=mp;
-	module->codePage=codepage;
+	module->codePage=PX_FONTMODULE_CODEPAGE_UNDEFINED;
 	module->max_BearingY=0;
 	module->max_Height=0;
 	module->max_Width=0;
-	return PX_MapInit(mp,&module->characters_map);
+	return PX_MapInitialize(mp,&module->characters_map);
 }
 
 px_bool PX_FontModuleLoad(PX_FontModule *module,px_byte *buffer,px_int size)
 {
 	px_int offset=0;
 	PX_FontModule_Charactor *cpy;
+
+	if(module->mp==PX_NULL)
+	{
+		PX_ASSERT();
+		return PX_FALSE;
+	}
+	
 	while (offset<size)
 	{
 		px_char hex[16]={0};
@@ -450,11 +460,19 @@ px_bool PX_FontModuleLoad(PX_FontModule *module,px_byte *buffer,px_int size)
 		if(pcHeader->c_magic[3]!='M')  
 			goto _ERROR;
 
-		if (pcHeader->codePage!=module->codePage)
+		if (module->codePage==PX_FONTMODULE_CODEPAGE_UNDEFINED)
 		{
-			offset+=pcHeader->Font_Width*pcHeader->Font_Height;
-			continue;
+			module->codePage=(PX_FONTMODULE_CODEPAGE)pcHeader->codePage;
 		}
+		else
+		{
+			if (pcHeader->codePage!=module->codePage)
+			{
+				offset+=pcHeader->Font_Width*pcHeader->Font_Height;
+				continue;
+			}
+		}
+		
 
 		PX_Base64Encode((px_byte *)&pcHeader->charactor_code,sizeof(pcHeader->charactor_code),hex);
 
@@ -562,6 +580,13 @@ px_void PX_FontModuleTextGetRenderWidthHeight(PX_FontModule *module,const px_cha
 	px_int max_width=0,max_height=0;
 	const px_char *pTextPointer=Text;
 
+	if (module==PX_NULL)
+	{
+		PX_FontTextGetRenderWidthHeight(pTextPointer,width,height);
+		return;
+	}
+
+
 	while (PX_TRUE)
 	{
 		px_dword code=0;
@@ -621,14 +646,14 @@ px_int PX_FontModuleDrawCharacter(px_surface *psurface,PX_FontModule *mod,int x,
 	pChar=(PX_FontModule_Charactor *)PX_MapGet(&mod->characters_map,hex);
 	if (pChar)
 	{
-		PX_ShapeRender(psurface,&pChar->shape,x+pChar->header.BearingX,y+mod->max_BearingY-pChar->header.BearingY,PX_TEXTURERENDER_REFPOINT_LEFTTOP,Color);
+		PX_ShapeRender(psurface,&pChar->shape,x+pChar->header.BearingX,y+mod->max_BearingY-pChar->header.BearingY,PX_ALIGN_LEFTTOP,Color);
 		return pChar->header.Advance;
 	}
 	
 	return 0;
 }
 
-px_int PX_FontModuleDrawText(px_surface *psurface,PX_FontModule *mod,int x,int y,PX_FONT_ALIGN align,const px_char *Text,px_color Color)
+px_int PX_FontModuleDrawText(px_surface *psurface,PX_FontModule *mod,int x,int y,PX_ALIGN align,const px_char *Text,px_color Color)
 {
 	px_int dx,dy,content_width=0;
 	px_int frWidth,frHeight;
@@ -640,37 +665,43 @@ px_int PX_FontModuleDrawText(px_surface *psurface,PX_FontModule *mod,int x,int y
 		return 0;
 	}
 
+	if (mod==PX_NULL)
+	{
+		return PX_FontDrawText(psurface,x,y,align,Text,Color);
+	}
+
+
 	PX_FontModuleTextGetRenderWidthHeight(mod,Text,&frWidth,&frHeight);
 	
 	switch (align)
 	{
-	case PX_FONT_ALIGN_LEFTTOP:
+	case PX_ALIGN_LEFTTOP:
 		break;
-	case PX_FONT_ALIGN_MIDTOP:
+	case PX_ALIGN_MIDTOP:
 		x-=frWidth/2;
 		break;
-	case PX_FONT_ALIGN_RIGHTTOP:
+	case PX_ALIGN_RIGHTTOP:
 		x-=frWidth;
 		break;
-	case PX_FONT_ALIGN_LEFTMID:
+	case PX_ALIGN_LEFTMID:
 		y-=frHeight/2;
 		break;
-	case PX_FONT_ALIGN_CENTER:
+	case PX_ALIGN_CENTER:
 		y-=frHeight/2;
 		x-=frWidth/2;
 		break;
-	case PX_FONT_ALIGN_RIGHTMID:
+	case PX_ALIGN_RIGHTMID:
 		y-=frHeight/2;
 		x-=frWidth;
 		break;
-	case PX_FONT_ALIGN_LEFTBOTTOM:
+	case PX_ALIGN_LEFTBOTTOM:
 		y-=frHeight;
 		break;
-	case PX_FONT_ALIGN_MIDBOTTOM:
+	case PX_ALIGN_MIDBOTTOM:
 		y-=frHeight;
 		x-=frWidth/2;
 		break;
-	case PX_FONT_ALIGN_RIGHTBOTTOM:
+	case PX_ALIGN_RIGHTBOTTOM:
 		y-=frHeight;
 		x-=frWidth;
 		break;
@@ -709,7 +740,7 @@ px_int PX_FontModuleDrawText(px_surface *psurface,PX_FontModule *mod,int x,int y
 			pChar=(PX_FontModule_Charactor *)PX_MapGet(&mod->characters_map,hex);
 			if (pChar)
 			{
-				PX_ShapeRender(psurface,&pChar->shape,dx+pChar->header.BearingX,dy+mod->max_BearingY-pChar->header.BearingY,PX_TEXTURERENDER_REFPOINT_LEFTTOP,Color);
+				PX_ShapeRender(psurface,&pChar->shape,dx+pChar->header.BearingX,dy+mod->max_BearingY-pChar->header.BearingY,PX_ALIGN_LEFTTOP,Color);
 				dx+=pChar->header.Advance;
 			}
 		}

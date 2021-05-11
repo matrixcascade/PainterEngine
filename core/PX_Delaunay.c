@@ -1,18 +1,6 @@
 #include "PX_Delaunay.h"
 #include "PX_Quicksort.h"
 
-typedef struct
-{
-	px_int index1;
-	px_int index2;
-}_Edge;
-
-typedef struct
-{
-	px_int index1;
-	px_int index2;
-	px_int index3;
-}_Triangle;
 
 typedef enum
 {
@@ -34,7 +22,7 @@ px_bool PX_DelaunaryVerifyCircle(px_point2D pt[],px_int p1,px_int p2,px_int p3)
 	return PX_TRUE;
 }
 
-PX_DELAUNAY_ROUND_TEST PX_DelaunaryTest(px_point2D pt_array[],px_int testIndex,_Triangle triangle)
+PX_DELAUNAY_ROUND_TEST PX_DelaunaryTest(px_point2D pt_array[],px_int testIndex,PX_Delaunay_Triangle triangle)
 {
 	px_float x,y,r;
 	px_float x1,x2,x3,y1,y2,y3;
@@ -76,7 +64,7 @@ PX_DELAUNAY_ROUND_TEST PX_DelaunaryTest(px_point2D pt_array[],px_int testIndex,_
 	}
 }
 
-px_bool PX_DelaunaryTriangleNeighbor(_Triangle *t1,_Triangle *t2)
+px_bool PX_DelaunaryTriangleNeighbor(PX_Delaunay_Triangle *t1,PX_Delaunay_Triangle *t2)
 {
 	px_int c1_3[3];
 	px_int c2_3[3];
@@ -102,11 +90,11 @@ px_bool PX_DelaunaryTriangleNeighbor(_Triangle *t1,_Triangle *t2)
 	return k==2;
 }
 
-px_void PX_DelaunaryTriangleSwitch(_Triangle *t1,_Triangle *t2)
+px_void PX_DelaunaryTriangleSwitch(PX_Delaunay_Triangle *t1,PX_Delaunay_Triangle *t2)
 {
 	px_int c1_3[3];
 	px_int c2_3[3];
-	px_int c[2],d[2];
+	px_int c[3],d[3];
 	px_int j,k;
 	c1_3[0]=t1->index1;
 	c1_3[1]=t1->index2;
@@ -175,11 +163,12 @@ px_void PX_DelaunaryTriangleSwitch(_Triangle *t1,_Triangle *t2)
 
 }
 
-px_bool PX_DelaunaryPointsBuild(px_memorypool *mp,px_point2D pt[],px_int count,px_vector *out_triangles)
+px_bool PX_DelaunaryPointsBuild(px_memorypool *mp,px_point2D pt[],px_int count,px_vector *out_triangles,PX_DELAUNAY_RETURN_TYPE type)
 {
 	
 	PX_QuickSortAtom *pAtoms;
 	px_point2D *sortPt;
+	px_int *mapPt;
 	//edge
 	px_float minx,miny,maxx,maxy=0;
 	px_int i,j;
@@ -188,12 +177,14 @@ px_bool PX_DelaunaryPointsBuild(px_memorypool *mp,px_point2D pt[],px_int count,p
 	px_vector DelaunaryTriangle;
 
 
-	PX_VectorInit(mp,&triangles,sizeof(_Triangle),1);
-	PX_VectorInit(mp,&DelaunaryTriangle,sizeof(_Triangle),1);
-	PX_VectorInit(mp,&edges,sizeof(_Edge),1);
+	PX_VectorInitialize(mp,&triangles,sizeof(PX_Delaunay_Triangle),1);
+	PX_VectorInitialize(mp,&DelaunaryTriangle,sizeof(PX_Delaunay_Triangle),1);
+	PX_VectorInitialize(mp,&edges,sizeof(PX_Delaunay_Edge),1);
 
 	pAtoms=(PX_QuickSortAtom *)MP_Malloc(mp,sizeof(PX_QuickSortAtom)*count);
 	sortPt=(px_point2D *)MP_Malloc(mp,sizeof(px_point2D)*(count+3));
+	mapPt=(px_int *)MP_Malloc(mp,sizeof(px_int)*(count));
+
 	if (!pAtoms)
 	{
 		return PX_FALSE;
@@ -207,6 +198,7 @@ px_bool PX_DelaunaryPointsBuild(px_memorypool *mp,px_point2D pt[],px_int count,p
 	for (i=0;i<count;i++)
 	{
 		sortPt[i]=*(px_point2D *)pAtoms[i].pData;
+		mapPt[i]=((px_byte *)pAtoms[i].pData-(px_byte *)pt)/sizeof(px_point2D);
 	}
 	MP_Free(mp,pAtoms);
 	//build huge triangle
@@ -238,7 +230,7 @@ px_bool PX_DelaunaryPointsBuild(px_memorypool *mp,px_point2D pt[],px_int count,p
 		px_point2D *tpt=&sortPt[count];
 		px_float hl=maxx-minx;
 		px_float vl=maxy-miny;
-		_Triangle temp_triangle;
+		PX_Delaunay_Triangle temp_triangle;
 		
 		tpt[0].x=minx+(maxx-minx)/2;
 		tpt[0].y=miny-hl/2;
@@ -264,9 +256,9 @@ px_bool PX_DelaunaryPointsBuild(px_memorypool *mp,px_point2D pt[],px_int count,p
 
 		for (j=0;j<triangles.size;j++)
 		{
-			_Triangle temp_triangle;
+			PX_Delaunay_Triangle temp_triangle;
 
-			temp_triangle=*PX_VECTORAT(_Triangle,&triangles,j);
+			temp_triangle=*PX_VECTORAT(PX_Delaunay_Triangle,&triangles,j);
 
 			switch (PX_DelaunaryTest(sortPt,i,temp_triangle))
 			{
@@ -274,7 +266,7 @@ px_bool PX_DelaunaryPointsBuild(px_memorypool *mp,px_point2D pt[],px_int count,p
 				break;
 			case PX_DELAUNAY_ROUND_TEST_INSIDE:
 				{
-					_Edge edge;
+					PX_Delaunay_Edge edge;
 					PX_VectorErase(&triangles,j);
 					edge.index1=temp_triangle.index1;
 					edge.index2=temp_triangle.index2;
@@ -305,10 +297,10 @@ px_bool PX_DelaunaryPointsBuild(px_memorypool *mp,px_point2D pt[],px_int count,p
 		{
 			px_int k;
 			px_bool bremove=PX_FALSE;
-			_Edge *pEdge=PX_VECTORAT(_Edge,&edges,j);
+			PX_Delaunay_Edge *pEdge=PX_VECTORAT(PX_Delaunay_Edge,&edges,j);
 			for (k=j+1;k<edges.size;k++)
 			{
-				_Edge *pCompareEdge=PX_VECTORAT(_Edge,&edges,k);
+				PX_Delaunay_Edge *pCompareEdge=PX_VECTORAT(PX_Delaunay_Edge,&edges,k);
 				if (pEdge->index1==pCompareEdge->index1&&pEdge->index2==pCompareEdge->index2)
 				{
 					PX_VectorErase(&edges,k);
@@ -332,8 +324,8 @@ px_bool PX_DelaunaryPointsBuild(px_memorypool *mp,px_point2D pt[],px_int count,p
 		//generate triangles
 		for (j=0;j<edges.size;j++)
 		{
-			_Triangle gtrianle;
-			_Edge *pEdge=PX_VECTORAT(_Edge,&edges,j);
+			PX_Delaunay_Triangle gtrianle;
+			PX_Delaunay_Edge *pEdge=PX_VECTORAT(PX_Delaunay_Edge,&edges,j);
 
 			if(PX_DelaunaryVerifyCircle(sortPt,i,pEdge->index1,pEdge->index2))
 			{
@@ -348,7 +340,7 @@ px_bool PX_DelaunaryPointsBuild(px_memorypool *mp,px_point2D pt[],px_int count,p
 
 	for (i=0;i<triangles.size;i++)
 	{
-		_Triangle *pTriangle=PX_VECTORAT(_Triangle,&triangles,i);
+		PX_Delaunay_Triangle *pTriangle=PX_VECTORAT(PX_Delaunay_Triangle,&triangles,i);
 		PX_VectorPushback(&DelaunaryTriangle,pTriangle);
 	}
 
@@ -358,11 +350,11 @@ px_bool PX_DelaunaryPointsBuild(px_memorypool *mp,px_point2D pt[],px_int count,p
 		px_bool done=PX_FALSE;
 		px_int index;
 		px_vector sortTriangles;
-		PX_VectorInit(mp,&sortTriangles,sizeof(_Triangle *),1);
+		PX_VectorInitialize(mp,&sortTriangles,sizeof(PX_Delaunay_Triangle *),1);
 		for (i=0;i<DelaunaryTriangle.size;i++)
 		{
 			px_int k=0;
-			_Triangle *pTriangle=PX_VECTORAT(_Triangle,&DelaunaryTriangle,i);
+			PX_Delaunay_Triangle *pTriangle=PX_VECTORAT(PX_Delaunay_Triangle,&DelaunaryTriangle,i);
 			if (pTriangle->index1-count>=0)
 			{
 				k++;
@@ -385,10 +377,10 @@ px_bool PX_DelaunaryPointsBuild(px_memorypool *mp,px_point2D pt[],px_int count,p
 
 		while (index<sortTriangles.size)
 		{
-			_Triangle *pTriangle1=*PX_VECTORAT(_Triangle *,&sortTriangles,index);
+			PX_Delaunay_Triangle *pTriangle1=*PX_VECTORAT(PX_Delaunay_Triangle *,&sortTriangles,index);
 			for (i=index+1;i<sortTriangles.size;i++)
 			{
-					_Triangle *pTriangle2=*PX_VECTORAT(_Triangle *,&sortTriangles,i);
+					PX_Delaunay_Triangle *pTriangle2=*PX_VECTORAT(PX_Delaunay_Triangle *,&sortTriangles,i);
 					if (PX_DelaunaryTriangleNeighbor(pTriangle1,pTriangle2))
 					{
 						px_int pO,pA,pB,pC;
@@ -467,7 +459,7 @@ px_bool PX_DelaunaryPointsBuild(px_memorypool *mp,px_point2D pt[],px_int count,p
 
 	for (i=0;i<DelaunaryTriangle.size;i++)
 	{
- 		_Triangle *pTriangle=PX_VECTORAT(_Triangle,&DelaunaryTriangle,i);
+ 		PX_Delaunay_Triangle *pTriangle=PX_VECTORAT(PX_Delaunay_Triangle,&DelaunaryTriangle,i);
 		if (pTriangle->index1-count>=0||pTriangle->index2-count>=0||pTriangle->index3-count>=0)
 		{
 			PX_VectorErase(&DelaunaryTriangle,i);
@@ -475,27 +467,46 @@ px_bool PX_DelaunaryPointsBuild(px_memorypool *mp,px_point2D pt[],px_int count,p
 		}
 		else
 		{
-			px_triangle dtriangle;
-			dtriangle.Vertex_1.x=sortPt[pTriangle->index1].x;
-			dtriangle.Vertex_1.y=sortPt[pTriangle->index1].y;
-			dtriangle.Vertex_1.z=0;
+			switch (type)
+			{
+			case PX_DELAUNAY_RETURN_TYPE_TRIANGLE:
+				{
+					px_triangle dtriangle;
+					dtriangle.Vertex_1.x=sortPt[pTriangle->index1].x;
+					dtriangle.Vertex_1.y=sortPt[pTriangle->index1].y;
+					dtriangle.Vertex_1.z=0;
 
-			dtriangle.Vertex_2.x=sortPt[pTriangle->index2].x;
-			dtriangle.Vertex_2.y=sortPt[pTriangle->index2].y;
-			dtriangle.Vertex_2.z=0;
+					dtriangle.Vertex_2.x=sortPt[pTriangle->index2].x;
+					dtriangle.Vertex_2.y=sortPt[pTriangle->index2].y;
+					dtriangle.Vertex_2.z=0;
 
-			dtriangle.Vertex_3.x=sortPt[pTriangle->index3].x;
-			dtriangle.Vertex_3.y=sortPt[pTriangle->index3].y;
-			dtriangle.Vertex_3.z=0;
+					dtriangle.Vertex_3.x=sortPt[pTriangle->index3].x;
+					dtriangle.Vertex_3.y=sortPt[pTriangle->index3].y;
+					dtriangle.Vertex_3.z=0;
 
-			PX_VectorPushback(out_triangles,&dtriangle);
+					PX_VectorPushback(out_triangles,&dtriangle);
+				}
+				break;
+			case PX_DELAUNAY_RETURN_TYPE_TRIANGLE_INDEX:
+				{
+					PX_Delaunay_Triangle mapTriangleIndex;
+					mapTriangleIndex.index1=mapPt[pTriangle->index1];
+					mapTriangleIndex.index2=mapPt[pTriangle->index2];
+					mapTriangleIndex.index3=mapPt[pTriangle->index3];
+					PX_VectorPushback(out_triangles,&mapTriangleIndex);
+				}
+				break;
+			default:
+				break;
+			}
+			
 		}
 	}
 
 	PX_VectorFree(&triangles);
 	PX_VectorFree(&DelaunaryTriangle);
 	PX_VectorFree(&edges);
-	
+	MP_Free(mp,mapPt);
 	MP_Free(mp,sortPt);
 	return PX_TRUE;
 }

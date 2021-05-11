@@ -1,3 +1,0 @@
-#ifndef PX_APPLICATION_LINUX
-#define PX_APPLICATION_LINUX
-#endif

@@ -1,10 +1,10 @@
 #include "PX_Resource.h"
 
-px_bool PX_ResourceLibraryInit(px_memorypool *mp,PX_ResourceLibrary *lib)
+px_bool PX_ResourceLibraryInitialize(px_memorypool *mp,PX_ResourceLibrary *lib)
 {
 	lib->mp=mp;
-	PX_MapInit(mp,&lib->map);
-	PX_ListInit(mp,&lib->resources);
+	PX_MapInitialize(mp,&lib->map);
+	PX_ListInitialize(mp,&lib->resources);
 	return PX_TRUE;
 }
 
@@ -91,7 +91,7 @@ px_bool PX_ResourceLibraryLoad(PX_ResourceLibrary *lib,PX_RESOURCE_TYPE type,px_
 		}
 		else
 		*/
-		if(!PX_ScriptVM_InstanceInit(&res.Script,lib->mp,data,datasize))
+		if(!PX_ScriptVM_InstanceInitialize(&res.Script,lib->mp,data,datasize))
 			return PX_FALSE;
 		break;
 	case PX_RESOURCE_TYPE_ANIMATIONLIBRARY:
@@ -147,7 +147,7 @@ px_bool PX_ResourceLibraryLoad(PX_ResourceLibrary *lib,PX_RESOURCE_TYPE type,px_
 		}
 		break;
 	case PX_RESOURCE_TYPE_DATA:
-		PX_MemoryInit(lib->mp,&res.data);
+		PX_MemoryInitialize(lib->mp,&res.data);
 		if (!PX_MemoryCat(&res.data,data,datasize))
 		{
 			PX_MemoryFree(&res.data);

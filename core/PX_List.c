@@ -1,6 +1,6 @@
 #include "PX_List.h"
 
-px_void PX_ListInit(px_memorypool *mp,px_list *list)
+px_void PX_ListInitialize(px_memorypool *mp,px_list *list)
 {
 	list->end=PX_NULL;
 	list->head=PX_NULL;
@@ -88,10 +88,10 @@ px_bool PX_ListPop(px_list *list,px_list_node *node)
 
 px_bool PX_ListErase(px_list *list,px_int i)
 {
-	 return PX_ListPop(list,PX_ListAt(list,i));
+	 return PX_ListPop(list,PX_ListNodeAt(list,i));
 }
 
-px_list_node* PX_ListAt(px_list *list,px_int index)
+px_list_node* PX_ListNodeAt(px_list *list,px_int index)
 {
 	px_list_node *node=list->head;
 	if (index>=list->size)
@@ -105,6 +105,11 @@ px_list_node* PX_ListAt(px_list *list,px_int index)
 	return node;
 }
 
+
+px_list_node* PX_ListNodeNext(px_list_node* node)
+{
+	return node->pnext;
+}
 
 px_void PX_ListMove(px_list *list,px_int index,px_int moveto)
 {

@@ -1,6 +1,6 @@
 #include "PX_Vector.h"
 
-px_bool PX_VectorInit(px_memorypool *mp,px_vector *vec,px_int nodeSize,px_int init_size)
+px_bool PX_VectorInitialize(px_memorypool *mp,px_vector *vec,px_int nodeSize,px_int init_size)
 {
 	vec->allocsize=init_size;
 	vec->nodesize=nodeSize;
@@ -84,6 +84,26 @@ px_bool PX_VectorPushback(px_vector *vec,px_void *data)
 	return PX_TRUE;
 }
 
+
+px_bool PX_VectorPushTo(px_vector *vec,px_void *data,px_int index)
+{
+	if(!PX_VectorPushback(vec,data)) return PX_FALSE;
+	if (index>=vec->size-1)
+	{
+		return PX_TRUE;
+	}
+#ifndef PX_DEBUG_MODE
+	if (index<0)
+	{
+		PX_ASSERT();
+		return PX_FALSE;
+	}
+#endif
+	PX_memcpy((px_byte *)vec->data+(index+1)*vec->nodesize,(px_byte *)vec->data+(index)*vec->nodesize,(vec->size-index-1)*vec->nodesize);
+	PX_memcpy((px_byte *)vec->data+(index)*vec->nodesize,data,vec->nodesize);
+	return PX_TRUE;
+}
+
 px_bool PX_VectorErase(px_vector *vec,px_int index)
 {
 	px_int i;
@@ -108,6 +128,43 @@ px_bool PX_VectorPop(px_vector *vec)
 	}
 	vec->size--;
 	return PX_TRUE;
+}
+
+
+px_bool PX_VectorCopy(px_vector *destvec,px_vector *resvec)
+{
+	if (destvec->nodesize!=resvec->nodesize)
+	{
+		return PX_FALSE;
+	}
+	if (destvec->allocsize<resvec->allocsize)
+	{
+		PX_VectorResize(destvec,resvec->allocsize);
+	}
+	PX_memcpy(destvec->data,resvec->data,resvec->nodesize*resvec->size);
+	destvec->size=resvec->size;
+	return PX_TRUE;
+}
+
+
+px_void PX_VectorFree(px_vector *vec)
+{
+	if((vec->data)!=PX_NULL) 
+		MP_Free(vec->mp,vec->data);
+}
+
+
+px_bool PX_VectorResize(px_vector *vec,px_int size)
+{
+	if (size!=vec->size)
+	{
+		PX_VectorFree(vec);
+		if(!PX_VectorInitialize(vec->mp,vec,vec->nodesize,size))return PX_FALSE;
+		PX_memset(vec->data,0,vec->nodesize*vec->allocsize);
+		vec->size=size;
+		return PX_TRUE;
+	}
+	return PX_FALSE;
 }
 
 px_bool PX_VectorAllocSize(px_vector *vec,px_int size)

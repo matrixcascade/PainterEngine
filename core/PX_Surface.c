@@ -9,6 +9,10 @@ px_bool PX_SurfaceCreate(px_memorypool *mp,px_uint width,px_uint height,px_surfa
 		surface->width=width;
 		surface->surfaceBuffer=(px_color *)p;
 		surface->MP=mp;
+		surface->limit_left=0;
+		surface->limit_top=0;
+		surface->limit_right=width-1;
+		surface->limit_bottom=height-1;
 		PX_memdwordset(p,0,height*width);
 		return PX_TRUE;
 	}
@@ -17,6 +21,10 @@ px_bool PX_SurfaceCreate(px_memorypool *mp,px_uint width,px_uint height,px_surfa
 
 px_void PX_SurfaceFree(px_surface *psurface)
 {
+	if (psurface->surfaceBuffer==PX_NULL)
+	{
+		return;
+	}
 	MP_Free(psurface->MP,psurface->surfaceBuffer);
 	psurface->surfaceBuffer=PX_NULL;
 	psurface->MP=0;
@@ -30,6 +38,63 @@ px_int PX_SurfaceMemorySize(px_uint width,px_uint height)
 	return width*height*sizeof(px_color);
 }
 
+
+PX_SurfaceLimitInfo PX_SurfaceGetLimit(px_surface *ps)
+{
+	PX_SurfaceLimitInfo info;
+	info.limit_bottom=ps->limit_bottom;
+	info.limit_left=ps->limit_left;
+	info.limit_right=ps->limit_right;
+	info.limit_top=ps->limit_top;
+	return info;
+}
+
+
+px_void PX_SurfaceSetLimitInfo(px_surface *ps,PX_SurfaceLimitInfo info)
+{
+	PX_SurfaceSetLimit(ps,info.limit_left,info.limit_top,info.limit_right,info.limit_bottom);
+}
+
+px_void PX_SurfaceSetLimit(px_surface *ps,px_int limit_left,px_int limit_top,px_int limit_right,px_int limit_bottom)
+{
+
+
+	if (limit_left<0)
+	{
+		limit_left=0;
+	}
+
+	if (limit_top<0)
+	{
+		limit_top=0;
+	}
+
+	if (limit_right>ps->width-1)
+	{
+		limit_right=ps->width-1;
+	}
+
+
+	if (limit_bottom>ps->height-1)
+	{
+		limit_bottom=ps->height-1;
+	}
+
+	ps->limit_left=limit_left;
+	ps->limit_right=limit_right;
+	ps->limit_top=limit_top;
+	ps->limit_bottom=limit_bottom;
+}
+
+
+px_void PX_SurfaceSetPixel(px_surface *psurface,px_int X,px_int Y,px_color color)
+{
+	if(X<=psurface->limit_right&&X>=psurface->limit_left&&Y<=psurface->limit_bottom&&Y>=psurface->limit_top)
+	{
+		psurface->surfaceBuffer[X+psurface->width*Y]=color;
+	}
+}
+
 px_void PX_SurfaceDrawPixel(px_surface *psurface,px_int X,px_int Y,px_color COLOR)
 {
 	px_color c;
@@ -37,7 +102,7 @@ px_void PX_SurfaceDrawPixel(px_surface *psurface,px_int X,px_int Y,px_color COLO
 	{
 		return;
 	}
-	if(X<psurface->width&&X>=0&&Y<psurface->height&&Y>=0)
+	if(X<=psurface->limit_right&&X>=psurface->limit_left&&Y<=psurface->limit_bottom&&Y>=psurface->limit_top)
 	{
 		if(COLOR._argb.a==0xff)
 		{
@@ -52,33 +117,6 @@ px_void PX_SurfaceDrawPixel(px_surface *psurface,px_int X,px_int Y,px_color COLO
 		c._argb.a=255-(255-c._argb.a)*(255-COLOR._argb.a)/255;
 		psurface->surfaceBuffer[X+psurface->width*Y]=c;
 		}
-	}
-}
-
-px_void PX_SurfaceDrawPixelFaster(px_surface *psurface,px_int X,px_int Y,px_color COLOR)
-{
-	px_color c;
-	if (COLOR._argb.a==0)
-	{
-		return;
-	}
-
-#ifdef PX_DEBUG_MODE
-	if(!(X<psurface->width&&X>=0&&Y<psurface->height&&Y>=0)) PX_ASSERT();
-#endif
-
-	if(COLOR._argb.a==0xff)
-	{
-		psurface->surfaceBuffer[X+psurface->width*Y]=COLOR;
-	}
-	else
-	{
-		c=psurface->surfaceBuffer[X+psurface->width*Y];
-		c._argb.r=(unsigned char)(((255-COLOR._argb.a)*c._argb.r+COLOR._argb.r*COLOR._argb.a)/255);
-		c._argb.g=(unsigned char)(((255-COLOR._argb.a)*c._argb.g+COLOR._argb.g*COLOR._argb.a)/255);
-		c._argb.b=(unsigned char)(((255-COLOR._argb.a)*c._argb.b+COLOR._argb.b*COLOR._argb.a)/255);
-		c._argb.a=255-(255-c._argb.a)*(255-COLOR._argb.a)/255;
-		psurface->surfaceBuffer[X+psurface->width*Y]=c;
 	}
 }
 

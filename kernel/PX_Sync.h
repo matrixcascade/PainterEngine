@@ -48,34 +48,9 @@ typedef enum
 	PX_SYNC_CLIENT_STATUS_END,
 }PX_SYNC_CLIENT_STATUS;
 
-//////////////////////////////////////////////////////////////////////////
-//
-//SyncID
-typedef struct  
-{
-	union
-	{
-		px_void     *ptr[4];
-		px_dword	dw_atom[4];
-		px_byte		byte_atom[16];
-	};
-}PX_Sync_Port;
-//id for ipv4
-//ip addr 4bytes
-//port 2bytes
-//dummy 2bytes
-//
-//10 bytes dummy
-//////////////////////////////////////////////////////////////////////////
 
 struct _PX_SyncFrame_Server;
 struct _PX_SyncFrame_Client;
-
-typedef px_bool (*px_syncframe_client_write)(struct _PX_SyncFrame_Client *client,PX_Sync_Port port,px_void *data,px_int size);
-typedef px_bool (*px_syncframe_client_read)(struct _PX_SyncFrame_Client *client,PX_Sync_Port *port,px_void *data,px_int buffersize,px_int *readsize);
-
-typedef px_bool (*px_syncframe_server_write)(struct _PX_SyncFrame_Server *server,PX_Sync_Port port,px_void *data,px_int size);
-typedef px_bool (*px_syncframe_server_read)(struct _PX_SyncFrame_Server *server,PX_Sync_Port *port,px_void *data,px_int buffersize,px_int *readsize);
 
 
 typedef struct
@@ -97,7 +72,6 @@ typedef struct
 	px_dword client_id;
 	px_dword server_id;
 	px_dword c_id;
-	PX_Sync_Port port;
 	px_dword timeIndexOffset;
 	px_dword timeStreamOffset;
 	px_dword uniqueQueuewIndex;
@@ -142,9 +116,7 @@ typedef struct _PX_SyncFrame_Server
 	px_vector stampsIndexTable;//PX_Sync_Server_StampIndex *
 	px_vector clients;//PX_Sync_Server_Clients *
 	PX_SYNC_SERVER_STATUS status;
-	px_void *user;
-	px_syncframe_server_write write;
-	px_syncframe_server_read read;
+	PX_Linker *linker;
 	px_int recv_cache_size;
 	px_uint instr_once_maxsize;
 	px_byte recv_cache_buffer[PX_SYNC_CACHESIZE];
@@ -157,7 +129,6 @@ typedef struct _PX_SyncFrame_Server
 typedef struct _PX_SyncFrame_Client
 {
 	px_memorypool *mp;
-	PX_Sync_Port serverport;
 	px_dword  c_id;
 	px_dword  client_id;
 	px_dword  server_verify_id;
@@ -174,9 +145,7 @@ typedef struct _PX_SyncFrame_Client
 	px_memory stampsInstrStream;//instrments
 	px_vector stampsIndexTable;//PX_Sync_Server_StampIndex *
 	px_memory Input_InstrStream;
-	px_void *user;
-	px_syncframe_client_write write;
-	px_syncframe_client_read read;
+	PX_Linker *linker;
 	PX_SYNC_CLIENT_STATUS status;
 	px_int send_repeat_times;
 	px_byte send_cache_buffer[PX_SYNC_CACHESIZE];
@@ -189,7 +158,7 @@ typedef struct _PX_SyncFrame_Client
 
 
 
-px_bool PX_SyncFrameServerInit(PX_SyncFrame_Server *sync,px_memorypool *mp,px_dword updateDuration,px_syncframe_server_read read,px_syncframe_server_write write,px_void *user);
+px_bool PX_SyncFrameServerInit(PX_SyncFrame_Server *sync,px_memorypool *mp,px_dword updateDuration,PX_Linker *linker);
 px_void PX_SyncFrameServerSetVersion(PX_SyncFrame_Server *sync,px_dword version);
 px_bool PX_SyncFrameServerAddClient(PX_SyncFrame_Server *sync,px_dword server_verify_id,px_dword client_id,px_dword c_id);
 px_void PX_SyncFrameServerSetInstrOnceMaxSize(PX_SyncFrame_Server *sync,px_int maxsize);
@@ -201,7 +170,7 @@ px_int  PX_SyncFrameServerGetReadyFrameCount(PX_SyncFrame_Server *sync);
 px_uint32 PX_SyncFrameServerSum32(PX_SyncFrame_Server *sync);
 
 
-px_bool PX_SyncFrameClientInit(PX_SyncFrame_Client *client,px_memorypool *mp,px_dword updateDuration,PX_Sync_Port serverport,px_dword server_verify_id,px_dword client_id,px_syncframe_client_read read,px_syncframe_client_write write,px_void *user);
+px_bool PX_SyncFrameClientInit(PX_SyncFrame_Client *client,px_memorypool *mp,px_dword updateDuration,px_dword server_verify_id,px_dword client_id,PX_Linker *linker);
 px_void PX_SyncFrameClientAddInstr(PX_SyncFrame_Client *client,px_void *instr,px_int size);
 px_void PX_SyncFrameClientSetVersion(PX_SyncFrame_Client *sync,px_dword version);
 px_void PX_SyncFrameClientUpdate(PX_SyncFrame_Client *sync,px_dword elpased);
@@ -218,12 +187,6 @@ px_uint32 PX_SyncFrameClientSum32(PX_SyncFrame_Client *sync);
 
 struct _PX_SyncData_Server;
 struct _PX_SyncData_Client;
-
-typedef px_bool (*px_syncdata_client_write)(struct _PX_SyncData_Client *client,PX_Sync_Port port,px_void *data,px_int size);
-typedef px_bool (*px_syncdata_client_read)(struct _PX_SyncData_Client *client,PX_Sync_Port *port,px_void *data,px_int buffersize,px_int *readsize);
-
-typedef px_bool (*px_syncdata_server_write)(struct _PX_SyncData_Server *server,PX_Sync_Port port,px_void *data,px_int size);
-typedef px_bool (*px_syncdata_server_read)(struct _PX_SyncData_Server *server,PX_Sync_Port *port,px_void *data,px_int buffersize,px_int *readsize);
 
 
 typedef struct
@@ -244,7 +207,6 @@ typedef px_bool (*PX_SyncData_Decode)(px_byte *data,px_int size);
 
 typedef struct _PX_SyncData_Server_Client
 {
-	PX_Sync_Port port;
     px_dword     clientID;
 	PX_SYNCDATA_STATUS     status;
 	px_int		 ProcessIndex;
@@ -253,9 +215,7 @@ typedef struct _PX_SyncData_Server_Client
 
 typedef struct _PX_SyncData_Server
 {
-	px_syncdata_server_write write;
-	px_syncdata_server_read read;
-
+	PX_Linker *linker;
 	px_dword serverID;
 	px_byte *data;
 	px_dword size;
@@ -266,12 +226,9 @@ typedef struct _PX_SyncData_Server
 
 typedef struct _PX_SyncData_Client
 {
-	px_syncdata_client_write write;
-	px_syncdata_client_read read;
+	PX_Linker *linker;
 
 	px_memorypool *mp;
-
-	PX_Sync_Port port;
 	px_dword	 clientID,serverID;
 	
 	px_byte *data;
@@ -342,14 +299,14 @@ typedef union
 	PX_SyncData_RequestAck requestAck;
 }PX_SyncData_Datagram;
 
-px_bool PX_SyncDataServerInit(PX_SyncData_Server *syncdata_server,px_memorypool *mp,px_dword serverID,px_syncdata_server_read read,px_syncdata_server_write write,px_void *user);
+px_bool PX_SyncDataServerInit(PX_SyncData_Server *syncdata_server,px_memorypool *mp,px_dword serverID,PX_Linker *linker);
 px_bool PX_SyncDataServerAddClient(PX_SyncData_Server *syncdata_server,px_dword clientID);
 px_bool PX_SyncDataServerSetSyncData(PX_SyncData_Server *s,px_void *data,px_dword size);
 px_bool PX_SyncDataServerUpdate(PX_SyncData_Server *syncdata_server,px_int elpased);
 px_void PX_SyncDataServerFree(PX_SyncData_Server *syncdata_server);
 
 
-px_bool PX_SyncDataClientInit(PX_SyncData_Client *syncdata_client,px_memorypool *mp,px_dword serverID,px_dword clientID,PX_Sync_Port server_port,px_syncdata_client_read read,px_syncdata_client_write write,px_void *user);
+px_bool PX_SyncDataClientInit(PX_SyncData_Client *syncdata_client,px_memorypool *mp,px_dword serverID,px_dword clientID,PX_Linker *linker);
 px_bool PX_SyncDataClientIsCompleted(PX_SyncData_Client *syncdata_client);
 px_bool PX_SyncDataClientUpdate(PX_SyncData_Client *syncdata_client,px_int elpased);
 px_void PX_SyncDataClientFree(PX_SyncData_Client *syncdata_client);

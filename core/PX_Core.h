@@ -31,9 +31,10 @@
 #include "PX_Packet.h"
 #include "PX_Base64.h"
 #include "PX_3D.h"
-#include "PX_Delaunay.h"
+#include "PX_PointsMesh.h"
 #include "PX_MFCC.h"
 #include "PX_KalmanFilter.h"
 #include "PX_SoundModule.h"
 #include "PX_ImageFilter.h"
+#include "PX_Linker.h"
 #endif
