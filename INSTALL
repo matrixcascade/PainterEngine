@@ -3,4 +3,4 @@ you can execute command like this:
 
     mkdir build && cd build && cmake ../ 
 
-then you can see some information from build progress
+then you can see some information from process of build
