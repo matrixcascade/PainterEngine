@@ -106,7 +106,7 @@ px_bool PX_LexerIsSpacer(px_lexer *lexer,px_char chr)
 //--------------------------------------------Delimiter--------------------------------
 
 
-px_uint PX_LexerRegisterDelimiter(px_lexer *lexer,px_char Delimiter)
+px_int PX_LexerRegisterDelimiter(px_lexer *lexer,px_char Delimiter)
 {
 	px_int i;
 	if (lexer->DelimiterCount<PX_LEXER_CA_DELIMITER_MAX_COUNT)
@@ -141,7 +141,7 @@ px_int PX_LexerIsDelimiter(px_lexer *lexer,px_char chr)
 	return PX_FALSE;
 }
 
-px_uint PX_LexerGetDelimiterType(px_lexer *lexer,px_char Delimiter)
+px_int PX_LexerGetDelimiterType(px_lexer *lexer,px_char Delimiter)
 {
 	px_int i;
 	for (i=0;i<lexer->DelimiterCount;i++)
@@ -158,7 +158,7 @@ px_uint PX_LexerGetDelimiterType(px_lexer *lexer,px_char Delimiter)
 
 
 
-px_uint PX_LexerRegisterContainer(px_lexer *lexer,const px_char Begin[],const px_char End[])
+px_int PX_LexerRegisterContainer(px_lexer *lexer,const px_char Begin[],const px_char End[])
 {
 	px_int i;
 	if (lexer->ContainerCount<PX_LEXER_CA_DELIMITER_MAX_COUNT)
@@ -185,7 +185,7 @@ px_void PX_LexerRegisterContainerTransfer(px_lexer *lexer,px_uint containerIndex
 	lexer->Container[containerIndex].transfer=transfer;
 }
 
-px_uint PX_LexerGetContainerType(px_lexer *lexer,px_char *pContainerText)
+px_int PX_LexerGetContainerType(px_lexer *lexer,px_char *pContainerText)
 {
 	return lexer->CurrentContainerType;
 }
@@ -273,6 +273,7 @@ px_int PX_LexerFilterChar(px_lexer *lexer,px_char ch)
 	switch(lexer->SortStatus)
 	{
 	case PX_LEXERSORT_STATUS_NORMAL:
+	{
 		if (PX_LexerIsSpacer(lexer,ch))
 		{
 			lexer->SortStatus=PX_LEXER_SORT_STATUS_SPACER;
@@ -284,8 +285,10 @@ px_int PX_LexerFilterChar(px_lexer *lexer,px_char ch)
 			return PX_TRUE;
 		}
 		return PX_TRUE;
-		break;
+	}
+	break;
 	case PX_LEXER_SORT_STATUS_SPACER:
+	{
 		if (PX_LexerIsSpacer(lexer,ch))
 		{
 			return PX_FALSE;
@@ -297,6 +300,7 @@ px_int PX_LexerFilterChar(px_lexer *lexer,px_char ch)
 		}
 		lexer->SortStatus=PX_LEXERSORT_STATUS_NORMAL;
 		return PX_TRUE;
+	}
 		break;
 
 	case PX_LEXER_SORT_STATUS_NEWLINE:
@@ -676,12 +680,12 @@ px_bool PX_LexerSetSourcePointer(px_lexer *lexer,const px_char *buffer)
 	return PX_TRUE;
 }
 
-px_uint PX_LexerGetCurrentContainerType(px_lexer *lexer)
+px_int PX_LexerGetCurrentContainerType(px_lexer *lexer)
 {
 	return lexer->CurrentContainerType;
 }
 
-px_uint PX_LexerGetCurrentDelimiterType(px_lexer *lexer)
+px_int PX_LexerGetCurrentDelimiterType(px_lexer *lexer)
 {
 	return lexer->CurrentDelimiterType;
 }

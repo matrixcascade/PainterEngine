@@ -28,3 +28,4 @@ px_void PX_Object_ScrollAreaSetBorderColor(PX_Object *pObj,px_color borderColor)
 px_void PX_Object_ScrollAreaFree(PX_Object *pObj);
 
 #endif
+

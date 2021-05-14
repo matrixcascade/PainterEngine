@@ -3444,6 +3444,35 @@ px_void PX_FileGetName(const px_char filefullName[],px_char _out[],px_int outSiz
 	}
 
 }
+px_void PX_FileGetPath(const px_char filefullName[],px_char _out[],px_int outSize)
+{
+	px_int s,i;
+	if (outSize==0)
+	{
+		return;
+	}
+	_out[0]=0;
+	s=PX_strlen(filefullName);
+	if (s==0)
+	{
+		return;
+	}
+	s--;
+	while (s)
+	{
+		if (filefullName[s]=='/'||filefullName[s]=='\\')
+		{
+			break;
+		}
+		s--;
+	}
+
+	for (i=0;i<s;i++)
+	{
+		_out[i]=filefullName[i];
+	}
+	_out[i]=0;
+}
 
 px_void PX_FileGetExt(const px_char filefullName[],px_char _out[],px_int outSize)
 {

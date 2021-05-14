@@ -55,3 +55,4 @@ px_void PX_Object_MessageBoxInputBox(PX_Object *pObject,const char *Message,PX_O
 px_char * PX_Object_MessageBoxGetInput(PX_Object *pObject);
 PX_Object * PX_Object_MessageBoxCreate(px_memorypool *mp,PX_Object *parent,PX_FontModule *fontmodule);
 #endif
+

@@ -86,3 +86,4 @@ px_void     MP_Reset    (px_memorypool *Pool);
 px_void    MP_ErrorCatch(px_memorypool *Pool,PX_MP_ErrorCall ErrorCall);
 
 #endif
+

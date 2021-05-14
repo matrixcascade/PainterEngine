@@ -19,3 +19,4 @@ px_void		PX_Object_ProcessBarSetMax(PX_Object *pProcessBar,px_int Max);
 px_int		PX_Object_ProcessBarGetValue(PX_Object *pProcessBar);
 
 #endif
+

@@ -99,30 +99,30 @@ PX_MQTT_CONNECT PX_MQTT_WaitConnACK(PX_MQTT *Mqtt)
 				{
 					return PX_MQTT_CONNECT_ERROR_PROTOCAL_NO_SUPPORT;
 				}
-				break;
+				//break;
 			case 0x02:
 				{
 					return PX_MQTT_CONNECT_ERROR_SESSION_ILLEGAL;
 				}
-				break;
+				//break;
 			case 0x03:
 				{
 					return PX_MQTT_CONNECT_ERROR_SERVER_CRASH;
 				}
-				break;
+				//break;
 			case 0x04:
 				{
 					return PX_MQTT_CONNECT_ERROR_USER_WRONG;
 				}
-				break;
+				//break;
 			case 0x05:
 				{
 					return PX_MQTT_CONNECT_ERROR_ILLEGAL;
 				}
-				break;
+				//break;
 			default:
 				return PX_MQTT_CONNECT_ERROR_UNKNOW;
-				break;
+				//break;
 			}
 		}
 
@@ -596,7 +596,7 @@ px_bool PX_MQTTPublish(PX_MQTT *Mqtt,PX_MQTT_PublishDesc publishDesc)
 			{
 				return PX_TRUE;
 			}
-			break;
+			//break;
 		case PX_MQTT_QOS_LEVEL_1:
 			{
 				if (PX_MQTT_WaitPUBACK(Mqtt))
@@ -619,7 +619,7 @@ px_bool PX_MQTTPublish(PX_MQTT *Mqtt,PX_MQTT_PublishDesc publishDesc)
 				}
 				return PX_FALSE;
 			}
-			break;
+			//break;
 		}
 	}
 	return PX_FALSE;
@@ -998,11 +998,11 @@ px_bool PX_MQTTListen(PX_MQTT *Mqtt)
 	{
 	case PX_MQTT_QOS_LEVEL_0:
 		return PX_TRUE;
-		break;
+		//break;
 	case PX_MQTT_QOS_LEVEL_1:
 		if(!PX_MQTT_SendPUBACK(Mqtt,id))return PX_FALSE;
 		return PX_TRUE;
-		break;
+		//break;
 	case PX_MQTT_QOS_LEVEL_2:
 		{
 			if (!PX_MQTT_SendPUBREC(Mqtt,id))
@@ -1019,7 +1019,7 @@ px_bool PX_MQTTListen(PX_MQTT *Mqtt)
 			}
 			return PX_TRUE;
 		}
-		break;
+		//break;
 	}
 
 

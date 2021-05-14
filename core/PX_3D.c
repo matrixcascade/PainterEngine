@@ -917,11 +917,11 @@ px_void PX_3D_Present(px_surface *psurface, PX_3D_RenderList *list,PX_3D_Camera 
 			{
 				if (list->PX_3D_PRESENTMODE&PX_3D_PRESENTMODE_PURE)
 				{
-					PX_3D_RenderListRasterization(psurface,list,pface->transform_vertex[0],pface->transform_vertex[1],pface->transform_vertex[2],list->ptexture,clr,(px_int)camera->viewport_width,(px_int)camera->viewplane_height,camera->zbuffer,(px_int)camera->viewport_width);
+					PX_3D_RenderListRasterization(psurface,list,pface->transform_vertex[0],pface->transform_vertex[1],pface->transform_vertex[2],list->ptexture,clr,(px_int)camera->viewport_width,(px_int)camera->viewport_height,camera->zbuffer,(px_int)camera->viewport_width);
 				}
 				else
 				{
-					PX_3D_RenderListRasterization(psurface,list,pface->transform_vertex[0],pface->transform_vertex[1],pface->transform_vertex[2],ptex,PX_COLOR(0,0,0,0),(px_int)camera->viewport_width,(px_int)camera->viewplane_height,camera->zbuffer,(px_int)camera->viewport_width);
+					PX_3D_RenderListRasterization(psurface,list,pface->transform_vertex[0],pface->transform_vertex[1],pface->transform_vertex[2],ptex,PX_COLOR(0,0,0,0),(px_int)camera->viewport_width,(px_int)camera->viewport_height,camera->zbuffer,(px_int)camera->viewport_width);
 				}
 
 			}

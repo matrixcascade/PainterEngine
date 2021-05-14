@@ -63,7 +63,6 @@ px_void PX_Object_ExplorerSetBorderColor(PX_Object *Object,px_color clr);
 px_void PX_Object_ExplorerSetPushColor(PX_Object *Object,px_color clr);
 px_void PX_Object_ExplorerSetCursorColor(PX_Object *Object,px_color clr);
 px_void PX_Object_ExplorerSetTextColor(PX_Object *Object,px_color clr);
-px_void PX_Object_ExplorerSetCheck(PX_Object *Object,px_bool check);
 px_void PX_Object_ExplorerRefresh(PX_Object *Object);
 px_int PX_Object_ExplorerGetSelectedCount(PX_Object *Object);
 px_void PX_Object_ExplorerGetPath(PX_Object *Object,px_char path[PX_EXPLORER_MAX_PATH_LEN],px_int index);
@@ -71,9 +70,6 @@ px_void PX_Object_ExplorerOpen(PX_Object *Object);
 px_void PX_Object_ExplorerClose(PX_Object *Object);
 px_void PX_Object_ExplorerSetFilter(PX_Object *Object,const px_char *filter);
 px_void PX_Object_ExplorerSetMaxSelectCount(PX_Object *Object,int selectCount);
-
-
-
 
 
 #endif

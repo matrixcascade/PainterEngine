@@ -276,3 +276,4 @@ px_double PX_Object_FilterEditorMapValue(PX_Object *Object,px_double precent);
 
 
 #endif
+

@@ -190,11 +190,11 @@ px_double PX_ReLU(px_double x);
 //////////////////////////////////////////////////////////////////////////
 //PMMCLCG
 px_void PX_srand(px_uint64 seed);
-px_uint32 PX_rand();
+px_uint32 PX_rand(void);
 px_double PX_randRange(px_double min,px_double max);
 px_uint32 PX_randEx(px_uint64 seed);
 //gauss rand
-px_double PX_GaussRand();
+px_double PX_GaussRand(void);
 
 //ceil
 px_double PX_Ceil(px_double v);
@@ -202,6 +202,7 @@ px_double PX_Ceil(px_double v);
 //////////////////////////////////////////////////////////////////////////
 //file ext
 px_void PX_FileGetName(const px_char filefullName[],px_char _out[],px_int outSize);
+px_void PX_FileGetPath(const px_char filefullName[],px_char _out[],px_int outSize);
 px_void PX_FileGetExt(const px_char filefullName[],px_char _out[],px_int outSize);
 
 //////////////////////////////////////////////////////////////////////////

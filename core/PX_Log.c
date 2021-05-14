@@ -1,7 +1,7 @@
 #include "PX_Typedef.h"
 
 
-void PX_ASSERT()
+void PX_ASSERT(void)
 {
 #ifdef PX_DEBUG_MODE
 *(char *)(0)=1;
@@ -14,7 +14,7 @@ void PX_ERROR(px_char fmt[])
 }
 
 
-px_char * PX_GETLOG()
+px_char * PX_GETLOG(void)
 {
 	return "";
 }

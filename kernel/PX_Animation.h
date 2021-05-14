@@ -50,3 +50,4 @@ px_int PX_AnimationLibraryGetFrameHeight(PX_Animationlibrary *panimationLib,px_i
 px_bool PX_AnimationLibraryCreateFromMemory(px_memorypool *mp,PX_Animationlibrary *panimationLib,px_byte *_2dxBuffer,px_uint size);
 px_bool PX_AnimationLibrary_CreateEffect_JumpVertical(px_memorypool *mp,PX_Animationlibrary *panimation,px_texture *effectTexture);
 #endif
+

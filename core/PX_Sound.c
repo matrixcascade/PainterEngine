@@ -234,7 +234,7 @@ px_void PX_SoundPlayClear(PX_SoundPlay *pSoundPlay)
 	}
 }
 
-px_bool PX_SoundPlayGetDataCount(PX_SoundPlay *pSoundPlay)
+px_int PX_SoundPlayGetDataCount(PX_SoundPlay *pSoundPlay)
 {
 	px_int count=0,j;
 	if (pSoundPlay->userread)

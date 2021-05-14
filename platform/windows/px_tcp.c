@@ -42,7 +42,6 @@ int PX_TCPInitialize(PX_TCP *tcp,PX_TCP_IP_TYPE type)
 	}
 	  	
 	setsockopt(tcp->socket,SOL_SOCKET,SO_RCVBUF,(const char*)&nRecvBuf,sizeof(int));
-
 	setsockopt(tcp->socket,SOL_SOCKET,SO_SNDBUF,(const char*)&nSendBuf,sizeof(int));
 
 	return 1;
@@ -132,9 +131,11 @@ int PX_TCPReceived(PX_TCP *tcp,void *buffer,int buffersize,int timeout)
 
 int PX_TCPAccept(PX_TCP *tcp,unsigned int *socket,PX_TCP_ADDR *fromAddr)
 {
+	DWORD lasterror;
 	SOCKADDR_IN sockaddr_in;
-	int len;
+	int len=sizeof(SOCKADDR);
 	*socket=accept(tcp->socket,(LPSOCKADDR)&sockaddr_in,&len);
+	lasterror=WSAGetLastError();
 	return *socket!=INVALID_SOCKET;
 }
 
@@ -186,11 +187,18 @@ void PX_TCPFree(PX_TCP *tcp)
 int PX_TCPListen(PX_TCP *tcp,unsigned short listen_Port)
 {
 	SOCKADDR_IN sockaddr_in;
+	memset(&sockaddr_in,0,sizeof(SOCKADDR_IN));
 	sockaddr_in.sin_family=AF_INET;
 	sockaddr_in.sin_addr.s_addr=INADDR_ANY;
 	sockaddr_in.sin_port=(listen_Port);
 
-	if (bind(tcp->socket,(LPSOCKADDR)&sockaddr_in,sizeof(sockaddr_in))==SOCKET_ERROR)
+	if (bind(tcp->socket,(LPSOCKADDR)&sockaddr_in,sizeof(sockaddr_in))!=0)
+	{
+		closesocket(tcp->socket);
+		return 0;
+	}
+
+	if (listen(tcp->socket,5)!=0)
 	{
 		closesocket(tcp->socket);
 		return 0;

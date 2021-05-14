@@ -62,3 +62,4 @@ px_void PX_Object_EditAutoNewLine(PX_Object *pObject,px_bool b,px_int AutoNewLin
 px_void PX_Object_EditSetOffset(PX_Object *pObject,px_int TopOffset,px_int LeftOffset);
 
 #endif
+

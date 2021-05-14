@@ -10741,7 +10741,7 @@ _ERROR:
 	return PX_FALSE;
 }
 
-px_char * PX_ScriptCompilerError()
+px_char * PX_ScriptCompilerError(void)
 {
 	return PX_Script_InterpreterError;
 }
