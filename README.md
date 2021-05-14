@@ -18,5 +18,5 @@
 快速入门教程在PainterEngine/supports/documents中<br/>
 ===========================================================================<br/>
 <br/><br/>
-<a href="www.painterengine.com">更多内容请访问 PainterEngine.com</a>
+更多内容请访问 PainterEngine.com
 <br/>
