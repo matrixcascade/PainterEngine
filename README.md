@@ -13,10 +13,6 @@
    <li>PainterEngine Live动画,UI框架,粒子系统,调音器,网络同步协议...</li>
 </ul>
 </p>
-===========================================================================
-<br/>
-快速入门教程在PainterEngine/supports/documents中<br/>
-===========================================================================<br/>
 <br/><br/>
-<a href="www.painterengine.com">更多内容请访问 PainterEngine.com</a>
+更多内容请访问 PainterEngine.com
 <br/>
