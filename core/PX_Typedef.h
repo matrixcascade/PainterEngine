@@ -122,6 +122,7 @@ typedef struct _px_point
 	px_float y;
 	px_float z;
 }px_point;
+typedef px_point px_point32;
 
 typedef struct _px_wpoint
 {

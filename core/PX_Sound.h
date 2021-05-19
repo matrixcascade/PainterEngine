@@ -9,6 +9,7 @@
 #include "PX_Tuning.h"
 
 #define PX_SOUND_DEFAULT_PARALLEL 8
+
 typedef enum
 {
 	PX_SOUND_CHANNEL_ONE,
@@ -55,6 +56,7 @@ px_void PX_SoundPlaySetUserRead(PX_SoundPlay *pSoundPlay,px_void (*userread)(px_
 px_void PX_SoundPlayPause(PX_SoundPlay *pSoundPlay,px_bool pause);
 px_bool PX_SoundPlayAdd(PX_SoundPlay *pSoundPlay,PX_Sound sound);
 px_bool PX_SoundPlayRead(PX_SoundPlay *pSoundPlay,px_byte *pBuffer,px_int readSize);
+px_bool PX_SoundPlayReadCurrentPlayingData(PX_SoundPlay *pSoundPlay,px_int soundIndex,px_int channel,px_int16 *out,px_int count);
 px_void PX_SoundPlayFree(PX_SoundPlay *pSoundPlay);
 px_void PX_SoundPlayClear(PX_SoundPlay *pSoundPlay);
 px_int  PX_SoundPlayGetDataCount(PX_SoundPlay *pSoundPlay);

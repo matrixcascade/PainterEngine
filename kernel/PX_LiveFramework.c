@@ -2188,6 +2188,15 @@ px_bool PX_LiveFrameworkExport(PX_LiveFramework *plive,px_memory *exportbuffer)
 	//export live texture
 	do 
 	{
+		typedef struct  
+		{
+			px_char id[PX_LIVE_ID_MAX_LEN];
+			px_int32 width;
+			px_int32 height;
+			px_int32 textureOffsetX;
+			px_int32 textureOffsetY;
+		}PX_LiveTextureExportInfo;
+
 		px_int i;
 		for (i=0;i<plive->livetextures.size;i++)
 		{
@@ -2196,10 +2205,12 @@ px_bool PX_LiveFrameworkExport(PX_LiveFramework *plive,px_memory *exportbuffer)
 			//export live texture structure
 			do 
 			{
-				PX_LiveTexture desc;
-				desc=*pTexture;
-				desc.Texture.MP=0;
-				desc.Texture.surfaceBuffer=PX_NULL;
+				PX_LiveTextureExportInfo desc;
+				desc.height=pTexture->Texture.height;
+				desc.width=pTexture->Texture.width;
+				PX_memcpy(desc.id,pTexture->id,sizeof(desc.id));
+				desc.textureOffsetX=pTexture->textureOffsetX;
+				desc.textureOffsetY=pTexture->textureOffsetY;
 				if(!PX_MemoryCat(exportbuffer,&desc,sizeof(desc)))return PX_FALSE;
 			} while (0);
 			
@@ -2217,14 +2228,13 @@ px_bool PX_LiveFrameworkExport(PX_LiveFramework *plive,px_memory *exportbuffer)
 		typedef struct  
 		{
 			px_char id[PX_LIVE_ID_MAX_LEN];
-			px_int parent_index;
-			px_int child_index[PX_LIVE_LAYER_MAX_LINK_NODE];
-			px_int triangleCount;
-			px_int verticesCount;
-			px_point KeyPoint;
-			px_int  LinkTextureIndex;
+			px_int32 parent_index;
+			px_int32 child_index[PX_LIVE_LAYER_MAX_LINK_NODE];
+			px_int32 triangleCount;
+			px_int32 verticesCount;
+			px_point32 KeyPoint;
+			px_int32  LinkTextureIndex;
 		}PX_LiveFramework_LayerExportInfo;
-
 		px_int i;
 		for (i=0;i<plive->layers.size;i++)
 		{
@@ -2276,10 +2286,15 @@ px_bool PX_LiveFrameworkExport(PX_LiveFramework *plive,px_memory *exportbuffer)
 			//export Live Animation structure
 			do 
 			{
-				PX_LiveAnimation desc;
-				desc=*pAnimation;
-				PX_memset(&desc.framesMemPtr,0,sizeof(px_vector));
-				desc.framesMemPtr.size=pAnimation->framesMemPtr.size;
+				typedef struct  
+				{
+					px_char id[PX_LIVE_ID_MAX_LEN];
+					px_int32  size;
+				}PX_LiveAnimationExportInfo;
+
+				PX_LiveAnimationExportInfo desc;
+				PX_memcpy(desc.id,pAnimation->id,sizeof(desc.id));
+				desc.size=pAnimation->framesMemPtr.size;
 				if(!PX_MemoryCat(exportbuffer,&desc,sizeof(desc)))return PX_FALSE;
 			} while (0);
 			
@@ -2313,6 +2328,7 @@ px_bool PX_LiveFrameworkImport(px_memorypool *mp,PX_LiveFramework *plive,px_void
 	px_int rOffset=0;
 	//////////////////////////////////////////////////////////////////////////
 	//check header
+	
 	do 
 	{
 		if (!PX_memequ(buffer,"PainterEngineLiveDBinary",24))
@@ -2370,11 +2386,21 @@ px_bool PX_LiveFrameworkImport(px_memorypool *mp,PX_LiveFramework *plive,px_void
 		plive->currentEditVertexIndex=-1;
 	} while (0);
 
+	
 	//////////////////////////////////////////////////////////////////////////
 	//
 	//import live texture
 	do 
 	{
+		typedef struct  
+		{
+			px_char id[PX_LIVE_ID_MAX_LEN];
+			px_int32 width;
+			px_int32 height;
+			px_int32 textureOffsetX;
+			px_int32 textureOffsetY;
+		}PX_LiveTextureImportInfo;
+
 		px_int i;
 		for (i=0;i<plive->livetextures.size;i++)
 		{
@@ -2382,14 +2408,22 @@ px_bool PX_LiveFrameworkImport(px_memorypool *mp,PX_LiveFramework *plive,px_void
 			do 
 			{
 				//import live texture structure
-				*pTexture=*((PX_LiveTexture *)(bBuffer+rOffset));
-				pTexture->Texture.MP=mp;
-				pTexture->Texture.surfaceBuffer=MP_Malloc(mp,pTexture->Texture.width*pTexture->Texture.height*sizeof(px_color));
-				if(pTexture->Texture.surfaceBuffer==PX_NULL) goto _ERROR;
-				rOffset+=sizeof(PX_LiveTexture);if(rOffset>size) goto _ERROR;
+				PX_LiveTextureImportInfo *pLiveTextureImportInfo;
+				pLiveTextureImportInfo=((PX_LiveTextureImportInfo *)(bBuffer+rOffset));
+				PX_memset(pTexture,0,sizeof(PX_LiveTexture));
+
+				if(!PX_TextureCreate(mp,&pTexture->Texture,pLiveTextureImportInfo->width,pLiveTextureImportInfo->height))
+					goto _ERROR;
+				PX_memcpy(pTexture->id,pLiveTextureImportInfo->id,sizeof(pTexture->id));
+				pTexture->textureOffsetX=pLiveTextureImportInfo->textureOffsetX;
+				pTexture->textureOffsetY=pLiveTextureImportInfo->textureOffsetY;
+
+				rOffset+=sizeof(PX_LiveTextureImportInfo);if(rOffset>size) 
+					goto _ERROR;
 				//import texture data
 				PX_memcpy(pTexture->Texture.surfaceBuffer,(bBuffer+rOffset),pTexture->Texture.width*pTexture->Texture.height*sizeof(px_color));
-				rOffset+=pTexture->Texture.width*pTexture->Texture.height*sizeof(px_color);if(rOffset>size) goto _ERROR;
+				rOffset+=pTexture->Texture.width*pTexture->Texture.height*sizeof(px_color);if(rOffset>size) 
+					goto _ERROR;
 			} while (0);
 		}
 	} while (0);
@@ -2427,10 +2461,12 @@ px_bool PX_LiveFrameworkImport(px_memorypool *mp,PX_LiveFramework *plive,px_void
 			pLayer->rel_endStretch=1;
 			pLayer->visible=PX_TRUE;
 
-			if(!PX_VectorInitialize(mp,&pLayer->triangles,sizeof(PX_Delaunay_Triangle),pReadLayer->triangleCount)) goto _ERROR;
+			if(!PX_VectorInitialize(mp,&pLayer->triangles,sizeof(PX_Delaunay_Triangle),pReadLayer->triangleCount)) 
+				goto _ERROR;
 			pLayer->triangles.size=pReadLayer->triangleCount;
 
-			if(!PX_VectorInitialize(mp,&pLayer->vertices,sizeof(PX_LiveVertex),pReadLayer->verticesCount)) goto _ERROR;
+			if(!PX_VectorInitialize(mp,&pLayer->vertices,sizeof(PX_LiveVertex),pReadLayer->verticesCount)) 
+				goto _ERROR;
 			pLayer->vertices.size=pReadLayer->verticesCount;
 
 
@@ -2465,6 +2501,12 @@ px_bool PX_LiveFrameworkImport(px_memorypool *mp,PX_LiveFramework *plive,px_void
 	//import live animation
 	do 
 	{
+		typedef struct  
+		{
+			px_char id[PX_LIVE_ID_MAX_LEN];
+			px_int32  size;
+		}PX_LiveAnimationImportInfo;
+
 		px_int i;
 		for (i=0;i<plive->liveAnimations.size;i++)
 		{
@@ -2473,12 +2515,13 @@ px_bool PX_LiveFrameworkImport(px_memorypool *mp,PX_LiveFramework *plive,px_void
 			//import Live Animation structure
 			do 
 			{
-				PX_LiveAnimation *pReadAnimation=(PX_LiveAnimation *)(bBuffer+rOffset);
-				rOffset+=sizeof(PX_LiveAnimation);if(rOffset>size) goto _ERROR;
+				PX_LiveAnimationImportInfo *pLiveAnimationImport=(PX_LiveAnimationImportInfo *)(bBuffer+rOffset);
+				rOffset+=sizeof(PX_LiveAnimationImportInfo);if(rOffset>size) goto _ERROR;
 
-				*pAnimation=*pReadAnimation;
-				if(!PX_VectorInitialize(mp,&pAnimation->framesMemPtr,sizeof(px_void *),pAnimation->framesMemPtr.size))goto _ERROR;
-				pAnimation->framesMemPtr.size=pReadAnimation->framesMemPtr.size;
+				PX_memcpy(pAnimation->id,pLiveAnimationImport->id,sizeof(pAnimation->id));
+
+				if(!PX_VectorInitialize(mp,&pAnimation->framesMemPtr,sizeof(px_void *),pLiveAnimationImport->size))goto _ERROR;
+				pAnimation->framesMemPtr.size=pLiveAnimationImport->size;
 			} while (0);
 
 			//import live animation frame
@@ -2527,7 +2570,7 @@ px_bool PX_LiveCreate(px_memorypool *mp,PX_LiveFramework *pLiveFramework,PX_Live
 		if(!PX_VectorInitialize(mp,&pLayer->vertices,sizeof(PX_LiveVertex),0))
 		{
 			px_int j;
-			for (j=0;i<i;j++)
+			for (j=0;j<i;j++)
 			{
 				PX_LiveLayer *pLayer=PX_VECTORAT(PX_LiveLayer,&pLive->layers,j);
 				PX_VectorFree(&pLayer->vertices);
@@ -2537,7 +2580,7 @@ px_bool PX_LiveCreate(px_memorypool *mp,PX_LiveFramework *pLiveFramework,PX_Live
 		if(!PX_VectorCopy(&pLayer->vertices,&pFrameworkLayer->vertices))
 		{
 			px_int j;
-			for (j=0;i<i;j++)
+			for (j=0;j<i;j++)
 			{
 				PX_LiveLayer *pLayer=PX_VECTORAT(PX_LiveLayer,&pLive->layers,j);
 				PX_VectorFree(&pLayer->vertices);
