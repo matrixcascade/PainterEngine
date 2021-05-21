@@ -3,12 +3,12 @@
 #include "PX_Object.h"
 
 #define PX_OBJECT_WIDGET_TITLE_LEN 64
-#define PX_OBJECT_WIDGET_BAR_SIZE 24
+#define PX_OBJECT_WIDGET_BAR_SIZE 28
 typedef struct
 {
 	PX_Object	*root;
 	PX_Object	*btn_close;
-	px_color    borderColor,barColor,backgroundcolor,focusColor;
+	px_color    borderColor,barColor,backgroundcolor,focusColor,fontcolor;
 	px_char		title[PX_OBJECT_WIDGET_TITLE_LEN];
 	PX_FontModule *fontmodule;
 	px_texture  renderTarget;//optimization for render
@@ -30,6 +30,11 @@ PX_Object * PX_Object_WidgetGetRoot(PX_Object *pObject);
 px_int PX_Object_WidgetGetRenderTargetHeight(PX_Object *pObject);
 px_int PX_Object_WidgetGetRenderTargetWidth(PX_Object *pObject);
 
-
+px_void PX_Object_WidgetSetBorderColor(PX_Object *pObject,px_color clr);
+px_void PX_Object_WidgetSetBarColor(PX_Object *pObject,px_color clr);
+px_void PX_Object_WidgetSetBackgroundColor(PX_Object *pObject,px_color clr);
+px_void PX_Object_WidgetSetFocusColor(PX_Object *pObject,px_color clr);
+px_void PX_Object_WidgetSetFontColor(PX_Object *pObject,px_color clr);
+px_void PX_Object_WidgetSetTitle(PX_Object *pObject,const px_char title[]);
 #endif
 

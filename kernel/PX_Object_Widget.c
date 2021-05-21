@@ -176,6 +176,7 @@ px_void PX_Object_WidgetRender(px_surface *psurface, PX_Object *pObject,px_uint 
 		PX_SurfaceRender(psurface,&pwidget->renderTarget,(px_int)objx,(px_int)objy+PX_OBJECT_WIDGET_BAR_SIZE,PX_ALIGN_LEFTTOP,PX_NULL);
 	} while (0);
 
+
 	PX_GeoDrawRect(psurface,(px_int)objx,(px_int)objy,(px_int)(objx+pObject->Width-1),(px_int)objy+PX_OBJECT_WIDGET_BAR_SIZE-1,pwidget->barColor);
 
 	if (pObject->OnFocus)
@@ -183,6 +184,8 @@ px_void PX_Object_WidgetRender(px_surface *psurface, PX_Object *pObject,px_uint 
 	else
 		PX_GeoDrawBorder(psurface,(px_int)objx,(px_int)objy,(px_int)(objx+pObject->Width-1),(px_int)(objy+pObject->Height-1),1,pwidget->borderColor);
 
+	PX_FontModuleDrawText(psurface,pwidget->fontmodule,(px_int)objx+3,(px_int)objy+3,PX_ALIGN_LEFTTOP,pwidget->title,pwidget->fontcolor);
+	
 }
 
 
@@ -234,6 +237,7 @@ PX_Object * PX_Object_WidgetCreate(px_memorypool *mp,PX_Object *Parent,int x,int
 	pWidget->focusColor=PX_COLOR(255,192,192,192);
 	pWidget->bevent_update=PX_TRUE;
 	pWidget->bmoveable=PX_TRUE;
+	pWidget->fontcolor=PX_OBJECT_UI_DEFAULT_FONTCOLOR;
 
 	PX_ObjectRegisterEvent(pWidget->btn_close,PX_OBJECT_EVENT_EXECUTE,PX_Object_WidgetOnButtonClose,pObject);
 	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_ANY,PX_Object_Widget_EventDispatcher,PX_NULL);
@@ -294,4 +298,58 @@ px_int PX_Object_WidgetGetRenderTargetWidth(PX_Object *pObject)
 		return pWidget->renderTarget.width;
 	}
 	return 0;
+}
+
+px_void PX_Object_WidgetSetBorderColor(PX_Object *pObject,px_color clr)
+{
+	PX_Object_Widget *pWidget=PX_Object_GetWidget(pObject);
+	if (pWidget)
+	{
+		pWidget->borderColor=clr;
+	}
+}
+
+px_void PX_Object_WidgetSetBarColor(PX_Object *pObject,px_color clr)
+{
+	PX_Object_Widget *pWidget=PX_Object_GetWidget(pObject);
+	if (pWidget)
+	{
+		pWidget->barColor=clr;
+	}
+}
+
+px_void PX_Object_WidgetSetBackgroundColor(PX_Object *pObject,px_color clr)
+{
+	PX_Object_Widget *pWidget=PX_Object_GetWidget(pObject);
+	if (pWidget)
+	{
+		pWidget->backgroundcolor=clr;
+	}
+}
+
+px_void PX_Object_WidgetSetFocusColor(PX_Object *pObject,px_color clr)
+{
+	PX_Object_Widget *pWidget=PX_Object_GetWidget(pObject);
+	if (pWidget)
+	{
+		pWidget->focusColor=clr;
+	}
+}
+
+px_void PX_Object_WidgetSetFontColor(PX_Object *pObject,px_color clr)
+{
+	PX_Object_Widget *pWidget=PX_Object_GetWidget(pObject);
+	if (pWidget)
+	{
+		pWidget->fontcolor=clr;
+	}
+}
+
+px_void PX_Object_WidgetSetTitle(PX_Object *pObject,const px_char title[])
+{
+	PX_Object_Widget *pWidget=PX_Object_GetWidget(pObject);
+	if (pWidget)
+	{
+		PX_strcpy(pWidget->title,title,sizeof(pWidget->title));
+	}
 }
