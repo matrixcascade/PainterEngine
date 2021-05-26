@@ -703,7 +703,7 @@ px_bool PX_ScriptVM_DebuggerCurrentInstruction(PX_ScriptVM_Instance *Ins,px_int 
 PX_SCRIPTVM_RUNRETURN PX_ScriptVM_InstanceRunThread(PX_ScriptVM_Instance *Ins,px_int tick)
 {
 	px_char opCode,opType[3],numOut[32],lastchar,*pchar;
-	px_float p1,p2;
+	px_float p1=0,p2=0;
 	PX_SCRIPTVM_VARIABLE *pVar,cVar,sVar,tVar;
 	px_string newString;
 	px_byte *newBuffer;
@@ -2921,7 +2921,7 @@ _ERROR:
 
 px_bool PX_ScriptVM_InstanceRunFunction(PX_ScriptVM_Instance *Ins,px_int threadID,const px_char *functionName,PX_SCRIPTVM_VARIABLE args[],px_int paramcount)
 {
-	int i,j,ip;
+	int i,j,ip=-1;
 	px_char	uprname[__PX_SCRIPT_ASM_MNEMONIC_NAME_LEN];
 	px_int old_T;
 	if (paramcount>16||threadID>=Ins->maxThreadCount)
@@ -3035,7 +3035,7 @@ px_bool PX_ScriptVM_InstanceRunFunctionIndex(PX_ScriptVM_Instance *Ins,px_int th
 
 px_bool PX_ScriptVM_InstanceBeginThreadFunction(PX_ScriptVM_Instance *Ins,px_int threadID,const px_char *func,PX_SCRIPTVM_VARIABLE args[],px_int paramcount)
 {
-	int i,j,ip;
+	int i,j,ip=-1;
 	px_int old_T;
 	px_char	uprname[__PX_SCRIPT_ASM_MNEMONIC_NAME_LEN];
 

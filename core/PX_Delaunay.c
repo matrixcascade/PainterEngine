@@ -383,7 +383,7 @@ px_bool PX_DelaunaryPointsBuild(px_memorypool *mp,px_point2D pt[],px_int count,p
 					PX_Delaunay_Triangle *pTriangle2=*PX_VECTORAT(PX_Delaunay_Triangle *,&sortTriangles,i);
 					if (PX_DelaunaryTriangleNeighbor(pTriangle1,pTriangle2))
 					{
-						px_int pO,pA,pB,pC;
+						px_int pO=0,pA=0,pB=0,pC=0;
 						px_point t1v,t2v,t3v;
 
 						if(pTriangle1->index1!=pTriangle2->index1&&pTriangle1->index1!=pTriangle2->index2&&pTriangle1->index1!=pTriangle2->index3)

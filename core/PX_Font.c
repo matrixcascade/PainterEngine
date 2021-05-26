@@ -466,7 +466,7 @@ px_bool PX_FontModuleLoad(PX_FontModule *module,px_byte *buffer,px_int size)
 		}
 		else
 		{
-			if (pcHeader->codePage!=module->codePage)
+			if (pcHeader->codePage!=(px_dword)module->codePage)
 			{
 				offset+=pcHeader->Font_Width*pcHeader->Font_Height;
 				continue;

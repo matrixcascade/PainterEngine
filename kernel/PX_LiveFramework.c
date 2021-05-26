@@ -274,6 +274,7 @@ static px_void PX_LiveFramework_RenderListRasterization(px_surface *psurface,PX_
 	if (x0==x1)
 	{
 		k01infinite=PX_TRUE;
+		k01 = 1;
 		b01=x0;
 	}
 	else
@@ -285,6 +286,7 @@ static px_void PX_LiveFramework_RenderListRasterization(px_surface *psurface,PX_
 	if (x0==x2)
 	{
 		k02infinite=PX_TRUE;
+		k02 = 1;
 		b02=x0;
 	}
 	else

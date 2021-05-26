@@ -263,6 +263,8 @@ px_void PX_Object_ScaleBoxOnCursorDrag(PX_Object *pObject,PX_Object_Event e,px_v
 			p2=pscalebox->scale_pt[2];
 		}
 		break;
+	default:
+		return;
 	}
 	v0=PX_Point2DNormalization(PX_Point2DSub(p1,p0)) ;
 	v1=PX_Point2DNormalization(PX_Point2DSub(p2,p0));

@@ -307,9 +307,9 @@ px_bool PX_BitmapBuild(px_surface *psurface,px_char *BitmapBuffer,px_int *size)
 		{
 			for (x=0;x<psurface->width;x++)
 			{
-				(*pdata).R=PX_SURFACECOLOR(psurface,x,y)._argb.r*PX_SURFACECOLOR(psurface,x,y)._argb.a/256;
-				(*pdata).G=PX_SURFACECOLOR(psurface,x,y)._argb.g*PX_SURFACECOLOR(psurface,x,y)._argb.a/256;
-				(*pdata).B=PX_SURFACECOLOR(psurface,x,y)._argb.b*PX_SURFACECOLOR(psurface,x,y)._argb.a/256;
+				(*pdata).R=(px_char)(PX_SURFACECOLOR(psurface,x,y)._argb.r*PX_SURFACECOLOR(psurface,x,y)._argb.a/256);
+				(*pdata).G= (px_char)(PX_SURFACECOLOR(psurface,x,y)._argb.g*PX_SURFACECOLOR(psurface,x,y)._argb.a/256);
+				(*pdata).B= (px_char)(PX_SURFACECOLOR(psurface,x,y)._argb.b*PX_SURFACECOLOR(psurface,x,y)._argb.a/256);
 				pdata++;
 			}
 			pdata=(PX_BITMAP_RGB24 *)(((px_char *)pdata)+rowAppendSize);

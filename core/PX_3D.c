@@ -171,6 +171,11 @@ px_void PX_3D_CameraBuildEulerMatrix(PX_3D_Camera *camera,PX_3D_CAMERAROTMODE ro
 			mrot=PX_MatrixMultiply(mtmp,my_inv);
 		}
 		break;
+	default:
+	{
+		PX_MatrixIdentity(&mrot);
+	}
+	break;
 	}
 	camera->mat_cam=PX_MatrixMultiply(mt_inv,mrot);
 }
@@ -470,18 +475,18 @@ static px_void PX_3D_RenderListRasterization(px_surface *psurface,PX_3D_RenderLi
 	
 	if (p1.position.y<p0.position.y)
 	{
-		PX_3D_Vertex t;
-		t=p1;
+		PX_3D_Vertex vt;
+		vt =p1;
 		p1=p0;
-		p0=t;
+		p0= vt;
 	}
 
 	if (p2.position.y<p0.position.y)
 	{
-		PX_3D_Vertex t;
-		t=p2;
+		PX_3D_Vertex vt;
+		vt =p2;
 		p2=p0;
-		p0=t;
+		p0= vt;
 	}
 	
 	btmy=p1.position.y;
@@ -552,6 +557,7 @@ static px_void PX_3D_RenderListRasterization(px_surface *psurface,PX_3D_RenderLi
 	if (x0==x1)
 	{
 		k01infinite=PX_TRUE;
+		k01 = 1;
 		b01=x0;
 	}
 	else
@@ -563,6 +569,7 @@ static px_void PX_3D_RenderListRasterization(px_surface *psurface,PX_3D_RenderLi
 	if (x0==x2)
 	{
 		k02infinite=PX_TRUE;
+		k02 = 1;
 		b02=x0;
 	}
 	else
@@ -585,7 +592,7 @@ static px_void PX_3D_RenderListRasterization(px_surface *psurface,PX_3D_RenderLi
 	
 	for(y = (px_int)(y0+0.5f)+0.5f; y <=midy; y++)
 	{
-		if (k01infinite)
+		if (k01infinite==PX_TRUE)
 		{
 			xleft=b01;
 		}
@@ -594,7 +601,7 @@ static px_void PX_3D_RenderListRasterization(px_surface *psurface,PX_3D_RenderLi
 			xleft = (y-b01)/k01;
 		}
 
-		if (k02infinite)
+		if (k02infinite==PX_TRUE)
 		{
 			xright=b02;
 		}
@@ -661,18 +668,18 @@ static px_void PX_3D_RenderListRasterization(px_surface *psurface,PX_3D_RenderLi
 	//    p0
 	if (p1.position.y>p0.position.y)
 	{
-		PX_3D_Vertex t;
-		t=p1;
+		PX_3D_Vertex vt;
+		vt=p1;
 		p1=p0;
-		p0=t;
+		p0=vt;
 	}
 
 	if (p2.position.y>p0.position.y)
 	{
-		PX_3D_Vertex t;
-		t=p2;
+		PX_3D_Vertex vt;
+		vt=p2;
 		p2=p0;
-		p0=t;
+		p0=vt;
 	}
 
 	btmy=p1.position.y;

@@ -453,6 +453,12 @@ px_void * PX_Object_ListGetItemData(PX_Object *pListObject,px_int index)
 	return PX_NULL;
 }
 
+px_void* PX_Object_ListItemGetData(PX_Object* pItemObject)
+{
+	PX_Object_ListItem* pItem=(PX_Object_ListItem *)pItemObject->pObject;
+	return pItem->pdata;
+}
+
 px_void PX_Object_ListRemoveItem(PX_Object *pListObject,px_int index)
 {
 	PX_Object_List *pList=PX_Object_GetList(pListObject);

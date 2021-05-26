@@ -2,7 +2,15 @@
 //Platform supports
 #include "PainterEngine_Application.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "px_display.h"
+
+#ifdef __cplusplus
+}
+#endif
 
 //mouse informations
 POINT main_zoomPoint;

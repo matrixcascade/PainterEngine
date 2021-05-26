@@ -66,7 +66,7 @@ px_bool PX_PointsMeshBuild(px_memorypool *mp,px_point2D limit_line_pt[],px_int l
 
 	for (i=0;i<out_triangles->size;i++)
 	{
-		px_int testx,testy;
+		px_int testx=0,testy=0;
 
 		switch(type)
 		{

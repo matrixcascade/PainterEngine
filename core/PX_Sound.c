@@ -27,7 +27,7 @@ px_void PX_SoundPlayPause(PX_SoundPlay *pSoundPlay,px_bool pause)
 px_bool PX_SoundPlayAdd(PX_SoundPlay *pSound,PX_Sound sounddata)
 {
 	px_int i;
-	px_int min_size=0,index;
+	px_int min_size=0,index=-1;
 	while(pSound->bLock);
 	pSound->bLock=PX_TRUE;
 

@@ -229,11 +229,11 @@ px_double PX_log10(px_double __x);
 #define  PX_RadianToAngle(radian) ((radian)*180/PX_PI)
 #define  PX_AngleToRadian(angle) ((angle)*PX_PI/180)
 
-px_double PX_sind(px_double radius);
-px_double PX_cosd(px_double radius);
-px_float PX_sin_radian(px_float radius);
-px_float PX_cos_radian(px_float radius);
-px_float PX_tan_radian(px_float radius);
+px_double PX_sind(px_double radian);
+px_double PX_cosd(px_double radian);
+px_float PX_sin_radian(px_float radian);
+px_float PX_cos_radian(px_float radian);
+px_float PX_tan_radian(px_float radian);
 px_float PX_sin_angle(px_float angle);
 px_float PX_cos_angle(px_float angle);
 px_float PX_tan_angle(px_float angle);

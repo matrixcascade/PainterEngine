@@ -9336,7 +9336,7 @@ px_bool PX_ScriptCompilerCompile(PX_SCRIPT_LIBRARY *lib,const px_char *name,px_s
 	//////////////////////////////////////////////////////////////////////////
 
 	//////////////////////////////////////////////////////////////////////////
-
+	PX_memset(&astStruct, 0, sizeof(&astStruct));
 	PX_StringInitialize(lib->mp,&codes);
 
 	for (i=0;i<lib->codeLibraries.size;i++)
