@@ -92,7 +92,7 @@ px_bool PX_QuadtreeCreate(px_memorypool *mp,PX_Quadtree *pQuadtree,px_float mapS
 	
 	pQuadtree->mp=mp;
 	pQuadtree->PX_AABB_MAX_DEEP=deep;
-	if(!PX_VectorInitialize(mp,&pQuadtree->boxes,sizeof(PX_Quadtree_AABB),ObjectsCount))
+	if(!PX_VectorInitialize(mp,&pQuadtree->boxes,sizeof(PX_Quadtree_AABB_BOX),ObjectsCount))
 	{
 		PX_ASSERT();
 		return PX_FALSE;

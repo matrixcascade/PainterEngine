@@ -293,6 +293,7 @@ PX_Object * PX_ObjectCreateEx(px_memorypool *mp,PX_Object *Parent,px_float x,px_
 	return pObject;
 }
 
+
 px_void PX_ObjectGetInheritXY(PX_Object *Object,px_float *x,px_float *y)
 {
 	*x=0;
@@ -588,8 +589,8 @@ px_void PX_ObjectInit(px_memorypool *mp,PX_Object *pObject,PX_Object *Parent,px_
 	pObject->pPreBrother=PX_NULL;
 	pObject->Type=PX_OBJECT_TYPE_NULL;
 	pObject->ReceiveEvents=PX_TRUE;
-	pObject->impact_test_type=0;
-	pObject->impact_Object_type=0;
+	pObject->impact_target_type=0;
+	pObject->impact_object_type=0;
 	pObject->pEventActions=PX_NULL;
 	pObject->world_index=-1;
 	pObject->User_int=0;
@@ -636,6 +637,21 @@ px_void PX_ObjectSetVisible( PX_Object *pObject,px_bool visible )
 
 
 
+
+px_void PX_ObjectSetEnabled(PX_Object *Object,px_bool enabled)
+{
+	Object->Enabled=enabled;
+}
+
+px_void PX_ObjectEnable(PX_Object *Object)
+{
+	Object->Enabled=PX_TRUE;
+}
+
+px_void PX_ObjectDisable(PX_Object *Object)
+{
+	Object->Enabled=PX_FALSE;
+}
 
 px_int PX_ObjectRegisterEvent( PX_Object *Object,px_uint Event,px_void (*ProcessFunc)(PX_Object *,PX_Object_Event e,px_void *user_ptr),px_void *user)
 {

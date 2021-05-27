@@ -156,8 +156,8 @@ struct _PX_Object
 	px_void *User_ptr;
 	};
 	px_int   world_index;
-	px_dword impact_Object_type;
-	px_dword impact_test_type;
+	px_dword impact_object_type;
+	px_dword impact_target_type;
 	px_void *pObject;
 	px_memorypool *mp;
 	struct _PX_Object *pChilds;
@@ -273,6 +273,7 @@ PX_Object *PX_ObjectCreateEx(px_memorypool *mp,PX_Object *Parent,\
 	px_void *desc,\
 	px_int size
 	);
+#define    PX_ObjectGetDesc(type,pobject) ((type *)((pobject)->pObject))
 px_void    PX_ObjectGetInheritXY(PX_Object *Object,px_float *x,px_float *y);
 px_void	   PX_ObjectInit(px_memorypool *mp,PX_Object *Object,PX_Object *Parent,px_float x,px_float y,px_float z,px_float Width,px_float Height,px_float Lenght);
 px_void    PX_ObjectSetUserCode(PX_Object *pObject,px_int user_int);
@@ -282,6 +283,9 @@ px_void	   PX_ObjectDeleteChilds( PX_Object *pObject );
 px_void	   PX_ObjectSetPosition(PX_Object *Object,px_float x,px_float y,px_float z);
 px_void    PX_ObjectSetSize(PX_Object *Object,px_float Width,px_float Height,px_float length);
 px_void	   PX_ObjectSetVisible(PX_Object *Object,px_bool visible);
+px_void    PX_ObjectSetEnabled(PX_Object *Object,px_bool enabled);
+px_void    PX_ObjectEnable(PX_Object *Object);
+px_void    PX_ObjectDisable(PX_Object *Object);
 PX_Object  *PX_ObjectGetChild(PX_Object *Object,px_int Index);
 px_void     PX_ObjectSetFocus(PX_Object *Object);
 px_void     PX_ObjectClearFocus(PX_Object *Object);

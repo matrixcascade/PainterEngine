@@ -1,7 +1,7 @@
 #include "PX_World.h"
 
 
-px_bool PX_WorldInit(px_memorypool *mp,PX_World *World,px_int world_width,px_int world_height,px_int surface_width,px_int surface_height,px_dword calcSize)
+px_bool PX_WorldInitialize(px_memorypool *mp,PX_World *World,px_int world_width,px_int world_height,px_int surface_width,px_int surface_height,px_dword calcSize)
 {
 	px_void *ptr;
 	if(!PX_VectorInitialize(mp,&World->pObjects,sizeof(PX_WorldObject),256)) return PX_FALSE;
@@ -90,7 +90,7 @@ px_void PX_WorldUpdate( PX_World *world,px_uint elpased )
 	PX_Object_Event e;
 	PX_WorldObject *pwo;
 	
-	px_int impact_count[sizeof(pwo->pObject->impact_Object_type)*8]={0};
+	px_int impact_count[sizeof(pwo->pObject->impact_object_type)*8]={0};
 	px_memorypool *calcmp=&world->mp_WorldCalc;
 
 	if (world==PX_NULL)
@@ -146,10 +146,10 @@ NEW_OBJECT_CONTINUE:
 		{
 			continue;
 		}
-		if (pwo->pObject->impact_Object_type)
+		if (pwo->pObject->impact_object_type)
 		{
 			j=0;
-			while(!(pwo->pObject->impact_Object_type&(1<<j)))
+			while(!(pwo->pObject->impact_object_type &(1<<j)))
 				j++;
 
 			impact_count[j]++;
@@ -157,7 +157,7 @@ NEW_OBJECT_CONTINUE:
 	}
 
 
-	for (i=0;i<sizeof(pwo->pObject->impact_Object_type)*8;i++)
+	for (i=0;i<sizeof(pwo->pObject->impact_object_type)*8;i++)
 	{
 		if (impact_count[i])
 		{
@@ -176,15 +176,23 @@ NEW_OBJECT_CONTINUE:
 		{
 			continue;
 		}
-		if (pwo->pObject->impact_Object_type)
+		if (pwo->pObject->impact_object_type)
 		{
-			for (b=0;b<sizeof(pwo->pObject->impact_Object_type)*8;b++)
+			for (b=0;b<sizeof(pwo->pObject->impact_object_type)*8;b++)
 			{
-				if ((pwo->pObject->impact_Object_type&(1<<b)))
+				if ((pwo->pObject->impact_object_type &(1<<b)))
 				{
 					PX_Quadtree_UserData userData;
 					userData.ptr=pwo;
-					PX_QuadtreeAddNode(&world->Impact_Test_array[b],(px_float)pwo->pObject->x,(px_float)pwo->pObject->y,(px_float)pwo->pObject->Width,(px_float)pwo->pObject->Height,userData);
+					if ((px_float)pwo->pObject->diameter)
+					{
+						PX_QuadtreeAddNode(&world->Impact_Test_array[b],(px_float)pwo->pObject->x,(px_float)pwo->pObject->y,(px_float)pwo->pObject->diameter,(px_float)pwo->pObject->diameter,userData);
+					}
+					else
+					{
+						PX_QuadtreeAddNode(&world->Impact_Test_array[b],(px_float)pwo->pObject->x,(px_float)pwo->pObject->y,(px_float)pwo->pObject->Width,(px_float)pwo->pObject->Height,userData);
+					}
+					
 				}
 			}
 		}
@@ -198,17 +206,25 @@ NEW_OBJECT_CONTINUE:
 			continue;
 		}
 		
-		if (pwo->pObject->impact_test_type)
+		if (pwo->pObject->impact_target_type)
 		{
-			for (b=0;b<sizeof(pwo->pObject->impact_test_type)*8;b++)
+			for (b=0;b<sizeof(pwo->pObject->impact_target_type)*8;b++)
 			{
-				if ((pwo->pObject->impact_test_type&(1<<b)))
+				if ((pwo->pObject->impact_target_type &(1<<b)))
 				{
 					px_int im_i;
 					PX_Quadtree_UserData userData;
 					userData.ptr=pwo;
 					PX_QuadtreeResetTest(&world->Impact_Test_array[b]);
-					PX_QuadtreeTestNode(&world->Impact_Test_array[b],(px_float)pwo->pObject->x,(px_float)pwo->pObject->y,(px_float)pwo->pObject->Width,(px_float)pwo->pObject->Height,userData);
+					if (pwo->pObject->diameter)
+					{
+						PX_QuadtreeTestNode(&world->Impact_Test_array[b],(px_float)pwo->pObject->x,(px_float)pwo->pObject->y,(px_float)pwo->pObject->diameter,(px_float)pwo->pObject->diameter,userData);
+					}
+					else
+					{
+						PX_QuadtreeTestNode(&world->Impact_Test_array[b],(px_float)pwo->pObject->x,(px_float)pwo->pObject->y,(px_float)pwo->pObject->Width,(px_float)pwo->pObject->Height,userData);
+					}
+					
 					for (im_i=0;im_i<world->Impact_Test_array[b].Impacts.size;im_i++)
 					{
 						PX_Quadtree_UserData *puData=PX_VECTORAT(PX_Quadtree_UserData,&world->Impact_Test_array[b].Impacts,im_i);
@@ -405,8 +421,8 @@ px_void PX_WorldRender(px_surface *psurface,PX_World *pw,px_uint elpased)
 
 px_void PX_WorldSetImpact(PX_Object *pObj,px_dword type,px_dword Intersect)
 {
-	pObj->impact_Object_type=type;
-	pObj->impact_test_type=Intersect;
+	pObj->impact_object_type=type;
+	pObj->impact_target_type=Intersect;
 }
 
 
