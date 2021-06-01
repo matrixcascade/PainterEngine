@@ -690,6 +690,11 @@ px_void PX_ObjectExecuteEvent(PX_Object *pPost,PX_Object_Event Event)
 {
 	PX_OBJECT_EventAction *EventAction;
 
+	if (pPost->Visible==PX_FALSE||pPost->Enabled==PX_FALSE||pPost->ReceiveEvents==PX_FALSE)
+	{
+		return;
+	}
+
 	EventAction=pPost->pEventActions;
 	while(EventAction)
 	{
@@ -751,6 +756,11 @@ px_void PX_ObjectPostEvent( PX_Object *pPost,PX_Object_Event Event )
 {
 
 	if (pPost==PX_NULL)
+	{
+		return;
+	}
+
+	if (pPost->Visible==PX_FALSE||pPost->Enabled==PX_FALSE||pPost->ReceiveEvents==PX_FALSE)
 	{
 		return;
 	}

@@ -422,14 +422,14 @@ px_bool PX_AnimationSetCurrentPlayAnimation(PX_Animation *animation,px_int i)
 	return PX_FALSE;
 }
 
-px_bool PX_AnimationSetCurrentPlayAnimationByName(PX_Animation *animation,px_char *name)
+px_bool PX_AnimationSetCurrentPlayAnimationByName(PX_Animation *animation,const px_char *name)
 {
 	px_int i;
 	if(animation->linker)
 		for (i=0;i<animation->linker->animation.size;i++)
 		{
 			PX_Animationlibrary_tagInfo *tag=PX_VECTORAT(PX_Animationlibrary_tagInfo,&animation->linker->animation,i);
-			if (PX_strequ(name,tag->name.buffer))
+			if (PX_strequ2(name,tag->name.buffer))
 			{
 				animation->ip=tag->ip;
 				animation->reg_reservedTime=0;
@@ -440,7 +440,7 @@ px_bool PX_AnimationSetCurrentPlayAnimationByName(PX_Animation *animation,px_cha
 }
 
 
-px_int PX_AnimationGetPlayAnimationIndexByName(PX_Animation *animation,px_char *name)
+px_int PX_AnimationGetPlayAnimationIndexByName(PX_Animation *animation,const px_char *name)
 {
 	px_int i;
 	if(animation->linker)

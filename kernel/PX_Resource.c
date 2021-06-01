@@ -49,7 +49,7 @@ px_bool PX_ResourceLibraryLoad(PX_ResourceLibrary *lib,PX_RESOURCE_TYPE type,px_
 				return PX_FALSE;
 			}
 
-			PX_StringInit(mptemp,&asmcodeString);
+			PX_VectorInitialize(mptemp,&asmcodeString);
 
 
 			if(PX_ScriptCompilerCompile(&compilelib,"main",&asmcodeString,256))

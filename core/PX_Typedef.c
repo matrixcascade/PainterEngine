@@ -2346,6 +2346,35 @@ px_int PX_wstrlen(const px_word *dst)
 }
 
 
+px_bool PX_strequ2(const px_char* src, const char* dst)
+{
+	px_char _l, _r;
+	while (PX_TRUE)
+	{
+		_l = *src;
+		_r = *dst;
+		if (_l>='a'&&_l<='z')
+		{
+			_l += 'A' - 'a';
+		}
+		if (_r >= 'a' && _r <= 'z')
+		{
+			_r += 'A' - 'a';
+		}
+		if (_l == _r)
+		{
+			if (_l == 0)return PX_TRUE;
+		}
+		else
+		{
+			return PX_FALSE;
+		}
+		src++;
+		dst++;
+	}
+	return PX_FALSE;
+}
+
 px_void PX_strupr(px_char *src)
 {
 	while (*src != '\0')  

@@ -301,6 +301,7 @@ px_int PX_strlen(const px_char *dst);
 px_int PX_wstrlen(const px_word *dst);
 px_int PX_strcmp(const px_char *str1, const px_char *str2);
 px_bool PX_strequ(const px_char *src,const char *dst);
+px_bool PX_strequ2(const px_char* src, const char* dst);
 px_void PX_strupr(px_char *src);
 px_void PX_strlwr(px_char *src);
 px_bool PX_strIsNumeric(const px_char *str);
