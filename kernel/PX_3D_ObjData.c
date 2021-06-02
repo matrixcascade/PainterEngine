@@ -189,7 +189,7 @@ px_bool PX_3D_ObjectDataLoad(PX_3D_ObjectData *ObjectData,const px_byte *data,px
 				PX_3D_ObjectDataFace Face;
 				px_int v;
 				px_int i;
-				int oft=0;
+
 				//	Face.mtlFileNameIndex=GetMtlFileIndex();
 				Face.mtlNameIndex=ObjectData->mtlName.size-1;
 				Face.mtlFileNameIndex=ObjectData->mtlFile.size-1;

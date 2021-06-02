@@ -30,8 +30,8 @@ px_void PX_AnimationLibraryAddInstr(PX_Animationlibrary *panimationLib,PX_2DX_OP
 px_void PX_AnimationLibraryFree(PX_Animationlibrary *panimationLib);
 px_int PX_AnimationGetAnimationsCount(PX_Animation *animation);
 px_bool PX_AnimationSetCurrentPlayAnimation(PX_Animation *animation,px_int i);
-px_bool PX_AnimationSetCurrentPlayAnimationByName(PX_Animation *animation,px_char *name);
-px_int PX_AnimationGetPlayAnimationIndexByName(PX_Animation *animation,px_char *name);
+px_bool PX_AnimationSetCurrentPlayAnimationByName(PX_Animation *animation,const px_char *name);
+px_int PX_AnimationGetPlayAnimationIndexByName(PX_Animation *animation,const px_char *name);
 px_void PX_AnimationFree(PX_Animation *animation);
 px_void PX_AnimationReset(PX_Animation *animation);
 px_void PX_AnimationUpdate(PX_Animation *panimation,px_uint elpased);
@@ -50,3 +50,4 @@ px_int PX_AnimationLibraryGetFrameHeight(PX_Animationlibrary *panimationLib,px_i
 px_bool PX_AnimationLibraryCreateFromMemory(px_memorypool *mp,PX_Animationlibrary *panimationLib,px_byte *_2dxBuffer,px_uint size);
 px_bool PX_AnimationLibrary_CreateEffect_JumpVertical(px_memorypool *mp,PX_Animationlibrary *panimation,px_texture *effectTexture);
 #endif
+

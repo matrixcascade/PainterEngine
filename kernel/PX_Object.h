@@ -86,13 +86,34 @@ enum PX_OBJECT_TYPE
 #define  PX_OBJECT_IMAGE_LISTBOX_STYLE_ITEMBORDER	1
 #define  PX_OBJECT_IMAGE_LISTBOX_STYLE_SELECT		2
 
-
+#ifndef PX_OBJECT_UI_DEFAULT_BACKGROUNDCOLOR
 #define PX_OBJECT_UI_DEFAULT_BACKGROUNDCOLOR PX_COLOR(255,48,48,48)
+#endif
+
+#ifndef PX_OBJECT_UI_DEFAULT_CURSORCOLOR
 #define PX_OBJECT_UI_DEFAULT_CURSORCOLOR PX_COLOR(255,32,32,32)
+#endif
+
+#ifndef PX_OBJECT_UI_DEFAULT_FONTCOLOR
 #define PX_OBJECT_UI_DEFAULT_FONTCOLOR PX_COLOR(255,192,192,192)
-#define PX_OBJECT_UI_DISABLE_FONTCOLOR PX_COLOR(255,128,128,128)
+#endif
+
+#ifndef PX_OBJECT_UI_DEFAULT_BORDERCOLOR
 #define PX_OBJECT_UI_DEFAULT_BORDERCOLOR PX_COLOR(255,0,0,0)
+#endif
+
+#ifndef PX_OBJECT_UI_DEFAULT_PUSHCOLOR
 #define PX_OBJECT_UI_DEFAULT_PUSHCOLOR PX_COLOR(255,64,64,64)
+#endif
+
+#define PX_OBJECT_UI_DISABLE_FONTCOLOR PX_COLOR(255,128,128,128)
+
+#define PX_COLOR_WHITE PX_COLOR(255,255,255,255)
+#define PX_COLOR_BLACK PX_COLOR(255,0,0,0)
+#define PX_COLOR_RED PX_COLOR(255,255,0,0)
+#define PX_COLOR_GREEN PX_COLOR(255,0,255,0)
+#define PX_COLOR_BLUE PX_COLOR(255,0,0,255)
+
 
 #define  PX_OBJECT_FILTEREDITOR_DEFAULE_HORIZONTALPIXELDIVIDING 48
 #define  PX_OBJECT_FILTEREDITOR_DEFAULE_VERTICALPIXELDIVIDING   20
@@ -135,8 +156,8 @@ struct _PX_Object
 	px_void *User_ptr;
 	};
 	px_int   world_index;
-	px_dword impact_Object_type;
-	px_dword impact_test_type;
+	px_dword impact_object_type;
+	px_dword impact_target_type;
 	px_void *pObject;
 	px_memorypool *mp;
 	struct _PX_Object *pChilds;
@@ -252,6 +273,7 @@ PX_Object *PX_ObjectCreateEx(px_memorypool *mp,PX_Object *Parent,\
 	px_void *desc,\
 	px_int size
 	);
+#define    PX_ObjectGetDesc(type,pobject) ((type *)((pobject)->pObject))
 px_void    PX_ObjectGetInheritXY(PX_Object *Object,px_float *x,px_float *y);
 px_void	   PX_ObjectInit(px_memorypool *mp,PX_Object *Object,PX_Object *Parent,px_float x,px_float y,px_float z,px_float Width,px_float Height,px_float Lenght);
 px_void    PX_ObjectSetUserCode(PX_Object *pObject,px_int user_int);
@@ -261,6 +283,9 @@ px_void	   PX_ObjectDeleteChilds( PX_Object *pObject );
 px_void	   PX_ObjectSetPosition(PX_Object *Object,px_float x,px_float y,px_float z);
 px_void    PX_ObjectSetSize(PX_Object *Object,px_float Width,px_float Height,px_float length);
 px_void	   PX_ObjectSetVisible(PX_Object *Object,px_bool visible);
+px_void    PX_ObjectSetEnabled(PX_Object *Object,px_bool enabled);
+px_void    PX_ObjectEnable(PX_Object *Object);
+px_void    PX_ObjectDisable(PX_Object *Object);
 PX_Object  *PX_ObjectGetChild(PX_Object *Object,px_int Index);
 px_void     PX_ObjectSetFocus(PX_Object *Object);
 px_void     PX_ObjectClearFocus(PX_Object *Object);
@@ -386,3 +411,6 @@ px_void PX_ObjectExecuteEvent(PX_Object *pPost,PX_Object_Event Event);
 #include "PX_Object_TransformAdapter.h"
 
 #endif
+
+
+

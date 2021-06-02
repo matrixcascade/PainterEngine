@@ -122,6 +122,7 @@ typedef struct _px_point
 	px_float y;
 	px_float z;
 }px_point;
+typedef px_point px_point32;
 
 typedef struct _px_wpoint
 {
@@ -190,11 +191,11 @@ px_double PX_ReLU(px_double x);
 //////////////////////////////////////////////////////////////////////////
 //PMMCLCG
 px_void PX_srand(px_uint64 seed);
-px_uint32 PX_rand();
+px_uint32 PX_rand(void);
 px_double PX_randRange(px_double min,px_double max);
 px_uint32 PX_randEx(px_uint64 seed);
 //gauss rand
-px_double PX_GaussRand();
+px_double PX_GaussRand(void);
 
 //ceil
 px_double PX_Ceil(px_double v);
@@ -202,6 +203,7 @@ px_double PX_Ceil(px_double v);
 //////////////////////////////////////////////////////////////////////////
 //file ext
 px_void PX_FileGetName(const px_char filefullName[],px_char _out[],px_int outSize);
+px_void PX_FileGetPath(const px_char filefullName[],px_char _out[],px_int outSize);
 px_void PX_FileGetExt(const px_char filefullName[],px_char _out[],px_int outSize);
 
 //////////////////////////////////////////////////////////////////////////
@@ -227,11 +229,11 @@ px_double PX_log10(px_double __x);
 #define  PX_RadianToAngle(radian) ((radian)*180/PX_PI)
 #define  PX_AngleToRadian(angle) ((angle)*PX_PI/180)
 
-px_double PX_sind(px_double radius);
-px_double PX_cosd(px_double radius);
-px_float PX_sin_radian(px_float radius);
-px_float PX_cos_radian(px_float radius);
-px_float PX_tan_radian(px_float radius);
+px_double PX_sind(px_double radian);
+px_double PX_cosd(px_double radian);
+px_float PX_sin_radian(px_float radian);
+px_float PX_cos_radian(px_float radian);
+px_float PX_tan_radian(px_float radian);
 px_float PX_sin_angle(px_float angle);
 px_float PX_cos_angle(px_float angle);
 px_float PX_tan_angle(px_float angle);
@@ -299,6 +301,7 @@ px_int PX_strlen(const px_char *dst);
 px_int PX_wstrlen(const px_word *dst);
 px_int PX_strcmp(const px_char *str1, const px_char *str2);
 px_bool PX_strequ(const px_char *src,const char *dst);
+px_bool PX_strequ2(const px_char* src, const char* dst);
 px_void PX_strupr(px_char *src);
 px_void PX_strlwr(px_char *src);
 px_bool PX_strIsNumeric(const px_char *str);

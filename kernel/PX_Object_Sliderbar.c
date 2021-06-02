@@ -292,8 +292,8 @@ PX_Object * PX_Object_SliderBarCreate(px_memorypool *mp,PX_Object *Parent,px_int
 	pSliderbar->style=style;
 	pSliderbar->status=PX_OBJECT_SLIDERBAR_STATUS_NORMAL;
 	pSliderbar->Type=Type;
-	pSliderbar->color=PX_COLOR(255,80,80,80);
-	pSliderbar->BackgroundColor=PX_COLOR(255,255,255,255);
+	pSliderbar->color=PX_OBJECT_UI_DEFAULT_FONTCOLOR;
+	pSliderbar->BackgroundColor=PX_OBJECT_UI_DEFAULT_BACKGROUNDCOLOR;
 	pSliderbar->btnDownX=0;
 	pSliderbar->btnDownY=0;
 	pSliderbar->DargButtonX=0;
@@ -648,6 +648,18 @@ px_void PX_Object_SliderBarRender(px_surface *psurface, PX_Object *pObject,px_ui
 				}
 
 			}
+
+			if (pSliderBar->lastValue!=pSliderBar->Value)
+			{
+				e.Event=PX_OBJECT_EVENT_VALUECHANGED;
+				e.Param_uint[0]=0;
+				e.Param_uint[1]=0;
+				e.Param_uint[2]=0;
+				e.Param_uint[3]=0;
+				pSliderBar->lastValue=pSliderBar->Value;
+				PX_ObjectExecuteEvent(pObject,e);
+			}
+
 		}
 		break;
 	}
@@ -662,17 +674,6 @@ px_void PX_Object_SliderBarRender(px_surface *psurface, PX_Object *pObject,px_ui
 		pSliderBar->Value=0;
 	}
 
-
-	if (pSliderBar->lastValue!=pSliderBar->Value)
-	{
-		e.Event=PX_OBJECT_EVENT_VALUECHANGED;
-		e.Param_uint[0]=0;
-		e.Param_uint[1]=0;
-		e.Param_uint[2]=0;
-		e.Param_uint[3]=0;
-		pSliderBar->lastValue=pSliderBar->Value;
-		PX_ObjectExecuteEvent(pObject,e);
-	}
 }
 
 px_void PX_Object_SliderBarSetBackgroundColor(PX_Object *pSliderBar,px_color color)

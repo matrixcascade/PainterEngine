@@ -43,7 +43,7 @@ typedef struct
 	px_world_func_CreateObject func;
 }PX_WorldObjectType;
 
-px_bool			PX_WorldInit(px_memorypool *mp,PX_World *World,px_int world_width,px_int world_height,px_int surface_width,px_int surface_height,px_dword calcsize);
+px_bool			PX_WorldInitialize(px_memorypool *mp,PX_World *World,px_int world_width,px_int world_height,px_int surface_width,px_int surface_height,px_dword calcsize);
 px_int			PX_WorldGetCount(PX_World *World);
 px_void         PX_WorldRemoveObject(PX_World *world,PX_Object *pObject);
 px_void			PX_WorldRemoveObjectByIndex(PX_World *world,px_int i_index);

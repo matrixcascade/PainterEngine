@@ -417,25 +417,25 @@ px_double PX_sind(px_double x)
 
 }
 
-px_double PX_cosd(px_double radius)
+px_double PX_cosd(px_double radian)
 {
-	return PX_sind((PX_PI/2-radius));
+	return PX_sind((PX_PI/2-radian));
 }
 
-px_float PX_sin_radian(px_float radius)
+px_float PX_sin_radian(px_float radian)
 {
-	return (px_float)PX_sind(radius);
+	return (px_float)PX_sind(radian);
 }
 
 
-px_float PX_cos_radian(px_float radius)
+px_float PX_cos_radian(px_float radian)
 {
-	return PX_sin_radian((px_float)(PX_PI/2-radius));
+	return PX_sin_radian((px_float)(PX_PI/2-radian));
 }
 
-px_float PX_tan_radian(px_float radius)
+px_float PX_tan_radian(px_float radian)
 {
-	return PX_sin_radian(radius)/PX_cos_radian(radius);
+	return PX_sin_radian(radian)/PX_cos_radian(radian);
 }
 
 px_float PX_sin_angle(px_float angle)
@@ -2346,6 +2346,35 @@ px_int PX_wstrlen(const px_word *dst)
 }
 
 
+px_bool PX_strequ2(const px_char* src, const char* dst)
+{
+	px_char _l, _r;
+	while (PX_TRUE)
+	{
+		_l = *src;
+		_r = *dst;
+		if (_l>='a'&&_l<='z')
+		{
+			_l += 'A' - 'a';
+		}
+		if (_r >= 'a' && _r <= 'z')
+		{
+			_r += 'A' - 'a';
+		}
+		if (_l == _r)
+		{
+			if (_l == 0)return PX_TRUE;
+		}
+		else
+		{
+			return PX_FALSE;
+		}
+		src++;
+		dst++;
+	}
+	return PX_FALSE;
+}
+
 px_void PX_strupr(px_char *src)
 {
 	while (*src != '\0')  
@@ -3444,6 +3473,35 @@ px_void PX_FileGetName(const px_char filefullName[],px_char _out[],px_int outSiz
 	}
 
 }
+px_void PX_FileGetPath(const px_char filefullName[],px_char _out[],px_int outSize)
+{
+	px_int s,i;
+	if (outSize==0)
+	{
+		return;
+	}
+	_out[0]=0;
+	s=PX_strlen(filefullName);
+	if (s==0)
+	{
+		return;
+	}
+	s--;
+	while (s)
+	{
+		if (filefullName[s]=='/'||filefullName[s]=='\\')
+		{
+			break;
+		}
+		s--;
+	}
+
+	for (i=0;i<s;i++)
+	{
+		_out[i]=filefullName[i];
+	}
+	_out[i]=0;
+}
 
 px_void PX_FileGetExt(const px_char filefullName[],px_char _out[],px_int outSize)
 {
@@ -4139,7 +4197,7 @@ px_sine PX_InstantaneousFrequency(px_sine src,px_double p2,px_double delta_t)
 px_void PX_FIRFilterBuild(PX_FIRFILTER_TYPE bandtype,px_double fln,px_double fhn,PX_FIRFILTER_WINDOW_TYPE wn,px_double h[],px_int n,px_double beta)
 {
 	px_int i,n2,mid;
-	px_double s,pi,wc1,wc2,delay;
+	px_double s,pi,wc1,wc2=0,delay;
 	
 	pi=4.0*PX_atan(1.0);
 	if ((n%2)==0)

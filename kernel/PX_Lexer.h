@@ -87,15 +87,15 @@ typedef  struct __PX_LEXER_START
 
 px_void PX_LexerInit(px_lexer *lexer,px_memorypool *mp);
 px_void PX_LexerRegisterComment(px_lexer *lexer,const px_char Begin[],const px_char End[]);
-px_uint PX_LexerRegisterContainer(px_lexer *lexer,const px_char Begin[],const px_char End[]);
+px_int PX_LexerRegisterContainer(px_lexer *lexer,const px_char Begin[],const px_char End[]);
 px_void PX_LexerRegisterContainerTransfer(px_lexer *lexer,px_uint containerIndex,px_char transfer);
 
 px_void PX_LexerRegisterSpacer(px_lexer *lexer,px_char Spacer);
-px_uint PX_LexerRegisterDelimiter(px_lexer *lexer,px_char Delimiter);
-px_uint PX_LexerGetDelimiterType(px_lexer *lexer,px_char Delimiter);
-px_uint PX_LexerGetContainerType(px_lexer *lexer,px_char *pContainerText);
-px_uint PX_LexerGetCurrentContainerType(px_lexer *lexer);
-px_uint PX_LexerGetCurrentDelimiterType(px_lexer *lexer);
+px_int PX_LexerRegisterDelimiter(px_lexer *lexer,px_char Delimiter);
+px_int PX_LexerGetDelimiterType(px_lexer *lexer,px_char Delimiter);
+px_int PX_LexerGetContainerType(px_lexer *lexer,px_char *pContainerText);
+px_int PX_LexerGetCurrentContainerType(px_lexer *lexer);
+px_int PX_LexerGetCurrentDelimiterType(px_lexer *lexer);
 px_void PX_LexerFree(px_lexer *lexer);
 px_bool PX_LexerSortText(px_lexer *lexer,const px_char *SourceText);
 px_bool  PX_LexerLoadSourceFromMemory(px_lexer *lexer,const px_char *buffer);

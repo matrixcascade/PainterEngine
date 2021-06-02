@@ -2,7 +2,15 @@
 //Platform supports
 #include "PainterEngine_Application.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "px_display.h"
+
+#ifdef __cplusplus
+}
+#endif
 
 //mouse informations
 POINT main_zoomPoint;
@@ -246,6 +254,21 @@ DWORD WINAPI DEMO_RenderThreadFunc(LPVOID p)
 	}
 	return 0;
 }
+
+void setCurrentDirectory()
+{
+	px_char szExeFilePathFileName[MAX_PATH];
+	px_char path[MAX_PATH];
+	GetModuleFileName(NULL, szExeFilePathFileName, MAX_PATH);
+	PX_FileGetPath(szExeFilePathFileName,path,sizeof(path));
+	if (path[PX_strlen(path)-1]==':')
+	{
+		PX_strcat(path,"\\");
+	}
+
+	SetCurrentDirectory(path);
+}
+
 #ifdef _DEBUG
 	int main()
 #else
@@ -255,6 +278,7 @@ DWORD WINAPI DEMO_RenderThreadFunc(LPVOID p)
 	HANDLE hThread;
 	DWORD  threadId;
 
+	setCurrentDirectory();
 	PX_srand(time(NULL));
 	if(!PX_ApplicationInitialize(&App,PX_GetScreenWidth(),PX_GetScreenHeight()))return 0;
 	if(!PX_CreateWindow(App.runtime.surface_width,App.runtime.surface_height,App.runtime.window_width,App.runtime.window_height,PX_APPLICATION_NAME)) 

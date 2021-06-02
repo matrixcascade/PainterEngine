@@ -1,213 +1,58 @@
 #include "PX_Partical.h"
-/*
-set Partical_Init_Info
-{
-int		     generateDuration;  +0
-int			 maxCount; +1
-float        forceX +2 ,forceY +3,forceZ +4;
-float        resistanceK +5;
-int          launchCount +6;
-}
-*/
 
-static px_bool PX_Partical_Rand(PX_ScriptVM_Instance *ins,px_void *ptr)
+
+
+px_void PX_ParticalLauncherInitializeDefault(PX_ParticalLauncher_InitializeInfo* info)
 {
-	PX_ScriptVM_RET(ins,PX_ScriptVM_Variable_float(PX_rand()*1.0f/PX_RAND_MAX));
+	PX_memset(info, 0, sizeof(PX_ParticalLauncher_InitializeInfo));
+	info->ak = 1;
+	info->alive = -1;
+	info->alpha = 1;
+	info->atomsize = 1;
+	info->hdrB = 1;
+	info->hdrG = 1;
+	info->hdrR = 1;
+	info->launchCount = -1;
+	info->maxCount = 100;
+}
+
+px_bool PX_ParticalLauncherCreate(PX_Partical_Launcher *launcher,px_memorypool *mp,PX_ParticalLauncher_InitializeInfo Info)
+{
+	PX_memset(launcher,0,sizeof(PX_Partical_Launcher));
+	launcher->LauncherInfo=Info;
+	launcher->mp=mp;
+
+	launcher->ParticalPool=(PX_Partical_Atom *)MP_Malloc(mp,sizeof(PX_Partical_Atom)*launcher->LauncherInfo.maxCount);
+	PX_memset(launcher->ParticalPool,0,sizeof(PX_Partical_Atom)*launcher->LauncherInfo.maxCount);
 	return PX_TRUE;
 }
 
-px_int PX_ParticalVM_ConvertToInt(PX_SCRIPTVM_VARIABLE var)
+
+px_void PX_ParticalLauncherSetPosition(PX_Partical_Launcher *launcher,px_point position)
 {
-	if (var.type==PX_SCRIPTVM_VARIABLE_TYPE_INT)
-	{
-		return var._int;
-	}
-	else if(var.type==PX_SCRIPTVM_VARIABLE_TYPE_FLOAT)
-	{
-		return (px_int)var._float;
-	}
-	else if(var.type==PX_SCRIPTVM_VARIABLE_TYPE_STRING)
-	{
-		return PX_atoi(var._string.buffer);
-	}
-	else
-		return 0;
+	launcher->LauncherInfo.position=position;
 }
 
-px_float PX_ParticalVM_ConvertToFloat(PX_SCRIPTVM_VARIABLE var)
-{
-	if (var.type==PX_SCRIPTVM_VARIABLE_TYPE_INT)
-	{
-		return (px_float)var._int;
-	}
-	else if(var.type==PX_SCRIPTVM_VARIABLE_TYPE_FLOAT)
-	{
-		return var._float;
-	}
-	else if(var.type==PX_SCRIPTVM_VARIABLE_TYPE_STRING)
-	{
-		return PX_atof(var._string.buffer);
-	}
-	else
-		return 0;
-}
-
-px_bool PX_ParticalLauncherCreateEx(PX_Partical_Launcher *env,px_memorypool *mp,PX_ParticalLauncher_InitializeInfo Info)
-{
-	env->VM_Instance=PX_NULL;
-
-	env->mp=mp;
-	env->genIndex=0;
-	env->texture=Info.tex;
-	env->generateDuration=Info.generateDuration;
-	env->elpased=0;
-	env->maxCount=Info.maxCount;
-	env->force=Info.force;
-	env->resistanceK=Info.resistanceK;
-	env->launchCount=Info.launchCount;
-	env->Create_func=Info.Create_func;
-	env->Update_func=Info.Update_func;
-	env->launcherVelocity=PX_POINT(0,0,0);
-	env->launcherPosition=PX_POINT(0,0,0);
-	env->user=PX_NULL;
-	env->velocity.x=0;
-	env->velocity.y=0;
-	env->velocity.z=0;
-	env->direction.x=1;
-	env->direction.y=0;
-	env->direction.z=0;
-	env->CreateParticalFuncIndex=-1;
-	env->UpdateParitcalFuncIndex=-1;
-	env->user=Info.user;
-
-	env->ParticalPool=(PX_Partical_Atom *)MP_Malloc(mp,sizeof(PX_Partical_Atom)*env->maxCount);
-	PX_memset(env->ParticalPool,0,sizeof(PX_Partical_Atom)*env->maxCount);
-	return PX_TRUE;
-}
-
-px_bool PX_ParticalLauncherCreate(PX_Partical_Launcher *env,px_memorypool *mp,px_texture *tex,PX_ScriptVM_Instance *pIns,px_char *Initfunc,px_char *_createfunc,px_char *_updatefunc)
-{
-	px_int vm_ptr;
-
-	env->VM_Instance=pIns;
-	env->mp=mp;
-	env->genIndex=0;
-	env->texture=tex;
-
-	env->Create_func=PX_NULL;
-	env->Update_func=PX_NULL;
-	
-	if (!PX_ScriptVM_InstanceRunFunction(env->VM_Instance,0,Initfunc,PX_NULL,0))
-	{
-		PX_ScriptVM_InstanceFree(env->VM_Instance);
-		return PX_FALSE;
-	}
-
-	if(PX_ScriptVM_REG_RETURN(env->VM_Instance).type!=PX_SCRIPTVM_VARIABLE_TYPE_INT)
-	{
-		PX_ScriptVM_InstanceFree(env->VM_Instance);
-		return PX_FALSE;
-	}
-	vm_ptr=PX_ScriptVM_REG_RETURN(env->VM_Instance)._int;
-
-
-
-	env->generateDuration=PX_ParticalVM_ConvertToInt(PX_ScriptVM_GLOBAL(env->VM_Instance,vm_ptr+0));
-
-	env->elpased=0;
-
-	env->maxCount=PX_ParticalVM_ConvertToInt(PX_ScriptVM_GLOBAL(env->VM_Instance,vm_ptr+1));
-
-	env->force.x=PX_ParticalVM_ConvertToFloat(PX_ScriptVM_GLOBAL(env->VM_Instance,vm_ptr+2));
-
-	env->force.y=PX_ParticalVM_ConvertToFloat(PX_ScriptVM_GLOBAL(env->VM_Instance,vm_ptr+3));
-
-	env->force.z=PX_ParticalVM_ConvertToFloat(PX_ScriptVM_GLOBAL(env->VM_Instance,vm_ptr+4));
-
-	env->resistanceK=PX_ParticalVM_ConvertToFloat(PX_ScriptVM_GLOBAL(env->VM_Instance,vm_ptr+5));
-
-	env->launchCount=PX_ParticalVM_ConvertToInt(PX_ScriptVM_GLOBAL(env->VM_Instance,vm_ptr+6));
-
-	env->velocity.x=0;
-	env->velocity.y=0;
-	env->velocity.z=0;
-
-	env->direction.x=1;
-	env->direction.y=0;
-	env->direction.z=0;
-
-	env->launcherPosition.x=0;
-	env->launcherPosition.y=0;
-	env->launcherPosition.z=0;
-
-	env->launcherVelocity.x=0;
-	env->launcherVelocity.y=0;
-	env->launcherVelocity.z=0;
-
- 	env->CreateParticalFuncIndex=PX_ScriptVM_GetFunctionIndex(env->VM_Instance,_createfunc);
- 	env->UpdateParitcalFuncIndex=PX_ScriptVM_GetFunctionIndex(env->VM_Instance,_updatefunc);
-
-	env->ParticalPool=(PX_Partical_Atom *)MP_Malloc(mp,sizeof(PX_Partical_Atom)*env->maxCount);
-	PX_memset(env->ParticalPool,0,sizeof(PX_Partical_Atom)*env->maxCount);
-
-	PX_ScriptVM_RegistryHostFunction(env->VM_Instance,"PARTICAL_RAND",PX_Partical_Rand,env);
-
-	return PX_TRUE;
-}
-
-px_void PX_ParticalLauncherSetLauncherPosition(PX_Partical_Launcher *launcher,px_point position)
-{
-	launcher->launcherPosition=position;
-}
-
-/*
-set PARTICAL_ATOM_INFO
-{
-float   size; +0
-float   rotation; +1
-float   mass;+2
-float   alpha;+3
-int     aliveTime;+4
-float   x +5,y +6,z +7;
-float   vx +8,vy +9,vz +10;
-float   hdrR +11,hdrG +12,hdrB +13;
-float   rotationSpeed +14;
-float   alphaIncrement +15;
-float   sizeIncrement +16;
-};
-
-void Partical_Atom_Create(PARTICAL_ATOM_INFO *atomInfo)
-{
-
-}
-
-void Partical_Atom_Update(PARTICAL_ATOM_INFO *atomInfo)
-{
-
-}
-*/
 px_void PX_ParticalAtomUpdate(PX_Partical_Launcher *env,PX_Partical_Atom *pAtom,px_dword elpased)
 {
 	px_int updateTime;
 	px_int atomTime;
-	px_float vx,vy,vz,rX,rY,rZ;
-	px_float resisForceX,resisForceY,resisForceZ;
-	PX_SCRIPTVM_MEMORY_PTR memptr;
-	PX_SCRIPTVM_VARIABLE var;
+	px_point ak;
+
 	if (elpased==0)
 	{
 		return;
 	}
-	if (pAtom->aliveTime)
+	if (pAtom->reg_alive)
 	{
-		if (pAtom->aliveTime<elpased)
+		if (pAtom->reg_alive<elpased)
 		{
-			pAtom->aliveTime=0;
+			pAtom->reg_alive=0;
 			return;
 		}
 		else
 		{
-			pAtom->aliveTime-=elpased;
+			pAtom->reg_alive-=elpased;
 			pAtom->elpasedTime+=elpased;
 		}
 
@@ -226,115 +71,35 @@ px_void PX_ParticalAtomUpdate(PX_Partical_Launcher *env,PX_Partical_Atom *pAtom,
 				updateTime=0;
 			}
 
-			pAtom->size+=pAtom->sizeIncrement*atomTime/1000;
-			pAtom->alpha+=pAtom->alphaIncrement*atomTime/1000;
-			pAtom->rotation+=pAtom->roatationSpeed*atomTime/1000;
+			pAtom->reg_size+=pAtom->reg_sizeinc*atomTime/1000.f;
+			pAtom->reg_alpha+=pAtom->reg_alphainc*atomTime/1000.f;
+			pAtom->reg_currentrotation+=pAtom->reg_rotation*atomTime/1000.f;
 
-			vx=pAtom->velocity.x*atomTime/1000+env->force.x/pAtom->mass*0.5f*atomTime*atomTime/1000000;
-			vy=pAtom->velocity.y*atomTime/1000+env->force.y/pAtom->mass*0.5f*atomTime*atomTime/1000000;
-			vz=pAtom->velocity.z*atomTime/1000+env->force.z/pAtom->mass*0.5f*atomTime*atomTime/1000000;
+			pAtom->velocity.x+=pAtom->reg_a.x*atomTime/1000.f;
+			pAtom->velocity.y+=pAtom->reg_a.y*atomTime/1000.f;
+			pAtom->velocity.z+=pAtom->reg_a.z*atomTime/1000.f;
 
-			resisForceX=(env->resistanceK*pAtom->velocity.x);
-			resisForceY=(env->resistanceK*pAtom->velocity.y);
-			resisForceZ=(env->resistanceK*pAtom->velocity.z);
+			ak=PX_PointMul(pAtom->velocity,1.0f-pAtom->reg_ak);
+			PX_PointMul(ak,atomTime/1000.f);
+			pAtom->velocity.x-=ak.x;
+			pAtom->velocity.y-=ak.y;
+			pAtom->velocity.z-=ak.z;
 
-			rX=resisForceX/pAtom->mass*0.5f*atomTime*atomTime/1000000;
-			rY=resisForceY/pAtom->mass*0.5f*atomTime*atomTime/1000000;
-			rZ=resisForceZ/pAtom->mass*0.5f*atomTime*atomTime/1000000;
-
-
-			if (vx*vx+vy*vy+vz*vz<rX*rX+rY*rY+rZ*rZ)
-			{
-				pAtom->velocity.x=0;
-				pAtom->velocity.y=0;
-				pAtom->velocity.z=0;
-			}
-			else
-			{
-				pAtom->position.x+=vx-rX;
-				pAtom->position.y+=vy-rY;
-				pAtom->position.z+=vz-rZ;
-
-				pAtom->velocity.x+=(env->force.x-resisForceX)/pAtom->mass*PX_PARTICAL_ATOM_TIME/1000;
-				pAtom->velocity.y+=(env->force.y-resisForceY)/pAtom->mass*PX_PARTICAL_ATOM_TIME/1000;
-				pAtom->velocity.z+=(env->force.z-resisForceZ)/pAtom->mass*PX_PARTICAL_ATOM_TIME/1000;
-			}
+			pAtom->position.x += pAtom->velocity.x * atomTime / 1000.f;
+			pAtom->position.y += pAtom->velocity.y * atomTime / 1000.f;
+			pAtom->position.z += pAtom->velocity.z * atomTime / 1000.f;
 		}
 
-		/*
-	set PARTICAL_ATOM_INFO
-	{
-		float   size; +0
-			float   rotation; +1
-			float   mass;+2
-			float   alpha;+3
-			int     aliveTime;+4
-			float   x +5,y +6,z +7;
-		float   vx +8,vy +9,vz +10;
-		float hdrR;
-		float hdrG;
-		float hdrB;
-		float RotationSpeed;
-		float sizeIncrement;
-		float alphaIncrement;
-	};
-	*/
-		if (env->Update_func)
+
+		if (env->LauncherInfo.Update_func)
 		{
-			env->Update_func(env,pAtom);
+			env->LauncherInfo.Update_func(env,pAtom);
 		}
-		else if(env->UpdateParitcalFuncIndex!=-1)
-			{
-				if(!PX_ScriptVM_LocalAlloc(env->VM_Instance,18,&memptr))
-					return;
+		
 
-				PX_ScriptVM_GLOBAL(env->VM_Instance,memptr.ptr+0)=PX_ScriptVM_Variable_float(pAtom->size);
-				PX_ScriptVM_GLOBAL(env->VM_Instance,memptr.ptr+1)=PX_ScriptVM_Variable_float(pAtom->rotation);
-				PX_ScriptVM_GLOBAL(env->VM_Instance,memptr.ptr+2)=PX_ScriptVM_Variable_float(pAtom->mass);
-				PX_ScriptVM_GLOBAL(env->VM_Instance,memptr.ptr+3)=PX_ScriptVM_Variable_float(pAtom->alpha);
-				PX_ScriptVM_GLOBAL(env->VM_Instance,memptr.ptr+4)=PX_ScriptVM_Variable_int(pAtom->aliveTime);
-				PX_ScriptVM_GLOBAL(env->VM_Instance,memptr.ptr+5)=PX_ScriptVM_Variable_int(pAtom->elpasedTime);
-				PX_ScriptVM_GLOBAL(env->VM_Instance,memptr.ptr+6)=PX_ScriptVM_Variable_float(pAtom->position.x);
-				PX_ScriptVM_GLOBAL(env->VM_Instance,memptr.ptr+7)=PX_ScriptVM_Variable_float(pAtom->position.y);
-				PX_ScriptVM_GLOBAL(env->VM_Instance,memptr.ptr+8)=PX_ScriptVM_Variable_float(pAtom->position.z);
-				PX_ScriptVM_GLOBAL(env->VM_Instance,memptr.ptr+9)=PX_ScriptVM_Variable_float(pAtom->velocity.x);
-				PX_ScriptVM_GLOBAL(env->VM_Instance,memptr.ptr+10)=PX_ScriptVM_Variable_float(pAtom->velocity.y);
-				PX_ScriptVM_GLOBAL(env->VM_Instance,memptr.ptr+11)=PX_ScriptVM_Variable_float(pAtom->velocity.z);
-				PX_ScriptVM_GLOBAL(env->VM_Instance,memptr.ptr+12)=PX_ScriptVM_Variable_float(pAtom->hdrR);
-				PX_ScriptVM_GLOBAL(env->VM_Instance,memptr.ptr+13)=PX_ScriptVM_Variable_float(pAtom->hdrG);
-				PX_ScriptVM_GLOBAL(env->VM_Instance,memptr.ptr+14)=PX_ScriptVM_Variable_float(pAtom->hdrB);
-				PX_ScriptVM_GLOBAL(env->VM_Instance,memptr.ptr+15)=PX_ScriptVM_Variable_float(pAtom->roatationSpeed);
-				PX_ScriptVM_GLOBAL(env->VM_Instance,memptr.ptr+16)=PX_ScriptVM_Variable_float(pAtom->sizeIncrement);
-				PX_ScriptVM_GLOBAL(env->VM_Instance,memptr.ptr+17)=PX_ScriptVM_Variable_float(pAtom->alphaIncrement);
-				var=PX_ScriptVM_Variable_int(memptr.ptr);
-			if(PX_ScriptVM_InstanceRunFunctionIndex(env->VM_Instance,0,env->UpdateParitcalFuncIndex,&var,1))
-			{
-			  pAtom->size=PX_ParticalVM_ConvertToFloat(PX_ScriptVM_GLOBAL(env->VM_Instance,memptr.ptr+0));
-			  pAtom->rotation=PX_ParticalVM_ConvertToFloat(PX_ScriptVM_GLOBAL(env->VM_Instance,memptr.ptr+1));
-			  pAtom->mass=PX_ParticalVM_ConvertToFloat(PX_ScriptVM_GLOBAL(env->VM_Instance,memptr.ptr+2));
-			  pAtom->alpha=PX_ParticalVM_ConvertToFloat(PX_ScriptVM_GLOBAL(env->VM_Instance,memptr.ptr+3));
-			  pAtom->aliveTime=PX_ParticalVM_ConvertToInt(PX_ScriptVM_GLOBAL(env->VM_Instance,memptr.ptr+4));
-			  pAtom->elpasedTime=PX_ParticalVM_ConvertToInt(PX_ScriptVM_GLOBAL(env->VM_Instance,memptr.ptr+5));
-			  pAtom->position.x=PX_ParticalVM_ConvertToFloat(PX_ScriptVM_GLOBAL(env->VM_Instance,memptr.ptr+6));
-			  pAtom->position.y=PX_ParticalVM_ConvertToFloat(PX_ScriptVM_GLOBAL(env->VM_Instance,memptr.ptr+7));
-			  pAtom->position.z=PX_ParticalVM_ConvertToFloat(PX_ScriptVM_GLOBAL(env->VM_Instance,memptr.ptr+8));
-			  pAtom->velocity.x=PX_ParticalVM_ConvertToFloat(PX_ScriptVM_GLOBAL(env->VM_Instance,memptr.ptr+9));
-			  pAtom->velocity.y=PX_ParticalVM_ConvertToFloat(PX_ScriptVM_GLOBAL(env->VM_Instance,memptr.ptr+10));
-			  pAtom->velocity.z=PX_ParticalVM_ConvertToFloat(PX_ScriptVM_GLOBAL(env->VM_Instance,memptr.ptr+11));
-			  pAtom->hdrR=PX_ParticalVM_ConvertToFloat(PX_ScriptVM_GLOBAL(env->VM_Instance,memptr.ptr+12));
-			  pAtom->hdrG=PX_ParticalVM_ConvertToFloat(PX_ScriptVM_GLOBAL(env->VM_Instance,memptr.ptr+13));
-			  pAtom->hdrB=PX_ParticalVM_ConvertToFloat(PX_ScriptVM_GLOBAL(env->VM_Instance,memptr.ptr+14));
-			  pAtom->roatationSpeed=PX_ParticalVM_ConvertToFloat(PX_ScriptVM_GLOBAL(env->VM_Instance,memptr.ptr+15));
-			  pAtom->sizeIncrement=PX_ParticalVM_ConvertToFloat(PX_ScriptVM_GLOBAL(env->VM_Instance,memptr.ptr+16));
-			  pAtom->alphaIncrement=PX_ParticalVM_ConvertToFloat(PX_ScriptVM_GLOBAL(env->VM_Instance,memptr.ptr+17));
-			}
-
-			PX_ScriptVM_LocalFree(env->VM_Instance,&memptr);
-		}
-
-		if (pAtom->size<0)
+		if (pAtom->reg_size<0)
 		{
-			pAtom->size=0;
+			pAtom->reg_size=0;
 		}
 
 		if (pAtom->hdrR<0)
@@ -352,159 +117,173 @@ px_void PX_ParticalAtomUpdate(PX_Partical_Launcher *env,PX_Partical_Atom *pAtom,
 			pAtom->hdrB=0;
 		}
 
-		if (pAtom->alpha<0)
+		if (pAtom->reg_alpha<0)
 		{
-			pAtom->alpha=0;
+			pAtom->reg_alpha=0;
 		}
 	}
 	
 
 }
 
-px_bool PX_ParticalLauncherUpdate(PX_Partical_Launcher *env,px_dword elpased)
+px_bool PX_ParticalLauncherUpdate(PX_Partical_Launcher *launcher,px_dword elpased)
 {
 	px_int i,j;
-	px_uint redTime;
+	px_int redTime=0;
 	px_int gencount=0;
 	PX_Partical_Atom *pAtom;
-	PX_SCRIPTVM_VARIABLE var;
-	env->lefttopX=0;
-	env->leftTopY=0;
-	env->rightBottomX=0;
-	env->rightBottomY=0;
 
-	for (i=0;i<(px_int)env->maxCount;i++)
+	launcher->lefttopX=0;
+	launcher->leftTopY=0;
+	launcher->rightBottomX=0;
+	launcher->rightBottomY=0;
+
+	for (i=0;i<(px_int)launcher->LauncherInfo.maxCount;i++)
 	{
-		pAtom=&env->ParticalPool[i];
-		PX_ParticalAtomUpdate(env,pAtom,elpased);
-		if (pAtom->aliveTime!=0)
+		pAtom=&launcher->ParticalPool[i];
+		PX_ParticalAtomUpdate(launcher,pAtom,elpased);
+		if (pAtom->reg_alive!=0)
 		{
-			if (env->ParticalPool[i].position.x<env->lefttopX)
+			if (launcher->ParticalPool[i].position.x<launcher->lefttopX)
 			{
-				env->lefttopX=env->ParticalPool[i].position.x;
+				launcher->lefttopX=launcher->ParticalPool[i].position.x;
 			}
-			if (env->ParticalPool[i].position.x>env->rightBottomX)
+			if (launcher->ParticalPool[i].position.x>launcher->rightBottomX)
 			{
-				env->rightBottomX=env->ParticalPool[i].position.x;
+				launcher->rightBottomX=launcher->ParticalPool[i].position.x;
 			}
-			if (env->ParticalPool[i].position.y<env->leftTopY)
+			if (launcher->ParticalPool[i].position.y<launcher->leftTopY)
 			{
-				env->leftTopY=env->ParticalPool[i].position.y;
+				launcher->leftTopY=launcher->ParticalPool[i].position.y;
 			}
-			if (env->ParticalPool[i].position.y>env->rightBottomY)
+			if (launcher->ParticalPool[i].position.y>launcher->rightBottomY)
 			{
-				env->rightBottomY=env->ParticalPool[i].position.y;
+				launcher->rightBottomY=launcher->ParticalPool[i].position.y;
 			}
 		}
 	}
-	if(env->launchCount!=0)
+	if(launcher->LauncherInfo.launchCount!=0)
 	{
-		if (env->generateDuration!=0)
+		if (launcher->LauncherInfo.generateDuration!=0)
 		{
-			if (env->elpased/env->generateDuration<((env->elpased+elpased)/env->generateDuration))
+			if (launcher->elpased/launcher->LauncherInfo.generateDuration<((launcher->elpased+elpased)/launcher->LauncherInfo.generateDuration))
 			{
-				gencount=(env->elpased+elpased)/env->generateDuration-env->elpased/env->generateDuration;
-				redTime=env->elpased+elpased-(env->elpased+env->generateDuration)/env->generateDuration*env->generateDuration;
+				gencount=(launcher->elpased+elpased)/launcher->LauncherInfo.generateDuration-launcher->elpased/launcher->LauncherInfo.generateDuration;
+				redTime=launcher->elpased+elpased-(launcher->elpased+launcher->LauncherInfo.generateDuration)/launcher->LauncherInfo.generateDuration*launcher->LauncherInfo.generateDuration;
 			}
 			else
 				gencount=0;
 		}
 		else
 		{
-			gencount=env->maxCount;
+			gencount=launcher->LauncherInfo.maxCount;
 			redTime=elpased;
 		}
 		
 
 		for (i=0;i<gencount;i++)
 		{
-			if(env->launchCount!=0)
+			if(launcher->LauncherInfo.launchCount!=0)
 			{
-				for (j=0;j<(px_int)env->maxCount;j++)
+				for (j=0;j<(px_int)launcher->LauncherInfo.maxCount;j++)
 				{
-					if (env->ParticalPool[j].aliveTime==0)
+					if (launcher->ParticalPool[j].reg_alive==0)
 					{
-						if (env->Create_func)
-						{
-							env->ParticalPool[j]=env->Create_func(env,env->genIndex);
-						}
-						else if (env->CreateParticalFuncIndex!=-1)
-						{
-							var=PX_ScriptVM_Variable_int(env->genIndex);
-							if(PX_ScriptVM_InstanceRunFunctionIndex(env->VM_Instance,0,env->CreateParticalFuncIndex,&var,1))
-							{
-							/*
-							set PARTICAL_ATOM_INFO
-							{
-								    float   size; +0
-									float   rotation; +1
-									float   mass;+2
-									float   alpha;+3
-									int     aliveTime;+4
-									int     elpased;+5
-									float   x +6,y +7,z +8;
-								    float   vx +9,vy +10,vz +11;
-									float   hdrR +12,hdrG +13,hdrB +14;
-							};
-							*/	
-							env->ParticalPool[j].size=PX_ScriptVM_RETURN_POINTER(env->VM_Instance,0)._float;
-							env->ParticalPool[j].rotation=PX_ScriptVM_RETURN_POINTER(env->VM_Instance,1)._float;
-							env->ParticalPool[j].mass=PX_ScriptVM_RETURN_POINTER(env->VM_Instance,2)._float;
-							env->ParticalPool[j].alpha=PX_ScriptVM_RETURN_POINTER(env->VM_Instance,3)._float;
-							env->ParticalPool[j].aliveTime=PX_ScriptVM_RETURN_POINTER(env->VM_Instance,4)._int;
-							env->ParticalPool[j].elpasedTime=PX_ScriptVM_RETURN_POINTER(env->VM_Instance,5)._int;
-							env->ParticalPool[j].position.x=PX_ScriptVM_RETURN_POINTER(env->VM_Instance,6)._float;
-							env->ParticalPool[j].position.y=PX_ScriptVM_RETURN_POINTER(env->VM_Instance,7)._float;
-							env->ParticalPool[j].position.z=PX_ScriptVM_RETURN_POINTER(env->VM_Instance,8)._float;
-							env->ParticalPool[j].velocity.x=PX_ScriptVM_RETURN_POINTER(env->VM_Instance,9)._float+env->velocity.x;
-							env->ParticalPool[j].velocity.y=PX_ScriptVM_RETURN_POINTER(env->VM_Instance,10)._float+env->velocity.y;
-							env->ParticalPool[j].velocity.z=PX_ScriptVM_RETURN_POINTER(env->VM_Instance,11)._float+env->velocity.z;
-							env->ParticalPool[j].hdrR=PX_ScriptVM_RETURN_POINTER(env->VM_Instance,12)._float;
-							env->ParticalPool[j].hdrG=PX_ScriptVM_RETURN_POINTER(env->VM_Instance,13)._float;
-							env->ParticalPool[j].hdrB=PX_ScriptVM_RETURN_POINTER(env->VM_Instance,14)._float;
-							env->ParticalPool[j].roatationSpeed=PX_ScriptVM_RETURN_POINTER(env->VM_Instance,15)._float;
-							env->ParticalPool[j].sizeIncrement=PX_ScriptVM_RETURN_POINTER(env->VM_Instance,16)._float;
-							env->ParticalPool[j].alphaIncrement=PX_ScriptVM_RETURN_POINTER(env->VM_Instance,17)._float;
-							}
-						}
-						//apply direction & launch postion
-						env->ParticalPool[j].velocity=PX_PointReflectX(env->direction,env->ParticalPool[j].velocity);
-						env->ParticalPool[j].velocity=PX_PointAdd(env->ParticalPool[j].velocity,env->launcherVelocity);
-						env->ParticalPool[j].position=PX_PointReflectX(env->direction,env->ParticalPool[j].position);
-						env->ParticalPool[j].position=PX_PointAdd(env->ParticalPool[j].position,env->launcherPosition);
+						px_float dirAngle;
+						px_float var;
+						PX_memset(&launcher->ParticalPool[j],0,sizeof(launcher->ParticalPool[j]));
+						launcher->lastgenIndex = j;
+						//position
+						launcher->ParticalPool[j].position = launcher->LauncherInfo.position;
+						//velocity
+						dirAngle = (px_float)PX_RadianToAngle(PX_atan2(launcher->LauncherInfo.direction.y, launcher->LauncherInfo.direction.x));
+						dirAngle += (px_float)PX_randRange(-launcher->LauncherInfo.deviation_rangAngle, launcher->LauncherInfo.deviation_rangAngle);
+						var = launcher->LauncherInfo.velocity;
+						var += (px_float)PX_randRange(-launcher->LauncherInfo.deviation_velocity, launcher->LauncherInfo.deviation_velocity);
+						launcher->ParticalPool[j].velocity = PX_POINT(PX_cos_angle(dirAngle), PX_sin_angle(dirAngle), 0);
+						launcher->ParticalPool[j].velocity = PX_PointMul(launcher->ParticalPool[j].velocity, var);
+						//size
+						var = launcher->LauncherInfo.atomsize;
+						var += (px_float)PX_randRange(-launcher->LauncherInfo.deviation_atomsize, launcher->LauncherInfo.deviation_atomsize);
+						if (var < 0)var = 0;
+						launcher->ParticalPool[j].reg_size = var;
+						//rotation
+						var = launcher->LauncherInfo.rotation;
+						var += (px_float)PX_randRange(-launcher->LauncherInfo.deviation_rotation, launcher->LauncherInfo.deviation_rotation);
+						launcher->ParticalPool[j].reg_rotation = var;
+						//alpha
+						var = launcher->LauncherInfo.alpha;
+						var += (px_float)PX_randRange(-launcher->LauncherInfo.deviation_alpha, launcher->LauncherInfo.deviation_alpha);
+						if (var < 0)var = 0;
+						launcher->ParticalPool[j].reg_alpha = var;
 
+						//hdrR
+						var = launcher->LauncherInfo.hdrR;
+						var += (px_float)PX_randRange(-launcher->LauncherInfo.deviation_hdrR, launcher->LauncherInfo.deviation_hdrR);
+						if (var < 0)var = 0;
+						launcher->ParticalPool[j].hdrR = var;
 
-						PX_ParticalAtomUpdate(env,&env->ParticalPool[j],redTime);
+						//hdrG
+						var = launcher->LauncherInfo.hdrG;
+						var += (px_float)PX_randRange(-launcher->LauncherInfo.deviation_hdrG, launcher->LauncherInfo.deviation_hdrG);
+						if (var < 0)var = 0;
+						launcher->ParticalPool[j].hdrG = var;
 
-						if (env->ParticalPool[j].position.x<env->lefttopX)
+						//hdrB
+						var = launcher->LauncherInfo.hdrB;
+						var += (px_float)PX_randRange(-launcher->LauncherInfo.deviation_hdrB, launcher->LauncherInfo.deviation_hdrB);
+						if (var < 0)var = 0;
+						launcher->ParticalPool[j].hdrB = var;
+
+						//size inc
+						launcher->ParticalPool[j].reg_sizeinc = launcher->LauncherInfo.sizeincrease;
+						//alpha inc
+						launcher->ParticalPool[j].reg_alphainc = launcher->LauncherInfo.alphaincrease;
+						//a
+						launcher->ParticalPool[j].reg_a = launcher->LauncherInfo.a;
+						//ak
+						launcher->ParticalPool[j].reg_ak = launcher->LauncherInfo.ak;
+						//alive
+						launcher->ParticalPool[j].reg_alive = launcher->LauncherInfo.alive;
+						//texture
+						launcher->ParticalPool[j].ptexture = launcher->LauncherInfo.tex;
+
+						if (launcher->LauncherInfo.Create_func)
 						{
-							env->lefttopX=env->ParticalPool[j].position.x;
+							launcher->ParticalPool[j]=launcher->LauncherInfo.Create_func(launcher,launcher->genIndex);
 						}
-						if (env->ParticalPool[j].position.x>env->rightBottomX)
+
+						PX_ParticalAtomUpdate(launcher,&launcher->ParticalPool[j],redTime);
+
+						if (launcher->ParticalPool[j].position.x<launcher->lefttopX)
 						{
-							env->rightBottomX=env->ParticalPool[j].position.x;
+							launcher->lefttopX=launcher->ParticalPool[j].position.x;
 						}
-						if (env->ParticalPool[j].position.y<env->leftTopY)
+						if (launcher->ParticalPool[j].position.x>launcher->rightBottomX)
 						{
-							env->leftTopY=env->ParticalPool[j].position.y;
+							launcher->rightBottomX=launcher->ParticalPool[j].position.x;
 						}
-						if (env->ParticalPool[j].position.y>env->rightBottomY)
+						if (launcher->ParticalPool[j].position.y<launcher->leftTopY)
 						{
-							env->rightBottomY=env->ParticalPool[j].position.y;
+							launcher->leftTopY=launcher->ParticalPool[j].position.y;
 						}
-						if(redTime>env->generateDuration)
+						if (launcher->ParticalPool[j].position.y>launcher->rightBottomY)
 						{
-							redTime-=env->generateDuration;
+							launcher->rightBottomY=launcher->ParticalPool[j].position.y;
+						}
+						if(redTime>launcher->LauncherInfo.generateDuration)
+						{
+							redTime-=launcher->LauncherInfo.generateDuration;
 						}
 						else
 						{
 							redTime=0;
 						}
 
-						env->genIndex++;
-						if (env->launchCount>0)
+						launcher->genIndex++;
+						if (launcher->LauncherInfo.launchCount>0)
 						{
-							env->launchCount--;
+							launcher->LauncherInfo.launchCount--;
 						}
 						break;
 					}
@@ -513,7 +292,7 @@ px_bool PX_ParticalLauncherUpdate(PX_Partical_Launcher *env,px_dword elpased)
 			
 		}
 	}
-	env->elpased+=elpased;
+	launcher->elpased+=elpased;
 	return PX_TRUE;
 }
 
@@ -534,59 +313,66 @@ px_bool PX_ParticalIsInSurfaceRegion(px_point atomPoint,px_int atomWidth,px_int 
 	return PX_isRectCrossRect(atomRect,surfaceRect);
 }
 
-px_void PX_ParticalLauncherRender(px_surface *surface,PX_Partical_Launcher *env,px_point offset)
+px_void PX_ParticalLauncherRender(px_surface *surface,PX_Partical_Launcher *launcher, px_dword elpased)
 {
-	px_int i;
+	px_int m,i;
 	PX_TEXTURERENDER_BLEND blend;
-	
+	PX_ParticalLauncherUpdate(launcher, elpased);
+
 	if (!PX_isRectCrossRect(PX_RECT(0,0,(px_float)surface->width,(px_float)surface->height),\
-		PX_RECT(env->lefttopX+offset.x,env->leftTopY+offset.y,env->rightBottomX-env->lefttopX+1,env->rightBottomY-env->leftTopY+1)))
+		PX_RECT(launcher->lefttopX+ launcher->LauncherInfo.position.x,launcher->leftTopY+ launcher->LauncherInfo.position.y,launcher->rightBottomX-launcher->lefttopX+1,launcher->rightBottomY-launcher->leftTopY+1)))
 	{
 		return;
 	}
 
-	if (env->texture==PX_NULL)
-	{
-		PX_ASSERT();
-	}
+	i = launcher->lastgenIndex + 1;
 
-	for (i=0;i<(px_int)env->maxCount;i++)
+	for (m =0; m <launcher->LauncherInfo.maxCount;m++,i++)
 	{
-		
-		px_point pos=env->ParticalPool[i].position;
-		pos=PX_PointAdd(pos,offset);
-
-		if (env->ParticalPool[i].aliveTime!=0&&env->ParticalPool[i].size!=0)
+		px_point pos;
+		if (i>= launcher->LauncherInfo.maxCount)
 		{
-			if (env->ParticalPool[i].size!=1.0||env->ParticalPool[i].rotation!=0)
+			i = 0;
+		}
+
+		pos=launcher->ParticalPool[i].position;
+
+		if (!launcher->ParticalPool[i].ptexture)
+		{
+			continue;
+		}
+
+		if (launcher->ParticalPool[i].reg_alive!=0&&launcher->ParticalPool[i].reg_size!=0)
+		{
+			if (launcher->ParticalPool[i].reg_size!=1.0||launcher->ParticalPool[i].reg_currentrotation!=0)
 			{
-				if (env->ParticalPool[i].size<0)
+				if (launcher->ParticalPool[i].reg_size<0)
 				{
-					env->ParticalPool[i].size=0;
+					launcher->ParticalPool[i].reg_size=0;
 					continue;
 				}
-				if(env->ParticalPool[i].alpha==1.0&&env->ParticalPool[i].hdrR==1.0f&&env->ParticalPool[i].hdrG==1.0f&&env->ParticalPool[i].hdrB==1.0f)
-					PX_TextureRenderEx(surface,env->texture,(px_int)(pos.x),(px_int)(pos.y),PX_ALIGN_CENTER,PX_NULL,env->ParticalPool[i].size,env->ParticalPool[i].rotation);
+				if(launcher->ParticalPool[i].reg_alpha==1.0&&launcher->ParticalPool[i].hdrR==1.0f&&launcher->ParticalPool[i].hdrG==1.0f&&launcher->ParticalPool[i].hdrB==1.0f)
+					PX_TextureRenderEx(surface,launcher->ParticalPool[i].ptexture,(px_int)(pos.x),(px_int)(pos.y),PX_ALIGN_CENTER,PX_NULL,launcher->ParticalPool[i].reg_size,launcher->ParticalPool[i].reg_currentrotation);
 				else
 				{
-					blend.alpha=env->ParticalPool[i].alpha;
-					blend.hdr_R=env->ParticalPool[i].hdrR;
-					blend.hdr_G=env->ParticalPool[i].hdrG;
-					blend.hdr_B=env->ParticalPool[i].hdrB;
-					PX_TextureRenderEx(surface,env->texture,(px_int)(pos.x),(px_int)(pos.y),PX_ALIGN_CENTER,&blend,env->ParticalPool[i].size,env->ParticalPool[i].rotation);
+					blend.alpha = launcher->ParticalPool[i].reg_alpha;
+					blend.hdr_R=launcher->ParticalPool[i].hdrR;
+					blend.hdr_G=launcher->ParticalPool[i].hdrG;
+					blend.hdr_B=launcher->ParticalPool[i].hdrB;
+					PX_TextureRenderEx(surface,launcher->ParticalPool[i].ptexture,(px_int)(pos.x),(px_int)(pos.y),PX_ALIGN_CENTER,&blend,launcher->ParticalPool[i].reg_size,launcher->ParticalPool[i].reg_currentrotation);
 				}
 			}
 			else
 			{
-				if(env->ParticalPool[i].alpha==1.0&&env->ParticalPool[i].hdrR==1.0f&&env->ParticalPool[i].hdrG==1.0f&&env->ParticalPool[i].hdrB==1.0f)
-					PX_TextureRender(surface,env->texture,(px_int)(pos.x),(px_int)(pos.y),PX_ALIGN_CENTER,PX_NULL);
+				if(launcher->ParticalPool[i].reg_alpha==1.0&&launcher->ParticalPool[i].hdrR==1.0f&&launcher->ParticalPool[i].hdrG==1.0f&&launcher->ParticalPool[i].hdrB==1.0f)
+					PX_TextureRender(surface,launcher->ParticalPool[i].ptexture,(px_int)(pos.x),(px_int)(pos.y),PX_ALIGN_CENTER,PX_NULL);
 				else
 				{
-					blend.alpha=env->ParticalPool[i].alpha;
-					blend.hdr_R=env->ParticalPool[i].hdrR;
-					blend.hdr_G=env->ParticalPool[i].hdrG;
-					blend.hdr_B=env->ParticalPool[i].hdrB;
-					PX_TextureRender(surface,env->texture,(px_int)(pos.x),(px_int)(pos.y),PX_ALIGN_CENTER,&blend);
+					blend.alpha=launcher->ParticalPool[i].reg_alpha;
+					blend.hdr_R=launcher->ParticalPool[i].hdrR;
+					blend.hdr_G=launcher->ParticalPool[i].hdrG;
+					blend.hdr_B=launcher->ParticalPool[i].hdrB;
+					PX_TextureRender(surface,launcher->ParticalPool[i].ptexture,(px_int)(pos.x),(px_int)(pos.y),PX_ALIGN_CENTER,&blend);
 				}
 			}
 		}
@@ -599,18 +385,9 @@ px_void PX_ParticalLauncherFree(PX_Partical_Launcher *env)
 	MP_Free(env->mp,env->ParticalPool);
 }
 
-px_bool PX_ParticalLauncherSetCreateFuncIndex(PX_Partical_Launcher *launcher,px_char *func_Name)
-{
-	return launcher->CreateParticalFuncIndex=PX_ScriptVM_GetFunctionIndex(launcher->VM_Instance,func_Name)!=-1;
-}
-
-px_bool PX_ParticalLauncherSetUpdateFuncIndex(PX_Partical_Launcher *launcher,px_char *func_Name)
-{
-	return launcher->UpdateParitcalFuncIndex=PX_ScriptVM_GetFunctionIndex(launcher->VM_Instance,func_Name)!=-1;
-}
 
 px_void PX_ParticalLauncherSetDirection(PX_Partical_Launcher *launcher,px_point direction)
 {
-	launcher->direction=direction;
+	launcher->LauncherInfo.direction=PX_PointNormalization(direction);
 }
 

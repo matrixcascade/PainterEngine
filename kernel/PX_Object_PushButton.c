@@ -313,6 +313,11 @@ px_void PX_Object_PushButtonRender(px_surface *psurface, PX_Object *pObject,px_u
 		return;
 	}
 
+	if (!pObject->Enabled)
+	{
+		pPushButton->state=PX_OBJECT_BUTTON_STATE_NORMAL;
+	}
+
 	switch(pPushButton->style)
 	{
 	case PX_OBJECT_PUSHBUTTON_STYLE_RECT:

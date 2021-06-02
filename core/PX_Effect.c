@@ -31,7 +31,7 @@ px_bool PX_EffectShine(px_surface *s,px_int radius,px_color color,px_float inten
 			bindColor=color;
 			if(alpha!=0)
 			{
-			bindColor._argb.a=alpha;
+			bindColor._argb.a=(px_uchar)alpha;
 			PX_SurfaceSetPixel(&ns,x,y,bindColor);
 			}
 		}
@@ -73,7 +73,7 @@ px_bool PX_EffectOutline(px_surface *s,px_int radius,px_color color)
 				bindColor=color;
 				if(alpha!=0)
 				{
-					bindColor._argb.a=alpha;
+					bindColor._argb.a= (px_uchar)alpha;
 					PX_SurfaceSetPixel(&ns,x,y,bindColor);
 				}
 			}

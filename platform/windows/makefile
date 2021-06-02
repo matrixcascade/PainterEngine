@@ -25,17 +25,17 @@ painterengine_build_painterengine_o += $(patsubst %.cpp,%.o,$(painterengine_buil
 
 all:$(project_build_o)  $(painterengine_build_painterengine_o) 
 	gcc $(project_build_o) $(painterengine_build_painterengine_o) \
-	-o $(target) \
+	-o $(project_path)\$(target) \
 	-I "$(painterengine_path)" \
 	-I "$(project_path)" \
-	-I "$(painterengine_path)/platform/windows" \
+	-I "$(painterengine_path)\platform\windows" \
 	-L. -lwinmm -ld2d1 -lws2_32 -ldsound -lcomdlg32
-	$(target)
+	$(project_path)\$(target)
 	make clean
 	
 
 $(project_path)/%.o:$(project_path)/%.c
-	gcc -c $^ -o $@ -I "$(painterengine_path)" -I "$(painterengine_path)/platform/windows"
+	gcc -c $^ -o $@ -I "$(painterengine_path)" -I "$(painterengine_path)/platform/windows" 
 
 $(painterengine_path)/architecture/%.o:$(painterengine_path)/architecture/%.c 
 	gcc -c $^ -o $@ -I "$(painterengine_path)"

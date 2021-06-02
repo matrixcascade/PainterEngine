@@ -34,7 +34,7 @@
 #include "PX_PointsMesh.h"
 #include "PX_MFCC.h"
 #include "PX_KalmanFilter.h"
-#include "PX_SoundModule.h"
 #include "PX_ImageFilter.h"
 #include "PX_Linker.h"
+#include "PX_Tuning.h"
 #endif

@@ -41,26 +41,7 @@ typedef enum
 #define PX_3D_PRESENTMODE_PURE	  8
 
 typedef px_void (*PX_3D_PixelShader)(px_surface *psurface,px_int x,px_int y,px_point position,px_float u,px_float v,px_point4D normal,px_texture *pTexture,px_color color);
-// typedef enum
-// {
-// 	PX_3D_FACEATTRIBUTE_2SIDED=1,
-// 	PX_3D_FACEATTRIBUTE_TRANSPARENT=2,
-// 	PX_3D_FACEATTRIBUTE_SHAPE_MODE_PURE=0x20,
-// 	PX_3D_FACEATTRIBUTE_SHAPE_MODE_FLAT=0x40,
-// 	PX_3D_FACEATTRIBUTE_SHAPE_MODE_GOURAUD=0x80,
-// 	PX_3D_FACEATTRIBUTE_SHAPE_MODE_PHONG=0x100,
-// }PX_3D_FACEATTRIBUTE;
 
-/*
-typedef struct 
-{
-	PX_3D_POLYSTATE state;
-	PX_3D_POLYATTRIBUTE attribute;
-	px_color clr;
-	px_point *list;
-	px_int vertex[3];
-}PX_3D_POLYINDEX;
-*/
 
 
 typedef struct

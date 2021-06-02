@@ -3,5 +3,5 @@
 #include "PX_ScriptCore.h"
 px_bool PX_ScriptAsmCompile(px_memorypool *mp,px_char *asmcode,px_memory *binmemory);
 px_bool PX_ScriptAsmOptimization(px_string *asmcode);
-px_char * PX_ScriptASMCompilerError();
+px_char * PX_ScriptASMCompilerError(void);
 #endif

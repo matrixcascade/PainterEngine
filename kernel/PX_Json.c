@@ -831,7 +831,7 @@ px_bool PX_JsonAddString(PX_Json *pjson,const px_char parent_payload[],const px_
 			
 			return PX_TRUE;
 		}
-		break;
+		//break;
 	case PX_JSON_VALUE_TYPE_OBJECT:
 		{
 			PX_Json_Value *pExistValue=PX_JsonGetObjectValue(pValue,name);
@@ -850,7 +850,7 @@ px_bool PX_JsonAddString(PX_Json *pjson,const px_char parent_payload[],const px_
 			}
 			return PX_TRUE;
 		}
-		break;
+		//break;
 	default:
 		return PX_FALSE;
 	}
@@ -889,7 +889,7 @@ px_bool PX_JsonAddNumber(PX_Json *pjson,const px_char parent_payload[],const px_
 			
 			return PX_TRUE;
 		}
-		break;
+		//break;
 	case PX_JSON_VALUE_TYPE_OBJECT:
 		{
 			PX_Json_Value *pExistValue=PX_JsonGetObjectValue(pValue,name);
@@ -908,7 +908,7 @@ px_bool PX_JsonAddNumber(PX_Json *pjson,const px_char parent_payload[],const px_
 			}
 			return PX_TRUE;
 		}
-		break;
+		//break;
 	default:
 		return PX_FALSE;
 	}
@@ -947,7 +947,7 @@ px_bool PX_JsonAddBoolean(PX_Json *pjson,const px_char parent_payload[],const px
 
 			return PX_TRUE;
 		}
-		break;
+		//break;
 	case PX_JSON_VALUE_TYPE_OBJECT:
 		{
 			PX_Json_Value *pExistValue=PX_JsonGetObjectValue(pValue,name);
@@ -967,7 +967,7 @@ px_bool PX_JsonAddBoolean(PX_Json *pjson,const px_char parent_payload[],const px
 
 			return PX_TRUE;
 		}
-		break;
+		//break;
 	default:
 		return PX_FALSE;
 	}
@@ -1003,7 +1003,7 @@ px_bool PX_JsonAddArray(PX_Json *pjson,const px_char parent_payload[],const px_c
 
 			return PX_TRUE;
 		}
-		break;
+		//break;
 	case PX_JSON_VALUE_TYPE_OBJECT:
 		{
 			PX_Json_Value *pExistValue=PX_JsonGetObjectValue(pValue,name);
@@ -1022,7 +1022,7 @@ px_bool PX_JsonAddArray(PX_Json *pjson,const px_char parent_payload[],const px_c
 			
 			return PX_TRUE;
 		}
-		break;
+		//break;
 	default:
 		return PX_FALSE;
 	}
@@ -1060,7 +1060,7 @@ px_bool PX_JsonAddObject(PX_Json *pjson,const px_char parent_payload[],const px_
 			
 			return PX_TRUE;
 		}
-		break;
+		//break;
 	case PX_JSON_VALUE_TYPE_OBJECT:
 		{
 
@@ -1079,7 +1079,7 @@ px_bool PX_JsonAddObject(PX_Json *pjson,const px_char parent_payload[],const px_
 			}
 			return PX_TRUE;
 		}
-		break;
+		//break;
 	default:
 		return PX_FALSE;
 	}

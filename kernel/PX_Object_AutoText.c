@@ -46,7 +46,7 @@ px_void PX_Object_AutoTextRender(px_surface *psurface, PX_Object *pObject,px_uin
 	px_int x_draw_oft,y_draw_oft,cursor,fsize;
 	PX_Object_AutoText *pAt=(PX_Object_AutoText *)pObject->pObject;
 	const px_char *Text=pAt->text.buffer;
-	px_float objx,objy,objWidth,objHeight;
+	px_float objx,objy,objHeight,objWidth;
 	px_float inheritX,inheritY;
 
 	PX_ObjectGetInheritXY(pObject,&inheritX,&inheritY);

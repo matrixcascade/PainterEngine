@@ -168,13 +168,14 @@ int PX_FileGetDirectoryFileCount(const char path[],PX_FILEENUM_TYPE type,const c
 				if (filter[0]&&FindFileData.dwFileAttributes !=FILE_ATTRIBUTE_DIRECTORY)
 				{
 					const char *pFilter=filter;
-					while (pFilter[1])
+					while (pFilter[0])
 					{
-						if (strstr(FindFileData.cFileName,filter))
+						if (strstr(FindFileData.cFileName,pFilter))
 						{
 							count++;
+							break;
 						}
-						pFilter+=strlen(pFilter);
+						pFilter+=strlen(pFilter)+1;
 					}
 					
 				} else
@@ -191,13 +192,15 @@ int PX_FileGetDirectoryFileCount(const char path[],PX_FILEENUM_TYPE type,const c
 					if (filter[0])
 					{
 						const char *pFilter=filter;
-						while (pFilter[1])
+						while (pFilter[0])
 						{
-							if (strstr(FindFileData.cFileName,filter))
+							if (strstr(FindFileData.cFileName,pFilter))
 							{
 								count++;
+								break;
 							}
-							pFilter+=strlen(pFilter);
+							pFilter+=strlen(pFilter)+1;
+
 						}
 					} else
 					{
@@ -287,14 +290,15 @@ int PX_FileGetDirectoryFileName(const char path[],int count,char FileName[][260]
 				if (filter[0]&&FindFileData.dwFileAttributes !=FILE_ATTRIBUTE_DIRECTORY)
 				{
 					const char *pFilter=filter;
-					while (pFilter[1])
+					while (pFilter[0])
 					{
-						if (strstr(FindFileData.cFileName,filter))
+						if (strstr(FindFileData.cFileName,pFilter))
 						{
 							strcpy_s(FileName[index],260,FindFileData.cFileName);
 							index++;
+							break;
 						}
-						pFilter+=strlen(pFilter);
+						pFilter+=strlen(pFilter)+1;
 					}
 				} else
 				{
@@ -311,14 +315,15 @@ int PX_FileGetDirectoryFileName(const char path[],int count,char FileName[][260]
 					if (filter[0])
 					{
 						const char *pFilter=filter;
-						while (pFilter[1])
+						while (pFilter[0])
 						{
-							if (strstr(FindFileData.cFileName,filter))
+							if (strstr(FindFileData.cFileName,pFilter))
 							{
 								strcpy_s(FileName[index],260,FindFileData.cFileName);
 								index++;
+								break;
 							}
-							pFilter+=strlen(pFilter);
+							pFilter+=strlen(pFilter)+1;
 						}
 					} else
 					{

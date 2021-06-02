@@ -51,3 +51,4 @@ px_void PX_Object_SelectBarSetBorderColor(PX_Object *pObject,px_color color);
 px_void PX_Object_SelectBarSetBackgroundColor(PX_Object *pObject,px_color color);
 
 #endif
+

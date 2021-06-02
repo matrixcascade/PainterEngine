@@ -139,10 +139,16 @@ int PX_FileGetDirectoryFileCount(const char path[],PX_FILEENUM_TYPE type,const c
             {
                 if (filter)
                 {
-                    if (strstr(ent->d_name,filter))
-                    {
-                        count++;
-                    }
+					const char *pFilter=filter;
+					while (pFilter[0])
+					{
+						if (strstr(ent->d_name,pFilter))
+						{
+							count++;
+							break;
+						}
+						pFilter+=strlen(pFilter)+1;
+					}
                 } else
                 {
                     count++;
@@ -155,10 +161,16 @@ int PX_FileGetDirectoryFileCount(const char path[],PX_FILEENUM_TYPE type,const c
                 {
                     if (filter)
                     {
-                        if (strstr(ent->d_name,filter))
-                        {
-                            count++;
-                        }
+						const char *pFilter=filter;
+						while (pFilter[0])
+						{
+							if (strstr(ent->d_name,pFilter))
+							{
+								count++;
+								break;
+							}
+							pFilter+=strlen(pFilter)+1;
+						}
                     } else
                     {
                         count++;
@@ -172,10 +184,16 @@ int PX_FileGetDirectoryFileCount(const char path[],PX_FILEENUM_TYPE type,const c
                 {
                     if (filter)
                     {
-                        if (strstr(ent->d_name,filter))
-                        {
-                            count++;
-                        }
+						const char *pFilter=filter;
+						while (pFilter[0])
+						{
+							if (strstr(ent->d_name,pFilter))
+							{
+								count++;
+								break;
+							}
+							pFilter+=strlen(pFilter)+1;
+						}
                     } else
                     {
                         count++;
@@ -189,10 +207,16 @@ int PX_FileGetDirectoryFileCount(const char path[],PX_FILEENUM_TYPE type,const c
                 {
                     if (filter)
                     {
-                        if (strstr(ent->d_name,filter))
-                        {
-                            count++;
-                        }
+						const char *pFilter=filter;
+						while (pFilter[0])
+						{
+							if (strstr(ent->d_name,pFilter))
+							{
+								count++;
+								break;
+							}
+							pFilter+=strlen(pFilter)+1;
+						}
                     } else
                     {
                         count++;
@@ -242,11 +266,17 @@ int PX_FileGetDirectoryFileName(const char path[],int count,char FileName[][260]
             {
                 if (filter)
                 {
-                    if (strstr(ent->d_name,filter))
-                    {
-                        strcpy(FileName[index],ent->d_name);
-                        index++;
-                    }
+					const char *pFilter=filter;
+					while (pFilter[0])
+					{
+						if (strstr(ent->d_name,pFilter))
+						{
+							strcpy(FileName[index],ent->d_name);
+							index++;
+							break;
+						}
+						pFilter+=strlen(pFilter)+1;
+					}
                 } else
                 {
                     strcpy(FileName[index],ent->d_name);
@@ -260,11 +290,17 @@ int PX_FileGetDirectoryFileName(const char path[],int count,char FileName[][260]
                 {
                     if (filter)
                     {
-                        if (strstr(ent->d_name,filter))
-                        {
-                            strcpy(FileName[index],ent->d_name);
-                            index++;
-                        }
+						const char *pFilter=filter;
+						while (pFilter[0])
+						{
+							if (strstr(ent->d_name,pFilter))
+							{
+								strcpy(FileName[index],ent->d_name);
+								index++;
+								break;
+							}
+							pFilter+=strlen(pFilter)+1;
+						}
                     } else
                     {
                         strcpy(FileName[index],ent->d_name);
@@ -279,11 +315,17 @@ int PX_FileGetDirectoryFileName(const char path[],int count,char FileName[][260]
                 {
                     if (filter)
                     {
-                        if (strstr(ent->d_name,filter))
-                        {
-                            strcpy(FileName[index],ent->d_name);
-                            index++;
-                        }
+						const char *pFilter=filter;
+						while (pFilter[0])
+						{
+							if (strstr(ent->d_name,pFilter))
+							{
+								strcpy(FileName[index],ent->d_name);
+								index++;
+								break;
+							}
+							pFilter+=strlen(pFilter)+1;
+						}
                     } else
                     {
                         strcpy(FileName[index],ent->d_name);
@@ -298,11 +340,17 @@ int PX_FileGetDirectoryFileName(const char path[],int count,char FileName[][260]
                 {
                     if (filter)
                     {
-                        if (strstr(ent->d_name,filter))
-                        {
-                            strcpy(FileName[index],ent->d_name);
-                            index++;
-                        }
+						const char *pFilter=filter;
+						while (pFilter[0])
+						{
+							if (strstr(ent->d_name,pFilter))
+							{
+								strcpy(FileName[index],ent->d_name);
+								index++;
+								break;
+							}
+							pFilter+=strlen(pFilter)+1;
+						}
                     } else
                     {
                         strcpy(FileName[index],ent->d_name);

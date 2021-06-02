@@ -27,7 +27,7 @@ px_void PX_SoundPlayPause(PX_SoundPlay *pSoundPlay,px_bool pause)
 px_bool PX_SoundPlayAdd(PX_SoundPlay *pSound,PX_Sound sounddata)
 {
 	px_int i;
-	px_int min_size=0,index;
+	px_int min_size=0,index=-1;
 	while(pSound->bLock);
 	pSound->bLock=PX_TRUE;
 
@@ -218,6 +218,57 @@ px_bool PX_SoundPlayRead(PX_SoundPlay *pSoundPlay,px_byte *pBuffer,px_int readSi
 	return PX_TRUE;
 }
 
+
+px_bool PX_SoundPlayReadCurrentPlayingData(PX_SoundPlay *pSoundPlay,px_int soundIndex,px_int channel,px_int16 *out,px_int count)
+{
+	PX_SoundData *pData;
+	px_int offset;
+	if (soundIndex>=PX_COUNTOF(pSoundPlay->Sounds)||soundIndex<0)
+	{
+		return PX_FALSE;
+	}
+	if (pSoundPlay->Sounds[soundIndex].data==PX_NULL)
+	{
+		return PX_FALSE;
+	}
+	if (channel<0||channel>=2)
+	{
+		return PX_FALSE;
+	}
+
+	pData=pSoundPlay->Sounds[soundIndex].data;
+	offset=pSoundPlay->Sounds[soundIndex].offset;
+	switch (pData->channel)
+	{
+	case PX_SOUND_CHANNEL_ONE:
+		{
+			if (pData->size-offset<count*2)
+			{
+				return PX_FALSE;
+			}
+			PX_memcpy(out,pData->buffer+offset,count*2);
+		}
+		break;
+	case PX_SOUND_CHANNEL_DOUBLE:
+		{
+			px_int i;
+			px_int16 *pdptr;
+			if (pData->size-offset<2*count*2)
+			{
+				return PX_FALSE;
+			}
+			pdptr=(px_int16 *)(pData->buffer+offset);
+			for (i=0;i<count;i++)
+			{
+				out[i]=pdptr[i*2+channel];
+			}
+		}
+		break;
+	}
+	return PX_TRUE;
+
+}
+
 px_void PX_SoundPlayFree(PX_SoundPlay *pSoundPlay)
 {
 	
@@ -234,7 +285,7 @@ px_void PX_SoundPlayClear(PX_SoundPlay *pSoundPlay)
 	}
 }
 
-px_bool PX_SoundPlayGetDataCount(PX_SoundPlay *pSoundPlay)
+px_int PX_SoundPlayGetDataCount(PX_SoundPlay *pSoundPlay)
 {
 	px_int count=0,j;
 	if (pSoundPlay->userread)
