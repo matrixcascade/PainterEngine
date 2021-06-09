@@ -3499,8 +3499,19 @@ px_void PX_FileGetPath(const px_char filefullName[],px_char _out[],px_int outSiz
 	for (i=0;i<s;i++)
 	{
 		_out[i]=filefullName[i];
+		if (i>=outSize-1)
+		{
+			_out[0]=0;
+			return;
+		}
+	}
+	if (i>0&&_out[i-1]==':')
+	{
+		_out[i]='/';
+		i++;
 	}
 	_out[i]=0;
+
 }
 
 px_void PX_FileGetExt(const px_char filefullName[],px_char _out[],px_int outSize)

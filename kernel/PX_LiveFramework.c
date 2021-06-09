@@ -1405,6 +1405,9 @@ PX_LiveLayer * PX_LiveFrameworkCreateLayer(PX_LiveFramework *plive,const px_char
 	layer.rel_currentStretch=1;
 	layer.rel_endStretch=1;
 
+	layer.RenderTextureIndex = -1;
+	layer.LinkTextureIndex = -1;
+
 	layer.parent_index=-1;
 	for (i=0;i<PX_COUNTOF(layer.child_index);i++)
 	{
@@ -1757,12 +1760,18 @@ px_void PX_LiveFrameworkDeleteLayer(PX_LiveFramework *plive,px_int index)
 		for (i=0;i<plive->layers.size;i++)
 		{
 			PX_LiveLayer *pSearchLayer=PX_VECTORAT(PX_LiveLayer,&plive->layers,i);
+
+			if (pSearchLayer->parent_index == index)
+			{
+				pSearchLayer->parent_index = -1;
+			}
+			else if (pSearchLayer->parent_index > index)
+			{
+				pSearchLayer->parent_index--;
+			}
+
 			for (j=0;j<PX_LIVE_LAYER_MAX_LINK_NODE;j++)
 			{
-				if (pSearchLayer->parent_index==index)
-				{
-					pSearchLayer->parent_index=-1;
-				}
 				if (pSearchLayer->child_index[j]==index)
 				{
 					px_int k;
@@ -1774,6 +1783,11 @@ px_void PX_LiveFrameworkDeleteLayer(PX_LiveFramework *plive,px_int index)
 							break;
 						}
 					}
+				}
+				
+				if (pSearchLayer->child_index[j] > index)
+				{
+					pSearchLayer->child_index[j]--;
 				}
 			}
 		}

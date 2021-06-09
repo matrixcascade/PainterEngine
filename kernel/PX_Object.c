@@ -9,7 +9,7 @@ PX_Object  * PX_ObjectGetChild( PX_Object *Object,px_int Index )
 		return PX_NULL;
 	}
 	pObject=Object->pChilds;
-	while (Index>=0&&pObject)
+	while (Index>0&&pObject)
 	{
 		pObject=pObject->pNextBrother;
 		Index--;
@@ -461,7 +461,7 @@ px_void PX_ObjectUpdate(PX_Object *Object,px_uint elpased )
 	}
 }
 
-px_void PX_ObjectRender(px_surface *pSurface, PX_Object *Object,px_uint elpased )
+static px_void PX_ObjectRenderEx(px_surface *pSurface, PX_Object *Object,px_uint elpased )
 {
 	if (Object==PX_NULL)
 	{
@@ -470,7 +470,7 @@ px_void PX_ObjectRender(px_surface *pSurface, PX_Object *Object,px_uint elpased 
 
 	if (Object->OnFocus)
 	{
-		PX_ObjectRender(pSurface,Object->pNextBrother,elpased);	
+		PX_ObjectRenderEx(pSurface,Object->pNextBrother,elpased);	
 
 		if (Object->Visible!=PX_FALSE)
 		{
@@ -484,7 +484,7 @@ px_void PX_ObjectRender(px_surface *pSurface, PX_Object *Object,px_uint elpased 
 				Object->Func_ObjectRender(pSurface,Object,elpased);
 			}
 
-			PX_ObjectRender(pSurface,Object->pChilds,elpased);
+			PX_ObjectRenderEx(pSurface,Object->pChilds,elpased);
 
 			
 			if (Object->Func_ObjectEndRender)
@@ -505,18 +505,69 @@ px_void PX_ObjectRender(px_surface *pSurface, PX_Object *Object,px_uint elpased 
 			{
 				Object->Func_ObjectRender(pSurface,Object,elpased);
 			}
-			PX_ObjectRender(pSurface,Object->pChilds,elpased);
+			PX_ObjectRenderEx(pSurface,Object->pChilds,elpased);
 			
 			if (Object->Func_ObjectEndRender)
 			{
 				Object->Func_ObjectEndRender(pSurface,Object,elpased);
 			}
 		}
-		PX_ObjectRender(pSurface,Object->pNextBrother,elpased);	
+		PX_ObjectRenderEx(pSurface,Object->pNextBrother,elpased);	
 	}
 }
 
+px_void PX_ObjectRender(px_surface *pSurface, PX_Object *Object,px_uint elpased )
+{
+	if (Object==PX_NULL)
+	{
+		return;
+	}
 
+	if (Object->OnFocus)
+	{
+		
+		if (Object->Visible!=PX_FALSE)
+		{
+			if (Object->Func_ObjectBeginRender)
+			{
+				Object->Func_ObjectBeginRender(pSurface,Object,elpased);
+			}
+
+			if (Object->Func_ObjectRender!=0)
+			{
+				Object->Func_ObjectRender(pSurface,Object,elpased);
+			}
+
+			PX_ObjectRenderEx(pSurface,Object->pChilds,elpased);
+
+
+			if (Object->Func_ObjectEndRender)
+			{
+				Object->Func_ObjectEndRender(pSurface,Object,elpased);
+			}
+		}
+	}
+	else
+	{
+		if (Object->Visible!=PX_FALSE)
+		{
+			if (Object->Func_ObjectBeginRender)
+			{
+				Object->Func_ObjectBeginRender(pSurface,Object,elpased);
+			}
+			if (Object->Func_ObjectRender!=0)
+			{
+				Object->Func_ObjectRender(pSurface,Object,elpased);
+			}
+			PX_ObjectRenderEx(pSurface,Object->pChilds,elpased);
+
+			if (Object->Func_ObjectEndRender)
+			{
+				Object->Func_ObjectEndRender(pSurface,Object,elpased);
+			}
+		}
+	}
+}
 
 px_bool PX_ObjectIsPointInRegion( PX_Object *pObject,px_float x,px_float y )
 {
