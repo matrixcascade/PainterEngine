@@ -4,7 +4,7 @@ px_bool PX_AnimationLibraryCreateFromMemory(px_memorypool *mp,PX_Animationlibrar
 {
 	PX_2DX_Header _header;
 	PX_TRaw_Header _trawheader;
-	px_int i;
+	px_int i,j;
 	px_byte *pbuffer;
 	px_uint reservedSize=size;
 	px_texture texture;
@@ -34,7 +34,10 @@ px_bool PX_AnimationLibraryCreateFromMemory(px_memorypool *mp,PX_Animationlibrar
 	PX_MemoryInitialize(mp,&panimation->code);
 	for (i=0;i<(px_int)_header.framecount;i++)
 	{
-		_trawheader=*(PX_TRaw_Header *)pbuffer;
+		for(j=0;j<sizeof(PX_TRaw_Header);j++)
+		{
+			*(((px_byte *)&_trawheader)+j)=*(pbuffer+j);
+		}
 
 		if (!PX_TextureCreateFromMemory(mp,pbuffer,reservedSize,&texture))
 		{
