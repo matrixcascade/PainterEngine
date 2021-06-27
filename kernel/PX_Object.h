@@ -68,6 +68,7 @@ enum PX_OBJECT_TYPE
   PX_OBJECT_TYPE_MESSAGEBOX		,
   PX_OBJECT_TYPE_PROTRACTOR		,
   PX_OBJECT_TYPE_TRANSFORMADAPTER,
+  PX_OBJECT_TYPE_PANC,
 };
 
 
@@ -409,6 +410,10 @@ px_void PX_ObjectExecuteEvent(PX_Object *pPost,PX_Object_Event Event);
 //////////////////////////////////////////////////////////////////////////
 //transform adapter
 #include "PX_Object_TransformAdapter.h"
+
+//////////////////////////////////////////////////////////////////////////
+//panc
+#include "PX_Object_Panc.h"
 
 #endif
 

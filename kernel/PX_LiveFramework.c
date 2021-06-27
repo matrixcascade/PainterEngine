@@ -644,6 +644,9 @@ static px_void PX_LiveFrameworkUpdateLayerInterpolation(PX_LiveFramework *plive,
 	}
 
 	//update parameters
+	pLayer->panc_currentx= pLayer->panc_beginx + (pLayer->panc_endx - pLayer->panc_beginx) * schedule;
+	pLayer->panc_currenty = pLayer->panc_beginy + (pLayer->panc_endy - pLayer->panc_beginy) * schedule;
+
 	//point translation
 	for (i=0;i<pLayer->vertices.size;i++)
 	{
@@ -671,6 +674,8 @@ static px_void PX_LiveFrameworkUpdateLayerInterpolation(PX_LiveFramework *plive,
 	
 	//rotation
 	pLayer->rel_currentRotationAngle=pLayer->rel_beginRotationAngle+(pLayer->rel_endRotationAngle-pLayer->rel_beginRotationAngle)*schedule;
+
+	
 
 }
 
@@ -743,8 +748,42 @@ static px_void PX_LiveFramework_UpdateLayerVertices(PX_LiveFramework *pLive,PX_L
 		resultPosition.x=plv->sourcePosition.x-pLayer->keyPoint.x;
 		resultPosition.y=plv->sourcePosition.y-pLayer->keyPoint.y;
 		resultPosition.z=plv->sourcePosition.z-pLayer->keyPoint.z;
-		//relative translation
+		//panc translation
+		if (pLayer->panc_currentx!=pLayer->panc_sx)
+		{
+			if (plv->sourcePosition.x>pLayer->panc_x&& plv->sourcePosition.x < pLayer->panc_x+pLayer->panc_width)
+			{
+				if (plv->sourcePosition.x < pLayer->panc_sx)
+				{
+					px_float disx = plv->sourcePosition.x - pLayer->panc_x;
+					resultPosition.x += disx * (pLayer->panc_currentx-pLayer->panc_x) /(pLayer->panc_sx- pLayer->panc_x) - disx;
+				}
+				else
+				{
+					px_float disx =  (pLayer->panc_x+pLayer->panc_width)- plv->sourcePosition.x;
+					resultPosition.x -= disx * (pLayer->panc_x + pLayer->panc_width - pLayer->panc_currentx) / (pLayer->panc_x + pLayer->panc_width - pLayer->panc_sx) - disx;
+				}
+			}
+
+			if (plv->sourcePosition.y > pLayer->panc_y && plv->sourcePosition.y < pLayer->panc_y + pLayer->panc_height)
+			{
+				if (plv->sourcePosition.y < pLayer->panc_sy)
+				{
+					px_float disy = plv->sourcePosition.y - pLayer->panc_y;
+					resultPosition.y += disy * (pLayer->panc_currenty - pLayer->panc_y) / (pLayer->panc_sy - pLayer->panc_y) - disy;
+				}
+				else
+				{
+					px_float disy = (pLayer->panc_y + pLayer->panc_height) - plv->sourcePosition.x;
+					resultPosition.y += disy * (pLayer->panc_y + pLayer->panc_height - pLayer->panc_currenty) / (pLayer->panc_y + pLayer->panc_height - pLayer->panc_sy) - disy;
+				}
+			}
+
+			
+		}
 		
+		
+		//relative translation
 		resultPosition.x+=plv->currentTranslation.x;
 		resultPosition.y+=plv->currentTranslation.y;
 		resultPosition.z+=plv->currentTranslation.z;
@@ -958,6 +997,27 @@ static px_bool PX_LiveFrameworkExecuteInstr(PX_LiveFramework *plive,px_int anima
 		//////////////////////////////////////////////////////////////////////////
 		//impulse
 		pLayer->rel_impulse=pPayload->impulse;
+
+
+		//////////////////////////////////////////////////////////////////////////
+		//panc
+		pLayer->panc_x = pPayload->panc_x;
+		pLayer->panc_y = pPayload->panc_y;
+
+		pLayer->panc_width = pPayload->panc_width;
+		pLayer->panc_height = pPayload->panc_height;
+
+		pLayer->panc_sx = pPayload->panc_sx;
+		pLayer->panc_sy = pPayload->panc_sy;
+
+		pLayer->panc_beginx = pLayer->panc_endx;
+		pLayer->panc_beginy = pLayer->panc_endy;
+
+		pLayer->panc_currentx = pLayer->panc_beginx;
+		pLayer->panc_currenty = pLayer->panc_beginy;
+
+		pLayer->panc_endx = pPayload->panc_endx;
+		pLayer->panc_endy = pPayload->panc_endy;
 
 		//////////////////////////////////////////////////////////////////////////
 		//vertices register

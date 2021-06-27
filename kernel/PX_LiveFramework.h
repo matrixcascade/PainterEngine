@@ -63,12 +63,17 @@ typedef struct
 
 typedef struct  
 {
-	px_point translation;//only root layer
-	px_float stretch;//only child layer
-	px_float rotation;
+	px_point32 translation;//only root layer
+	px_float32 stretch;//only child layer
+	px_float32 rotation;
 	px_int32 mapTexture;
 	px_int32 translationVerticesCount;
-	px_point impulse;
+	px_point32 impulse;
+
+	px_float panc_x, panc_y, panc_width, panc_height;
+	px_float panc_sx,panc_sy;
+	px_float panc_endx, panc_endy;
+	px_dword reserve[32];
 }PX_LiveAnimationFramePayload;
 //////////////////////////////////////////////////////////////////////////
 
@@ -108,6 +113,12 @@ struct _PX_LiveLayer
 	px_vector vertices;//PX_LiveVertex
 	//triangle
 	px_vector triangles;//PX_LiveTriangle
+
+	//panc
+	px_float panc_x, panc_y, panc_width, panc_height, panc_sx, panc_sy;
+	px_float panc_beginx, panc_beginy;
+	px_float panc_currentx, panc_currenty;
+	px_float panc_endx, panc_endy;
 
 	px_bool visible;
 	px_bool showMesh;

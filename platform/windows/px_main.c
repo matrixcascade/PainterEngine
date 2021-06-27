@@ -149,7 +149,7 @@ DWORD WINAPI DEMO_RenderThreadFunc(LPVOID p)
 			case  WM_KEYDOWN:
 				{
 					e.Event=PX_OBJECT_EVENT_KEYDOWN;
-					PX_Object_Event_SetKeyDown(&e,msg.wparam);
+					PX_Object_Event_SetKeyDown(&e,(px_uint)msg.wparam);
 				}
 				break;
 			case WM_MOUSEWHEEL:
@@ -259,14 +259,14 @@ void setCurrentDirectory()
 {
 	px_char szExeFilePathFileName[MAX_PATH];
 	px_char path[MAX_PATH];
-	GetModuleFileName(NULL, szExeFilePathFileName, MAX_PATH);
+	GetModuleFileNameA(NULL, szExeFilePathFileName, MAX_PATH);
 	PX_FileGetPath(szExeFilePathFileName,path,sizeof(path));
 	if (path[PX_strlen(path)-1]==':')
 	{
 		PX_strcat(path,"\\");
 	}
 
-	SetCurrentDirectory(path);
+	SetCurrentDirectoryA(path);
 }
 
 #ifdef _DEBUG
