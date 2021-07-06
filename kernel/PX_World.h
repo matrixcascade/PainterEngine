@@ -29,6 +29,7 @@ typedef struct
 	px_int     auxiliaryYSpacer;
 	px_bool    auxiliaryline;
 	px_color   auxiliaryline_color;
+	px_bool    showImpactRegion;
 	px_point   camera_offset;
 	px_memorypool *mp;
 	px_memorypool mp_WorldCalc;
@@ -60,5 +61,6 @@ px_void			PX_WorldSetAuxiliaryXYSpacer(PX_World *pw,px_int x,px_int y);
 px_void			PX_WorldEnableAuxiliaryLine(PX_World *pw,px_bool bline);
 px_void			PX_WorldSetAuxiliaryLineColor(PX_World *pw,px_color color);
 px_point        PX_WolrdObjectXYtoScreenXY(PX_World *pw,px_float x,px_float y);
+px_void			PX_WorldPostEvent(PX_World* pw, PX_Object_Event e);
 px_void         PX_WorldFree(PX_World *pw);
 #endif

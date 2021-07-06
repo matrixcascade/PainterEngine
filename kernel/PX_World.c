@@ -4,6 +4,7 @@
 px_bool PX_WorldInitialize(px_memorypool *mp,PX_World *World,px_int world_width,px_int world_height,px_int surface_width,px_int surface_height,px_dword calcSize)
 {
 	px_void *ptr;
+	PX_memset(World, 0, sizeof(PX_World));
 	if(!PX_VectorInitialize(mp,&World->pObjects,sizeof(PX_WorldObject),256)) return PX_FALSE;
 	if(!PX_VectorInitialize(mp,&World->pNewObjects,sizeof(PX_Object *),128)) return PX_FALSE;
 	World->mp=mp;
@@ -323,7 +324,7 @@ px_void PX_WorldUpdateOffset(PX_World *pw)
 	pw->offsety=(px_float)LeftTopY;
 }
 
-static px_void PX_WorldClildRender(px_surface *pSurface, PX_Object *Object,px_uint elpased,px_float oftX,px_float oftY)
+static px_void PX_WorldClildRender(PX_World *pworld,px_surface *pSurface, PX_Object *Object,px_uint elpased,px_float oftX,px_float oftY)
 {
 	if (Object==PX_NULL)
 	{
@@ -340,16 +341,30 @@ static px_void PX_WorldClildRender(px_surface *pSurface, PX_Object *Object,px_ui
 		Object->x-=oftX;
 		Object->y-=oftY;
 		Object->Func_ObjectRender(pSurface,Object,elpased);
+
+		if (pworld->showImpactRegion)
+		{
+			if (Object->diameter)
+			{
+				PX_GeoDrawSolidCircle(pSurface, (px_int)Object->x, (px_int)Object->y, (px_int)Object->diameter / 2, PX_COLOR(32, 255, 0, 0));
+			}
+			else
+			{
+				PX_GeoDrawRect(pSurface, (px_int)(Object->x- Object->Width/2), (px_int)(Object->y- Object->Height/2), (px_int)(Object->x + Object->Width/2), (px_int)(Object->y + Object->Height/2), PX_COLOR(32, 255, 0, 0));
+			}
+		}
+
+
 		Object->x=x;
 		Object->y=y;
 	}
 	if (Object->pNextBrother!=PX_NULL)
 	{
-		PX_WorldClildRender(pSurface,Object->pNextBrother,elpased,oftX,oftY);
+		PX_WorldClildRender(pworld,pSurface,Object->pNextBrother,elpased,oftX,oftY);
 	}
 	if (Object->pChilds!=PX_NULL)
 	{
-		PX_WorldClildRender(pSurface,Object->pNextBrother,elpased,oftX,oftY);
+		PX_WorldClildRender(pworld,pSurface,Object->pNextBrother,elpased,oftX,oftY);
 	}
 }
 
@@ -414,7 +429,7 @@ px_void PX_WorldRender(px_surface *psurface,PX_World *pw,px_uint elpased)
 
 	for (i=0;i<pw->aliveCount;i++)
 	{
-		PX_WorldClildRender(psurface,(PX_Object *)ArrayIndex[i].pData,elpased,pw->offsetx,pw->offsety);
+		PX_WorldClildRender(pw,psurface,(PX_Object *)ArrayIndex[i].pData,elpased,pw->offsetx,pw->offsety);
 	}
 	MP_Reset(calcmp);
 }
@@ -443,6 +458,20 @@ px_void PX_WorldSetAuxiliaryLineColor(PX_World *pw,px_color color)
 px_point PX_WolrdObjectXYtoScreenXY(PX_World *pw,px_float x,px_float y)
 {
 	return PX_POINT(x-pw->offsetx,y-pw->offsety,0);
+}
+
+px_void PX_WorldPostEvent(PX_World* pw, PX_Object_Event e)
+{
+	PX_WorldObject* pwo;
+	int i;
+	for (i = 0; i < pw->pObjects.size; i++)
+	{
+		pwo = PX_VECTORAT(PX_WorldObject, &pw->pObjects, i);
+		if (pwo->pObject)
+		{
+			PX_ObjectPostEvent(pwo->pObject, e);
+		}
+	}
 }
 
 px_void PX_WorldFree(PX_World *pw)

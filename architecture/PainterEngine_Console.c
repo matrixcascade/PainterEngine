@@ -5,7 +5,7 @@ static char const fox_console_logo[]=\
 #include "PainterEngine_FoxLogo.h"
 };
 
-char const PC_ScriptPreload[]="#name \"shell\"\r\n\
+static char const PC_ScriptPreload[]="#name \"shell\"\r\n\
 							  #runtime stack 1024\r\n\
 							  host int print(string s);\r\n\
 							  host int printimage(string s);\r\n\
@@ -65,7 +65,7 @@ px_void PX_ConsoleUpdateEx(PX_Console *pc)
 PX_Object * PX_ConsolePrintText(PX_Console *pc,const px_char *text)
 {
 	PX_ConsoleColumn obj;
-	PX_Object *pObject=PX_Object_AutoTextCreate(&pc->runtime->mp_ui,pc->Area,0,0,pc->runtime->surface_width-1,PX_NULL);
+	PX_Object *pObject=PX_Object_AutoTextCreate(&pc->runtime->mp_ui,pc->Area,0,0,(px_int)pc->Area->Width-1,PX_NULL);
 
 	if (pObject)
 	{
@@ -477,21 +477,25 @@ px_void PX_ConsoleOnMouseDown(PX_Object *Obj,PX_Object_Event e,px_void *user_ptr
 }
 
 
-px_bool PC_ConsoleInit(PX_Console *pc)
+px_bool PX_ConsoleInitializeEx(PX_Runtime *runtime,PX_Console *pc,px_int x,px_int y,px_int width,px_int height)
 {
+	//console initialize
+	pc->runtime=runtime;
+	pc->registry_call=PX_NULL;
+	pc->script_header_append=PX_NULL;
 
 	pc->show=PX_TRUE;
 	pc->max_column=PC_CONSOLE_DEFAULT_MAX_COLUMN;
 	pc->column=0;
 	if(!(pc->Root=PX_ObjectCreate(&pc->runtime->mp_ui,0,0,0,0,0,0,0))) return PX_FALSE;
-	if(!(pc->Area=PX_Object_ScrollAreaCreate(&pc->runtime->mp_ui,pc->Root,0,0,pc->runtime->surface_width,pc->runtime->surface_height))) return PX_FALSE;
+	if(!(pc->Area=PX_Object_ScrollAreaCreate(&pc->runtime->mp_ui,pc->Root,x,y,width,height))) return PX_FALSE;
 
 
 	pc->Area->User_ptr=pc;
 	PX_ObjectRegisterEvent(pc->Area,PX_OBJECT_EVENT_KEYDOWN,PX_ConsoleOnEnter,PX_NULL);
 	PX_ObjectRegisterEvent(pc->Area,PX_OBJECT_EVENT_CURSORDOWN,PX_ConsoleOnMouseDown,PX_NULL);
 	PX_Object_ScrollAreaSetBorder(pc->Area,PX_FALSE);
-	if(!(pc->Input=PX_Object_EditCreate(&pc->runtime->mp_ui,PX_Object_ScrollAreaGetIncludedObjects(pc->Area),0,0,pc->runtime->surface_width-1,PX_FontGetCharactorHeight()+4,PX_NULL))) return PX_FALSE;
+	if(!(pc->Input=PX_Object_EditCreate(&pc->runtime->mp_ui,PX_Object_ScrollAreaGetIncludedObjects(pc->Area),0,0,width-1,PX_FontGetCharactorHeight()+4,PX_NULL))) return PX_FALSE;
 	PX_Object_EditSetTextColor(pc->Input,PX_COLOR(255,0,255,0));
 	PX_Object_EditSetCursorColor(pc->Input,PX_COLOR(255,0,255,0));
 	PX_Object_EditSetTextColor(pc->Input,PX_COLOR(255,0,255,0));
@@ -502,12 +506,12 @@ px_bool PC_ConsoleInit(PX_Console *pc)
 
 	PX_VectorInitialize(&pc->runtime->mp_ui,&pc->pObjects,sizeof(PX_ConsoleColumn),PC_CONSOLE_DEFAULT_MAX_COLUMN);
 
-	
-//////////////////////////////////////////////////////////////////////////
+
+	//////////////////////////////////////////////////////////////////////////
 	//logo
-	
+
 	if(!PX_ResourceLibraryLoad(&pc->runtime->ResourceLibrary,PX_RESOURCE_TYPE_TEXTURE,(px_byte *)fox_console_logo,sizeof(fox_console_logo),"console_logo"))return PX_FALSE;
-	
+
 	PX_ConsoleShowImage(pc,"console_logo");
 	PX_ConsolePrintText(pc,"----------------------------------------");
 	PX_ConsolePrintText(pc,"-PainterEngine JIT Compilation Console -\n-Code By DBinary Build on 2019         -\n-Refer To:www.GitHub.com/matrixcascade -");
@@ -515,16 +519,12 @@ px_bool PC_ConsoleInit(PX_Console *pc)
 	return PX_TRUE;
 }
 
+
 px_bool PX_ConsoleInitialize(PX_Runtime *runtime,PX_Console *pc)
 {
-	//console initialize
-	pc->runtime=runtime;
-	pc->registry_call=PX_NULL;
-	pc->script_header_append=PX_NULL;
-	if(!PC_ConsoleInit(pc))return PX_FALSE;
-
-	return PX_TRUE;
+	return PX_ConsoleInitializeEx(runtime,pc,0,0,runtime->surface_width,runtime->surface_height);
 }
+
 px_void PX_ConsolePostEvent(PX_Console *pc,PX_Object_Event e)
 {
 	if(pc->show)
@@ -565,11 +565,11 @@ px_void PX_ConsoleShow(PX_Console *pc,px_bool b)
 	pc->show=b;
 }
 
-px_void PX_ConsoleRender(PX_Console *pc,px_dword elpased)
+px_void PX_ConsoleRender(px_surface *psurface,PX_Console *pc,px_dword elpased)
 {
 	if(pc->show)
 	{
-		PX_ObjectRender(&pc->runtime->RenderSurface,pc->Area,elpased);
+		PX_ObjectRender(psurface,pc->Area,elpased);
 	}
 }
 

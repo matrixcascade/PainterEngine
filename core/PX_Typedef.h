@@ -18,7 +18,7 @@
 #define     PX_PI				3.141592653589793238462
 #define     PX_e                (2.7182818284590452353602)
 #define     PX_e2               (PX_e*PX_e)
-#define     PX_RAND_MAX         (0xffff)
+#define     PX_RAND_MAX         (0xffffff)
 
 
 #ifdef _DEBUG
@@ -136,6 +136,7 @@ typedef struct
 	px_float x, y;
 }px_point2D;
 
+typedef px_point2D px_vector2D;
 typedef px_point px_point3D;
 typedef px_point px_vector3D;
 
