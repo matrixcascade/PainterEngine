@@ -45,12 +45,4 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
-
-# Xmake cache
-.xmake/
-.cache/
 build/
-compile_commands.json
-
-# MacOS Cache
-.DS_Store

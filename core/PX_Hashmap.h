@@ -26,8 +26,7 @@ typedef struct
 	struct px_rb_root root;
 }px_map;
 
-typedef struct		__px_map_element
-{
+typedef struct	__px_map_element{
 	struct px_rb_node node;//must be first member
 	px_char		string[PX_HASHMAP_STRINGKEY_LEN];
 	union
