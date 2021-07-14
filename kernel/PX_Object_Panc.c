@@ -103,9 +103,6 @@ px_void PX_Object_PancRender(px_surface *pSurface,PX_Object *pObject,px_dword el
 
 	PX_GeoDrawBorder(pSurface,(px_int)objx,(px_int)objy,(px_int)(objx+objWidth),(px_int)(objy+objHeight),3,pDesc->borderColor);
 
-
-
-
 }
 
 px_void PX_Object_PancOnCursorDown(PX_Object *pObject,PX_Object_Event e,px_void *ptr)
@@ -124,6 +121,7 @@ px_void PX_Object_PancOnCursorDown(PX_Object *pObject,PX_Object_Event e,px_void 
 	x=PX_Object_Event_GetCursorX(e);
 	y=PX_Object_Event_GetCursorY(e);
 
+	
 	pDesc->bselect=PX_Object_Panc_bselect_none;
 	if ((x-pDesc->currentX)*(x-pDesc->currentX)+(y-pDesc->currentY)*(y-pDesc->currentY)<64)
 	{
@@ -132,29 +130,30 @@ px_void PX_Object_PancOnCursorDown(PX_Object *pObject,PX_Object_Event e,px_void 
 	}
 	
 
-	if ((x-objx)*(x-objx)+(y-objy)*(y-objy)<3)
+	if ((x-objx)*(x-objx)+(y-objy)*(y-objy)<25)
 	{
 		pDesc->bselect=PX_Object_Panc_bselect_lefttop;
 		return;
 	}
 
-	if ((x-objx-objWidth)*(x-objx-objWidth)+(y-objy)*(y-objy)<3)
+	if ((x-objx-objWidth)*(x-objx-objWidth)+(y-objy)*(y-objy)<25)
 	{
 		pDesc->bselect=PX_Object_Panc_bselect_righttop;
 		return;
 	}
 
-	if ((x-objx)*(x-objx)+(y-objy-objHeight)*(y-objy-objHeight)<3)
+	if ((x-objx)*(x-objx)+(y-objy-objHeight)*(y-objy-objHeight)<25)
 	{
 		pDesc->bselect=PX_Object_Panc_bselect_leftbottom;
 		return;
 	}
 
-	if ((x-objx-objWidth)*(x-objx-objWidth)+(y-objy-objHeight)*(y-objy-objHeight)<3)
+	if ((x-objx-objWidth)*(x-objx-objWidth)+(y-objy-objHeight)*(y-objy-objHeight)<25)
 	{
 		pDesc->bselect=PX_Object_Panc_bselect_rightbottom;
 		return;
 	}
+	
 }
 
 px_void PX_Object_PancOnCursorRDown(PX_Object* pObject, PX_Object_Event e, px_void* ptr)
@@ -371,7 +370,7 @@ PX_Object * PX_Object_PancCreate(px_memorypool *mp,PX_Object *Parent,px_float x,
 {
 	PX_Object_Panc panc;
 	PX_Object *pObject;
-
+	PX_memset(&panc, 0, sizeof(panc));
 	panc.sourceX=x+widht/2;
 	panc.sourceY=y+height/2;
 

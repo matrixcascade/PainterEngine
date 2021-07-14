@@ -1,5 +1,5 @@
-#ifndef PX_OBJECT_WIDGET_H
-#define PX_OBJECT_WIDGET_H
+#ifndef PX_OBJECT_SCALEBOX_H
+#define PX_OBJECT_SCALEBOX_H
 #include "PX_Object.h"
 
 

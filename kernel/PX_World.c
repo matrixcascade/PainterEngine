@@ -13,7 +13,7 @@ px_bool PX_WorldInitialize(px_memorypool *mp,PX_World *World,px_int world_width,
 	World->surface_height=surface_height;
 	World->surface_width=surface_width;
 	World->auxiliaryline=PX_TRUE;
-	World->auxiliaryline_color=PX_COLOR(255,255,192,255);
+	World->auxiliaryline_color=PX_COLOR(64,255,192,255);
 	World->camera_offset=PX_POINT(0,0,0);
 	World->aliveCount=0;
 	World->offsetx=0;

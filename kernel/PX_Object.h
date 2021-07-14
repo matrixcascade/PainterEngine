@@ -69,6 +69,7 @@ enum PX_OBJECT_TYPE
   PX_OBJECT_TYPE_PROTRACTOR		,
   PX_OBJECT_TYPE_TRANSFORMADAPTER,
   PX_OBJECT_TYPE_PANC,
+  PX_OBJECT_TYPE_DESIGNERBOX,
 };
 
 
@@ -264,9 +265,9 @@ struct _PX_Object_EventAction
 typedef struct _PX_Object_EventAction PX_OBJECT_EventAction;
 
 
-PX_Object *PX_ObjectCreate(px_memorypool *mp,PX_Object *Parent,px_float x,px_float y,px_float z,px_float Width,px_float Height,px_float Lenght);
+PX_Object *PX_ObjectCreate(px_memorypool *mp,PX_Object *Parent,px_float x,px_float y,px_float z,px_float Width,px_float Height,px_float Length);
 PX_Object *PX_ObjectCreateEx(px_memorypool *mp,PX_Object *Parent,\
-	px_float x,px_float y,px_float z,px_float Width,px_float Height,px_float Lenght,\
+	px_float x,px_float y,px_float z,px_float Width,px_float Height,px_float Length,\
 	px_int type,\
 	Function_ObjectUpdate Func_ObjectUpdate,\
 	Function_ObjectRender Func_ObjectRender,\
@@ -276,7 +277,7 @@ PX_Object *PX_ObjectCreateEx(px_memorypool *mp,PX_Object *Parent,\
 	);
 #define    PX_ObjectGetDesc(type,pobject) ((type *)((pobject)->pObject))
 px_void    PX_ObjectGetInheritXY(PX_Object *Object,px_float *x,px_float *y);
-px_void	   PX_ObjectInit(px_memorypool *mp,PX_Object *Object,PX_Object *Parent,px_float x,px_float y,px_float z,px_float Width,px_float Height,px_float Lenght);
+px_void	   PX_ObjectInit(px_memorypool *mp,PX_Object *Object,PX_Object *Parent,px_float x,px_float y,px_float z,px_float Width,px_float Height,px_float Length);
 px_void    PX_ObjectSetUserCode(PX_Object *pObject,px_int user_int);
 px_void    PX_ObjectSetUserPointer(PX_Object *pObject,px_void *user_ptr);
 px_void    PX_ObjectDelete(PX_Object *pObject);

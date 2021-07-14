@@ -1,4 +1,4 @@
-#include "PX_Object_Image.h"
+#include "PX_Object_Animation.h"
 
 PX_Object * PX_Object_AnimationCreate(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y,PX_AnimationLibrary *lib)
 {
