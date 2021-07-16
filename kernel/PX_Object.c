@@ -266,7 +266,7 @@ PX_Object * PX_ObjectCreate(px_memorypool *mp,PX_Object *Parent,px_float x,px_fl
 		return PX_NULL;
 	}
 
-	PX_ObjectInit(mp,pObject,Parent,x,y,z,Width,Height,Lenght);
+	PX_ObjectInitialize(mp,pObject,Parent,x,y,z,Width,Height,Lenght);
 
 	return pObject;
 }
@@ -620,7 +620,7 @@ px_void PX_ObjectAddClild(PX_Object *Parent,PX_Object *child)
 	child->pNextBrother=PX_NULL;
 }
 
-px_void PX_ObjectInit(px_memorypool *mp,PX_Object *pObject,PX_Object *Parent,px_float x,px_float y,px_float z,px_float Width,px_float Height,px_float Lenght )
+px_void PX_ObjectInitialize(px_memorypool *mp,PX_Object *pObject,PX_Object *Parent,px_float x,px_float y,px_float z,px_float Width,px_float Height,px_float Lenght )
 {
 	PX_memset(pObject,0,sizeof(PX_Object));
 	

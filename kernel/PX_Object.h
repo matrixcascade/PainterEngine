@@ -152,11 +152,13 @@ struct _PX_Object
 	px_bool Visible;
 	px_bool ReceiveEvents;
 	px_int	Type;
+	px_int  designerTyoe;
 	union
 	{
 	px_int  User_int;
 	px_void *User_ptr;
 	};
+	
 	px_int   world_index;
 	px_dword impact_object_type;
 	px_dword impact_target_type;
@@ -277,7 +279,7 @@ PX_Object *PX_ObjectCreateEx(px_memorypool *mp,PX_Object *Parent,\
 	);
 #define    PX_ObjectGetDesc(type,pobject) ((type *)((pobject)->pObject))
 px_void    PX_ObjectGetInheritXY(PX_Object *Object,px_float *x,px_float *y);
-px_void	   PX_ObjectInit(px_memorypool *mp,PX_Object *Object,PX_Object *Parent,px_float x,px_float y,px_float z,px_float Width,px_float Height,px_float Length);
+px_void	   PX_ObjectInitialize(px_memorypool *mp,PX_Object *Object,PX_Object *Parent,px_float x,px_float y,px_float z,px_float Width,px_float Height,px_float Length);
 px_void    PX_ObjectSetUserCode(PX_Object *pObject,px_int user_int);
 px_void    PX_ObjectSetUserPointer(PX_Object *pObject,px_void *user_ptr);
 px_void    PX_ObjectDelete(PX_Object *pObject);
@@ -415,6 +417,11 @@ px_void PX_ObjectExecuteEvent(PX_Object *pPost,PX_Object_Event Event);
 //////////////////////////////////////////////////////////////////////////
 //panc
 #include "PX_Object_Panc.h"
+
+
+//////////////////////////////////////////////////////////////////////////
+//designerbox
+#include "PX_Object_DesignerBox.h"
 
 #endif
 

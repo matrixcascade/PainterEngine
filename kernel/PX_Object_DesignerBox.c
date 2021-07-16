@@ -32,8 +32,6 @@ px_void PX_Object_DesignerBoxRender(px_surface *pSurface,PX_Object *pObject,px_d
 	PX_GeoDrawSolidCircle(pSurface,(px_int)(objx),(px_int)(objy+objHeight),5,renderColor);
 	PX_GeoDrawSolidCircle(pSurface,(px_int)(objx+objWidth),(px_int)(objy+objHeight),5,renderColor);
 
-	PX_GeoDrawBorder(pSurface,(px_int)objx,(px_int)objy,(px_int)(objx+objWidth),(px_int)(objy+objHeight),3,pDesc->borderColor);
-
 }
 
 px_void PX_Object_DesignerBoxOnCursorDown(PX_Object *pObject,PX_Object_Event e,px_void *ptr)
@@ -54,14 +52,6 @@ px_void PX_Object_DesignerBoxOnCursorDown(PX_Object *pObject,PX_Object_Event e,p
 
 	
 	pDesc->bselect=PX_Object_DesignerBox_bselect_none;
-	if ((x- objx - objWidth/2)*(x - objx - objWidth / 2)+(y-  objy - objHeight / 2)*(y - objy - objHeight / 2)<64)
-	{
-		pDesc->bselect=PX_Object_DesignerBox_bselect_center;
-		pDesc->lastx = x;
-		pDesc->lasty = y;
-		return;
-	}
-	
 
 	if ((x-objx)*(x-objx)+(y-objy)*(y-objy)<25)
 	{
@@ -86,6 +76,17 @@ px_void PX_Object_DesignerBoxOnCursorDown(PX_Object *pObject,PX_Object_Event e,p
 		pDesc->bselect=PX_Object_DesignerBox_bselect_rightbottom;
 		return;
 	}
+
+	if (PX_ObjectIsCursorInRegion(pObject,e))
+	{
+		pDesc->bselect=PX_Object_DesignerBox_bselect_center;
+		pDesc->lastx = x;
+		pDesc->lasty = y;
+		return;
+	}
+	
+
+
 	
 }
 
@@ -112,9 +113,11 @@ px_void PX_Object_DesignerBoxOnCursorDrag(PX_Object *pObject,PX_Object_Event e,p
 	{
 	case PX_Object_DesignerBox_bselect_center:
 		{
+
+			pObject->x+=x-pDesc->lastx;
+			pObject->y+=y-pDesc->lasty;
 			pDesc->lastx= x;
 			pDesc->lasty =y;
-
 			PX_ObjectExecuteEvent(pObject, PX_OBJECT_BUILD_EVENT(PX_OBJECT_EVENT_VALUECHANGED));
 		}
 		break;
@@ -138,6 +141,7 @@ px_void PX_Object_DesignerBoxOnCursorDrag(PX_Object *pObject,PX_Object_Event e,p
 			pObject->y=y-inheritY;
 			pObject->Width+=widthinc;
 			pObject->Height+=heightinc;
+			PX_ObjectExecuteEvent(pObject, PX_OBJECT_BUILD_EVENT(PX_OBJECT_EVENT_VALUECHANGED));
 		}
 		break;
 	case PX_Object_DesignerBox_bselect_righttop:
@@ -160,6 +164,7 @@ px_void PX_Object_DesignerBoxOnCursorDrag(PX_Object *pObject,PX_Object_Event e,p
 
 			pObject->Width+=widthinc;
 			pObject->Height+=heightinc;
+			PX_ObjectExecuteEvent(pObject, PX_OBJECT_BUILD_EVENT(PX_OBJECT_EVENT_VALUECHANGED));
 		}
 		break;
 	case PX_Object_DesignerBox_bselect_leftbottom:
@@ -182,6 +187,7 @@ px_void PX_Object_DesignerBoxOnCursorDrag(PX_Object *pObject,PX_Object_Event e,p
 
 			pObject->Width+=widthinc;
 			pObject->Height+=heightinc;
+			PX_ObjectExecuteEvent(pObject, PX_OBJECT_BUILD_EVENT(PX_OBJECT_EVENT_VALUECHANGED));
 		}
 		break;
 
@@ -203,6 +209,7 @@ px_void PX_Object_DesignerBoxOnCursorDrag(PX_Object *pObject,PX_Object_Event e,p
 
 			pObject->Width+=widthinc;
 			pObject->Height+=heightinc;
+			PX_ObjectExecuteEvent(pObject, PX_OBJECT_BUILD_EVENT(PX_OBJECT_EVENT_VALUECHANGED));
 		}
 		break;
 	default:
@@ -214,8 +221,9 @@ px_void PX_Object_DesignerBoxOnCursorDrag(PX_Object *pObject,PX_Object_Event e,p
 PX_Object * PX_Object_DesignerBoxCreate(px_memorypool *mp,PX_Object *Parent,px_float x,px_float y,px_float widht,px_float height)
 {
 	PX_Object_DesignerBox desc;
-	PX_memset(&desc, 0, sizeof(desc));
 	PX_Object *pObject;
+	PX_memset(&desc, 0, sizeof(desc));
+	
 
 	desc.borderColor=PX_OBJECT_UI_DEFAULT_FONTCOLOR;
 

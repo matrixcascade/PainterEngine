@@ -239,7 +239,7 @@ px_bool PX_MQTT_SendConnect(PX_MQTT *Mqtt,PX_MQTT_ConnectDesc connectDesc)
 		}PX_MQTT_ConnectionFlag;
 
 		PX_MQTT_ConnectionFlag ConnectionFlag;
-		
+		ConnectionFlag.reserved=0;
 		ConnectionFlag.cleanSession=connectDesc.CleanSession;
 		if (connectDesc.willSize&&connectDesc.willContent)
 		{
