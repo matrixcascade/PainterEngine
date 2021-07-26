@@ -1,68 +1,58 @@
 #include "PX_Object_Joystick.h"
 
-PX_Object_Joystick *PX_Object_GetJoystick(PX_Object *pObject)
-{
-    if (pObject->Type != PX_OBJECT_TYPE_JOYSTICK)
-    {
+PX_Object_Joystick* PX_Object_GetJoystick(PX_Object* pObject) {
+    if (pObject->Type != PX_OBJECT_TYPE_JOYSTICK) {
         return PX_NULL;
     }
     return pObject->pObject;
 }
 
-px_double PX_Object_JoystickGetAngle(PX_Object *pObject)
-{
-    if (pObject->Type != PX_OBJECT_TYPE_JOYSTICK)
-    {
+px_double PX_Object_JoystickGetAngle(PX_Object* pObject) {
+    if (pObject->Type != PX_OBJECT_TYPE_JOYSTICK) {
         return 0.0;
     }
-    return ((PX_Object_Joystick *)(pObject->pObject))->Angle;
+    return ((PX_Object_Joystick*)(pObject->pObject))->Angle;
 }
 
-px_double PX_Object_JoystickGetDistance(PX_Object *pObject)
-{
-    if (pObject->Type != PX_OBJECT_TYPE_JOYSTICK)
-    {
+px_double PX_Object_JoystickGetDistance(PX_Object* pObject) {
+    if (pObject->Type != PX_OBJECT_TYPE_JOYSTICK) {
         return 0.0;
     }
-    return ((PX_Object_Joystick *)(pObject->pObject))->Distance;
+    return ((PX_Object_Joystick*)(pObject->pObject))->Distance;
 }
 
-px_point2D PX_Object_JoystickGetVector(PX_Object *pObject)
-{
+px_point2D PX_Object_JoystickGetVector(PX_Object* pObject) {
     px_point2D p;
-    if (pObject->Type != PX_OBJECT_TYPE_JOYSTICK)
-    {
+    if (pObject->Type != PX_OBJECT_TYPE_JOYSTICK) {
         p.x = 0.0;
         p.y = 0.0;
-    }
-    else
-    {
-        p.x = ((PX_Object_Joystick *)(pObject->pObject))->Distance *
-              PX_cosd(((PX_Object_Joystick *)(pObject->pObject))->Angle);
-        p.y = ((PX_Object_Joystick *)(pObject->pObject))->Distance *
-              PX_sind(((PX_Object_Joystick *)(pObject->pObject))->Angle);
+    } else {
+        p.x = ((PX_Object_Joystick*)(pObject->pObject))->Distance *
+            PX_cosd(((PX_Object_Joystick*)(pObject->pObject))->Angle);
+        p.y = ((PX_Object_Joystick*)(pObject->pObject))->Distance *
+            PX_sind(((PX_Object_Joystick*)(pObject->pObject))->Angle);
     }
     return p;
 }
 
 ///////////////////////////////////////////////
 
-px_void Func_JoystickRender(px_surface *pSurface, PX_Object *pObject, px_uint elpased);
-px_void Func_JoystickOnCursorDown(PX_Object *pObject, PX_Object_Event e, px_void *ptr);
-px_void Func_JoystickOnCursorDrag(PX_Object *pObject, PX_Object_Event e, px_void *ptr);
-px_void Func_JoystickOnCursorUp(PX_Object *pObject, PX_Object_Event e, px_void *ptr);
+px_void Func_JoystickRender(px_surface* pSurface, PX_Object* pObject, px_uint elpased);
+px_void Func_JoystickOnCursorDown(PX_Object* pObject, PX_Object_Event e, px_void* ptr);
+px_void Func_JoystickOnCursorDrag(PX_Object* pObject, PX_Object_Event e, px_void* ptr);
+px_void Func_JoystickOnCursorUp(PX_Object* pObject, PX_Object_Event e, px_void* ptr);
 
-PX_Object *PX_Object_CreateJoystick(px_memorypool *mp, PX_Object *Parent,
-                                    px_float x, px_float y,
-                                    px_float deferentR, px_float epicycleR, px_float senseR,
-                                    px_color deferentColor, px_color epicycleColor)
-{
+PX_Object* PX_Object_JoystickCreate(px_memorypool* mp, PX_Object* Parent,
+    px_float x, px_float y,
+    px_float deferentR, px_float epicycleR, px_float senseR,
+    px_color deferentColor, px_color epicycleColoe) {
 
-    PX_Object *pObject;
+    px_float z = 0.0f;
+    PX_Object* pObject;
     PX_Object_Joystick joystick;
 
     joystick.DeferentColor = deferentColor;
-    joystick.EpicycleColor = epicycleColor;
+    joystick.EpicycleColor = epicycleColoe;
     joystick.Position.x = x;
     joystick.Position.y = y;
     joystick.Distance = 0.0;
@@ -71,15 +61,22 @@ PX_Object *PX_Object_CreateJoystick(px_memorypool *mp, PX_Object *Parent,
     joystick.EpicycleRadius = epicycleR;
     joystick.SenseRadius = senseR;
 
-    pObject = PX_ObjectCreateEx(mp, Parent, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0,
-                                PX_NULL, Func_JoystickRender, PX_NULL, &joystick, sizeof(PX_Object_Joystick));
+    if (Parent != PX_NULL) {
+        joystick.Position.x += Parent->x;
+        joystick.Position.y += Parent->y;
+        z = Parent->z;
+    }
 
-    if (pObject == PX_NULL)
-    {
+    pObject = PX_ObjectCreateEx(mp, Parent,
+        joystick.Position.x, joystick.Position.y, z,
+        0.0f, 0.0f, 0.0f, PX_OBJECT_TYPE_JOYSTICK,
+        PX_NULL, Func_JoystickRender, PX_NULL, &joystick, sizeof(PX_Object_Joystick));
+
+    if (pObject == PX_NULL) {
         return PX_NULL;
     }
 
-    pObject->Type = PX_OBJECT_TYPE_JOYSTICK;
+    pObject->diameter = 2 * joystick.SenseRadius;
 
     PX_ObjectRegisterEvent(pObject, PX_OBJECT_EVENT_CURSORDOWN, Func_JoystickOnCursorDown, PX_NULL);
     PX_ObjectRegisterEvent(pObject, PX_OBJECT_EVENT_CURSORDRAG, Func_JoystickOnCursorDrag, PX_NULL);
@@ -88,9 +85,8 @@ PX_Object *PX_Object_CreateJoystick(px_memorypool *mp, PX_Object *Parent,
     return pObject;
 }
 
-px_void Func_JoystickRender(px_surface *pSurface, PX_Object *pObject, px_uint elpased)
-{
-    PX_Object_Joystick *pJoystick = pObject->pObject;
+px_void Func_JoystickRender(px_surface* pSurface, PX_Object* pObject, px_uint elpased) {
+    PX_Object_Joystick* pJoystick = pObject->pObject;
 
     PX_GeoDrawSolidCircle(
         pSurface,
@@ -104,51 +100,59 @@ px_void Func_JoystickRender(px_surface *pSurface, PX_Object *pObject, px_uint el
         pJoystick->EpicycleRadius, pJoystick->EpicycleColor);
 }
 
-px_void Func_JoystickOnCursorDown(PX_Object *pObject, PX_Object_Event e, px_void *ptr)
-{
-    PX_Object_Joystick *pJoystick = pObject->pObject;
+px_void Func_JoystickOnCursorDown(PX_Object* pObject, PX_Object_Event e, px_void* ptr) {
+    PX_Object_Joystick* pJoystick = pObject->pObject;
     px_float
         x = PX_Object_Event_GetCursorX(e) - pJoystick->Position.x,
         y = PX_Object_Event_GetCursorY(e) - pJoystick->Position.y,
         r = PX_sqrt(x * x + y * y);
 
-    if (r < pJoystick->SenseRadius)
-    {
+    if (pJoystick->IsAciton) {
+        return;
+    }
+
+    if (r < pJoystick->SenseRadius) {
+        pJoystick->IsAciton = PX_TRUE;
         pJoystick->Distance = r;
         pJoystick->Angle = PX_atan2(y, x);
-    }
-    else
-    {
+    } else {
         pJoystick->Distance = 0.0f;
     }
 }
 
-px_void Func_JoystickOnCursorDrag(PX_Object *pObject, PX_Object_Event e, px_void *ptr)
-{
-    PX_Object_Joystick *pJoystick = pObject->pObject;
+px_void Func_JoystickOnCursorDrag(PX_Object* pObject, PX_Object_Event e, px_void* ptr) {
+    PX_Object_Joystick* pJoystick = pObject->pObject;
     px_float
         x = PX_Object_Event_GetCursorX(e) - pJoystick->Position.x,
         y = PX_Object_Event_GetCursorY(e) - pJoystick->Position.y,
         r = PX_sqrt(x * x + y * y);
+
+    if (!pJoystick->IsAciton) {
+        return;
+    }
+
+    if (r <= pJoystick->DeferentRadius) {
+        pJoystick->Distance = r;
+    } else if (r <= pJoystick->SenseRadius) {
+        pJoystick->Distance = pJoystick->DeferentRadius;
+    } else {
+        pJoystick->Distance = 0.0f;
+        pJoystick->IsAciton = PX_FALSE;
+        return;
+    }
 
     pJoystick->Angle = PX_atan2(y, x);
-    if (r > pJoystick->DeferentRadius)
-    {
-        pJoystick->Distance = pJoystick->DeferentRadius;
-    }
-    else
-    {
-        pJoystick->Distance = r;
-    }
 }
 
-px_void Func_JoystickOnCursorUp(PX_Object *pObject, PX_Object_Event e, px_void *ptr)
-{
-    PX_Object_Joystick *pJoystick = pObject->pObject;
+px_void Func_JoystickOnCursorUp(PX_Object* pObject, PX_Object_Event e, px_void* ptr) {
+    PX_Object_Joystick* pJoystick = pObject->pObject;
     px_float
         x = PX_Object_Event_GetCursorX(e) - pJoystick->Position.x,
         y = PX_Object_Event_GetCursorY(e) - pJoystick->Position.y,
         r = PX_sqrt(x * x + y * y);
 
-    pJoystick->Distance = 0.0f;
+    if (r <= pJoystick->SenseRadius) {
+        pJoystick->Distance = 0.0f;
+        pJoystick->IsAciton = PX_FALSE;
+    }
 }

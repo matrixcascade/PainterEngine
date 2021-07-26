@@ -12,9 +12,10 @@ typedef struct {
     px_float DeferentRadius;
     px_float EpicycleRadius;
     px_float SenseRadius;
+    px_bool IsAciton;
 }PX_Object_Joystick;
 
-PX_Object* PX_Object_CreateJoystick(px_memorypool* mp, PX_Object* Parent,
+PX_Object* PX_Object_JoystickCreate(px_memorypool* mp, PX_Object* Parent,
     px_float x, px_float y,
     px_float deferentR, px_float epicycleR, px_float senseR,
     px_color deferentColor, px_color epicycleColoe);
@@ -27,5 +28,5 @@ px_double PX_Object_JoystickGetDistance(PX_Object* pObject);
 
 px_point2D PX_Object_JoystickGetVector(PX_Object *pObject);
 
-#endif // !PX_ROCKER
+#endif
 
