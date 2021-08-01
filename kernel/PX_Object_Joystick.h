@@ -6,9 +6,8 @@
 typedef struct {
     px_color DeferentColor;
     px_color EpicycleColor;
-    px_point2D Position;
-    px_double Distance;
-    px_double Angle;
+    px_float Distance;
+    px_float Angle;
     px_float DeferentRadius;
     px_float EpicycleRadius;
     px_float SenseRadius;

@@ -180,6 +180,28 @@ px_void PX_Object_ListRender(px_surface *psurface, PX_Object *pObject,px_uint el
 	objWidth=pObject->Width;
 	objHeight=pObject->Height;
 
+	if (pList->Items.size!=(px_int)(objHeight/(pList->ItemHeight) + 2))
+	{
+		PX_Object_ListItem Item;
+		for (i=0;i<pList->Items.size;i++)
+		{
+			PX_Object* pItemObject = *PX_VECTORAT(PX_Object*, &pList->Items, i);
+			PX_ObjectDelete(pItemObject);
+		}
+
+		
+		PX_VectorClear(&pList->Items);
+
+		for (i = 0; i < (px_int)(objHeight / pList->ItemHeight + 2); i++)
+		{
+			Item.pList = pObject;
+			Item.pdata = PX_NULL;
+			pItemObject = PX_ObjectCreateEx(pList->mp, PX_NULL, 0, 0, 0, (px_float)pObject->Width, (px_float)pList->ItemHeight, 0, PX_OBJECT_TYPE_LISTITEM, PX_NULL, PX_NULL, PX_NULL, &Item, sizeof(PX_Object_ListItem));
+			if (!pList->CreateFunctions(pList->mp, pItemObject, pList->userptr)) return;
+			if (!PX_VectorPushback(&pList->Items, &pItemObject))return;
+		}
+	}
+
 
 	if (pList->ItemHeight*pList->pData.size>objHeight)
 	{
@@ -214,6 +236,7 @@ px_void PX_Object_ListRender(px_surface *psurface, PX_Object *pObject,px_uint el
 		pItemObject=*PX_VECTORAT(PX_Object *,&pList->Items,i);
 		pItemObject->x=0;
 		pItemObject->y=(px_float)iy;
+		pItemObject->Width = pObject->Width;
 		pItem=PX_Object_GetListItem(pItemObject);
 		if (pList->offsety<0)
 		{
@@ -371,10 +394,9 @@ px_void PX_Object_ListOnEvent(PX_Object  *Object,PX_Object_Event e,px_void *ptr)
 
 PX_Object * PX_Object_ListCreate(px_memorypool *mp, PX_Object *Parent,px_int x,px_int y,px_int Width,px_int Height,px_int ItemHeight,PX_Object_ListItemOnCreate _CreateFunc,px_void *userptr)
 {
-	px_int i;
 	PX_Object_List List,*pList;
-	PX_Object_ListItem Item;
-	PX_Object *pListObject,*pItemObject;
+
+	PX_Object *pListObject;
 	PX_memset(&List,0,sizeof(List));
 	List.mp=mp;
 	List.ItemWidth=Width-32;
@@ -391,6 +413,7 @@ PX_Object * PX_Object_ListCreate(px_memorypool *mp, PX_Object *Parent,px_int x,p
 	List.currentCursorIndex=-1;
 	List.offsety=0;
 	List.showCursor=PX_TRUE;
+	List.userptr = userptr;
 
 	PX_VectorInitialize(mp,&List.Items,sizeof(PX_Object *),64);
 	PX_VectorInitialize(mp,&List.pData,sizeof(px_void *),32);
@@ -400,13 +423,6 @@ PX_Object * PX_Object_ListCreate(px_memorypool *mp, PX_Object *Parent,px_int x,p
 	pList=PX_Object_GetList(pListObject);
 	pList->SliderBar=PX_Object_SliderBarCreate(mp,pListObject,(px_int)pListObject->Width-32,0,32,(px_int)pListObject->Height,PX_OBJECT_SLIDERBAR_TYPE_VERTICAL,PX_OBJECT_SLIDERBAR_STYLE_BOX);
 
-	for (i=0;i<Height/ItemHeight+2;i++)
-	{
-		pItemObject=PX_ObjectCreateEx(mp,PX_NULL,0,0,0,(px_float)pListObject->Width,(px_float)ItemHeight,0,PX_OBJECT_TYPE_LISTITEM,PX_NULL,PX_NULL,PX_NULL,&Item,sizeof(PX_Object_ListItem));
-		if(!_CreateFunc(mp,pItemObject,userptr)) return PX_FALSE;
-		if(!PX_VectorPushback(&pList->Items,&pItemObject))return PX_FALSE;
-	}
-
 	PX_ObjectRegisterEvent(pListObject,PX_OBJECT_EVENT_CURSORWHEEL,PX_Object_ListOnWheel,pListObject);
 	PX_ObjectRegisterEvent(pListObject,PX_OBJECT_EVENT_CURSORDOWN,PX_Object_ListOnCursorDown,pListObject);
 	PX_ObjectRegisterEvent(pListObject,PX_OBJECT_EVENT_CURSORRDOWN,PX_Object_ListOnCursorRDown,pListObject);
@@ -414,6 +430,50 @@ PX_Object * PX_Object_ListCreate(px_memorypool *mp, PX_Object *Parent,px_int x,p
 	PX_ObjectRegisterEvent(pList->SliderBar,PX_OBJECT_EVENT_VALUECHANGED,PX_Object_ListOnSliderValueChanged,pListObject);
 	PX_ObjectRegisterEvent(pListObject,PX_OBJECT_EVENT_ANY,PX_Object_ListOnEvent,pListObject);
 	return pListObject;
+}
+
+static px_void PX_Object_ListContentItemOnRender(px_surface* psurface, PX_Object* pObject, px_dword elpased)
+{
+	PX_Object_ListItem* pListItem;
+	px_float objx, objy, objWidth, objHeight;
+	px_float inheritX, inheritY;
+	pListItem = PX_Object_GetListItem(pObject);
+
+	PX_ObjectGetInheritXY(pObject, &inheritX, &inheritY);
+	objx = (pObject->x + inheritX);
+	objy = (pObject->y + inheritY);
+	objWidth = pObject->Width;
+	objHeight = pObject->Height;
+
+	PX_FontModuleDrawText(psurface, PX_Object_GetList(pListItem->pList)->fm, (px_int)objx + 3, (px_int)(objy + objHeight / 2), PX_ALIGN_LEFTMID, (const px_char*)pListItem->pdata, PX_OBJECT_UI_DEFAULT_FONTCOLOR);
+
+}
+
+px_bool PX_Designer_ListContentItemOnCreate(px_memorypool* mp, PX_Object* ItemObject, px_void* userptr)
+{
+	ItemObject->Func_ObjectRender = PX_Object_ListContentItemOnRender;
+	return PX_TRUE;
+}
+
+
+PX_Object* PX_Object_ListContentCreate(px_memorypool* mp, PX_Object* Parent, px_int x, px_int y, px_int Width, px_int Height, PX_FontModule* fm)
+{
+	PX_Object* pObject;
+	if (fm)
+	{
+		pObject=PX_Object_ListCreate(mp, Parent, x, y, Width, Height, fm->max_Height + 6, PX_Designer_ListContentItemOnCreate, PX_NULL);
+		if (pObject)
+		{
+			PX_Object_List* pList = PX_ObjectGetDesc(PX_Object_List,pObject);
+			pList->fm = fm;
+		}
+	}
+	else
+	{
+		pObject = PX_Object_ListCreate(mp, Parent, x, y, Width, Height, __PX_FONT_HEIGHT+6, PX_Designer_ListContentItemOnCreate,PX_NULL);
+	}
+	return pObject;
+	
 }
 
 px_void PX_Object_ListSetBackgroundColor(PX_Object *pListObject,px_color color)

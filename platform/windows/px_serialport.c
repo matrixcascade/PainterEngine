@@ -233,7 +233,7 @@ const int PX_SerialPortRead(PX_SerialPort *com,void *data,int size)
 
 	if(com->Handle!=-1)
 	{
-		UINT BytesInQue = PX_SerialPortGetBufferBytes(com);  
+		int BytesInQue = (int)PX_SerialPortGetBufferBytes(com);  
 
 		/*if Buffer is empty,sleep 10ms*/
 		if ( BytesInQue == 0 )  

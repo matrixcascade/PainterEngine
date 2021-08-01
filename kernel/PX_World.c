@@ -83,18 +83,53 @@ px_void PX_WorldRemoveObjectEx(PX_World *world,px_int i_index)
 	}
 }
 
-px_void PX_WorldUpdate( PX_World *world,px_uint elpased )
+static px_void PX_WorldUpdateNewObjectList(PX_World* pworld)
+{
+	px_int k = 0,i,j;
+	for (i = 0; i < pworld->pNewObjects.size; i++)
+	{
+		PX_WorldObject* pwo, wo;
+
+		wo.pObject = *PX_VECTORAT(PX_Object*, &pworld->pNewObjects, i);
+		wo.DeleteMark = PX_FALSE;
+
+		for (j = k; j < pworld->pObjects.size; j++)
+		{
+			pwo = PX_VECTORAT(PX_WorldObject, &pworld->pObjects, j);
+			if (!pwo->pObject)
+			{
+				wo.pObject->world_index = j;
+				*pwo = wo;
+				pworld->aliveCount++;
+				k = j + 1;
+				goto NEW_OBJECT_CONTINUE;
+			}
+		}
+
+		if (PX_VectorPushback(&pworld->pObjects, &wo))
+		{
+			pworld->aliveCount++;
+			wo.pObject->world_index = pworld->pObjects.size - 1;
+			k = wo.pObject->world_index + 1;
+		}
+	NEW_OBJECT_CONTINUE:
+		continue;
+	}
+	PX_VectorClear(&pworld->pNewObjects);
+}
+
+px_void PX_WorldUpdate( PX_World *pworld,px_uint elpased )
 {
 	px_int updateCount;
-	px_int i,b,j,k;
+	px_int i,b,j;
 	px_float w_left=0,w_top=0,w_right=0,w_height=0;
 	PX_Object_Event e;
 	PX_WorldObject *pwo;
 	
 	px_int impact_count[sizeof(pwo->pObject->impact_object_type)*8]={0};
-	px_memorypool *calcmp=&world->mp_WorldCalc;
+	px_memorypool *calcmp=&pworld->mp_WorldCalc;
 
-	if (world==PX_NULL)
+	if (pworld==PX_NULL)
 	{
 		return;
 	}
@@ -102,47 +137,17 @@ px_void PX_WorldUpdate( PX_World *world,px_uint elpased )
 	MP_Reset(calcmp);
 
 	//Add NewObjects
-	k=0;
-	for (i=0;i<world->pNewObjects.size;i++)
-	{
-		PX_WorldObject *pwo,wo;
-
-		wo.pObject=*PX_VECTORAT(PX_Object *,&world->pNewObjects,i);
-		wo.DeleteMark=PX_FALSE;
-
-		for (j=k;j<world->pObjects.size;j++)
-		{
-			pwo=PX_VECTORAT(PX_WorldObject,&world->pObjects,j);
-			if (!pwo->pObject)
-			{
-				wo.pObject->world_index=j;
-				*pwo=wo;
-				world->aliveCount++;
-				k=j+1;
-				goto NEW_OBJECT_CONTINUE;
-			}
-		}
-
-		if (PX_VectorPushback(&world->pObjects,&wo))
-		{
-			world->aliveCount++;
-			wo.pObject->world_index=world->pObjects.size-1;
-			k=wo.pObject->world_index+1;
-		}
-NEW_OBJECT_CONTINUE:
-		continue;
-	}
-	PX_VectorClear(&world->pNewObjects);
+	PX_WorldUpdateNewObjectList(pworld);
 
 	//Object Counts
-	updateCount=world->pObjects.size;
+	updateCount=pworld->pObjects.size;
 
 	//////////////////////////////////////////////////////////////////////////
 	//impact test
 	//////////////////////////////////////////////////////////////////////////
 	for (i=0;i<updateCount;i++)
 	{
-		pwo=PX_VECTORAT(PX_WorldObject,&world->pObjects,i);
+		pwo=PX_VECTORAT(PX_WorldObject,&pworld->pObjects,i);
 		if (!pwo->pObject)
 		{
 			continue;
@@ -162,17 +167,17 @@ NEW_OBJECT_CONTINUE:
 	{
 		if (impact_count[i])
 		{
-			PX_QuadtreeCreate(calcmp,&world->Impact_Test_array[i],0,0,(px_float)world->world_width,(px_float)world->world_height,impact_count[i],2);
+			PX_QuadtreeCreate(calcmp,&pworld->Impact_Test_array[i],0,0,(px_float)pworld->world_width,(px_float)pworld->world_height,impact_count[i],2);
 		}
 		else
 		{
-			PX_QuadtreeCreate(calcmp,&world->Impact_Test_array[i],0,0,(px_float)world->world_width,(px_float)world->world_height,impact_count[i],0);
+			PX_QuadtreeCreate(calcmp,&pworld->Impact_Test_array[i],0,0,(px_float)pworld->world_width,(px_float)pworld->world_height,impact_count[i],0);
 		}
 	}
 
 	for (i=0;i<updateCount;i++)
 	{
-		pwo=PX_VECTORAT(PX_WorldObject,&world->pObjects,i);
+		pwo=PX_VECTORAT(PX_WorldObject,&pworld->pObjects,i);
 		if (!pwo->pObject)
 		{
 			continue;
@@ -187,11 +192,11 @@ NEW_OBJECT_CONTINUE:
 					userData.ptr=pwo;
 					if ((px_float)pwo->pObject->diameter)
 					{
-						PX_QuadtreeAddNode(&world->Impact_Test_array[b],(px_float)pwo->pObject->x,(px_float)pwo->pObject->y,(px_float)pwo->pObject->diameter,(px_float)pwo->pObject->diameter,userData);
+						PX_QuadtreeAddNode(&pworld->Impact_Test_array[b],(px_float)pwo->pObject->x,(px_float)pwo->pObject->y,(px_float)pwo->pObject->diameter,(px_float)pwo->pObject->diameter,userData);
 					}
 					else
 					{
-						PX_QuadtreeAddNode(&world->Impact_Test_array[b],(px_float)pwo->pObject->x,(px_float)pwo->pObject->y,(px_float)pwo->pObject->Width,(px_float)pwo->pObject->Height,userData);
+						PX_QuadtreeAddNode(&pworld->Impact_Test_array[b],(px_float)pwo->pObject->x,(px_float)pwo->pObject->y,(px_float)pwo->pObject->Width,(px_float)pwo->pObject->Height,userData);
 					}
 					
 				}
@@ -201,7 +206,7 @@ NEW_OBJECT_CONTINUE:
 
 	for (i=0;i<updateCount;i++)
 	{
-		pwo=PX_VECTORAT(PX_WorldObject,&world->pObjects,i);
+		pwo=PX_VECTORAT(PX_WorldObject,&pworld->pObjects,i);
 		if (!pwo->pObject)
 		{
 			continue;
@@ -216,19 +221,19 @@ NEW_OBJECT_CONTINUE:
 					px_int im_i;
 					PX_Quadtree_UserData userData;
 					userData.ptr=pwo;
-					PX_QuadtreeResetTest(&world->Impact_Test_array[b]);
+					PX_QuadtreeResetTest(&pworld->Impact_Test_array[b]);
 					if (pwo->pObject->diameter)
 					{
-						PX_QuadtreeTestNode(&world->Impact_Test_array[b],(px_float)pwo->pObject->x,(px_float)pwo->pObject->y,(px_float)pwo->pObject->diameter,(px_float)pwo->pObject->diameter,userData);
+						PX_QuadtreeTestNode(&pworld->Impact_Test_array[b],(px_float)pwo->pObject->x,(px_float)pwo->pObject->y,(px_float)pwo->pObject->diameter,(px_float)pwo->pObject->diameter,userData);
 					}
 					else
 					{
-						PX_QuadtreeTestNode(&world->Impact_Test_array[b],(px_float)pwo->pObject->x,(px_float)pwo->pObject->y,(px_float)pwo->pObject->Width,(px_float)pwo->pObject->Height,userData);
+						PX_QuadtreeTestNode(&pworld->Impact_Test_array[b],(px_float)pwo->pObject->x,(px_float)pwo->pObject->y,(px_float)pwo->pObject->Width,(px_float)pwo->pObject->Height,userData);
 					}
 					
-					for (im_i=0;im_i<world->Impact_Test_array[b].Impacts.size;im_i++)
+					for (im_i=0;im_i<pworld->Impact_Test_array[b].Impacts.size;im_i++)
 					{
-						PX_Quadtree_UserData *puData=PX_VECTORAT(PX_Quadtree_UserData,&world->Impact_Test_array[b].Impacts,im_i);
+						PX_Quadtree_UserData *puData=PX_VECTORAT(PX_Quadtree_UserData,&pworld->Impact_Test_array[b].Impacts,im_i);
 						PX_Object *pObj1=pwo->pObject;
 						PX_WorldObject *pimpactWo=(PX_WorldObject *)puData->ptr;
 						PX_Object *pObj2=((PX_WorldObject *)(puData->ptr))->pObject;
@@ -271,7 +276,7 @@ NEW_OBJECT_CONTINUE:
 
 	for (i=0;i<updateCount;i++)
 	{
-		pwo=PX_VECTORAT(PX_WorldObject,&world->pObjects,i);
+		pwo=PX_VECTORAT(PX_WorldObject,&pworld->pObjects,i);
 		if (!pwo->pObject)
 		{
 			continue;
@@ -283,10 +288,10 @@ NEW_OBJECT_CONTINUE:
 	//delete death objects
 	for (i=0;i<updateCount;i++)
 	{
-		pwo=PX_VECTORAT(PX_WorldObject,&world->pObjects,i);
+		pwo=PX_VECTORAT(PX_WorldObject,&pworld->pObjects,i);
 		if (pwo->pObject&&pwo->DeleteMark)
 		{
-			PX_WorldRemoveObjectEx(world,i);
+			PX_WorldRemoveObjectEx(pworld,i);
 		}
 	}
 
@@ -446,6 +451,8 @@ px_bool PX_WorldAddObject(PX_World *World,PX_Object *pObject)
 {
 	return PX_VectorPushback(&World->pNewObjects,&pObject);
 }
+
+
 
 
 px_void PX_WorldSetAuxiliaryLineColor(PX_World *pw,px_color color)

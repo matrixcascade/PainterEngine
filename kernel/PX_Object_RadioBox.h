@@ -31,6 +31,7 @@ px_void PX_Object_RadioBoxSetBorderColor(PX_Object *Object,px_color clr);
 px_void PX_Object_RadioBoxSetPushColor(PX_Object *Object,px_color clr);
 px_void PX_Object_RadioBoxSetCursorColor(PX_Object *Object,px_color clr);
 px_void PX_Object_RadioBoxSetText(PX_Object *Object,const px_char text[]);
+const px_char *PX_Object_RadioBoxGetText(PX_Object *Object);
 px_void PX_Object_RadioBoxSetTextColor(PX_Object *Object,px_color clr);
 px_void PX_Object_RadioBoxSetCheck(PX_Object *Object,px_bool check);
 

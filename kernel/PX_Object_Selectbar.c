@@ -368,10 +368,10 @@ PX_Object * PX_Object_SelectBarCreate(px_memorypool *mp,PX_Object *Parent,px_int
 	}
 
 	pSelectbar->maxDisplayCount=16;
-	pSelectbar->backgroundColor=PX_COLOR(255,255,255,255);
-	pSelectbar->cursorColor=PX_COLOR(255,192,192,192);
-	pSelectbar->fontColor=PX_COLOR(255,0,0,0);
-	pSelectbar->borderColor=PX_COLOR(255,0,0,0);
+	pSelectbar->backgroundColor= PX_OBJECT_UI_DEFAULT_BACKGROUNDCOLOR;
+	pSelectbar->cursorColor= PX_OBJECT_UI_DEFAULT_CURSORCOLOR;
+	pSelectbar->fontColor=PX_OBJECT_UI_DEFAULT_FONTCOLOR;
+	pSelectbar->borderColor= PX_OBJECT_UI_DEFAULT_BORDERCOLOR;
 	pSelectbar->activating=PX_FALSE;
 	pSelectbar->style=PX_OBJECT_SELECTBAR_STYLE_RECT;
 	PX_VectorInitialize(mp,&pSelectbar->Items,sizeof(PX_Object_SelectBar_Item),16);
@@ -419,6 +419,12 @@ px_int PX_Object_SelectBarAddItem(PX_Object *pSelectBarObject,const px_char Text
 		return pSelectBar->Items.size-1;
 	else
 		return -1;
+}
+
+px_void PX_Object_SelectBarClear(PX_Object* pSelectBarObject)
+{
+	PX_Object_SelectBar* pSelectBar = PX_Object_GetSelectBar(pSelectBarObject);
+	PX_VectorClear(&pSelectBar->Items);
 }
 
 px_void PX_Object_SelectBarRemoveItem(PX_Object *pObject,px_int index)

@@ -38,7 +38,8 @@ typedef struct
 PX_Object_SelectBar *PX_Object_GetSelectBar(PX_Object *pSelecrBar);
 PX_Object * PX_Object_SelectBarCreate(px_memorypool *mp,PX_Object *Parent,px_int x,int y,px_int width,px_int height,PX_FontModule *fontmodule);
 px_int  PX_Object_SelectBarAddItem(PX_Object *PX_Object_SelectBar,const px_char Text[]);
-px_void PX_Object_SelectBarRemoveItem(PX_Object *PX_Object_SelectBar,px_int index);
+px_void PX_Object_SelectBarClear(PX_Object* pSelectBarObject);
+px_void PX_Object_SelectBarRemoveItem(PX_Object* PX_Object_SelectBar, px_int index);
 px_int PX_Object_SelectBarGetItemIndexByText(PX_Object *pObject,const px_char Text[]);
 const px_char *PX_Object_SelectBarGetCurrentText(PX_Object *pObject);
 px_void PX_Object_SelectBarSetDisplayCount(PX_Object *pObject,px_int count);

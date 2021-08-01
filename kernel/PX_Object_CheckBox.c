@@ -171,13 +171,13 @@ PX_Object * PX_Object_CheckBoxCreate(px_memorypool *mp, PX_Object *Parent,px_int
 	cbx.BackgroundColor=PX_COLOR(0,0,0,0);
 	cbx.bCheck=PX_FALSE;
 	cbx.Border=PX_FALSE;
-	cbx.BorderColor=PX_COLOR(255,0,0,0);
-	cbx.CursorColor=PX_COLOR(255,204,204,204);
-	cbx.PushColor=PX_COLOR(255,192,192,192);
+	cbx.BorderColor=PX_OBJECT_UI_DEFAULT_FONTCOLOR;
+	cbx.CursorColor=PX_OBJECT_UI_DEFAULT_CURSORCOLOR;
+	cbx.PushColor=PX_OBJECT_UI_DEFAULT_PUSHCOLOR;
 	cbx.fm=fm;
 	cbx.state=PX_OBJECT_CHECKBOX_STATE_NORMAL;
 	PX_strset(cbx.Text,text);
-	cbx.TextColor=PX_COLOR(255,0,0,0);
+	cbx.TextColor=PX_OBJECT_UI_DEFAULT_FONTCOLOR;
 	pObject=PX_ObjectCreateEx(mp,Parent,(px_float)x,(px_float)y,0,(px_float)Width,(px_float)Height,0,PX_OBJECT_TYPE_CHECKBOX,PX_NULL,PX_Object_CheckBoxRender,PX_NULL,&cbx,sizeof(cbx));
 	if (!pObject)
 	{
@@ -217,6 +217,20 @@ px_void PX_Object_CheckBoxSetCursorColor(PX_Object *Object,px_color clr)
 px_void PX_Object_CheckBoxSetText(PX_Object *Object,const px_char text[])
 {
 	PX_strset(PX_Object_GetCheckBox(Object)->Text,text);
+}
+
+px_char *PX_Object_CheckBoxGetText(PX_Object *Object)
+{
+	PX_Object_CheckBox *pCheckBox=PX_Object_GetCheckBox(Object);
+	if (pCheckBox)
+	{
+		return pCheckBox->Text;
+	}
+	else
+	{
+		PX_ASSERT();
+		return PX_NULL;
+	}
 }
 
 px_void PX_Object_CheckBoxSetTextColor(PX_Object *Object,px_color clr)

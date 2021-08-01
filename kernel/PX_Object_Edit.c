@@ -129,6 +129,7 @@ PX_Object* PX_Object_EditCreate(px_memorypool *mp, PX_Object *Parent,px_int x,px
 	pEdit->fontModule=fontModule;
 	pEdit->AutoNewLineSpacing=__PX_FONT_ASCSIZE+2;
 	pEdit->style=PX_OBJECT_EDIT_STYLE_RECT;
+	pEdit->multiLines=PX_FALSE;
 	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_CURSORMOVE,PX_Object_EditOnMouseMove,PX_NULL);
 	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_CURSORDOWN,PX_Object_EditOnMouseLButtonDown,PX_NULL);
 	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_STRING,PX_Object_EditOnKeyboardString,PX_NULL);
@@ -191,11 +192,23 @@ px_void PX_Object_EditSetFocus(PX_Object *pObject,px_bool OnFocus)
 	{
 		if (pEdit->onFocus!=OnFocus)
 		{
-			PX_Object_Event e;
-			pEdit->onFocus=OnFocus;
-			e.Event=PX_OBJECT_EVENT_ONFOCUSCHANGED;
-			e.Param_bool[0]=OnFocus;
-			PX_ObjectPostEvent(pObject,e);
+			if (OnFocus)
+			{
+				PX_Object_Event e;
+				pEdit->onFocus=OnFocus;
+				e.Event=PX_OBJECT_EVENT_ONFOCUS;
+				e.Param_bool[0]=OnFocus;
+				PX_ObjectPostEvent(pObject,e);
+			}
+			else
+			{
+				PX_Object_Event e;
+				pEdit->onFocus=OnFocus;
+				e.Event=PX_OBJECT_EVENT_LOSTFOCUS;
+				e.Param_bool[0]=OnFocus;
+				PX_ObjectPostEvent(pObject,e);
+			}
+			
 		}
 
 	}
@@ -355,7 +368,7 @@ px_void PX_Object_EditGetCursorXY(PX_Object *pObject,px_int *cx,px_int *cy,px_in
 				//skip
 			}else if (Text[cursor]=='\n')
 			{
-				x=0;
+				x=pEdit->HorizontalOffset;
 				y+=__PX_FONT_HEIGHT+pEdit->yFontSpacing;
 			}
 			else if(Text[cursor])
@@ -429,7 +442,7 @@ px_void PX_Object_EditUpdateCursorOnDown(PX_Object *pObject,px_int cx,px_int cy)
 				//skip
 			}else if (code=='\n')
 			{
-				x=0;
+				x=pEdit->HorizontalOffset;
 				y+=pEdit->fontModule->max_Height+pEdit->yFontSpacing;
 			}
 			else
@@ -670,7 +683,7 @@ px_void PX_Object_EditRender(px_surface *psurface, PX_Object *pObject,px_uint el
 				//skip
 			}else if (Text[cursor]=='\n')
 			{
-				x=0;
+				x=pEdit->HorizontalOffset;
 				y+=__PX_FONT_HEIGHT+pEdit->yFontSpacing;
 			}
 			else if(Text[cursor])
@@ -729,7 +742,7 @@ px_void PX_Object_EditAddString(PX_Object *pObject,px_char *Text)
 
 			if(*Text!=8)
 			{
-				if (Text[1]==0&&(*Text=='\r'||*Text=='\n'))
+				if (!pEdit->multiLines&&Text[1]==0&&(*Text=='\n'||*Text=='\r'))
 				{
 					return;
 				}
@@ -758,13 +771,23 @@ px_void PX_Object_EditAddString(PX_Object *pObject,px_char *Text)
 				{
 					if (PX_StringLen(&pEdit->text)<pEdit->max_length)
 					{
-						PX_StringInsertChar(&pEdit->text,pEdit->cursor_index,*Text);
+						px_char ch=*Text;
+						if (ch=='\r')
+						{
+							ch='\n';
+						}
+						PX_StringInsertChar(&pEdit->text,pEdit->cursor_index,ch);
 						pEdit->cursor_index++;
 					}
 				}
 				else
 				{
-					PX_StringInsertChar(&pEdit->text,pEdit->cursor_index,*Text);
+					px_char ch=*Text;
+					if (ch=='\r')
+					{
+						ch='\n';
+					}
+					PX_StringInsertChar(&pEdit->text,pEdit->cursor_index,ch);
 					pEdit->cursor_index++;
 				}
 

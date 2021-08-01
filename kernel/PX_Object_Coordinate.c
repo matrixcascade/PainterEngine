@@ -1793,8 +1793,8 @@ PX_Object *PX_Object_CoordinatesCreate(px_memorypool *mp, PX_Object *Parent,px_i
 
 	Coordinates.FontSize=PX_OBJECT_COORDINATES_DEFAULT_FONT_SIZE;
 	Coordinates.DataLineWidth=PX_OBJECT_COORDINATES_DEFAULT_LINE_WIDTH;
-	Coordinates.FontColor=PX_COLOR(255,0,0,0);
-	Coordinates.borderColor=PX_COLOR(255,0,0,0);
+	Coordinates.FontColor= PX_OBJECT_UI_DEFAULT_FONTCOLOR;
+	Coordinates.borderColor= PX_OBJECT_UI_DEFAULT_BORDERCOLOR;
 	Coordinates.DashColor=PX_COLOR(PX_OBJECT_COORDINATES_DEFAULT_DASH_RGB);
 	Coordinates.OnMarkStatus=PX_FALSE;
 	Coordinates.MarkValueEnabled=PX_TRUE;

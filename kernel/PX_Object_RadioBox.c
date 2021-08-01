@@ -204,7 +204,7 @@ PX_Object * PX_Object_RadioBoxCreate(px_memorypool *mp, PX_Object *Parent,px_int
 	cbx.fm=fm;
 	cbx.state=PX_OBJECT_RADIOBOX_STATE_NORMAL;
 	PX_strset(cbx.Text,text);
-	cbx.TextColor=PX_COLOR(255,0,0,0);
+	cbx.TextColor= PX_OBJECT_UI_DEFAULT_FONTCOLOR;
 	pObject=PX_ObjectCreateEx(mp,Parent,(px_float)x,(px_float)y,0,(px_float)Width,(px_float)Height,0,PX_OBJECT_TYPE_RADIOBOX,PX_NULL,PX_Object_RadioBoxRender,PX_NULL,&cbx,sizeof(cbx));
 	if (!pObject)
 	{
@@ -246,9 +246,26 @@ px_void PX_Object_RadioBoxSetText(PX_Object *Object,const px_char text[])
 	PX_strset(PX_Object_GetRadioBox(Object)->Text,text);
 }
 
+const px_char *PX_Object_RadioBoxGetText(PX_Object *Object)
+{
+	PX_Object_RadioBox *pDesc=PX_Object_GetRadioBox(Object);
+	if (pDesc)
+	{
+		return pDesc->Text;
+	}
+	PX_ASSERT();
+	return PX_NULL;
+}
+
 px_void PX_Object_RadioBoxSetTextColor(PX_Object *Object,px_color clr)
 {
-	PX_Object_GetRadioBox(Object)->TextColor=clr;
+	PX_Object_RadioBox *pDesc=PX_Object_GetRadioBox(Object);
+	if (pDesc)
+	{
+		pDesc->TextColor=clr;
+	}
+	else
+	PX_ASSERT();
 }
 
 px_void PX_Object_RadioBoxSetCheck(PX_Object *Object,px_bool check)

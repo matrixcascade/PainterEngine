@@ -32,6 +32,7 @@ typedef struct
 	px_int xFontSpacing,yFontSpacing;
 	px_int cursor_index;
 	px_int max_length;
+	px_bool multiLines;
 	px_surface EditSurface;
 	PX_FontModule *fontModule;
 	px_char Limit[128];

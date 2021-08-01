@@ -38,7 +38,7 @@ px_int PX_atoi(const px_char s[])
 }
 
 
-px_float PX_atof(px_char fstr[])
+px_float PX_atof(const px_char fstr[])
 {
 	px_double temp=10;
 	px_bool ispnum=PX_TRUE;

@@ -36,6 +36,7 @@ px_void PX_Object_CheckBoxSetBorderColor(PX_Object *Object,px_color clr);
 px_void PX_Object_CheckBoxSetPushColor(PX_Object *Object,px_color clr);
 px_void PX_Object_CheckBoxSetCursorColor(PX_Object *Object,px_color clr);
 px_void PX_Object_CheckBoxSetText(PX_Object *Object,const px_char text[]);
+px_char *PX_Object_CheckBoxGetText(PX_Object *Object);
 px_void PX_Object_CheckBoxSetTextColor(PX_Object *Object,px_color clr);
 px_void PX_Object_CheckBoxSetCheck(PX_Object *Object,px_bool check);
 

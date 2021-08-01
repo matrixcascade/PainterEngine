@@ -124,7 +124,7 @@ PX_Object *PX_Object_CursorButtonCreate(px_memorypool *mp,PX_Object *Parent,px_i
 
 
 	pCb->pushbutton=PX_Object_PushButtonCreate(mp,pObject,x,y,Width,Height,Text,fontmodule);
-	pCb->c_color=PX_COLOR(255,0,0,0);
+	pCb->c_color= PX_OBJECT_UI_DEFAULT_BORDERCOLOR;
 	pCb->c_distance=0;
 	pCb->c_distance_far=(px_float)(Width>Height?Height/4:Width/4);
 	pCb->c_distance_near=3;

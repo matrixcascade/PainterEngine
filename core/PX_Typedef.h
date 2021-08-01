@@ -258,7 +258,7 @@ px_void PX_BufferToHexString(px_byte data[],px_int size,px_char hex_str[]);
 px_int PX_HexStringToBuffer(const px_char hex_str[],px_byte data[]);
 px_uint PX_htoi(const px_char hex_str[]);
 px_int  PX_atoi(const px_char str[]);
-px_float PX_atof(px_char fstr[]);
+px_float PX_atof(const px_char fstr[]);
 PX_RETURN_STRING PX_ftos(px_float f, int precision);
 PX_RETURN_STRING PX_itos(px_int num,px_int radix);
 px_void PX_AscToWord(const px_char *asc,px_word *u16);
