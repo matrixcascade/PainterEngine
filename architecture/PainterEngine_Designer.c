@@ -8,8 +8,8 @@ static px_void PX_Designer_RefreshProperties(PX_Object *pObject)
 
 	for (i=0;i<PX_COUNTOF(pDesignerDesc->edit_propertys);i++)
 	{
-		pDesignerDesc->edit_propertys[i]->Visible=PX_FALSE;
-		pDesignerDesc->label_propertys[i]->Visible=PX_FALSE;
+		PX_ObjectSetVisible(pDesignerDesc->edit_propertys[i],PX_FALSE);
+		PX_ObjectSetVisible(pDesignerDesc->label_propertys[i],PX_FALSE);
 	}
 
 	if (PX_VectorCheckIndex(&pDesignerDesc->Objects,pDesignerDesc->selectObjectIndex))
@@ -25,8 +25,8 @@ static px_void PX_Designer_RefreshProperties(PX_Object *pObject)
 				{
 					break;
 				}
-				pDesignerDesc->label_propertys[j]->Visible=PX_TRUE;
-				pDesignerDesc->edit_propertys[j]->Visible=PX_TRUE;
+				PX_ObjectSetVisible(pDesignerDesc->label_propertys[j],PX_TRUE);
+				PX_ObjectSetVisible(pDesignerDesc->edit_propertys[j],PX_TRUE);
 				PX_Object_LabelSetText(pDesignerDesc->label_propertys[j],pObjectDesc->properties[j].Name);
 
 				if(pObjectDesc->properties[j].getbool)
@@ -70,15 +70,20 @@ static px_void PX_Designer_RefreshProperties(PX_Object *pObject)
 
 				if(pObjectDesc->properties[j].getstring)
 				{
-					const px_char *v=pObjectDesc->properties[j].getstring(pdobject->pObject);
-					if (v)
+					px_string str;
+					PX_StringInitialize(pDesignerDesc->mp, &str);
+					;
+					if (pObjectDesc->properties[j].getstring(pdobject->pObject,&str))
 					{
-						PX_Object_EditSetText(pDesignerDesc->edit_propertys[j],v);
+						PX_Object_EditSetText(pDesignerDesc->edit_propertys[j],str.buffer);
 					}
 					else
 					{
 						PX_Object_EditSetText(pDesignerDesc->edit_propertys[j],"");
 					}
+
+					PX_StringFree(&str);
+
 					continue;
 				}
 			}
@@ -159,6 +164,10 @@ px_void PX_DesignerOnDesignerBoxValueChanged(PX_Object *pObject,PX_Object_Event 
 		{
 		case PX_DESIGNER_OBJECT_TYPE_UI:
 		{
+			if (!pDesc->pLinkObject)
+			{
+				return;
+			}
 			pdobject->pObject->x = pDesc->designerbox->x;
 			pdobject->pObject->y = pDesc->designerbox->y;
 			pdobject->pObject->Width = pDesc->designerbox->Width;
@@ -167,14 +176,18 @@ px_void PX_DesignerOnDesignerBoxValueChanged(PX_Object *pObject,PX_Object_Event 
 		break;
 		case PX_DESIGNER_OBJECT_TYPE_GAME:
 		{
-			pdobject->pObject->x = pDesc->designerbox->x+pDesc->pLinkworld->offsetx;
-			pdobject->pObject->y = pDesc->designerbox->y + pDesc->pLinkworld->offsety;
+			if (!pDesc->pLinkWorld)
+			{
+				return;
+			}
+			pdobject->pObject->x = pDesc->designerbox->x+pDesc->pLinkWorld->offsetx;
+			pdobject->pObject->y = pDesc->designerbox->y + pDesc->pLinkWorld->offsety;
 			pdobject->pObject->Width = pDesc->designerbox->Width;
 			pdobject->pObject->Height = pDesc->designerbox->Height;
 		}
 		break;
 		default:
-			break;
+			return;
 		}
 		
 
@@ -182,9 +195,7 @@ px_void PX_DesignerOnDesignerBoxValueChanged(PX_Object *pObject,PX_Object_Event 
 
 	}
 }
-
-
-px_void PX_DesignerUpdate(PX_Object *pObject,px_dword elpased)
+px_void PX_DesignerUpdate(PX_Object *pObject,px_dword elapsed)
 {
 	px_int i,count;
 	PX_Designer *pDesc=(PX_Designer *)pObject->pObject;
@@ -199,6 +210,10 @@ px_void PX_DesignerUpdate(PX_Object *pObject,px_dword elpased)
 		{
 		case PX_DESIGNER_OBJECT_TYPE_UI:
 		{
+			if (!pDesc->pLinkObject)
+			{
+				return;
+			}
 			pDesc->designerbox->x = pdobject->pObject->x;
 			pDesc->designerbox->y = pdobject->pObject->y;
 			pDesc->designerbox->Width = pdobject->pObject->Width;
@@ -208,11 +223,15 @@ px_void PX_DesignerUpdate(PX_Object *pObject,px_dword elpased)
 		break;
 		case PX_DESIGNER_OBJECT_TYPE_GAME:
 		{
-			pDesc->designerbox->x = pdobject->pObject->x-pDesc->pLinkworld->offsetx;
-			pDesc->designerbox->y = pdobject->pObject->y - pDesc->pLinkworld->offsety;
+			if (!pDesc->pLinkWorld)
+			{
+				return;
+			}
+			pDesc->designerbox->x = pdobject->pObject->x-pDesc->pLinkWorld->offsetx;
+			pDesc->designerbox->y = pdobject->pObject->y - pDesc->pLinkWorld->offsety;
 			pDesc->designerbox->Width = pdobject->pObject->Width;
 			pDesc->designerbox->Height = pdobject->pObject->Height;
-			pDesc->designerbox->Visible = PX_TRUE;
+			PX_ObjectSetVisible(pDesc->designerbox,PX_TRUE);
 		}
 		break;
 		default:
@@ -222,7 +241,7 @@ px_void PX_DesignerUpdate(PX_Object *pObject,px_dword elpased)
 	}
 	else
 	{
-		pDesc->designerbox->Visible=PX_FALSE;
+		PX_ObjectSetVisible(pDesc->designerbox,PX_FALSE);
 	}
 
 	//////////////////////////////////////////////////////////////////////////
@@ -231,11 +250,11 @@ px_void PX_DesignerUpdate(PX_Object *pObject,px_dword elpased)
 	{
 		pDesc->button_delete->x=pDesc->designerbox->x+ pDesc->designerbox->Width-pDesc->button_delete->Width;
 		pDesc->button_delete->y= pDesc->designerbox->y-pDesc->button_delete->Height-8;
-		pDesc->button_delete->Visible=PX_TRUE;
+		PX_ObjectSetVisible(pDesc->button_delete,PX_TRUE);
 	}
 	else
 	{
-		pDesc->button_delete->Visible=PX_FALSE;
+		PX_ObjectSetVisible(pDesc->button_delete,PX_FALSE);
 	}
 
 	//////////////////////////////////////////////////////////////////////////
@@ -245,8 +264,8 @@ px_void PX_DesignerUpdate(PX_Object *pObject,px_dword elpased)
 		px_int i;
 		for (i=0;i<PX_DESIGNER_MAX_PROPERTYS;i++)
 		{
-			pDesc->label_propertys[i]->Visible=PX_FALSE;
-			pDesc->edit_propertys[i]->Visible=PX_FALSE;
+			PX_ObjectSetVisible(pDesc->label_propertys[i],PX_FALSE);
+			PX_ObjectSetVisible(pDesc->edit_propertys[i],PX_FALSE);
 		}
 	}
 	
@@ -261,7 +280,7 @@ px_void PX_DesignerUpdate(PX_Object *pObject,px_dword elpased)
 
 }
 
-px_void PX_Designer_ControllersListItemOnRender(px_surface* psurface,PX_Object *pObject, px_dword elpased)
+px_void PX_Designer_ControllersListItemOnRender(px_surface* psurface,PX_Object *pObject, px_dword elapsed)
 {
 	PX_Designer_ObjectDesc*pDesc=(PX_Designer_ObjectDesc*)PX_Object_ListItemGetData(pObject);
 	PX_Designer *pDesignerDesc=PX_ObjectGetDesc(PX_Designer,(PX_Object *)pObject->User_ptr);
@@ -276,8 +295,6 @@ px_void PX_Designer_ControllersListItemOnRender(px_surface* psurface,PX_Object *
 	//////////////////////////////////////////////////////////////////////////
 	//designer controller
 	//////////////////////////////////////////////////////////////////////////
-
-
 
 	switch (pDesc->type)
 	{
@@ -308,32 +325,32 @@ px_bool PX_Designer_ControllersListItemOnCreate(px_memorypool* mp, PX_Object* It
 	return PX_TRUE;
 }
 
-px_void PX_DesignerRender(px_surface* psurface,PX_Object *pObject, px_dword elpased)
+px_void PX_DesignerRender(px_surface* psurface,PX_Object *pObject, px_dword elapsed)
 {
 	PX_Designer*pDesc=PX_ObjectGetDesc(PX_Designer,pObject);
-	PX_DesignerUpdate(pObject, elpased);
-	if (pDesc->showsliderbar)
+	PX_DesignerUpdate(pObject, elapsed);
+	if (pDesc->pLinkWorld&&pDesc->showsliderbar)
 	{
-		if (pDesc->pLinkworld->world_width > pDesc->pLinkworld->surface_width)
+		if (pDesc->pLinkWorld->world_width > pDesc->pLinkWorld->surface_width)
 		{
 			pDesc->world_hscroll->Visible = PX_TRUE;
 			pDesc->world_hscroll->x = 0;
-			pDesc->world_hscroll->y = pDesc->pLinkworld->surface_height - 24.f;
+			pDesc->world_hscroll->y = pDesc->pLinkWorld->surface_height - 24.f;
 			pDesc->world_hscroll->Height = 24;
-			pDesc->world_hscroll->Width = pDesc->pLinkworld->surface_width-24.f;
+			pDesc->world_hscroll->Width = pDesc->pLinkWorld->surface_width-24.f;
 		}
 		else
 		{
 			pDesc->world_hscroll->Visible = PX_FALSE;
 		}
 
-		if (pDesc->pLinkworld->world_height > pDesc->pLinkworld->surface_height)
+		if (pDesc->pLinkWorld->world_height > pDesc->pLinkWorld->surface_height)
 		{
 			pDesc->world_vscroll->Visible = PX_TRUE;
-			pDesc->world_vscroll->x = pDesc->pLinkworld->surface_width - 24.f;
+			pDesc->world_vscroll->x = pDesc->pLinkWorld->surface_width - 24.f;
 			pDesc->world_vscroll->y = 0;
 			pDesc->world_vscroll->Width = 24;
-			pDesc->world_vscroll->Height = pDesc->pLinkworld->surface_height - 24.f;
+			pDesc->world_vscroll->Height = pDesc->pLinkWorld->surface_height - 24.f;
 		}
 		else
 		{
@@ -351,9 +368,10 @@ px_void PX_DesignerRender(px_surface* psurface,PX_Object *pObject, px_dword elpa
 }
 
 //////////////////////////////////////////////////////////////////////////
-const px_char *PX_Designer_GetID(PX_Object *pObject)
+px_bool PX_Designer_GetID(PX_Object *pObject,px_string *str)
 {
-	return pObject->id;
+	PX_StringSet(str, pObject->id);
+	return PX_TRUE;
 }
 
 px_void PX_Designer_SetID(PX_Object *pObject,const px_char id[])
@@ -424,12 +442,22 @@ px_void PX_Designer_OnDeleteCurrentObject(PX_Object *pObject,PX_Object_Event e,p
 		{
 		case PX_DESIGNER_OBJECT_TYPE_UI:
 			{
+			if (!pDesignerDesc->pLinkObject)
+			{
+				PX_ASSERT();
+				return;
+			}
 				PX_ObjectDelete(pdobject->pObject);
 			}
 			break;
 		case PX_DESIGNER_OBJECT_TYPE_GAME:
 			{
-				PX_WorldRemoveObject(pDesignerDesc->pLinkworld,pdobject->pObject);
+				if (!pDesignerDesc->pLinkWorld)
+				{
+					PX_ASSERT();
+					return;
+				}
+				PX_WorldRemoveObject(pDesignerDesc->pLinkWorld,pdobject->pObject);
 			}
 		default:
 			break;
@@ -443,7 +471,8 @@ px_void PX_Designer_OnCursorDown(PX_Object *pObject,PX_Object_Event e,px_void *p
 {
 	PX_Designer *pDesignerDesc=PX_ObjectGetDesc(PX_Designer,pObject);
 	PX_Object *pSelectObject=PX_NULL;
-	px_bool breadycreate=PX_FALSE;
+	px_int selectObjectIndex=-1;
+
 	if (e.Event==PX_OBJECT_EVENT_CURSORDOWN)
 	{
 		px_int i;
@@ -480,46 +509,37 @@ px_void PX_Designer_OnCursorDown(PX_Object *pObject,PX_Object_Event e,px_void *p
 			}
 		}
 
-		if (pDesignerDesc->selectObjectIndex==-1)
-		{
-			breadycreate=PX_TRUE;
-		}
-		
-
-		pDesignerDesc->selectObjectIndex=-1;
 
 		for (i=0;i<pDesignerDesc->Objects.size;i++)
 		{
 			PX_Designer_Object *pdobject=PX_VECTORAT(PX_Designer_Object,&pDesignerDesc->Objects,i);
 			
-			if (pdobject->type==PX_DESIGNER_OBJECT_TYPE_GAME)
+			if (pDesignerDesc->pLinkWorld&&pdobject->type==PX_DESIGNER_OBJECT_TYPE_GAME)
 			{
 				px_rect rect;
-				rect.x=pdobject->pObject->x-pDesignerDesc->pLinkworld->offsetx;
-				rect.y=pdobject->pObject->y-pDesignerDesc->pLinkworld->offsety;
+				rect.x=pdobject->pObject->x-pDesignerDesc->pLinkWorld->offsetx;
+				rect.y=pdobject->pObject->y-pDesignerDesc->pLinkWorld->offsety;
 				rect.width=pdobject->pObject->Width;
 				rect.height=pdobject->pObject->Height;
 				if(PX_isPointInRect(PX_POINT(x,y,0),rect))
 				{
-					pDesignerDesc->selectObjectIndex=i;
+					selectObjectIndex=i;
 				}
 			}
 			
-			if (pdobject->type==PX_DESIGNER_OBJECT_TYPE_UI)
+			if (pDesignerDesc->pLinkObject && pdobject->type==PX_DESIGNER_OBJECT_TYPE_UI)
 			{
 				if(PX_ObjectIsCursorInRegion(pdobject->pObject,e))
 				{
-					pDesignerDesc->selectObjectIndex=i;
+					selectObjectIndex=i;
 				}
 			}
 
 		}
 
 
-		if (pDesignerDesc->selectObjectIndex==-1)
+		if (selectObjectIndex==-1&&pDesignerDesc->selectObjectIndex==-1)
 		{
-			if (breadycreate)
-			{
 				px_int selectDescIndex=PX_Object_ListGetCurrentSelectIndex(pDesignerDesc->list_ObjectDesc);
 				PX_Designer_Object dobject;
 				if (selectDescIndex!=-1)
@@ -531,25 +551,31 @@ px_void PX_Designer_OnCursorDown(PX_Object *pObject,PX_Object_Event e,px_void *p
 					{
 					case PX_DESIGNER_OBJECT_TYPE_UI:
 						{
-							PX_Object *pNewObject=pObjectDesc->createfunc(pDesignerDesc->mp,pDesignerDesc->pLinkObject,x,y,100,100,pDesignerDesc->fm);
-							PX_sprintf2(pNewObject->id,sizeof(pNewObject->id),"%1%2",PX_STRINGFORMAT_STRING(pObjectDesc->Name),PX_STRINGFORMAT_INT(pDesignerDesc->allocID++));
+						if (pDesignerDesc->pLinkObject)
+						{
+							PX_Object* pNewObject = pObjectDesc->createfunc(pDesignerDesc->mp_ui, pDesignerDesc->pLinkObject, x, y, 100, 100, pDesignerDesc->fm);
+							PX_sprintf2(pNewObject->id, sizeof(pNewObject->id), "%1%2", PX_STRINGFORMAT_STRING(pObjectDesc->Name), PX_STRINGFORMAT_INT(pDesignerDesc->allocID++));
 
-							dobject.pObject=pNewObject;
-							dobject.type=PX_DESIGNER_OBJECT_TYPE_UI;
-							dobject.descIndex=selectDescIndex;
-							PX_VectorPushback(&pDesignerDesc->Objects,&dobject);
+							dobject.pObject = pNewObject;
+							dobject.type = PX_DESIGNER_OBJECT_TYPE_UI;
+							dobject.descIndex = selectDescIndex;
+							PX_VectorPushback(&pDesignerDesc->Objects, &dobject);
+						}
 						}
 						break;
 					case PX_DESIGNER_OBJECT_TYPE_GAME:
 						{
-							PX_Object *pNewObject=pObjectDesc->createfunc(pDesignerDesc->mp,PX_NULL,x+pDesignerDesc->pLinkworld->offsetx,y + pDesignerDesc->pLinkworld->offsety,100,100,pDesignerDesc->fm);
-							PX_sprintf2(pNewObject->id,sizeof(pNewObject->id),"%1%2",PX_STRINGFORMAT_STRING(pObjectDesc->Name),PX_STRINGFORMAT_INT(pDesignerDesc->allocID++));
+						if (pDesignerDesc->pLinkWorld)
+						{
+							PX_Object* pNewObject = pObjectDesc->createfunc(pDesignerDesc->mp_game, PX_NULL, x + pDesignerDesc->pLinkWorld->offsetx, y + pDesignerDesc->pLinkWorld->offsety, 100, 100, pDesignerDesc->fm);
+							PX_sprintf2(pNewObject->id, sizeof(pNewObject->id), "%1%2", PX_STRINGFORMAT_STRING(pObjectDesc->Name), PX_STRINGFORMAT_INT(pDesignerDesc->allocID++));
 
-							PX_WorldAddObject(pDesignerDesc->pLinkworld,pNewObject);
-							dobject.pObject=pNewObject;
-							dobject.type=PX_DESIGNER_OBJECT_TYPE_GAME;
-							dobject.descIndex=selectDescIndex;
-							PX_VectorPushback(&pDesignerDesc->Objects,&dobject);
+							PX_WorldAddObject(pDesignerDesc->pLinkWorld, pNewObject);
+							dobject.pObject = pNewObject;
+							dobject.type = PX_DESIGNER_OBJECT_TYPE_GAME;
+							dobject.descIndex = selectDescIndex;
+							PX_VectorPushback(&pDesignerDesc->Objects, &dobject);
+						}
 						}
 						break;
 					case PX_DESIGNER_OBJECT_TYPE_FUNCTION:
@@ -571,29 +597,34 @@ px_void PX_Designer_OnCursorDown(PX_Object *pObject,PX_Object_Event e,px_void *p
 					pDesignerDesc->lastcursorx=x;
 					pDesignerDesc->lastcursory=y;
 				}
-			}
-			else
+			
+		}
+		
+		if (selectObjectIndex!=-1)
+		{
+			if (pDesignerDesc->selectObjectIndex!=selectObjectIndex)
 			{
+				PX_Designer_Object *pdobject=PX_VECTORAT(PX_Designer_Object,&pDesignerDesc->Objects,selectObjectIndex);
+				PX_Object_DesignerBox *pDesignerBox=PX_ObjectGetDesc(PX_Object_DesignerBox,pDesignerDesc->designerbox);
+
+				pDesignerDesc->selectObjectIndex=selectObjectIndex;
+
+
+				pDesignerDesc->designerbox->x=pdobject->pObject->x;
+				pDesignerDesc->designerbox->y=pdobject->pObject->y;
+				pDesignerDesc->designerbox->Width=pdobject->pObject->Width;
+				pDesignerDesc->designerbox->Height=pdobject->pObject->Height;
+
+				pDesignerBox->bselect=PX_Object_DesignerBox_bselect_center;
+				pDesignerBox->lastx = x;
+				pDesignerBox->lasty = y;
+
 				PX_Designer_RefreshProperties(pObject);
 			}
 		}
 		else
 		{
-			PX_Designer_Object *pdobject=PX_VECTORAT(PX_Designer_Object,&pDesignerDesc->Objects,pDesignerDesc->selectObjectIndex);
-			PX_Object_DesignerBox *pDesignerBox=PX_ObjectGetDesc(PX_Object_DesignerBox,pDesignerDesc->designerbox);
-			pDesignerDesc->designerbox->x=pdobject->pObject->x;
-			pDesignerDesc->designerbox->y=pdobject->pObject->y;
-			pDesignerDesc->designerbox->Width=pdobject->pObject->Width;
-			pDesignerDesc->designerbox->Height=pdobject->pObject->Height;
-
-			pDesignerBox->bselect=PX_Object_DesignerBox_bselect_center;
-			pDesignerBox->lastx = x;
-			pDesignerBox->lasty = y;
-		}
-
-		if (pDesignerDesc->selectObjectIndex!=-1)
-		{
-			PX_Designer_RefreshProperties(pObject);
+			pDesignerDesc->selectObjectIndex=-1;
 		}
 
 	}
@@ -605,7 +636,7 @@ px_void PX_Designer_OnCursorDown(PX_Object *pObject,PX_Object_Event e,px_void *p
 typedef PX_Object *(*px_designer_createfunc)(px_memorypool *mp,PX_Object *pparent,px_float x,px_float y,px_float width,px_float height,PX_FontModule *fm);
 typedef px_float (*px_designer_getproperty_float)(PX_Object *pObject);
 typedef px_int (*px_designer_getproperty_int)(PX_Object *pObject);
-typedef const px_char *(*px_designer_getproperty_string)(PX_Object *pObject);
+typedef px_bool (*px_designer_getproperty_string)(PX_Object *pObject);
 typedef px_bool (*px_designer_getproperty_bool)(PX_Object *pObject);
 
 typedef px_void (*px_designer_setproperty_float)(PX_Object *pObject,px_float v);
@@ -628,9 +659,9 @@ px_void PX_Designer_LabelSetText(PX_Object *pobject,const px_char text[])
 	PX_Object_LabelSetText(pobject,text);
 }
 
-const px_char* PX_Designer_LabelGetText(PX_Object *pobject)
+px_bool PX_Designer_LabelGetText(PX_Object *pobject,px_string *str)
 {
-	return PX_Object_LabelGetText(pobject);
+	return PX_StringSet(str, PX_Object_LabelGetText(pobject));
 }
 
 px_void PX_Designer_LabelSetAlign(PX_Object *pobject,px_int align)
@@ -673,9 +704,9 @@ px_void PX_Designer_PushButtonSetText(PX_Object *pobject,const px_char text[])
 	PX_Object_PushButtonSetText(pobject,text);
 }
 
-const px_char* PX_Designer_PushButtonGetText(PX_Object *pobject)
+px_bool PX_Designer_PushButtonGetText(PX_Object *pobject,px_string *str)
 {
-	return PX_Object_PushButtonGetText(pobject);
+	return PX_StringSet(str,PX_Object_PushButtonGetText(pobject));
 }
 
 
@@ -692,9 +723,9 @@ px_void PX_Designer_RadioBoxSetText(PX_Object *pobject,const px_char text[])
 	PX_Object_RadioBoxSetText(pobject,text);
 }
 
-const px_char* PX_Designer_RadioBoxGetText(PX_Object *pobject)
+px_bool PX_Designer_RadioBoxGetText(PX_Object *pobject,px_string *str)
 {
-	return PX_Object_RadioBoxGetText(pobject);
+	return PX_StringSet(str,PX_Object_RadioBoxGetText(pobject));
 }
 
 px_void PX_Designer_RadioBoxSetCheck(PX_Object *pobject,px_bool b)
@@ -720,9 +751,9 @@ px_void PX_Designer_CheckBoxSetText(PX_Object *pobject,const px_char text[])
 	PX_Object_CheckBoxSetText(pobject,text);
 }
 
-const px_char* PX_Designer_CheckBoxGetText(PX_Object *pobject)
+px_bool PX_Designer_CheckBoxGetText(PX_Object *pobject,px_string *str)
 {
-	return PX_Object_CheckBoxGetText(pobject);
+	return PX_StringSet(str,PX_Object_CheckBoxGetText(pobject));
 }
 
 px_void PX_Designer_CheckBoxSetCheck(PX_Object *pobject,px_bool b)
@@ -748,9 +779,9 @@ px_void PX_Designer_EditSetText(PX_Object *pobject,const px_char text[])
 	PX_Object_EditSetText(pobject,text);
 }
 
-const px_char* PX_Designer_EditGetText(PX_Object *pobject)
+px_bool PX_Designer_EditGetText(PX_Object *pobject,px_string *str)
 {
-	return PX_Object_EditGetText(pobject);
+	return PX_StringSet(str,PX_Object_EditGetText(pobject));
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -831,9 +862,17 @@ px_void PX_Designer_SelectBarSetText(PX_Object* pobject, const px_char text[])
 }
 
 
-const px_char *PX_Designer_SelectBarGetText(PX_Object* pobject)
+px_bool PX_Designer_SelectBarGetText(PX_Object* pobject,px_string *str)
 {
-	return "";
+	px_int i;
+	PX_Object_SelectBar* pdesc = PX_ObjectGetDesc(PX_Object_SelectBar, pobject);
+	for (i=0;i< pdesc->Items.size;i++)
+	{
+		PX_StringCat(str, PX_Object_SelectBarGetItemText(pobject, i));
+		PX_StringCat(str, "\n");
+	}
+	PX_StringBackspace(str);
+	return PX_TRUE;
 }
 
 
@@ -959,9 +998,16 @@ px_bool PX_DesignerStandardInitialize(PX_Designer *designer)
 		slabel.properties[i].getint=PX_Designer_LabelGetAlign;
 		i++;
 
-		PX_VectorPushback(&designer->ObjectDesc, &slabel);
-		slabel.type=PX_DESIGNER_OBJECT_TYPE_GAME;
-		PX_VectorPushback(&designer->ObjectDesc, &slabel);
+		if (designer->pLinkObject)
+		{
+			PX_VectorPushback(&designer->ObjectDesc, &slabel);
+		}
+		if (designer->pLinkWorld)
+		{
+			slabel.type = PX_DESIGNER_OBJECT_TYPE_GAME;
+			PX_VectorPushback(&designer->ObjectDesc, &slabel);
+		}
+		
 	} while (0);
 
 	do 
@@ -1003,9 +1049,18 @@ px_bool PX_DesignerStandardInitialize(PX_Designer *designer)
 		spushbutton.properties[i].getstring=PX_Designer_PushButtonGetText;
 		i++;
 
-		PX_VectorPushback(&designer->ObjectDesc, &spushbutton);
-		spushbutton.type=PX_DESIGNER_OBJECT_TYPE_GAME;
-		PX_VectorPushback(&designer->ObjectDesc, &spushbutton);
+		if (designer->pLinkObject)
+		{
+			PX_VectorPushback(&designer->ObjectDesc, &spushbutton);
+		}
+
+		if (designer->pLinkWorld)
+		{
+			spushbutton.type = PX_DESIGNER_OBJECT_TYPE_GAME;
+			PX_VectorPushback(&designer->ObjectDesc, &spushbutton);
+		}
+		
+		
 	} while (0);
 
 
@@ -1054,9 +1109,15 @@ px_bool PX_DesignerStandardInitialize(PX_Designer *designer)
 		sradiobutton.properties[i].getbool = PX_Designer_RadioBoxGetCheck;
 		i++;
 
-		PX_VectorPushback(&designer->ObjectDesc, &sradiobutton);
-		sradiobutton.type = PX_DESIGNER_OBJECT_TYPE_GAME;
-		PX_VectorPushback(&designer->ObjectDesc, &sradiobutton);
+		if (designer->pLinkObject)
+		{
+			PX_VectorPushback(&designer->ObjectDesc, &sradiobutton);
+		}
+		if (designer->pLinkWorld)
+		{
+			sradiobutton.type = PX_DESIGNER_OBJECT_TYPE_GAME;
+			PX_VectorPushback(&designer->ObjectDesc, &sradiobutton);
+		}
 	} while (0);
 
 
@@ -1105,9 +1166,15 @@ px_bool PX_DesignerStandardInitialize(PX_Designer *designer)
 		scheckbox.properties[i].getbool = PX_Designer_CheckBoxGetCheck;
 		i++;
 
-		PX_VectorPushback(&designer->ObjectDesc, &scheckbox);
-		scheckbox.type = PX_DESIGNER_OBJECT_TYPE_GAME;
-		PX_VectorPushback(&designer->ObjectDesc, &scheckbox);
+		if (designer->pLinkObject)
+		{
+			PX_VectorPushback(&designer->ObjectDesc, &scheckbox);
+		}
+		if (designer->pLinkWorld)
+		{
+			scheckbox.type = PX_DESIGNER_OBJECT_TYPE_GAME;
+			PX_VectorPushback(&designer->ObjectDesc, &scheckbox);
+		}
 	} while (0);
 
 
@@ -1151,9 +1218,17 @@ px_bool PX_DesignerStandardInitialize(PX_Designer *designer)
 		edit.properties[i].getstring = PX_Designer_EditGetText;
 		i++;
 
-		PX_VectorPushback(&designer->ObjectDesc, &edit);
-		edit.type = PX_DESIGNER_OBJECT_TYPE_GAME;
-		PX_VectorPushback(&designer->ObjectDesc, &edit);
+		if (designer->pLinkObject)
+		{
+			PX_VectorPushback(&designer->ObjectDesc, &edit);
+		}
+		if (designer->pLinkWorld)
+		{
+			edit.type = PX_DESIGNER_OBJECT_TYPE_GAME;
+			PX_VectorPushback(&designer->ObjectDesc, &edit);
+		}
+		
+		
 	} while (0);
 
 
@@ -1202,9 +1277,15 @@ px_bool PX_DesignerStandardInitialize(PX_Designer *designer)
 		processbar.properties[i].getint = PX_Designer_ProcessBarGetValue;
 		i++;
 
-		PX_VectorPushback(&designer->ObjectDesc, &processbar);
-		processbar.type = PX_DESIGNER_OBJECT_TYPE_GAME;
-		PX_VectorPushback(&designer->ObjectDesc, &processbar);
+		if (designer->pLinkObject)
+		{
+			PX_VectorPushback(&designer->ObjectDesc, &processbar);
+		}
+		if (designer->pLinkWorld)
+		{
+			processbar.type = PX_DESIGNER_OBJECT_TYPE_GAME;
+			PX_VectorPushback(&designer->ObjectDesc, &processbar);
+		}
 	} while (0);
 
 	do
@@ -1242,9 +1323,17 @@ px_bool PX_DesignerStandardInitialize(PX_Designer *designer)
 		list.properties[i].setfloat = PX_Designer_SetHeight;
 		i++;
 
-		PX_VectorPushback(&designer->ObjectDesc, &list);
-		list.type = PX_DESIGNER_OBJECT_TYPE_GAME;
-		PX_VectorPushback(&designer->ObjectDesc, &list);
+		if (designer->pLinkObject)
+		{
+			PX_VectorPushback(&designer->ObjectDesc, &list);
+		}
+		if (designer->pLinkWorld)
+		{
+			list.type = PX_DESIGNER_OBJECT_TYPE_GAME;
+			PX_VectorPushback(&designer->ObjectDesc, &list);
+		}
+		
+		
 	} while (0);
 
 
@@ -1288,9 +1377,15 @@ px_bool PX_DesignerStandardInitialize(PX_Designer *designer)
 		selectbar.properties[i].getstring = PX_Designer_SelectBarGetText;
 		i++;
 
-		PX_VectorPushback(&designer->ObjectDesc, &selectbar);
-		selectbar.type = PX_DESIGNER_OBJECT_TYPE_GAME;
-		PX_VectorPushback(&designer->ObjectDesc, &selectbar);
+		if (designer->pLinkObject)
+		{
+			PX_VectorPushback(&designer->ObjectDesc, &selectbar);
+		}
+		if (designer->pLinkWorld)
+		{
+			selectbar.type = PX_DESIGNER_OBJECT_TYPE_GAME;
+			PX_VectorPushback(&designer->ObjectDesc, &selectbar);
+		}
 	} while (0);
 
 	do
@@ -1354,15 +1449,23 @@ px_bool PX_DesignerStandardInitialize(PX_Designer *designer)
 		sliderbar.properties[i].getint = PX_Designer_SliderBarGetValue;
 		i++;
 
-		PX_VectorPushback(&designer->ObjectDesc, &sliderbar);
-		sliderbar.type = PX_DESIGNER_OBJECT_TYPE_GAME;
-		PX_VectorPushback(&designer->ObjectDesc, &sliderbar);
+		if (designer->pLinkObject)
+		{
+			PX_VectorPushback(&designer->ObjectDesc, &sliderbar);
+		}
+		if (designer->pLinkWorld)
+		{
+			sliderbar.type = PX_DESIGNER_OBJECT_TYPE_GAME;
+			PX_VectorPushback(&designer->ObjectDesc, &sliderbar);
+		}
+		
+		
 	} while (0);
 
 	return PX_TRUE;
 }
 
-px_void PX_DesignerOnMenuRun(px_void *userPtr)
+px_void PX_DesignerOnMenuExec(px_void *userPtr)
 {
 	PX_Object *pObject=(PX_Object *)userPtr;
 	PX_ObjectExecuteEvent(pObject,PX_OBJECT_BUILD_EVENT(PX_OBJECT_EVENT_EXECUTE));
@@ -1372,6 +1475,7 @@ px_void PX_DesignerOnMenuExit(px_void *userPtr)
 {
 	PX_Object *pObject=(PX_Object *)userPtr;
 	PX_ObjectExecuteEvent(pObject,PX_OBJECT_BUILD_EVENT(PX_OBJECT_EVENT_CLOSE));
+	PX_DesignerClose(pObject);
 }
 
 px_void PX_DesignerOnMenuWindowControllers(px_void *userPtr)
@@ -1408,35 +1512,42 @@ px_void PX_Designer_OnScrollVChanged(PX_Object* pObject, PX_Object_Event e, px_v
 {
 	PX_Object* pDesignerObject = (PX_Object*)ptr;
 	PX_Designer* pDesc = PX_ObjectGetDesc(PX_Designer, pDesignerObject);
-	px_point camera = pDesc->pLinkworld->camera_offset;
-	camera.y = PX_Object_SliderBarGetValue(pObject)*1.0f;
-	PX_WorldSetCamera(pDesc->pLinkworld, camera);
+	if (pDesc->pLinkWorld)
+	{
+		px_point camera = pDesc->pLinkWorld->camera_offset;
+		camera.y = PX_Object_SliderBarGetValue(pObject) * 1.0f;
+		PX_WorldSetCamera(pDesc->pLinkWorld, camera);
+	}
 }
 
 px_void PX_Designer_OnScrollHChanged(PX_Object* pObject, PX_Object_Event e, px_void* ptr)
 {
 	PX_Object* pDesignerObject = (PX_Object*)ptr;
 	PX_Designer* pDesc = PX_ObjectGetDesc(PX_Designer, pDesignerObject);
-	px_point camera = pDesc->pLinkworld->camera_offset;
-	camera.x = PX_Object_SliderBarGetValue(pObject) * 1.0f;
-	PX_WorldSetCamera(pDesc->pLinkworld, camera);
+	if (pDesc->pLinkWorld)
+	{
+		px_point camera = pDesc->pLinkWorld->camera_offset;
+		camera.x = PX_Object_SliderBarGetValue(pObject) * 1.0f;
+		PX_WorldSetCamera(pDesc->pLinkWorld, camera);
+	}
 }
 
-PX_Object * PX_DesignerCreate(px_memorypool *mp,PX_Object *pparent,PX_Object *pLinkObject,PX_World *pLinkWorld,PX_FontModule *fm)
+PX_Object * PX_DesignerCreate(px_memorypool *mp,px_memorypool *mp_ui,px_memorypool *mp_world,PX_Object *pparent,PX_Object *pLinkObject,PX_World *pLinkWorld,PX_FontModule *fm)
 {
 	px_int i;
 	PX_Object *pObject;
 	PX_Designer desc,*pdesc;
 	PX_memset(&desc,0,sizeof(desc));
 
-	pObject=PX_ObjectCreateEx(mp,pparent,0,0,0,0,0,0,0,PX_DesignerUpdate,PX_DesignerRender,PX_NULL,&desc,sizeof(desc));
+	pObject=PX_ObjectCreateEx(mp,pparent,0,0,0,0,0,0,0x21080210,PX_DesignerUpdate,PX_DesignerRender,PX_NULL,&desc,sizeof(desc));
 	pdesc=(PX_Designer *)pObject->pObject;
-	pdesc->pLinkworld=pLinkWorld;
+	pdesc->pLinkWorld=pLinkWorld;
 	pdesc->pLinkObject=pLinkObject;
 	pdesc->showsliderbar = PX_TRUE;
-	pdesc->widget_property = PX_Object_WidgetCreate(mp, pObject, 5, 5 + 256, 192, 192, "properties", PX_NULL);
+	pdesc->widget_property = PX_Object_WidgetCreate(mp, pObject, 5, 36 + 256, 192, 192, "properties", PX_NULL);
 	if (!pdesc->widget_property)return PX_FALSE;
-	pdesc->widget_property->x = pdesc->pLinkworld->surface_width - pdesc->widget_property->Width - 25;
+	if(pdesc->pLinkWorld)
+		pdesc->widget_property->x = pdesc->pLinkWorld->surface_width - pdesc->widget_property->Width - 25;
 
 	pdesc->widget_propertyscrollarea=PX_Object_ScrollAreaCreate(mp,pdesc->widget_property,0,0,174, 162);
 
@@ -1446,7 +1557,7 @@ PX_Object * PX_DesignerCreate(px_memorypool *mp,PX_Object *pparent,PX_Object *pL
 		pdesc->menu=PX_Object_MenuCreate(mp,pObject,0,0,64,PX_NULL);
 
 		pItem=PX_Object_MenuAddItem(pdesc->menu,PX_Object_MenuGetRootItem(pdesc->menu),"debug",PX_NULL,PX_NULL);
-			PX_Object_MenuAddItem(pdesc->menu,pItem,"run",PX_DesignerOnMenuRun,pObject);
+			PX_Object_MenuAddItem(pdesc->menu,pItem,"execute",PX_DesignerOnMenuExec,pObject);
 			PX_Object_MenuAddItem(pdesc->menu,pItem,"exit",PX_DesignerOnMenuExit,pObject);
 
 		pItem=PX_Object_MenuAddItem(pdesc->menu,PX_Object_MenuGetRootItem(pdesc->menu),"window",PX_NULL,PX_NULL);
@@ -1469,18 +1580,21 @@ PX_Object * PX_DesignerCreate(px_memorypool *mp,PX_Object *pparent,PX_Object *pL
 		PX_Object_GetEdit(pdesc->edit_propertys[i])->multiLines = PX_TRUE;
 		pdesc->edit_propertys[i]->Visible=PX_FALSE;
 		PX_ObjectRegisterEvent(pdesc->edit_propertys[i],PX_OBJECT_EVENT_VALUECHANGED,PX_Designer_OnPropertyChanged,pObject);
-		PX_ObjectRegisterEvent(pdesc->edit_propertys[i],PX_OBJECT_EVENT_LOSTFOCUS,PX_Designer_OnPropertyRefresh,pObject);
+		//PX_ObjectRegisterEvent(pdesc->edit_propertys[i],PX_OBJECT_EVENT_LOSTFOCUS,PX_Designer_OnPropertyRefresh,pObject);
 	}
 
 
-	pdesc->widget_controllers=PX_Object_WidgetCreate(mp,pObject,5,5,192,256,"controllers",PX_NULL);
+	pdesc->widget_controllers=PX_Object_WidgetCreate(mp,pObject,5,25,192,256,"controllers",PX_NULL);
 	if(!pdesc->widget_controllers)return PX_FALSE;
-	pdesc->widget_controllers->x = pdesc->pLinkworld->surface_width - pdesc->widget_controllers->Width - 25;
+	if (pdesc->pLinkWorld)
+		pdesc->widget_controllers->x = pdesc->pLinkWorld->surface_width - pdesc->widget_controllers->Width - 25;
 
 
 	if (!PX_VectorInitialize(mp, &pdesc->ObjectDesc, sizeof(PX_Designer_ObjectDesc), 16))return PX_FALSE;
 	if (!PX_VectorInitialize(mp, &pdesc->Objects, sizeof(PX_Designer_Object), 16))return PX_FALSE;
 	pdesc->mp=mp;
+	pdesc->mp_ui=mp_ui;
+	pdesc->mp_game=mp_world;
 	pdesc->fm=fm;
 	pdesc->selectObjectIndex=-1;
 	pdesc->menu=PX_Object_MenuCreate(mp,pObject,0,0,64,fm);
@@ -1504,9 +1618,9 @@ PX_Object * PX_DesignerCreate(px_memorypool *mp,PX_Object *pparent,PX_Object *pL
 
 	pdesc->world_hscroll = PX_Object_SliderBarCreate(mp, pObject, 0, 0, 10, 10, PX_OBJECT_SLIDERBAR_TYPE_HORIZONTAL, PX_OBJECT_SLIDERBAR_STYLE_BOX);
 	
-	if (pdesc->pLinkworld->world_width > pdesc->pLinkworld->surface_width)
+	if (pdesc->pLinkWorld&&pdesc->pLinkWorld->world_width > pdesc->pLinkWorld->surface_width)
 	{
-		PX_Object_SliderBarSetRange(pdesc->world_hscroll, (px_int)(pdesc->pLinkworld->surface_width / 2) - 1, (px_int)(pdesc->pLinkworld->world_width - pdesc->pLinkworld->surface_width / 2) + 1);
+		PX_Object_SliderBarSetRange(pdesc->world_hscroll, (px_int)(pdesc->pLinkWorld->surface_width / 2) - 1, (px_int)(pdesc->pLinkWorld->world_width - pdesc->pLinkWorld->surface_width / 2) + 1);
 	}
 	else
 	{
@@ -1516,9 +1630,9 @@ PX_Object * PX_DesignerCreate(px_memorypool *mp,PX_Object *pparent,PX_Object *pL
 
 
 	pdesc->world_vscroll = PX_Object_SliderBarCreate(mp, pObject, 0, 0, 10, 10, PX_OBJECT_SLIDERBAR_TYPE_VERTICAL, PX_OBJECT_SLIDERBAR_STYLE_BOX);
-	if (pdesc->pLinkworld->world_height > pdesc->pLinkworld->surface_height)
+	if (pdesc->pLinkWorld && pdesc->pLinkWorld->world_height > pdesc->pLinkWorld->surface_height)
 	{
-		PX_Object_SliderBarSetRange(pdesc->world_vscroll, (px_int)(pdesc->pLinkworld->surface_height / 2) - 1, (px_int)(pdesc->pLinkworld->world_height - pdesc->pLinkworld->surface_height / 2) + 1);
+		PX_Object_SliderBarSetRange(pdesc->world_vscroll, (px_int)(pdesc->pLinkWorld->surface_height / 2) - 1, (px_int)(pdesc->pLinkWorld->world_height - pdesc->pLinkWorld->surface_height / 2) + 1);
 	}
 	else
 	{
@@ -1534,6 +1648,283 @@ PX_Object * PX_DesignerCreate(px_memorypool *mp,PX_Object *pparent,PX_Object *pL
 	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_CURSORDOWN,PX_Designer_OnCursorDown,pObject);
 	PX_ObjectRegisterEvent(pdesc->designerbox,PX_OBJECT_EVENT_VALUECHANGED,PX_DesignerOnDesignerBoxValueChanged,pObject);
 
-	
+	pObject->Visible = PX_FALSE;
+
 	return pObject;
+}
+
+
+
+px_void PX_DesignerActivate(PX_Object* pObject)
+{
+	if (pObject->Type== 0x21080210)
+	{
+		PX_ObjectSetVisible(pObject, PX_TRUE);
+		PX_ObjectSetFocus(pObject);
+	}
+}
+
+px_void PX_DesignerClose(PX_Object* pObject)
+{
+	if (pObject->Type == 0x21080210)
+	{
+		PX_ObjectSetVisible(pObject, PX_FALSE);
+		PX_ObjectClearFocus(pObject);
+	}
+}
+
+
+
+px_bool PX_DesignerExport(PX_Object *pObject, px_string* pText)
+{
+	px_int i;
+	PX_Designer* designer;
+	if (pObject->Type!=0x21080210)
+	{
+		PX_ASSERT();
+		return PX_FALSE;
+	}
+	designer=PX_ObjectGetDesc(PX_Designer,pObject);
+
+	if (designer->Objects.size==0)
+	{
+		return PX_TRUE;
+	}
+
+	PX_StringCatEx(pText,"{\n");
+
+	for (i=0;i<designer->Objects.size;i++)
+	{
+		PX_Designer_Object* pdobject = PX_VECTORAT(PX_Designer_Object, &designer->Objects, i);
+		PX_Designer_ObjectDesc* pobjectdesc = PX_VECTORAT(PX_Designer_ObjectDesc, &designer->ObjectDesc, pdobject->descIndex);
+		px_int j;
+		if (!pobjectdesc)
+		{
+			PX_ASSERT();
+			goto _ERROR;;
+		}
+		//Object Name
+		if(!PX_StringCatEx(pText,"\""))goto _ERROR;
+		if(!PX_StringCatEx(pText,pobjectdesc->Name))goto _ERROR;
+		if(!PX_StringCatEx(pText,"\":{\n"))goto _ERROR;
+
+		//Object Type
+		switch (pdobject->type)
+		{
+		case PX_DESIGNER_OBJECT_TYPE_UI:
+			if(!PX_StringCatEx(pText,"\"type\":\"ui\",\n"))goto _ERROR;
+			break;
+		case PX_DESIGNER_OBJECT_TYPE_GAME:
+			if(!PX_StringCatEx(pText,"\"type\":\"game\",\n"))goto _ERROR;
+				break;
+		case PX_DESIGNER_OBJECT_TYPE_FUNCTION:
+			PX_ASSERT();
+			break;
+		default:
+			return PX_FALSE;
+		}
+		
+		for (j=0;j<PX_COUNTOF(pobjectdesc->properties);j++)
+		{
+			if (!pobjectdesc->properties[j].Name[0])
+			{
+				break;
+			}
+			
+			if (pobjectdesc->properties[j].getbool)
+			{
+				if (pobjectdesc->properties[j].getbool(pdobject->pObject))
+				{
+					if(!PX_StringCatEx(pText,"\""))goto _ERROR;
+					if(!PX_StringCatEx(pText,pobjectdesc->properties[j].Name))goto _ERROR;
+					if(!PX_StringCatEx(pText,"\":true"))goto _ERROR;
+				}
+				else
+				{
+					if(!PX_StringCatEx(pText,"\""))goto _ERROR;
+					if(!PX_StringCatEx(pText,pobjectdesc->Name))goto _ERROR;
+					if(!PX_StringCatEx(pText,"\":false"))goto _ERROR;
+				}
+			}
+			else if (pobjectdesc->properties[j].getfloat)
+			{
+				if(!PX_StringCatEx(pText,"\""))goto _ERROR;
+				if(!PX_StringCatEx(pText,pobjectdesc->properties[j].Name))goto _ERROR;
+				if(!PX_StringCatEx(pText,"\":"))goto _ERROR;
+				
+				if(!PX_StringCatEx(pText,PX_ftos(pobjectdesc->properties[j].getfloat(pdobject->pObject),2).data))goto _ERROR;
+			}
+			else if (pobjectdesc->properties[j].getint)
+			{
+				if(!PX_StringCatEx(pText,"\""))goto _ERROR;
+				if(!PX_StringCatEx(pText,pobjectdesc->properties[j].Name))goto _ERROR;
+				if(!PX_StringCatEx(pText,"\":"))goto _ERROR;
+
+				if(!PX_StringCatEx(pText,PX_itos(pobjectdesc->properties[j].getint(pdobject->pObject),10).data))goto _ERROR;
+			}
+			else if (pobjectdesc->properties[j].getstring)
+			{
+				px_string str;
+				if(!PX_StringCatEx(pText,"\""))goto _ERROR;
+				if(!PX_StringCatEx(pText,pobjectdesc->properties[j].Name))goto _ERROR;
+				if(!PX_StringCatEx(pText,"\":\""))goto _ERROR;
+				PX_StringInitialize(designer->mp, &str);
+				pobjectdesc->properties[j].getstring(pdobject->pObject, &str);
+				
+				if (!PX_StringCatEx(pText,str.buffer ))
+				{
+					PX_StringFree(&str);
+					goto _ERROR;
+				}
+				PX_StringFree(&str);
+				if(!PX_StringCatEx(pText,"\""))goto _ERROR;
+			}
+			if(!PX_StringCatEx(pText,",\n"))goto _ERROR;
+		}
+		PX_StringBackspaceEx(pText);
+		PX_StringBackspaceEx(pText);
+		PX_StringCatEx(pText,"\n},\n");
+	}
+	PX_StringBackspaceEx(pText);
+	PX_StringBackspaceEx(pText);
+
+	PX_StringCatEx(pText,"\n}\n");
+
+	return PX_TRUE;
+_ERROR:
+	PX_StringClear(pText);
+	return PX_FALSE;
+
+}
+
+px_bool PX_DesignerImport(PX_Object* pObject, const px_char* pText)
+{
+	PX_Json Json;
+	px_int i;
+	PX_Designer * pdesigner=PX_ObjectGetDesc(PX_Designer,pObject);
+	if(!PX_JsonInitialize(pdesigner->mp,&Json))return PX_FALSE;
+	if (!PX_JsonParse(&Json,pText))
+	{
+		goto _ERROR;
+	}
+	for (i=0;i<Json.rootValue._object.values.size;i++)
+	{
+		PX_Json_Value *pJsonValue=PX_JsonGetObjectValueByIndex(&Json.rootValue,i);
+		PX_Designer_ObjectDesc *pObjectDesc;
+		px_int j,descindex=-1;
+		if (!pJsonValue||pJsonValue->type!=PX_JSON_VALUE_TYPE_OBJECT)
+		{
+			continue;
+		}
+		pObjectDesc=PX_NULL;
+		for (j=0;j<pdesigner->ObjectDesc.size;j++)
+		{
+			PX_Designer_ObjectDesc *pEnumObjectDesc=PX_VECTORAT(PX_Designer_ObjectDesc,&pdesigner->ObjectDesc,j);
+			if (PX_strequ(pJsonValue->name.buffer,pEnumObjectDesc->Name))
+			{
+				pObjectDesc=pEnumObjectDesc;
+				descindex=j;
+				break;
+			}
+		}
+		if (pObjectDesc)
+		{
+			PX_Json_Value *TypeValue=PX_JsonGetObjectValue(pJsonValue,"type");
+			PX_DESIGNER_OBJECT_TYPE type;
+			PX_Object *pNewObject=PX_NULL;
+			if (TypeValue&&TypeValue->type==PX_JSON_VALUE_TYPE_STRING)
+			{
+				if (PX_strequ(TypeValue->_string.buffer,"ui"))
+				{
+					type=PX_DESIGNER_OBJECT_TYPE_UI;
+				}
+				else if (PX_strequ(TypeValue->_string.buffer,"game"))
+				{
+					type=PX_DESIGNER_OBJECT_TYPE_GAME;
+				}
+				else
+				{
+					type=PX_DESIGNER_OBJECT_TYPE_FUNCTION;
+				}
+			}
+
+
+			switch (type)
+			{
+			case PX_DESIGNER_OBJECT_TYPE_UI:
+				{
+					PX_Designer_Object dobject;
+					pNewObject=pObjectDesc->createfunc(pdesigner->mp_ui,pdesigner->pLinkObject,0,0,100,100,pdesigner->fm);
+					dobject.pObject = pNewObject;
+					dobject.type = PX_DESIGNER_OBJECT_TYPE_UI;
+					dobject.descIndex = descindex;
+					PX_VectorPushback(&pdesigner->Objects, &dobject);
+				}
+				break;
+			case PX_DESIGNER_OBJECT_TYPE_GAME:
+				{
+					PX_Designer_Object dobject;
+					pNewObject=pObjectDesc->createfunc(pdesigner->mp_game,PX_NULL,0,0,100,100,pdesigner->fm);
+					PX_WorldAddObject(pdesigner->pLinkWorld, pNewObject);
+					dobject.pObject = pNewObject;
+					dobject.type = PX_DESIGNER_OBJECT_TYPE_GAME;
+					dobject.descIndex = descindex;
+					PX_VectorPushback(&pdesigner->Objects, &dobject);
+				}
+				break;
+			default:
+				break;
+			}
+
+			if (pNewObject)
+			{
+				for(j=0;j<PX_COUNTOF(pObjectDesc->properties);j++)
+				{
+					if (pObjectDesc->properties[j].Name[0]=='\0')
+					{
+						break;
+					}
+					if (pObjectDesc->properties[j].setbool)
+					{
+						PX_Json_Value *pvalue=PX_JsonGetObjectValue(pJsonValue,pObjectDesc->properties[j].Name);
+						if (pvalue&&pvalue->type==PX_JSON_VALUE_TYPE_BOOLEAN)
+						{
+							pObjectDesc->properties[j].setbool(pNewObject,pvalue->_boolean);
+						}
+					}
+					else if(pObjectDesc->properties[j].setfloat)
+					{
+						PX_Json_Value *pvalue=PX_JsonGetObjectValue(pJsonValue,pObjectDesc->properties[j].Name);
+						if (pvalue&&pvalue->type==PX_JSON_VALUE_TYPE_NUMBER)
+						{
+							pObjectDesc->properties[j].setfloat(pNewObject,(px_float)pvalue->_number);
+						}
+					}
+					else if(pObjectDesc->properties[j].setint)
+					{
+						PX_Json_Value *pvalue=PX_JsonGetObjectValue(pJsonValue,pObjectDesc->properties[j].Name);
+						if (pvalue&&pvalue->type==PX_JSON_VALUE_TYPE_NUMBER)
+						{
+							pObjectDesc->properties[j].setint(pNewObject,(px_int)pvalue->_number);
+						}
+					}
+					else if(pObjectDesc->properties[j].setstring)
+					{
+						PX_Json_Value *pvalue=PX_JsonGetObjectValue(pJsonValue,pObjectDesc->properties[j].Name);
+						if (pvalue&&pvalue->type==PX_JSON_VALUE_TYPE_STRING)
+						{
+							pObjectDesc->properties[j].setstring(pNewObject,pvalue->_string.buffer);
+						}
+					}
+				}
+			}
+			
+		}
+	}
+
+	PX_JsonFree(&Json);
+	return PX_TRUE;
+_ERROR:
+	PX_JsonFree(&Json);
+	return PX_FALSE;
 }

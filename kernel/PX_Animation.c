@@ -94,7 +94,7 @@ px_void PX_AnimationLibraryFree(PX_AnimationLibrary *panimation)
 	PX_MemoryFree(&panimation->code);
 }
 
-px_void PX_AnimationUpdate(PX_Animation *panimation,px_uint elpased)
+px_void PX_AnimationUpdate(PX_Animation *panimation,px_uint elapsed)
 {
 	PX_2DX_INSTR *pInstr;
 
@@ -102,17 +102,17 @@ px_void PX_AnimationUpdate(PX_Animation *panimation,px_uint elpased)
 	{
 		return;
 	}
-	if (panimation->reg_reservedTime>=elpased)
+	if (panimation->reg_reservedTime>=elapsed)
 	{
-		panimation->reg_reservedTime-=elpased;
+		panimation->reg_reservedTime-=elapsed;
 		return;
 	}
 	else
 	{
-		elpased-=panimation->reg_reservedTime;
+		elapsed-=panimation->reg_reservedTime;
 	}
 
-	while(elpased)
+	while(elapsed)
 	{
 		if (panimation->ip>panimation->linker->code.usedsize-sizeof(PX_2DX_INSTR))
 		{
@@ -154,15 +154,15 @@ px_void PX_AnimationUpdate(PX_Animation *panimation,px_uint elpased)
 			break;
 		case PX_2DX_OPCODE_SLEEP:
 
-			if (pInstr->param>elpased)
+			if (pInstr->param>elapsed)
 			{
-				panimation->reg_reservedTime=pInstr->param-elpased;
+				panimation->reg_reservedTime=pInstr->param-elapsed;
 				panimation->ip+=sizeof(PX_2DX_INSTR);
 				return;
 			}
 			else
 			{
-				elpased-=pInstr->param;
+				elapsed-=pInstr->param;
 				panimation->ip+=sizeof(PX_2DX_INSTR);
 			}
 			break;
@@ -249,7 +249,7 @@ px_int PX_AnimationLibraryGetFrameHeight(PX_AnimationLibrary *panimationLib,px_i
 
 px_bool PX_AnimationCreate(PX_Animation *animation,PX_AnimationLibrary *linker)
 {
-	animation->elpased=0;
+	animation->elapsed=0;
 	animation->linker=linker;
 	animation->reg_currentFrameIndex=-1;
 	animation->reg_loopTimes=0;
@@ -263,7 +263,7 @@ px_bool PX_AnimationCreate(PX_Animation *animation,PX_AnimationLibrary *linker)
 px_bool PX_AnimationSetLibrary(PX_Animation *animation,PX_AnimationLibrary *linker)
 {
 	PX_AnimationFree(animation);
-	animation->elpased=0;
+	animation->elapsed=0;
 	animation->linker=linker;
 	animation->reg_currentFrameIndex=-1;
 	animation->reg_loopTimes=0;
@@ -281,7 +281,7 @@ px_void PX_AnimationFree(PX_Animation *animation)
 
 px_void PX_AnimationReset(PX_Animation *animation)
 {
-	animation->elpased=0;
+	animation->elapsed=0;
 	animation->reg_currentFrameIndex=-1;
 	animation->reg_loopTimes=0;
 	animation->reg_reservedTime=0;

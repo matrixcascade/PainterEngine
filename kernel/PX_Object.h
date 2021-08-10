@@ -128,9 +128,9 @@ enum PX_OBJECT_TYPE
 struct _PX_Object;
 typedef struct _PX_Object PX_Object;
 
-typedef px_void  (*Function_ObjectUpdate)(PX_Object *,px_uint elpased);
+typedef px_void  (*Function_ObjectUpdate)(PX_Object *,px_uint elapsed);
 typedef px_void  (*Function_ObjectBeginRender)(px_surface *,PX_Object *,px_dword);
-typedef px_void  (*Function_ObjectRender)(px_surface *psurface,PX_Object *,px_uint elpased);
+typedef px_void  (*Function_ObjectRender)(px_surface *psurface,PX_Object *,px_uint elapsed);
 typedef px_void  (*Function_ObjectEndRender)(px_surface *,PX_Object *,px_dword);
 typedef px_void  (*Function_ObjectFree)(PX_Object *);
 typedef px_void  (*Function_ObjectLinkChild)(PX_Object *parent,PX_Object *child);
@@ -303,8 +303,8 @@ px_float	PX_ObjectGetHeight(PX_Object *Object);
 px_float	PX_ObjectGetWidth(PX_Object *Object);
 
 px_void PX_ObjectAddClild(PX_Object *Parent,PX_Object *child);
-px_void PX_ObjectUpdate(PX_Object *Object,px_uint elpased );
-px_void PX_ObjectRender(px_surface *pSurface,PX_Object *Object,px_uint elpased);
+px_void PX_ObjectUpdate(PX_Object *Object,px_uint elapsed );
+px_void PX_ObjectRender(px_surface *pSurface,PX_Object *Object,px_uint elapsed);
 
 px_int PX_ObjectRegisterEvent(PX_Object *Object,px_uint Event,px_void (*ProcessFunc)(PX_Object *,PX_Object_Event e,px_void *user_ptr),px_void *ptr);
 px_void PX_ObjectPostEvent(PX_Object *pPost,PX_Object_Event Event);

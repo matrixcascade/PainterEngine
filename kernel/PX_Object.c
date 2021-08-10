@@ -18,10 +18,9 @@ PX_Object  * PX_ObjectGetChild( PX_Object *Object,px_int Index )
 
 }
 
-static PX_Object * PX_ObjectGetObjectChild(PX_Object *pObject,const px_char payload[])
+static PX_Object * PX_ObjectGetObjectLink(PX_Object *pObject,const px_char payload[])
 {
 	px_char id[PX_OBJECT_ID_MAXLEN]={0};
-	PX_Object *resultObject;
 	px_int oft=0;
 	if (!pObject)
 	{
@@ -31,27 +30,39 @@ static PX_Object * PX_ObjectGetObjectChild(PX_Object *pObject,const px_char payl
 	while (payload[oft]!='.'&&payload[oft]!='\0'&&oft<PX_OBJECT_ID_MAXLEN-1)
 	{
 		id[oft]=payload[oft];
+		oft++;
 	}
 
-	if (id[0]=='\0')
-	{
-		return PX_NULL;
-	}
+
 
 	if (payload[oft]=='.')
 	{
 		oft++;
 	}
-	if (PX_strequ(pObject->id,id))
+
+	if (payload[oft]=='\0')
 	{
-		return pObject;
+		if (PX_strequ(pObject->id,id))
+		{
+			return pObject;
+		}
+		else
+		{
+			return PX_ObjectGetObjectLink(pObject->pNextBrother,payload);
+		}
 	}
-	resultObject=PX_ObjectGetObject(pObject->pNextBrother,payload);
-	if (resultObject)
+	else
 	{
-		return resultObject;
+		if (PX_strequ(pObject->id,id))
+		{
+			return PX_ObjectGetObjectLink(pObject->pChilds,payload+oft);
+		}
+		else
+		{
+			return PX_ObjectGetObjectLink(pObject->pNextBrother,payload);
+		}
 	}
-	return PX_ObjectGetObject(pObject->pChilds,payload+oft);
+	return PX_NULL;
 }
 
 PX_Object * PX_ObjectGetObject(PX_Object *pObject,const px_char payload[])
@@ -67,23 +78,33 @@ PX_Object * PX_ObjectGetObject(PX_Object *pObject,const px_char payload[])
 	while (payload[oft]!='.'&&payload[oft]!='\0'&&oft<PX_OBJECT_ID_MAXLEN-1)
 	{
 		id[oft]=payload[oft];
-	}
-
-	if (id[0]=='\0')
-	{
-		return PX_NULL;
+		oft++;
 	}
 
 	if (payload[oft]=='.')
 	{
 		oft++;
 	}
-	if (PX_strequ(pObject->id,id))
-	{
-		return pObject;
-	}
 
-	return PX_ObjectGetObject(pObject->pChilds,payload+oft);
+	if (payload[oft]=='\0')
+	{
+		if (PX_strequ(pObject->id,id))
+		{
+			return pObject;
+		}
+		else
+		{
+			return PX_NULL;
+		}
+	}
+	else
+	{
+		if (PX_strequ(pObject->id,id))
+		{
+			return PX_ObjectGetObjectLink(pObject->pChilds,payload+oft);
+		}
+	}
+	return PX_NULL;
 }
 
 
@@ -491,7 +512,7 @@ px_void PX_ObjectDeleteChilds( PX_Object *pObject )
 	}
 }
 
-px_void PX_Object_ObjectLinkerUpdate( PX_Object *Object,px_uint elpased)
+px_void PX_Object_ObjectLinkerUpdate( PX_Object *Object,px_uint elapsed)
 {
 	if (Object==PX_NULL)
 	{
@@ -501,15 +522,15 @@ px_void PX_Object_ObjectLinkerUpdate( PX_Object *Object,px_uint elpased)
 	{
 		if (Object->Func_ObjectUpdate!=0)
 		{
-			Object->Func_ObjectUpdate(Object,elpased);
+			Object->Func_ObjectUpdate(Object,elapsed);
 		}
-		PX_Object_ObjectLinkerUpdate(Object->pChilds,elpased);
+		PX_Object_ObjectLinkerUpdate(Object->pChilds,elapsed);
 	}
-	PX_Object_ObjectLinkerUpdate(Object->pNextBrother,elpased);	
+	PX_Object_ObjectLinkerUpdate(Object->pNextBrother,elapsed);	
 }
 
 
-px_void PX_ObjectUpdate(PX_Object *Object,px_uint elpased )
+px_void PX_ObjectUpdate(PX_Object *Object,px_uint elapsed )
 {
 	if (Object==PX_NULL)
 	{
@@ -522,15 +543,15 @@ px_void PX_ObjectUpdate(PX_Object *Object,px_uint elpased )
 	}
 	if (Object->Func_ObjectUpdate!=0)
 	{
-		Object->Func_ObjectUpdate(Object,elpased);
+		Object->Func_ObjectUpdate(Object,elapsed);
 	}
 	if (Object->pChilds!=PX_NULL)
 	{
-		PX_Object_ObjectLinkerUpdate(Object->pChilds,elpased);
+		PX_Object_ObjectLinkerUpdate(Object->pChilds,elapsed);
 	}
 }
 
-static px_void PX_ObjectRenderEx(px_surface *pSurface, PX_Object *Object,px_uint elpased )
+static px_void PX_ObjectRenderEx(px_surface *pSurface, PX_Object *Object,px_uint elapsed )
 {
 	if (Object==PX_NULL)
 	{
@@ -539,26 +560,26 @@ static px_void PX_ObjectRenderEx(px_surface *pSurface, PX_Object *Object,px_uint
 
 	if (Object->OnFocus)
 	{
-		PX_ObjectRenderEx(pSurface,Object->pNextBrother,elpased);	
+		PX_ObjectRenderEx(pSurface,Object->pNextBrother,elapsed);	
 
 		if (Object->Visible!=PX_FALSE)
 		{
 			if (Object->Func_ObjectBeginRender)
 			{
-				Object->Func_ObjectBeginRender(pSurface,Object,elpased);
+				Object->Func_ObjectBeginRender(pSurface,Object,elapsed);
 			}
 			
 			if (Object->Func_ObjectRender!=0)
 			{
-				Object->Func_ObjectRender(pSurface,Object,elpased);
+				Object->Func_ObjectRender(pSurface,Object,elapsed);
 			}
 
-			PX_ObjectRenderEx(pSurface,Object->pChilds,elpased);
+			PX_ObjectRenderEx(pSurface,Object->pChilds,elapsed);
 
 			
 			if (Object->Func_ObjectEndRender)
 			{
-				Object->Func_ObjectEndRender(pSurface,Object,elpased);
+				Object->Func_ObjectEndRender(pSurface,Object,elapsed);
 			}
 		}
 	}
@@ -568,24 +589,24 @@ static px_void PX_ObjectRenderEx(px_surface *pSurface, PX_Object *Object,px_uint
 		{
 			if (Object->Func_ObjectBeginRender)
 			{
-				Object->Func_ObjectBeginRender(pSurface,Object,elpased);
+				Object->Func_ObjectBeginRender(pSurface,Object,elapsed);
 			}
 			if (Object->Func_ObjectRender!=0)
 			{
-				Object->Func_ObjectRender(pSurface,Object,elpased);
+				Object->Func_ObjectRender(pSurface,Object,elapsed);
 			}
-			PX_ObjectRenderEx(pSurface,Object->pChilds,elpased);
+			PX_ObjectRenderEx(pSurface,Object->pChilds,elapsed);
 			
 			if (Object->Func_ObjectEndRender)
 			{
-				Object->Func_ObjectEndRender(pSurface,Object,elpased);
+				Object->Func_ObjectEndRender(pSurface,Object,elapsed);
 			}
 		}
-		PX_ObjectRenderEx(pSurface,Object->pNextBrother,elpased);	
+		PX_ObjectRenderEx(pSurface,Object->pNextBrother,elapsed);	
 	}
 }
 
-px_void PX_ObjectRender(px_surface *pSurface, PX_Object *Object,px_uint elpased )
+px_void PX_ObjectRender(px_surface *pSurface, PX_Object *Object,px_uint elapsed )
 {
 	if (Object==PX_NULL)
 	{
@@ -599,20 +620,20 @@ px_void PX_ObjectRender(px_surface *pSurface, PX_Object *Object,px_uint elpased 
 		{
 			if (Object->Func_ObjectBeginRender)
 			{
-				Object->Func_ObjectBeginRender(pSurface,Object,elpased);
+				Object->Func_ObjectBeginRender(pSurface,Object,elapsed);
 			}
 
 			if (Object->Func_ObjectRender!=0)
 			{
-				Object->Func_ObjectRender(pSurface,Object,elpased);
+				Object->Func_ObjectRender(pSurface,Object,elapsed);
 			}
 
-			PX_ObjectRenderEx(pSurface,Object->pChilds,elpased);
+			PX_ObjectRenderEx(pSurface,Object->pChilds,elapsed);
 
 
 			if (Object->Func_ObjectEndRender)
 			{
-				Object->Func_ObjectEndRender(pSurface,Object,elpased);
+				Object->Func_ObjectEndRender(pSurface,Object,elapsed);
 			}
 		}
 	}
@@ -622,17 +643,17 @@ px_void PX_ObjectRender(px_surface *pSurface, PX_Object *Object,px_uint elpased 
 		{
 			if (Object->Func_ObjectBeginRender)
 			{
-				Object->Func_ObjectBeginRender(pSurface,Object,elpased);
+				Object->Func_ObjectBeginRender(pSurface,Object,elapsed);
 			}
 			if (Object->Func_ObjectRender!=0)
 			{
-				Object->Func_ObjectRender(pSurface,Object,elpased);
+				Object->Func_ObjectRender(pSurface,Object,elapsed);
 			}
-			PX_ObjectRenderEx(pSurface,Object->pChilds,elpased);
+			PX_ObjectRenderEx(pSurface,Object->pChilds,elapsed);
 
 			if (Object->Func_ObjectEndRender)
 			{
-				Object->Func_ObjectEndRender(pSurface,Object,elpased);
+				Object->Func_ObjectEndRender(pSurface,Object,elapsed);
 			}
 		}
 	}

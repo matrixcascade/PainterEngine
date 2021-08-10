@@ -39,7 +39,8 @@ px_bool PX_TextureCreateFromMemory(px_memorypool *mp,px_void *data,px_int size,p
 		}
 	}
 
-	return PX_TRUE;
+	//image-format not supported
+	return PX_FALSE;
 }
 
 typedef struct  

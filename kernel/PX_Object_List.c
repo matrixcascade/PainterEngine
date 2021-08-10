@@ -162,7 +162,7 @@ px_void PX_Object_ListMoveToTop(PX_Object *pObject)
 	PX_Object_SliderBarSetValue(pList->SliderBar,0);
 }
 
-px_void PX_Object_ListRender(px_surface *psurface, PX_Object *pObject,px_uint elpased)
+px_void PX_Object_ListRender(px_surface *psurface, PX_Object *pObject,px_uint elapsed)
 {
 	PX_Object *pItemObject;
 	px_int offsetX=0,drawXCenter=0;
@@ -243,7 +243,7 @@ px_void PX_Object_ListRender(px_surface *psurface, PX_Object *pObject,px_uint el
 			if(i<pList->pData.size)
 			{
 				pItem->pdata=*PX_VECTORAT(px_void *,&pList->pData,i);
-				PX_ObjectUpdate(pItemObject,elpased);
+				PX_ObjectUpdate(pItemObject,elapsed);
 			}
 			else
 			{
@@ -255,7 +255,7 @@ px_void PX_Object_ListRender(px_surface *psurface, PX_Object *pObject,px_uint el
 			if(i+pList->offsety/pList->ItemHeight<pList->pData.size)
 			{
 				pItem->pdata=*PX_VECTORAT(px_void *,&pList->pData,i+pList->offsety/pList->ItemHeight);
-				PX_ObjectUpdate(pItemObject,elpased);
+				PX_ObjectUpdate(pItemObject,elapsed);
 			}
 			else
 			{
@@ -286,7 +286,7 @@ px_void PX_Object_ListRender(px_surface *psurface, PX_Object *pObject,px_uint el
 			{
 				PX_GeoDrawRect(&pList->renderSurface,(px_int)pItemObject->x,(px_int)pItemObject->y,(px_int)(pItemObject->x+pItemObject->Width-1),(px_int)(pItemObject->y+pItemObject->Height-1),pList->SelectCursor);
 			}
-			PX_ObjectRender(&pList->renderSurface,pItemObject,elpased);
+			PX_ObjectRender(&pList->renderSurface,pItemObject,elapsed);
 		}
 	}
 	PX_GeoDrawBorder(&pList->renderSurface,0,0,pList->renderSurface.width-1,pList->renderSurface.height-1,1,pList->BorderColor);
@@ -432,7 +432,7 @@ PX_Object * PX_Object_ListCreate(px_memorypool *mp, PX_Object *Parent,px_int x,p
 	return pListObject;
 }
 
-static px_void PX_Object_ListContentItemOnRender(px_surface* psurface, PX_Object* pObject, px_dword elpased)
+static px_void PX_Object_ListContentItemOnRender(px_surface* psurface, PX_Object* pObject, px_dword elapsed)
 {
 	PX_Object_ListItem* pListItem;
 	px_float objx, objy, objWidth, objHeight;

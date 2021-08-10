@@ -18,7 +18,7 @@ typedef PX_Object *(*px_designer_createfunc)(px_memorypool *mp,PX_Object *pparen
 
 typedef px_float (*px_designer_getproperty_float)(PX_Object *pObject);
 typedef px_int (*px_designer_getproperty_int)(PX_Object *pObject);
-typedef const px_char *(*px_designer_getproperty_string)(PX_Object *pObject);
+typedef px_bool (*px_designer_getproperty_string)(PX_Object *pObject,px_string *str);
 typedef px_bool (*px_designer_getproperty_bool)(PX_Object *pObject);
 
 typedef px_void (*px_designer_setproperty_float)(PX_Object *pObject,px_float v);
@@ -64,9 +64,9 @@ typedef struct
 
 typedef struct  
 {
-	px_memorypool *mp;
+	px_memorypool *mp,*mp_ui,*mp_game;
 	PX_Object *pLinkObject;
-	PX_World  *pLinkworld;
+	PX_World  *pLinkWorld;
 
 	PX_Object	*widget_controllers;
 	PX_Object	*widget_property,*widget_propertyscrollarea;
@@ -88,5 +88,9 @@ typedef struct
 	px_vector Objects;
 }PX_Designer;
 
-PX_Object * PX_DesignerCreate(px_memorypool *mp,PX_Object *pparent,PX_Object *pLinkObject,PX_World *pLinkWorld,PX_FontModule *fm);
+PX_Object * PX_DesignerCreate(px_memorypool *mp,px_memorypool *mp_ui,px_memorypool*mp_world,PX_Object *pparent,PX_Object *pLinkObject,PX_World *pLinkWorld,PX_FontModule *fm);
+px_void PX_DesignerActivate(PX_Object* pObject);
+px_void PX_DesignerClose(PX_Object* pObject);
+px_bool PX_DesignerExport(PX_Object* pObject, px_string* pText);
+px_bool PX_DesignerImport(PX_Object* pObject, const px_char* pText);
 #endif

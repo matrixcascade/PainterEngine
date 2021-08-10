@@ -1,7 +1,7 @@
 #include "PX_Object_DesignerBox.h"
 #include "PX_Object_DesignerBox.h"
 
-px_void PX_Object_DesignerBoxRender(px_surface *pSurface,PX_Object *pObject,px_dword elpased)
+px_void PX_Object_DesignerBoxRender(px_surface *pSurface,PX_Object *pObject,px_dword elapsed)
 {
 	PX_Object_DesignerBox*pDesc=PX_ObjectGetDesc(PX_Object_DesignerBox,pObject);
 	px_color renderColor;

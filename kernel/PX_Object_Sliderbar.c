@@ -369,7 +369,7 @@ px_int PX_Object_SliderBarGetValue( PX_Object *pSliderBar )
 	return 0;
 }
 
-px_void PX_Object_SliderBarRender(px_surface *psurface, PX_Object *pObject,px_uint elpased)
+px_void PX_Object_SliderBarRender(px_surface *psurface, PX_Object *pObject,px_uint elapsed)
 {
 	PX_Object_SliderBar *pSliderBar=PX_Object_GetSliderBar(pObject);
 	PX_Object_Event e;

@@ -109,7 +109,7 @@ px_void PX_Object_CheckBoxOnMouseLButtonUp(PX_Object *Object,PX_Object_Event e,p
 	}
 }
 
-px_void PX_Object_CheckBoxRender(px_surface *psurface, PX_Object *pObject,px_uint elpased)
+px_void PX_Object_CheckBoxRender(px_surface *psurface, PX_Object *pObject,px_uint elapsed)
 {
 	PX_Object_CheckBox *pcb=PX_Object_GetCheckBox(pObject);
 	px_float objx,objy,objWidth,objHeight;

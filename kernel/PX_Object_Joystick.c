@@ -37,7 +37,7 @@ px_point2D PX_Object_JoystickGetVector(PX_Object* pObject) {
 
 ///////////////////////////////////////////////
 
-px_void Func_JoystickRender(px_surface* pSurface, PX_Object* pObject, px_uint elpased);
+px_void Func_JoystickRender(px_surface* pSurface, PX_Object* pObject, px_uint elapsed);
 px_void Func_JoystickOnCursorDown(PX_Object* pObject, PX_Object_Event e, px_void* ptr);
 px_void Func_JoystickOnCursorDrag(PX_Object* pObject, PX_Object_Event e, px_void* ptr);
 px_void Func_JoystickOnCursorUp(PX_Object* pObject, PX_Object_Event e, px_void* ptr);
@@ -77,7 +77,7 @@ PX_Object* PX_Object_JoystickCreate(px_memorypool* mp, PX_Object* Parent,
     return pObject;
 }
 
-px_void Func_JoystickRender(px_surface* pSurface, PX_Object* pObject, px_uint elpased) {
+px_void Func_JoystickRender(px_surface* pSurface, PX_Object* pObject, px_uint elapsed) {
     PX_Object_Joystick* pJoystick = (PX_Object_Joystick*)pObject->pObject;
 	px_float objx, objy, objWidth, objHeight;
 	px_float inheritX, inheritY;

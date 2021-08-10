@@ -296,6 +296,7 @@ px_void PX_memcpy(px_void *dst,const px_void *src,px_int size);
 px_void PX_strcpy(px_char *dst,const px_char *src,px_int size);
 px_void PX_wstrcpy(px_word *dst,const px_word *src,px_int size);
 px_void PX_strcat(px_char *src,const px_char *cat);
+px_void PX_strcat_s(px_char* src, const px_char* cat,px_int size);
 px_void PX_wstrcat(px_word *src,const px_word *cat);
 px_void PX_strset(px_char *dst,const px_char *src);
 px_int PX_strlen(const px_char *dst);

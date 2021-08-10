@@ -2306,6 +2306,14 @@ px_void PX_strcat(px_char *src,const px_char *cat)
 	*src='\0';
 }
 
+px_void PX_strcat_s(px_char* src, const px_char* cat, px_int size)
+{
+	if (PX_strlen(src)+PX_strlen(cat)<size)
+	{
+		PX_strcat(src, cat);
+	}
+}
+
 px_void PX_wstrcat(px_word *src,const px_word *cat)
 {
 	px_int len=PX_wstrlen(cat);

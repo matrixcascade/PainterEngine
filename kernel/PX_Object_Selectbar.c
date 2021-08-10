@@ -461,6 +461,21 @@ const px_char * PX_Object_SelectBarGetCurrentText(PX_Object *pObject)
 	return "";
 }
 
+
+const px_char* PX_Object_SelectBarGetItemText(PX_Object* pObject,px_int index)
+{
+	PX_Object_SelectBar* pSelectBar = PX_Object_GetSelectBar(pObject);
+	if (!PX_VectorCheckIndex(&pSelectBar->Items,index))
+	{
+		return "";
+	}
+	if (pSelectBar)
+	{
+		return PX_VECTORAT(PX_Object_SelectBar_Item, &pSelectBar->Items, index)->Text;
+	}
+	return "";
+}
+
 px_void PX_Object_SelectBarSetDisplayCount(PX_Object *pObject,px_int count)
 {
 	PX_Object_SelectBar *pSelectBar=PX_Object_GetSelectBar(pObject);

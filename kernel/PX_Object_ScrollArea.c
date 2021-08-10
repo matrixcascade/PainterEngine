@@ -262,7 +262,7 @@ px_void PX_Object_ScrollAreaUpdateRange( PX_Object *pObject)
 	} while (0);
 }
 
-px_void PX_Object_ScrollAreaRender(px_surface *psurface, PX_Object *pObject,px_uint elpased)
+px_void PX_Object_ScrollAreaRender(px_surface *psurface, PX_Object *pObject,px_uint elapsed)
 {
 	PX_Object_ScrollArea *pSA;
 	px_float objx,objy,objWidth,objHeight;
@@ -295,7 +295,7 @@ px_void PX_Object_ScrollAreaRender(px_surface *psurface, PX_Object *pObject,px_u
 	PX_SurfaceClear(&pSA->surface,0,0,(px_int)objWidth-1,(px_int)objHeight-1,pSA->BackgroundColor);
 
 	//draw
-	PX_ObjectRender(&pSA->surface,pSA->root,elpased);
+	PX_ObjectRender(&pSA->surface,pSA->root,elapsed);
 	PX_SurfaceRender(psurface,&pSA->surface,(px_int)objx,(px_int)objy,PX_ALIGN_LEFTTOP,PX_NULL);
 
 	//Draw Border

@@ -135,7 +135,7 @@ px_void PX_Object_Widget_EventDispatcher(PX_Object *pObject,PX_Object_Event e,px
 	PX_ObjectPostEvent(pwidget->root,oe);
 }
 
-px_void PX_Object_WidgetRender(px_surface *psurface, PX_Object *pObject,px_uint elpased)
+px_void PX_Object_WidgetRender(px_surface *psurface, PX_Object *pObject,px_uint elapsed)
 {
 	PX_Object_Widget *pwidget=PX_Object_GetWidget(pObject);
 	px_float objx,objy,objWidth,objHeight;
@@ -172,7 +172,7 @@ px_void PX_Object_WidgetRender(px_surface *psurface, PX_Object *pObject,px_uint 
 
 		pwidget->bevent_update=PX_FALSE;
 		PX_SurfaceClear(&pwidget->renderTarget,0,0,pwidget->renderTarget.width-1,pwidget->renderTarget.height-1,pwidget->backgroundcolor);
-		PX_ObjectRender(&pwidget->renderTarget,pwidget->root,elpased);
+		PX_ObjectRender(&pwidget->renderTarget,pwidget->root,elapsed);
 		PX_SurfaceRender(psurface,&pwidget->renderTarget,(px_int)objx,(px_int)objy+PX_OBJECT_WIDGET_BAR_SIZE,PX_ALIGN_LEFTTOP,PX_NULL);
 	} while (0);
 
@@ -234,7 +234,7 @@ PX_Object * PX_Object_WidgetCreate(px_memorypool *mp,PX_Object *Parent,int x,int
 	pWidget->backgroundcolor=PX_OBJECT_UI_DEFAULT_BACKGROUNDCOLOR;
 	pWidget->barColor=PX_COLOR(255,48,48,48);
 	pWidget->borderColor=PX_OBJECT_UI_DEFAULT_BORDERCOLOR;
-	pWidget->focusColor=PX_COLOR(255,192,192,192);
+	pWidget->focusColor=PX_COLOR_WHITE;
 	pWidget->bevent_update=PX_TRUE;
 	pWidget->bmoveable=PX_TRUE;
 	pWidget->fontcolor=PX_OBJECT_UI_DEFAULT_FONTCOLOR;

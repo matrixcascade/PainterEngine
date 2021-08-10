@@ -134,7 +134,7 @@ px_void PX_Object_RadioBoxOnMouseLButtonUp(PX_Object *Object,PX_Object_Event e,p
 	}
 }
 
-px_void PX_Object_RadioBoxRender(px_surface *psurface, PX_Object *pObject,px_uint elpased)
+px_void PX_Object_RadioBoxRender(px_surface *psurface, PX_Object *pObject,px_uint elapsed)
 {
 
 	PX_Object_RadioBox *pcb=PX_Object_GetRadioBox(pObject);

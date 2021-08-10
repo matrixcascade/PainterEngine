@@ -86,9 +86,8 @@ px_void PX_Object_ExplorerOnButtonCancel(PX_Object *pObject,PX_Object_Event e,px
 	PX_Object_Explorer *pExp=PX_Object_GetExplorer((PX_Object *)ptr);
 	PX_ObjectClearFocus((PX_Object *)ptr);
 	pExp->returnType=PX_OBJECT_EXPLORER_RETURN_CANCEL;
+	PX_ObjectExecuteEvent((PX_Object*)ptr, PX_OBJECT_BUILD_EVENT(PX_OBJECT_EVENT_CANCEL));
 	((PX_Object *)ptr)->Visible=PX_FALSE;
-	e.Event=PX_OBJECT_EVENT_CANCEL;
-	PX_ObjectExecuteEvent((PX_Object *)ptr,e);
 }
 
 px_void PX_Object_ExplorerOnCursorDown(PX_Object *pObject,PX_Object_Event e,px_void *ptr)
@@ -222,7 +221,7 @@ static px_void PX_Object_ExplorerOnCursorWheel(PX_Object *pObject,PX_Object_Even
 
 }
 
-px_void PX_Object_ExplorerRender(px_surface *psurface, PX_Object *pObject,px_uint elpased)
+px_void PX_Object_ExplorerRender(px_surface *psurface, PX_Object *pObject,px_uint elapsed)
 {
 	PX_Object_Explorer *pExp=PX_Object_GetExplorer(pObject);
 	//background

@@ -1,6 +1,6 @@
 #include "PX_Object_Image.h"
 
-px_void PX_Object_ImageRender(px_surface *psurface, PX_Object *pObject,px_uint elpased)
+px_void PX_Object_ImageRender(px_surface *psurface, PX_Object *pObject,px_uint elapsed)
 {
 	PX_Object_Image *pImage=PX_Object_GetImage(pObject);
 	px_int x,y,w,h;

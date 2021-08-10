@@ -1,5 +1,153 @@
 #include "PX_Object_Edit.h"
 
+
+px_void PX_Object_EditGetCursorXY(PX_Object *pObject, px_int *cx, px_int *cy, px_int *height)
+{
+	px_int x = 0, y = 0, cursor = 0, fsize = 0;
+	PX_Object_Edit *pEdit = (PX_Object_Edit *)pObject->pObject;
+	const px_char *Text = pEdit->text.buffer;
+	px_float objx, objy, objWidth, objHeight;
+	px_float inheritX, inheritY;
+
+	PX_ObjectGetInheritXY(pObject, &inheritX, &inheritY);
+
+	objx = (pObject->x + inheritX);
+	objy = (pObject->y + inheritY);
+	objWidth = pObject->Width;
+	objHeight = pObject->Height;
+
+
+	if (pEdit == PX_NULL)
+	{
+		return;
+	}
+
+	x = pEdit->HorizontalOffset;
+	y = pEdit->VerticalOffset;
+
+
+
+	while (PX_TRUE)
+	{
+		fsize = 0;
+
+		if (cursor == pEdit->cursor_index)
+		{
+			*cx = x;
+			*cy = y;
+			*height = pEdit->fontModule ? pEdit->fontModule->max_Height : __PX_FONT_HEIGHT;
+			return;
+		}
+
+		if (pEdit->fontModule)
+		{
+			px_dword code;
+			px_int width, height;
+			fsize = PX_FontModuleGetCharacterDesc(pEdit->fontModule, Text + cursor, &code, &width, &height);
+			if (!fsize)
+			{
+				break;
+			}
+			if (code == '\r')
+			{
+				//skip
+			}
+			else if (code == '\n')
+			{
+				x = 0;
+				y += pEdit->fontModule->max_Height + pEdit->yFontSpacing;
+			}
+			else
+			{
+				x += width + pEdit->xFontSpacing;
+			}
+
+			if (pEdit->AutoNewline)
+			{
+				if (x > objWidth - pEdit->AutoNewLineSpacing)
+				{
+					x = 0;
+					y += pEdit->fontModule->max_Height + pEdit->yFontSpacing;
+				}
+			}
+
+		}
+		else
+		{
+			fsize = 1;
+
+			if (Text[cursor] == '\r')
+			{
+				//skip
+			}
+			else if (Text[cursor] == '\n')
+			{
+				x = pEdit->HorizontalOffset;
+				y += __PX_FONT_HEIGHT + pEdit->yFontSpacing;
+			}
+			else if (Text[cursor])
+			{
+				x += __PX_FONT_ASCSIZE + pEdit->xFontSpacing;
+			}
+			else
+			{
+				break;
+			}
+
+			if (pEdit->AutoNewline)
+			{
+				if (x > objWidth - pEdit->AutoNewLineSpacing)
+				{
+					x = 0;
+					y += __PX_FONT_HEIGHT + pEdit->yFontSpacing;
+				}
+			}
+		}
+		cursor += fsize;
+	}
+
+	*cx = x;
+	*cy = y;
+	*height = pEdit->fontModule ? pEdit->fontModule->max_Height : __PX_FONT_HEIGHT;
+}
+
+px_void PX_Object_EditUpdateCursorViewRegion(PX_Object *pObject)
+{
+	px_int cursorX, cursorY, cursorHeight;
+	PX_Object_Edit *pEdit = (PX_Object_Edit *)pObject->pObject;
+	px_float objWidth, objHeight;
+	objWidth = pObject->Width;
+	objHeight = pObject->Height;
+
+	if (pEdit == PX_NULL)
+	{
+		return;
+	}
+
+
+	PX_Object_EditGetCursorXY(pObject, &cursorX, &cursorY, &cursorHeight);
+
+
+	if (cursorX > objWidth - 8)
+	{
+		pEdit->XOffset = cursorX - (px_int)objWidth + 8;
+	}
+	else
+	{
+		pEdit->XOffset = 0;
+	}
+
+	if (cursorY + cursorHeight > objHeight - 2)
+	{
+		pEdit->YOffset = cursorY + cursorHeight - (px_int)objHeight + 2;
+	}
+	else
+	{
+		pEdit->YOffset = 0;
+	}
+
+}
+
 px_void PX_Object_EditOnMouseMove(PX_Object *Object,PX_Object_Event e,px_void *user_ptr)
 {
 	PX_Object_Edit *pEdit=PX_Object_GetEdit(Object);
@@ -172,6 +320,7 @@ px_void PX_Object_EditSetText( PX_Object *pObject,const px_char *Text )
 		PX_StringClear(&pEdit->text);
 		PX_StringCat(&pEdit->text,Text);
 		pEdit->cursor_index=PX_strlen(Text);
+		PX_Object_EditUpdateCursorViewRegion(pObject);
 	}
 }
 
@@ -182,6 +331,7 @@ px_void PX_Object_EditAppendText(PX_Object *pObject,const px_char *Text)
 	{
 		PX_StringCat(&pEdit->text,Text);
 		pEdit->cursor_index=PX_strlen(Text);
+		PX_Object_EditUpdateCursorViewRegion(pObject);
 	}
 }
 
@@ -289,113 +439,7 @@ px_void PX_Object_EditSetBorder( PX_Object *pObj,px_bool Border )
 	}
 }
 
-px_void PX_Object_EditGetCursorXY(PX_Object *pObject,px_int *cx,px_int *cy,px_int *height)
-{
-	px_int x=0,y=0,cursor=0,fsize=0;
-	PX_Object_Edit *pEdit=(PX_Object_Edit *)pObject->pObject;
-	const px_char *Text=pEdit->text.buffer;
-	px_float objx,objy,objWidth,objHeight;
-	px_float inheritX,inheritY;
 
-	PX_ObjectGetInheritXY(pObject,&inheritX,&inheritY);
-
-	objx=(pObject->x+inheritX);
-	objy=(pObject->y+inheritY);
-	objWidth=pObject->Width;
-	objHeight=pObject->Height;
-
-
-	if (pEdit==PX_NULL)
-	{
-		return;
-	}
-
-	x=pEdit->HorizontalOffset;
-	y=pEdit->VerticalOffset;
-
-
-
-	while (PX_TRUE)
-	{
-		fsize=0;
-
-		if (cursor==pEdit->cursor_index)
-		{
-			*cx=x;
-			*cy=y;
-			*height=pEdit->fontModule?pEdit->fontModule->max_Height:__PX_FONT_HEIGHT;
-			return;
-		}
-
-		if (pEdit->fontModule)
-		{
-			px_dword code;
-			px_int width,height;
-			fsize=PX_FontModuleGetCharacterDesc(pEdit->fontModule,Text+cursor,&code,&width,&height);
-			if (!fsize)
-			{
-				break;
-			}
-			if (code=='\r')
-			{
-				//skip
-			}else if (code=='\n')
-			{
-				x=0;
-				y+=pEdit->fontModule->max_Height+pEdit->yFontSpacing;
-			}
-			else
-			{
-				x+=width+pEdit->xFontSpacing;
-			}
-
-			if (pEdit->AutoNewline)
-			{
-				if (x>objWidth-pEdit->AutoNewLineSpacing)
-				{
-					x=0;
-					y+=pEdit->fontModule->max_Height+pEdit->yFontSpacing;
-				}
-			}
-
-		}
-		else
-		{
-			fsize=1;
-
-			if (Text[cursor]=='\r')
-			{
-				//skip
-			}else if (Text[cursor]=='\n')
-			{
-				x=pEdit->HorizontalOffset;
-				y+=__PX_FONT_HEIGHT+pEdit->yFontSpacing;
-			}
-			else if(Text[cursor])
-			{
-				x+=__PX_FONT_ASCSIZE+pEdit->xFontSpacing;
-			}
-			else
-			{
-				break;
-			}
-
-			if (pEdit->AutoNewline)
-			{
-				if (x>objWidth-pEdit->AutoNewLineSpacing)
-				{
-					x=0;
-					y+=__PX_FONT_HEIGHT+pEdit->yFontSpacing;
-				}
-			}
-		}
-		cursor+=fsize;
-	}
-
-	*cx=x;
-	*cy=y;
-	*height=pEdit->fontModule?pEdit->fontModule->max_Height:__PX_FONT_HEIGHT;
-}
 
 px_void PX_Object_EditUpdateCursorOnDown(PX_Object *pObject,px_int cx,px_int cy)
 {
@@ -515,41 +559,8 @@ px_void PX_Object_EditUpdateCursorOnDown(PX_Object *pObject,px_int cx,px_int cy)
 
 }
 
-px_void PX_Object_EditUpdateCursorViewRegion(PX_Object *pObject)
-{
-	px_int cursorX,cursorY,cursorHeight;
-	PX_Object_Edit *pEdit=(PX_Object_Edit *)pObject->pObject;
-	px_float objWidth,objHeight;
-	objWidth=pObject->Width;
-	objHeight=pObject->Height;
 
-	if (pEdit==PX_NULL)
-	{
-		return;
-	}
-
-
-	PX_Object_EditGetCursorXY(pObject,&cursorX,&cursorY,&cursorHeight);
-
-
-	if (cursorX>objWidth-8)
-	{
-		pEdit->XOffset=cursorX-(px_int)objWidth+8;
-	}else
-	{
-		pEdit->XOffset=0;
-	}
-
-	if (cursorY+cursorHeight>objHeight-2)
-	{
-		pEdit->YOffset=cursorY+cursorHeight-(px_int)objHeight+2;
-	}else
-	{
-		pEdit->YOffset=0;
-	}
-
-}
-px_void PX_Object_EditRender(px_surface *psurface, PX_Object *pObject,px_uint elpased)
+px_void PX_Object_EditRender(px_surface *psurface, PX_Object *pObject,px_uint elapsed)
 {
 	px_int x_draw_oft,y_draw_oft,x,y,cursor,fsize;
 	PX_Object_Edit *pEdit=(PX_Object_Edit *)pObject->pObject;
@@ -625,8 +636,8 @@ px_void PX_Object_EditRender(px_surface *psurface, PX_Object *pObject,px_uint el
 		//Draw Cursor
 		if (pEdit->onFocus&&pEdit->cursor_index==cursor)
 		{
-			pEdit->elpased+=elpased;
-			if ((pEdit->elpased/200)&1)
+			pEdit->elapsed+=elapsed;
+			if ((pEdit->elapsed/200)&1)
 			{
 				if (pEdit->fontModule)
 				{

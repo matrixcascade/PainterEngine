@@ -33,8 +33,8 @@ typedef struct
 px_bool		PX_ExecuterInitialize(PX_Runtime *runtime,PX_Executer *pExecuter);
 px_void		PX_ExecuterShow(PX_Executer *pExecuter,px_bool bShow);
 px_void		PX_ExecuterPostEvent(PX_Executer *pExecuter,PX_Object_Event e);
-px_void		PX_ExecuterUpdate(PX_Executer *pExecuter,px_dword elpased);
-px_void		PX_ExecuterRender(PX_Executer *pExecuter,px_dword elpased);
+px_void		PX_ExecuterUpdate(PX_Executer *pExecuter,px_dword elapsed);
+px_void		PX_ExecuterRender(PX_Executer *pExecuter,px_dword elapsed);
 PX_Object * PX_ExecuterPrintText(PX_Executer *pExecuter,const px_char *text);
 PX_Object * PX_ExecuterPrintImage(PX_Executer *pExecuter,const px_char *res_image_key);
 px_void     PX_ExecuterClear(PX_Executer *pExecuter);

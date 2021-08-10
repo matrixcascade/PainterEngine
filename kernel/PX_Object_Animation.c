@@ -53,7 +53,7 @@ px_void PX_Object_AnimationSetAlign(PX_Object *panimation,PX_ALIGN Align)
 	}
 }
 
-px_void PX_Object_AnimationRender(px_surface *psurface,PX_Object *pObject,px_uint elpased)
+px_void PX_Object_AnimationRender(px_surface *psurface,PX_Object *pObject,px_uint elapsed)
 {
 	PX_Object_Animation *pA=PX_Object_GetAnimation(pObject);
 	px_float objx,objy,objWidth,objHeight;
@@ -68,7 +68,7 @@ px_void PX_Object_AnimationRender(px_surface *psurface,PX_Object *pObject,px_uin
 
 	if (pA)
 	{
-		PX_AnimationUpdate(&pA->animation,elpased);
+		PX_AnimationUpdate(&pA->animation,elapsed);
 
 		switch(pA->Align)
 		{

@@ -41,7 +41,7 @@ PX_Object * PX_Object_AutoTextCreate(px_memorypool *mp,PX_Object *Parent,px_int 
 	return pObject;
 }
 
-px_void PX_Object_AutoTextRender(px_surface *psurface, PX_Object *pObject,px_uint elpased)
+px_void PX_Object_AutoTextRender(px_surface *psurface, PX_Object *pObject,px_uint elapsed)
 {
 	px_int x_draw_oft,y_draw_oft,cursor,fsize;
 	PX_Object_AutoText *pAt=(PX_Object_AutoText *)pObject->pObject;

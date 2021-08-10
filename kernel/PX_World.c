@@ -118,7 +118,7 @@ static px_void PX_WorldUpdateNewObjectList(PX_World* pworld)
 	PX_VectorClear(&pworld->pNewObjects);
 }
 
-px_void PX_WorldUpdate( PX_World *pworld,px_uint elpased )
+px_void PX_WorldUpdate( PX_World *pworld,px_uint elapsed )
 {
 	px_int updateCount;
 	px_int i,b,j;
@@ -281,7 +281,7 @@ px_void PX_WorldUpdate( PX_World *pworld,px_uint elpased )
 		{
 			continue;
 		}
-		PX_ObjectUpdate(pwo->pObject,elpased);
+		PX_ObjectUpdate(pwo->pObject,elapsed);
 	}
 
 	//////////////////////////////////////////////////////////////////////////
@@ -329,7 +329,7 @@ px_void PX_WorldUpdateOffset(PX_World *pw)
 	pw->offsety=(px_float)LeftTopY;
 }
 
-static px_void PX_WorldClildRender(PX_World *pworld,px_surface *pSurface, PX_Object *Object,px_uint elpased,px_float oftX,px_float oftY)
+static px_void PX_WorldClildRender(PX_World *pworld,px_surface *pSurface, PX_Object *Object,px_uint elapsed,px_float oftX,px_float oftY)
 {
 	if (Object==PX_NULL)
 	{
@@ -345,7 +345,7 @@ static px_void PX_WorldClildRender(PX_World *pworld,px_surface *pSurface, PX_Obj
 		px_float y=Object->y;
 		Object->x-=oftX;
 		Object->y-=oftY;
-		Object->Func_ObjectRender(pSurface,Object,elpased);
+		Object->Func_ObjectRender(pSurface,Object,elapsed);
 
 		if (pworld->showImpactRegion)
 		{
@@ -365,17 +365,17 @@ static px_void PX_WorldClildRender(PX_World *pworld,px_surface *pSurface, PX_Obj
 	}
 	if (Object->pNextBrother!=PX_NULL)
 	{
-		PX_WorldClildRender(pworld,pSurface,Object->pNextBrother,elpased,oftX,oftY);
+		PX_WorldClildRender(pworld,pSurface,Object->pNextBrother,elapsed,oftX,oftY);
 	}
 	if (Object->pChilds!=PX_NULL)
 	{
-		PX_WorldClildRender(pworld,pSurface,Object->pNextBrother,elpased,oftX,oftY);
+		PX_WorldClildRender(pworld,pSurface,Object->pNextBrother,elapsed,oftX,oftY);
 	}
 }
 
 
 
-px_void PX_WorldRender(px_surface *psurface,PX_World *pw,px_uint elpased)
+px_void PX_WorldRender(px_surface *psurface,PX_World *pw,px_uint elapsed)
 {
 	px_int i,j;
 	px_int surface_width,surface_height;
@@ -434,7 +434,7 @@ px_void PX_WorldRender(px_surface *psurface,PX_World *pw,px_uint elpased)
 
 	for (i=0;i<pw->aliveCount;i++)
 	{
-		PX_WorldClildRender(pw,psurface,(PX_Object *)ArrayIndex[i].pData,elpased,pw->offsetx,pw->offsety);
+		PX_WorldClildRender(pw,psurface,(PX_Object *)ArrayIndex[i].pData,elapsed,pw->offsetx,pw->offsety);
 	}
 	MP_Reset(calcmp);
 }

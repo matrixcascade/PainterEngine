@@ -1,7 +1,7 @@
 #include "PX_Object_Processbar.h"
 
 
-px_void PX_Object_ProcessBarRender(px_surface *psurface, PX_Object *pObject,px_uint elpased)
+px_void PX_Object_ProcessBarRender(px_surface *psurface, PX_Object *pObject,px_uint elapsed)
 {
 	px_int px,py,pl;//Processing start X,Processing Start Y &Processing length
 	px_int x,y,w,h;
