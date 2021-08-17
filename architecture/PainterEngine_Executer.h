@@ -39,6 +39,7 @@ PX_Object * PX_ExecuterPrintText(PX_Executer *pExecuter,const px_char *text);
 PX_Object * PX_ExecuterPrintImage(PX_Executer *pExecuter,const px_char *res_image_key);
 px_void     PX_ExecuterClear(PX_Executer *pExecuter);
 px_bool		PX_ExecuterRunScipt(PX_Executer *pExecuter,const px_char *pshellstr);
+px_bool		PX_ExecuterLoadScipt(PX_Executer* pExecuter, const px_char* pshellstr);
 px_bool     PX_ExecuterRegistryHostFunction(PX_Executer *pExecuter,const px_char Name[],PX_ScriptVM_Function_Modules function,px_void *userptr);
 
 #endif

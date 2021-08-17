@@ -361,6 +361,11 @@ px_bool PX_ExecuterRunScipt(PX_Executer *pExecute,const px_char *pshellstr)
 }
 
 
+px_bool PX_ExecuterLoadScipt(PX_Executer* pExecuter, const px_char* pshellstr)
+{
+	return PX_ExecuterRunScipt(pExecuter, pshellstr);
+}
+
 px_bool PX_ExecuterRegistryHostFunction(PX_Executer *pExecuter,const px_char Name[],PX_ScriptVM_Function_Modules function,px_void *userptr)
 {
 	return PX_ScriptVM_RegistryHostFunction(&pExecuter->VM_Instance,Name,function,userptr);

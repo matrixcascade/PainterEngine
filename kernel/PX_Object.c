@@ -321,6 +321,11 @@ px_void PX_Object_Event_SetKeyDown(PX_Object_Event *e,px_uint key)
 	e->Param_uint[0]=key;
 }
 
+px_void PX_Object_Event_SetKeyUp(PX_Object_Event *e,px_uint key)
+{
+	e->Param_uint[0]=key;
+}
+
 px_char* PX_Object_Event_GetStringPtr(PX_Object_Event e)
 {
 	return (px_char *)e.Param_ptr[0];

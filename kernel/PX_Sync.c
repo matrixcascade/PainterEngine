@@ -911,7 +911,7 @@ px_bool PX_SyncDataServerUpdate(PX_SyncData_Server *s,px_int elapsed)
 		{
 			if (R_datagram.header.opcode==PX_SYNCDATA_OPCODE_QUERY)
 			{
-				if (s->clients.size>s->clients.size)
+				if ((px_int)R_datagram.request.blockIndex>=s->clients.size)
 				{
 					continue;
 				}

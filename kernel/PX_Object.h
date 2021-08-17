@@ -25,13 +25,14 @@
 #define PX_OBJECT_EVENT_VALUECHANGED		13
 #define PX_OBJECT_EVENT_DRAGFILE			14
 #define PX_OBJECT_EVENT_KEYDOWN				15
-#define PX_OBJECT_EVENT_IMPACT				16
-#define PX_OBJECT_EVENT_SCALE               17
-#define PX_OBJECT_EVENT_WINDOWRESIZE        18
-#define PX_OBJECT_EVENT_ONFOCUS				19
-#define PX_OBJECT_EVENT_LOSTFOCUS           20
-#define PX_OBJECT_EVENT_CANCEL				21
-#define PX_OBJECT_EVENT_CLOSE				22
+#define PX_OBJECT_EVENT_KEYUP				16
+#define PX_OBJECT_EVENT_IMPACT				17
+#define PX_OBJECT_EVENT_SCALE               18
+#define PX_OBJECT_EVENT_WINDOWRESIZE        19
+#define PX_OBJECT_EVENT_ONFOCUS				20
+#define PX_OBJECT_EVENT_LOSTFOCUS           21
+#define PX_OBJECT_EVENT_CANCEL				22
+#define PX_OBJECT_EVENT_CLOSE				23
 //////////////////////////////////////////////////////////////////////////////
 //    Type of Controls
 /////////////////////////////////////////////////////////////////////////////
@@ -250,6 +251,7 @@ px_void PX_Object_Event_SetScaleCursorZ(PX_Object_Event *e,px_float z);
 
 px_uint PX_Object_Event_GetKeyDown(PX_Object_Event e);
 px_void PX_Object_Event_SetKeyDown(PX_Object_Event *e,px_uint key);
+px_void PX_Object_Event_SetKeyUp(PX_Object_Event *e,px_uint key);
 px_char* PX_Object_Event_GetStringPtr(PX_Object_Event e);
 px_void* PX_Object_Event_GetDataPtr(PX_Object_Event e);
 px_void PX_Object_Event_SetStringPtr(PX_Object_Event *e,px_void *ptr);
