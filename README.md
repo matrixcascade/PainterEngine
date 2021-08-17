@@ -1,6 +1,6 @@
 ![avatar](supports/logo/logo_web.png)
 <br>
- <p>PainterEngine是一个由C语言编写的<b>跨平台图形应用框架</b>,可运行于Windows Linux Android iOS 及嵌入式MCU上</p>
+ <p>PainterEngine是一个由C语言编写的<b>跨平台图形应用框架</b>,可运行于Windows Linux Android iOS 支持Webassembly的Web端及嵌入式MCU上</p>
 <p>
 <ul>
    <li>PainterEngine由C89标准及部分拓展编写,不依赖任何C标准库及三方库。</li>
