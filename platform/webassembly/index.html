@@ -19,16 +19,27 @@
 				align-items: center;
 			}
 
-			#canvas {}
+			.progressContainer{
+				width: 70vw;
+				height: 1.3em;
+				border: 1px solid #000;
+				padding: 1px;
+			}
 		</style>
 	</head>
 	<body>
 		<div class="container">
 			<canvas id="canvas" style="display: none;" oncontextmenu="event.preventDefault()" width="960"
 				height="480"></canvas>
-			<div id="loaded" style="transition-duration: 0.2s;background-color: #000000;height: 1em;color: #fff;min-width: 2em;">
-				0%
+			<div id="progressBar">
+				<p>loading ...</p>
+				<div class="progressContainer">
+					<div id="loaded" style="transition-duration: 0.2s;background-color: #000000;height: 100%;min-width: 2em;width: 0%; color: #fff;text-align: center;">
+						0%
+					</div>
+				</div>
 			</div>
+			
 			<script type="text/javascript">
 				var Module = {
 					canvas: (function() {
@@ -64,12 +75,13 @@
 				
 				
 				var progress = document.getElementById('loaded');
+				var progressBar = document.getElementById('progressBar');
 				addEventListener("progress",function(e){
-					progress.style.width =  e.precent + 'vw';
+					progress.style.width =  e.precent + '%';
 					progress.innerHTML = e.precent + '%';
 					if(e.precent === 100){
 						Module.canvas.style.display = 'block';
-						progress.style.display = 'none';
+						progressBar.style.display = 'none';
 					}
 				});
 				
