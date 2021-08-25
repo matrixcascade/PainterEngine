@@ -1,7 +1,7 @@
 #emscripten makefile
 #####################################################
 target :=PainterEngine.html
-project_path := ../../../project
+project_path := ../../project
 painterengine_path := ../..
 #####################################################
 
@@ -25,6 +25,7 @@ painterengine_build_painterengine_o += $(patsubst %.cpp,%.o,$(painterengine_buil
 
 all:$(project_build_o)  $(painterengine_build_painterengine_o) 
 	emcc $(project_build_o) $(painterengine_build_painterengine_o) \
+	-O3 \
 	-o $(target) \
 	-I "$(painterengine_path)" \
 	-I "$(project_path)" \

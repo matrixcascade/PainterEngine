@@ -28,6 +28,9 @@ px_int lastcursorx=-1,lastcursory=-1;
 px_bool mouseldown=PX_FALSE;
 ///////////////////////////////////////////////
 
+
+
+
 void mainloop(void *ptr)
 {
 	px_dword elpased;
@@ -160,7 +163,6 @@ extern "C"
 int main(int argc, char *argv[])
 {
 	
-
 	printf("PainterEngine Webassembly initializating...\n");
 	SDL_Init(SDL_INIT_VIDEO);
 	info=SDL_GetVideoInfo();
@@ -172,8 +174,7 @@ int main(int argc, char *argv[])
 
 	screen = SDL_SetVideoMode(App.runtime.surface_width, App.runtime.surface_height, 32, SDL_SWSURFACE);
 	lastupdatetime=SDL_GetTicks();
-	emscripten_set_main_loop_arg(mainloop, 0, -1, 1);
-	
-	
+
+	emscripten_set_main_loop_arg(mainloop, 0, -1, 1);	
 	return 0;
 }
