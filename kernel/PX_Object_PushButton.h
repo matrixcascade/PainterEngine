@@ -45,7 +45,7 @@ px_void PX_Object_PushButtonSetStyle(PX_Object *pObject,PX_OBJECT_PUSHBUTTON_STY
 px_void PX_Object_PushButtonSetPushColor( PX_Object *pObject,px_color Color );
 px_void PX_Object_PushButtonSetBorderColor( PX_Object *pObject,px_color Color );
 px_void PX_Object_PushButtonSetBorder( PX_Object *Object,px_bool Border );
-px_void PX_Object_PushButtonRender(px_surface *psurface, PX_Object *pObject,px_uint elpased);
+px_void PX_Object_PushButtonRender(px_surface *psurface, PX_Object *pObject,px_uint elapsed);
 px_void PX_Object_PushButtonSetTextColor( PX_Object *pObject,px_color Color );
 px_void PX_Object_PushButtonSetTexture(PX_Object *pObject,px_texture *texture);
 px_void PX_Object_PushButtonSetShape(PX_Object *pObject,px_shape *pshape);

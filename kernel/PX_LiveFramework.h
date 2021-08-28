@@ -170,7 +170,7 @@ typedef struct
 	//VirtualMachine
 	px_int32 reg_duration;
 	px_int32 reg_ip;
-	px_int32 reg_elpased;
+	px_int32 reg_elapsed;
 	px_int32 reg_animation;
 	px_int32 reg_bp;
 }PX_LiveFramework;
@@ -184,8 +184,8 @@ px_void PX_LiveFrameworkReset(PX_LiveFramework *plive);
 px_void PX_LiveFrameworkStop(PX_LiveFramework *plive);
 
 
-px_void PX_LiveFrameworkRender(px_surface *psurface,PX_LiveFramework *plive,px_int x,px_int y,PX_ALIGN refPoint,px_dword elpased);
-px_void PX_LiveFrameworkRenderRefer(px_surface *psurface,PX_LiveFramework *plive,PX_ALIGN refPoint,px_dword elpased);
+px_void PX_LiveFrameworkRender(px_surface *psurface,PX_LiveFramework *plive,px_int x,px_int y,PX_ALIGN refPoint,px_dword elapsed);
+px_void PX_LiveFrameworkRenderRefer(px_surface *psurface,PX_LiveFramework *plive,PX_ALIGN refPoint,px_dword elapsed);
 
 px_bool PX_LiveFrameworkPlayAnimation(PX_LiveFramework *plive,px_int index);
 px_bool PX_LiveFrameworkPlayAnimationByName(PX_LiveFramework *plive,const px_char name[]);
@@ -260,7 +260,7 @@ px_void PX_LivePause(PX_Live *plive);
 px_void PX_LiveReset(PX_Live *plive);
 px_void PX_LiveStop(PX_Live *plive);
 
-px_void PX_LiveRender(px_surface *psurface,PX_Live *plive,px_int x,px_int y,PX_ALIGN refPoint,px_dword elpased);
+px_void PX_LiveRender(px_surface *psurface,PX_Live *plive,px_int x,px_int y,PX_ALIGN refPoint,px_dword elapsed);
 
 
 #endif

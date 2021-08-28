@@ -10,7 +10,7 @@ typedef struct
 
 typedef struct
 {
-	px_uint   elpased;
+	px_uint   elapsed;
 	px_uint   ip;
 	px_uint   reg_loopTimes;
 	px_uint   reg_reservedTime;
@@ -37,7 +37,7 @@ px_bool PX_AnimationSetCurrentPlayAnimationByName(PX_Animation *animation,const 
 px_int PX_AnimationGetPlayAnimationIndexByName(PX_Animation* animation, const px_char* name);
 px_void PX_AnimationFree(PX_Animation *animation);
 px_void PX_AnimationReset(PX_Animation *animation);
-px_void PX_AnimationUpdate(PX_Animation *panimation,px_uint elpased);
+px_void PX_AnimationUpdate(PX_Animation *panimation,px_uint elapsed);
 px_bool PX_AnimationIsEnd(PX_Animation *panimation);
 px_rect PX_AnimationGetSize(PX_Animation *panimation);
 px_texture *PX_AnimationGetCurrentTexture(PX_Animation *panimation);

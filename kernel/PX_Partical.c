@@ -33,30 +33,30 @@ px_void PX_ParticalLauncherSetPosition(PX_Partical_Launcher *launcher,px_point p
 	launcher->LauncherInfo.position=position;
 }
 
-px_void PX_ParticalAtomUpdate(PX_Partical_Launcher *env,PX_Partical_Atom *pAtom,px_dword elpased)
+px_void PX_ParticalAtomUpdate(PX_Partical_Launcher *env,PX_Partical_Atom *pAtom,px_dword elapsed)
 {
 	px_int updateTime;
 	px_int atomTime;
 	px_point ak;
 
-	if (elpased==0)
+	if (elapsed==0)
 	{
 		return;
 	}
 	if (pAtom->reg_alive)
 	{
-		if (pAtom->reg_alive<elpased)
+		if (pAtom->reg_alive<elapsed)
 		{
 			pAtom->reg_alive=0;
 			return;
 		}
 		else
 		{
-			pAtom->reg_alive-=elpased;
-			pAtom->elpasedTime+=elpased;
+			pAtom->reg_alive-=elapsed;
+			pAtom->elapsedTime+=elapsed;
 		}
 
-		updateTime=elpased;
+		updateTime=elapsed;
 
 		while (updateTime)
 		{
@@ -126,7 +126,7 @@ px_void PX_ParticalAtomUpdate(PX_Partical_Launcher *env,PX_Partical_Atom *pAtom,
 
 }
 
-px_bool PX_ParticalLauncherUpdate(PX_Partical_Launcher *launcher,px_dword elpased)
+px_bool PX_ParticalLauncherUpdate(PX_Partical_Launcher *launcher,px_dword elapsed)
 {
 	px_int i,j;
 	px_int redTime=0;
@@ -141,7 +141,7 @@ px_bool PX_ParticalLauncherUpdate(PX_Partical_Launcher *launcher,px_dword elpase
 	for (i=0;i<(px_int)launcher->LauncherInfo.maxCount;i++)
 	{
 		pAtom=&launcher->ParticalPool[i];
-		PX_ParticalAtomUpdate(launcher,pAtom,elpased);
+		PX_ParticalAtomUpdate(launcher,pAtom,elapsed);
 		if (pAtom->reg_alive!=0)
 		{
 			if (launcher->ParticalPool[i].position.x<launcher->lefttopX)
@@ -166,10 +166,10 @@ px_bool PX_ParticalLauncherUpdate(PX_Partical_Launcher *launcher,px_dword elpase
 	{
 		if (launcher->LauncherInfo.generateDuration!=0)
 		{
-			if (launcher->elpased/launcher->LauncherInfo.generateDuration<((launcher->elpased+elpased)/launcher->LauncherInfo.generateDuration))
+			if (launcher->elapsed/launcher->LauncherInfo.generateDuration<((launcher->elapsed+elapsed)/launcher->LauncherInfo.generateDuration))
 			{
-				gencount=(launcher->elpased+elpased)/launcher->LauncherInfo.generateDuration-launcher->elpased/launcher->LauncherInfo.generateDuration;
-				redTime=launcher->elpased+elpased-(launcher->elpased+launcher->LauncherInfo.generateDuration)/launcher->LauncherInfo.generateDuration*launcher->LauncherInfo.generateDuration;
+				gencount=(launcher->elapsed+elapsed)/launcher->LauncherInfo.generateDuration-launcher->elapsed/launcher->LauncherInfo.generateDuration;
+				redTime=launcher->elapsed+elapsed-(launcher->elapsed+launcher->LauncherInfo.generateDuration)/launcher->LauncherInfo.generateDuration*launcher->LauncherInfo.generateDuration;
 			}
 			else
 				gencount=0;
@@ -177,7 +177,7 @@ px_bool PX_ParticalLauncherUpdate(PX_Partical_Launcher *launcher,px_dword elpase
 		else
 		{
 			gencount=launcher->LauncherInfo.maxCount;
-			redTime=elpased;
+			redTime=elapsed;
 		}
 		
 
@@ -292,7 +292,7 @@ px_bool PX_ParticalLauncherUpdate(PX_Partical_Launcher *launcher,px_dword elpase
 			
 		}
 	}
-	launcher->elpased+=elpased;
+	launcher->elapsed+=elapsed;
 	return PX_TRUE;
 }
 
@@ -313,11 +313,11 @@ px_bool PX_ParticalIsInSurfaceRegion(px_point atomPoint,px_int atomWidth,px_int 
 	return PX_isRectCrossRect(atomRect,surfaceRect);
 }
 
-px_void PX_ParticalLauncherRender(px_surface *surface,PX_Partical_Launcher *launcher, px_dword elpased)
+px_void PX_ParticalLauncherRender(px_surface *surface,PX_Partical_Launcher *launcher, px_dword elapsed)
 {
 	px_int m,i;
 	PX_TEXTURERENDER_BLEND blend;
-	PX_ParticalLauncherUpdate(launcher, elpased);
+	PX_ParticalLauncherUpdate(launcher, elapsed);
 
 	if (!PX_isRectCrossRect(PX_RECT(0,0,(px_float)surface->width,(px_float)surface->height),\
 		PX_RECT(launcher->lefttopX+ launcher->LauncherInfo.position.x,launcher->leftTopY+ launcher->LauncherInfo.position.y,launcher->rightBottomX-launcher->lefttopX+1,launcher->rightBottomY-launcher->leftTopY+1)))

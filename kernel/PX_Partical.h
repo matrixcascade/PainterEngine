@@ -10,7 +10,7 @@ typedef struct
 	//
 	px_point   position;
 	px_point   velocity;
-	px_dword   elpasedTime;
+	px_dword   elapsedTime;
 
 	//
 	px_dword   reg_alive;
@@ -83,7 +83,7 @@ typedef struct _PX_Partical_Launcher
 	px_memorypool   *mp;
 	PX_ParticalLauncher_InitializeInfo LauncherInfo;
 
-	px_dword        elpased;
+	px_dword        elapsed;
 	px_int          genIndex;
 	px_int			lastgenIndex;
 	PX_Partical_Atom *ParticalPool;
@@ -96,6 +96,6 @@ px_bool PX_ParticalLauncherCreate(PX_Partical_Launcher *launcher,px_memorypool  
 px_void PX_ParticalLauncherSetPosition(PX_Partical_Launcher *launcher,px_point position);
 px_void PX_ParticalLauncherSetDirection(PX_Partical_Launcher *launcher,px_point direction);
 
-px_void PX_ParticalLauncherRender(px_surface *surface,PX_Partical_Launcher *launcher,px_dword elpased);
+px_void PX_ParticalLauncherRender(px_surface *surface,PX_Partical_Launcher *launcher,px_dword elapsed);
 px_void PX_ParticalLauncherFree(PX_Partical_Launcher *launcher);
 #endif

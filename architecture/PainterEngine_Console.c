@@ -554,9 +554,9 @@ px_void PX_ConsolePostEvent(PX_Console *pc,PX_Object_Event e)
 		}
 	}
 }
-px_void PX_ConsoleUpdate(PX_Console *pc,px_dword elpased)
+px_void PX_ConsoleUpdate(PX_Console *pc,px_dword elapsed)
 {
-	PX_ObjectUpdate(pc->Area,elpased);
+	PX_ObjectUpdate(pc->Area,elapsed);
 }
 
 
@@ -565,11 +565,11 @@ px_void PX_ConsoleShow(PX_Console *pc,px_bool b)
 	pc->show=b;
 }
 
-px_void PX_ConsoleRender(px_surface *psurface,PX_Console *pc,px_dword elpased)
+px_void PX_ConsoleRender(px_surface *psurface,PX_Console *pc,px_dword elapsed)
 {
 	if(pc->show)
 	{
-		PX_ObjectRender(psurface,pc->Area,elpased);
+		PX_ObjectRender(psurface,pc->Area,elapsed);
 	}
 }
 

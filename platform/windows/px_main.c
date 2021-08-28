@@ -20,7 +20,7 @@ volatile px_bool main_exit=0;
 //////////////////////////////////////////////////////////////////////////
 DWORD WINAPI DEMO_RenderThreadFunc(LPVOID p)
 {   
-	DWORD time,elpased;
+	DWORD time,elapsed;
 	PX_Object_Event e;
 	WM_MESSAGE msg;
 	static POINT LastDownPoint;
@@ -41,7 +41,7 @@ DWORD WINAPI DEMO_RenderThreadFunc(LPVOID p)
 
 		PX_SystemReadDeviceState();
 
-		elpased=timeGetTime()-time;
+		elapsed=timeGetTime()-time;
 		time=timeGetTime();
 
 		cursorx_scale=App.runtime.surface_width*1.0f/App.runtime.window_width;
@@ -247,8 +247,8 @@ DWORD WINAPI DEMO_RenderThreadFunc(LPVOID p)
 			}
 
 		}
-		PX_ApplicationUpdate(&App,elpased);
-		PX_ApplicationRender(&App,elpased);
+		PX_ApplicationUpdate(&App,elapsed);
+		PX_ApplicationRender(&App,elapsed);
 		PX_SystemRender(App.runtime.RenderSurface.surfaceBuffer,App.runtime.surface_width,App.runtime.surface_height);
 		Sleep(0);
 	}

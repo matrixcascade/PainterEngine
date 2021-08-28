@@ -17,6 +17,7 @@ px_bool PX_TextureCreateFromMemory(px_memorypool *mp,px_void *data,px_int size,p
 		if(PX_TextureCreate(mp,tex,width,height))
 		{
 			PX_BitmapRender(tex,data,size,0,0);
+			return PX_TRUE;
 		}
 		else
 		{
@@ -32,6 +33,7 @@ px_bool PX_TextureCreateFromMemory(px_memorypool *mp,px_void *data,px_int size,p
 		if(PX_TextureCreate(mp,tex,width,height))
 		{
 			PX_TRawRender(tex,data,0,0);
+			return PX_TRUE;
 		}
 		else
 		{
@@ -39,7 +41,8 @@ px_bool PX_TextureCreateFromMemory(px_memorypool *mp,px_void *data,px_int size,p
 		}
 	}
 
-	return PX_TRUE;
+	//image-format not supported
+	return PX_FALSE;
 }
 
 typedef struct  

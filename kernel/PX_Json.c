@@ -481,11 +481,11 @@ px_bool PX_JsonBuild_Value(PX_Json_Value *pValue,px_string *_out,px_bool bArrayV
 	if (!bArrayValue)
 	{
 		//name
-		if(!PX_StringCatChar(_out,'"'))return PX_FALSE;
-		if(!PX_StringCat(_out,pValue->name.buffer)) return PX_FALSE;
-		if(!PX_StringCatChar(_out,'"'))return PX_FALSE;
+		if(!PX_StringCatCharEx(_out,'"'))return PX_FALSE;
+		if(!PX_StringCatEx(_out,pValue->name.buffer)) return PX_FALSE;
+		if(!PX_StringCatCharEx(_out,'"'))return PX_FALSE;
 		//:
-		if(!PX_StringCatChar(_out,':')) return PX_FALSE;
+		if(!PX_StringCatCharEx(_out,':')) return PX_FALSE;
 	}
 
 	switch(pValue->type)
@@ -493,57 +493,57 @@ px_bool PX_JsonBuild_Value(PX_Json_Value *pValue,px_string *_out,px_bool bArrayV
 	case PX_JSON_VALUE_TYPE_ARRAY:
 		{
 			px_int i;
-			if(!PX_StringCatChar(_out,'['))return PX_FALSE;
+			if(!PX_StringCatCharEx(_out,'['))return PX_FALSE;
 			for (i=0;i<pValue->_array.size;i++)
 			{
 				PX_Json_Value *pv=PX_LISTAT(PX_Json_Value,&pValue->_array,i);
 				if(!PX_JsonBuild_Value(pv,_out,PX_TRUE))return PX_FALSE;
-				if(i!=pValue->_array.size-1)if(!PX_StringCatChar(_out,','))return PX_FALSE;
+				if(i!=pValue->_array.size-1)if(!PX_StringCatCharEx(_out,','))return PX_FALSE;
 			}
-			if(!PX_StringCatChar(_out,']'))return PX_FALSE;
+			if(!PX_StringCatCharEx(_out,']'))return PX_FALSE;
 		}
 		break;
 	case PX_JSON_VALUE_TYPE_BOOLEAN:
 		{
 			if (pValue->_boolean)
 			{
-				if(!PX_StringCat(_out,"true"))return PX_FALSE;
+				if(!PX_StringCatEx(_out,"true"))return PX_FALSE;
 			}
 			else
 			{
-				if(!PX_StringCat(_out,"false"))return PX_FALSE;
+				if(!PX_StringCatEx(_out,"false"))return PX_FALSE;
 			}
 		}
 		break;
 	case PX_JSON_VALUE_TYPE_NULL:
 		{
-			if(!PX_StringCat(_out,"null"))return PX_FALSE;
+			if(!PX_StringCatEx(_out,"null"))return PX_FALSE;
 		}
 		break;
 	case PX_JSON_VALUE_TYPE_NUMBER:
 		{
-			if(!PX_StringCat(_out,PX_ftos((px_float)pValue->_number,6).data))return PX_FALSE;
+			if(!PX_StringCatEx(_out,PX_ftos((px_float)pValue->_number,6).data))return PX_FALSE;
 		}
 		break;
 	case PX_JSON_VALUE_TYPE_STRING:
 		{
-			if(!PX_StringCat(_out,"\""))return PX_FALSE;
-			if(!PX_StringCat(_out,pValue->_string.buffer))return PX_FALSE;
-			if(!PX_StringCat(_out,"\""))return PX_FALSE;
+			if(!PX_StringCatEx(_out,"\""))return PX_FALSE;
+			if(!PX_StringCatEx(_out,pValue->_string.buffer))return PX_FALSE;
+			if(!PX_StringCatEx(_out,"\""))return PX_FALSE;
 		}
 		break;
 	case PX_JSON_VALUE_TYPE_OBJECT:
 		{
 			px_int i;
-			if(!PX_StringCat(_out,"{\n")) return PX_FALSE;
+			if(!PX_StringCatEx(_out,"{\n")) return PX_FALSE;
 			for (i=0;i<pValue->_object.values.size;i++)
 			{
 				PX_Json_Value *ptmpValue=PX_LISTAT(PX_Json_Value,&pValue->_object.values,i);
 				if(!PX_JsonBuild_Value(ptmpValue,_out,PX_FALSE))return PX_FALSE;
-				if(i!=pValue->_object.values.size-1)if(!PX_StringCat(_out,",")) return PX_FALSE;
-				if(!PX_StringCat(_out,"\n")) return PX_FALSE;
+				if(i!=pValue->_object.values.size-1)if(!PX_StringCatEx(_out,",")) return PX_FALSE;
+				if(!PX_StringCatEx(_out,"\n")) return PX_FALSE;
 			}
-			if(!PX_StringCat(_out,"}")) return PX_FALSE;
+			if(!PX_StringCatEx(_out,"}")) return PX_FALSE;
 		}
 		break;
 	}
@@ -553,6 +553,7 @@ px_bool PX_JsonBuild_Value(PX_Json_Value *pValue,px_string *_out,px_bool bArrayV
 
 px_bool PX_JsonBuild(PX_Json *pjson,px_string *_out)
 {
+	PX_StringUpdateExReg(_out);
 	return PX_JsonBuild_Value(&pjson->rootValue,_out,PX_TRUE);
 }
 

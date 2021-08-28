@@ -36,7 +36,7 @@ int PX_TCPInitialize(PX_TCP *tcp,PX_TCP_IP_TYPE type)
 	}
 	//Initialize socket
 
-	if ((tcp->socket=socket(AF_INET,SOCK_STREAM,IPPROTO_TCP))==INVALID_SOCKET)
+	if ((tcp->socket=(unsigned int)socket(AF_INET,SOCK_STREAM,IPPROTO_TCP))==INVALID_SOCKET)
 	{
 		return 0;
 	}
@@ -111,7 +111,7 @@ int PX_TCPReceived(PX_TCP *tcp,void *buffer,int buffersize,int timeout)
 			int SockAddrSize=sizeof(SOCKADDR);
 			if((ReturnSize=recv(tcp->socket,(char *)buffer,buffersize,0))!=SOCKET_ERROR)
 			{
-				return ReturnSize;
+				return (int)ReturnSize;
 			}
 			else
 			{
@@ -134,7 +134,7 @@ int PX_TCPAccept(PX_TCP *tcp,unsigned int *socket,PX_TCP_ADDR *fromAddr)
 	DWORD lasterror;
 	SOCKADDR_IN sockaddr_in;
 	int len=sizeof(SOCKADDR);
-	*socket=accept(tcp->socket,(LPSOCKADDR)&sockaddr_in,&len);
+	*socket=(unsigned int)accept((SOCKET)(tcp->socket),(LPSOCKADDR)&sockaddr_in,&len);
 	lasterror=WSAGetLastError();
 	return *socket!=INVALID_SOCKET;
 }

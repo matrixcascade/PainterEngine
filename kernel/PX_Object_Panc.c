@@ -1,7 +1,7 @@
 #include "PX_Object_Panc.h"
 #include "PX_Object_Panc.h"
 
-px_void PX_Object_PancRender(px_surface *pSurface,PX_Object *pObject,px_dword elpased)
+px_void PX_Object_PancRender(px_surface *pSurface,PX_Object *pObject,px_dword elapsed)
 {
 	PX_Object_Panc *pDesc=PX_ObjectGetDesc(PX_Object_Panc,pObject);
 	px_int i;

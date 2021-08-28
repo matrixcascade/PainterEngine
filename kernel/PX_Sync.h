@@ -81,7 +81,7 @@ typedef struct
 	px_dword sendTimes;
 	px_dword onceRecvSize;
 	px_dword lastsendtime;
-	px_dword lastInstrElpased;
+	px_dword lastInstrelapsed;
 	PX_SYNC_SERVERCLIENT_STATUS status;
 	px_int send_cache_instr_size;
 	px_byte send_cache_instr_buffer[PX_SYNC_CACHESIZE];
@@ -164,7 +164,7 @@ px_bool PX_SyncFrameServerAddClient(PX_SyncFrame_Server *sync,px_dword server_ve
 px_void PX_SyncFrameServerSetInstrOnceMaxSize(PX_SyncFrame_Server *sync,px_int maxsize);
 px_void PX_SyncFrameServerRun(PX_SyncFrame_Server *sync);
 px_void PX_SyncFrameServerStop(PX_SyncFrame_Server *sync);
-px_void PX_SyncFrameServerUpdate(PX_SyncFrame_Server *sync,px_dword elpased);
+px_void PX_SyncFrameServerUpdate(PX_SyncFrame_Server *sync,px_dword elapsed);
 px_void PX_SyncFrameServerFree(PX_SyncFrame_Server *sync);
 px_int  PX_SyncFrameServerGetReadyFrameCount(PX_SyncFrame_Server *sync);
 px_uint32 PX_SyncFrameServerSum32(PX_SyncFrame_Server *sync);
@@ -173,7 +173,7 @@ px_uint32 PX_SyncFrameServerSum32(PX_SyncFrame_Server *sync);
 px_bool PX_SyncFrameClientInit(PX_SyncFrame_Client *client,px_memorypool *mp,px_dword updateDuration,px_dword server_verify_id,px_dword client_id,PX_Linker *linker);
 px_void PX_SyncFrameClientAddInstr(PX_SyncFrame_Client *client,px_void *instr,px_int size);
 px_void PX_SyncFrameClientSetVersion(PX_SyncFrame_Client *sync,px_dword version);
-px_void PX_SyncFrameClientUpdate(PX_SyncFrame_Client *sync,px_dword elpased);
+px_void PX_SyncFrameClientUpdate(PX_SyncFrame_Client *sync,px_dword elapsed);
 px_int  PX_SyncFrameClientGetReadyFrameCount(PX_SyncFrame_Client *sync);
 px_void PX_SyncFrameClientFree(PX_SyncFrame_Client *sync);
 px_uint32 PX_SyncFrameClientSum32(PX_SyncFrame_Client *sync);
@@ -210,7 +210,7 @@ typedef struct _PX_SyncData_Server_Client
     px_dword     clientID;
 	PX_SYNCDATA_STATUS     status;
 	px_int		 ProcessIndex;
-	px_dword	 send_elpased;
+	px_dword	 send_elapsed;
 }PX_SyncData_Server_Client;
 
 typedef struct _PX_SyncData_Server
@@ -241,8 +241,8 @@ typedef struct _PX_SyncData_Client
 
 	PX_SYNCDATA_STATUS status;
 	
-	px_dword query_elpased;
-	px_dword last_recv_elpased;
+	px_dword query_elapsed;
+	px_dword last_recv_elapsed;
 }PX_SyncData_Client;
 
 #define PX_SYNCDATA_OPCODE_QUERY 0x680
@@ -302,12 +302,12 @@ typedef union
 px_bool PX_SyncDataServerInit(PX_SyncData_Server *syncdata_server,px_memorypool *mp,px_dword serverID,PX_Linker *linker);
 px_bool PX_SyncDataServerAddClient(PX_SyncData_Server *syncdata_server,px_dword clientID);
 px_bool PX_SyncDataServerSetSyncData(PX_SyncData_Server *s,px_void *data,px_dword size);
-px_bool PX_SyncDataServerUpdate(PX_SyncData_Server *syncdata_server,px_int elpased);
+px_bool PX_SyncDataServerUpdate(PX_SyncData_Server *syncdata_server,px_int elapsed);
 px_void PX_SyncDataServerFree(PX_SyncData_Server *syncdata_server);
 
 
 px_bool PX_SyncDataClientInit(PX_SyncData_Client *syncdata_client,px_memorypool *mp,px_dword serverID,px_dword clientID,PX_Linker *linker);
 px_bool PX_SyncDataClientIsCompleted(PX_SyncData_Client *syncdata_client);
-px_bool PX_SyncDataClientUpdate(PX_SyncData_Client *syncdata_client,px_int elpased);
+px_bool PX_SyncDataClientUpdate(PX_SyncData_Client *syncdata_client,px_int elapsed);
 px_void PX_SyncDataClientFree(PX_SyncData_Client *syncdata_client);
 #endif

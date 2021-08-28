@@ -38,7 +38,7 @@ px_int PX_atoi(const px_char s[])
 }
 
 
-px_float PX_atof(px_char fstr[])
+px_float PX_atof(const px_char fstr[])
 {
 	px_double temp=10;
 	px_bool ispnum=PX_TRUE;
@@ -2304,6 +2304,14 @@ px_void PX_strcat(px_char *src,const px_char *cat)
 	while(*src)src++;
 	while(len--)*src++=*cat++;
 	*src='\0';
+}
+
+px_void PX_strcat_s(px_char* src, const px_char* cat, px_int size)
+{
+	if (PX_strlen(src)+PX_strlen(cat)<size)
+	{
+		PX_strcat(src, cat);
+	}
 }
 
 px_void PX_wstrcat(px_word *src,const px_word *cat)

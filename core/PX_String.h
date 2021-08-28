@@ -7,6 +7,7 @@ typedef struct __px_string
 	px_char *buffer;
 	px_memorypool *mp;
 	px_int bufferlen;
+	px_int exreg_strlen;
 }px_string;
 
 
@@ -14,7 +15,8 @@ typedef struct __px_string
 
 px_bool PX_StringInitialize(px_memorypool *mp,px_string *str);
 px_void PX_StringInitFromConst(px_string *str,const px_char *constchar);
-px_int PX_StringToInteger(px_string *str);
+px_void PX_StringUpdateExReg(px_string* text);
+px_int PX_StringToInteger(px_string* str);
 px_float PX_StringToFloat(px_string *str);
 px_void PX_StringTrim(px_string *str);
 px_bool PX_StringCat(px_string *str,const px_char *str2);
@@ -47,5 +49,11 @@ px_bool PX_StringFormat3(px_string *str,const px_char fmt[],px_stringformat _1, 
 px_bool PX_StringFormat2(px_string *str,const px_char fmt[],px_stringformat _1, px_stringformat _2);
 px_bool PX_StringFormat1(px_string *str,const px_char fmt[],px_stringformat _1);
 px_bool PX_StringSet(px_string *str,const px_char fmt[]);
+
+px_bool PX_StringCatEx(px_string *text,const px_char *str2);
+px_void PX_StringBackspace(px_string *text);
+px_void PX_StringBackspaceEx(px_string* text);
+px_bool PX_StringCatCharEx(px_string* text, px_char ch);
+
 
 #endif

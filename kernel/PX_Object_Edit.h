@@ -23,7 +23,7 @@ typedef struct
 	px_color BorderColor;
 	px_color CursorColor;
 	px_color BackgroundColor;
-	px_uint elpased;
+	px_uint elapsed;
 	px_bool Password;
 	px_bool AutoNewline;
 	px_int AutoNewLineSpacing;
@@ -32,6 +32,7 @@ typedef struct
 	px_int xFontSpacing,yFontSpacing;
 	px_int cursor_index;
 	px_int max_length;
+	px_bool multiLines;
 	px_surface EditSurface;
 	PX_FontModule *fontModule;
 	px_char Limit[128];
@@ -54,7 +55,7 @@ px_void PX_Object_EditSetTextColor( PX_Object *pObject,px_color Color );
 px_void PX_Object_EditSetLimit(PX_Object *pObject,const px_char *Limit);
 px_void PX_Object_EditSetStyle(PX_Object *pObject,PX_OBJECT_EDIT_STYLE style);
 px_void PX_Object_EditSetBorder( PX_Object *pObj,px_bool Border );
-px_void PX_Object_EditRender(px_surface *psurface, PX_Object *pObject,px_uint elpased);
+px_void PX_Object_EditRender(px_surface *psurface, PX_Object *pObject,px_uint elapsed);
 px_void PX_Object_EditFree( PX_Object *pObject );
 px_void PX_Object_EditAddString(PX_Object *pObject,px_char *Text);
 px_void PX_Object_EditBackspace(PX_Object *pObject);

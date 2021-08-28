@@ -21,7 +21,7 @@ px_void PX_Object_ScrollAreaMoveToBottom(PX_Object *pObject);
 px_void PX_Object_ScrollAreaMoveToTop(PX_Object *pObject);
 px_void PX_Object_ScrollAreaGetRegion(PX_Object *pObject,px_float *left,px_float *top,px_float *right,px_float *bottom);
 px_void PX_Object_ScrollAreaUpdateRange( PX_Object *pObject);
-px_void PX_Object_ScrollAreaRender(px_surface *psurface, PX_Object *pObject,px_uint elpased);
+px_void PX_Object_ScrollAreaRender(px_surface *psurface, PX_Object *pObject,px_uint elapsed);
 px_void PX_Object_ScrollAreaSetBkColor(PX_Object *pObj,px_color bkColor);
 px_void PX_Object_ScrollAreaSetBorder( PX_Object *pObj,px_bool Border );
 px_void PX_Object_ScrollAreaSetBorderColor(PX_Object *pObj,px_color borderColor);

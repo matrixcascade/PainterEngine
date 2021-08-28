@@ -1,7 +1,7 @@
 #include "PX_Object_DesignerBox.h"
 #include "PX_Object_DesignerBox.h"
 
-px_void PX_Object_DesignerBoxRender(px_surface *pSurface,PX_Object *pObject,px_dword elpased)
+px_void PX_Object_DesignerBoxRender(px_surface *pSurface,PX_Object *pObject,px_dword elapsed)
 {
 	PX_Object_DesignerBox*pDesc=PX_ObjectGetDesc(PX_Object_DesignerBox,pObject);
 	px_color renderColor;
@@ -25,7 +25,6 @@ px_void PX_Object_DesignerBoxRender(px_surface *pSurface,PX_Object *pObject,px_d
 	//controller point
 	renderColor=pDesc->borderColor;
 	renderColor._argb.a/=2;
-	PX_GeoDrawSolidCircle(pSurface,(px_int)(objx + objWidth/2),(px_int)(objy + objHeight/2),8,renderColor);
 
 	PX_GeoDrawSolidCircle(pSurface,(px_int)(objx),(px_int)(objy),5,renderColor);
 	PX_GeoDrawSolidCircle(pSurface,(px_int)(objx+objWidth),(px_int)(objy),5,renderColor);

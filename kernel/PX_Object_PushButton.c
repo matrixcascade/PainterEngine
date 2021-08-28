@@ -284,7 +284,7 @@ px_void PX_Object_PushButtonSetBorder( PX_Object *Object,px_bool Border )
 	}
 }
 
-px_void PX_Object_PushButtonRender(px_surface *psurface, PX_Object *pObject,px_uint elpased)
+px_void PX_Object_PushButtonRender(px_surface *psurface, PX_Object *pObject,px_uint elapsed)
 {
 	px_int fx,fy;
 	PX_Object_PushButton *pPushButton=PX_Object_GetPushButton(pObject);

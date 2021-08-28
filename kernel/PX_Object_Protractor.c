@@ -9,7 +9,7 @@ PX_Object_Protractor * PX_Object_GetProtractor(PX_Object *Object)
 	return PX_NULL;
 }
 
-px_void PX_Object_ProtractorRender(px_surface *rendersurface,PX_Object *pObject,px_dword elpased)
+px_void PX_Object_ProtractorRender(px_surface *rendersurface,PX_Object *pObject,px_dword elapsed)
 {
 	px_float objx,objy,objWidth,objHeight;
 	px_float inheritX,inheritY;

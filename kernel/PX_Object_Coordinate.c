@@ -611,7 +611,7 @@ px_double  PX_Object_CoordinatesMapPixelValueToVertical(PX_Object *pObject,px_in
 }
 
 
-px_void PX_Object_CoordinatesUpdate(PX_Object *pObject,px_uint elpased)
+px_void PX_Object_CoordinatesUpdate(PX_Object *pObject,px_uint elapsed)
 {
 
 }
@@ -1523,7 +1523,7 @@ px_void PX_Object_CoordinatesScaleCoordinates(PX_Object *pObject)
 }
 
 
-px_void PX_Object_CoordinatesRender(px_surface *psurface, PX_Object *pObject,px_uint elpased)
+px_void PX_Object_CoordinatesRender(px_surface *psurface, PX_Object *pObject,px_uint elapsed)
 {
 	PX_Object_Coordinates *pcd=PX_Object_GetCoordinates(pObject);
 	if (!pcd)
@@ -1793,8 +1793,8 @@ PX_Object *PX_Object_CoordinatesCreate(px_memorypool *mp, PX_Object *Parent,px_i
 
 	Coordinates.FontSize=PX_OBJECT_COORDINATES_DEFAULT_FONT_SIZE;
 	Coordinates.DataLineWidth=PX_OBJECT_COORDINATES_DEFAULT_LINE_WIDTH;
-	Coordinates.FontColor=PX_COLOR(255,0,0,0);
-	Coordinates.borderColor=PX_COLOR(255,0,0,0);
+	Coordinates.FontColor= PX_OBJECT_UI_DEFAULT_FONTCOLOR;
+	Coordinates.borderColor= PX_OBJECT_UI_DEFAULT_BORDERCOLOR;
 	Coordinates.DashColor=PX_COLOR(PX_OBJECT_COORDINATES_DEFAULT_DASH_RGB);
 	Coordinates.OnMarkStatus=PX_FALSE;
 	Coordinates.MarkValueEnabled=PX_TRUE;
@@ -2016,7 +2016,7 @@ px_void PX_Object_FilterEditorCursorReleaseEvent( PX_Object *pObject, PX_Object_
 }
 
 
-px_void PX_Object_FilterEditorRender(px_surface *psurface, PX_Object *pObject,px_uint elpased)
+px_void PX_Object_FilterEditorRender(px_surface *psurface, PX_Object *pObject,px_uint elapsed)
 {
 	PX_Object_FilterEditorDrawFrameLine(psurface,pObject);
 	PX_Object_FilterEditorDrawHelpLine(psurface,pObject);
