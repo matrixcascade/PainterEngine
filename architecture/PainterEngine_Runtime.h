@@ -17,6 +17,12 @@ typedef struct
 	px_memorypool		mp_game;
 	PX_ResourceLibrary	ResourceLibrary;
 	px_surface			RenderSurface;
+
+	//////////////////////////////////////////////////////////////////////////
+	PX_FontModule *fontmodule;
+	PX_SoundPlay  *soundplay;
+
+
 }PX_Runtime;
 
 

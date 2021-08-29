@@ -1,9 +1,13 @@
 #include "PainterEngine_Application.h"
 PX_Application App;
-
+#include "stdio.h"
 px_bool PX_ApplicationInitialize(PX_Application *pApp,px_int screen_width,px_int screen_height)
 {
 	PX_ApplicationInitializeDefault(&pApp->runtime, screen_width, screen_height);
+	if(PX_LoadTextureToResource(&pApp->runtime.ResourceLibrary,"assets/test.traw","111"))
+	printf("\nsucceeded\n");
+	else
+	printf("\nfailed\n");
 	return PX_TRUE;
 }
 

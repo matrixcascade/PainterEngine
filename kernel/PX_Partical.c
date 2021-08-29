@@ -28,9 +28,9 @@ px_bool PX_ParticalLauncherCreate(PX_Partical_Launcher *launcher,px_memorypool *
 }
 
 
-px_void PX_ParticalLauncherSetPosition(PX_Partical_Launcher *launcher,px_point position)
+px_void PX_ParticalLauncherSetPosition(PX_Partical_Launcher *launcher,px_float x,px_float y,px_float z)
 {
-	launcher->LauncherInfo.position=position;
+	launcher->LauncherInfo.position=PX_POINT(x,y,z);
 }
 
 px_void PX_ParticalAtomUpdate(PX_Partical_Launcher *env,PX_Partical_Atom *pAtom,px_dword elapsed)
@@ -126,7 +126,7 @@ px_void PX_ParticalAtomUpdate(PX_Partical_Launcher *env,PX_Partical_Atom *pAtom,
 
 }
 
-px_bool PX_ParticalLauncherUpdate(PX_Partical_Launcher *launcher,px_dword elapsed)
+px_void PX_ParticalLauncherUpdate(PX_Partical_Launcher *launcher,px_dword elapsed)
 {
 	px_int i,j;
 	px_int redTime=0;
@@ -293,7 +293,6 @@ px_bool PX_ParticalLauncherUpdate(PX_Partical_Launcher *launcher,px_dword elapse
 		}
 	}
 	launcher->elapsed+=elapsed;
-	return PX_TRUE;
 }
 
 px_bool PX_ParticalIsInSurfaceRegion(px_point atomPoint,px_int atomWidth,px_int atomHeight,px_float scale,px_int surfaceWidth,px_int surfaceHeight)

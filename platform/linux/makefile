@@ -29,7 +29,7 @@ all:$(project_build_o)  $(painterengine_build_painterengine_o)
 	-I "$(painterengine_path)" \
 	-I "$(project_path)" \
 	-I "$(painterengine_path)/platform/linux" \
-	-L. -lGL -lglut 
+	-L. -lGL -lglut -lpthread
 	
 
 $(project_path)/%.o:$(project_path)/%.c

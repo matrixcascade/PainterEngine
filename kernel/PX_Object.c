@@ -379,7 +379,15 @@ PX_Object * PX_ObjectCreateEx(px_memorypool *mp,PX_Object *Parent,px_float x,px_
 			MP_Free(mp,pObject);
 			return PX_NULL;
 		}
-		PX_memcpy(pObject->pObject,desc,size);
+		if (desc)
+		{
+			PX_memcpy(pObject->pObject,desc,size);
+		}
+		else
+		{
+			PX_memset(pObject->pObject,0,size);
+		}
+		
 		pObject->Type=type;
 		pObject->Func_ObjectFree=Func_ObjectFree;
 		pObject->Func_ObjectRender=Func_ObjectRender;

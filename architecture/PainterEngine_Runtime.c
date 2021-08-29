@@ -21,6 +21,7 @@ px_void PE_MP_ErrorCall(PX_MEMORYPOOL_ERROR err)
 
 px_bool PX_RuntimeInitialize(PX_Runtime *pe,px_int surface_width,px_int surface_height,px_int window_width,px_int window_height,px_void *runtime_memoryPtr,px_uint size,px_uint ui_size,px_uint resource_size,px_uint game_size)
 {
+	PX_memset(pe,0,sizeof(PX_Runtime));
 	pe->surface_width=surface_width;
 	pe->surface_height=surface_height;
 	pe->window_width=window_width;
