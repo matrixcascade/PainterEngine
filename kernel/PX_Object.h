@@ -89,6 +89,10 @@ enum PX_OBJECT_TYPE
 #define  PX_OBJECT_IMAGE_LISTBOX_STYLE_ITEMBORDER	1
 #define  PX_OBJECT_IMAGE_LISTBOX_STYLE_SELECT		2
 
+///////////////////////////////////////////////////////////////////////////
+///Colors
+///////////////////////////////////////////////////////////////////////////
+
 #ifndef PX_OBJECT_UI_DEFAULT_BACKGROUNDCOLOR
 #define PX_OBJECT_UI_DEFAULT_BACKGROUNDCOLOR PX_COLOR(255,48,48,48)
 #endif
@@ -121,6 +125,13 @@ enum PX_OBJECT_TYPE
 #define  PX_OBJECT_FILTEREDITOR_DEFAULE_HORIZONTALPIXELDIVIDING 48
 #define  PX_OBJECT_FILTEREDITOR_DEFAULE_VERTICALPIXELDIVIDING   20
 #define	 PX_OBJECT_FILTEREDITOR_DEFAULT_FRAMELINE_WIDTH			   2
+
+#include"PX_CSS_COLOR.h"
+///////////////////////////////////////////////////////////////////////////
+
+#define PX_OBJECT_FILTEREDITOR_DEFAULE_HORIZONTALPIXELDIVIDING 48
+#define PX_OBJECT_FILTEREDITOR_DEFAULE_VERTICALPIXELDIVIDING 20
+#define PX_OBJECT_FILTEREDITOR_DEFAULT_FRAMELINE_WIDTH 2
 
 
 ///////////////////////////////////////////////////////////////////////////
