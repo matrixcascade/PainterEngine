@@ -36,11 +36,7 @@ int PX_UDPInitialize(PX_UDP *udp,PX_UDP_IP_TYPE type)
 	//Initialize socket
 	
 
-<<<<<<< HEAD
-	if ((udp->socket=socket(AF_INET,SOCK_DGRAM,0))==INVALID_SOCKET)
-=======
 	if ((udp->socket=(unsigned int)socket(AF_INET,SOCK_DGRAM,0))==INVALID_SOCKET)
->>>>>>> 9af37198227e9f31ceeac74366b9b5bb1cc7e2fc
 	{
 		return 0;
 	}
@@ -125,11 +121,7 @@ int PX_UDPReceived(PX_UDP *udp,PX_UDP_ADDR *from_addr,void *buffer,int buffersiz
 			{
 				from_addr->ipv4=in.sin_addr.s_addr;
 				from_addr->port=in.sin_port;
-<<<<<<< HEAD
-				*readsize=ReturnSize;
-=======
 				*readsize=(int)ReturnSize;
->>>>>>> 9af37198227e9f31ceeac74366b9b5bb1cc7e2fc
 				return 1;
 			}
 			else

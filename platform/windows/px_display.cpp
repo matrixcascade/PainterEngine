@@ -1,4 +1,4 @@
-#include <d2d1.h>
+﻿#include <d2d1.h>
 #include <d2d1helper.h>
 #include <WindowsX.h>
 #pragma comment(lib,"d2d1.lib")
@@ -203,11 +203,7 @@ BOOL PX_CreateWindow( int surfaceWidth,int surfaceHeight,int windowWidth,int win
 	do 
 	{
 		WCHAR wname[128]={0};
-<<<<<<< HEAD
-		MultiByteToWideChar(CP_ACP, 0,name, strlen(name), wname,128);
-=======
 		MultiByteToWideChar(CP_ACP, 0,name, (int)strlen(name), wname,128);
->>>>>>> 9af37198227e9f31ceeac74366b9b5bb1cc7e2fc
 		Win_Hwnd = CreateWindowA("WindowCls", (LPCSTR)wname,
 			WS_OVERLAPPED|WS_SYSMENU|WS_MAXIMIZEBOX|WS_SIZEBOX,
 			CW_USEDEFAULT, CW_USEDEFAULT,
@@ -602,11 +598,7 @@ char *PX_MultFileDialog(const char Filter[])
 	{
 		if (szFile[strlen(szFile)+1]=='\0')
 		{
-<<<<<<< HEAD
-			int oft=strlen(szFile)-1;
-=======
 			int oft=(int)strlen(szFile)-1;
->>>>>>> 9af37198227e9f31ceeac74366b9b5bb1cc7e2fc
 			while (oft>=0)
 			{
 				if (szFile[oft]=='\\'||szFile[oft]=='/')
