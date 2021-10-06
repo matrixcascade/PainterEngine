@@ -7,6 +7,7 @@ DWORD WINAPI  PX_ThreadRun(void *ptr)
 	pthread->isRun=1;
 	pthread->pfunc(pthread->userptr);
 	pthread->isRun=0;
+	return 0;
 }
 
 
