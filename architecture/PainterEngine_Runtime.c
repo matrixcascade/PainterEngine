@@ -55,6 +55,8 @@ px_bool PX_RuntimeInitialize(PX_Runtime *pe,px_int surface_width,px_int surface_
 		}
 		PX_SurfaceClear(&pe->RenderSurface,0,0,pe->RenderSurface.width-1,pe->RenderSurface.height-1,PX_COLOR(255,255,255,255));
 	}
+
+	
 	
 	return PX_TRUE;
 }

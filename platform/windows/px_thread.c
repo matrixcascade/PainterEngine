@@ -13,9 +13,8 @@ DWORD WINAPI  PX_ThreadRun(void *ptr)
 
 int PX_ThreadCreate(px_thread *pthread,func_thread func,void *ptr)
 {
-	DWORD id;
 	pthread->pfunc=func;
-	pthread->userptr;
+	pthread->userptr=ptr;
 	pthread->isRun=0;
 	if(CreateThread(NULL,0,PX_ThreadRun,pthread,0,&pthread->handle_ulong)!=INVALID_HANDLE_VALUE)
 		return 1;

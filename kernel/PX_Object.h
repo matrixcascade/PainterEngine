@@ -71,6 +71,7 @@ enum PX_OBJECT_TYPE
   PX_OBJECT_TYPE_PANC,
   PX_OBJECT_TYPE_DESIGNERBOX,
   PX_OBJECT_TYPE_JOYSTICK,
+  PX_OBJECT_TYPE_RINGPROCESSBAR,
 };
 
 
@@ -431,6 +432,9 @@ px_void PX_ObjectExecuteEvent(PX_Object *pPost,PX_Object_Event Event);
 //joystick
 #include "PX_Object_Joystick.h"
 
+//////////////////////////////////////////////////////////////////////////
+//ringprocessbar
+#include "PX_Object_RingProcessbar.h"
 
 #endif
 

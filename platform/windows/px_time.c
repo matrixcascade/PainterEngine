@@ -70,3 +70,7 @@ unsigned int PX_TimeGetTime()
 	return timeGetTime();
 }
 
+void PX_Sleep(unsigned int ms)
+{
+	Sleep(ms);
+}
