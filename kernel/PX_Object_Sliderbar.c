@@ -24,7 +24,7 @@ px_void PX_Object_SliderBarOnMouseLButtonDown(PX_Object *pObject,PX_Object_Event
 
 	if (pSliderBar)
 	{
-		Range=pSliderBar->Max-pSliderBar->Min+1;
+		Range=pSliderBar->Max-pSliderBar->Min;
 		relValue=pSliderBar->Value-pSliderBar->Min;
 
 		if(PX_ObjectIsPointInRegion(pObject,(px_float)x,(px_float)y))

@@ -273,6 +273,7 @@ px_void PX_Object_PancOnCursorDrag(PX_Object *pObject,PX_Object_Event e,px_void 
 
 			pDesc->currentX=pDesc->sourceX;
 			pDesc->currentY=pDesc->sourceY;
+			PX_ObjectExecuteEvent(pObject, PX_OBJECT_BUILD_EVENT(PX_OBJECT_EVENT_VALUECHANGED));
 		}
 		break;
 	case PX_Object_Panc_bselect_righttop:
@@ -301,6 +302,7 @@ px_void PX_Object_PancOnCursorDrag(PX_Object *pObject,PX_Object_Event e,px_void 
 
 			pDesc->currentX=pDesc->sourceX;
 			pDesc->currentY=pDesc->sourceY;
+			PX_ObjectExecuteEvent(pObject, PX_OBJECT_BUILD_EVENT(PX_OBJECT_EVENT_VALUECHANGED));
 		}
 		break;
 	case PX_Object_Panc_bselect_leftbottom:
@@ -329,6 +331,7 @@ px_void PX_Object_PancOnCursorDrag(PX_Object *pObject,PX_Object_Event e,px_void 
 
 			pDesc->currentX=pDesc->sourceX;
 			pDesc->currentY=pDesc->sourceY;
+			PX_ObjectExecuteEvent(pObject, PX_OBJECT_BUILD_EVENT(PX_OBJECT_EVENT_VALUECHANGED));
 		}
 		break;
 
@@ -356,6 +359,7 @@ px_void PX_Object_PancOnCursorDrag(PX_Object *pObject,PX_Object_Event e,px_void 
 
 			pDesc->currentX=pDesc->sourceX;
 			pDesc->currentY=pDesc->sourceY;
+			PX_ObjectExecuteEvent(pObject, PX_OBJECT_BUILD_EVENT(PX_OBJECT_EVENT_VALUECHANGED));
 		}
 		break;
 	default:

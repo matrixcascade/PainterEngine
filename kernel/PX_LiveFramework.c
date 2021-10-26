@@ -749,7 +749,7 @@ static px_void PX_LiveFramework_UpdateLayerVertices(PX_LiveFramework *pLive,PX_L
 		resultPosition.y=plv->sourcePosition.y-pLayer->keyPoint.y;
 		resultPosition.z=plv->sourcePosition.z-pLayer->keyPoint.z;
 		//panc translation
-		if (pLayer->panc_currentx!=pLayer->panc_sx)
+		if (pLayer->panc_currentx!=pLayer->panc_sx|| pLayer->panc_currenty != pLayer->panc_sy)
 		{
 			if (plv->sourcePosition.x>pLayer->panc_x&& plv->sourcePosition.x < pLayer->panc_x+pLayer->panc_width)
 			{
@@ -774,8 +774,8 @@ static px_void PX_LiveFramework_UpdateLayerVertices(PX_LiveFramework *pLive,PX_L
 				}
 				else
 				{
-					px_float disy = (pLayer->panc_y + pLayer->panc_height) - plv->sourcePosition.x;
-					resultPosition.y += disy * (pLayer->panc_y + pLayer->panc_height - pLayer->panc_currenty) / (pLayer->panc_y + pLayer->panc_height - pLayer->panc_sy) - disy;
+					px_float disy = (pLayer->panc_y + pLayer->panc_height) - plv->sourcePosition.y;
+					resultPosition.y -= disy * (pLayer->panc_y + pLayer->panc_height - pLayer->panc_currenty) / (pLayer->panc_y + pLayer->panc_height - pLayer->panc_sy) - disy;
 				}
 			}
 
@@ -2235,6 +2235,7 @@ px_bool PX_LiveFrameworkExport(PX_LiveFramework *plive,px_memory *exportbuffer)
 		typedef struct  
 		{
 			px_char id[PX_LIVE_ID_MAX_LEN];
+			px_dword version;
 			px_int32 width;
 			px_int32 height;
 			px_int32 layerCount;
@@ -2245,9 +2246,10 @@ px_bool PX_LiveFrameworkExport(PX_LiveFramework *plive,px_memory *exportbuffer)
 		PX_LiveFrameworkBaseAttributes desc;
 
 		PX_memset(&desc,0,sizeof(PX_LiveFrameworkBaseAttributes));
-
-		PX_memcpy(desc.id,plive->id,PX_LIVE_ID_MAX_LEN);
 		
+		PX_memcpy(desc.id,plive->id,PX_LIVE_ID_MAX_LEN);
+		desc.version = PX_LIVE_VERSION;
+
 		desc.width=plive->width;
 		
 		desc.height=plive->height;
@@ -2422,6 +2424,7 @@ px_bool PX_LiveFrameworkImport(px_memorypool *mp,PX_LiveFramework *plive,px_void
 		typedef struct  
 		{
 			px_char id[PX_LIVE_ID_MAX_LEN];
+			px_dword version;
 			px_int32 width;
 			px_int32 height;
 			px_int32 layerCount;
@@ -2433,6 +2436,11 @@ px_bool PX_LiveFrameworkImport(px_memorypool *mp,PX_LiveFramework *plive,px_void
 		rOffset+=sizeof(PX_LiveFrameworkBaseAttributes);if(rOffset>size) return PX_FALSE;
 
 		//////////////////////////////////////////////////////////////////////////
+		if (pReadLiveFrameworkAttributes->version != PX_LIVE_VERSION)
+		{
+			return PX_FALSE;
+		}
+
 		PX_memset(plive,0,sizeof(PX_LiveFramework));
 
 		PX_memcpy(plive->id,pReadLiveFrameworkAttributes->id,sizeof(plive->id));

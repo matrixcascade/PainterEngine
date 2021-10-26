@@ -1,5 +1,6 @@
 #include "../modules/px_time.h"
 #include "time.h"
+#include <unistd.h>
 
 unsigned int PX_TimeGetTime()
 {
@@ -70,3 +71,7 @@ int PX_TimeGetSecond()
 	return 1900+p->tm_sec;
 }
 
+void PX_Sleep(unsigned int ms)
+{
+	usleep(ms*1000);
+}

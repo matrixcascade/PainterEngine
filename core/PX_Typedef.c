@@ -469,6 +469,7 @@ px_float PX_Point_cos(px_point v)
 px_void PX_BufferToHexString(px_byte data[],px_int size,px_char hex_str[])
 {
 	px_int i;
+	hex_str[0]=0;
 	for (i=0;i<size;i++)
 	{
 		if (data[i]==0)
@@ -1429,6 +1430,102 @@ px_color PX_ColorSub(px_color color1,px_color color2)
 px_bool PX_ColorEqual(px_color color1,px_color color2)
 {
 	return color1._argb.ucolor==color2._argb.ucolor;
+}
+
+px_color_hsl PX_ColorRGBToHSL(px_color color_rgb)
+{
+	px_color_hsl hsl;
+	px_float max=0,min=0;
+	px_float r,g,b;
+
+	r=color_rgb._argb.r/255.f;
+	g=color_rgb._argb.g/255.f;
+	b=color_rgb._argb.b/255.f;
+
+	max=r;
+	max=max<g?g:max;
+	max=max<b?b:max;
+
+	min=r;
+	min=min>g?g:min;
+	min=min>b?b:min;
+
+
+	hsl.L=(max+min)/2.0f;
+	if (max==min)
+	{
+		hsl.S=0;
+	}
+	else
+	{
+		hsl.S=(hsl.L<0.5f?(max-min)/(max + min):(max-min)/(2.0f-max-min));
+	}
+	if(r==max) hsl.H=(g-b)*1.0f/(max-min);
+	if(g==max) hsl.H=2.0f+(b-r)*1.0f/(max-min);
+	if(b==max) hsl.H=4.0f+(r-g)*1.0f/(max-min);
+	hsl.H=hsl.H*60;
+	if (hsl.H<0)
+	{
+		hsl.H+=360;
+	}
+	hsl.a=color_rgb._argb.a/255.f;
+	return hsl;
+}
+
+px_color PX_ColorHSLToRGB(px_color_hsl color_hsl)
+{
+	px_float r,g,b,temp1,temp2,temp3,H,S,L;
+	H=color_hsl.H;
+	S=color_hsl.S;
+	L=color_hsl.L;
+
+	if (color_hsl.S==0)
+	{
+		r=g=b=color_hsl.L;
+	}
+	else
+	{
+		if(L<0.5)
+			temp2=L*(1.0f+S);
+		else
+			temp2=L+S-L*S;
+
+		temp1 = 2.0f * L - temp2;
+		H /= 360;
+
+		r = temp3 = H + 1.0f / 3.0f;
+		if (temp3 < 0)
+			temp3 = temp3 + 1.0f;
+		if (temp3 > 1)
+			temp3 = temp3 - 1.0f;
+
+		if (6.0f * temp3 < 1)r = temp1 + (temp2 - temp1) * 6.0f * temp3;
+		else if (2.0f * temp3 < 1)r = temp2;
+		else if (3.0f * temp3 < 2)r = temp1 + (temp2 - temp1) * ((2.0f / 3.0f) - temp3) * 6.0f;
+		else r = temp1;
+
+		temp3 = H;
+		if (temp3 < 0)
+			temp3 = temp3 + 1.0f;
+		if (temp3 > 1)
+			temp3 = temp3 - 1.0f;
+		if (6.0f * temp3 < 1)g = temp1 + (temp2 - temp1) * 6.0f * temp3;
+		else if (2.0f * temp3 < 1)g = temp2;
+		else if (3.0f * temp3 < 2)g = temp1 + (temp2 - temp1) * ((2.0f / 3.0f) - temp3) * 6.0f;
+		else g = temp1;
+
+		temp3 = H - 1.0f / 3.0f;
+		if (temp3 < 0)
+			temp3 = temp3 + 1.0f;
+		if (temp3 > 1)
+			temp3 = temp3 - 1.0f;
+		if (6.0f * temp3 < 1)b = temp1 + (temp2 - temp1) * 6.0f * temp3;
+		else if (2.0f * temp3 < 1)b = temp2;
+		else if (3.0f * temp3 < 2)b = temp1 + (temp2 - temp1) * ((2.0f / 3.0f) - temp3) * 6.0f;
+		else b = temp1;
+	}
+
+	return PX_COLOR((px_uchar)(color_hsl.a*255),(px_uchar)(r*255),(px_uchar)(g*255),(px_uchar)(b*255));
 }
 
 px_color PX_ColorMul(px_color color1,px_double muls)

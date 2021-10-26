@@ -19,8 +19,8 @@ typedef struct
 	px_surface			RenderSurface;
 
 	//////////////////////////////////////////////////////////////////////////
-	PX_FontModule *fontmodule;
-	PX_SoundPlay  *soundplay;
+	PX_FontModule fontmodule;
+	PX_SoundPlay  soundplay;
 
 
 }PX_Runtime;
