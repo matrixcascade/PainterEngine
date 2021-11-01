@@ -239,7 +239,7 @@ px_bool PX_MQTT_SendConnect(PX_MQTT *Mqtt,PX_MQTT_ConnectDesc connectDesc)
 		}PX_MQTT_ConnectionFlag;
 
 		PX_MQTT_ConnectionFlag ConnectionFlag;
-		
+		ConnectionFlag.reserved=0;
 		ConnectionFlag.cleanSession=connectDesc.CleanSession;
 		if (connectDesc.willSize&&connectDesc.willContent)
 		{
@@ -319,8 +319,8 @@ px_bool PX_MQTT_SendConnect(PX_MQTT *Mqtt,PX_MQTT_ConnectDesc connectDesc)
 			px_byte willsizeEncode[2];
 			willsizeEncode[0]=(px_byte)((willsize&0xff00)>>8);
 			willsizeEncode[1]=(px_byte)((willsize&0xff));
-			PX_MemoryCat(&packbuild,&willsizeEncode,2);
-			PX_MemoryCat(&packbuild,&connectDesc.willContent,willsize);
+			PX_MemoryCat(&packbuild,willsizeEncode,2);
+			PX_MemoryCat(&packbuild,connectDesc.willContent,willsize);
 		}
 
 	} while (0);

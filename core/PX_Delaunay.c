@@ -198,7 +198,7 @@ px_bool PX_DelaunaryPointsBuild(px_memorypool *mp,px_point2D pt[],px_int count,p
 	for (i=0;i<count;i++)
 	{
 		sortPt[i]=*(px_point2D *)pAtoms[i].pData;
-		mapPt[i]=((px_byte *)pAtoms[i].pData-(px_byte *)pt)/sizeof(px_point2D);
+		mapPt[i]=(px_int)(((px_byte *)pAtoms[i].pData-(px_byte *)pt)/sizeof(px_point2D));
 	}
 	MP_Free(mp,pAtoms);
 	//build huge triangle

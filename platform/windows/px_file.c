@@ -133,7 +133,7 @@ int PX_FileGetDirectoryFileCount(const char path[],PX_FILEENUM_TYPE type,const c
 				while (drivers[index])
 				{
 					count++;
-					index+=strlen(drivers)+1;
+					index+= (int)(strlen(drivers))+1;
 				}
 			}
 			return count;
@@ -249,7 +249,7 @@ int PX_FileGetDirectoryFileName(const char path[],int count,char FileName[][260]
 				{
 					strcpy_s(FileName[dcount],260,drivers+index);
 					dcount++;
-					index+=strlen(drivers)+1;
+					index+=(int)(strlen(drivers)+1);
 				}
 			}
 			return dcount;

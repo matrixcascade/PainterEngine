@@ -118,7 +118,7 @@ MemoryNode *PX_AllocFromFreq(px_memorypool *MP,px_uint Size)
 			itNode=PX_MemoryPool_GetFreeTable(MP,i);
 			fSize=(px_uint)((px_char *)itNode->EndAddr-(px_char *)itNode->StartAddr+1);
 
-			if (Size<=fSize&&(Size+sizeof(MemoryNode)>fSize))
+			if (Size<=fSize&&(Size+sizeof(MemoryNode)>=fSize))
 			{
 				allocNode=(MemoryNode *)itNode->StartAddr;
 
@@ -466,8 +466,9 @@ px_void MP_Free(px_memorypool *MP, px_void *pAddress )
 		*PX_AllocFreeMemoryNode(MP)=FreeNode;
 	}
 
-	PX_UpdateMaxFreqSize(MP);
 _END:
+	PX_UpdateMaxFreqSize(MP);
+
 #if defined(PX_DEBUG_MODE) && defined(PX_MEMORYPOOL_DEBUG_CHECK)
 	for (DEBUG_i=0;DEBUG_i<sizeof(MP->DEBUG_allocdata)/sizeof(MP->DEBUG_allocdata[0]);DEBUG_i++)
 	{

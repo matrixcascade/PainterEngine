@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<!-- saved from url=(0073)http://www.painterengine.com/main/instances/instance2021081801/index.html -->
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+
+		<style type="text/css">
+			* {
+				margin: 0;
+			}
+
+			.container {
+				display: flex;
+				width: 100vw;
+				height: 100vh;
+				overflow: hidden;
+				justify-content: center;
+				align-items: center;
+			}
+
+			.progressContainer{
+				width: 70vw;
+				height: 1.3em;
+				border: 1px solid #000;
+				padding: 1px;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="container">
+			<canvas id="canvas" style="display: none;" oncontextmenu="event.preventDefault()" width="960"
+				height="480"></canvas>
+			<div id="progressBar">
+				<p>loading ...</p>
+				<div class="progressContainer">
+					<div id="loaded" style="transition-duration: 0.2s;background-color: #000000;height: 100%;min-width: 2em;width: 0%; color: #fff;text-align: center;">
+						0%
+					</div>
+				</div>
+			</div>
+			
+			<script type="text/javascript">
+				var Module = {
+					canvas: (function() {
+						return document.getElementById('canvas');
+					})()
+				};
+				
+				var event = new CustomEvent('progress');
+				
+				function lookProgress() {
+					var total = 0;
+					var loaded = 0;
+					if (Module.dataFileDownloads) {
+				
+						for (var key in Module.dataFileDownloads) {
+							total += Module.dataFileDownloads[key].total;
+							loaded += Module.dataFileDownloads[key].loaded;
+						}
+						if (total != 0) {
+							current = Math.round(loaded * 100 / total);
+							if (current !== event.precent) {
+								event.precent = current;
+								dispatchEvent(event);
+							}
+							if (current === 100)
+								return;
+				
+						}
+					}
+					setTimeout(lookProgress, 100);
+				}
+				lookProgress();
+				
+				
+				var progress = document.getElementById('loaded');
+				var progressBar = document.getElementById('progressBar');
+				addEventListener("progress",function(e){
+					progress.style.width =  e.precent + '%';
+					progress.innerHTML = e.precent + '%';
+					if(e.precent === 100){
+						Module.canvas.style.display = 'block';
+						progressBar.style.display = 'none';
+					}
+				});
+				
+			</script>
+			<script src="PainterEngine.js"></script>
+			
+		</div>
+		<remove-web-limits-iqxin id="rwl-iqxin" class="rwl-exempt" style="position: fixed; top: 212px; left: 0px;">
+			<qxinbutton type="qxinbutton" id="rwl-setbtn"> set </qxinbutton>
+			<lalala style="cursor:move; font-size:12px;">限制解除</lalala> <input type="checkbox" name="" id="black_node">
+			<style type="text/css">
+				#rwl-iqxin {
+					position: fixed;
+					transform: translate(-95px, 0);
+					width: 85px;
+					height: 25px;
+					font-size: 12px;
+					font-weight: 500;
+					font-family: Verdana, Arial, '宋体';
+					color: #fff;
+					background: #333;
+					z-index: 2147483647;
+					margin: 0;
+					opacity: 0.05;
+					transition: 0.3s;
+					overflow: hidden;
+					user-select: none;
+					text-align: center;
+					white-space: nowrap;
+					line-height: 25px;
+					padding: 0 16px;
+					border: 1px solid #ccc;
+					border-width: 1px 1px 1px 0;
+					border-bottom-right-radius: 5px;
+					box-sizing: content-box;
+				}
+
+				#rwl-iqxin input {
+					margin: 0;
+					padding: 0;
+					vertical-align: middle;
+					-webkit-appearance: checkbox;
+					-moz-appearance: checkbox;
+					position: static;
+					clip: auto;
+					opacity: 1;
+					cursor: pointer;
+				}
+
+				#rwl-iqxin.rwl-active-iqxin {
+					left: 0px;
+					transform: translate(0, 0);
+					opacity: 0.9;
+					height: 32px;
+					line-height: 32px
+				}
+
+				#rwl-iqxin label {
+					margin: 0;
+					padding: 0;
+					font-weight: 500;
+				}
+
+				#rwl-iqxin #rwl-setbtn {
+					margin: 0 4px 0 0;
+					padding: 0 0 0 4px;
+					border: none;
+					border-radius: 2px;
+					cursor: pointer;
+					background: #fff;
+					color: #000;
+				}
+			</style>
+		</remove-web-limits-iqxin>
+
+
+	</body>
+</html>

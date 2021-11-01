@@ -15,8 +15,8 @@ int PX_UDPInitialize(PX_UDP *udp,PX_UDP_IP_TYPE type)
 	WSADATA wsaData;        
 	int err;           
 	int nZero=0;
-	int nRecvBuf=1024*1024*2;
-	int nSendBuf=1024*1024*2;
+	int nRecvBuf=1024*1024;
+	int nSendBuf=1024*1024;
 	int optval=TRUE;
 	int imode=1,rev;
 	udp->type=type;
@@ -36,7 +36,7 @@ int PX_UDPInitialize(PX_UDP *udp,PX_UDP_IP_TYPE type)
 	//Initialize socket
 	
 
-	if ((udp->socket=socket(AF_INET,SOCK_DGRAM,0))==INVALID_SOCKET)
+	if ((udp->socket=(unsigned int)socket(AF_INET,SOCK_DGRAM,0))==INVALID_SOCKET)
 	{
 		return 0;
 	}
@@ -121,7 +121,7 @@ int PX_UDPReceived(PX_UDP *udp,PX_UDP_ADDR *from_addr,void *buffer,int buffersiz
 			{
 				from_addr->ipv4=in.sin_addr.s_addr;
 				from_addr->port=in.sin_port;
-				*readsize=ReturnSize;
+				*readsize=(int)ReturnSize;
 				return 1;
 			}
 			else

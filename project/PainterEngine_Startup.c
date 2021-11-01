@@ -1,5 +1,5 @@
 #include "PainterEngine_Startup.h"
-#include "stdlib.h"
+
 
 //////////////////////////////////////////////////////////////////////////
 //Functions
@@ -138,7 +138,7 @@ px_bool PX_LoadSoundFromFile(px_memorypool *mp,PX_SoundData *sounddata,const px_
 }
 
 
-px_bool PX_LoadAnimationLibraryFromFile(px_memorypool *mp,PX_Animationlibrary *lib,const px_char path[])
+px_bool PX_LoadAnimationLibraryFromFile(px_memorypool *mp,PX_AnimationLibrary *lib,const px_char path[])
 {
 	PX_IO_Data io;
 	io=PX_LoadFileToIOData(path);

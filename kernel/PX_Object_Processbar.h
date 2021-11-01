@@ -16,7 +16,8 @@ px_void		PX_Object_ProcessBarSetColor(PX_Object *pProcessBar,px_color Color);
 px_void		PX_Object_ProcessBarSetBackgroundColor(PX_Object *pProcessBar,px_color Color);
 px_void		PX_Object_ProcessBarSetValue(PX_Object *pProcessBar,px_int Value);
 px_void		PX_Object_ProcessBarSetMax(PX_Object *pProcessBar,px_int Max);
-px_int		PX_Object_ProcessBarGetValue(PX_Object *pProcessBar);
+px_int		PX_Object_ProcessBarGetMax(PX_Object* pProcessBar);
+px_int		PX_Object_ProcessBarGetValue(PX_Object* pProcessBar);
 
 #endif
 

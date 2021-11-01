@@ -276,7 +276,7 @@ px_shape * PX_ResourceLibraryGetShape(PX_ResourceLibrary *lib,const px_char key[
 	return PX_NULL;
 }
 
-PX_Animationlibrary * PX_ResourceLibraryGetAnimationLibrary(PX_ResourceLibrary *lib,const px_char key[])
+PX_AnimationLibrary * PX_ResourceLibraryGetAnimationLibrary(PX_ResourceLibrary *lib,const px_char key[])
 {
 	PX_Resource *pres=PX_ResourceLibraryGet(lib,key);
 	if (pres&&pres->Type==PX_RESOURCE_TYPE_ANIMATIONLIBRARY)

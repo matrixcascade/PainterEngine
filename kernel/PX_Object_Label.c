@@ -1,6 +1,6 @@
 #include "PX_Object_Label.h"
 
-px_void PX_Object_LabelRender(px_surface *psurface, PX_Object *pObject,px_uint elpased)
+px_void PX_Object_LabelRender(px_surface *psurface, PX_Object *pObject,px_uint elapsed)
 {
 	px_int x,y,w,h;
 	px_float inheritX,inheritY;
@@ -157,6 +157,7 @@ px_void PX_Object_LabelSetText( PX_Object *pObject,const px_char *Text )
 	}
 	if (pObject->Type!=PX_OBJECT_TYPE_LABEL)
 	{
+		PX_ASSERT();
 		return;
 	}
 

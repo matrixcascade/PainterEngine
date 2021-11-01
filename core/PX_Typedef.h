@@ -18,7 +18,7 @@
 #define     PX_PI				3.141592653589793238462
 #define     PX_e                (2.7182818284590452353602)
 #define     PX_e2               (PX_e*PX_e)
-#define     PX_RAND_MAX         (0xffff)
+#define     PX_RAND_MAX         (0xffffff)
 
 
 #ifdef _DEBUG
@@ -116,6 +116,14 @@ typedef struct _px_color
 	}_argb;
 }px_color;
 
+typedef struct _px_color_hsl
+{
+	px_float a;//Alpha 0--1
+	px_float H;//Hue 0-360
+	px_float S;//Saturation 0--1
+	px_float L;//Lightness 0--1
+}px_color_hsl;
+
 typedef struct _px_point
 {
 	px_float x;
@@ -136,6 +144,7 @@ typedef struct
 	px_float x, y;
 }px_point2D;
 
+typedef px_point2D px_vector2D;
 typedef px_point px_point3D;
 typedef px_point px_vector3D;
 
@@ -257,7 +266,7 @@ px_void PX_BufferToHexString(px_byte data[],px_int size,px_char hex_str[]);
 px_int PX_HexStringToBuffer(const px_char hex_str[],px_byte data[]);
 px_uint PX_htoi(const px_char hex_str[]);
 px_int  PX_atoi(const px_char str[]);
-px_float PX_atof(px_char fstr[]);
+px_float PX_atof(const px_char fstr[]);
 PX_RETURN_STRING PX_ftos(px_float f, int precision);
 PX_RETURN_STRING PX_itos(px_int num,px_int radix);
 px_void PX_AscToWord(const px_char *asc,px_word *u16);
@@ -295,6 +304,7 @@ px_void PX_memcpy(px_void *dst,const px_void *src,px_int size);
 px_void PX_strcpy(px_char *dst,const px_char *src,px_int size);
 px_void PX_wstrcpy(px_word *dst,const px_word *src,px_int size);
 px_void PX_strcat(px_char *src,const px_char *cat);
+px_void PX_strcat_s(px_char* src, const px_char* cat,px_int size);
 px_void PX_wstrcat(px_word *src,const px_word *cat);
 px_void PX_strset(px_char *dst,const px_char *src);
 px_int PX_strlen(const px_char *dst);
@@ -416,6 +426,8 @@ px_color PX_ColorAdd(px_color color1,px_color color2);
 px_color PX_ColorSub(px_color color1,px_color color2);
 px_color PX_ColorMul(px_color color1,px_double muls);
 px_bool  PX_ColorEqual(px_color color1,px_color color2);
+px_color_hsl PX_ColorRGBToHSL(px_color color_rgb);
+px_color PX_ColorHSLToRGB(px_color_hsl color_hsl);
 //////////////////////////////////////////////////////////////////////////
 
 

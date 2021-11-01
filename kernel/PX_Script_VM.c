@@ -3039,7 +3039,7 @@ px_bool PX_ScriptVM_InstanceBeginThreadFunction(PX_ScriptVM_Instance *Ins,px_int
 	px_int old_T;
 	px_char	uprname[__PX_SCRIPT_ASM_MNEMONIC_NAME_LEN];
 
-	if (paramcount>16||threadID>=Ins->maxThreadCount)
+	if (paramcount>16||threadID>=Ins->maxThreadCount||threadID<0)
 	{
 		return PX_FALSE;
 	}
@@ -3146,6 +3146,20 @@ px_bool PX_ScriptVM_InstanceBeginThreadFunctionIndex(PX_ScriptVM_Instance *Ins,p
 		return PX_FALSE;
 	}
 	return PX_TRUE;
+}
+
+
+px_int PX_ScriptVM_InstanceGetFreeThreadId(PX_ScriptVM_Instance *Ins)
+{
+	px_int i;
+	for (i=0;i<Ins->maxThreadCount;i++)
+	{
+		if (!Ins->pThread[i].Activated)
+		{
+			return i;
+		}
+	}
+	return -1;
 }
 
 px_bool PX_ScriptVM_InstanceFree(PX_ScriptVM_Instance *Ins)

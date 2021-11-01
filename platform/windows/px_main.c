@@ -20,7 +20,7 @@ volatile px_bool main_exit=0;
 //////////////////////////////////////////////////////////////////////////
 DWORD WINAPI DEMO_RenderThreadFunc(LPVOID p)
 {   
-	DWORD time,elpased;
+	DWORD time,elapsed;
 	PX_Object_Event e;
 	WM_MESSAGE msg;
 	static POINT LastDownPoint;
@@ -41,7 +41,7 @@ DWORD WINAPI DEMO_RenderThreadFunc(LPVOID p)
 
 		PX_SystemReadDeviceState();
 
-		elpased=timeGetTime()-time;
+		elapsed=timeGetTime()-time;
 		time=timeGetTime();
 
 		cursorx_scale=App.runtime.surface_width*1.0f/App.runtime.window_width;
@@ -149,7 +149,7 @@ DWORD WINAPI DEMO_RenderThreadFunc(LPVOID p)
 			case  WM_KEYDOWN:
 				{
 					e.Event=PX_OBJECT_EVENT_KEYDOWN;
-					PX_Object_Event_SetKeyDown(&e,msg.wparam);
+					PX_Object_Event_SetKeyDown(&e,(px_uint)msg.wparam);
 				}
 				break;
 			case WM_MOUSEWHEEL:
@@ -247,8 +247,8 @@ DWORD WINAPI DEMO_RenderThreadFunc(LPVOID p)
 			}
 
 		}
-		PX_ApplicationUpdate(&App,elpased);
-		PX_ApplicationRender(&App,elpased);
+		PX_ApplicationUpdate(&App,elapsed);
+		PX_ApplicationRender(&App,elapsed);
 		PX_SystemRender(App.runtime.RenderSurface.surfaceBuffer,App.runtime.surface_width,App.runtime.surface_height);
 		Sleep(0);
 	}
@@ -259,14 +259,14 @@ void setCurrentDirectory()
 {
 	px_char szExeFilePathFileName[MAX_PATH];
 	px_char path[MAX_PATH];
-	GetModuleFileName(NULL, szExeFilePathFileName, MAX_PATH);
+	GetModuleFileNameA(NULL, szExeFilePathFileName, MAX_PATH);
 	PX_FileGetPath(szExeFilePathFileName,path,sizeof(path));
 	if (path[PX_strlen(path)-1]==':')
 	{
 		PX_strcat(path,"\\");
 	}
 
-	SetCurrentDirectory(path);
+	SetCurrentDirectoryA(path);
 }
 
 #ifdef _DEBUG

@@ -82,6 +82,7 @@ px_bool				PX_ScriptVM_InstanceRunFunction(PX_ScriptVM_Instance *Ins,px_int thre
 px_bool				PX_ScriptVM_InstanceRunFunctionIndex(PX_ScriptVM_Instance *Ins,px_int threadID,px_int funcIndex,PX_SCRIPTVM_VARIABLE args[],px_int paramcount);
 px_bool				PX_ScriptVM_InstanceBeginThreadFunction(PX_ScriptVM_Instance *Ins,px_int threadID,const px_char *functionName,PX_SCRIPTVM_VARIABLE args[],px_int paramcount);
 px_bool				PX_ScriptVM_InstanceBeginThreadFunctionIndex(PX_ScriptVM_Instance *Ins,px_int threadID,px_int funcIndex,PX_SCRIPTVM_VARIABLE args[],px_int paramcount);
+px_int				PX_ScriptVM_InstanceGetFreeThreadId(PX_ScriptVM_Instance *Ins);
 PX_SCRIPTVM_RUNRETURN PX_ScriptVM_InstanceRunThread(PX_ScriptVM_Instance *Ins,px_int tick);
 px_void				PX_ScriptVM_InstanceRun(PX_ScriptVM_Instance *Ins,px_int tick);
 px_void				PX_ScriptVM_ThreadStop(PX_ScriptVM_Instance *Ins,px_int ThreadId);

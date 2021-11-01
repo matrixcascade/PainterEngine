@@ -8,5 +8,5 @@ int PX_TimeGetHour();
 int PX_TimeGetMinute();
 int PX_TimeGetSecond();
 unsigned int PX_TimeGetTime();
-
+void PX_Sleep(unsigned int ms);
 #endif

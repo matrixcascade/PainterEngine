@@ -43,6 +43,7 @@ px_void PX_StringTrim(px_string *str)
 			str->buffer[i--]='\0';
 		}
 	}
+	PX_StringUpdateExReg(str);
 }
 
 px_void PX_StringTrimLeft(px_string *str,px_int leftCount)
@@ -64,6 +65,7 @@ px_void PX_StringTrimLeft(px_string *str,px_int leftCount)
 		}
 		str->buffer[i]='\0';
 	}
+	PX_StringUpdateExReg(str);
 }
 
 px_void PX_StringTrimRight(px_string *str,px_int RightCount)
@@ -80,6 +82,7 @@ px_void PX_StringTrimRight(px_string *str,px_int RightCount)
 	{
 		str->buffer[PX_strlen(str->buffer)-RightCount]='\0';
 	}
+	PX_StringUpdateExReg(str);
 }
 
 px_void PX_StringFree(px_string *str)
@@ -89,6 +92,7 @@ px_void PX_StringFree(px_string *str)
 
 	str->buffer=PX_NULL;
 	str->bufferlen=0;
+	str->exreg_strlen = 0;
 }
 
 px_bool PX_StringInitialize(px_memorypool *mp,px_string *str)
@@ -98,6 +102,7 @@ px_bool PX_StringInitialize(px_memorypool *mp,px_string *str)
 	str->bufferlen=16;
 	PX_memset(str->buffer,0,16);
 	str->mp=mp;
+	str->exreg_strlen = 0;
 	return PX_TRUE;
 }
 
@@ -112,85 +117,8 @@ px_void PX_StringInitAlloc(px_memorypool *mp,px_string *str,px_int allocSize)
 	str->bufferlen=allocSize;
 	PX_memset(str->buffer,0,size);
 	str->mp=mp;
+	str->exreg_strlen = 0;
 }
-
-//%s %d %f
-// px_void PX_StringFormat(px_string *str,px_char fmt[],...)
-// {
-// 	_px_va_list ap;
-// 	px_char *p, *sval,*oldptr;
-// 	px_int ival,oft=0;
-// 	px_uint finalLen=0;
-// 	px_double dval;
-// 	px_char dat[32];
-// 	px_uchar shl=0;
-// 
-// 	_px_va_start(ap, fmt);
-// 	for (p = fmt; *p; p++) {
-// 		if(*p != '%') {
-// 			finalLen++;
-// 			continue;
-// 		}
-// 		switch(*++p) {
-// 		case 'd':
-// 			ival = _px_va_arg(ap, px_int);
-// 			finalLen +=PX_itoa(ival,dat,sizeof dat,10);
-// 			break;
-// 		case 'f':
-// 			dval = _px_va_arg(ap, px_double);
-// 			finalLen +=PX_ftoa((px_float)dval,dat,sizeof dat,6);
-// 			break;
-// 		case 's':
-// 			sval = _px_va_arg(ap, char *); 
-// 			finalLen +=PX_strcpy(sval);
-// 			break;
-// 		default:
-// 			finalLen+=1;
-// 			break;
-// 		}
-// 	}
-// 	_px_va_end(ap);
-// 	finalLen++;
-// 
-// 	
-// 	oldptr=str->buffer;
-// 	while ((px_uint)(1<<++shl)<=finalLen);
-// 	str->bufferlen=(1<<shl);
-// 	str->buffer=(px_char *)MP_Malloc(str->mp,str->bufferlen);
-// 	px_memset(str->buffer,0,str->bufferlen);
-// 	_px_va_start(ap, fmt);
-// 	for (p = fmt; *p; p++) {
-// 		if(*p != '%') {
-// 			str->buffer[oft++]=*p;
-// 			continue;
-// 		}
-// 		switch(*++p) {
-// 		case 'd':
-// 			ival = _px_va_arg(ap, px_int);
-// 			oft+=PX_itoa(ival,dat,sizeof dat,10);
-// 		    PX_strcat(str->buffer,dat);
-// 			break;
-// 		case 'f':
-// 			dval = _px_va_arg(ap, px_double);
-// 			oft+=PX_ftoa((px_float)dval,dat,sizeof dat,6);
-// 			PX_strcat(str->buffer,dat);
-// 			break;
-// 		case 's':
-// 			sval = _px_va_arg(ap, char *); 
-// 			oft+=PX_strcpy(sval);
-// 			PX_strcat(str->buffer,sval);
-// 			break;
-// 		default:
-// 			str->buffer[oft++]=*p;
-// 			break;
-// 		}
-// 	}
-// 	_px_va_end(ap);
-// 	str->buffer[oft]='\0';
-// 
-// 	if(oldptr)
-// 	MP_Free(str->mp,oldptr);
-// }
 
 
 px_bool PX_StringFormat8(px_string *str,const px_char fmt[],px_stringformat _1, px_stringformat _2, px_stringformat _3, px_stringformat _4,px_stringformat _5, px_stringformat _6, px_stringformat _7, px_stringformat _8)
@@ -208,6 +136,7 @@ px_bool PX_StringFormat8(px_string *str,const px_char fmt[],px_stringformat _1, 
 	str->buffer=(px_char *)MP_Malloc(str->mp,str->bufferlen);
 	if (!str->buffer)
 	{
+		PX_StringUpdateExReg(str);
 		return PX_FALSE;
 	}
 	
@@ -216,6 +145,7 @@ px_bool PX_StringFormat8(px_string *str,const px_char fmt[],px_stringformat _1, 
 	if(oldptr)
 		MP_Free(str->mp,oldptr);
 
+	PX_StringUpdateExReg(str);
 	return PX_TRUE;
 }
 px_bool PX_StringFormat7(px_string *str,const px_char fmt[],px_stringformat _1, px_stringformat _2, px_stringformat _3, px_stringformat _4,px_stringformat _5, px_stringformat _6, px_stringformat _7)
@@ -264,6 +194,7 @@ px_bool PX_StringSet(px_string *str,const px_char fmt[])
 	if (finalLen<(px_uint)str->bufferlen)
 	{
 		PX_strset(str->buffer,fmt);
+		PX_StringUpdateExReg(str);
 		return PX_TRUE;
 	}
 
@@ -280,6 +211,8 @@ px_bool PX_StringSet(px_string *str,const px_char fmt[])
 
 	if(oldptr)
 		MP_Free(str->mp,oldptr);
+
+	PX_StringUpdateExReg(str);
 	return PX_TRUE;
 }
 
@@ -306,6 +239,7 @@ px_bool PX_StringCat(px_string *str,const px_char *str2)
 	if (length<str->bufferlen)
 	{
 		PX_strcat(str->buffer,str2);
+		PX_StringUpdateExReg(str);
 		return PX_TRUE;
 	}
 
@@ -318,12 +252,14 @@ px_bool PX_StringCat(px_string *str,const px_char *str2)
 	PX_strcat(str->buffer,str2);
 	if(old)
 	MP_Free(str->mp,old);
+	PX_StringUpdateExReg(str);
 	return PX_TRUE;
 }
 
 px_void PX_StringClear(px_string *str)
 {
 	str->buffer[0]='\0';
+	str->exreg_strlen = 0;
 }
 
 px_bool PX_StringCatChar(px_string *str,px_char ch)
@@ -335,6 +271,7 @@ px_bool PX_StringCatChar(px_string *str,px_char ch)
 	{
 		str->buffer[length-1]=ch;
 		str->buffer[length]='\0';
+		PX_StringUpdateExReg(str);
 		return PX_TRUE;
 	}
 
@@ -348,6 +285,8 @@ px_bool PX_StringCatChar(px_string *str,px_char ch)
 	str->buffer[length]='\0';
 	if(old)
 	MP_Free(str->mp,old);
+
+	PX_StringUpdateExReg(str);
 	return PX_TRUE;
 }
 
@@ -374,6 +313,8 @@ px_bool PX_StringInsertChar(px_string *str,px_int index,px_char ch)
 	{
 		PX_memcpy(str->buffer+index+1,str->buffer+index,cpysize);
 		str->buffer[index]=ch;
+		str->exreg_strlen++;
+		return PX_TRUE;
 	}
 	return PX_FALSE;
 }
@@ -383,6 +324,7 @@ px_bool PX_StringRemoveChar(px_string *str,px_int index)
 	if (index>=0&&index<PX_strlen(str->buffer))
 	{
 		PX_memcpy(str->buffer+index,str->buffer+index+1,PX_strlen(str->buffer+index));
+		str->exreg_strlen--;
 		return PX_TRUE;
 	}
 	return PX_FALSE;
@@ -414,15 +356,20 @@ px_void PX_StringReplace(px_string *str,px_char *source,px_char *replaceto)
 	}
 	PX_StringCat(str,tempstr.buffer+i);
 	PX_StringFree(&tempstr);
+
 }
 
 px_bool PX_StringInsert(px_string *str,px_int insertIndex,const px_char *InstrString)
 {
 	px_int length=PX_strlen(InstrString);
 	px_int resLen=PX_strlen(str->buffer+insertIndex);
-	if(!PX_StringCat(str,InstrString)) return PX_FALSE;
+	if (!PX_StringCat(str, InstrString))
+	{
+		return PX_FALSE;
+	}
 	PX_memcpy(str->buffer+insertIndex+length,str->buffer+insertIndex,resLen);
 	PX_memcpy(str->buffer+insertIndex,InstrString,length);
+	PX_StringUpdateExReg(str);
 	return PX_TRUE;
 }
 
@@ -660,3 +607,91 @@ px_void PX_StringInitFromConst(px_string *str,const px_char *constchar)
 }
 
 
+px_void PX_StringUpdateExReg(px_string *text)
+{
+	if (text->buffer)
+	{
+		text->exreg_strlen =PX_strlen(text->buffer);
+	}
+	else
+		text->exreg_strlen =0;
+}
+
+px_bool PX_StringCatEx(px_string* text, const px_char* str2)
+{
+	px_uchar shl = 0;
+	px_int len2 = PX_strlen(str2);
+	px_char* old = text->buffer;
+	px_int length = text->exreg_strlen + len2;
+	if (length < text->bufferlen)
+	{
+		PX_strcat(text->buffer + text->exreg_strlen, str2);
+		text->exreg_strlen += len2;
+		return PX_TRUE;
+	}
+
+	while ((px_int)(1 << ++shl) <= length);
+	text->bufferlen = (1 << shl);
+	text->buffer = (px_char*)MP_Malloc(text->mp, text->bufferlen);
+	if (!text->buffer)
+	{
+		return PX_FALSE;
+	}
+
+	text->buffer[0] = '\0';
+
+	PX_strcat(text->buffer, old);
+	PX_strcat(text->buffer + text->exreg_strlen, str2);
+
+	if (old)
+		MP_Free(text->mp, old);
+
+	text->exreg_strlen += len2;
+	return PX_TRUE;
+}
+
+px_void PX_StringBackspace(px_string* text)
+{
+	px_int len = PX_strlen(text->buffer);
+	if (len)
+	{
+		text->buffer[len - 1] = '\0';
+	}
+}
+
+
+px_void PX_StringBackspaceEx(px_string* text)
+{
+	if (text->exreg_strlen > 0)
+	{
+		text->buffer[text->exreg_strlen - 1] = '\0';
+		text->exreg_strlen--;
+	}
+}
+
+px_bool PX_StringCatCharEx(px_string* text, px_char ch)
+{
+	px_uchar shl = 0;
+	px_char* old = text->buffer;
+	px_int length = text->exreg_strlen + 1;
+	if (length < text->bufferlen)
+	{
+		text->buffer[length - 1] = ch;
+		text->buffer[length] = '\0';
+		text->exreg_strlen++;
+		return PX_TRUE;
+	}
+
+	while ((px_int)(1 << ++shl) <= length);
+	text->bufferlen = (1 << shl);
+	text->buffer = (px_char*)MP_Malloc(text->mp, text->bufferlen);
+	if (!text->buffer)return PX_FALSE;
+	text->buffer[0] = '\0';
+	PX_strcat(text->buffer, old);
+	text->buffer[length - 1] = ch;
+	text->buffer[length] = '\0';
+	text->exreg_strlen++;
+	if (old)
+		MP_Free(text->mp, old);
+	return PX_TRUE;
+}

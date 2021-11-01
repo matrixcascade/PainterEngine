@@ -1,7 +1,7 @@
 #include "PX_Object_Processbar.h"
 
 
-px_void PX_Object_ProcessBarRender(px_surface *psurface, PX_Object *pObject,px_uint elpased)
+px_void PX_Object_ProcessBarRender(px_surface *psurface, PX_Object *pObject,px_uint elapsed)
 {
 	px_int px,py,pl;//Processing start X,Processing Start Y &Processing length
 	px_int x,y,w,h;
@@ -86,8 +86,8 @@ PX_Object * PX_Object_ProcessBarCreate(px_memorypool *mp,PX_Object *Parent,px_in
 
 	ProcessBar->MAX=100;
 	ProcessBar->Value=0;
-	ProcessBar->Color=PX_COLOR(255,0,0,0);
-	ProcessBar->BackgroundColor=PX_COLOR(255,255,255,255);
+	ProcessBar->Color=PX_OBJECT_UI_DEFAULT_FONTCOLOR;
+	ProcessBar->BackgroundColor= PX_OBJECT_UI_DEFAULT_BACKGROUNDCOLOR;
 	return pObject;
 }
 
@@ -119,6 +119,7 @@ px_void PX_Object_ProcessBarSetValue( PX_Object *pProcessBar,px_int Value )
 	}
 }
 
+
 px_void PX_Object_ProcessBarSetMax( PX_Object *pProcessBar,px_int Max )
 {
 	PX_Object_ProcessBar *pProcess=PX_Object_GetProcessBar(pProcessBar);
@@ -127,6 +128,18 @@ px_void PX_Object_ProcessBarSetMax( PX_Object *pProcessBar,px_int Max )
 
 		pProcess->MAX=Max;
 	}
+}
+
+px_int PX_Object_ProcessBarGetMax(PX_Object* pProcessBar)
+{
+	PX_Object_ProcessBar* pProcess = PX_Object_GetProcessBar(pProcessBar);
+	if (pProcess != PX_NULL)
+	{
+
+		return pProcess->MAX;
+	}
+	PX_ASSERT();
+	return 0;
 }
 
 PX_Object_ProcessBar * PX_Object_GetProcessBar( PX_Object *Object )
@@ -141,6 +154,7 @@ px_int PX_Object_ProcessBarGetValue( PX_Object *pProcessBar )
 {
 	if (pProcessBar->Type!=PX_OBJECT_TYPE_PROCESSBAR)
 	{
+		PX_ASSERT();
 		return 0;
 	}
 	return PX_Object_GetProcessBar(pProcessBar)->Value;

@@ -61,12 +61,12 @@ px_void PX_Object_MessageBoxClose(PX_Object *pObject)
 	
 }
 
-static px_void PX_Object_MessageBoxRender(px_surface *pSurface,PX_Object *pObject,px_dword elpased)
+static px_void PX_Object_MessageBoxRender(px_surface *pSurface,PX_Object *pObject,px_dword elapsed)
 {
 
 	px_color backGroundColor,frontColor;
 	PX_Object_MessageBox *pm=PX_Object_GetMessageBox(pObject);
-	if (elpased>2000)
+	if (elapsed>2000)
 	{
 		return;
 	}
@@ -94,7 +94,7 @@ static px_void PX_Object_MessageBoxRender(px_surface *pSurface,PX_Object *pObjec
 	switch(pm->mode)
 	{
 	case PX_OBJECT_MESSAGEBOX_MODE_EXPAND:
-		pm->schedule+=elpased;
+		pm->schedule+=elapsed;
 		if (pm->schedule>PX_OBJECT_MESSAGEBOX_DEFAULT_STAGE_2_TIME)
 		{
 			pm->schedule=PX_OBJECT_MESSAGEBOX_DEFAULT_STAGE_2_TIME;
@@ -103,7 +103,7 @@ static px_void PX_Object_MessageBoxRender(px_surface *pSurface,PX_Object *pObjec
 	case PX_OBJECT_MESSAGEBOX_MODE_CLOSE:
 	default:
 		{
-			pm->schedule-=elpased;
+			pm->schedule-=elapsed;
 			if (pm->schedule<0)
 			{
 				pm->schedule=0;

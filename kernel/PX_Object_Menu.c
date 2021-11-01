@@ -291,7 +291,7 @@ px_void PX_Object_MenuOnCursorEventEx(PX_Object *pObject,PX_Object_Event e)
 	}
 
 }
-static px_void PX_MenuRenderItem(px_surface *pSurface,PX_Object_Menu *pMenu,PX_Object_Menu_Item *pItem,px_bool broot,px_dword elpased)
+static px_void PX_MenuRenderItem(px_surface *pSurface,PX_Object_Menu *pMenu,PX_Object_Menu_Item *pItem,px_bool broot,px_dword elapsed)
 {
 	if (pItem->width&&pItem->height)
 	{
@@ -338,19 +338,19 @@ static px_void PX_MenuRenderItem(px_surface *pSurface,PX_Object_Menu *pMenu,PX_O
 			for (pNode=PX_ListNodeAt(&pItem->Items,0);pNode;pNode=PX_ListNodeNext(pNode))
 			{
 				PX_Object_Menu_Item *pSubItem=PX_LIST_NODETDATA(PX_Object_Menu_Item,pNode);
-				PX_MenuRenderItem(pSurface,pMenu,pSubItem,PX_FALSE,elpased);
+				PX_MenuRenderItem(pSurface,pMenu,pSubItem,PX_FALSE,elapsed);
 			}
 		}
 	}
 }
-px_void PX_Object_MenuRenderEx(px_surface *pSurface,PX_Object_Menu *pMenu,px_dword elpased)
+px_void PX_Object_MenuRenderEx(px_surface *pSurface,PX_Object_Menu *pMenu,px_dword elapsed)
 {
 	px_list_node *pNode=PX_NULL;
 
 	for (pNode=PX_ListNodeAt(&pMenu->root.Items,0);pNode;pNode=PX_ListNodeNext(pNode))
 	{
 		PX_Object_Menu_Item *pSubItem=PX_LIST_NODETDATA(PX_Object_Menu_Item,pNode);
-		PX_MenuRenderItem(pSurface,pMenu,pSubItem,PX_TRUE,elpased);
+		PX_MenuRenderItem(pSurface,pMenu,pSubItem,PX_TRUE,elapsed);
 	}
 
 }
@@ -403,9 +403,9 @@ px_void PX_Object_MenuFree(PX_Object *Obj)
 	PX_Object_MenuFreeEx(PX_Object_GetMenu(Obj));
 }
 
-px_void PX_Object_MenuRender(px_surface *psurface, PX_Object *Obj,px_uint elpased)
+px_void PX_Object_MenuRender(px_surface *psurface, PX_Object *Obj,px_uint elapsed)
 {
-	PX_Object_MenuRenderEx(psurface,PX_Object_GetMenu(Obj),elpased);
+	PX_Object_MenuRenderEx(psurface,PX_Object_GetMenu(Obj),elapsed);
 }
 
 px_void PX_Object_MenuOnCursorEvent(PX_Object *pObject,PX_Object_Event e,px_void *ptr)

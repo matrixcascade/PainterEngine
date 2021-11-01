@@ -181,6 +181,27 @@ px_bool PX_ExecuterVM_Rand(PX_ScriptVM_Instance *Ins,px_void *userptr)
 	return PX_TRUE;
 }
 
+px_bool PX_ExecuterVM_Sin(PX_ScriptVM_Instance *Ins,px_void *userptr)
+{
+	if (PX_ScriptVM_STACK(Ins,0).type!=PX_SCRIPTVM_VARIABLE_TYPE_FLOAT)
+	{
+		PX_ScriptVM_RET(Ins,PX_ScriptVM_Variable_int(0));
+		return PX_TRUE;
+	}
+	PX_ScriptVM_RET(Ins,PX_ScriptVM_Variable_float((px_float)PX_sind(PX_ScriptVM_STACK(Ins,0)._float)));
+	return PX_TRUE;
+}
+
+px_bool PX_ExecuterVM_Cos(PX_ScriptVM_Instance *Ins,px_void *userptr)
+{
+	if (PX_ScriptVM_STACK(Ins,0).type!=PX_SCRIPTVM_VARIABLE_TYPE_FLOAT)
+	{
+		PX_ScriptVM_RET(Ins,PX_ScriptVM_Variable_int(0));
+		return PX_TRUE;
+	}
+	PX_ScriptVM_RET(Ins,PX_ScriptVM_Variable_float((px_float)PX_cosd(PX_ScriptVM_STACK(Ins,0)._float)));
+	return PX_TRUE;
+}
 
 px_bool PX_ExecuterVM_Gets(PX_ScriptVM_Instance *Ins,px_void *userptr)
 {
@@ -210,6 +231,23 @@ px_bool PX_ExecuterVM_Clear(PX_ScriptVM_Instance *Ins,px_void *userptr)
 }
 
 
+px_bool PX_ExecuterVM_CreateThread(PX_ScriptVM_Instance *Ins,px_void *userptr)
+{
+	PX_Executer *pExecute=(PX_Executer *)userptr;
+
+	if (PX_ScriptVM_STACK(Ins,0).type!=PX_SCRIPTVM_VARIABLE_TYPE_STRING)
+	{
+		PX_ScriptVM_RET(Ins,PX_ScriptVM_Variable_int(0));
+		return PX_TRUE;
+	}
+
+	if(!PX_ScriptVM_InstanceBeginThreadFunction(&pExecute->VM_Instance,PX_ScriptVM_InstanceGetFreeThreadId(Ins),PX_ScriptVM_STACK(Ins,0)._string.buffer,PX_NULL,0))
+	{
+		PX_ScriptVM_RET(Ins,PX_ScriptVM_Variable_int(0));
+	}
+	return PX_TRUE;
+}
+
 
 
 
@@ -219,14 +257,17 @@ px_bool PX_ExecuterRunScipt(PX_Executer *pExecute,const px_char *pshellstr)
 	PX_SCRIPT_LIBRARY lib;
 	px_string asmcodeString;
 	px_memorypool mp_calc;
-	const px_char stdio[]="#name \"stdio.h\"\n\
+	const px_char stdio[]="#name \"stdlib.h\"\n\
 						 host int print(string s);\n\
 						 host int printImage(string key);\n\
 						 host string gets();\n\
 						 host void clear();\n\
 						 host void sleep(int millionsecond);\n\
 						 host int rand();\n\
+						 host float sin(float x);\n\
+						 host float cos(float x);\n\
 						 host int lastprint(string s);\n\
+						 host int createthread(string callname);\n\
 						  ";
 	mp_calc=MP_Create(MP_Malloc(&pExecute->runtime->mp,PE_MEMORY_CALC_SIZE),PE_MEMORY_CALC_SIZE);
 	if(mp_calc.StartAddr==PX_NULL) return PX_FALSE;
@@ -288,7 +329,10 @@ px_bool PX_ExecuterRunScipt(PX_Executer *pExecute,const px_char *pshellstr)
 	PX_ScriptVM_RegistryHostFunction(&pExecute->VM_Instance,"clear",PX_ExecuterVM_Clear,pExecute);//Clear
 	PX_ScriptVM_RegistryHostFunction(&pExecute->VM_Instance,"sleep",PX_ExecuterVM_Sleep,pExecute);//Sleep
 	PX_ScriptVM_RegistryHostFunction(&pExecute->VM_Instance,"rand",PX_ExecuterVM_Rand,pExecute);//Rand
+	PX_ScriptVM_RegistryHostFunction(&pExecute->VM_Instance,"sin",PX_ExecuterVM_Sin,pExecute);//Rand
+	PX_ScriptVM_RegistryHostFunction(&pExecute->VM_Instance,"cos",PX_ExecuterVM_Cos,pExecute);//Rand
 	PX_ScriptVM_RegistryHostFunction(&pExecute->VM_Instance,"lastprint",PX_ExecuterVM_LastPrint,pExecute);//lastprint
+	PX_ScriptVM_RegistryHostFunction(&pExecute->VM_Instance,"createthread",PX_ExecuterVM_CreateThread,pExecute);//lastprint
 	//////////////////////////////////////////////////////////////////////////
 	//sleep
 	if (pExecute->Sleep)
@@ -316,6 +360,11 @@ px_bool PX_ExecuterRunScipt(PX_Executer *pExecute,const px_char *pshellstr)
 
 }
 
+
+px_bool PX_ExecuterLoadScipt(PX_Executer* pExecuter, const px_char* pshellstr)
+{
+	return PX_ExecuterRunScipt(pExecuter, pshellstr);
+}
 
 px_bool PX_ExecuterRegistryHostFunction(PX_Executer *pExecuter,const px_char Name[],PX_ScriptVM_Function_Modules function,px_void *userptr)
 {
@@ -429,7 +478,7 @@ px_bool PX_ExecuterInitialize(PX_Runtime *runtime,PX_Executer *pExecute)
 	PX_ExecuterShowImage(pExecute,"fox_executer_logo");
 	PX_ExecuterShowImage(pExecute,"console_logo");
 	PX_ExecuterPrintText(pExecute,"----------------------------------------");
-	PX_ExecuterPrintText(pExecute,"-PainterEngine Script Executer         -\n-Code By DBinary Build on 2019         -\n-Refer To:www.GitHub.com/matrixcascade -");
+	PX_ExecuterPrintText(pExecute,"-PainterEngine Script Executer         -\n-Code By DBinary Build on v2021         -\n-Refer To:www.GitHub.com/matrixcascade -");
 	PX_ExecuterPrintText(pExecute,"----------------------------------------");
 
 
@@ -464,14 +513,14 @@ px_void PX_ExecuterPostEvent(PX_Executer *pExecute,PX_Object_Event e)
 		}
 	}
 }
-px_void PX_ExecuterUpdate(PX_Executer *pExecute,px_dword elpased)
+px_void PX_ExecuterUpdate(PX_Executer *pExecute,px_dword elapsed)
 {
 	px_int i;
 
 	pExecute->Area->Width=(px_float)pExecute->runtime->surface_width;
 	pExecute->Area->Height=(px_float)pExecute->runtime->surface_height;
 	pExecute->Input->Width=(px_float)pExecute->runtime->surface_width-1;
-	PX_ObjectUpdate(pExecute->Area,elpased);
+	PX_ObjectUpdate(pExecute->Area,elapsed);
 
 	if (pExecute->bInput)
 	{
@@ -490,11 +539,11 @@ px_void PX_ExecuterUpdate(PX_Executer *pExecute,px_dword elpased)
 			{
 				if (pExecute->Sleep[i]==0)
 				{
-					PX_ScriptVM_InstanceRunThread(&pExecute->VM_Instance,0xffff);
+					PX_ScriptVM_InstanceRun(&pExecute->VM_Instance,0xffff);
 				}
 				else
 				{
-					if (pExecute->Sleep[i]<=elpased)
+					if (pExecute->Sleep[i]<=elapsed)
 					{
 						pExecute->VM_Instance.pThread[i].suspend=PX_FALSE;
 						pExecute->Sleep[i]=0;
@@ -502,7 +551,7 @@ px_void PX_ExecuterUpdate(PX_Executer *pExecute,px_dword elpased)
 					else
 					{
 						pExecute->VM_Instance.pThread[i].suspend=PX_TRUE;
-						pExecute->Sleep[i]-=elpased;
+						pExecute->Sleep[i]-=elapsed;
 					}
 				}
 				
@@ -519,11 +568,11 @@ px_void PX_ExecuterShow(PX_Executer *pExecute,px_bool b)
 	pExecute->show=b;
 }
 
-px_void PX_ExecuterRender(PX_Executer *pExecute,px_dword elpased)
+px_void PX_ExecuterRender(PX_Executer *pExecute,px_dword elapsed)
 {
 	if(pExecute->show)
 	{
-		PX_ObjectRender(&pExecute->runtime->RenderSurface,pExecute->Area,elpased);
+		PX_ObjectRender(&pExecute->runtime->RenderSurface,pExecute->Area,elapsed);
 	}
 }
 

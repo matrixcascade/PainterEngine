@@ -25,8 +25,8 @@
 #define PX_OBJECT_EVENT_VALUECHANGED		13
 #define PX_OBJECT_EVENT_DRAGFILE			14
 #define PX_OBJECT_EVENT_KEYDOWN				15
-#define PX_OBJECT_EVENT_IMPACT				16
-#define PX_OBJECT_EVENT_ONFOCUSCHANGED		17
+#define PX_OBJECT_EVENT_KEYUP				16
+#define PX_OBJECT_EVENT_IMPACT				17
 #define PX_OBJECT_EVENT_SCALE               18
 #define PX_OBJECT_EVENT_WINDOWRESIZE        19
 #define PX_OBJECT_EVENT_ONFOCUS				20
@@ -68,6 +68,11 @@ enum PX_OBJECT_TYPE
   PX_OBJECT_TYPE_MESSAGEBOX		,
   PX_OBJECT_TYPE_PROTRACTOR		,
   PX_OBJECT_TYPE_TRANSFORMADAPTER,
+  PX_OBJECT_TYPE_PANC,
+  PX_OBJECT_TYPE_DESIGNERBOX,
+  PX_OBJECT_TYPE_JOYSTICK,
+  PX_OBJECT_TYPE_RINGPROCESSBAR,
+  PX_OBJECT_TYPE_MEMORYVIEW,
 };
 
 
@@ -75,7 +80,7 @@ enum PX_OBJECT_TYPE
 //
 //////////////////////////////////////////////////////////////////////////
 
-
+#define PX_OBJECT_ID_MAXLEN 32
 
 #define  PX_OBJECT_IMAGE_LISTITEM_STYLE_NONE		0
 #define  PX_OBJECT_IMAGE_LISTITEM_STYLE_BORDER		1
@@ -99,7 +104,7 @@ enum PX_OBJECT_TYPE
 #endif
 
 #ifndef PX_OBJECT_UI_DEFAULT_BORDERCOLOR
-#define PX_OBJECT_UI_DEFAULT_BORDERCOLOR PX_COLOR(255,0,0,0)
+#define PX_OBJECT_UI_DEFAULT_BORDERCOLOR PX_COLOR(255,192,192,192)
 #endif
 
 #ifndef PX_OBJECT_UI_DEFAULT_PUSHCOLOR
@@ -126,16 +131,16 @@ enum PX_OBJECT_TYPE
 struct _PX_Object;
 typedef struct _PX_Object PX_Object;
 
-typedef px_void  (*Function_ObjectUpdate)(PX_Object *,px_uint elpased);
+typedef px_void  (*Function_ObjectUpdate)(PX_Object *,px_uint elapsed);
 typedef px_void  (*Function_ObjectBeginRender)(px_surface *,PX_Object *,px_dword);
-typedef px_void  (*Function_ObjectRender)(px_surface *psurface,PX_Object *,px_uint elpased);
+typedef px_void  (*Function_ObjectRender)(px_surface *psurface,PX_Object *,px_uint elapsed);
 typedef px_void  (*Function_ObjectEndRender)(px_surface *,PX_Object *,px_dword);
 typedef px_void  (*Function_ObjectFree)(PX_Object *);
 typedef px_void  (*Function_ObjectLinkChild)(PX_Object *parent,PX_Object *child);
 
 struct _PX_Object
 {
-	px_int id;
+	px_char id[PX_OBJECT_ID_MAXLEN];
 	px_float x;
 	px_float y;
 	px_float z;
@@ -150,11 +155,13 @@ struct _PX_Object
 	px_bool Visible;
 	px_bool ReceiveEvents;
 	px_int	Type;
+	px_int  designerTyoe;
 	union
 	{
 	px_int  User_int;
 	px_void *User_ptr;
 	};
+	
 	px_int   world_index;
 	px_dword impact_object_type;
 	px_dword impact_target_type;
@@ -246,6 +253,7 @@ px_void PX_Object_Event_SetScaleCursorZ(PX_Object_Event *e,px_float z);
 
 px_uint PX_Object_Event_GetKeyDown(PX_Object_Event e);
 px_void PX_Object_Event_SetKeyDown(PX_Object_Event *e,px_uint key);
+px_void PX_Object_Event_SetKeyUp(PX_Object_Event *e,px_uint key);
 px_char* PX_Object_Event_GetStringPtr(PX_Object_Event e);
 px_void* PX_Object_Event_GetDataPtr(PX_Object_Event e);
 px_void PX_Object_Event_SetStringPtr(PX_Object_Event *e,px_void *ptr);
@@ -263,9 +271,9 @@ struct _PX_Object_EventAction
 typedef struct _PX_Object_EventAction PX_OBJECT_EventAction;
 
 
-PX_Object *PX_ObjectCreate(px_memorypool *mp,PX_Object *Parent,px_float x,px_float y,px_float z,px_float Width,px_float Height,px_float Lenght);
+PX_Object *PX_ObjectCreate(px_memorypool *mp,PX_Object *Parent,px_float x,px_float y,px_float z,px_float Width,px_float Height,px_float Length);
 PX_Object *PX_ObjectCreateEx(px_memorypool *mp,PX_Object *Parent,\
-	px_float x,px_float y,px_float z,px_float Width,px_float Height,px_float Lenght,\
+	px_float x,px_float y,px_float z,px_float Width,px_float Height,px_float Length,\
 	px_int type,\
 	Function_ObjectUpdate Func_ObjectUpdate,\
 	Function_ObjectRender Func_ObjectRender,\
@@ -275,7 +283,8 @@ PX_Object *PX_ObjectCreateEx(px_memorypool *mp,PX_Object *Parent,\
 	);
 #define    PX_ObjectGetDesc(type,pobject) ((type *)((pobject)->pObject))
 px_void    PX_ObjectGetInheritXY(PX_Object *Object,px_float *x,px_float *y);
-px_void	   PX_ObjectInit(px_memorypool *mp,PX_Object *Object,PX_Object *Parent,px_float x,px_float y,px_float z,px_float Width,px_float Height,px_float Lenght);
+px_void	   PX_ObjectInitialize(px_memorypool *mp,PX_Object *Object,PX_Object *Parent,px_float x,px_float y,px_float z,px_float Width,px_float Height,px_float Length);
+px_void    PX_ObjectSetId(PX_Object *pObject,const px_char id[]);
 px_void    PX_ObjectSetUserCode(PX_Object *pObject,px_int user_int);
 px_void    PX_ObjectSetUserPointer(PX_Object *pObject,px_void *user_ptr);
 px_void    PX_ObjectDelete(PX_Object *pObject);
@@ -287,6 +296,7 @@ px_void    PX_ObjectSetEnabled(PX_Object *Object,px_bool enabled);
 px_void    PX_ObjectEnable(PX_Object *Object);
 px_void    PX_ObjectDisable(PX_Object *Object);
 PX_Object  *PX_ObjectGetChild(PX_Object *Object,px_int Index);
+PX_Object  *PX_ObjectGetObject(PX_Object *pObject,const px_char payload[]);
 px_void     PX_ObjectSetFocus(PX_Object *Object);
 px_void     PX_ObjectClearFocus(PX_Object *Object);
 #define		PX_ObjectReleaseFocus PX_ObjectClearFocus
@@ -297,8 +307,8 @@ px_float	PX_ObjectGetHeight(PX_Object *Object);
 px_float	PX_ObjectGetWidth(PX_Object *Object);
 
 px_void PX_ObjectAddClild(PX_Object *Parent,PX_Object *child);
-px_void PX_ObjectUpdate(PX_Object *Object,px_uint elpased );
-px_void PX_ObjectRender(px_surface *pSurface,PX_Object *Object,px_uint elpased);
+px_void PX_ObjectUpdate(PX_Object *Object,px_uint elapsed );
+px_void PX_ObjectRender(px_surface *pSurface,PX_Object *Object,px_uint elapsed);
 
 px_int PX_ObjectRegisterEvent(PX_Object *Object,px_uint Event,px_void (*ProcessFunc)(PX_Object *,PX_Object_Event e,px_void *user_ptr),px_void *ptr);
 px_void PX_ObjectPostEvent(PX_Object *pPost,PX_Object_Event Event);
@@ -409,6 +419,27 @@ px_void PX_ObjectExecuteEvent(PX_Object *pPost,PX_Object_Event Event);
 //////////////////////////////////////////////////////////////////////////
 //transform adapter
 #include "PX_Object_TransformAdapter.h"
+
+//////////////////////////////////////////////////////////////////////////
+//panc
+#include "PX_Object_Panc.h"
+
+
+//////////////////////////////////////////////////////////////////////////
+//designerbox
+#include "PX_Object_DesignerBox.h"
+
+//////////////////////////////////////////////////////////////////////////
+//joystick
+#include "PX_Object_Joystick.h"
+
+//////////////////////////////////////////////////////////////////////////
+//ringprocessbar
+#include "PX_Object_RingProcessbar.h"
+
+//////////////////////////////////////////////////////////////////////////
+//memoryview
+#include "PX_Object_MemoryView.h"
 
 #endif
 

@@ -82,7 +82,7 @@ px_bool PX_MemoryResize(px_memory *memory,px_int size)
 }
 
 
-px_byte *PX_MemoryFine(px_memory *memory,const px_void *buffer,px_int size)
+px_byte *PX_MemoryFind(px_memory *memory,const px_void *buffer,px_int size)
 {
 	px_int offest;
 	if (memory->usedsize<size)

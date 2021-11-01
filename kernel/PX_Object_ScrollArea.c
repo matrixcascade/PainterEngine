@@ -152,7 +152,7 @@ px_void PX_Object_ScrollAreaGetRegion(PX_Object *pObject,px_float *left,px_float
 	px_float objx,objy,objWidth,objHeight;
 	px_float inheritX,inheritY;
 
-	if (pObject==PX_NULL)
+	if (pObject==PX_NULL||pObject->Visible==PX_FALSE)
 	{
 		return;
 	}
@@ -196,7 +196,11 @@ px_void PX_Object_ScrollAreaUpdateRange( PX_Object *pObject)
 	px_float left=0,top=0,right=0,bottom=0;
 	PX_Object_ScrollArea *pSA;
 
+
 	pSA=PX_Object_GetScrollArea(pObject);
+	pSA->root->x = 0;
+	pSA->root->y = 0;
+
 	PX_ObjectGetInheritXY(pObject,&inheritX,&inheritY);
 	objx=(pObject->x+inheritX);
 	objy=(pObject->y+inheritY);
@@ -221,10 +225,12 @@ px_void PX_Object_ScrollAreaUpdateRange( PX_Object *pObject)
 				PX_Object_SliderBarSetSliderButtonLength(pSA->hscroll,(px_int)btnW);
 			}
 			PX_Object_SliderBarSetRange(pSA->hscroll,(px_int)left,(px_int)(right-objWidth));
+			PX_Object_SliderBarSetValue(pSA->hscroll, (px_int)left);
 		}
 		else
 		{
 			pSA->hscroll->Visible=PX_FALSE;
+			PX_Object_SliderBarSetValue(pSA->hscroll, 0);
 		}
 	} while (0);
 
@@ -244,17 +250,19 @@ px_void PX_Object_ScrollAreaUpdateRange( PX_Object *pObject)
 				pSA->vscroll->Visible=PX_TRUE;
 				PX_Object_SliderBarSetSliderButtonLength(pSA->vscroll,(px_int)btnH);
 			}
-
+			PX_Object_SliderBarSetRange(pSA->vscroll, (px_int)top, (px_int)(bottom - objHeight));
+			PX_Object_SliderBarSetValue(pSA->vscroll, (px_int)top);
 		}
 		else
 		{
 			pSA->vscroll->Visible=PX_FALSE;
+			PX_Object_SliderBarSetValue(pSA->vscroll, 0);
 		}
-		PX_Object_SliderBarSetRange(pSA->vscroll,(px_int)top,(px_int)(bottom-objHeight));
+		
 	} while (0);
 }
 
-px_void PX_Object_ScrollAreaRender(px_surface *psurface, PX_Object *pObject,px_uint elpased)
+px_void PX_Object_ScrollAreaRender(px_surface *psurface, PX_Object *pObject,px_uint elapsed)
 {
 	PX_Object_ScrollArea *pSA;
 	px_float objx,objy,objWidth,objHeight;
@@ -287,7 +295,7 @@ px_void PX_Object_ScrollAreaRender(px_surface *psurface, PX_Object *pObject,px_u
 	PX_SurfaceClear(&pSA->surface,0,0,(px_int)objWidth-1,(px_int)objHeight-1,pSA->BackgroundColor);
 
 	//draw
-	PX_ObjectRender(&pSA->surface,pSA->root,elpased);
+	PX_ObjectRender(&pSA->surface,pSA->root,elapsed);
 	PX_SurfaceRender(psurface,&pSA->surface,(px_int)objx,(px_int)objy,PX_ALIGN_LEFTTOP,PX_NULL);
 
 	//Draw Border

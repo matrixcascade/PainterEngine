@@ -36,12 +36,12 @@ PX_Object * PX_Object_AutoTextCreate(px_memorypool *mp,PX_Object *Parent,px_int 
 	pObject->Func_ObjectFree=PX_Object_AutoTextFree;
 	pObject->Func_ObjectRender=PX_Object_AutoTextRender;
 
-	pAt->TextColor=PX_COLOR(255,0,0,0);
+	pAt->TextColor=PX_OBJECT_UI_DEFAULT_FONTCOLOR;
 	pAt->fontModule=fm;
 	return pObject;
 }
 
-px_void PX_Object_AutoTextRender(px_surface *psurface, PX_Object *pObject,px_uint elpased)
+px_void PX_Object_AutoTextRender(px_surface *psurface, PX_Object *pObject,px_uint elapsed)
 {
 	px_int x_draw_oft,y_draw_oft,cursor,fsize;
 	PX_Object_AutoText *pAt=(PX_Object_AutoText *)pObject->pObject;

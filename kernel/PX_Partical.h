@@ -10,7 +10,7 @@ typedef struct
 	//
 	px_point   position;
 	px_point   velocity;
-	px_dword   elpasedTime;
+	px_dword   elapsedTime;
 
 	//
 	px_dword   reg_alive;
@@ -35,7 +35,7 @@ typedef px_void (* PX_ParticalLauncher_UpdateAtom)(struct _PX_Partical_Launcher 
 
 typedef struct
 {
-	
+	px_void			*userptr;
 	px_texture		*tex;
 	px_point        position;
 
@@ -83,7 +83,7 @@ typedef struct _PX_Partical_Launcher
 	px_memorypool   *mp;
 	PX_ParticalLauncher_InitializeInfo LauncherInfo;
 
-	px_dword        elpased;
+	px_dword        elapsed;
 	px_int          genIndex;
 	px_int			lastgenIndex;
 	PX_Partical_Atom *ParticalPool;
@@ -93,9 +93,9 @@ typedef struct _PX_Partical_Launcher
 
 px_void PX_ParticalLauncherInitializeDefault(PX_ParticalLauncher_InitializeInfo* info);
 px_bool PX_ParticalLauncherCreate(PX_Partical_Launcher *launcher,px_memorypool   *mp,PX_ParticalLauncher_InitializeInfo Info);
-px_void PX_ParticalLauncherSetPosition(PX_Partical_Launcher *launcher,px_point position);
+px_void PX_ParticalLauncherSetPosition(PX_Partical_Launcher *launcher,px_float x,px_float y,px_float z);
 px_void PX_ParticalLauncherSetDirection(PX_Partical_Launcher *launcher,px_point direction);
-
-px_void PX_ParticalLauncherRender(px_surface *surface,PX_Partical_Launcher *launcher,px_dword elpased);
+px_void PX_ParticalLauncherUpdate(PX_Partical_Launcher *launcher,px_dword elapsed);
+px_void PX_ParticalLauncherRender(px_surface *surface,PX_Partical_Launcher *launcher,px_dword elapsed);
 px_void PX_ParticalLauncherFree(PX_Partical_Launcher *launcher);
 #endif

@@ -1,7 +1,7 @@
 #include "PX_Object_ScaleBox.h"
 
 
-px_void PX_Object_ScaleBoxRender(px_surface *psurface, PX_Object *pObject,px_uint elpased)
+px_void PX_Object_ScaleBoxRender(px_surface *psurface, PX_Object *pObject,px_uint elapsed)
 {
 
 	PX_Object_ScaleBox * pScaleBox=PX_Object_GetScaleBox(pObject);

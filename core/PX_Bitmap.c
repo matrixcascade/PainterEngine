@@ -72,7 +72,12 @@ px_void PX_BitmapRender(px_surface *psurface, void *BitmapBuffer,px_int BufferSi
 			{
 				for (j=0;j<Width;j++)
 				{
-					PX_SurfaceDrawPixel(psurface,j+x,i+y,*(px_color *)&rgb32[Width*(Height-1-i)+j]);
+					px_color clr;
+					clr._argb.a = rgb32[Width * (Height - 1 - i) + j].A;
+					clr._argb.r = rgb32[Width * (Height - 1 - i) + j].R;
+					clr._argb.g = rgb32[Width * (Height - 1 - i) + j].G;
+					clr._argb.b = rgb32[Width * (Height - 1 - i) + j].B;
+					PX_SurfaceDrawPixel(psurface,j+x,i+y, clr);
 				}
 			}
 		}
@@ -82,7 +87,12 @@ px_void PX_BitmapRender(px_surface *psurface, void *BitmapBuffer,px_int BufferSi
 			{
 				for (j=0;j<Width;j++)
 				{
-					PX_SurfaceDrawPixel(psurface,j+x,i+y,*(px_color *)&rgb32[Width*Height+j]);
+					px_color clr;
+					clr._argb.a = rgb32[Width * (Height - 1 - i) + j].A;
+					clr._argb.r = rgb32[Width * (Height - 1 - i) + j].R;
+					clr._argb.g = rgb32[Width * (Height - 1 - i) + j].G;
+					clr._argb.b = rgb32[Width * (Height - 1 - i) + j].B;
+					PX_SurfaceDrawPixel(psurface,j+x,i+y, clr);
 				}
 			}
 		}

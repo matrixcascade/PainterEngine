@@ -1,7 +1,7 @@
 #include "PX_Object_CursorButton.h"
 
 
-px_void PX_Object_CursorButtonRender(px_surface *psurface, PX_Object *pObject,px_uint elpased)
+px_void PX_Object_CursorButtonRender(px_surface *psurface, PX_Object *pObject,px_uint elapsed)
 {
 	px_float w,h,_x,_y;
 	px_uchar alpha;
@@ -31,14 +31,14 @@ px_void PX_Object_CursorButtonRender(px_surface *psurface, PX_Object *pObject,px
 	if(pcb->enter)
 	{
 		if(PX_ABS(pcb->c_distance-pcb->c_distance_near)>=1)
-			pcb->c_distance+=(pcb->c_distance_near-pcb->c_distance)*(elpased*1.f/200);
+			pcb->c_distance+=(pcb->c_distance_near-pcb->c_distance)*(elapsed*1.f/200);
 		else
 			pcb->c_distance=pcb->c_distance_near;
 	}
 	else
 	{
 		if(PX_ABS(pcb->c_distance-pcb->c_distance_far)>=1)
-			pcb->c_distance+=(pcb->c_distance_far-pcb->c_distance)*(elpased*1.f/200);
+			pcb->c_distance+=(pcb->c_distance_far-pcb->c_distance)*(elapsed*1.f/200);
 		else
 			pcb->c_distance=pcb->c_distance_far;
 	}
@@ -124,7 +124,7 @@ PX_Object *PX_Object_CursorButtonCreate(px_memorypool *mp,PX_Object *Parent,px_i
 
 
 	pCb->pushbutton=PX_Object_PushButtonCreate(mp,pObject,x,y,Width,Height,Text,fontmodule);
-	pCb->c_color=PX_COLOR(255,0,0,0);
+	pCb->c_color= PX_OBJECT_UI_DEFAULT_BORDERCOLOR;
 	pCb->c_distance=0;
 	pCb->c_distance_far=(px_float)(Width>Height?Height/4:Width/4);
 	pCb->c_distance_near=3;

@@ -585,7 +585,7 @@ px_void PX_LiveFrameworkReset(PX_LiveFramework *plive)
 	px_int i;
 	plive->reg_duration=0;
 	plive->reg_ip=0;
-	plive->reg_elpased=0;
+	plive->reg_elapsed=0;
 	plive->reg_bp=-1;
 	plive->status=PX_LIVEFRAMEWORK_STATUS_STOP;
 
@@ -629,13 +629,18 @@ static px_void PX_LiveFrameworkUpdateLayerInterpolation(PX_LiveFramework *plive,
 {
 	px_float schedule;
 	px_int i;
-	if (plive->reg_duration==0)
+
+	if (plive->status==PX_LIVEFRAMEWORK_STATUS_STOP)
+	{
+		schedule = 1;
+	}
+	else if (plive->reg_duration==0)
 	{
 		schedule=1;
 	}
 	else
 	{
-		schedule=plive->reg_elpased*1.0f/plive->reg_duration;
+		schedule=plive->reg_elapsed*1.0f/plive->reg_duration;
 	}
 
 	if (schedule>1)
@@ -644,6 +649,9 @@ static px_void PX_LiveFrameworkUpdateLayerInterpolation(PX_LiveFramework *plive,
 	}
 
 	//update parameters
+	pLayer->panc_currentx= pLayer->panc_beginx + (pLayer->panc_endx - pLayer->panc_beginx) * schedule;
+	pLayer->panc_currenty = pLayer->panc_beginy + (pLayer->panc_endy - pLayer->panc_beginy) * schedule;
+
 	//point translation
 	for (i=0;i<pLayer->vertices.size;i++)
 	{
@@ -671,6 +679,8 @@ static px_void PX_LiveFrameworkUpdateLayerInterpolation(PX_LiveFramework *plive,
 	
 	//rotation
 	pLayer->rel_currentRotationAngle=pLayer->rel_beginRotationAngle+(pLayer->rel_endRotationAngle-pLayer->rel_beginRotationAngle)*schedule;
+
+	
 
 }
 
@@ -704,11 +714,12 @@ static px_void PX_LiveFramework_UpdateLayerKeyPoint(PX_LiveFramework *pLive,PX_L
 	}
 }
 
-static px_void PX_LiveFramework_UpdateLayerVertices(PX_LiveFramework *pLive,PX_LiveLayer *pLayer,px_dword elpased)
+static px_void PX_LiveFramework_UpdateLayerVertices(PX_LiveFramework *pLive,PX_LiveLayer *pLayer,px_dword elapsed)
 {
 	px_int i;
 	px_point2D keyDirection;
 	px_int k;
+
 
 	PX_LiveFrameworkUpdateLayerRenderVerticesUV(pLive,pLayer);
 
@@ -743,8 +754,42 @@ static px_void PX_LiveFramework_UpdateLayerVertices(PX_LiveFramework *pLive,PX_L
 		resultPosition.x=plv->sourcePosition.x-pLayer->keyPoint.x;
 		resultPosition.y=plv->sourcePosition.y-pLayer->keyPoint.y;
 		resultPosition.z=plv->sourcePosition.z-pLayer->keyPoint.z;
-		//relative translation
+		//panc translation
+		if (pLayer->panc_currentx!=pLayer->panc_sx|| pLayer->panc_currenty != pLayer->panc_sy)
+		{
+			if (plv->sourcePosition.x>pLayer->panc_x&& plv->sourcePosition.x < pLayer->panc_x+pLayer->panc_width)
+			{
+				if (plv->sourcePosition.x < pLayer->panc_sx)
+				{
+					px_float disx = plv->sourcePosition.x - pLayer->panc_x;
+					resultPosition.x += disx * (pLayer->panc_currentx-pLayer->panc_x) /(pLayer->panc_sx- pLayer->panc_x) - disx;
+				}
+				else
+				{
+					px_float disx =  (pLayer->panc_x+pLayer->panc_width)- plv->sourcePosition.x;
+					resultPosition.x -= disx * (pLayer->panc_x + pLayer->panc_width - pLayer->panc_currentx) / (pLayer->panc_x + pLayer->panc_width - pLayer->panc_sx) - disx;
+				}
+			}
+
+			if (plv->sourcePosition.y > pLayer->panc_y && plv->sourcePosition.y < pLayer->panc_y + pLayer->panc_height)
+			{
+				if (plv->sourcePosition.y < pLayer->panc_sy)
+				{
+					px_float disy = plv->sourcePosition.y - pLayer->panc_y;
+					resultPosition.y += disy * (pLayer->panc_currenty - pLayer->panc_y) / (pLayer->panc_sy - pLayer->panc_y) - disy;
+				}
+				else
+				{
+					px_float disy = (pLayer->panc_y + pLayer->panc_height) - plv->sourcePosition.y;
+					resultPosition.y -= disy * (pLayer->panc_y + pLayer->panc_height - pLayer->panc_currenty) / (pLayer->panc_y + pLayer->panc_height - pLayer->panc_sy) - disy;
+				}
+			}
+
+			
+		}
 		
+		
+		//relative translation
 		resultPosition.x+=plv->currentTranslation.x;
 		resultPosition.y+=plv->currentTranslation.y;
 		resultPosition.z+=plv->currentTranslation.z;
@@ -798,20 +843,20 @@ static px_void PX_LiveFramework_UpdateLayerVertices(PX_LiveFramework *pLive,PX_L
 		{
 			px_point2D direction,direction_normal;
 			px_float distance;
-			px_dword updateelpased=elpased+elpased/2;
-			px_dword atomelpased;
+			px_dword updateelapsed=elapsed+elapsed/2;
+			px_dword atomelapsed;
 
-			while (updateelpased)
+			while (updateelapsed)
 			{
-				if (updateelpased>50)
+				if (updateelapsed>50)
 				{
-					atomelpased=50;
-					updateelpased-=50;
+					atomelapsed=50;
+					updateelapsed-=50;
 				}
 				else
 				{
-					atomelpased=updateelpased;
-					updateelpased=0;
+					atomelapsed=updateelapsed;
+					updateelapsed=0;
 				}
 				direction.x=resultPosition.x-plv->currentPosition.x;
 				direction.y=resultPosition.y-plv->currentPosition.y;
@@ -836,7 +881,7 @@ static px_void PX_LiveFramework_UpdateLayerVertices(PX_LiveFramework *pLive,PX_L
 					px_float _cos,length;
 					incv.x+=pLayer->rel_impulse.x;
 					incv.y+=pLayer->rel_impulse.y;
-					incv=PX_Point2DMul(incv,atomelpased/1000.f);
+					incv=PX_Point2DMul(incv,atomelapsed/1000.f);
 					velocity=PX_Point2DAdd(PX_POINT2D(plv->velocity.x,plv->velocity.y),incv);
 					if (velocity.x||velocity.y)
 					{
@@ -852,8 +897,8 @@ static px_void PX_LiveFramework_UpdateLayerVertices(PX_LiveFramework *pLive,PX_L
 						velocity_vy.z=0;
 
 
-						velocity_vx=PX_PointMul(velocity_vx,1.0f-atomelpased/(k*10.f+50));
-						velocity_vy=PX_PointMul(velocity_vy,1.0f-atomelpased/(k*30.f+50));
+						velocity_vx=PX_PointMul(velocity_vx,1.0f-atomelapsed/(k*10.f+50));
+						velocity_vy=PX_PointMul(velocity_vy,1.0f-atomelapsed/(k*30.f+50));
 
 						if (velocity_vx.x>10000||velocity_vx.y>10000||velocity_vy.x>10000||velocity_vy.y>10000)
 						{
@@ -862,7 +907,7 @@ static px_void PX_LiveFramework_UpdateLayerVertices(PX_LiveFramework *pLive,PX_L
 
 						plv->velocity=PX_PointAdd(velocity_vx,velocity_vy);
 					}
-					plv->currentPosition=PX_PointAdd(plv->currentPosition,PX_PointMul(plv->velocity,atomelpased/1000.f));
+					plv->currentPosition=PX_PointAdd(plv->currentPosition,PX_PointMul(plv->velocity,atomelapsed/1000.f));
 										
 				}while(0);
 			}
@@ -872,7 +917,7 @@ static px_void PX_LiveFramework_UpdateLayerVertices(PX_LiveFramework *pLive,PX_L
 	}
 }
 
-static px_void PX_LiveFrameworkUpdatePhysical(PX_LiveFramework *plive,px_dword elpased)
+static px_void PX_LiveFrameworkUpdatePhysical(PX_LiveFramework *plive,px_dword elapsed)
 {
 	px_int i;
 
@@ -895,7 +940,7 @@ static px_void PX_LiveFrameworkUpdatePhysical(PX_LiveFramework *plive,px_dword e
 	for (i=0;i<plive->layers.size;i++)
 	{
 		PX_LiveLayer *pLayer=PX_VECTORAT(PX_LiveLayer,&plive->layers,i);
-		PX_LiveFramework_UpdateLayerVertices(plive,pLayer,elpased);
+		PX_LiveFramework_UpdateLayerVertices(plive,pLayer,elapsed);
 	}
 }
 
@@ -912,7 +957,11 @@ static px_bool PX_LiveFrameworkExecuteInstr(PX_LiveFramework *plive,px_int anima
 		goto _ERROR;
 	}
 	pAnimation=PX_VECTORAT(PX_LiveAnimation,&plive->liveAnimations,animation_index);
-	if (frameindex<0||frameindex>=pAnimation->framesMemPtr.size)
+	if (frameindex<0)
+	{
+		goto _ERROR;
+	}
+	if (frameindex >= pAnimation->framesMemPtr.size)
 	{
 		goto _ERROR;
 	}
@@ -959,6 +1008,27 @@ static px_bool PX_LiveFrameworkExecuteInstr(PX_LiveFramework *plive,px_int anima
 		//impulse
 		pLayer->rel_impulse=pPayload->impulse;
 
+
+		//////////////////////////////////////////////////////////////////////////
+		//panc
+		pLayer->panc_x = pPayload->panc_x;
+		pLayer->panc_y = pPayload->panc_y;
+
+		pLayer->panc_width = pPayload->panc_width;
+		pLayer->panc_height = pPayload->panc_height;
+
+		pLayer->panc_sx = pPayload->panc_sx;
+		pLayer->panc_sy = pPayload->panc_sy;
+
+		pLayer->panc_beginx = pLayer->panc_endx;
+		pLayer->panc_beginy = pLayer->panc_endy;
+
+		pLayer->panc_currentx = pLayer->panc_beginx;
+		pLayer->panc_currenty = pLayer->panc_beginy;
+
+		pLayer->panc_endx = pPayload->panc_endx;
+		pLayer->panc_endy = pPayload->panc_endy;
+
 		//////////////////////////////////////////////////////////////////////////
 		//vertices register
 		if (pPayload->translationVerticesCount!=pLayer->vertices.size)
@@ -990,40 +1060,43 @@ _ERROR:
 	return PX_FALSE;
 }
 
-static px_void PX_LiveFrameworkUpdateVM(PX_LiveFramework *plive,px_dword elpased)
+static px_void PX_LiveFrameworkUpdateVM(PX_LiveFramework *plive,px_dword elapsed)
 {
 	if (plive->status==PX_LIVEFRAMEWORK_STATUS_STOP)
 	{
 		return;
 	}
 
-	plive->reg_elpased+=elpased;
+	plive->reg_elapsed+=elapsed;
 
 
 	while (PX_TRUE)
 	{
 
-		if (plive->reg_elpased>=plive->reg_duration)
+		if (plive->reg_elapsed>=plive->reg_duration)
 		{
-			//update time
-			plive->reg_elpased-=plive->reg_duration;
+			px_dword duration = plive->reg_duration;
+			if (!PX_LiveFrameworkExecuteInstr(plive, plive->reg_animation, plive->reg_ip))
+			{
+				plive->status = PX_LIVEFRAMEWORK_STATUS_STOP;
+				goto _ERROR;
+			}
 
-			if(!PX_LiveFrameworkExecuteInstr(plive,plive->reg_animation,plive->reg_ip)) goto _ERROR;
+			//update time
+			plive->reg_elapsed -= duration;
+
 			//update ip
 			plive->reg_ip++;
 		}
 		else
 			break;
 	}
-
-	
 	return;
 _ERROR:
-	PX_LiveFrameworkStop(plive);
 	return;
 }
 
-static px_void PX_LiveFrameworkRenderLayer(px_surface *psurface,PX_LiveFramework *plive,PX_LiveLayer *pLayer,px_int x,px_int y,px_dword elpased)
+static px_void PX_LiveFrameworkRenderLayer(px_surface *psurface,PX_LiveFramework *plive,PX_LiveLayer *pLayer,px_int x,px_int y,px_dword elapsed)
 {
 	PX_TEXTURERENDER_BLEND blend;
 	PX_LiveTexture *pLiveTexture;
@@ -1183,13 +1256,13 @@ static px_void PX_LiveFrameworkRenderLayer(px_surface *psurface,PX_LiveFramework
 	}
 }
 
-px_void PX_LiveFrameworkRender(px_surface *psurface,PX_LiveFramework *plive,px_int x,px_int y,PX_ALIGN refPoint,px_dword elpased)
+px_void PX_LiveFrameworkRender(px_surface *psurface,PX_LiveFramework *plive,px_int x,px_int y,PX_ALIGN refPoint,px_dword elapsed)
 {
 	PX_QuickSortAtom sAtom[PX_LIVEFRAMEWORK_MAX_SUPPORT_LAYER];
 	px_int i,count;
 
-	PX_LiveFrameworkUpdateVM(plive,elpased);
-	PX_LiveFrameworkUpdatePhysical(plive,elpased);
+	PX_LiveFrameworkUpdateVM(plive,elapsed);
+	PX_LiveFrameworkUpdatePhysical(plive,elapsed);
 	switch (refPoint)
 	{
 	case PX_ALIGN_LEFTTOP:
@@ -1243,7 +1316,7 @@ px_void PX_LiveFrameworkRender(px_surface *psurface,PX_LiveFramework *plive,px_i
 		for (i=0;i<count;i++)
 		{
 			PX_LiveLayer *pLayer=(PX_LiveLayer *)sAtom[i].pData;
-			PX_LiveFrameworkRenderLayer(psurface,plive,pLayer,x,y,elpased);
+			PX_LiveFrameworkRenderLayer(psurface,plive,pLayer,x,y,elapsed);
 		}
 	}
 	
@@ -1322,9 +1395,9 @@ px_void PX_LiveFrameworkRender(px_surface *psurface,PX_LiveFramework *plive,px_i
 
 }
 
-px_void PX_LiveFrameworkRenderRefer(px_surface *psurface,PX_LiveFramework *plive,PX_ALIGN refPoint,px_dword elpased)
+px_void PX_LiveFrameworkRenderRefer(px_surface *psurface,PX_LiveFramework *plive,PX_ALIGN refPoint,px_dword elapsed)
 {
-	PX_LiveFrameworkRender(psurface,plive,(px_int)plive->refer_x,(px_int)plive->refer_y,refPoint,elpased);
+	PX_LiveFrameworkRender(psurface,plive,(px_int)plive->refer_x,(px_int)plive->refer_y,refPoint,elapsed);
 }
 
 
@@ -1333,13 +1406,11 @@ px_bool PX_LiveFrameworkPlayAnimation(PX_LiveFramework *plive,px_int index)
 {
 	if (index>=0&&index<plive->liveAnimations.size)
 	{
-		PX_LiveFrameworkReset(plive);
-
 		plive->currentEditFrameIndex=-1;
 		plive->currentEditLayerIndex=-1;
 		plive->currentEditVertexIndex=-1;
-
 		plive->reg_animation=index;
+		plive->reg_ip = 0;
 		plive->status=PX_LIVEFRAMEWORK_STATUS_PLAYING;
 		return PX_TRUE;
 	}
@@ -1404,6 +1475,9 @@ PX_LiveLayer * PX_LiveFrameworkCreateLayer(PX_LiveFramework *plive,const px_char
 	layer.rel_beginStretch=1;
 	layer.rel_currentStretch=1;
 	layer.rel_endStretch=1;
+
+	layer.RenderTextureIndex = -1;
+	layer.LinkTextureIndex = -1;
 
 	layer.parent_index=-1;
 	for (i=0;i<PX_COUNTOF(layer.child_index);i++)
@@ -1757,12 +1831,18 @@ px_void PX_LiveFrameworkDeleteLayer(PX_LiveFramework *plive,px_int index)
 		for (i=0;i<plive->layers.size;i++)
 		{
 			PX_LiveLayer *pSearchLayer=PX_VECTORAT(PX_LiveLayer,&plive->layers,i);
+
+			if (pSearchLayer->parent_index == index)
+			{
+				pSearchLayer->parent_index = -1;
+			}
+			else if (pSearchLayer->parent_index > index)
+			{
+				pSearchLayer->parent_index--;
+			}
+
 			for (j=0;j<PX_LIVE_LAYER_MAX_LINK_NODE;j++)
 			{
-				if (pSearchLayer->parent_index==index)
-				{
-					pSearchLayer->parent_index=-1;
-				}
 				if (pSearchLayer->child_index[j]==index)
 				{
 					px_int k;
@@ -1774,6 +1854,11 @@ px_void PX_LiveFrameworkDeleteLayer(PX_LiveFramework *plive,px_int index)
 							break;
 						}
 					}
+				}
+				
+				if (pSearchLayer->child_index[j] > index)
+				{
+					pSearchLayer->child_index[j]--;
 				}
 			}
 		}
@@ -2161,6 +2246,7 @@ px_bool PX_LiveFrameworkExport(PX_LiveFramework *plive,px_memory *exportbuffer)
 		typedef struct  
 		{
 			px_char id[PX_LIVE_ID_MAX_LEN];
+			px_dword version;
 			px_int32 width;
 			px_int32 height;
 			px_int32 layerCount;
@@ -2171,9 +2257,10 @@ px_bool PX_LiveFrameworkExport(PX_LiveFramework *plive,px_memory *exportbuffer)
 		PX_LiveFrameworkBaseAttributes desc;
 
 		PX_memset(&desc,0,sizeof(PX_LiveFrameworkBaseAttributes));
-
-		PX_memcpy(desc.id,plive->id,PX_LIVE_ID_MAX_LEN);
 		
+		PX_memcpy(desc.id,plive->id,PX_LIVE_ID_MAX_LEN);
+		desc.version = PX_LIVE_VERSION;
+
 		desc.width=plive->width;
 		
 		desc.height=plive->height;
@@ -2348,6 +2435,7 @@ px_bool PX_LiveFrameworkImport(px_memorypool *mp,PX_LiveFramework *plive,px_void
 		typedef struct  
 		{
 			px_char id[PX_LIVE_ID_MAX_LEN];
+			px_dword version;
 			px_int32 width;
 			px_int32 height;
 			px_int32 layerCount;
@@ -2359,6 +2447,11 @@ px_bool PX_LiveFrameworkImport(px_memorypool *mp,PX_LiveFramework *plive,px_void
 		rOffset+=sizeof(PX_LiveFrameworkBaseAttributes);if(rOffset>size) return PX_FALSE;
 
 		//////////////////////////////////////////////////////////////////////////
+		if (pReadLiveFrameworkAttributes->version != PX_LIVE_VERSION)
+		{
+			return PX_FALSE;
+		}
+
 		PX_memset(plive,0,sizeof(PX_LiveFramework));
 
 		PX_memcpy(plive->id,pReadLiveFrameworkAttributes->id,sizeof(plive->id));
@@ -2379,7 +2472,7 @@ px_bool PX_LiveFrameworkImport(px_memorypool *mp,PX_LiveFramework *plive,px_void
 		plive->reg_animation=0;
 		plive->reg_bp=0;
 		plive->reg_duration=0;
-		plive->reg_elpased=0;
+		plive->reg_elapsed=0;
 		plive->reg_ip=0;
 
 		plive->currentEditAnimationIndex=-1;
@@ -2634,7 +2727,7 @@ px_void PX_LiveStop(PX_Live *plive)
 	PX_LiveFrameworkStop(plive);
 }
 
-px_void PX_LiveRender(px_surface *psurface,PX_Live *plive,px_int x,px_int y,PX_ALIGN refPoint,px_dword elpased)
+px_void PX_LiveRender(px_surface *psurface,PX_Live *plive,px_int x,px_int y,PX_ALIGN refPoint,px_dword elapsed)
 {
-	PX_LiveFrameworkRender(psurface,plive,x,y,refPoint,elpased);
+	PX_LiveFrameworkRender(psurface,plive,x,y,refPoint,elapsed);
 }

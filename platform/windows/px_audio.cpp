@@ -189,7 +189,7 @@ int PX_AudioWriteBuffer(void *pBuffer,size_t Size )
 	wbuf1_size=DSOUND_BUFFER_SIZE-DSound_wPosition;
 	if (wbuf1_size>Size)
 	{
-		wbuf1_size=Size;
+		wbuf1_size= (DWORD)Size;
 	}
 
 	Size-=wbuf1_size;
@@ -212,7 +212,7 @@ int PX_AudioWriteBuffer(void *pBuffer,size_t Size )
 	{
 		pBuffer=((char *)pBuffer+wbuf1_size);
 
-		wbuf2_size=Size;
+		wbuf2_size=(DWORD)Size;
 
 		if(DSound_lpdbsBuffer ->Lock(0,wbuf2_size,&pDSLockedBuffer,&dwDSLockedBufferSize,NULL,NULL,0L))
 			return FALSE;
@@ -225,7 +225,7 @@ int PX_AudioWriteBuffer(void *pBuffer,size_t Size )
 	}
 
 	
-	return Size;
+	return (DWORD)Size;
 }
 
 #define DSOUNDCAPTURE_CHANNEL  1

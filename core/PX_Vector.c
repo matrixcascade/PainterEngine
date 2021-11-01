@@ -88,7 +88,7 @@ px_bool PX_VectorPushback(px_vector *vec,px_void *data)
 px_bool PX_VectorPushTo(px_vector *vec,px_void *data,px_int index)
 {
 	if(!PX_VectorPushback(vec,data)) return PX_FALSE;
-	if (index>=vec->size-1)
+	if (index<0||index>=vec->size)
 	{
 		return PX_TRUE;
 	}
@@ -107,7 +107,7 @@ px_bool PX_VectorPushTo(px_vector *vec,px_void *data,px_int index)
 px_bool PX_VectorErase(px_vector *vec,px_int index)
 {
 	px_int i;
-	if (index>=vec->size)
+	if (index<0||index>=vec->size)
 	{
 		PX_ERROR("Vector Erase Error!");
 		return PX_FALSE;
@@ -167,9 +167,18 @@ px_bool PX_VectorResize(px_vector *vec,px_int size)
 	return PX_FALSE;
 }
 
+px_bool PX_VectorCheckIndex(px_vector *vec,px_int index)
+{
+	if (index<0||index>=vec->size)
+	{
+		return PX_FALSE;
+	}
+	return PX_TRUE;
+}
+
 px_bool PX_VectorAllocSize(px_vector *vec,px_int size)
 {
-	if (size<vec->size)
+	if (size<0||size<vec->size)
 	{
 		return PX_FALSE;
 	}

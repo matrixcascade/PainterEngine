@@ -29,6 +29,7 @@ typedef struct
 	px_int     auxiliaryYSpacer;
 	px_bool    auxiliaryline;
 	px_color   auxiliaryline_color;
+	px_bool    showImpactRegion;
 	px_point   camera_offset;
 	px_memorypool *mp;
 	px_memorypool mp_WorldCalc;
@@ -51,14 +52,15 @@ px_void			PX_WorldRemoveObjectByIndex(PX_World *world,px_int i_index);
 //LIMIT-Only used to ObjectUpdate Function 
 _LIMIT px_int	PX_WorldSearchRegion(PX_World *world,px_float centerX,px_float centerY,px_float raduis,PX_Object *Object[],px_int MaxSearchCount,px_dword impact_test_type);
 px_bool			PX_WorldAddObject(PX_World *World,PX_Object *pObject);
-px_void			PX_WorldUpdate(PX_World *World,px_uint elpased );
+px_void			PX_WorldUpdate(PX_World *World,px_uint elapsed );
 px_void			PX_WorldUpdateOffset(PX_World *pw);
-px_void			PX_WorldRender(px_surface *psurface,PX_World *World,px_uint elpased );
+px_void			PX_WorldRender(px_surface *psurface,PX_World *World,px_uint elapsed );
 px_void         PX_WorldSetCamera(PX_World *World,px_point camera_center_point);
 px_void			PX_WorldSetImpact(PX_Object *pObj,px_dword type,px_dword impact);
 px_void			PX_WorldSetAuxiliaryXYSpacer(PX_World *pw,px_int x,px_int y);
 px_void			PX_WorldEnableAuxiliaryLine(PX_World *pw,px_bool bline);
 px_void			PX_WorldSetAuxiliaryLineColor(PX_World *pw,px_color color);
 px_point        PX_WolrdObjectXYtoScreenXY(PX_World *pw,px_float x,px_float y);
+px_void			PX_WorldPostEvent(PX_World* pw, PX_Object_Event e);
 px_void         PX_WorldFree(PX_World *pw);
 #endif

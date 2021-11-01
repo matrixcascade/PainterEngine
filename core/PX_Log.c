@@ -4,7 +4,7 @@
 void PX_ASSERT(void)
 {
 #ifdef PX_DEBUG_MODE
-*(char *)(0)=1;
+	while(1) *(char *)(0)=1;
 #endif
 }
 

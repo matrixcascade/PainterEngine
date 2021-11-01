@@ -27,7 +27,7 @@ typedef struct
 	{
 		px_texture texture;
 		px_shape  shape;
-		PX_Animationlibrary animationlibrary;
+		PX_AnimationLibrary animationlibrary;
 		PX_ScriptVM_Instance Script;
 		PX_SoundData sound;
 		px_memory data;
@@ -49,7 +49,7 @@ px_bool PX_ResourceLibraryAddTexture(PX_ResourceLibrary *lib,const px_char key[]
 PX_Resource * PX_ResourceLibraryGet(PX_ResourceLibrary *lib,const px_char key[]);
 px_texture *PX_ResourceLibraryGetTexture(PX_ResourceLibrary *lib,const px_char key[]);
 px_shape *PX_ResourceLibraryGetShape(PX_ResourceLibrary *lib,const px_char key[]);
-PX_Animationlibrary *PX_ResourceLibraryGetAnimationLibrary(PX_ResourceLibrary *lib,const px_char key[]);
+PX_AnimationLibrary *PX_ResourceLibraryGetAnimationLibrary(PX_ResourceLibrary *lib,const px_char key[]);
 PX_ScriptVM_Instance *PX_ResourceLibraryGetScript(PX_ResourceLibrary *lib,const px_char key[]);
 PX_SoundData *PX_ResourceLibraryGetSound(PX_ResourceLibrary *lib,const px_char key[]);
 px_memory *PX_ResourceLibraryGetData(PX_ResourceLibrary *lib,const px_char key[]);

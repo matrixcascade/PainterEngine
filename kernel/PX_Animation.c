@@ -1,10 +1,10 @@
 #include "PX_Animation.h"
 
-px_bool PX_AnimationLibraryCreateFromMemory(px_memorypool *mp,PX_Animationlibrary *panimation,px_byte *_2dxBuffer,px_uint size)
+px_bool PX_AnimationLibraryCreateFromMemory(px_memorypool *mp,PX_AnimationLibrary *panimation,px_byte *_2dxBuffer,px_uint size)
 {
 	PX_2DX_Header _header;
 	PX_TRaw_Header _trawheader;
-	px_int i;
+	px_int i,j;
 	px_byte *pbuffer;
 	px_uint reservedSize=size;
 	px_texture texture;
@@ -34,7 +34,10 @@ px_bool PX_AnimationLibraryCreateFromMemory(px_memorypool *mp,PX_Animationlibrar
 	PX_MemoryInitialize(mp,&panimation->code);
 	for (i=0;i<(px_int)_header.framecount;i++)
 	{
-		_trawheader=*(PX_TRaw_Header *)pbuffer;
+		for(j=0;j<sizeof(PX_TRaw_Header);j++)
+		{
+			*(((px_byte *)&_trawheader)+j)=*(pbuffer+j);
+		}
 
 		if (!PX_TextureCreateFromMemory(mp,pbuffer,reservedSize,&texture))
 		{
@@ -74,7 +77,7 @@ _ERROR:
 	return PX_FALSE;
 }
 
-px_void PX_AnimationLibraryFree(PX_Animationlibrary *panimation)
+px_void PX_AnimationLibraryFree(PX_AnimationLibrary *panimation)
 {
 	px_int i;
 	for (i=0;i<panimation->animation.size;i++)
@@ -91,7 +94,7 @@ px_void PX_AnimationLibraryFree(PX_Animationlibrary *panimation)
 	PX_MemoryFree(&panimation->code);
 }
 
-px_void PX_AnimationUpdate(PX_Animation *panimation,px_uint elpased)
+px_void PX_AnimationUpdate(PX_Animation *panimation,px_uint elapsed)
 {
 	PX_2DX_INSTR *pInstr;
 
@@ -99,17 +102,17 @@ px_void PX_AnimationUpdate(PX_Animation *panimation,px_uint elpased)
 	{
 		return;
 	}
-	if (panimation->reg_reservedTime>=elpased)
+	if (panimation->reg_reservedTime>=elapsed)
 	{
-		panimation->reg_reservedTime-=elpased;
+		panimation->reg_reservedTime-=elapsed;
 		return;
 	}
 	else
 	{
-		elpased-=panimation->reg_reservedTime;
+		elapsed-=panimation->reg_reservedTime;
 	}
 
-	while(elpased)
+	while(elapsed)
 	{
 		if (panimation->ip>panimation->linker->code.usedsize-sizeof(PX_2DX_INSTR))
 		{
@@ -151,15 +154,15 @@ px_void PX_AnimationUpdate(PX_Animation *panimation,px_uint elpased)
 			break;
 		case PX_2DX_OPCODE_SLEEP:
 
-			if (pInstr->param>elpased)
+			if (pInstr->param>elapsed)
 			{
-				panimation->reg_reservedTime=pInstr->param-elpased;
+				panimation->reg_reservedTime=pInstr->param-elapsed;
 				panimation->ip+=sizeof(PX_2DX_INSTR);
 				return;
 			}
 			else
 			{
-				elpased-=pInstr->param;
+				elapsed-=pInstr->param;
 				panimation->ip+=sizeof(PX_2DX_INSTR);
 			}
 			break;
@@ -233,32 +236,34 @@ px_void PX_AnimationRender_vector(px_surface *psurface,PX_Animation *animation,p
 }
 
 
-px_int PX_AnimationLibraryGetFrameWidth(PX_Animationlibrary *panimationLib,px_int frameIndex)
+px_int PX_AnimationLibraryGetFrameWidth(PX_AnimationLibrary *panimationLib,px_int frameIndex)
 {
 	return PX_VECTORAT(px_texture,&panimationLib->frames,frameIndex)->width;
 }
 
 
-px_int PX_AnimationLibraryGetFrameHeight(PX_Animationlibrary *panimationLib,px_int frameIndex)
+px_int PX_AnimationLibraryGetFrameHeight(PX_AnimationLibrary *panimationLib,px_int frameIndex)
 {
 	return PX_VECTORAT(px_texture,&panimationLib->frames,frameIndex)->height;
 }
 
-px_bool PX_AnimationCreate(PX_Animation *animation,PX_Animationlibrary *linker)
+px_bool PX_AnimationCreate(PX_Animation *animation,PX_AnimationLibrary *linker)
 {
-	animation->elpased=0;
+	animation->elapsed=0;
 	animation->linker=linker;
 	animation->reg_currentFrameIndex=-1;
 	animation->reg_loopTimes=0;
 	animation->reg_reservedTime=0;
+	animation->reg_currentAnimation = -1;
 	animation->ip=0;
+
 	return PX_TRUE;
 }
 
-px_bool PX_AnimationSetLibrary(PX_Animation *animation,PX_Animationlibrary *linker)
+px_bool PX_AnimationSetLibrary(PX_Animation *animation,PX_AnimationLibrary *linker)
 {
 	PX_AnimationFree(animation);
-	animation->elpased=0;
+	animation->elapsed=0;
 	animation->linker=linker;
 	animation->reg_currentFrameIndex=-1;
 	animation->reg_loopTimes=0;
@@ -276,14 +281,14 @@ px_void PX_AnimationFree(PX_Animation *animation)
 
 px_void PX_AnimationReset(PX_Animation *animation)
 {
-	animation->elpased=0;
+	animation->elapsed=0;
 	animation->reg_currentFrameIndex=-1;
 	animation->reg_loopTimes=0;
 	animation->reg_reservedTime=0;
 	animation->ip=0;
 }
 
-px_bool PX_AnimationLibrary_CreateEffect_JumpVertical(px_memorypool *mp,PX_Animationlibrary *panimation,px_texture *effectTexture)
+px_bool PX_AnimationLibrary_CreateEffect_JumpVertical(px_memorypool *mp,PX_AnimationLibrary *panimation,px_texture *effectTexture)
 {
 	px_int i;
 	px_int volume=effectTexture->width*effectTexture->height;
@@ -332,7 +337,7 @@ px_bool PX_AnimationLibrary_CreateEffect_JumpVertical(px_memorypool *mp,PX_Anima
 	return PX_TRUE;
 }
 
-px_void PX_AnimationLibraryAddInstr(PX_Animationlibrary *panimationLib,PX_2DX_OPCODE opcode,px_word param)
+px_void PX_AnimationLibraryAddInstr(PX_AnimationLibrary *panimationLib,PX_2DX_OPCODE opcode,px_word param)
 {
 	PX_2DX_INSTR instr;
 	instr.opcode=opcode;
@@ -410,13 +415,19 @@ px_int PX_AnimationGetAnimationsCount(PX_Animation *animation)
 		return 0;
 }
 
+px_dword PX_AnimationGetCurrentPlayAnimation(PX_Animation *animation)
+{
+	return animation->reg_currentAnimation;
+}
+
 px_bool PX_AnimationSetCurrentPlayAnimation(PX_Animation *animation,px_int i)
 {
 	if(animation->linker)
-	if (i<animation->linker->animation.size)
+	if (i>=0&&i<animation->linker->animation.size)
 	{
 		PX_Animationlibrary_tagInfo *tag=PX_VECTORAT(PX_Animationlibrary_tagInfo,&animation->linker->animation,i);
 		animation->ip=tag->ip;
+		animation->reg_currentAnimation=i;
 		return PX_TRUE;
 	}
 	return PX_FALSE;
@@ -433,10 +444,26 @@ px_bool PX_AnimationSetCurrentPlayAnimationByName(PX_Animation *animation,const 
 			{
 				animation->ip=tag->ip;
 				animation->reg_reservedTime=0;
+				animation->reg_currentAnimation= i;
 				return PX_TRUE;
 			}
 		}
 		return PX_FALSE;
+}
+
+px_int PX_AnimationLibraryGetPlayAnimationIndexByName(PX_AnimationLibrary* pLib, const px_char* name)
+{
+	px_int i;
+	if (pLib)
+		for (i = 0; i < pLib->animation.size; i++)
+		{
+			PX_Animationlibrary_tagInfo* tag = PX_VECTORAT(PX_Animationlibrary_tagInfo, &pLib->animation, i);
+			if (PX_strequ2(name, tag->name.buffer))
+			{
+				return i;
+			}
+		}
+	return -1;
 }
 
 

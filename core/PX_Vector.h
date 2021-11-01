@@ -20,6 +20,7 @@ px_bool PX_VectorPop(px_vector *vec);
 px_bool PX_VectorCopy(px_vector *destvec,px_vector *resvec);
 px_void PX_VectorFree(px_vector *vec);
 px_bool PX_VectorResize(px_vector *vec,px_int size);
+px_bool PX_VectorCheckIndex(px_vector *vec,px_int index);
 #define PX_VectorSize(x) ((x)->size)
 
 #ifdef PX_DEBUG_MODE

@@ -103,15 +103,10 @@ PX_Object * PX_Object_PushButtonCreate(px_memorypool *mp,PX_Object *Parent,px_in
 		return PX_NULL;
 	}
 	pObject=PX_ObjectCreate(mp,Parent,(px_float)x,(px_float)y,0,(px_float)Width,(px_float)Height,0);
-
-	if (pObject==PX_NULL)
-	{
-		return PX_NULL;
-	}
-
 	if (!pObject)
 	{
 		MP_Free(mp,pPushButton);
+		return PX_NULL;
 	}
 	pObject->pObject=pPushButton;
 	pObject->Type=PX_OBJECT_TYPE_PUSHBUTTON;
@@ -289,7 +284,7 @@ px_void PX_Object_PushButtonSetBorder( PX_Object *Object,px_bool Border )
 	}
 }
 
-px_void PX_Object_PushButtonRender(px_surface *psurface, PX_Object *pObject,px_uint elpased)
+px_void PX_Object_PushButtonRender(px_surface *psurface, PX_Object *pObject,px_uint elapsed)
 {
 	px_int fx,fy;
 	PX_Object_PushButton *pPushButton=PX_Object_GetPushButton(pObject);
