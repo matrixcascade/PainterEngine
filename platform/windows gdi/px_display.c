@@ -1,5 +1,5 @@
 #include "px_display.h"
-
+#pragma comment(lib,"Msimg32.lib")
 static HWND g_hwng;
 static HDC  g_targetDC;
 static HDC  g_compatibleDC;
@@ -73,11 +73,57 @@ void PX_DisplayRender(void* bgra,int oftx,int ofty)
 
 	if (hbitmap)
 	{
+		RECT rect;
+		rect.left = oftx;
+		rect.right = oftx+ g_width;
+		rect.top = ofty;
+		rect.bottom = ofty+g_height;
 		SelectObject(g_compatibleDC, hbitmap);
 		BitBlt(g_targetDC, oftx, ofty, g_width, g_height, g_compatibleDC, 0, 0, SRCCOPY);
 		DeleteObject(hbitmap);
 	}
-	
-	
 }
+
+void* PX_DisplayCaptureScreenBitmap(int *outSize)
+{
+	void *buffer;
+	BITMAPINFO bitmapInfo = { 0 };
+	BITMAPFILEHEADER* pHeader;
+	HDC desktopDC = GetDC(g_hwng);
+	HDC comHDC = CreateCompatibleDC(desktopDC);
+	int screenWidth = GetSystemMetrics(SM_CXSCREEN);
+	int screenHeight = GetSystemMetrics(SM_CYSCREEN);
+	HBITMAP hBitmap = CreateCompatibleBitmap(desktopDC, screenWidth, screenHeight);
+	SelectObject(comHDC, hBitmap);
+	if (!BitBlt(comHDC, 0, 0, screenWidth, screenHeight, desktopDC, 0, 0, SRCCOPY))
+	{
+		*outSize = 0;
+		return NULL;
+	}
+	bitmapInfo.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+	GetDIBits(comHDC, hBitmap, 0, screenHeight, NULL, &bitmapInfo, DIB_RGB_COLORS);
+	buffer = malloc(bitmapInfo.bmiHeader.biSizeImage + sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFO));
+	if (!buffer)
+	{
+		*outSize = 0;
+		return NULL;
+	}
+	pHeader = (BITMAPFILEHEADER*)buffer;
+	ZeroMemory(pHeader, sizeof(BITMAPFILEHEADER));
+	pHeader->bfOffBits = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER);
+	pHeader->bfType = 0x4D42;
+	pHeader->bfSize = bitmapInfo.bmiHeader.biSizeImage + sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFO);
+
+	memcpy((BYTE *)buffer + sizeof(BITMAPFILEHEADER), &bitmapInfo.bmiHeader, sizeof(BITMAPINFO));
+	bitmapInfo.bmiHeader.biCompression = BI_RGB;
+	GetDIBits(comHDC, hBitmap, 0, screenHeight, (BYTE*)buffer + sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFO), &bitmapInfo, DIB_RGB_COLORS);
+	
+	DeleteObject(hBitmap);
+	ReleaseDC(NULL,desktopDC);
+	DeleteDC(comHDC);
+
+	* outSize = (bitmapInfo.bmiHeader.biSizeImage + sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFO)); 
+	return buffer;
+}
+
 

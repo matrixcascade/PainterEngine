@@ -629,7 +629,12 @@ static px_void PX_LiveFrameworkUpdateLayerInterpolation(PX_LiveFramework *plive,
 {
 	px_float schedule;
 	px_int i;
-	if (plive->reg_duration==0)
+
+	if (plive->status==PX_LIVEFRAMEWORK_STATUS_STOP)
+	{
+		schedule = 1;
+	}
+	else if (plive->reg_duration==0)
 	{
 		schedule=1;
 	}
@@ -714,6 +719,7 @@ static px_void PX_LiveFramework_UpdateLayerVertices(PX_LiveFramework *pLive,PX_L
 	px_int i;
 	px_point2D keyDirection;
 	px_int k;
+
 
 	PX_LiveFrameworkUpdateLayerRenderVerticesUV(pLive,pLayer);
 
@@ -951,7 +957,11 @@ static px_bool PX_LiveFrameworkExecuteInstr(PX_LiveFramework *plive,px_int anima
 		goto _ERROR;
 	}
 	pAnimation=PX_VECTORAT(PX_LiveAnimation,&plive->liveAnimations,animation_index);
-	if (frameindex<0||frameindex>=pAnimation->framesMemPtr.size)
+	if (frameindex<0)
+	{
+		goto _ERROR;
+	}
+	if (frameindex >= pAnimation->framesMemPtr.size)
 	{
 		goto _ERROR;
 	}
@@ -1065,21 +1075,24 @@ static px_void PX_LiveFrameworkUpdateVM(PX_LiveFramework *plive,px_dword elapsed
 
 		if (plive->reg_elapsed>=plive->reg_duration)
 		{
-			//update time
-			plive->reg_elapsed-=plive->reg_duration;
+			px_dword duration = plive->reg_duration;
+			if (!PX_LiveFrameworkExecuteInstr(plive, plive->reg_animation, plive->reg_ip))
+			{
+				plive->status = PX_LIVEFRAMEWORK_STATUS_STOP;
+				goto _ERROR;
+			}
 
-			if(!PX_LiveFrameworkExecuteInstr(plive,plive->reg_animation,plive->reg_ip)) goto _ERROR;
+			//update time
+			plive->reg_elapsed -= duration;
+
 			//update ip
 			plive->reg_ip++;
 		}
 		else
 			break;
 	}
-
-	
 	return;
 _ERROR:
-	PX_LiveFrameworkStop(plive);
 	return;
 }
 
@@ -1393,13 +1406,11 @@ px_bool PX_LiveFrameworkPlayAnimation(PX_LiveFramework *plive,px_int index)
 {
 	if (index>=0&&index<plive->liveAnimations.size)
 	{
-		PX_LiveFrameworkReset(plive);
-
 		plive->currentEditFrameIndex=-1;
 		plive->currentEditLayerIndex=-1;
 		plive->currentEditVertexIndex=-1;
-
 		plive->reg_animation=index;
+		plive->reg_ip = 0;
 		plive->status=PX_LIVEFRAMEWORK_STATUS_PLAYING;
 		return PX_TRUE;
 	}
