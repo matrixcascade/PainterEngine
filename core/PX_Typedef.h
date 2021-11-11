@@ -299,6 +299,7 @@ px_double PX_Variance(px_double x[],px_int n);
 //memory
 void PX_memset(void *dst,px_byte byte,px_int size);
 void PX_memdwordset(void *dst,px_dword dw,px_int count);
+#define PX_zeromemory(dst,size) PX_memset(dst,0,size)
 px_bool PX_memequ(const void *dst,const void *src,px_int size);
 px_void PX_memcpy(px_void *dst,const px_void *src,px_int size);
 px_void PX_strcpy(px_char *dst,const px_char *src,px_int size);
