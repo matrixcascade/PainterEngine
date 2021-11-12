@@ -3863,6 +3863,40 @@ px_char* PX_inet_ntoa(px_dword ipv4)
 	return a;
 }
 
+px_bool PX_IsValidIPAddress(const px_char *ip_addr)
+{
+	// Only supports Ipv4
+	px_int len;
+	px_int position = 0; // Current parser position
+	px_int bitsNumber = 0; // how many bits in ip_addr,The valid ip address should be 4 bits
+	px_int bitsLen; // The length of a single bit
+	px_int bits;// The value of a single bit
+	px_int n, i;
+
+	len = PX_strlen(ip_addr);
+	if (len < 7 || len > 15) return PX_FALSE; // The valid IP address length should be 7 to 15
+
+	for (i = 0; i < len; i++) 
+	{
+		if (ip_addr[i] == '.' || i == len - 1) 
+		{
+			bitsLen = i - position;
+			if (i == len - 1) bitsLen++; // at the end, Need to add an extra length 1
+			if (bitsLen > 3 || bitsLen == 0) return PX_FALSE;
+			if (bitsLen != 1 && ip_addr[position] == '0') return PX_FALSE;
+
+			for (n = 0, bits = 0; n < bitsLen; n++, position++) bits = 10 * bits + (ip_addr[position] - '0');
+			if (bits > 255) return PX_FALSE;
+			position++;
+			bitsNumber++;
+		} 
+		else if (ip_addr[i] >= '0' && ip_addr[i] <= '9') continue;
+		else return PX_FALSE;
+	}
+	if (bitsNumber != 4) return PX_FALSE;
+	return PX_TRUE;
+}
+
 px_dword PX_htonl(px_dword h)
 {
 	return PX_isBigEndianCPU() ? h : BigLittleSwap32(h);

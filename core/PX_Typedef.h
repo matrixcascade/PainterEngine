@@ -545,6 +545,7 @@ void PX_UpSampled(_IN px_complex x[],_OUT px_complex X[],px_int N,px_int L);
 //ipv4
 px_dword PX_inet_addr( const px_char cp[] );
 px_char* PX_inet_ntoa( px_dword ipv4 );
+px_bool PX_IsValidIPAddress(const px_char *ip_addr);
 
 //////////////////////////////////////////////////////////////////////////
 //Bessel
