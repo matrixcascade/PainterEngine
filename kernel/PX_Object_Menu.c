@@ -380,6 +380,11 @@ PX_Object_Menu_Item * PX_Object_MenuAddItem(PX_Object *pObject,PX_Object_Menu_It
 		parent = PX_Object_MenuGetRootItem(pObject);
 	}
 
+	if (parent==PX_NULL)
+	{
+		parent = PX_Object_MenuGetRootItem(pObject);
+	}
+
 	PX_ObjectGetInheritXY(pObject,&inheritX,&inheritY);
 
 	objx=(pObject->x+inheritX);
