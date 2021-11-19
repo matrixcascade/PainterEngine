@@ -430,6 +430,9 @@ px_void PX_Object_SliderBarRender(px_surface *psurface, PX_Object *pObject,px_ui
 		pSliderBar->BackgroundColor
 		);
 
+
+
+
 	switch(pSliderBar->status)
 	{
 	case PX_OBJECT_SLIDERBAR_STATUS_NORMAL:

@@ -30,6 +30,7 @@ px_void		PX_Object_LabelSetAlign(PX_Object *pLabel,PX_ALIGN Align);
 px_void		PX_Object_LabelSetBorder(PX_Object *pLabel,px_bool b);
 px_void		PX_Object_LabelSetBorderColor(PX_Object *pLabel,px_color color);
 px_void		PX_Object_LabelSetStyle(PX_Object *pLabel,PX_OBJECT_LABEL_STYLE style);
+px_int		PX_Object_LabelGetTextRenderWidth(PX_Object* pLabel);
 
 
 #endif

@@ -61,6 +61,6 @@ px_void PX_Object_EditAddString(PX_Object *pObject,px_char *Text);
 px_void PX_Object_EditBackspace(PX_Object *pObject);
 px_void PX_Object_EditAutoNewLine(PX_Object *pObject,px_bool b,px_int AutoNewLineSpacing);
 px_void PX_Object_EditSetOffset(PX_Object *pObject,px_int TopOffset,px_int LeftOffset);
-
+px_void PX_Object_EditSetXYOffset(PX_Object* pObject, px_int XOffset, px_int YOffset);
 #endif
 

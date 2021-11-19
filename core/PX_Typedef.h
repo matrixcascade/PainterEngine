@@ -35,6 +35,7 @@ typedef		int					px_bool;
 typedef		unsigned int		px_dword;//typedef     uint32_t		       px_dword;
 typedef     short               px_short;
 typedef     short				px_int16;
+typedef		unsigned short		px_uint16;
 typedef     unsigned short		px_word; //typedef     uint16_t		       px_word;
 typedef		unsigned short		px_ushort;
 typedef     unsigned int		px_uint;

@@ -14,8 +14,6 @@ int PX_TCPInitialize(PX_TCP *tcp,PX_TCP_IP_TYPE type)
 {
 	int err;           
 	int nZero=0;
-	int nRecvBuf=1024*1024*2;
-	int nSendBuf=1024*1024*2;
 	int optval=1;
 	int imode=1,rev;
 	tcp->type=type;
@@ -26,16 +24,6 @@ int PX_TCPInitialize(PX_TCP *tcp,PX_TCP_IP_TYPE type)
 		return 0;
 	}
 	  
-	rev=ioctl(tcp->socket,FIONBIO,(u_long *)&imode);
-	setsockopt(tcp->socket,SOL_SOCKET,SO_RCVBUF,(const char*)&nRecvBuf,sizeof(int));
-	setsockopt(tcp->socket,SOL_SOCKET,SO_SNDBUF,(const char*)&nSendBuf,sizeof(int));
-
-	if(rev == -1)
-	{
-        close(tcp->socket);
-		return 0;  
-	}  
-
 	return 1;
 }
 

@@ -140,6 +140,14 @@ px_int  PX_ftoa(px_float f, char *outbuf, px_int maxlen, px_int precision)
 	shl=PX_pow_ii(shl,precision);
 	i_value=(px_int)f;
 	f_value=(px_int)PX_ABS(shl*(f-(px_int)f));
+	if (f_value<0)
+	{
+		outbuf[0] = 'N';
+		outbuf[1] = 'a';
+		outbuf[2] = 'N';
+		outbuf[3] = '\0';
+		return 0;
+	}
 	if (i_value==0&&f<0)
 	{
 		outbuf[0]='-';

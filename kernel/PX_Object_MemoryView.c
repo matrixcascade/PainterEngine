@@ -70,9 +70,11 @@ px_void PX_Object_MemoryViewRender(px_surface *prendersurface,PX_Object *pObject
 	px_float inheritX,inheritY;
 	px_int columnoffset;
 	px_int drawx,drawy;
+
+	
 	
 	pdesc=PX_ObjectGetDesc(PX_Object_MemoryView,pObject);
-	pdesc->cursor_elpased+=elapsed;
+	pdesc->cursor_elapsed+=elapsed;
 	columnoffset=PX_Object_SliderBarGetValue(pdesc->scrollbar);
 
 	PX_ObjectGetInheritXY(pObject,&inheritX,&inheritY);
@@ -82,8 +84,8 @@ px_void PX_Object_MemoryViewRender(px_surface *prendersurface,PX_Object *pObject
 	h=(px_int)pObject->Height;
 
 
-	pdesc->scrollbar->x=x+w-16.f;
-	pdesc->scrollbar->y=(px_float)y;
+	pdesc->scrollbar->x=w-16.f;
+	pdesc->scrollbar->y=0;
 	pdesc->scrollbar->Width=16.f;
 	pdesc->scrollbar->Height=(px_float)h;
 
@@ -94,7 +96,7 @@ px_void PX_Object_MemoryViewRender(px_surface *prendersurface,PX_Object *pObject
 		return;
 	}
 
-	column=h/(15+3);
+	column=h/(16);
 	if (column<1)
 	{
 		return;
@@ -117,12 +119,17 @@ px_void PX_Object_MemoryViewRender(px_surface *prendersurface,PX_Object *pObject
 	//render background
 	PX_GeoDrawRect(prendersurface,x,y,x+w,y+h,pdesc->backgroundcolor);
 
+	/////////////////////////////////////////////////////////////////////////
+	//render border
+	PX_GeoDrawBorder(prendersurface, x, y, x + w, y + h, 1,pdesc->bordercolor);
+
 	rel_address_offset=row*columnoffset;
 
 	drawy=y;
 	for (j=0;j<column;j++)
 	{
-		px_char addrhex[9];
+		px_char _addrhex[9];
+		px_char addrhex[9] = {0};
 		px_dword addr;
 		if (rel_address_offset>=pdesc->size)
 		{
@@ -131,7 +138,7 @@ px_void PX_Object_MemoryViewRender(px_surface *prendersurface,PX_Object *pObject
 		addr=rel_address_offset+pdesc->address_offset;
 		
 		
-		drawx=0;
+		drawx=x;
 		//0x
 		PX_FontDrawChar(prendersurface,drawx,drawy,'0',pdesc->fontcolor);
 		drawx+=8;
@@ -140,7 +147,9 @@ px_void PX_Object_MemoryViewRender(px_surface *prendersurface,PX_Object *pObject
 		drawx+=8;
 
 		
-		PX_BufferToHexString((px_byte *)&addr,4,addrhex);
+		PX_itoa(addr, _addrhex,9,16);
+		PX_memset(addrhex, '0', 8);
+		PX_memcpy(addrhex+ 8-PX_strlen(_addrhex), _addrhex,PX_strlen(_addrhex));
 		PX_FontDrawText(prendersurface,drawx,drawy,PX_ALIGN_LEFTTOP,addrhex,pdesc->fontcolor);
 		drawx+=8*8;
 
@@ -166,26 +175,26 @@ px_void PX_Object_MemoryViewRender(px_surface *prendersurface,PX_Object *pObject
 
 			if ((rel_address_offset*2>=mst&&rel_address_offset*2<=med)||(rel_address_offset*2+1>=mst&&rel_address_offset*2+1<=med))
 			{
-				PX_GeoDrawRect(prendersurface,96+row*24+8*i,drawy,96+row*24+8*i+7,drawy+15,pdesc->selectcolor);
+				PX_GeoDrawRect(prendersurface,x+96+row*24+8*i,drawy,x+96+row*24+8*i+7,drawy+15,pdesc->selectcolor);
 			}
 
 			if (rel_address_offset*2==pdesc->cursor)
 			{
-				if ((pdesc->cursor_elpased/200)&1)
+				if ((pdesc->cursor_elapsed/200)&1)
 				{
 					PX_GeoDrawRect(prendersurface,drawx,drawy,drawx+7,drawy+15,pdesc->cursorcolor);
 				}
 			}
 			if (rel_address_offset*2==pdesc->cursor||rel_address_offset*2+1==pdesc->cursor)
 			{
-				PX_GeoDrawRect(prendersurface,96+row*24+8*i,drawy,96+row*24+8*i+7,drawy+15,pdesc->selectcolor);
+				PX_GeoDrawRect(prendersurface, x + 96+row*24+8*i,drawy, x + 96+row*24+8*i+7,drawy+15,pdesc->selectcolor);
 			}
 			
 
 			PX_FontDrawChar(prendersurface,drawx,drawy,hex[0],pdesc->fontcolor);
 			if (b>=32&&b<=126)
 			{
-				PX_FontDrawChar(prendersurface,96+row*24+8*i,drawy,b,pdesc->fontcolor);
+				PX_FontDrawChar(prendersurface, x + 96+row*24+8*i,drawy,b,pdesc->fontcolor);
 			}
 
 			drawx+=8;
@@ -196,7 +205,7 @@ px_void PX_Object_MemoryViewRender(px_surface *prendersurface,PX_Object *pObject
 
 			if (rel_address_offset*2+1==pdesc->cursor)
 			{
-				if ((pdesc->cursor_elpased/200)&1)
+				if ((pdesc->cursor_elapsed/200)&1)
 				{
 					PX_GeoDrawRect(prendersurface,drawx,drawy,drawx+7,drawy+15,pdesc->cursorcolor);
 				}
@@ -334,7 +343,8 @@ PX_Object * PX_Object_MemoryViewCreate(px_memorypool *mp,PX_Object *pParent,px_i
 	desc.mark_start_cursor=-1;
 	desc.cursorcolor=PX_COLOR(64,255,255,255);
 	desc.fontcolor=PX_OBJECT_UI_DEFAULT_FONTCOLOR;
-	desc.selectcolor=PX_COLOR(64,255,255,255);;
+	desc.selectcolor=PX_COLOR(64,255,255,255);
+	desc.bordercolor = PX_OBJECT_UI_DEFAULT_BORDERCOLOR;
 	pObject=PX_ObjectCreateEx(mp,pParent,(px_float)x,(px_float)y,0,(px_float)Width,(px_float)Height,0,PX_OBJECT_TYPE_MEMORYVIEW,PX_NULL,PX_Object_MemoryViewRender,PX_NULL,&desc,sizeof(desc));
 	pdesc=PX_ObjectGetDesc(PX_Object_MemoryView,pObject);
 	pdesc->scrollbar=PX_Object_SliderBarCreate(mp,pObject,0,0,10,10,PX_OBJECT_SLIDERBAR_TYPE_VERTICAL,PX_OBJECT_SLIDERBAR_STYLE_BOX);

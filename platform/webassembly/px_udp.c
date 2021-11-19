@@ -14,8 +14,8 @@ int PX_UDPInitialize(PX_UDP *udp,PX_UDP_IP_TYPE type)
 {
 	int err;           
 	int nZero=0;
-	int nRecvBuf=1024*1024*2;
-	int nSendBuf=1024*1024*2;
+	int nRecvBuf=1024*128;
+	int nSendBuf=1024*128;
 	int optval=1;
 	int imode=1,rev;
 	udp->type=type;
@@ -25,22 +25,7 @@ int PX_UDPInitialize(PX_UDP *udp,PX_UDP_IP_TYPE type)
         err = errno;
 		return 0;
 	}
-	  
-	rev=ioctl(udp->socket,FIONBIO,(u_long *)&imode);
-	setsockopt(udp->socket,SOL_SOCKET,SO_RCVBUF,(const char*)&nRecvBuf,sizeof(int));
-	setsockopt(udp->socket,SOL_SOCKET,SO_SNDBUF,(const char*)&nSendBuf,sizeof(int));
 
-	if(rev == -1)
-	{
-        close(udp->socket);
-		return 0;  
-	}  
-
-	if (setsockopt(udp->socket,SOL_SOCKET,SO_BROADCAST,(char *)&optval,sizeof(int))==-1)
-	{
-        close(udp->socket);
-		return 0;
-	}
 	return 1;
 }
 
