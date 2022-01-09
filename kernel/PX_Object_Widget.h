@@ -18,6 +18,7 @@ typedef struct
 	px_bool     bmodel;
 	px_bool		event_optimization;
 	px_bool     bevent_update;
+	px_bool		showShader;
 }PX_Object_Widget;
 
 PX_Object_Widget * PX_Object_GetWidget( PX_Object *Object );

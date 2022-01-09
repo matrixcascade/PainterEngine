@@ -72,6 +72,13 @@ px_void PX_Object_IPBoxClose(PX_Object* pObject)
 	PX_ObjectClearFocus(pObject);
 }
 
+px_void PX_Object_IPBoxSetDefault(PX_Object* pObject, const px_char ip[], const px_char port[])
+{
+	PX_Object_VariousSetText(PX_Object_GetIPBox(pObject)->various_ip, ip);
+	PX_Object_VariousSetText(PX_Object_GetIPBox(pObject)->various_port, port);
+	return;
+}
+
 px_void PX_Object_IPBoxHide(PX_Object* pObject)
 {
 	pObject->Visible = PX_FALSE;

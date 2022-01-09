@@ -20,7 +20,7 @@
 #include "PX_Object.h"
 #include "PX_Json.h"
 #include "PX_3D_ObjData.h"
-#include "PX_MODBUS.h"
+#include "PX_Modbus.h"
 #include "PX_LiveFramework.h"
 #include "PX_UI.h"
 #include "PX_Compiler.h"

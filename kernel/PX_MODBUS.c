@@ -1,27 +1,49 @@
-#include "PX_MODBUS.h"
+#include "PX_Modbus.h"
 
-px_int PX_ModbusPacketBuild(PX_ModbusPacket *packet,px_byte opcode,px_word startAddr,px_word regcount, px_byte *buffer,px_int size)
+PX_ModbusTCP_Write PX_ModbusTCPWriteSingleReg(px_word counter, px_byte unit, px_word startAddr, px_word regdata)
 {
-	packet->magic=0;
-	packet->protocol=0;
-	packet->size=size+6;
-	packet->startAddress[0]=0xff&(startAddr>>8);
-	packet->startAddress[1]=0xff&(startAddr);
-	packet->regcount[0]=0xff&(regcount>>8);
-	packet->regcount[1]=0xff&(regcount);
-	packet->opcode=opcode;
-	packet->unit=1;
-	if(size)
-	PX_memcpy(packet->data,buffer,size);
-	return size+9;
+	PX_ModbusTCP_Write write;
+	write.counter = counter;
+	write.magic = 0;
+	write.size[0] = 0;
+	write.size[1] = 6;
+	write.unit = unit;
+	write.opcode = 0x06;
+	write.startAddress[1] = startAddr & 0xff;
+	write.startAddress[0] = (startAddr>>8) & 0xff;
+	write.regdata[1] = regdata & 0xff;
+	write.regdata[0] = (regdata >> 8) & 0xff;
+	return write;
 }
 
-px_int PX_ModbusWrite(PX_ModbusPacket *packet,px_word startAddr,px_word regcount, px_word *buffer,px_int size)
+PX_ModbusTCP_Read PX_ModbusTCPReadReg(px_word counter, px_byte unit, px_word startAddr, px_int count)
 {
-	return PX_ModbusPacketBuild(packet,0x06,startAddr,regcount,(px_byte *)buffer,size*2);
+	PX_ModbusTCP_Read read;
+	read.counter = counter;
+	read.magic = 0;
+	read.size[0] = 0;
+	read.size[1] = 6;
+	read.unit = unit;
+	read.opcode = 0x03;
+	read.startAddress[1] = startAddr & 0xff;
+	read.startAddress[0] = (startAddr >> 8) & 0xff;
+	read.regcount[0] = (count>>8)&0xff;
+	read.regcount[1] = count&0xff;
+	return read;
 }
 
-px_int PX_ModbusRead(PX_ModbusPacket *packet,px_word startAddr,px_word regcount)
+PX_ModbusTCP_Read PX_ModbusTCPReadBool(px_word counter, px_byte unit, px_word startAddr, px_int count)
 {
-	return PX_ModbusPacketBuild(packet,0x03,startAddr,regcount,(px_byte *)"",0);
+	PX_ModbusTCP_Read read;
+	read.counter = counter;
+	read.magic = 0;
+	read.size[0] = 0;
+	read.size[1] = 6;
+	read.unit = unit;
+	read.opcode = 0x01;
+	read.startAddress[1] = startAddr & 0xff;
+	read.startAddress[0] = (startAddr >> 8) & 0xff;
+	read.regcount[0] = (count >> 8) & 0xff;
+	read.regcount[1] = count & 0xff;
+	return read;
 }

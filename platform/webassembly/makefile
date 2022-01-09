@@ -1,7 +1,7 @@
 #emscripten makefile
 #####################################################
 target :=PainterEngine.html
-project_path := ../../project
+project_path := ../../../project
 painterengine_path := ../..
 #####################################################
 
@@ -30,6 +30,8 @@ all:$(project_build_o)  $(painterengine_build_painterengine_o)
 	-I "$(painterengine_path)" \
 	-I "$(project_path)" \
 	-I "$(painterengine_path)/platform/webassembly" \
+	-pthread \
+	-s USE_PTHREADS=1 -s PTHREAD_POOL_SIZE=16 \
 	--preload-file assets
 	emrun --no_browser --port 8080 PainterEngine.html
 	

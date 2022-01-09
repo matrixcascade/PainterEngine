@@ -324,6 +324,8 @@ LRESULT CALLBACK AppWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 	switch(uMsg) 
 	{
 	case WM_MOUSEMOVE:
+	case WM_MBUTTONDOWN:
+	case WM_MBUTTONUP:
 	case WM_LBUTTONDOWN:
 	case WM_LBUTTONUP:
 	case WM_RBUTTONDOWN:
