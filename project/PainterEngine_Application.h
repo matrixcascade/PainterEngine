@@ -1,14 +1,9 @@
 #ifndef PAINTERENGINE_APPLICATION_H
 #define PAINTERENGINE_APPLICATION_H
 
-#ifdef __cplusplus
-extern "C"{
-#endif
 
 #include "PainterEngine_Startup.h"
-#ifdef __cplusplus
-}
-#endif
+
 typedef struct
 {
 	PX_Runtime runtime;

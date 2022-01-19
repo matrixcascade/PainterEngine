@@ -258,7 +258,7 @@ PX_Object* PX_Object_EditCreate(px_memorypool *mp, PX_Object *Parent,px_int x,px
 
 	pEdit->TextColor=PX_OBJECT_UI_DEFAULT_FONTCOLOR;
 
-	pEdit->CursorColor=PX_COLOR_WHITE;
+	pEdit->CursorColor=PX_OBJECT_UI_DEFAULT_CURSORCOLOR;
 	pEdit->BorderColor=PX_OBJECT_UI_DEFAULT_BORDERCOLOR;
 	pEdit->BackgroundColor=PX_OBJECT_UI_DEFAULT_BACKGROUNDCOLOR;
 	pEdit->XOffset=0;
@@ -947,15 +947,5 @@ px_void PX_Object_EditSetOffset(PX_Object *pObject,px_int TopOffset,px_int LeftO
 	{
 		pEdit->VerticalOffset=TopOffset;
 		pEdit->HorizontalOffset=LeftOffset;
-	}
-}
-
-px_void PX_Object_EditSetXYOffset(PX_Object* pObject, px_int XOffset, px_int YOffset)
-{
-	PX_Object_Edit* pEdit = PX_Object_GetEdit(pObject);
-	if (pObject != PX_NULL)
-	{
-		pEdit->XOffset = XOffset;
-		pEdit->YOffset = YOffset;
 	}
 }

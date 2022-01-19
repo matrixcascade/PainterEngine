@@ -775,7 +775,7 @@ px_bool PX_JsonCreateNumberValue(px_memorypool *mp,PX_Json_Value *pValue,const p
 px_bool PX_JsonCreateBooleanValue(px_memorypool *mp,PX_Json_Value *pValue,const px_char name[],px_bool b)
 {
 	PX_memset(pValue,0,sizeof(PX_Json_Value));
-	pValue->type=PX_JSON_VALUE_TYPE_BOOLEAN;
+	pValue->type=PX_JSON_VALUE_TYPE_NUMBER;
 
 	if (!PX_StringInitialize(mp,&pValue->name))
 	{

@@ -7,7 +7,8 @@
         <option name="testRunner" value="PLATFORM" />
         <option name="distributionType" value="LOCAL" />
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
-        <option name="gradleHome" value="C:\Program Files\Huawei\DevEco Studio 2.1.0.501\tools\gradle" />
+        <option name="gradleHome" value="C:\Program Files\Huawei\DevEco Studio 3.0.0.800\tools\gradle" />
+        <option name="gradleJvm" value="#JAVA_INTERNAL" />
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />

@@ -2,11 +2,15 @@
 #ifndef PAINTERENGINE_FILE_H
 #define PAINTERENGINE_FILE_H
 
-#define PAINTERENGIN_FILE_SUPPORT
+#define PAINTERENGIN_FILE_SUPPORT 1
 //////////////////////////////////////////////////////////////////////////
 #include "stdio.h"
 #include "stdlib.h"
 #include "string.h"
+
+#ifdef __cplusplus
+extern "C"{
+#endif
 
 typedef struct
 {
@@ -31,6 +35,10 @@ void PX_FreeIOData(PX_IO_Data *io);
 
 int PX_FileGetDirectoryFileCount(const char path[],PX_FILEENUM_TYPE type,const char *filter);
 int PX_FileGetDirectoryFileName(const char path[],int count,char FileName[][260],PX_FILEENUM_TYPE type,const char *filter);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
 

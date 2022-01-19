@@ -236,15 +236,3 @@ px_void PX_Object_LabelSetStyle(PX_Object *pObject,PX_OBJECT_LABEL_STYLE style)
 		pLabel->style=style;
 	}
 }
-
-px_int PX_Object_LabelGetTextRenderWidth(PX_Object* pObject)
-{
-	PX_Object_Label* pLabel = PX_Object_GetLabel(pObject);
-	if (pLabel)
-	{
-		px_int w, h;
-		PX_FontModuleTextGetRenderWidthHeight(pLabel->fontModule, pLabel->Text, &w, &h);
-		return w;
-	}
-	return 0;
-}

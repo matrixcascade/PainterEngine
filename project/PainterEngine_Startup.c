@@ -1,6 +1,5 @@
 #include "PainterEngine_Startup.h"
 
-
 //////////////////////////////////////////////////////////////////////////
 //Functions
 static px_byte PX_ApplicationRuntime[PX_APPLICATION_MEMORYPOOL_UI_SIZE+PX_APPLICATION_MEMORYPOOL_RESOURCES_SIZE+PX_APPLICATION_MEMORYPOOL_GAME_SIZE+PX_APPLICATION_MEMORYPOOL_SPACE_SIZE];
@@ -38,7 +37,7 @@ px_void PX_ApplicationEventDefault(PX_Runtime *runtime,PX_Object_Event e)
 	}
 }
 
-#ifdef PAINTERENGIN_FILE_SUPPORT
+//#ifdef PAINTERENGIN_FILE_SUPPORT
 
 px_bool PX_LoadTextureFromFile(px_memorypool *mp,px_texture *tex,const px_char path[])
 {
@@ -289,4 +288,4 @@ _ERROR:
 	return PX_FALSE;
 }
 
-#endif
+//#endif

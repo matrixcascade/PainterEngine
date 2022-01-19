@@ -1,0 +1,18 @@
+texture "release/bird1.traw" f1
+texture "release/bird2.traw" f2
+texture "release/bird3.traw" f3
+texture "release/bird4.traw" f4
+
+animation run
+loop -1
+tag run_begin
+frame f1
+sleep 120
+frame f2
+sleep 120
+frame f3
+sleep 120
+frame f4
+sleep 120
+goto run_begin
+end

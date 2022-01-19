@@ -35,7 +35,6 @@ typedef		int					px_bool;
 typedef		unsigned int		px_dword;//typedef     uint32_t		       px_dword;
 typedef     short               px_short;
 typedef     short				px_int16;
-typedef		unsigned short		px_uint16;
 typedef     unsigned short		px_word; //typedef     uint16_t		       px_word;
 typedef		unsigned short		px_ushort;
 typedef     unsigned int		px_uint;
@@ -300,7 +299,6 @@ px_double PX_Variance(px_double x[],px_int n);
 //memory
 void PX_memset(void *dst,px_byte byte,px_int size);
 void PX_memdwordset(void *dst,px_dword dw,px_int count);
-#define PX_zeromemory(dst,size) PX_memset(dst,0,size)
 px_bool PX_memequ(const void *dst,const void *src,px_int size);
 px_void PX_memcpy(px_void *dst,const px_void *src,px_int size);
 px_void PX_strcpy(px_char *dst,const px_char *src,px_int size);
@@ -546,7 +544,6 @@ void PX_UpSampled(_IN px_complex x[],_OUT px_complex X[],px_int N,px_int L);
 //ipv4
 px_dword PX_inet_addr( const px_char cp[] );
 px_char* PX_inet_ntoa( px_dword ipv4 );
-px_bool PX_IsValidIPAddress(const px_char *ip_addr);
 
 //////////////////////////////////////////////////////////////////////////
 //Bessel

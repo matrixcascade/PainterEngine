@@ -48,9 +48,8 @@ px_void PX_Object_WidgetShowHideCloseButton(PX_Object *pObject,px_bool show)
 static px_void PX_Object_WidgetOnButtonClose(PX_Object *pObject,PX_Object_Event e,px_void *ptr)
 {
 	PX_Object *pWidgetObject=(PX_Object *)ptr;
-	PX_ObjectExecuteEvent(pWidgetObject, PX_OBJECT_BUILD_EVENT(PX_OBJECT_EVENT_CLOSE));
 	PX_Object_WidgetHide(pWidgetObject);
-	
+	PX_ObjectExecuteEvent(pWidgetObject,PX_OBJECT_BUILD_EVENT(PX_OBJECT_EVENT_CLOSE));
 }
 
 px_void PX_Object_Widget_EventDispatcher(PX_Object *pObject,PX_Object_Event e,px_void *ptr)

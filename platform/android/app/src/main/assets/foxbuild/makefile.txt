@@ -1,0 +1,63 @@
+texture "release/jump 0.traw" jump_0
+texture "release/jump up.traw" jump_up
+texture "release/jump down.traw" jump_down
+texture "release/run 1.traw" run_1
+texture "release/run 2.traw" run_2
+texture "release/run 3.traw" run_3
+texture "release/run 4.traw" run_4
+texture "release/run 5.traw" run_5
+texture "release/run 6.traw" run_6
+texture "release/walk 1.traw" walk_1
+texture "release/walk 2.traw" walk_2
+texture "release/walk 3.traw" walk_3
+texture "release/walk 4.traw" walk_4
+texture "release/walk 5.traw" walk_5
+texture "release/walk 6.traw" walk_6
+texture "release/impact.traw" impact
+animation jump_up
+frame jump_up
+end
+
+animation jump_down
+frame jump_down
+end
+
+animation run
+loop -1
+tag run_begin
+frame run_1
+sleep 60
+frame run_2
+sleep 60
+frame run_3
+sleep 60
+frame run_4
+sleep 60
+frame run_5
+sleep 60
+frame run_6
+sleep 60
+goto run_begin
+end
+
+animation walk
+loop -1
+tag walk_begin
+frame walk_1
+sleep 100
+frame walk_2
+sleep 100
+frame walk_3
+sleep 100
+frame walk_4
+sleep 100
+frame walk_5
+sleep 100
+frame walk_6
+sleep 100
+goto walk_begin
+end
+
+animation impact
+frame impact
+end

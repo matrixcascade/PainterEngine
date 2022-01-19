@@ -209,7 +209,6 @@ px_void PX_Object_ListRender(px_surface *psurface, PX_Object *pObject,px_uint el
 		pList->SliderBar->Visible=PX_TRUE;
 		pList->SliderBar->y=0;
 		pList->SliderBar->x=objx+objWidth-32;
-		pList->SliderBar->Height = objHeight;
 		pSliderBar->SliderButtonLength=(px_int)(pList->SliderBar->Height*objHeight/(pList->ItemHeight*pList->pData.size));
 		if(pSliderBar->SliderButtonLength<32) pSliderBar->SliderButtonLength=32;
 		pSliderBar->Max=(pList->ItemHeight)*pList->pData.size-(px_int)objHeight;
@@ -266,15 +265,6 @@ px_void PX_Object_ListRender(px_surface *psurface, PX_Object *pObject,px_uint el
 		iy+=(px_int)pItemObject->Height;
 	}
 
-	if ((px_int)pList->renderSurface.width!=(px_int)pObject->Width|| (px_int)pList->renderSurface.height != (px_int)pObject->Height)
-	{
-		PX_SurfaceFree(&pList->renderSurface);
-		if (!PX_SurfaceCreate(pList->mp, (px_int)pObject->Width, (px_int)pObject->Height, &pList->renderSurface))
-		{
-			PX_ASSERT();
-			return;
-		}
-	}
 
 	PX_SurfaceClear(&pList->renderSurface,0,0,pList->renderSurface.width-1,pList->renderSurface.height-1,pList->BackgroundColor);
 	for (i=0;i<pList->Items.size;i++)
@@ -484,22 +474,6 @@ PX_Object* PX_Object_ListContentCreate(px_memorypool* mp, PX_Object* Parent, px_
 	}
 	return pObject;
 	
-}
-
-px_bool PX_Object_ListItemIsOnDisplayPresent(PX_Object* pObject, px_int index)
-{
-	if (pObject->Type==PX_OBJECT_TYPE_LIST)
-	{
-		PX_Object_List* pList = PX_ObjectGetDesc(PX_Object_List, pObject);
-		PX_Object* pItemObject = *PX_VECTORAT(PX_Object*, &pList->Items, index);
-		PX_Object_ListItem* pItem = PX_Object_GetListItem(pItemObject);
-		if (pItemObject->y + pItemObject->Height > 0 && pItemObject->y < pObject->Height && pItem->pdata)
-		{
-			return PX_TRUE;
-		}
-	}
-
-	return PX_FALSE;
 }
 
 px_void PX_Object_ListSetBackgroundColor(PX_Object *pListObject,px_color color)

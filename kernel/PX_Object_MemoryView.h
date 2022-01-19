@@ -12,9 +12,7 @@ typedef struct
 	px_int mark_start_cursor;
 	px_int mark_end_cursor;
 
-	px_dword cursor_elapsed;
-
-	px_color bordercolor;
+	px_dword cursor_elpased;
 	px_color backgroundcolor;
 	px_color fontcolor;
 	px_color cursorcolor;

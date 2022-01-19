@@ -3,7 +3,10 @@
 
 //////////////////////////////////////////////////////////////////////////
 //Configures
-#include "platform/modules/px_file.h"
+//#include "platform/modules/px_file.h"
+#if defined(HARMONY)    //鸿蒙编译器有些奇怪
+#include "px_file.h"
+#endif
 
 #define PX_APPLICATION_NAME "PainterEngine"
 #define PX_APPLICATION_SURFACE_SIZE 680

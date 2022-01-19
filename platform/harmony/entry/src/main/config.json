@@ -1,6 +1,6 @@
 {
   "app": {
-    "bundleName": "com.PE.demo",
+    "bundleName": "com.PE.EngineDemo",
     "vendor": "PE",
     "version": {
       "code": 1000000,
@@ -9,9 +9,9 @@
   },
   "deviceConfig": {},
   "module": {
-    "package": "com.PE.demo",
+    "package": "com.PE.EngineDemo",
     "name": ".MyApplication",
-    "mainAbility": "com.PE.demo.MainAbility",
+    "mainAbility": "com.PE.EngineDemo.MainAbility",
     "deviceType": [
       "phone"
     ],
@@ -35,7 +35,7 @@
         ],
         "orientation": "portrait",
         "permissions": [],
-        "name": "com.PE.demo.MainAbility",
+        "name": "com.PE.EngineDemo.MainAbility",
         "icon": "$media:icon",
         "description": "$string:mainability_description",
         "label": "$string:entry_MainAbility",
