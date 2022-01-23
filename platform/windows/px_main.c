@@ -145,6 +145,24 @@ DWORD WINAPI DEMO_RenderThreadFunc(LPVOID p)
 					PX_Object_Event_SetCursorY(&e,cursory*cursory_scale);
 				}
 				break;
+			case WM_MBUTTONDOWN:
+			{
+				e.Event = PX_OBJECT_EVENT_CURSORMDOWN;
+				cursorx = (px_float)((msg.lparam) & 0xffff);
+				cursory = (px_float)((msg.lparam >> 16) & 0xffff);
+				PX_Object_Event_SetCursorX(&e, cursorx * cursorx_scale);
+				PX_Object_Event_SetCursorY(&e, cursory * cursory_scale);
+			}
+			break;
+			case WM_MBUTTONUP:
+			{
+				e.Event = PX_OBJECT_EVENT_CURSORMUP;
+				cursorx = (px_float)((msg.lparam) & 0xffff);
+				cursory = (px_float)((msg.lparam >> 16) & 0xffff);
+				PX_Object_Event_SetCursorX(&e, cursorx * cursorx_scale);
+				PX_Object_Event_SetCursorY(&e, cursory * cursory_scale);
+			}
+			break;
 
 			case  WM_KEYDOWN:
 				{

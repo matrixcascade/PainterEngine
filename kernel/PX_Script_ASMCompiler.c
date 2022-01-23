@@ -1483,7 +1483,7 @@ px_bool PX_ScriptAsmCompile(px_memorypool *mp,px_char *asmcode,px_memory *binmem
 
 	compiler.mp=mp;
 
-	PX_LexerInit(&compiler.lexer,mp);
+	PX_LexerInitialize(&compiler.lexer,mp);
 	PX_LexerRegisterComment(&compiler.lexer,";","\n");
 	PX_LexerRegisterComment(&compiler.lexer,";","\r");
 	PX_LexerRegisterDelimiter(&compiler.lexer,',');

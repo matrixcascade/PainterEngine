@@ -51,9 +51,17 @@ px_bool PX_VectorSet(px_vector *vec,px_uint index,px_void *data)
 px_bool PX_VectorPushback(px_vector *vec,px_void *data)
 {
 	px_void *old;
+
 	if (vec->size<vec->allocsize)
 	{
-		PX_memcpy((px_byte *)vec->data+vec->size*vec->nodesize,data,vec->nodesize);
+		if (data)
+		{
+			PX_memcpy((px_byte*)vec->data + vec->size * vec->nodesize, data, vec->nodesize);
+		}
+		else
+		{
+			PX_memset((px_byte*)vec->data + vec->size * vec->nodesize, 0, vec->nodesize);
+		}
 		vec->size++;
 	}
 	else
@@ -76,7 +84,15 @@ px_bool PX_VectorPushback(px_vector *vec,px_void *data)
 		}
 		PX_memcpy(vec->data,old,vec->allocsize*vec->nodesize);
 		vec->allocsize=allocSize;
-		PX_memcpy((px_byte *)vec->data+vec->size*vec->nodesize,data,vec->nodesize);
+
+		if (data)
+		{
+			PX_memcpy((px_byte*)vec->data + vec->size * vec->nodesize, data, vec->nodesize);
+		}
+		else
+		{
+			PX_memset((px_byte*)vec->data + vec->size * vec->nodesize, 0, vec->nodesize);
+		}
 		vec->size++;
 		if(old)
 		MP_Free(vec->mp,old);

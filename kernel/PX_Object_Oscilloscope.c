@@ -1,8 +1,8 @@
-#include "PX_Object_Coordinate.h"
+#include "PX_Object_Oscilloscope.h"
 
 //////////////////////////////////////////////////////////////////////////
 //
-static px_int PX_Object_CoordinatesDichotomy(px_double *p,px_int Size,px_double Mark)
+static px_int PX_Object_OscilloscopeDichotomy(px_double *p,px_int Size,px_double Mark)
 {
 	px_int Minx,Maxx;
 	px_int Index;
@@ -53,18 +53,18 @@ static px_int PX_Object_CoordinatesDichotomy(px_double *p,px_int Size,px_double 
 
 
 
-PX_Object_Coordinates *PX_Object_GetCoordinates(PX_Object *pObject)
+PX_Object_Oscilloscope *PX_Object_GetOscilloscope(PX_Object *pObject)
 {
-	if (pObject->Type==PX_OBJECT_TYPE_COORDINATE)
+	if (pObject->Type==PX_OBJECT_TYPE_OSCILLOSCOPE)
 	{
-		return (PX_Object_Coordinates *)pObject->pObject;
+		return (PX_Object_Oscilloscope *)pObject->pObject;
 	}
 	return PX_NULL;
 }
 
-px_void PX_Object_CoordinatesSetMinVerticalPixelDividing(PX_Object *pObj,px_int val)
+px_void PX_Object_OscilloscopeSetMinVerticalPixelDividing(PX_Object *pObj,px_int val)
 {
-	PX_Object_Coordinates *pcd=PX_Object_GetCoordinates(pObj);
+	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObj);
 	if (!pcd)
 	{
 		PX_ASSERT();
@@ -73,9 +73,9 @@ px_void PX_Object_CoordinatesSetMinVerticalPixelDividing(PX_Object *pObj,px_int 
 	pcd->MinVerticalPixelDividing=val;
 }
 
-px_void PX_Object_CoordinatesSetMinHorizontalPixelDividing(PX_Object *pObj,px_int val)
+px_void PX_Object_OscilloscopeSetMinHorizontalPixelDividing(PX_Object *pObj,px_int val)
 {
-	PX_Object_Coordinates *pcd=PX_Object_GetCoordinates(pObj);
+	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObj);
 	if (!pcd)
 	{
 		PX_ASSERT();
@@ -84,9 +84,9 @@ px_void PX_Object_CoordinatesSetMinHorizontalPixelDividing(PX_Object *pObj,px_in
 	pcd->MinHorizontalPixelDividing=val;
 }
 
-px_void PX_Object_CoordinatesSetHorizontalDividing(PX_Object *pObj,px_int Count)
+px_void PX_Object_OscilloscopeSetHorizontalDividing(PX_Object *pObj,px_int Count)
 {
-	PX_Object_Coordinates *pcd=PX_Object_GetCoordinates(pObj);
+	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObj);
 	if (!pcd)
 	{
 		PX_ASSERT();
@@ -95,9 +95,9 @@ px_void PX_Object_CoordinatesSetHorizontalDividing(PX_Object *pObj,px_int Count)
 	pcd->HorizontalDividing=Count;
 }
 
-px_void PX_Object_CoordinatesSetLeftVerticalDividing(PX_Object *pObj,px_int Count)
+px_void PX_Object_OscilloscopeSetLeftVerticalDividing(PX_Object *pObj,px_int Count)
 {
-	PX_Object_Coordinates *pcd=PX_Object_GetCoordinates(pObj);
+	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObj);
 	if (!pcd)
 	{
 		PX_ASSERT();
@@ -106,9 +106,9 @@ px_void PX_Object_CoordinatesSetLeftVerticalDividing(PX_Object *pObj,px_int Coun
 	pcd->LeftVerticalDividing=Count;
 }
 
-px_void PX_Object_CoordinatesSetRightVerticalDividing(PX_Object *pObj,px_int Count)
+px_void PX_Object_OscilloscopeSetRightVerticalDividing(PX_Object *pObj,px_int Count)
 {
-	PX_Object_Coordinates *pcd=PX_Object_GetCoordinates(pObj);
+	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObj);
 	if (!pcd)
 	{
 		PX_ASSERT();
@@ -119,9 +119,9 @@ px_void PX_Object_CoordinatesSetRightVerticalDividing(PX_Object *pObj,px_int Cou
 
 
 
-px_void PX_Object_CoordinatesSetStyle(PX_Object *pObj,PX_OBJECT_COORDINATES_LINEMODE mode)
+px_void PX_Object_OscilloscopeSetStyle(PX_Object *pObj,PX_OBJECT_OSCILLOSCOPE_LINEMODE mode)
 {
-	PX_Object_Coordinates *pcd=PX_Object_GetCoordinates(pObj);
+	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObj);
 	if (!pcd)
 	{
 		PX_ASSERT();
@@ -132,9 +132,9 @@ px_void PX_Object_CoordinatesSetStyle(PX_Object *pObj,PX_OBJECT_COORDINATES_LINE
 
 
 
-px_void PX_Object_CoordinatesSetScaleEnabled(PX_Object *pObject,px_bool Enabled)
+px_void PX_Object_OscilloscopeSetScaleEnabled(PX_Object *pObject,px_bool Enabled)
 {
-	PX_Object_Coordinates *pcd=PX_Object_GetCoordinates(pObject);
+	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
 	if (!pcd)
 	{
 		PX_ASSERT();
@@ -143,9 +143,9 @@ px_void PX_Object_CoordinatesSetScaleEnabled(PX_Object *pObject,px_bool Enabled)
 	pcd->ScaleEnabled=Enabled;
 }
 
-px_void PX_Object_CoordinatesSetGuidesVisible(PX_Object *pObject,px_bool Visible)
+px_void PX_Object_OscilloscopeSetGuidesVisible(PX_Object *pObject,px_bool Visible)
 {
-	PX_Object_Coordinates *pcd=PX_Object_GetCoordinates(pObject);
+	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
 	if (!pcd)
 	{
 		PX_ASSERT();
@@ -154,9 +154,9 @@ px_void PX_Object_CoordinatesSetGuidesVisible(PX_Object *pObject,px_bool Visible
 	pcd->ShowGuides=Visible;
 }
 
-px_void PX_Object_CoordinatesSetGuidesShowMode(PX_Object *pObject,PX_OBJECT_COORDINATES_GUIDESSHOWMODE mode)
+px_void PX_Object_OscilloscopeSetGuidesShowMode(PX_Object *pObject,PX_OBJECT_OSCILLOSCOPE_GUIDESSHOWMODE mode)
 {
-	PX_Object_Coordinates *pcd=PX_Object_GetCoordinates(pObject);
+	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
 	if (!pcd)
 	{
 		PX_ASSERT();
@@ -166,9 +166,9 @@ px_void PX_Object_CoordinatesSetGuidesShowMode(PX_Object *pObject,PX_OBJECT_COOR
 }
 
 
-px_void PX_Object_CoordinatesShowHelpLine(PX_Object *pObject,px_bool show)
+px_void PX_Object_OscilloscopeShowHelpLine(PX_Object *pObject,px_bool show)
 {
-	PX_Object_Coordinates *pcd=PX_Object_GetCoordinates(pObject);
+	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
 	if (!pcd)
 	{
 		PX_ASSERT();
@@ -177,9 +177,9 @@ px_void PX_Object_CoordinatesShowHelpLine(PX_Object *pObject,px_bool show)
 	pcd->ShowHelpLine=show;
 }
 
-px_void PX_Object_CoordinatesSetDataLineWidth(PX_Object *pObject,px_float linewidth)
+px_void PX_Object_OscilloscopeSetDataLineWidth(PX_Object *pObject,px_float linewidth)
 {
-	PX_Object_Coordinates *pcd=PX_Object_GetCoordinates(pObject);
+	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
 	if (!pcd)
 	{
 		PX_ASSERT();
@@ -188,10 +188,10 @@ px_void PX_Object_CoordinatesSetDataLineWidth(PX_Object *pObject,px_float linewi
 	pcd->DataLineWidth=linewidth;
 }
 
-void PX_Object_CoordinatesSetDataShow(PX_Object *pObject,px_int index,px_bool show)
+void PX_Object_OscilloscopeSetDataShow(PX_Object *pObject,px_int index,px_bool show)
 {
-	PX_Object_Coordinates *pcd=PX_Object_GetCoordinates(pObject);
-	PX_Object_CoordinateData *pData;
+	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
+	PX_Object_OscilloscopeData *pData;
 	if (!pcd)
 	{
 		PX_ASSERT();
@@ -201,13 +201,13 @@ void PX_Object_CoordinatesSetDataShow(PX_Object *pObject,px_int index,px_bool sh
 	{
 		return;
 	}
-	pData=PX_VECTORAT(PX_Object_CoordinateData,&pcd->vData,index);
+	pData=PX_VECTORAT(PX_Object_OscilloscopeData,&pcd->vData,index);
 	pData->Visibled=show;
 }
 
-px_void PX_Object_CoordinatesSetGuidesLineWidth(PX_Object *pObject,px_float linewidth)
+px_void PX_Object_OscilloscopeSetGuidesLineWidth(PX_Object *pObject,px_float linewidth)
 {
-	PX_Object_Coordinates *pcd=PX_Object_GetCoordinates(pObject);
+	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
 	if (!pcd)
 	{
 		PX_ASSERT();
@@ -216,9 +216,9 @@ px_void PX_Object_CoordinatesSetGuidesLineWidth(PX_Object *pObject,px_float line
 	pcd->GuidesLineWidth=linewidth;
 }
 
-px_void PX_Object_CoordinatesSetGuidesLineColor(PX_Object *pObject,px_color clr)
+px_void PX_Object_OscilloscopeSetGuidesLineColor(PX_Object *pObject,px_color clr)
 {
-	PX_Object_Coordinates *pcd=PX_Object_GetCoordinates(pObject);
+	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
 	if (!pcd)
 	{
 		PX_ASSERT();
@@ -227,9 +227,9 @@ px_void PX_Object_CoordinatesSetGuidesLineColor(PX_Object *pObject,px_color clr)
 	pcd->helpLineColor=clr;
 }
 
-px_void PX_Object_CoordinatesSetTitleFontSize(PX_Object *pObject,px_int size)
+px_void PX_Object_OscilloscopeSetTitleFontSize(PX_Object *pObject,px_int size)
 {
-	PX_Object_Coordinates *pcd=PX_Object_GetCoordinates(pObject);
+	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
 	if (!pcd)
 	{
 		PX_ASSERT();
@@ -238,9 +238,9 @@ px_void PX_Object_CoordinatesSetTitleFontSize(PX_Object *pObject,px_int size)
 	pcd->FontSize=size;
 }
 
-px_void PX_Object_CoordinatesSetTitleFontColor(PX_Object *pObject,px_color clr)
+px_void PX_Object_OscilloscopeSetTitleFontColor(PX_Object *pObject,px_color clr)
 {
-	PX_Object_Coordinates *pcd=PX_Object_GetCoordinates(pObject);
+	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
 	if (!pcd)
 	{
 		PX_ASSERT();
@@ -249,9 +249,9 @@ px_void PX_Object_CoordinatesSetTitleFontColor(PX_Object *pObject,px_color clr)
 	pcd->FontColor=clr;
 }
 
-px_void PX_Object_CoordinatesSetDashLineColor(PX_Object *pObject,px_color clr)
+px_void PX_Object_OscilloscopeSetDashLineColor(PX_Object *pObject,px_color clr)
 {
-	PX_Object_Coordinates *pcd=PX_Object_GetCoordinates(pObject);
+	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
 	if (!pcd)
 	{
 		PX_ASSERT();
@@ -260,9 +260,9 @@ px_void PX_Object_CoordinatesSetDashLineColor(PX_Object *pObject,px_color clr)
 	pcd->DashColor=clr;
 }
 
-px_void PX_Object_CoordinatesSetLeftTextShow(PX_Object *pObject,px_bool bshow)
+px_void PX_Object_OscilloscopeSetLeftTextShow(PX_Object *pObject,px_bool bshow)
 {
-	PX_Object_Coordinates *pcd=PX_Object_GetCoordinates(pObject);
+	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
 	if (!pcd)
 	{
 		PX_ASSERT();
@@ -271,9 +271,9 @@ px_void PX_Object_CoordinatesSetLeftTextShow(PX_Object *pObject,px_bool bshow)
 	pcd->LeftTextShow=bshow;
 }
 
-px_void PX_Object_CoordinatesSetRightTextShow(PX_Object *pObject,px_bool bshow)
+px_void PX_Object_OscilloscopeSetRightTextShow(PX_Object *pObject,px_bool bshow)
 {
-	PX_Object_Coordinates *pcd=PX_Object_GetCoordinates(pObject);
+	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
 	if (!pcd)
 	{
 		PX_ASSERT();
@@ -282,9 +282,9 @@ px_void PX_Object_CoordinatesSetRightTextShow(PX_Object *pObject,px_bool bshow)
 	pcd->RightTextShow=bshow;
 }
 
-px_void PX_Object_CoordinatesSetHorizontalTextShow(PX_Object *pObject,px_bool bshow)
+px_void PX_Object_OscilloscopeSetHorizontalTextShow(PX_Object *pObject,px_bool bshow)
 {
-	PX_Object_Coordinates *pcd=PX_Object_GetCoordinates(pObject);
+	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
 	if (!pcd)
 	{
 		PX_ASSERT();
@@ -293,9 +293,9 @@ px_void PX_Object_CoordinatesSetHorizontalTextShow(PX_Object *pObject,px_bool bs
 	pcd->HorizontalTextShow=bshow;
 }
 
-px_void PX_Object_CoordinatesSetFloatFlagFormatHorizontal(PX_Object *pObject,const char *fmt)
+px_void PX_Object_OscilloscopeSetFloatFlagFormatHorizontal(PX_Object *pObject,const char *fmt)
 {
-	PX_Object_Coordinates *pcd=PX_Object_GetCoordinates(pObject);
+	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
 	if (!pcd)
 	{
 		PX_ASSERT();
@@ -304,9 +304,9 @@ px_void PX_Object_CoordinatesSetFloatFlagFormatHorizontal(PX_Object *pObject,con
 	pcd->FloatFlagFormat_H=fmt;
 }
 
-px_void PX_Object_CoordinatesSetIntFlagFormatHorizontal(PX_Object *pObject,const char *fmt)
+px_void PX_Object_OscilloscopeSetIntFlagFormatHorizontal(PX_Object *pObject,const char *fmt)
 {
-	PX_Object_Coordinates *pcd=PX_Object_GetCoordinates(pObject);
+	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
 	if (!pcd)
 	{
 		PX_ASSERT();
@@ -315,9 +315,9 @@ px_void PX_Object_CoordinatesSetIntFlagFormatHorizontal(PX_Object *pObject,const
 	pcd->IntFlagFormat_H=fmt;
 }
 
-px_void PX_Object_CoordinatesSetFloatFlagFormatVerticalLeft(PX_Object *pObject,const char *fmt)
+px_void PX_Object_OscilloscopeSetFloatFlagFormatVerticalLeft(PX_Object *pObject,const char *fmt)
 {
-	PX_Object_Coordinates *pcd=PX_Object_GetCoordinates(pObject);
+	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
 	if (!pcd)
 	{
 		PX_ASSERT();
@@ -326,9 +326,9 @@ px_void PX_Object_CoordinatesSetFloatFlagFormatVerticalLeft(PX_Object *pObject,c
 	pcd->FloatFlagFormat_L=fmt;
 }
 
-px_void PX_Object_CoordinatesSetIntFlagFormatVerticalLeft(PX_Object *pObject,const char *fmt)
+px_void PX_Object_OscilloscopeSetIntFlagFormatVerticalLeft(PX_Object *pObject,const char *fmt)
 {
-	PX_Object_Coordinates *pcd=PX_Object_GetCoordinates(pObject);
+	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
 	if (!pcd)
 	{
 		PX_ASSERT();
@@ -337,9 +337,9 @@ px_void PX_Object_CoordinatesSetIntFlagFormatVerticalLeft(PX_Object *pObject,con
 	pcd->IntFlagFormat_L=fmt;
 }
 
-px_void PX_Object_CoordinatesSetFloatFlagFormatVerticalRight(PX_Object *pObject,const char *fmt)
+px_void PX_Object_OscilloscopeSetFloatFlagFormatVerticalRight(PX_Object *pObject,const char *fmt)
 {
-	PX_Object_Coordinates *pcd=PX_Object_GetCoordinates(pObject);
+	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
 	if (!pcd)
 	{
 		PX_ASSERT();
@@ -348,9 +348,9 @@ px_void PX_Object_CoordinatesSetFloatFlagFormatVerticalRight(PX_Object *pObject,
 	pcd->FloatFlagFormat_R=fmt;
 }
 
-px_void PX_Object_CoordinatesSetIntFlagFormatVericalRight(PX_Object *pObject,const char *fmt)
+px_void PX_Object_OscilloscopeSetIntFlagFormatVericalRight(PX_Object *pObject,const char *fmt)
 {
-	PX_Object_Coordinates *pcd=PX_Object_GetCoordinates(pObject);
+	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
 	if (!pcd)
 	{
 		PX_ASSERT();
@@ -359,9 +359,9 @@ px_void PX_Object_CoordinatesSetIntFlagFormatVericalRight(PX_Object *pObject,con
 	pcd->IntFlagFormat_R=fmt;
 }
 
-px_void PX_Object_CoordinatesSetLeftTextMode(PX_Object *pObject,PX_OBJECT_COORDINATES_TEXT_DISPLAYMODE mode)
+px_void PX_Object_OscilloscopeSetLeftTextMode(PX_Object *pObject,PX_OBJECT_OSCILLOSCOPE_TEXT_DISPLAYMODE mode)
 {
-	PX_Object_Coordinates *pcd=PX_Object_GetCoordinates(pObject);
+	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
 	if (!pcd)
 	{
 		PX_ASSERT();
@@ -370,9 +370,9 @@ px_void PX_Object_CoordinatesSetLeftTextMode(PX_Object *pObject,PX_OBJECT_COORDI
 	pcd->leftTextDisplayMode=mode;
 }
 
-px_void PX_Object_CoordinatesSetRightTextMode(PX_Object *pObject,PX_OBJECT_COORDINATES_TEXT_DISPLAYMODE mode)
+px_void PX_Object_OscilloscopeSetRightTextMode(PX_Object *pObject,PX_OBJECT_OSCILLOSCOPE_TEXT_DISPLAYMODE mode)
 {
-	PX_Object_Coordinates *pcd=PX_Object_GetCoordinates(pObject);
+	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
 	if (!pcd)
 	{
 		PX_ASSERT();
@@ -381,9 +381,9 @@ px_void PX_Object_CoordinatesSetRightTextMode(PX_Object *pObject,PX_OBJECT_COORD
 	pcd->RightTextDisplayMode=mode;
 }
 
-px_void PX_Object_CoordinatesSetHorizontalMin(PX_Object *pObject,px_double Min)
+px_void PX_Object_OscilloscopeSetHorizontalMin(PX_Object *pObject,px_double Min)
 {
-	PX_Object_Coordinates *pcd=PX_Object_GetCoordinates(pObject);
+	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
 	if (!pcd)
 	{
 		PX_ASSERT();
@@ -392,9 +392,9 @@ px_void PX_Object_CoordinatesSetHorizontalMin(PX_Object *pObject,px_double Min)
 	pcd->HorizontalRangeMin=Min;
 }
 
-px_void PX_Object_CoordinatesSetHorizontalMax(PX_Object *pObject,px_double Max)
+px_void PX_Object_OscilloscopeSetHorizontalMax(PX_Object *pObject,px_double Max)
 {
-	PX_Object_Coordinates *pcd=PX_Object_GetCoordinates(pObject);
+	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
 	if (!pcd)
 	{
 		PX_ASSERT();
@@ -403,9 +403,9 @@ px_void PX_Object_CoordinatesSetHorizontalMax(PX_Object *pObject,px_double Max)
 	pcd->HorizontalRangeMax=Max;
 }
 
-px_void PX_Object_CoordinatesSetLeftVerticalMin(PX_Object *pObject,px_double Min)
+px_void PX_Object_OscilloscopeSetLeftVerticalMin(PX_Object *pObject,px_double Min)
 {
-	PX_Object_Coordinates *pcd=PX_Object_GetCoordinates(pObject);
+	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
 	if (!pcd)
 	{
 		PX_ASSERT();
@@ -414,9 +414,9 @@ px_void PX_Object_CoordinatesSetLeftVerticalMin(PX_Object *pObject,px_double Min
 	pcd->LeftVerticalRangeMin=Min;
 }
 
-px_void PX_Object_CoordinatesSetLeftVerticalMax(PX_Object *pObject,px_double Max)
+px_void PX_Object_OscilloscopeSetLeftVerticalMax(PX_Object *pObject,px_double Max)
 {
-	PX_Object_Coordinates *pcd=PX_Object_GetCoordinates(pObject);
+	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
 	if (!pcd)
 	{
 		PX_ASSERT();
@@ -425,9 +425,9 @@ px_void PX_Object_CoordinatesSetLeftVerticalMax(PX_Object *pObject,px_double Max
 	pcd->LeftVerticalRangeMax=Max;
 }
 
-px_void PX_Object_CoordinatesSetRightVerticalMax(PX_Object *pObject,px_double Max)
+px_void PX_Object_OscilloscopeSetRightVerticalMax(PX_Object *pObject,px_double Max)
 {
-	PX_Object_Coordinates *pcd=PX_Object_GetCoordinates(pObject);
+	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
 	if (!pcd)
 	{
 		PX_ASSERT();
@@ -436,9 +436,9 @@ px_void PX_Object_CoordinatesSetRightVerticalMax(PX_Object *pObject,px_double Ma
 	pcd->RightVerticalRangeMax=Max;
 }
 
-px_void PX_Object_CoordinatesSetRightVerticalMin(PX_Object *pObject,px_double Min)
+px_void PX_Object_OscilloscopeSetRightVerticalMin(PX_Object *pObject,px_double Min)
 {
-	PX_Object_Coordinates *pcd=PX_Object_GetCoordinates(pObject);
+	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
 	if (!pcd)
 	{
 		PX_ASSERT();
@@ -447,127 +447,132 @@ px_void PX_Object_CoordinatesSetRightVerticalMin(PX_Object *pObject,px_double Mi
 	pcd->RightVerticalRangeMin=Min;
 }
 
-px_void PX_Object_CoordinatesSetBorderColor(PX_Object *pObject,px_color clr)
+px_void PX_Object_OscilloscopeSetBorderColor(PX_Object *pObject,px_color clr)
 {
-	PX_Object_Coordinates *pcd=PX_Object_GetCoordinates(pObject);
+	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
 	if (pcd)
 	{
 		pcd->borderColor=clr;
 	}
 }
 
-PX_Object_CoordinateData * PX_Object_CoordinatesGetCoordinateData(PX_Object *pObject,px_int index)
+PX_Object_OscilloscopeData * PX_Object_OscilloscopeGetOscilloscopeData(PX_Object *pObject,px_int index)
 {
-	PX_Object_Coordinates *pcd=PX_Object_GetCoordinates(pObject);
+	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
 	if (index>pcd->vData.size-1)
 	{
 		return PX_NULL;
 	}
-	return PX_VECTORAT(PX_Object_CoordinateData,&pcd->vData,index);
+	return PX_VECTORAT(PX_Object_OscilloscopeData,&pcd->vData,index);
 }
 
-px_int PX_Object_CoordinatesGetCoordinateWidth(PX_Object *pObject)
+px_int PX_Object_OscilloscopeGetOscilloscopeWidth(PX_Object *pObject)
 {
-	PX_Object_Coordinates *pcd=PX_Object_GetCoordinates(pObject);
+	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
 
 	return (px_int)(pObject->Width-pcd->LeftSpacer-pcd->RightSpacer);
 }
 
-px_int PX_Object_CoordinatesGetCoordinateHeight(PX_Object *pObject)
+px_int PX_Object_OscilloscopeGetOscilloscopeHeight(PX_Object *pObject)
 {
-	PX_Object_Coordinates *pcd=PX_Object_GetCoordinates(pObject);
+	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
 
 	return (px_int)(pObject->Height-pcd->TopSpacer-pcd->BottomSpacer);
 }
 
-void PX_Object_CoordinatesSetTitleTop(PX_Object *pObject,const px_char * title)
+void PX_Object_OscilloscopeSetTitleTop(PX_Object *pObject,const px_char * title)
 {
-	PX_Object_Coordinates *pcd=PX_Object_GetCoordinates(pObject);
+	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
 	if (pcd)
 	{
 		pcd->TopTitle=title;
 	}
 }
 
-void PX_Object_CoordinatesSetTitleBottom(PX_Object *pObject,const px_char * title)
+void PX_Object_OscilloscopeSetTitleBottom(PX_Object *pObject,const px_char * title)
 {
-	PX_Object_Coordinates *pcd=PX_Object_GetCoordinates(pObject);
+	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
 	if (pcd)
 	{
 		pcd->BottomTitle=title;
 	}
 }
 
-void PX_Object_CoordinatesSetMarkValueEnabled(PX_Object *pObject,px_bool Enabled)
+void PX_Object_OscilloscopeSetMarkValueEnabled(PX_Object *pObject,px_bool Enabled)
 {
-	PX_Object_Coordinates *pcd=PX_Object_GetCoordinates(pObject);
+	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
 	pcd->MarkValueEnabled=Enabled;
 }
 
-void PX_Object_CoordinatesSetFontColor(PX_Object *pObject,px_color clr)
+void PX_Object_OscilloscopeSetFontColor(PX_Object *pObject,px_color clr)
 {
-	PX_Object_Coordinates *pcd=PX_Object_GetCoordinates(pObject);
+	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
 	if (pcd)
 	{
 		pcd->FontColor=clr;
 	}
 }
 
-void PX_Object_CoordinatesClearContext(PX_Object *pObject)
+void PX_Object_OscilloscopeClearContext(PX_Object *pObject)
 {
-	PX_Object_Coordinates *pcd=PX_Object_GetCoordinates(pObject);
-	PX_Object_CoordinatesRestoreCoordinates(pObject);
+	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
+	PX_Object_OscilloscopeRestoreOscilloscope(pObject);
 	PX_VectorClear(&pcd->vData);
 }
 
-void PX_Object_CoordinatesClearFlagLine(PX_Object *pObject)
+void PX_Object_OscilloscopeClearFlagLine(PX_Object *pObject)
 {
-	PX_Object_Coordinates *pcd=PX_Object_GetCoordinates(pObject);
+	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
 	PX_VectorClear(&pcd->vFlagLine);
 }
 
-void PX_Object_CoordinatesAddData(PX_Object *pObject,PX_Object_CoordinateData data)
+void PX_Object_OscilloscopeAddData(PX_Object *pObject,PX_Object_OscilloscopeData data)
 {
-	PX_Object_Coordinates *pcd=PX_Object_GetCoordinates(pObject);
+	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
 	PX_VectorPushback(&pcd->vData,&data);
 }
 
-void PX_Object_CoordinatesAddCoordinateFlagLine(PX_Object *pObject,PX_Object_CoordinateFlagLine Line)
+px_void PX_Object_OscilloscopeClearData(PX_Object* pObject)
 {
-	PX_Object_Coordinates *pcd=PX_Object_GetCoordinates(pObject);
+	PX_Object_OscilloscopeClearContext(pObject);
+}
+
+void PX_Object_OscilloscopeAddOscilloscopeFlagLine(PX_Object *pObject,PX_Object_OscilloscopeFlagLine Line)
+{
+	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
 	PX_VectorPushback(&pcd->vFlagLine,&Line);
 }
 
 
-px_void PX_Object_CoordinatesSetMargin(PX_Object *pObject,px_int Left,px_int Right,px_int Top,px_int Bottom)
+px_void PX_Object_OscilloscopeSetMargin(PX_Object *pObject,px_int Left,px_int Right,px_int Top,px_int Bottom)
 {
-	PX_Object_Coordinates *pcd=PX_Object_GetCoordinates(pObject);
+	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
 	pcd->LeftSpacer=Left;
 	pcd->RightSpacer=Right;
 	pcd->TopSpacer=Top;
 	pcd->BottomSpacer=Bottom;
 }
 
-px_int  PX_Object_CoordinatesMapHorizontalValueToPixel(PX_Object *pObject,px_double val)
+px_int  PX_Object_OscilloscopeMapHorizontalValueToPixel(PX_Object *pObject,px_double val)
 {
-	PX_Object_Coordinates *pcd=PX_Object_GetCoordinates(pObject);
-	px_double scale=PX_Object_CoordinatesGetCoordinateWidth(pObject)/(pcd->HorizontalRangeMax-pcd->HorizontalRangeMin);
+	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
+	px_double scale=PX_Object_OscilloscopeGetOscilloscopeWidth(pObject)/(pcd->HorizontalRangeMax-pcd->HorizontalRangeMin);
 	return (px_int)((val-pcd->HorizontalRangeMin)*scale)+pcd->LeftSpacer;
 }
 
-px_int  PX_Object_CoordinatesMapVerticalValueToPixel(PX_Object *pObject,px_double val,px_int Map)
+px_int  PX_Object_OscilloscopeMapVerticalValueToPixel(PX_Object *pObject,px_double val,px_int Map)
 {
-	PX_Object_Coordinates *pcd=PX_Object_GetCoordinates(pObject);
+	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
 	px_double scale;
 
-	if(Map==PX_OBJECT_COORDINATEDATA_MAP_LEFT)
+	if(Map==PX_OBJECT_OSCILLOSCOPEDATA_MAP_LEFT)
 	{
-		scale=PX_Object_CoordinatesGetCoordinateHeight(pObject)/(pcd->LeftVerticalRangeMax-pcd->LeftVerticalRangeMin);
+		scale=PX_Object_OscilloscopeGetOscilloscopeHeight(pObject)/(pcd->LeftVerticalRangeMax-pcd->LeftVerticalRangeMin);
 		return (px_int)(pObject->Height-pcd->BottomSpacer-(px_int)((val-pcd->LeftVerticalRangeMin)*scale));
 	}
-	else if(Map==PX_OBJECT_COORDINATEDATA_MAP_RIGHT)
+	else if(Map==PX_OBJECT_OSCILLOSCOPEDATA_MAP_RIGHT)
 	{
-		scale=PX_Object_CoordinatesGetCoordinateHeight(pObject)/(pcd->RightVerticalRangeMax-pcd->RightVerticalRangeMin);
+		scale=PX_Object_OscilloscopeGetOscilloscopeHeight(pObject)/(pcd->RightVerticalRangeMax-pcd->RightVerticalRangeMin);
 		return (px_int)(pObject->Height-pcd->BottomSpacer-(px_int)((val-pcd->RightVerticalRangeMin)*scale));
 	}
 
@@ -575,51 +580,51 @@ px_int  PX_Object_CoordinatesMapVerticalValueToPixel(PX_Object *pObject,px_doubl
 
 }
 
-px_double  PX_Object_CoordinatesMapPixelValueToHorizontal(PX_Object *pObject,px_int Pixel)
+px_double  PX_Object_OscilloscopeMapPixelValueToHorizontal(PX_Object *pObject,px_int Pixel)
 {
-	PX_Object_Coordinates *pcd=PX_Object_GetCoordinates(pObject);
+	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
 	px_int XDisten=Pixel-pcd->LeftSpacer;
-	return pcd->HorizontalRangeMin+XDisten*(pcd->HorizontalRangeMax-pcd->HorizontalRangeMin)/PX_Object_CoordinatesGetCoordinateWidth(pObject);
+	return pcd->HorizontalRangeMin+XDisten*(pcd->HorizontalRangeMax-pcd->HorizontalRangeMin)/PX_Object_OscilloscopeGetOscilloscopeWidth(pObject);
 
 }
 
-px_double  PX_Object_CoordinatesMapPixelValueToVertical(PX_Object *pObject,px_int Pixel,px_int Map)
+px_double  PX_Object_OscilloscopeMapPixelValueToVertical(PX_Object *pObject,px_int Pixel,px_int Map)
 {
-	PX_Object_Coordinates *pcd=PX_Object_GetCoordinates(pObject);
+	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
 	px_double Min,Max;
-	if (Map==PX_OBJECT_COORDINATEDATA_MAP_LEFT)
+	if (Map==PX_OBJECT_OSCILLOSCOPEDATA_MAP_LEFT)
 	{
 		Max=pcd->LeftVerticalRangeMax;
 		Min=pcd->LeftVerticalRangeMin;
-		return pcd->LeftVerticalRangeMin+(pObject->Height-pcd->BottomSpacer-Pixel)*(Max-Min)/PX_Object_CoordinatesGetCoordinateHeight(pObject);
+		return pcd->LeftVerticalRangeMin+(pObject->Height-pcd->BottomSpacer-Pixel)*(Max-Min)/PX_Object_OscilloscopeGetOscilloscopeHeight(pObject);
 	}
 
-	if (Map==PX_OBJECT_COORDINATEDATA_MAP_RIGHT)
+	if (Map==PX_OBJECT_OSCILLOSCOPEDATA_MAP_RIGHT)
 	{
 		Max=pcd->RightVerticalRangeMax;
 		Min=pcd->RightVerticalRangeMin;
-		return pcd->RightVerticalRangeMin+(pObject->Height-pcd->BottomSpacer-Pixel)*(Max-Min)/PX_Object_CoordinatesGetCoordinateHeight(pObject);
+		return pcd->RightVerticalRangeMin+(pObject->Height-pcd->BottomSpacer-Pixel)*(Max-Min)/PX_Object_OscilloscopeGetOscilloscopeHeight(pObject);
 	}
 
-	if (Map==PX_OBJECT_COORDINATEDATA_MAP_HORIZONTAL)
+	if (Map==PX_OBJECT_OSCILLOSCOPEDATA_MAP_HORIZONTAL)
 	{
 		Max=pcd->HorizontalRangeMax;
 		Min=pcd->HorizontalRangeMin;
-		return pcd->HorizontalRangeMin+(Pixel-pcd->LeftSpacer)*(Max-Min)/PX_Object_CoordinatesGetCoordinateWidth(pObject);
+		return pcd->HorizontalRangeMin+(Pixel-pcd->LeftSpacer)*(Max-Min)/PX_Object_OscilloscopeGetOscilloscopeWidth(pObject);
 	}
 	return 0;
 }
 
 
-px_void PX_Object_CoordinatesUpdate(PX_Object *pObject,px_uint elapsed)
+px_void PX_Object_OscilloscopeUpdate(PX_Object *pObject,px_uint elapsed)
 {
 
 }
 
 
-static px_void PX_Object_CoordinatesDrawFrameLine(px_surface *psurface,PX_Object *pObject)
+static px_void PX_Object_OscilloscopeDrawFrameLine(px_surface *psurface,PX_Object *pObject)
 {
-	PX_Object_Coordinates *pcd=PX_Object_GetCoordinates(pObject);
+	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
 	px_int offsetx;
 	px_int offsety;
 	px_float objx,objy,objWidth,objHeight;
@@ -635,22 +640,22 @@ static px_void PX_Object_CoordinatesDrawFrameLine(px_surface *psurface,PX_Object
 	offsetx=(px_int)objx;
 	offsety=(px_int)objy;
 
-	PX_GeoDrawLine(psurface,offsetx+pcd->LeftSpacer,offsety+pcd->TopSpacer,offsetx+(px_int)(objWidth-pcd->RightSpacer),offsety+pcd->TopSpacer,PX_OBJECT_COORDINATES_DEFAULT_FRAMELINE_WIDTH,pcd->borderColor);
-	PX_GeoDrawLine(psurface,offsetx+pcd->LeftSpacer,offsety+pcd->TopSpacer,offsetx+pcd->LeftSpacer,offsety+(px_int)(objHeight-pcd->BottomSpacer),PX_OBJECT_COORDINATES_DEFAULT_FRAMELINE_WIDTH,pcd->borderColor);
-	PX_GeoDrawLine(psurface,(px_int)(offsetx+objWidth-pcd->RightSpacer),offsety+(px_int)(objHeight-pcd->BottomSpacer),offsetx+(pcd->LeftSpacer),offsety+(px_int)objHeight-pcd->BottomSpacer,PX_OBJECT_COORDINATES_DEFAULT_FRAMELINE_WIDTH,pcd->borderColor);
-	PX_GeoDrawLine(psurface,(px_int)(offsetx+objWidth-pcd->RightSpacer),offsety+(px_int)(objHeight-pcd->BottomSpacer),offsetx+(px_int)(objWidth-pcd->RightSpacer),offsety+pcd->TopSpacer,PX_OBJECT_COORDINATES_DEFAULT_FRAMELINE_WIDTH,pcd->borderColor);
+	PX_GeoDrawLine(psurface,offsetx+pcd->LeftSpacer,offsety+pcd->TopSpacer,offsetx+(px_int)(objWidth-pcd->RightSpacer),offsety+pcd->TopSpacer,PX_OBJECT_OSCILLOSCOPE_DEFAULT_FRAMELINE_WIDTH,pcd->borderColor);
+	PX_GeoDrawLine(psurface,offsetx+pcd->LeftSpacer,offsety+pcd->TopSpacer,offsetx+pcd->LeftSpacer,offsety+(px_int)(objHeight-pcd->BottomSpacer),PX_OBJECT_OSCILLOSCOPE_DEFAULT_FRAMELINE_WIDTH,pcd->borderColor);
+	PX_GeoDrawLine(psurface,(px_int)(offsetx+objWidth-pcd->RightSpacer),offsety+(px_int)(objHeight-pcd->BottomSpacer),offsetx+(pcd->LeftSpacer),offsety+(px_int)objHeight-pcd->BottomSpacer,PX_OBJECT_OSCILLOSCOPE_DEFAULT_FRAMELINE_WIDTH,pcd->borderColor);
+	PX_GeoDrawLine(psurface,(px_int)(offsetx+objWidth-pcd->RightSpacer),offsety+(px_int)(objHeight-pcd->BottomSpacer),offsetx+(px_int)(objWidth-pcd->RightSpacer),offsety+pcd->TopSpacer,PX_OBJECT_OSCILLOSCOPE_DEFAULT_FRAMELINE_WIDTH,pcd->borderColor);
 }
 
-static px_void PX_Object_CoordinatesDrawDashed(px_surface *psurface,PX_Object *pObject)
+static px_void PX_Object_OscilloscopeDrawDashed(px_surface *psurface,PX_Object *pObject)
 {
-	PX_Object_Coordinates *pcd=PX_Object_GetCoordinates(pObject);
+	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
 	px_double HorizontalInc=0;
 	px_int i;
 	px_double VerticalInc=0;
 	px_int offsetx;
 	px_int offsety;
 
-	px_int Divid=PX_Object_CoordinatesGetCoordinateWidth(pObject)/pcd->MinHorizontalPixelDividing;
+	px_int Divid=PX_Object_OscilloscopeGetOscilloscopeWidth(pObject)/pcd->MinHorizontalPixelDividing;
 
 	px_float objx,objy,objWidth,objHeight;
 	px_float inheritX,inheritY;
@@ -674,14 +679,14 @@ static px_void PX_Object_CoordinatesDrawDashed(px_surface *psurface,PX_Object *p
 
 	if(Divid>1)
 	{
-		HorizontalInc=(px_double)PX_Object_CoordinatesGetCoordinateWidth(pObject)/Divid;
-		if(pcd->guidesShowMode==PX_OBJECT_COORDINATES_GUIDESSHOWMODE_ALL||pcd->guidesShowMode==PX_OBJECT_COORDINATES_GUIDESSHOWMODE_HORIZONTAL)
+		HorizontalInc=(px_double)PX_Object_OscilloscopeGetOscilloscopeWidth(pObject)/Divid;
+		if(pcd->guidesShowMode==PX_OBJECT_OSCILLOSCOPE_GUIDESSHOWMODE_ALL||pcd->guidesShowMode==PX_OBJECT_OSCILLOSCOPE_GUIDESSHOWMODE_HORIZONTAL)
 		{
 			for (i=1;i<=Divid;i++)
 			{
 				PX_GeoDrawLine(psurface,\
 					offsetx+(px_int)(pcd->LeftSpacer+i*HorizontalInc),offsety+pcd->TopSpacer,\
-					offsetx+(px_int)(pcd->LeftSpacer+i*HorizontalInc),offsety+pcd->TopSpacer+PX_Object_CoordinatesGetCoordinateHeight(pObject),\
+					offsetx+(px_int)(pcd->LeftSpacer+i*HorizontalInc),offsety+pcd->TopSpacer+PX_Object_OscilloscopeGetOscilloscopeHeight(pObject),\
 					1,\
 					pcd->DashColor
 					);
@@ -691,7 +696,7 @@ static px_void PX_Object_CoordinatesDrawDashed(px_surface *psurface,PX_Object *p
 
 
 
-	Divid=PX_Object_CoordinatesGetCoordinateHeight(pObject)/pcd->MinVerticalPixelDividing;
+	Divid=PX_Object_OscilloscopeGetOscilloscopeHeight(pObject)/pcd->MinVerticalPixelDividing;
 	if (pcd->LeftVerticalDividing>=pcd->RightVerticalDividing)
 	{
 		if (Divid>pcd->LeftVerticalDividing)
@@ -709,15 +714,15 @@ static px_void PX_Object_CoordinatesDrawDashed(px_surface *psurface,PX_Object *p
 
 	if(Divid>1)
 	{
-		VerticalInc=(px_double)PX_Object_CoordinatesGetCoordinateHeight(pObject)/Divid;
-		if(pcd->guidesShowMode==PX_OBJECT_COORDINATES_GUIDESSHOWMODE_ALL||pcd->guidesShowMode==PX_OBJECT_COORDINATES_GUIDESSHOWMODE_VERTICAL)
+		VerticalInc=(px_double)PX_Object_OscilloscopeGetOscilloscopeHeight(pObject)/Divid;
+		if(pcd->guidesShowMode==PX_OBJECT_OSCILLOSCOPE_GUIDESSHOWMODE_ALL||pcd->guidesShowMode==PX_OBJECT_OSCILLOSCOPE_GUIDESSHOWMODE_VERTICAL)
 		{	
 			for (i=1;i<=Divid;i++)
 			{
 				PX_GeoDrawLine(psurface,\
 					offsetx+(px_int)pcd->LeftSpacer,\
 					offsety+(px_int)(objHeight-pcd->BottomSpacer-i*VerticalInc),\
-					offsetx+(px_int)(pcd->LeftSpacer+PX_Object_CoordinatesGetCoordinateWidth(pObject)),\
+					offsetx+(px_int)(pcd->LeftSpacer+PX_Object_OscilloscopeGetOscilloscopeWidth(pObject)),\
 					offsety+(px_int)(objHeight-pcd->BottomSpacer-i*VerticalInc),\
 					1,\
 					pcd->DashColor\
@@ -727,19 +732,19 @@ static px_void PX_Object_CoordinatesDrawDashed(px_surface *psurface,PX_Object *p
 	}
 }
 
-static px_void PX_Object_CoordinatesDrawDashText(px_surface *psurface,PX_Object *pObject)
+static px_void PX_Object_OscilloscopeDrawDashText(px_surface *psurface,PX_Object *pObject)
 {
 
 	px_double HorizontalInc=0;
 	px_double VerticalInc=0;
-	PX_Object_Coordinates *pcd=PX_Object_GetCoordinates(pObject);
+	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
 	px_double ValInc;
 	px_int	   IsFloat;
 	px_int i;
 	px_int offsetx;
 	px_int offsety;
 
-	px_int Divid=PX_Object_CoordinatesGetCoordinateWidth(pObject)/pcd->MinHorizontalPixelDividing;
+	px_int Divid=PX_Object_OscilloscopeGetOscilloscopeWidth(pObject)/pcd->MinHorizontalPixelDividing;
 
 	px_float objx,objy,objWidth,objHeight;
 	px_float inheritX,inheritY;
@@ -763,7 +768,7 @@ static px_void PX_Object_CoordinatesDrawDashText(px_surface *psurface,PX_Object 
 
 	if(Divid>0&&pcd->HorizontalTextShow)
 	{
-		HorizontalInc=(px_double)PX_Object_CoordinatesGetCoordinateWidth(pObject)/Divid;
+		HorizontalInc=(px_double)PX_Object_OscilloscopeGetOscilloscopeWidth(pObject)/Divid;
 		ValInc=(pcd->HorizontalRangeMax-pcd->HorizontalRangeMin)/Divid;
 		if (PX_ABS(ValInc-(px_int)ValInc)<0.000001f)
 		{
@@ -784,11 +789,11 @@ static px_void PX_Object_CoordinatesDrawDashText(px_surface *psurface,PX_Object 
 			else
 				PX_sprintf1(text,sizeof(text),pcd->IntFlagFormat_H,PX_STRINGFORMAT_INT((px_int)(pcd->HorizontalRangeMin+i*ValInc)));
 
-			PX_FontModuleDrawText(psurface,PX_NULL,offsetx+(px_int)(pcd->LeftSpacer+(i)*HorizontalInc),offsety+(px_int)(pObject->Height-pcd->BottomSpacer+PX_OBJECT_COORDINATES_DEFAULT_FLAGTEXT_SPACER+2),PX_ALIGN_CENTER,text,pcd->FontColor);
+			PX_FontModuleDrawText(psurface,PX_NULL,offsetx+(px_int)(pcd->LeftSpacer+(i)*HorizontalInc),offsety+(px_int)(pObject->Height-pcd->BottomSpacer+PX_OBJECT_OSCILLOSCOPE_DEFAULT_FLAGTEXT_SPACER+2),PX_ALIGN_CENTER,text,pcd->FontColor);
 		}
 	}
 
-	Divid=PX_Object_CoordinatesGetCoordinateHeight(pObject)/pcd->MinVerticalPixelDividing;
+	Divid=PX_Object_OscilloscopeGetOscilloscopeHeight(pObject)/pcd->MinVerticalPixelDividing;
 	if (pcd->LeftVerticalDividing>=pcd->RightVerticalDividing)
 	{
 		if (Divid>pcd->LeftVerticalDividing)
@@ -806,7 +811,7 @@ static px_void PX_Object_CoordinatesDrawDashText(px_surface *psurface,PX_Object 
 
 	if(Divid>0)
 	{
-		VerticalInc=(px_double)PX_Object_CoordinatesGetCoordinateHeight(pObject)/Divid;
+		VerticalInc=(px_double)PX_Object_OscilloscopeGetOscilloscopeHeight(pObject)/Divid;
 
 
 		//paint for Left vertical coordinates text 
@@ -829,7 +834,7 @@ static px_void PX_Object_CoordinatesDrawDashText(px_surface *psurface,PX_Object 
 
 				switch (pcd->leftTextDisplayMode)
 				{
-				case PX_OBJECT_COORDINATES_TEXT_DISPLAYMODE_EXPONENTRAL:
+				case PX_OBJECT_OSCILLOSCOPE_TEXT_DISPLAYMODE_EXPONENTRAL:
 					{
 						px_double value=PX_ABS(pcd->LeftVerticalRangeMin)>PX_ABS(pcd->LeftVerticalRangeMax)?PX_ABS(pcd->LeftVerticalRangeMin):PX_ABS(pcd->LeftVerticalRangeMax);
 						px_int e=0;
@@ -854,7 +859,7 @@ static px_void PX_Object_CoordinatesDrawDashText(px_surface *psurface,PX_Object 
 					}
 					break;
 				default:
-				case PX_OBJECT_COORDINATES_TEXT_DISPLAYMODE_NORMAL:
+				case PX_OBJECT_OSCILLOSCOPE_TEXT_DISPLAYMODE_NORMAL:
 					{
 						if(IsFloat)
 							PX_sprintf1(text,sizeof(text),pcd->FloatFlagFormat_L,PX_STRINGFORMAT_FLOAT((px_float)(pcd->LeftVerticalRangeMin+i*ValInc)));
@@ -889,7 +894,7 @@ static px_void PX_Object_CoordinatesDrawDashText(px_surface *psurface,PX_Object 
 
 				switch (pcd->leftTextDisplayMode)
 				{
-				case PX_OBJECT_COORDINATES_TEXT_DISPLAYMODE_EXPONENTRAL:
+				case PX_OBJECT_OSCILLOSCOPE_TEXT_DISPLAYMODE_EXPONENTRAL:
 					{
 						px_double value=PX_ABS(pcd->RightVerticalRangeMin)>PX_ABS(pcd->RightVerticalRangeMax)?PX_ABS(pcd->RightVerticalRangeMin):PX_ABS(pcd->RightVerticalRangeMax);
 						px_int e=0;
@@ -914,7 +919,7 @@ static px_void PX_Object_CoordinatesDrawDashText(px_surface *psurface,PX_Object 
 					}
 					break;
 				default:
-				case PX_OBJECT_COORDINATES_TEXT_DISPLAYMODE_NORMAL:
+				case PX_OBJECT_OSCILLOSCOPE_TEXT_DISPLAYMODE_NORMAL:
 					{
 						if(IsFloat)
 							PX_sprintf1(text,sizeof(text),pcd->FloatFlagFormat_L,PX_STRINGFORMAT_FLOAT((px_float)(pcd->RightVerticalRangeMin+i*ValInc)));
@@ -923,7 +928,7 @@ static px_void PX_Object_CoordinatesDrawDashText(px_surface *psurface,PX_Object 
 					}
 					break;
 				}
-				PX_FontModuleDrawText(psurface,PX_NULL,offsetx+(px_int)(pObject->Width-pcd->RightSpacer+PX_OBJECT_COORDINATES_DEFAULT_FLAGTEXT_SPACER),offsety+(px_int)(pObject->Height-pcd->BottomSpacer-(i)*VerticalInc-6),PX_ALIGN_LEFTTOP,text,pcd->FontColor);
+				PX_FontModuleDrawText(psurface,PX_NULL,offsetx+(px_int)(pObject->Width-pcd->RightSpacer+PX_OBJECT_OSCILLOSCOPE_DEFAULT_FLAGTEXT_SPACER),offsety+(px_int)(pObject->Height-pcd->BottomSpacer-(i)*VerticalInc-6),PX_ALIGN_LEFTTOP,text,pcd->FontColor);
 			}
 		}
 	}
@@ -931,9 +936,9 @@ static px_void PX_Object_CoordinatesDrawDashText(px_surface *psurface,PX_Object 
 
 }
 
-static px_void PX_Object_CoordinatesDrawTitle(px_surface *psurface,PX_Object *pObject)
+static px_void PX_Object_OscilloscopeDrawTitle(px_surface *psurface,PX_Object *pObject)
 {
-	PX_Object_Coordinates *pcd=PX_Object_GetCoordinates(pObject);
+	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
 	px_int offsetx;
 	px_int offsety;
 	px_float objx,objy,objWidth,objHeight;
@@ -969,7 +974,7 @@ static px_void PX_Object_CoordinatesDrawTitle(px_surface *psurface,PX_Object *pO
 	// 	painter.drawText(-y-70, 45,m_LeftTitle);
 }
 
-static px_void PX_Object_CoordinatesDrawDataInfo(px_surface *psurface,PX_Object *pObject,px_double *Horizontal,px_double n,px_double *Vertical,px_int linewidth,px_int Size,px_int Map,px_color Color)
+static px_void PX_Object_OscilloscopeDrawDataInfo(px_surface *psurface,PX_Object *pObject,px_double *Horizontal,px_double n,px_double *Vertical,px_int linewidth,px_int Size,px_int Map,px_color Color)
 {
 	px_double RangeMin,RangeMax;
 	px_double x,y,w,btm,zeroy;
@@ -978,7 +983,7 @@ static px_void PX_Object_CoordinatesDrawDataInfo(px_surface *psurface,PX_Object 
 	px_int offsetx;
 	px_int offsety;
 
-	PX_Object_Coordinates *pcd=PX_Object_GetCoordinates(pObject);
+	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
 	px_float objx,objy,objWidth,objHeight;
 	px_float inheritX,inheritY;
 
@@ -992,13 +997,13 @@ static px_void PX_Object_CoordinatesDrawDataInfo(px_surface *psurface,PX_Object 
 	offsetx=(px_int)objx;
 	offsety=(px_int)objy;
 
-	if (Map==PX_OBJECT_COORDINATEDATA_MAP_LEFT)
+	if (Map==PX_OBJECT_OSCILLOSCOPEDATA_MAP_LEFT)
 	{
 		RangeMin=pcd->LeftVerticalRangeMin;
 		RangeMax=pcd->LeftVerticalRangeMax;
 	}
 
-	if (Map==PX_OBJECT_COORDINATEDATA_MAP_RIGHT)
+	if (Map==PX_OBJECT_OSCILLOSCOPEDATA_MAP_RIGHT)
 	{
 		RangeMin=pcd->RightVerticalRangeMin;
 		RangeMax=pcd->RightVerticalRangeMax;
@@ -1006,16 +1011,16 @@ static px_void PX_Object_CoordinatesDrawDataInfo(px_surface *psurface,PX_Object 
 
 	switch(pcd->LineMode)
 	{
-	case PX_OBJECT_COORDINATES_LINEMODE_PILLAR:
+	case PX_OBJECT_OSCILLOSCOPE_LINEMODE_PILLAR:
 		{
-			zeroy=PX_Object_CoordinatesMapVerticalValueToPixel(pObject,0,Map);
+			zeroy=PX_Object_OscilloscopeMapVerticalValueToPixel(pObject,0,Map);
 			for (i=0;i<Size;i++)
 			{
 				if (Horizontal[i]>=pcd->HorizontalRangeMin)
 				{
 
-					x=PX_Object_CoordinatesMapHorizontalValueToPixel(pObject,Horizontal[i-1])-pcd->DataPillarWidth/2;
-					y=PX_Object_CoordinatesMapVerticalValueToPixel(pObject,Vertical[i]/n,Map);
+					x=PX_Object_OscilloscopeMapHorizontalValueToPixel(pObject,Horizontal[i-1])-pcd->DataPillarWidth/2;
+					y=PX_Object_OscilloscopeMapVerticalValueToPixel(pObject,Vertical[i]/n,Map);
 
 					w=pcd->DataPillarWidth;
 					btm=zeroy;
@@ -1056,7 +1061,7 @@ static px_void PX_Object_CoordinatesDrawDataInfo(px_surface *psurface,PX_Object 
 			}
 		}
 		break;
-	case PX_OBJECT_COORDINATES_LINEMODE_LINES:
+	case PX_OBJECT_OSCILLOSCOPE_LINEMODE_LINES:
 	default:
 		{
 			for (i=0;i<Size;i++)
@@ -1068,12 +1073,12 @@ static px_void PX_Object_CoordinatesDrawDataInfo(px_surface *psurface,PX_Object 
 					if(i>0){
 						px_point pt1,pt2;
 
-						dx1=PX_Object_CoordinatesMapHorizontalValueToPixel(pObject,Horizontal[i-1]);
-						dy1=PX_Object_CoordinatesMapVerticalValueToPixel(pObject,Vertical[i-1]/n,Map);
-						dx2=PX_Object_CoordinatesMapHorizontalValueToPixel(pObject,Horizontal[i]);
-						dy2=PX_Object_CoordinatesMapVerticalValueToPixel(pObject,Vertical[i]/n,Map);
+						dx1=PX_Object_OscilloscopeMapHorizontalValueToPixel(pObject,Horizontal[i-1]);
+						dy1=PX_Object_OscilloscopeMapVerticalValueToPixel(pObject,Vertical[i-1]/n,Map);
+						dx2=PX_Object_OscilloscopeMapHorizontalValueToPixel(pObject,Horizontal[i]);
+						dy2=PX_Object_OscilloscopeMapVerticalValueToPixel(pObject,Vertical[i]/n,Map);
 
-						if(PX_isLineCrossRect(PX_POINT((px_float)dx1,(px_float)dy1,0),PX_POINT((px_float)dx2,(px_float)dy2,0),PX_RECT((px_float)pcd->LeftSpacer,(px_float)pcd->TopSpacer,(px_float)PX_Object_CoordinatesGetCoordinateWidth(pObject),(px_float)PX_Object_CoordinatesGetCoordinateHeight(pObject)),&pt1,&pt2))
+						if(PX_isLineCrossRect(PX_POINT((px_float)dx1,(px_float)dy1,0),PX_POINT((px_float)dx2,(px_float)dy2,0),PX_RECT((px_float)pcd->LeftSpacer,(px_float)pcd->TopSpacer,(px_float)PX_Object_OscilloscopeGetOscilloscopeWidth(pObject),(px_float)PX_Object_OscilloscopeGetOscilloscopeHeight(pObject)),&pt1,&pt2))
 						{
 							PX_GeoDrawLine(psurface,(px_int)(offsetx+pt1.x),(px_int)(offsety+pt1.y),(px_int)(offsetx+pt2.x),(px_int)(offsety+pt2.y),linewidth,Color);
 						}
@@ -1085,11 +1090,11 @@ static px_void PX_Object_CoordinatesDrawDataInfo(px_surface *psurface,PX_Object 
 					if(i>0){
 						px_point pt1,pt2;
 
-						dx1=PX_Object_CoordinatesMapHorizontalValueToPixel(pObject,Horizontal[i-1]);
-						dy1=PX_Object_CoordinatesMapVerticalValueToPixel(pObject,Vertical[i-1]/n,Map);
-						dx2=PX_Object_CoordinatesMapHorizontalValueToPixel(pObject,Horizontal[i]);
-						dy2=PX_Object_CoordinatesMapVerticalValueToPixel(pObject,Vertical[i]/n,Map);
-						if(PX_isLineCrossRect(PX_POINT((px_float)dx1,(px_float)dy1,0),PX_POINT((px_float)dx2,(px_float)dy2,0),PX_RECT((px_float)pcd->TopSpacer,(px_float)pcd->LeftSpacer,(px_float)PX_Object_CoordinatesGetCoordinateWidth(pObject),(px_float)PX_Object_CoordinatesGetCoordinateHeight(pObject)),&pt1,&pt2))
+						dx1=PX_Object_OscilloscopeMapHorizontalValueToPixel(pObject,Horizontal[i-1]);
+						dy1=PX_Object_OscilloscopeMapVerticalValueToPixel(pObject,Vertical[i-1]/n,Map);
+						dx2=PX_Object_OscilloscopeMapHorizontalValueToPixel(pObject,Horizontal[i]);
+						dy2=PX_Object_OscilloscopeMapVerticalValueToPixel(pObject,Vertical[i]/n,Map);
+						if(PX_isLineCrossRect(PX_POINT((px_float)dx1,(px_float)dy1,0),PX_POINT((px_float)dx2,(px_float)dy2,0),PX_RECT((px_float)pcd->TopSpacer,(px_float)pcd->LeftSpacer,(px_float)PX_Object_OscilloscopeGetOscilloscopeWidth(pObject),(px_float)PX_Object_OscilloscopeGetOscilloscopeHeight(pObject)),&pt1,&pt2))
 							PX_GeoDrawLine(psurface,(px_int)(offsetx+pt1.x),(px_int)(offsety+pt1.y),(px_int)(offsetx+pt2.x),(px_int)(offsety+pt2.y),linewidth,Color);
 					}
 					break;
@@ -1102,35 +1107,35 @@ static px_void PX_Object_CoordinatesDrawDataInfo(px_surface *psurface,PX_Object 
 }
 
 
-static px_void PX_Object_CoordinatesDrawData(px_surface *psurface,PX_Object *pObject)
+static px_void PX_Object_OscilloscopeDrawData(px_surface *psurface,PX_Object *pObject)
 {
-	PX_Object_Coordinates *pcd=PX_Object_GetCoordinates(pObject);
+	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
 	px_int i;
 	if(pcd->bDataUpdatePainter)
 	{
 		for ( i=0;i<pcd->vData.size;i++)
 		{
-			PX_Object_CoordinateData *pData=PX_VECTORAT(PX_Object_CoordinateData,&pcd->vData,i);
+			PX_Object_OscilloscopeData *pData=PX_VECTORAT(PX_Object_OscilloscopeData,&pcd->vData,i);
 			if(pData->Visibled)
 			{
 				if (pData->Normalization==0)
 				{
-					PX_Object_CoordinatesDrawDataInfo(psurface,pObject,pData->MapHorizontalArray,1.0,pData->MapVerticalArray,pData->linewidth,pData->Size,pData->Map,pData->Color);
+					PX_Object_OscilloscopeDrawDataInfo(psurface,pObject,pData->MapHorizontalArray,1.0,pData->MapVerticalArray,pData->linewidth,pData->Size,pData->Map,pData->Color);
 				}
 				else
 				{
-					PX_Object_CoordinatesDrawDataInfo(psurface,pObject,pData->MapHorizontalArray,pData->Normalization,pData->MapVerticalArray,pData->linewidth,pData->Size,pData->Map,pData->Color);
+					PX_Object_OscilloscopeDrawDataInfo(psurface,pObject,pData->MapHorizontalArray,pData->Normalization,pData->MapVerticalArray,pData->linewidth,pData->Size,pData->Map,pData->Color);
 				}
 			}
 
 		}
 	}
 }
-static px_void PX_Object_CoordinatesDrawScaleDraging(px_surface *psurface,PX_Object *pObject)
+static px_void PX_Object_OscilloscopeDrawScaleDraging(px_surface *psurface,PX_Object *pObject)
 {
 	px_int offsetx;
 	px_int offsety;
-	PX_Object_Coordinates *pcd=PX_Object_GetCoordinates(pObject);
+	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
 	px_float objx,objy,objWidth,objHeight;
 	px_float inheritX,inheritY;
 
@@ -1156,11 +1161,11 @@ static px_void PX_Object_CoordinatesDrawScaleDraging(px_surface *psurface,PX_Obj
 
 }
 
-static px_void PX_Object_CoordinatesDrawHelpLine(px_surface *psurface,PX_Object *pObject)
+static px_void PX_Object_OscilloscopeDrawHelpLine(px_surface *psurface,PX_Object *pObject)
 {
 	px_int x,y;
 	px_double value;
-	PX_Object_Coordinates *pcd=PX_Object_GetCoordinates(pObject);
+	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
 	px_float objx,objy,objWidth,objHeight;
 	px_float inheritX,inheritY;
 
@@ -1178,7 +1183,7 @@ static px_void PX_Object_CoordinatesDrawHelpLine(px_surface *psurface,PX_Object 
 	//Draw X line
 
 
-	value=PX_Object_CoordinatesMapPixelValueToVertical(pObject,pcd->helpLineX,PX_OBJECT_COORDINATEDATA_MAP_HORIZONTAL);
+	value=PX_Object_OscilloscopeMapPixelValueToVertical(pObject,pcd->helpLineX,PX_OBJECT_OSCILLOSCOPEDATA_MAP_HORIZONTAL);
 
 	if (value>pcd->HorizontalRangeMin&&value<pcd->HorizontalRangeMax)
 	{
@@ -1186,7 +1191,7 @@ static px_void PX_Object_CoordinatesDrawHelpLine(px_surface *psurface,PX_Object 
 		px_int X,Y;
 		px_double ValInc=value;
 		px_char text[16];
-		x=PX_Object_CoordinatesMapHorizontalValueToPixel(pObject,value);
+		x=PX_Object_OscilloscopeMapHorizontalValueToPixel(pObject,value);
 
 		PX_GeoDrawLine(psurface,(px_int)objx+x,(px_int)(objy+objHeight-pcd->BottomSpacer),(px_int)objx+x,(px_int)objy+pcd->TopSpacer,(px_int)1,pcd->helpLineColor);
 
@@ -1203,7 +1208,7 @@ static px_void PX_Object_CoordinatesDrawHelpLine(px_surface *psurface,PX_Object 
 		}
 
 
-		X=PX_Object_CoordinatesMapHorizontalValueToPixel(pObject,value);
+		X=PX_Object_OscilloscopeMapHorizontalValueToPixel(pObject,value);
 		Y=(px_int)(objHeight-pcd->BottomSpacer);
 
 		if(IsFloat)
@@ -1211,7 +1216,7 @@ static px_void PX_Object_CoordinatesDrawHelpLine(px_surface *psurface,PX_Object 
 		else
 			PX_sprintf1(text,sizeof(text),"%1",PX_STRINGFORMAT_INT((px_int)ValInc));
 
-		PX_FontModuleDrawText(psurface,PX_NULL,(px_int)(objx+X-PX_OBJECT_COORDINATES_DEFAULT_FLAGTEXT_SPACER*1.5),(px_int)objy+Y,PX_ALIGN_LEFTTOP,text,pcd->helpLineColor);
+		PX_FontModuleDrawText(psurface,PX_NULL,(px_int)(objx+X-PX_OBJECT_OSCILLOSCOPE_DEFAULT_FLAGTEXT_SPACER*1.5),(px_int)objy+Y,PX_ALIGN_LEFTTOP,text,pcd->helpLineColor);
 
 	}
 
@@ -1220,7 +1225,7 @@ static px_void PX_Object_CoordinatesDrawHelpLine(px_surface *psurface,PX_Object 
 	//Draw YL line
 
 
-	value=PX_Object_CoordinatesMapPixelValueToVertical(pObject,pcd->helpLineY,PX_OBJECT_COORDINATEDATA_MAP_LEFT);
+	value=PX_Object_OscilloscopeMapPixelValueToVertical(pObject,pcd->helpLineY,PX_OBJECT_OSCILLOSCOPEDATA_MAP_LEFT);
 
 	if (value>pcd->LeftVerticalRangeMin&&value<pcd->LeftVerticalRangeMax)
 	{
@@ -1229,7 +1234,7 @@ static px_void PX_Object_CoordinatesDrawHelpLine(px_surface *psurface,PX_Object 
 		px_double ValInc=value;
 		px_char text[16];
 
-		y=pcd->helpLineY;//PX_Object_CoordinatesMapVerticalValueToPixel(pObject,value,PX_OBJECT_COORDINATEDATA_MAP_LEFT);
+		y=pcd->helpLineY;//PX_Object_OscilloscopeMapVerticalValueToPixel(pObject,value,PX_OBJECT_OSCILLOSCOPEDATA_MAP_LEFT);
 
 		PX_GeoDrawLine(psurface,(px_int)objx+pcd->LeftSpacer,(px_int)objy+y,(px_int)(objx+objWidth-pcd->RightSpacer),(px_int)objy+y,1,pcd->helpLineColor);
 		//Draw text
@@ -1245,21 +1250,21 @@ static px_void PX_Object_CoordinatesDrawHelpLine(px_surface *psurface,PX_Object 
 
 
 		X=pcd->LeftSpacer;
-		Y=y;//PX_Object_CoordinatesMapVerticalValueToPixel(pObject,ValInc,PX_OBJECT_COORDINATEDATA_MAP_LEFT);
+		Y=y;//PX_Object_OscilloscopeMapVerticalValueToPixel(pObject,ValInc,PX_OBJECT_OSCILLOSCOPEDATA_MAP_LEFT);
 
 		if(IsFloat)
 			PX_sprintf1(text,sizeof(text),"%1",PX_STRINGFORMAT_FLOAT((px_float)ValInc));
 		else
 			PX_sprintf1(text,sizeof(text),"%1",PX_STRINGFORMAT_INT((px_int)ValInc));
 
-		PX_FontModuleDrawText(psurface,PX_NULL,(px_int)objx+X,(px_int)objy+Y-PX_OBJECT_COORDINATES_DEFAULT_FLAGTEXT_SPACER*2-1,PX_ALIGN_LEFTTOP,text,pcd->helpLineColor);
+		PX_FontModuleDrawText(psurface,PX_NULL,(px_int)objx+X,(px_int)objy+Y-PX_OBJECT_OSCILLOSCOPE_DEFAULT_FLAGTEXT_SPACER*2-1,PX_ALIGN_LEFTTOP,text,pcd->helpLineColor);
 
 	}
 
 
 	//Draw YR line
 
-	value=PX_Object_CoordinatesMapPixelValueToVertical(pObject,pcd->helpLineY,PX_OBJECT_COORDINATEDATA_MAP_RIGHT);
+	value=PX_Object_OscilloscopeMapPixelValueToVertical(pObject,pcd->helpLineY,PX_OBJECT_OSCILLOSCOPEDATA_MAP_RIGHT);
 
 	if (value>pcd->RightVerticalRangeMin&&value<pcd->RightVerticalRangeMax)
 	{
@@ -1268,7 +1273,7 @@ static px_void PX_Object_CoordinatesDrawHelpLine(px_surface *psurface,PX_Object 
 		px_double ValInc=value;
 		px_char text[16];
 
-		y=pcd->helpLineY;//PX_Object_CoordinatesMapVerticalValueToPixel(pObject,pflgl->Y,PX_OBJECT_COORDINATEDATA_MAP_RIGHT);
+		y=pcd->helpLineY;//PX_Object_OscilloscopeMapVerticalValueToPixel(pObject,pflgl->Y,PX_OBJECT_OSCILLOSCOPEDATA_MAP_RIGHT);
 		PX_GeoDrawLine(psurface,(px_int)objx+pcd->LeftSpacer,(px_int)objy+y,(px_int)(objx+objWidth-pcd->RightSpacer),(px_int)objy+y,(px_int)(1),pcd->helpLineColor);
 
 
@@ -1282,24 +1287,24 @@ static px_void PX_Object_CoordinatesDrawHelpLine(px_surface *psurface,PX_Object 
 		}
 
 		X=(px_int)(objWidth-pcd->RightSpacer);
-		Y=y;//PX_Object_CoordinatesMapVerticalValueToPixel(pObject,ValInc,PX_OBJECT_COORDINATEDATA_MAP_RIGHT);
+		Y=y;//PX_Object_OscilloscopeMapVerticalValueToPixel(pObject,ValInc,PX_OBJECT_OSCILLOSCOPEDATA_MAP_RIGHT);
 
 		if(IsFloat)
 			PX_sprintf1(text,sizeof(text),"%1",PX_STRINGFORMAT_FLOAT((px_float)ValInc));
 		else
 			PX_sprintf1(text,sizeof(text),"%1",PX_STRINGFORMAT_INT((px_int)ValInc));
 
-		PX_FontModuleDrawText(psurface,PX_NULL,(px_int)objx+X,(px_int)objy+Y-PX_OBJECT_COORDINATES_DEFAULT_FLAGTEXT_SPACER*2-1,PX_ALIGN_LEFTTOP,text,pcd->helpLineColor);
+		PX_FontModuleDrawText(psurface,PX_NULL,(px_int)objx+X,(px_int)objy+Y-PX_OBJECT_OSCILLOSCOPE_DEFAULT_FLAGTEXT_SPACER*2-1,PX_ALIGN_LEFTTOP,text,pcd->helpLineColor);
 
 	}
 }
 
 
 
-static px_void PX_Object_CoordinatesDrawFlagLine(px_surface *psurface,PX_Object *pObject)
+static px_void PX_Object_OscilloscopeDrawFlagLine(px_surface *psurface,PX_Object *pObject)
 {
 	px_int x,y,i;
-	PX_Object_Coordinates *pcd=PX_Object_GetCoordinates(pObject);
+	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
 	px_float objx,objy,objWidth,objHeight;
 	px_float inheritX,inheritY;
 
@@ -1313,8 +1318,8 @@ static px_void PX_Object_CoordinatesDrawFlagLine(px_surface *psurface,PX_Object 
 	for (i=0;i<pcd->vFlagLine.size;i++)
 	{
 		//Draw X line
-		PX_Object_CoordinateFlagLine *pflgl=PX_VECTORAT(PX_Object_CoordinateFlagLine,&pcd->vFlagLine,i);
-		if(pflgl->XYshow&PX_OBJECT_COORDINATEFLAGLINE_XSHOW)
+		PX_Object_OscilloscopeFlagLine *pflgl=PX_VECTORAT(PX_Object_OscilloscopeFlagLine,&pcd->vFlagLine,i);
+		if(pflgl->XYshow&PX_OBJECT_OSCILLOSCOPEFLAGLINE_XSHOW)
 		{
 			if (pflgl->X>=pcd->HorizontalRangeMin&&pflgl->X<=pcd->HorizontalRangeMax)
 			{
@@ -1322,7 +1327,7 @@ static px_void PX_Object_CoordinatesDrawFlagLine(px_surface *psurface,PX_Object 
 				px_int X,Y;
 				px_double ValInc=pflgl->X;
 				px_char text[16];
-				x=PX_Object_CoordinatesMapHorizontalValueToPixel(pObject,pflgl->X);
+				x=PX_Object_OscilloscopeMapHorizontalValueToPixel(pObject,pflgl->X);
 
 				PX_GeoDrawLine(psurface,(px_int)objx+x,(px_int)((px_int)objy+objHeight-pcd->BottomSpacer),(px_int)objx+x,(px_int)objy+pcd->TopSpacer,(px_int)pflgl->LineWidth,pflgl->color);
 				//Draw text
@@ -1337,7 +1342,7 @@ static px_void PX_Object_CoordinatesDrawFlagLine(px_surface *psurface,PX_Object 
 				}
 
 
-				X=PX_Object_CoordinatesMapHorizontalValueToPixel(pObject,pflgl->X);
+				X=PX_Object_OscilloscopeMapHorizontalValueToPixel(pObject,pflgl->X);
 				Y=(px_int)(objHeight-pcd->BottomSpacer);
 
 				if(IsFloat)
@@ -1345,14 +1350,14 @@ static px_void PX_Object_CoordinatesDrawFlagLine(px_surface *psurface,PX_Object 
 				else
 					PX_sprintf1(text,sizeof(text),"%1",PX_STRINGFORMAT_INT((px_int)ValInc));
 
-				PX_FontModuleDrawText(psurface,PX_NULL,(px_int)((px_int)objx+X-PX_OBJECT_COORDINATES_DEFAULT_FLAGTEXT_SPACER*1.5),(px_int)objy+Y,PX_ALIGN_LEFTTOP,text,pcd->FontColor);
+				PX_FontModuleDrawText(psurface,PX_NULL,(px_int)((px_int)objx+X-PX_OBJECT_OSCILLOSCOPE_DEFAULT_FLAGTEXT_SPACER*1.5),(px_int)objy+Y,PX_ALIGN_LEFTTOP,text,pcd->FontColor);
 			}
 		}
 
 
 		//Draw YL line
 
-		if(pflgl->XYshow&PX_OBJECT_COORDINATEFLAGLINE_XSHOW)
+		if(pflgl->XYshow&PX_OBJECT_OSCILLOSCOPEFLAGLINE_XSHOW)
 		{
 			if (pflgl->Y>=pcd->LeftVerticalRangeMin&&pflgl->Y<=pcd->LeftVerticalRangeMax)
 			{
@@ -1360,7 +1365,7 @@ static px_void PX_Object_CoordinatesDrawFlagLine(px_surface *psurface,PX_Object 
 				px_int X,Y;
 				px_double ValInc=pflgl->Y;
 				px_char text[16];
-				y=PX_Object_CoordinatesMapVerticalValueToPixel(pObject,pflgl->Y,PX_OBJECT_COORDINATEDATA_MAP_LEFT);
+				y=PX_Object_OscilloscopeMapVerticalValueToPixel(pObject,pflgl->Y,PX_OBJECT_OSCILLOSCOPEDATA_MAP_LEFT);
 
 				PX_GeoDrawLine(psurface,(px_int)objx+pcd->LeftSpacer,(px_int)objy+y,(px_int)((px_int)objx+objWidth-pcd->RightSpacer),(px_int)objy+y,(px_int)(pflgl->LineWidth),pflgl->color);
 				//Draw text
@@ -1376,20 +1381,20 @@ static px_void PX_Object_CoordinatesDrawFlagLine(px_surface *psurface,PX_Object 
 
 
 				X=pcd->LeftSpacer;
-				Y=y;//PX_Object_CoordinatesMapVerticalValueToPixel(pObject,ValInc,PX_OBJECT_COORDINATEDATA_MAP_LEFT);
+				Y=y;//PX_Object_OscilloscopeMapVerticalValueToPixel(pObject,ValInc,PX_OBJECT_OSCILLOSCOPEDATA_MAP_LEFT);
 
 				if(IsFloat)
 					PX_sprintf1(text,sizeof(text),"%1",PX_STRINGFORMAT_FLOAT((px_float)ValInc));
 				else
 					PX_sprintf1(text,sizeof(text),"%1",PX_STRINGFORMAT_INT((px_int)ValInc));
 
-				PX_FontModuleDrawText(psurface,PX_NULL,(px_int)objx+X-4*PX_OBJECT_COORDINATES_DEFAULT_FLAGTEXT_SPACER,(px_int)objy+Y-PX_OBJECT_COORDINATES_DEFAULT_FLAGTEXT_SPACER,PX_ALIGN_LEFTTOP,text,pcd->FontColor);
+				PX_FontModuleDrawText(psurface,PX_NULL,(px_int)objx+X-4*PX_OBJECT_OSCILLOSCOPE_DEFAULT_FLAGTEXT_SPACER,(px_int)objy+Y-PX_OBJECT_OSCILLOSCOPE_DEFAULT_FLAGTEXT_SPACER,PX_ALIGN_LEFTTOP,text,pcd->FontColor);
 			}
 		}
 
 
 		//Draw YR line
-		if(pflgl->XYshow&PX_OBJECT_COORDINATEFLAGLINE_YRSHOW)
+		if(pflgl->XYshow&PX_OBJECT_OSCILLOSCOPEFLAGLINE_YRSHOW)
 		{
 			if (pflgl->Y>=pcd->RightVerticalRangeMin&&pflgl->Y<=pcd->RightVerticalRangeMax)
 			{
@@ -1398,7 +1403,7 @@ static px_void PX_Object_CoordinatesDrawFlagLine(px_surface *psurface,PX_Object 
 				px_double ValInc=pflgl->Y;
 				px_char text[16];
 
-				y=PX_Object_CoordinatesMapVerticalValueToPixel(pObject,pflgl->Y,PX_OBJECT_COORDINATEDATA_MAP_RIGHT);
+				y=PX_Object_OscilloscopeMapVerticalValueToPixel(pObject,pflgl->Y,PX_OBJECT_OSCILLOSCOPEDATA_MAP_RIGHT);
 				PX_GeoDrawLine(psurface,(px_int)objx+pcd->LeftSpacer,(px_int)objy+y,(px_int)((px_int)objx+objWidth-pcd->RightSpacer),(px_int)objy+y,(px_int)(pflgl->LineWidth),pflgl->color);
 
 				if (PX_ABS(ValInc-(px_int)ValInc)<0.000001f)
@@ -1411,18 +1416,18 @@ static px_void PX_Object_CoordinatesDrawFlagLine(px_surface *psurface,PX_Object 
 				}
 
 				X=(px_int)(objWidth-pcd->RightSpacer);
-				Y=y;//PX_Object_CoordinatesMapVerticalValueToPixel(pObject,ValInc,PX_OBJECT_COORDINATEDATA_MAP_RIGHT);
+				Y=y;//PX_Object_OscilloscopeMapVerticalValueToPixel(pObject,ValInc,PX_OBJECT_OSCILLOSCOPEDATA_MAP_RIGHT);
 
-				PX_FontModuleDrawText(psurface,PX_NULL,(px_int)objx+X,(px_int)objy+Y-PX_OBJECT_COORDINATES_DEFAULT_FLAGTEXT_SPACER,PX_ALIGN_LEFTTOP,text,pcd->FontColor);
+				PX_FontModuleDrawText(psurface,PX_NULL,(px_int)objx+X,(px_int)objy+Y-PX_OBJECT_OSCILLOSCOPE_DEFAULT_FLAGTEXT_SPACER,PX_ALIGN_LEFTTOP,text,pcd->FontColor);
 			}
 		}
 	}
 }
 
 
-px_void PX_Object_CoordinatesDrawMarkLine(px_surface *psurface,PX_Object *pObject)
+px_void PX_Object_OscilloscopeDrawMarkLine(px_surface *psurface,PX_Object *pObject)
 {
-	PX_Object_Coordinates *pcd=PX_Object_GetCoordinates(pObject);
+	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
 
 	if (pcd->MarkValueEnabled&&pcd->OnMarkStatus)
 	{
@@ -1435,24 +1440,24 @@ px_void PX_Object_CoordinatesDrawMarkLine(px_surface *psurface,PX_Object *pObjec
 
 
 
-px_void PX_Object_CoordinatesRestoreCoordinates(PX_Object *pObject)
+px_void PX_Object_OscilloscopeRestoreOscilloscope(PX_Object *pObject)
 {
-	PX_Object_Coordinates *pcd=PX_Object_GetCoordinates(pObject);
+	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
 	if (!pcd->bScaling)
 	{
 		return;
 	}
-	PX_Object_CoordinatesSetHorizontalMin(pObject,pcd->ResHorizontalRangeMin);
-	PX_Object_CoordinatesSetHorizontalMax(pObject,pcd->ResHorizontalRangeMax);
-	PX_Object_CoordinatesSetLeftVerticalMin(pObject,pcd->ResLeftVerticalRangeMin);
-	PX_Object_CoordinatesSetLeftVerticalMax(pObject,pcd->ResLeftVerticalRangeMax);
-	PX_Object_CoordinatesSetRightVerticalMin(pObject,pcd->ResRightVerticalRangeMin);
-	PX_Object_CoordinatesSetRightVerticalMax(pObject,pcd->ResRightVerticalRangeMax);
+	PX_Object_OscilloscopeSetHorizontalMin(pObject,pcd->ResHorizontalRangeMin);
+	PX_Object_OscilloscopeSetHorizontalMax(pObject,pcd->ResHorizontalRangeMax);
+	PX_Object_OscilloscopeSetLeftVerticalMin(pObject,pcd->ResLeftVerticalRangeMin);
+	PX_Object_OscilloscopeSetLeftVerticalMax(pObject,pcd->ResLeftVerticalRangeMax);
+	PX_Object_OscilloscopeSetRightVerticalMin(pObject,pcd->ResRightVerticalRangeMin);
+	PX_Object_OscilloscopeSetRightVerticalMax(pObject,pcd->ResRightVerticalRangeMax);
 	pcd->bScaling=PX_FALSE;
 }
-px_void PX_Object_CoordinatesScaleCoordinates(PX_Object *pObject)
+px_void PX_Object_OscilloscopeScaleOscilloscope(PX_Object *pObject)
 {
-	PX_Object_Coordinates *pcd=PX_Object_GetCoordinates(pObject);
+	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
 	px_double Min,Max;
 	px_double dMin;
 	px_double dMax;
@@ -1493,11 +1498,11 @@ px_void PX_Object_CoordinatesScaleCoordinates(PX_Object *pObject)
 		Max=pcd->DragStartPoint.x;
 		Min=pcd->DragingPoint.x;
 	}
-	dMin=PX_Object_CoordinatesMapPixelValueToHorizontal(pObject,(px_int)Min);
-	dMax=PX_Object_CoordinatesMapPixelValueToHorizontal(pObject,(px_int)Max);
+	dMin=PX_Object_OscilloscopeMapPixelValueToHorizontal(pObject,(px_int)Min);
+	dMax=PX_Object_OscilloscopeMapPixelValueToHorizontal(pObject,(px_int)Max);
 
-	PX_Object_CoordinatesSetHorizontalMin(pObject,dMin);
-	PX_Object_CoordinatesSetHorizontalMax(pObject,dMax);
+	PX_Object_OscilloscopeSetHorizontalMin(pObject,dMin);
+	PX_Object_OscilloscopeSetHorizontalMax(pObject,dMax);
 
 	if (pcd->DragStartPoint.y<pcd->DragingPoint.y)
 	{
@@ -1510,22 +1515,22 @@ px_void PX_Object_CoordinatesScaleCoordinates(PX_Object *pObject)
 		Max=pcd->DragingPoint.y;
 	}
 
-	dMin=PX_Object_CoordinatesMapPixelValueToVertical(pObject,(px_int)Min,PX_OBJECT_COORDINATEDATA_MAP_LEFT);
-	dMax=PX_Object_CoordinatesMapPixelValueToVertical(pObject,(px_int)Max,PX_OBJECT_COORDINATEDATA_MAP_LEFT);
-	PX_Object_CoordinatesSetLeftVerticalMin(pObject,dMin);
-	PX_Object_CoordinatesSetLeftVerticalMax(pObject,dMax);
+	dMin=PX_Object_OscilloscopeMapPixelValueToVertical(pObject,(px_int)Min,PX_OBJECT_OSCILLOSCOPEDATA_MAP_LEFT);
+	dMax=PX_Object_OscilloscopeMapPixelValueToVertical(pObject,(px_int)Max,PX_OBJECT_OSCILLOSCOPEDATA_MAP_LEFT);
+	PX_Object_OscilloscopeSetLeftVerticalMin(pObject,dMin);
+	PX_Object_OscilloscopeSetLeftVerticalMax(pObject,dMax);
 
-	dMin=PX_Object_CoordinatesMapPixelValueToVertical(pObject,(px_int)Min,PX_OBJECT_COORDINATEDATA_MAP_RIGHT);
-	dMax=PX_Object_CoordinatesMapPixelValueToVertical(pObject,(px_int)Max,PX_OBJECT_COORDINATEDATA_MAP_RIGHT);
+	dMin=PX_Object_OscilloscopeMapPixelValueToVertical(pObject,(px_int)Min,PX_OBJECT_OSCILLOSCOPEDATA_MAP_RIGHT);
+	dMax=PX_Object_OscilloscopeMapPixelValueToVertical(pObject,(px_int)Max,PX_OBJECT_OSCILLOSCOPEDATA_MAP_RIGHT);
 
-	PX_Object_CoordinatesSetRightVerticalMin(pObject,dMin);
-	PX_Object_CoordinatesSetRightVerticalMax(pObject,dMax);
+	PX_Object_OscilloscopeSetRightVerticalMin(pObject,dMin);
+	PX_Object_OscilloscopeSetRightVerticalMax(pObject,dMax);
 }
 
 
-px_void PX_Object_CoordinatesRender(px_surface *psurface, PX_Object *pObject,px_uint elapsed)
+px_void PX_Object_OscilloscopeRender(px_surface *psurface, PX_Object *pObject,px_uint elapsed)
 {
-	PX_Object_Coordinates *pcd=PX_Object_GetCoordinates(pObject);
+	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
 	if (!pcd)
 	{
 		PX_ASSERT();
@@ -1533,39 +1538,39 @@ px_void PX_Object_CoordinatesRender(px_surface *psurface, PX_Object *pObject,px_
 	}
 
 	// 
-	// 	PX_Object_CoordinatesDrawMarkLine(psurface,pObject);
+	// 	PX_Object_OscilloscopeDrawMarkLine(psurface,pObject);
 
 	if(pcd->ShowGuides)
-		PX_Object_CoordinatesDrawDashed(psurface,pObject);
+		PX_Object_OscilloscopeDrawDashed(psurface,pObject);
 
-	PX_Object_CoordinatesDrawDashText(psurface,pObject);
+	PX_Object_OscilloscopeDrawDashText(psurface,pObject);
 
-	PX_Object_CoordinatesDrawTitle(psurface,pObject);
+	PX_Object_OscilloscopeDrawTitle(psurface,pObject);
 
-	PX_Object_CoordinatesDrawData(psurface,pObject);
+	PX_Object_OscilloscopeDrawData(psurface,pObject);
 
-	PX_Object_CoordinatesDrawFrameLine(psurface,pObject);
+	PX_Object_OscilloscopeDrawFrameLine(psurface,pObject);
 
 	if(pcd->ScaleEnabled)
-		PX_Object_CoordinatesDrawScaleDraging(psurface,pObject);
+		PX_Object_OscilloscopeDrawScaleDraging(psurface,pObject);
 
-	PX_Object_CoordinatesDrawHelpLine(psurface,pObject);
+	PX_Object_OscilloscopeDrawHelpLine(psurface,pObject);
 
-	PX_Object_CoordinatesDrawFlagLine(psurface,pObject);
+	PX_Object_OscilloscopeDrawFlagLine(psurface,pObject);
 }
 
-px_void PX_Object_CoordinatesFree(PX_Object *pObject)
+px_void PX_Object_OscilloscopeFree(PX_Object *pObject)
 {
-	PX_Object_Coordinates *pcd=PX_Object_GetCoordinates(pObject);
+	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
 	PX_VectorFree(&pcd->vData);
 	PX_VectorFree(&pcd->vFlagLine);
 }
 
-px_void PX_Object_CoordinatesCursorPressEvent(PX_Object *pObject, PX_Object_Event e,px_void *ptr)
+px_void PX_Object_OscilloscopeCursorPressEvent(PX_Object *pObject, PX_Object_Event e,px_void *ptr)
 {
 	px_float x;
 	px_float y;
-	PX_Object_Coordinates *pcd=PX_Object_GetCoordinates(pObject);
+	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
 	px_float objx,objy,objWidth,objHeight;
 	px_float inheritX,inheritY;
 
@@ -1608,13 +1613,13 @@ px_void PX_Object_CoordinatesCursorPressEvent(PX_Object *pObject, PX_Object_Even
 	pcd->bScaleDrag=PX_TRUE;
 }
 
-px_void PX_Object_CoordinatesCursorReleaseEvent( PX_Object *pObject, PX_Object_Event e,px_void *ptr )
+px_void PX_Object_OscilloscopeCursorReleaseEvent( PX_Object *pObject, PX_Object_Event e,px_void *ptr )
 {
 
 	px_float x=PX_Object_Event_GetCursorX(e);
 	px_float y=PX_Object_Event_GetCursorY(e);
 
-	PX_Object_Coordinates *pcd=PX_Object_GetCoordinates(pObject);
+	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
 	px_float objx,objy,objWidth,objHeight;
 	px_float inheritX,inheritY;
 
@@ -1636,19 +1641,19 @@ px_void PX_Object_CoordinatesCursorReleaseEvent( PX_Object *pObject, PX_Object_E
 
 		if(pcd->DragingPoint.y<pcd->DragStartPoint.y&&pcd->DragingPoint.x<pcd->DragStartPoint.x)
 		{
-			PX_Object_CoordinatesRestoreCoordinates(pObject);
+			PX_Object_OscilloscopeRestoreOscilloscope(pObject);
 		}
 		else
 		{
-			PX_Object_CoordinatesScaleCoordinates(pObject);
+			PX_Object_OscilloscopeScaleOscilloscope(pObject);
 		}
 	}
 
 }
 
-px_void PX_Object_CoordinatesCursorDragEvent(PX_Object *pObject, PX_Object_Event e,px_void *ptr )
+px_void PX_Object_OscilloscopeCursorDragEvent(PX_Object *pObject, PX_Object_Event e,px_void *ptr )
 {
-	PX_Object_Coordinates *pcd=PX_Object_GetCoordinates(pObject);
+	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
 	px_float objx,objy,objWidth,objHeight;
 	px_float inheritX,inheritY;
 
@@ -1669,7 +1674,7 @@ px_void PX_Object_CoordinatesCursorDragEvent(PX_Object *pObject, PX_Object_Event
 
 		// 	emit SignalOnMousePosition(this->MapPixelValueToHorizontal(e->x()),
 		// 		e->x(),
-		// 		this->MapPixelValueToVertical(e->y(),COORDINATEDATA_MAP_RIGHT));
+		// 		this->MapPixelValueToVertical(e->y(),OSCILLOSCOPEDATA_MAP_RIGHT));
 		if (x<pcd->LeftSpacer)
 		{
 			x=(px_float)pcd->LeftSpacer;
@@ -1693,9 +1698,9 @@ px_void PX_Object_CoordinatesCursorDragEvent(PX_Object *pObject, PX_Object_Event
 
 }
 
-px_void PX_Object_CoordinatesCursorMoveEvent(PX_Object *pObject, PX_Object_Event e,px_void *ptr )
+px_void PX_Object_OscilloscopeCursorMoveEvent(PX_Object *pObject, PX_Object_Event e,px_void *ptr )
 {
-	PX_Object_Coordinates *pcd=PX_Object_GetCoordinates(pObject);
+	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
 	px_float objx,objy,objWidth,objHeight;
 	px_float inheritX,inheritY;
 
@@ -1716,7 +1721,7 @@ px_void PX_Object_CoordinatesCursorMoveEvent(PX_Object *pObject, PX_Object_Event
 
 		// 	emit SignalOnMousePosition(this->MapPixelValueToHorizontal(e->x()),
 		// 		e->x(),
-		// 		this->MapPixelValueToVertical(e->y(),COORDINATEDATA_MAP_RIGHT));
+		// 		this->MapPixelValueToVertical(e->y(),OSCILLOSCOPEDATA_MAP_RIGHT));
 		if (x<pcd->LeftSpacer)
 		{
 			x=(px_float)pcd->LeftSpacer;
@@ -1748,86 +1753,86 @@ px_void PX_Object_CoordinatesCursorMoveEvent(PX_Object *pObject, PX_Object_Event
 
 
 
-PX_Object *PX_Object_CoordinatesCreate(px_memorypool *mp, PX_Object *Parent,px_int x,px_int y,px_int Width,px_int Height,PX_FontModule *fontmodule)
+PX_Object *PX_Object_OscilloscopeCreate(px_memorypool *mp, PX_Object *Parent,px_int x,px_int y,px_int Width,px_int Height,PX_FontModule *fontmodule)
 {
 	PX_Object *pObject;
-	PX_Object_Coordinates Coordinates;
-	PX_memset(&Coordinates,0,sizeof(Coordinates));
-	Coordinates.mp=mp;
-	Coordinates.MinHorizontalPixelDividing=PX_OBJECT_COORDINATES_DEFAULE_MINHORIZONTALPIXELDIVIDING;
-	Coordinates.MinVerticalPixelDividing=PX_OBJECT_COORDINATES_DEFAULE_MINVERTICALPIXELDIVIDING;
-	Coordinates.HorizontalDividing=PX_OBJECT_COORDINATES_DEFAULE_DIVIDING;
-	Coordinates.LeftVerticalDividing=PX_OBJECT_COORDINATES_DEFAULE_DIVIDING;
-	Coordinates.RightVerticalDividing=PX_OBJECT_COORDINATES_DEFAULE_DIVIDING;
-	Coordinates.bScaleDrag=PX_FALSE;
-	Coordinates.guidesShowMode=PX_OBJECT_COORDINATES_GUIDESSHOWMODE_ALL;
-	Coordinates.helpLineColor=PX_COLOR(255,255,0,0);
-	Coordinates.ShowHelpLine=PX_TRUE;
+	PX_Object_Oscilloscope Oscilloscope;
+	PX_memset(&Oscilloscope,0,sizeof(Oscilloscope));
+	Oscilloscope.mp=mp;
+	Oscilloscope.MinHorizontalPixelDividing=PX_OBJECT_OSCILLOSCOPE_DEFAULE_MINHORIZONTALPIXELDIVIDING;
+	Oscilloscope.MinVerticalPixelDividing=PX_OBJECT_OSCILLOSCOPE_DEFAULE_MINVERTICALPIXELDIVIDING;
+	Oscilloscope.HorizontalDividing=PX_OBJECT_OSCILLOSCOPE_DEFAULE_DIVIDING;
+	Oscilloscope.LeftVerticalDividing=PX_OBJECT_OSCILLOSCOPE_DEFAULE_DIVIDING;
+	Oscilloscope.RightVerticalDividing=PX_OBJECT_OSCILLOSCOPE_DEFAULE_DIVIDING;
+	Oscilloscope.bScaleDrag=PX_FALSE;
+	Oscilloscope.guidesShowMode=PX_OBJECT_OSCILLOSCOPE_GUIDESSHOWMODE_ALL;
+	Oscilloscope.helpLineColor=PX_COLOR(255,255,0,0);
+	Oscilloscope.ShowHelpLine=PX_TRUE;
 
-	Coordinates.LeftSpacer=(px_int)(1.5f*PX_OBJECT_COORDINATES_DEFAULT_SPACER);
-	Coordinates.RightSpacer=(px_int)(1.5*PX_OBJECT_COORDINATES_DEFAULT_SPACER);
-	Coordinates.TopSpacer=PX_OBJECT_COORDINATES_DEFAULT_SPACER;
-	Coordinates.BottomSpacer=PX_OBJECT_COORDINATES_DEFAULT_SPACER;
+	Oscilloscope.LeftSpacer=(px_int)(1.5f*PX_OBJECT_OSCILLOSCOPE_DEFAULT_SPACER);
+	Oscilloscope.RightSpacer=(px_int)(1.5*PX_OBJECT_OSCILLOSCOPE_DEFAULT_SPACER);
+	Oscilloscope.TopSpacer=PX_OBJECT_OSCILLOSCOPE_DEFAULT_SPACER;
+	Oscilloscope.BottomSpacer=PX_OBJECT_OSCILLOSCOPE_DEFAULT_SPACER;
 
-	Coordinates.HorizontalRangeMin=-150;
-	Coordinates.HorizontalRangeMax=150;
+	Oscilloscope.HorizontalRangeMin=-150;
+	Oscilloscope.HorizontalRangeMax=150;
 
-	Coordinates.LeftVerticalRangeMin=0;
-	Coordinates.LeftVerticalRangeMax=100;
+	Oscilloscope.LeftVerticalRangeMin=0;
+	Oscilloscope.LeftVerticalRangeMax=100;
 
-	Coordinates.RightVerticalRangeMax=1.0;
-	Coordinates.RightVerticalRangeMin=0;
+	Oscilloscope.RightVerticalRangeMax=1.0;
+	Oscilloscope.RightVerticalRangeMin=0;
 
-	Coordinates.FloatFlagFormat_H=PX_OBJECT_COORDINATES_DEFAULT_FLOAT_FLAGFORMAT_H;
-	Coordinates.IntFlagFormat_H=PX_OBJECT_COORDINATES_DEFAULT_INT_FLAGFORMAT_H;
+	Oscilloscope.FloatFlagFormat_H=PX_OBJECT_OSCILLOSCOPE_DEFAULT_FLOAT_FLAGFORMAT_H;
+	Oscilloscope.IntFlagFormat_H=PX_OBJECT_OSCILLOSCOPE_DEFAULT_INT_FLAGFORMAT_H;
 
-	Coordinates.FloatFlagFormat_L=PX_OBJECT_COORDINATES_DEFAULT_FLOAT_FLAGFORMAT_L;
-	Coordinates.IntFlagFormat_L=PX_OBJECT_COORDINATES_DEFAULT_INT_FLAGFORMAT_L;
+	Oscilloscope.FloatFlagFormat_L=PX_OBJECT_OSCILLOSCOPE_DEFAULT_FLOAT_FLAGFORMAT_L;
+	Oscilloscope.IntFlagFormat_L=PX_OBJECT_OSCILLOSCOPE_DEFAULT_INT_FLAGFORMAT_L;
 
-	Coordinates.FloatFlagFormat_R=PX_OBJECT_COORDINATES_DEFAULT_FLOAT_FLAGFORMAT_R;
-	Coordinates.IntFlagFormat_R=PX_OBJECT_COORDINATES_DEFAULT_INT_FLAGFORMAT_R;
+	Oscilloscope.FloatFlagFormat_R=PX_OBJECT_OSCILLOSCOPE_DEFAULT_FLOAT_FLAGFORMAT_R;
+	Oscilloscope.IntFlagFormat_R=PX_OBJECT_OSCILLOSCOPE_DEFAULT_INT_FLAGFORMAT_R;
 
-	Coordinates.Exponential_Format=PX_OBJECT_COORDINATES_DEFAULT_EXPONENTIAL_FORMAT;
+	Oscilloscope.Exponential_Format=PX_OBJECT_OSCILLOSCOPE_DEFAULT_EXPONENTIAL_FORMAT;
 
-	Coordinates.bScaling=PX_FALSE;
+	Oscilloscope.bScaling=PX_FALSE;
 
-	Coordinates.FontSize=PX_OBJECT_COORDINATES_DEFAULT_FONT_SIZE;
-	Coordinates.DataLineWidth=PX_OBJECT_COORDINATES_DEFAULT_LINE_WIDTH;
-	Coordinates.FontColor= PX_OBJECT_UI_DEFAULT_FONTCOLOR;
-	Coordinates.borderColor= PX_OBJECT_UI_DEFAULT_BORDERCOLOR;
-	Coordinates.DashColor=PX_COLOR(PX_OBJECT_COORDINATES_DEFAULT_DASH_RGB);
-	Coordinates.OnMarkStatus=PX_FALSE;
-	Coordinates.MarkValueEnabled=PX_TRUE;
-	Coordinates.MarkLineX=-1;
+	Oscilloscope.FontSize=PX_OBJECT_OSCILLOSCOPE_DEFAULT_FONT_SIZE;
+	Oscilloscope.DataLineWidth=PX_OBJECT_OSCILLOSCOPE_DEFAULT_LINE_WIDTH;
+	Oscilloscope.FontColor= PX_OBJECT_UI_DEFAULT_FONTCOLOR;
+	Oscilloscope.borderColor= PX_OBJECT_UI_DEFAULT_BORDERCOLOR;
+	Oscilloscope.DashColor=PX_COLOR(PX_OBJECT_OSCILLOSCOPE_DEFAULT_DASH_RGB);
+	Oscilloscope.OnMarkStatus=PX_FALSE;
+	Oscilloscope.MarkValueEnabled=PX_TRUE;
+	Oscilloscope.MarkLineX=-1;
 
-	Coordinates.bDataUpdatePainter=PX_TRUE;
+	Oscilloscope.bDataUpdatePainter=PX_TRUE;
 
-	Coordinates.LineMode=PX_OBJECT_COORDINATES_LINEMODE_LINES;
+	Oscilloscope.LineMode=PX_OBJECT_OSCILLOSCOPE_LINEMODE_LINES;
 
-	Coordinates.LeftTextShow=PX_TRUE;
-	Coordinates.RightTextShow=PX_TRUE;
-	Coordinates.HorizontalTextShow=PX_TRUE;
-	Coordinates.ScaleEnabled=PX_TRUE;
-	Coordinates.ShowGuides=PX_TRUE;
+	Oscilloscope.LeftTextShow=PX_TRUE;
+	Oscilloscope.RightTextShow=PX_TRUE;
+	Oscilloscope.HorizontalTextShow=PX_TRUE;
+	Oscilloscope.ScaleEnabled=PX_TRUE;
+	Oscilloscope.ShowGuides=PX_TRUE;
 
-	Coordinates.LeftTitle="";
-	Coordinates.RightTitle="";
-	Coordinates.TopTitle="";
-	Coordinates.BottomTitle="";
-	Coordinates.fontmodule=fontmodule;
-	Coordinates.leftTextDisplayMode=PX_OBJECT_COORDINATES_TEXT_DISPLAYMODE_NORMAL;
-	Coordinates.RightTextDisplayMode=PX_OBJECT_COORDINATES_TEXT_DISPLAYMODE_NORMAL;
+	Oscilloscope.LeftTitle="";
+	Oscilloscope.RightTitle="";
+	Oscilloscope.TopTitle="";
+	Oscilloscope.BottomTitle="";
+	Oscilloscope.fontmodule=fontmodule;
+	Oscilloscope.leftTextDisplayMode=PX_OBJECT_OSCILLOSCOPE_TEXT_DISPLAYMODE_NORMAL;
+	Oscilloscope.RightTextDisplayMode=PX_OBJECT_OSCILLOSCOPE_TEXT_DISPLAYMODE_NORMAL;
 
-	PX_VectorInitialize(mp,&Coordinates.vData,sizeof(PX_Object_CoordinateData),16);
-	PX_VectorInitialize(mp,&Coordinates.vFlagLine,sizeof(PX_Object_CoordinateFlagLine),16);
+	PX_VectorInitialize(mp,&Oscilloscope.vData,sizeof(PX_Object_OscilloscopeData),16);
+	PX_VectorInitialize(mp,&Oscilloscope.vFlagLine,sizeof(PX_Object_OscilloscopeFlagLine),16);
 
-	pObject=PX_ObjectCreateEx(mp,Parent,(px_float)x,(px_float)y,0,(px_float)Width,(px_float)Height,0,PX_OBJECT_TYPE_COORDINATE,PX_Object_CoordinatesUpdate,PX_Object_CoordinatesRender,PX_Object_CoordinatesFree,&Coordinates,sizeof(PX_Object_Coordinates));
+	pObject=PX_ObjectCreateEx(mp,Parent,(px_float)x,(px_float)y,0,(px_float)Width,(px_float)Height,0,PX_OBJECT_TYPE_OSCILLOSCOPE,PX_Object_OscilloscopeUpdate,PX_Object_OscilloscopeRender,PX_Object_OscilloscopeFree,&Oscilloscope,sizeof(PX_Object_Oscilloscope));
 
-	//PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_CURSORMOVE,PX_Object_CoordinatesCursorMoveEvent,PX_NULL);
-	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_CURSORMOVE,PX_Object_CoordinatesCursorMoveEvent,PX_NULL);
-	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_CURSORDRAG,PX_Object_CoordinatesCursorDragEvent,PX_NULL);
-	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_CURSORDOWN,PX_Object_CoordinatesCursorPressEvent,PX_NULL);
-	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_CURSORUP,PX_Object_CoordinatesCursorReleaseEvent,PX_NULL);
+	//PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_CURSORMOVE,PX_Object_OscilloscopeCursorMoveEvent,PX_NULL);
+	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_CURSORMOVE,PX_Object_OscilloscopeCursorMoveEvent,PX_NULL);
+	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_CURSORDRAG,PX_Object_OscilloscopeCursorDragEvent,PX_NULL);
+	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_CURSORDOWN,PX_Object_OscilloscopeCursorPressEvent,PX_NULL);
+	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_CURSORUP,PX_Object_OscilloscopeCursorReleaseEvent,PX_NULL);
 
 	return pObject;
 }
@@ -1861,8 +1866,8 @@ static px_void PX_Object_FilterEditorDrawFrameLine(px_surface *psurface,PX_Objec
 
 	PX_GeoDrawLine(psurface,offsetx,offsety,offsetx+(px_int)(objWidth-1),offsety,PX_OBJECT_FILTEREDITOR_DEFAULT_FRAMELINE_WIDTH,pfe->borderColor);
 	PX_GeoDrawLine(psurface,offsetx,offsety,offsetx,offsety+(px_int)(objHeight-1),PX_OBJECT_FILTEREDITOR_DEFAULT_FRAMELINE_WIDTH,pfe->borderColor);
-	PX_GeoDrawLine(psurface,(px_int)(offsetx+objWidth-1),offsety+(px_int)(objHeight-1),offsetx,offsety+(px_int)objHeight-1,PX_OBJECT_COORDINATES_DEFAULT_FRAMELINE_WIDTH,pfe->borderColor);
-	PX_GeoDrawLine(psurface,(px_int)(offsetx+objWidth-1),offsety+(px_int)(objHeight-1),offsetx+(px_int)(objWidth-1),offsety,PX_OBJECT_COORDINATES_DEFAULT_FRAMELINE_WIDTH,pfe->borderColor);
+	PX_GeoDrawLine(psurface,(px_int)(offsetx+objWidth-1),offsety+(px_int)(objHeight-1),offsetx,offsety+(px_int)objHeight-1,PX_OBJECT_OSCILLOSCOPE_DEFAULT_FRAMELINE_WIDTH,pfe->borderColor);
+	PX_GeoDrawLine(psurface,(px_int)(offsetx+objWidth-1),offsety+(px_int)(objHeight-1),offsetx+(px_int)(objWidth-1),offsety,PX_OBJECT_OSCILLOSCOPE_DEFAULT_FRAMELINE_WIDTH,pfe->borderColor);
 }
 
 static px_void PX_Object_FilterEditorDrawSelectDraging(px_surface *psurface,PX_Object *pObject)

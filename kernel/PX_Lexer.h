@@ -85,7 +85,7 @@ typedef  struct __PX_LEXER_START
 	px_lexer *lexer;
 }PX_LEXER_STATE;
 
-px_void PX_LexerInit(px_lexer *lexer,px_memorypool *mp);
+px_void PX_LexerInitialize(px_lexer *lexer,px_memorypool *mp);
 px_void PX_LexerRegisterComment(px_lexer *lexer,const px_char Begin[],const px_char End[]);
 px_int PX_LexerRegisterContainer(px_lexer *lexer,const px_char Begin[],const px_char End[]);
 px_void PX_LexerRegisterContainerTransfer(px_lexer *lexer,px_uint containerIndex,px_char transfer);

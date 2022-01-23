@@ -83,15 +83,19 @@ px_bool				PX_ScriptVM_InstanceRunFunctionIndex(PX_ScriptVM_Instance *Ins,px_int
 px_bool				PX_ScriptVM_InstanceBeginThreadFunction(PX_ScriptVM_Instance *Ins,px_int threadID,const px_char *functionName,PX_SCRIPTVM_VARIABLE args[],px_int paramcount);
 px_bool				PX_ScriptVM_InstanceBeginThreadFunctionIndex(PX_ScriptVM_Instance *Ins,px_int threadID,px_int funcIndex,PX_SCRIPTVM_VARIABLE args[],px_int paramcount);
 px_int				PX_ScriptVM_InstanceGetFreeThreadId(PX_ScriptVM_Instance *Ins);
+		
 PX_SCRIPTVM_RUNRETURN PX_ScriptVM_InstanceRunThread(PX_ScriptVM_Instance *Ins,px_int tick);
+
+
 px_void				PX_ScriptVM_InstanceRun(PX_ScriptVM_Instance *Ins,px_int tick);
+px_void				PX_ScriptVM_InstanceRunTime(PX_ScriptVM_Instance* Ins, px_int tick,px_dword elapsed);
 px_void				PX_ScriptVM_ThreadStop(PX_ScriptVM_Instance *Ins,px_int ThreadId);
 px_void				PX_ScriptVM_ThreadClear(PX_ScriptVM_Instance *Ins,px_int ThreadId);
 px_void				PX_ScriptVM_ThreadSuspend(PX_ScriptVM_Instance *Ins,px_int ThreadId);
 px_void				PX_ScriptVM_ThreadResume(PX_ScriptVM_Instance *Ins,px_int ThreadId);
 
-
-px_bool PX_ScriptVM_InstanceInitialize(PX_ScriptVM_Instance *Ins,px_memorypool *mp,px_byte *code,px_int size);
+px_bool PX_ScriptVM_InstanceIsRuning(PX_ScriptVM_Instance* Ins);
+px_bool PX_ScriptVM_InstanceInitialize(PX_ScriptVM_Instance* Ins, px_memorypool* mp, px_byte* code, px_int size);
 px_bool PX_ScriptVM_LocalAlloc(PX_ScriptVM_Instance *Ins,int size,PX_SCRIPTVM_MEMORY_PTR *mem_ptr);
 px_bool PX_ScriptVM_LocalFree(PX_ScriptVM_Instance *Ins,PX_SCRIPTVM_MEMORY_PTR *mem_ptr);
 px_bool PX_ScriptVM_RegistryHostFunction(PX_ScriptVM_Instance *Ins,const px_char *name,PX_ScriptVM_Function_Modules funcModules,px_void *userptr);

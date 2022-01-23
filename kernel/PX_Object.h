@@ -33,6 +33,8 @@
 #define PX_OBJECT_EVENT_LOSTFOCUS           21
 #define PX_OBJECT_EVENT_CANCEL				22
 #define PX_OBJECT_EVENT_CLOSE				23
+#define PX_OBJECT_EVENT_CURSORMUP			24
+#define PX_OBJECT_EVENT_CURSORMDOWN			25
 //////////////////////////////////////////////////////////////////////////////
 //    Type of Controls
 /////////////////////////////////////////////////////////////////////////////
@@ -55,7 +57,7 @@ enum PX_OBJECT_TYPE
   PX_OBJECT_TYPE_CURSORBUTTON   ,
   PX_OBJECT_TYPE_VKEYBOARD		,
   PX_OBJECT_TYPE_VNKEYBOARD		,
-  PX_OBJECT_TYPE_COORDINATE     ,
+  PX_OBJECT_TYPE_OSCILLOSCOPE	,
   PX_OBJECT_TYPE_FILTEREDITOR   ,
   PX_OBJECT_TYPE_CHECKBOX		,
   PX_OBJECT_TYPE_ROTATION		,
@@ -71,8 +73,17 @@ enum PX_OBJECT_TYPE
   PX_OBJECT_TYPE_PANC,
   PX_OBJECT_TYPE_DESIGNERBOX,
   PX_OBJECT_TYPE_JOYSTICK,
-  PX_OBJECT_TYPE_RINGPROCESSBAR,
   PX_OBJECT_TYPE_MEMORYVIEW,
+<<<<<<< HEAD
+=======
+  PX_OBJECT_TYPE_VARIOUS,
+  PX_OBJECT_TYPE_IPBOX,
+  PX_OBJECT_TYPE_VARBOX,
+  PX_OBJECT_TYPE_COMBOX,
+  PX_OBJECT_TYPE_RANKPANEL,
+  PX_OBJECT_TYPE_RINGPROGRESS,
+  PX_OBJECT_TYPE_RINGPROCESSBAR,
+>>>>>>> f1b534df109f6e7a9bacaaf4e448dd0d8ae06de7
 };
 
 
@@ -372,7 +383,7 @@ px_void PX_ObjectExecuteEvent(PX_Object *pPost,PX_Object_Event Event);
 #include "PX_Object_VirtualKeyboard.h"
 //////////////////////////////////////////////////////////////////////////
 //coordinate
-#include "PX_Object_Coordinate.h"
+#include "PX_Object_Oscilloscope.h"
 
 //////////////////////////////////////////////////////////////////////////
 //checkbox
@@ -441,6 +452,34 @@ px_void PX_ObjectExecuteEvent(PX_Object *pPost,PX_Object_Event Event);
 //memoryview
 #include "PX_Object_MemoryView.h"
 
+<<<<<<< HEAD
+=======
+//////////////////////////////////////////////////////////////////////////
+//various
+#include "PX_Object_Various.h"
+
+
+//////////////////////////////////////////////////////////////////////////
+//ipbox
+#include "PX_Object_IPBox.h"
+
+//////////////////////////////////////////////////////////////////////////
+//varbox
+#include "PX_Object_VarBox.h"
+
+//////////////////////////////////////////////////////////////////////////
+//combox
+#include "PX_Object_COMBox.h"
+
+//////////////////////////////////////////////////////////////////////////
+//RankPanel
+#include "PX_Object_RankPanel.h"
+
+//////////////////////////////////////////////////////////////////////////
+//ring progress
+#include "PX_Object_RingProgress.h"
+
+>>>>>>> f1b534df109f6e7a9bacaaf4e448dd0d8ae06de7
 #endif
 
 
