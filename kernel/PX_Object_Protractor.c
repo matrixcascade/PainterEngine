@@ -44,7 +44,7 @@ px_void PX_Object_ProtractorRender(px_surface *rendersurface,PX_Object *pObject,
 			acolor=pProtractor->color;
 			acolor._argb.a/=4;
 			
-			PX_GeoDrawSector(rendersurface,(px_int)objx,(px_int)objy,(px_int)pProtractor->radius,1,acolor,(px_int)pProtractor->startAngle,(px_int)pProtractor->endAngle);
+			PX_GeoDrawSector(rendersurface,(px_int)objx,(px_int)objy,pProtractor->radius,1,acolor, (px_int)pProtractor->startAngle,(px_int)pProtractor->endAngle);
 
 			PX_GeoDrawLine(rendersurface,(px_int)objx,(px_int)objy,(px_int)(objx+PX_cos_angle(pProtractor->startAngle)*pProtractor->radius),
 				(px_int)(objy+PX_sin_angle(pProtractor->startAngle)*pProtractor->radius),1,pProtractor->color);
@@ -157,7 +157,7 @@ PX_Object * PX_Object_ProtractorCreate(px_memorypool *mp, PX_Object *Parent,px_i
 	PX_memset(&protractor,0,sizeof(protractor));
 	protractor.color=PX_OBJECT_UI_DEFAULT_BORDERCOLOR;
 	protractor.fontColor=PX_COLOR(255,255,0,0);
-	protractor.radius=radius;
+	protractor.radius=(px_float)radius;
 	
 	pObject=PX_ObjectCreateEx(mp,Parent,(px_float)x,(px_float)y,0,0,0,0,PX_OBJECT_TYPE_PROTRACTOR,0,PX_Object_ProtractorRender,0,&protractor,sizeof(protractor));
 	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_CURSORDOWN,PX_Object_ProtractorOnCursorDown,PX_NULL);

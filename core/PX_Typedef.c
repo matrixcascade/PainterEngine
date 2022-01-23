@@ -417,6 +417,20 @@ px_double PX_sind(px_double x)
 
 }
 
+px_double PX_sinc(px_double i)
+{
+	return i?PX_sind(i * PX_PI) / (i * PX_PI):1;
+}
+
+px_double PX_sinc_interpolate(px_double x[], px_int size, px_double d)
+{
+	px_int i;
+	px_double sum = 0;
+	for (i = 0; i < size; i++)
+		sum += x[i] * PX_sinc(d - i);
+	return sum;
+}
+
 px_double PX_cosd(px_double radian)
 {
 	return PX_sind((PX_PI/2-radian));
@@ -1316,6 +1330,15 @@ px_color PX_COLOR(px_uchar a,px_uchar r,px_uchar g,px_uchar b)
 	return color;
 }
 
+px_color PX_ColorInverse(px_color clr)
+{
+	px_color color;
+	color._argb.a = clr._argb.a;
+	color._argb.r = 255-clr._argb.r;
+	color._argb.g = 255 - clr._argb.g;
+	color._argb.b = 255 - clr._argb.b;
+	return color;
+}
 
 px_void PX_ColorIncrease(px_color *color,px_uchar inc)
 {
@@ -2674,6 +2697,11 @@ void PX_DCT(_IN px_double x[],_OUT px_double X[],px_int N)
 {
 	px_int n,m;
 	px_double v;
+	if (x == X)
+	{
+		//overlap error
+		PX_ASSERT();
+	}
 	PX_memset(X,0,sizeof(px_double)*N);
 	for (n=0;n<N;n++)
 	{
@@ -2906,7 +2934,6 @@ void PX_FFT_2(_IN px_complex x[],_OUT px_complex X[],px_int N)
 		}
 	}
 }
-
 void PX_IFFT_2(_IN px_complex X[],_OUT px_complex x[],px_int N)
 {
 	px_int cx,cy,i;
@@ -2968,6 +2995,34 @@ void PX_FFT_2_Shift(_IN px_complex _in[],_OUT px_complex _out[],px_int N)
 			_ext=_t[y*N+x];
 			_t[y*N+x]=_t[y*N+N*N/2+x-N/2];
 			_t[y*N+N*N/2+x-N/2]=_ext;
+		}
+	}
+}
+
+void PX_DCT_2_Shift(_IN px_double _in[], _OUT px_double _out[], px_int N)
+{
+	px_int x, y;
+	px_double* _t = _out;
+	px_double _ext;
+	PX_memcpy(_t, _in, sizeof(px_double) * N * N);
+
+	for (y = 0; y < N / 2; y++)
+	{
+		for (x = 0; x < N / 2; x++)
+		{
+			_ext = _t[y * N + x];
+			_t[y * N + x] = _t[y * N + N * N / 2 + x + N / 2];
+			_t[y * N + N * N / 2 + x + N / 2] = _ext;
+		}
+	}
+
+	for (y = 0; y < N / 2; y++)
+	{
+		for (x = N / 2; x < N; x++)
+		{
+			_ext = _t[y * N + x];
+			_t[y * N + x] = _t[y * N + N * N / 2 + x - N / 2];
+			_t[y * N + N * N / 2 + x - N / 2] = _ext;
 		}
 	}
 }
@@ -3117,6 +3172,16 @@ void PX_LinearInterpolationResample(_IN px_double x[],_OUT px_double X[],px_int 
 			
 		}
 		X[k]=d1;
+	}
+}
+
+void PX_SincInterpolationResample(_IN px_double x[], _OUT px_double X[], px_int N, px_int M)
+{
+	px_double step = 1 / (M-1);
+	px_int i;
+	for ( i = 0; i < M; i++)
+	{
+		X[i] = PX_sinc_interpolate(x, N, step * i);
 	}
 }
 
@@ -3842,11 +3907,28 @@ px_dword  PX_inet_addr( const px_char cp[] )
 	return *(px_dword*)ipBytes;
 }
 
+px_dword  PX_inet_port(const px_char cp[])
+{
+	const px_char *p=cp;
+	while (*p)
+	{
+		if (*p==':')
+		{
+			p++;
+			break;
+		}
+		p++;
+	}
+	return (px_dword)PX_atoi(p);
+}
 
-px_char* PX_inet_ntoa(px_dword ipv4)
+
+
+PX_RETURN_STRING PX_inet_ntoa(px_dword ipv4)
 {
 	px_int b[4];
-	static px_char a[17];
+	PX_RETURN_STRING ret = {0};
+	px_char *a=ret.data;
 	a[0]='\0';
 	b[0]=((ipv4 & 0xff000000)>>24);
 	b[1]=((ipv4 & 0x00ff0000)>>16);
@@ -3860,7 +3942,8 @@ px_char* PX_inet_ntoa(px_dword ipv4)
 	PX_itoa(b[1],a+PX_strlen(a),5,10);
 	PX_strcat(a,".");
 	PX_itoa(b[0],a+PX_strlen(a),5,10);
-	return a;
+	
+	return ret;
 }
 
 px_dword PX_htonl(px_dword h)
