@@ -27,16 +27,7 @@ typedef struct
 	px_byte bytesize;//02
 }PX_ModbusTCP_ReadResponse;
 
-typedef struct
-{
-	px_word  counter;
-	px_word  magic;
-	px_byte  size[2];
-	px_byte unit;
-	px_byte opcode;
-	px_byte startAddress[2];
-	px_byte regcount[2];
-}PX_ModbusTCP_ReadBool;
+
 
 typedef struct
 {
@@ -63,6 +54,7 @@ typedef struct
 }PX_ModbusTCP_Write;
 
 PX_ModbusTCP_Write PX_ModbusTCPWriteSingleReg(px_word counter,px_byte unit,px_word startAddr,px_word regdata);
+PX_ModbusTCP_Write PX_ModbusTCPWriteSingleBool(px_word counter, px_byte unit, px_word startAddr, px_bool b);
 PX_ModbusTCP_Read PX_ModbusTCPReadReg(px_word counter, px_byte unit, px_word startAddr,px_int count);
 PX_ModbusTCP_Read PX_ModbusTCPReadBool(px_word counter, px_byte unit, px_word startAddr, px_int count);
 #endif

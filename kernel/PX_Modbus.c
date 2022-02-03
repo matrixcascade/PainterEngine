@@ -16,6 +16,32 @@ PX_ModbusTCP_Write PX_ModbusTCPWriteSingleReg(px_word counter, px_byte unit, px_
 	return write;
 }
 
+PX_ModbusTCP_Write PX_ModbusTCPWriteSingleBool(px_word counter, px_byte unit, px_word startAddr, px_bool b)
+{
+	PX_ModbusTCP_Write write;
+	write.counter = counter;
+	write.magic = 0;
+	write.size[0] = 0;
+	write.size[1] = 6;
+	write.unit = unit;
+	write.opcode = 0x06;
+	write.startAddress[1] = startAddr & 0xff;
+	write.startAddress[0] = (startAddr >> 8) & 0xff;
+	if (b)
+	{
+		write.regdata[1] = 0xff;
+		write.regdata[0] = 0xff;
+	}
+	else
+	{
+		write.regdata[1] = 0;
+		write.regdata[0] = 0;
+	}
+	
+	return write;
+}
+
+
 PX_ModbusTCP_Read PX_ModbusTCPReadReg(px_word counter, px_byte unit, px_word startAddr, px_int count)
 {
 	PX_ModbusTCP_Read read;
