@@ -111,6 +111,7 @@ px_void PX_Object_VariousSetEditStyle(PX_Object* pObject,PX_OBJECT_VARIOUS_EIDT_
 			case PX_OBJECT_VARIOUS_EDIT_TYPE_HEX:
 			{
 				PX_Object_EditSetLimit(pDesc->various, "-01234567890ABCDEFabcdef");
+				PX_Object_EditSetInputMode(pDesc->various, PX_OBJECT_EDIT_INPUT_MODE_UPPERCASE);
 			}
 			break;
 			default:
@@ -345,6 +346,18 @@ px_void PX_Object_VariousSetInt(PX_Object* pObject, int i)
 	PX_Object_VariousSetText(pObject, content);
 }
 
+px_void PX_Object_VariousSetHex(PX_Object* pObject, px_dword i)
+{
+	px_char content[32];
+	if (pObject->Type != PX_OBJECT_TYPE_VARIOUS)
+	{
+		PX_ASSERT();
+		return;
+	}
+	PX_itoa(i, content, sizeof(content), 16);
+
+	PX_Object_VariousSetText(pObject, content);
+}
 px_void PX_Object_VariousSetBool(PX_Object* pObject, px_bool b)
 {
 	if (pObject->Type != PX_OBJECT_TYPE_VARIOUS)

@@ -1,3 +1,3 @@
-Put your resource files in this folder
-use "assets/filename" to access your resource files.
+Put your resource file(s) in this folder
+use "assets/filename" to access your resource file(s).
 

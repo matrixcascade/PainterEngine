@@ -76,7 +76,7 @@ int PX_AudioInitializeEx()
 	HANDLE hThread;
 	DWORD  threadId;
 	HWND hwnd=Win_Hwnd;
-	BOOL startThread=PX_TRUE;
+	BOOL startThread=TRUE;
 	/*Sound Play*/
 	if (!DSound_soundplay)
 	{

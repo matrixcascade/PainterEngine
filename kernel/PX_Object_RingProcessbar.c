@@ -27,8 +27,8 @@ px_void PX_Object_RingProcessBarRender(px_surface *psurface, PX_Object *pObject,
 	}
 
 	PX_sprintf1(content,sizeof(content),"%1.2%",PX_STRINGFORMAT_FLOAT(process*100));
-	PX_GeoDrawCircle(psurface,x,y,r,pDesc->linewidth+6,pDesc->BackgroundColor);
-	PX_GeoDrawRing(psurface,x,y,r,pDesc->linewidth,pDesc->Color,-90,-90+(px_int)(360*process));
+	PX_GeoDrawCircle(psurface,x,y,r, pDesc->linewidth+6,pDesc->BackgroundColor);
+	PX_GeoDrawRing(psurface,x,y,(px_float)r, (px_float)pDesc->linewidth,pDesc->Color,-90,-90+(px_int)(360*process));
 	PX_FontModuleDrawText(psurface,pDesc->fm,x,y,PX_ALIGN_CENTER,content,pDesc->Color);
 
 }
@@ -44,7 +44,7 @@ PX_Object * PX_Object_RingProcessBarCreate(px_memorypool *mp,PX_Object *Parent,p
 	Desc.Min=0;
 	Desc.Value=32;
 	Desc.fm=fm;
-	pObject=PX_ObjectCreateEx(mp,Parent,(px_float)x,(px_float)y,0,(px_float)0,(px_float)0,0,PX_OBJECT_TYPE_RINGPROCESSBAR,PX_NULL,PX_Object_RingProcessBarRender,PX_NULL,&Desc,sizeof(PX_Object_RingProcessBar));
+	pObject=PX_ObjectCreateEx(mp,Parent,(px_float)x,(px_float)y,0,(px_float)0,(px_float)0,0,PX_OBJECT_TYPE_RINGPROGRESS,PX_NULL,PX_Object_RingProcessBarRender,PX_NULL,&Desc,sizeof(PX_Object_RingProcessBar));
 	pObject->diameter=r*2.0f;
 	return pObject;
 }
@@ -101,7 +101,7 @@ px_int PX_Object_RingProcessBarGetMax(PX_Object* pRingProcessBar)
 
 PX_Object_RingProcessBar * PX_Object_GetRingProcessBar( PX_Object *Object )
 {
-	if(Object->Type==PX_OBJECT_TYPE_RINGPROCESSBAR)
+	if(Object->Type== PX_OBJECT_TYPE_RINGPROGRESS)
 		return (PX_Object_RingProcessBar *)Object->pObject;
 	else
 		return PX_NULL;
@@ -109,7 +109,7 @@ PX_Object_RingProcessBar * PX_Object_GetRingProcessBar( PX_Object *Object )
 
 px_int PX_Object_RingProcessBarGetValue( PX_Object *pRingProcessBar )
 {
-	if (pRingProcessBar->Type!=PX_OBJECT_TYPE_RINGPROCESSBAR)
+	if (pRingProcessBar->Type!=PX_OBJECT_TYPE_RINGPROGRESS)
 	{
 		PX_ASSERT();
 		return 0;

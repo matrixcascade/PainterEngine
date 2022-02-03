@@ -190,7 +190,10 @@ px_void PX_Object_ExplorerOnCursorDown(PX_Object *pObject,PX_Object_Event e,px_v
 
 		if (PX_Object_ExplorerGetSelectedCount(pObject)==0)
 		{
-			pExp->btn_Ok->Visible=PX_FALSE;
+			if (pExp->savemode&&PX_Object_EditGetText(pExp->edit_FileName)[0]==0)
+			{
+				pExp->btn_Ok->Visible = PX_FALSE;
+			}
 		}
 		else
 		{
@@ -229,6 +232,24 @@ static px_void PX_Object_ExplorerOnCursorWheel(PX_Object *pObject,PX_Object_Even
 
 }
 
+static px_void PX_Object_ExplorerOnEditChanged(PX_Object* pObject, PX_Object_Event e, px_void* ptr)
+{
+	PX_Object_Explorer* pExp = PX_ObjectGetDesc(PX_Object_Explorer,((PX_Object *)ptr));
+	if (pExp->savemode)
+	{
+		if (PX_Object_EditGetText(pObject)[0]!=0)
+		{
+			pExp->btn_Ok->Visible = PX_TRUE;
+		}
+		else
+		{
+			pExp->btn_Ok->Visible = PX_FALSE;
+		}
+		
+	}
+
+
+}
 px_void PX_Object_ExplorerRender(px_surface *psurface, PX_Object *pObject,px_uint elapsed)
 {
 	PX_Object_Explorer *pExp=PX_Object_GetExplorer(pObject);
@@ -463,10 +484,12 @@ PX_Object * PX_Object_ExplorerCreate(px_memorypool *mp, PX_Object *Parent,px_int
 		PX_ObjectRegisterEvent(pExp->btn_go,PX_OBJECT_EVENT_EXECUTE,PX_Object_ExplorerOnButtonGo,pObject);
 		PX_ObjectRegisterEvent(pExp->btn_Ok,PX_OBJECT_EVENT_EXECUTE,PX_Object_ExplorerOnButtonOk,pObject);
 		PX_ObjectRegisterEvent(pExp->btn_Cancel,PX_OBJECT_EVENT_EXECUTE,PX_Object_ExplorerOnButtonCancel,pObject);
+		PX_ObjectRegisterEvent(pExp->edit_FileName, PX_OBJECT_EVENT_VALUECHANGED, PX_Object_ExplorerOnEditChanged, pObject);
 
 		PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_CURSORMOVE,PX_Object_ExplorerOnCursorMove,pObject);
 		PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_CURSORDOWN,PX_Object_ExplorerOnCursorDown,pObject);
 		PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_CURSORWHEEL,PX_Object_ExplorerOnCursorWheel,pObject);
+		
 	} while (0);
 
 	PX_Object_ExplorerRefresh(pObject);
@@ -644,6 +667,7 @@ px_void PX_Object_ExplorerOpen(PX_Object *Object)
 
 px_void PX_Object_ExplorerSave(PX_Object* Object)
 {
+	PX_Object_Explorer* pExp = PX_ObjectGetDesc(PX_Object_Explorer, Object);
 	if (Object->Type != PX_OBJECT_TYPE_EXPLORER)
 	{
 		PX_ASSERT();
@@ -652,7 +676,7 @@ px_void PX_Object_ExplorerSave(PX_Object* Object)
 	PX_ObjectSetFocus(Object);
 	PX_Object_ExplorerRefresh(Object);
 	Object->Visible = PX_TRUE;
-	PX_ObjectGetDesc(PX_Object_Explorer, Object)->savemode = PX_TRUE;
+	pExp->savemode = PX_TRUE;
 }
 
 px_void PX_Object_ExplorerClose(PX_Object *Object)

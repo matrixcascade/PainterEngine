@@ -787,6 +787,20 @@ px_void PX_Object_EditAddString(PX_Object *pObject,px_char *Text)
 						{
 							ch='\n';
 						}
+						if (pEdit->inputmode == PX_OBJECT_EDIT_INPUT_MODE_LOWERCASE)
+						{
+							if (ch>='A'&& ch <= 'Z')
+							{
+								ch += 'a' - 'A';
+							}
+						}
+						else if(pEdit->inputmode == PX_OBJECT_EDIT_INPUT_MODE_UPPERCASE)
+						{
+							if (ch >= 'a' && ch <= 'z')
+							{
+								ch += 'A' - 'a';
+							}
+						}
 						PX_StringInsertChar(&pEdit->text,pEdit->cursor_index,ch);
 						pEdit->cursor_index++;
 					}
@@ -797,6 +811,20 @@ px_void PX_Object_EditAddString(PX_Object *pObject,px_char *Text)
 					if (ch=='\r')
 					{
 						ch='\n';
+					}
+					if (pEdit->inputmode == PX_OBJECT_EDIT_INPUT_MODE_LOWERCASE)
+					{
+						if (ch >= 'A' && ch <= 'Z')
+						{
+							ch += 'a' - 'A';
+						}
+					}
+					else if (pEdit->inputmode == PX_OBJECT_EDIT_INPUT_MODE_UPPERCASE)
+					{
+						if (ch >= 'a' && ch <= 'z')
+						{
+							ch += 'A' - 'a';
+						}
 					}
 					PX_StringInsertChar(&pEdit->text,pEdit->cursor_index,ch);
 					pEdit->cursor_index++;
@@ -953,9 +981,17 @@ px_void PX_Object_EditSetOffset(PX_Object *pObject,px_int TopOffset,px_int LeftO
 px_void PX_Object_EditSetXYOffset(PX_Object* pObject, px_int XOffset, px_int YOffset)
 {
 	PX_Object_Edit* pEdit = PX_Object_GetEdit(pObject);
-	if (pObject != PX_NULL)
+	if (pEdit != PX_NULL)
 	{
 		pEdit->XOffset = XOffset;
 		pEdit->YOffset = YOffset;
+	}
+}
+px_void PX_Object_EditSetInputMode(PX_Object* pObject, PX_OBJECT_EDIT_INPUT_MODE mode)
+{
+	PX_Object_Edit* pEdit = PX_Object_GetEdit(pObject);
+	if (pEdit != PX_NULL)
+	{
+		pEdit->inputmode = mode;
 	}
 }

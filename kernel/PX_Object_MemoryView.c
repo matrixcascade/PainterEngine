@@ -9,7 +9,7 @@ static px_int PX_Object_MemoryViewGetCursorMapIndex(PX_Object *pObject,px_float 
 	PX_Object_MemoryView *pdesc;
 	px_int x,y,w,h;
 	px_float inheritX,inheritY;
-	px_int row,column;
+	px_int row;
 	px_int columnoffset;
 	px_int rel_address_offset;
 	px_int xIndex,yIndex,Index;
@@ -21,7 +21,6 @@ static px_int PX_Object_MemoryViewGetCursorMapIndex(PX_Object *pObject,px_float 
 	h=(px_int)pObject->Height;
 
 	row=(w-(16+64+16+8+16))/32;
-	column=h/(15+3);
 
 	cx-=x;
 	cy-=y;
@@ -44,7 +43,7 @@ static px_int PX_Object_MemoryViewGetCursorMapIndex(PX_Object *pObject,px_float 
 		return -1;
 	}
 
-	yIndex=(px_int)(cy/18);
+	yIndex=(px_int)(cy/16);
 
 	Index=yIndex*row*2+rel_address_offset*2+xIndex;
 	if (Index<0)
@@ -413,3 +412,12 @@ px_void PX_Object_MemoryViewSetData(PX_Object *pObject,px_void *pdata,px_dword s
 	}
 }
 
+px_bool		PX_Object_MemoryViewReadData(PX_Object* pObject,px_dword offset, px_void* poutdata, px_dword size)
+{
+	PX_Object_MemoryView* pdesc = PX_Object_GetMemoryView(pObject);
+	if (offset + size <= (px_dword)pdesc->size)
+	{
+		PX_memcpy(poutdata, (px_byte *)pdesc->pdata + offset, size);
+	}
+	return PX_FALSE;
+}

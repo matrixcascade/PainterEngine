@@ -37,4 +37,7 @@
 #include "PX_ImageFilter.h"
 #include "PX_Linker.h"
 #include "PX_Tuning.h"
+#include "PX_Midi.h"
+#include "PX_KarplusStrong.h"
+#include "PX_Piano.h"
 #endif

@@ -3,7 +3,7 @@
 
 PX_Object_VarBox* PX_Object_GetVarBox(PX_Object* pObject)
 {
-	if (pObject->Type==PX_OBJECT_TYPE_IPBOX)
+	if (pObject->Type==PX_OBJECT_TYPE_VARBOX)
 	{
 		return PX_ObjectGetDesc(PX_Object_VarBox, pObject);
 	}
@@ -103,7 +103,7 @@ PX_Object* PX_Object_VarBoxCreate(px_memorypool* mp, PX_Object* Parent, int x, i
 {
 	PX_Object_VarBox desc, * pdesc;
 	PX_Object* pObject;
-	pObject = PX_ObjectCreateEx(mp, Parent, (px_float)x, (px_float)y, 0, (px_float)width, (px_float)height, 0, PX_OBJECT_TYPE_IPBOX, PX_NULL, PX_NULL, PX_NULL, &desc, sizeof(desc));
+	pObject = PX_ObjectCreateEx(mp, Parent, (px_float)x, (px_float)y, 0, (px_float)width, (px_float)height, 0, PX_OBJECT_TYPE_VARBOX, PX_NULL, PX_NULL, PX_NULL, &desc, sizeof(desc));
 	pdesc = PX_ObjectGetDesc(PX_Object_VarBox, pObject);
 	pdesc->widget = PX_Object_WidgetCreate(mp, pObject, 0, 0, width, height, "", fontmodule);
 	PX_Object_WidgetShowHideCloseButton(pdesc->widget, PX_FALSE);
@@ -147,18 +147,33 @@ PX_Object* PX_Object_VarBoxCreate(px_memorypool* mp, PX_Object* Parent, int x, i
 
 px_void PX_Object_VarBoxShow(PX_Object* pObject)
 {
+	if (pObject->Type != PX_OBJECT_TYPE_VARBOX)
+	{
+		PX_ASSERT();
+		return;
+	}
 	pObject->Visible = PX_TRUE;
 	PX_ObjectSetFocus(pObject);
 }
 
 px_void PX_Object_VarBoxClose(PX_Object* pObject)
 {
+	if (pObject->Type != PX_OBJECT_TYPE_VARBOX)
+	{
+		PX_ASSERT();
+		return;
+	}
 	pObject->Visible = PX_FALSE;
 	PX_ObjectClearFocus(pObject);
 }
 
 px_void PX_Object_VarBoxHide(PX_Object* pObject)
 {
+	if (pObject->Type != PX_OBJECT_TYPE_VARBOX)
+	{
+		PX_ASSERT();
+		return;
+	}
 	pObject->Visible = PX_FALSE;
 	PX_ObjectClearFocus(pObject);
 }

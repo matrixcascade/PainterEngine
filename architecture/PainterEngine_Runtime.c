@@ -66,6 +66,7 @@ px_bool PX_RuntimeResize(PX_Runtime *pe,px_int surface_width,px_int surface_heig
 {
 	if (PX_SurfaceMemorySize(surface_width,surface_height)+64>(px_int)pe->mp.FreeSize)
 	{
+		PX_ASSERT();//out of memory
 		return PX_FALSE;
 	}
 

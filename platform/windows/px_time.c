@@ -22,7 +22,7 @@ int PX_TimeGetMouth()
 	time(&timep);
 	gmtime_s(&p, &timep);
 
-	return  p.tm_mon;
+	return  p.tm_mon+1;
 }
 
 int PX_TimeGetDay()

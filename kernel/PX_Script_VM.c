@@ -723,7 +723,7 @@ PX_SCRIPTVM_RUNRETURN PX_ScriptVM_InstanceRunThread(PX_ScriptVM_Instance *Ins,px
 			return PX_SCRIPTVM_RUNRETURN_END;
 		}
 
-		if (Ins->Suspend||pT->suspend)
+		if (Ins->Suspend||pT->suspend || pT->sleep)
 		{
 			return PX_SCRIPTVM_RUNRETURN_SUSPEND;
 		}
@@ -1248,16 +1248,16 @@ PX_SCRIPTVM_RUNRETURN PX_ScriptVM_InstanceRunThread(PX_ScriptVM_Instance *Ins,px
 			}
 			else if (pVar->type==PX_SCRIPTVM_VARIABLE_TYPE_INT&&cVar.type==PX_SCRIPTVM_VARIABLE_TYPE_FLOAT)
 			{
-				pVar->_float=(px_float)PX_pow_dd(pVar->_int,cVar._float);
+				pVar->_float=(px_float)PX_pow(pVar->_int,cVar._float);
 				pVar->type=PX_SCRIPTVM_VARIABLE_TYPE_FLOAT;
 			}
 			else if (pVar->type==PX_SCRIPTVM_VARIABLE_TYPE_FLOAT&&cVar.type==PX_SCRIPTVM_VARIABLE_TYPE_FLOAT)
 			{
-				pVar->_float=(px_float)PX_pow_dd(pVar->_float,cVar._float);
+				pVar->_float=(px_float)PX_pow(pVar->_float,cVar._float);
 			}
 			else if (pVar->type==PX_SCRIPTVM_VARIABLE_TYPE_FLOAT&&cVar.type==PX_SCRIPTVM_VARIABLE_TYPE_INT)
 			{
-				pVar->_float=(px_float)PX_pow_dd(pVar->_float,cVar._int);
+				pVar->_float=(px_float)PX_pow(pVar->_float,cVar._int);
 			}
 			pT->IP+=(4+2*4);
 		}
@@ -2908,6 +2908,7 @@ PX_SCRIPTVM_RUNRETURN PX_ScriptVM_InstanceRunThread(PX_ScriptVM_Instance *Ins,px
 			break;
 		}
 	}
+	PX_ScriptVM_ThreadStop(Ins, Ins->T);
 	return PX_SCRIPTVM_RUNRETURN_END;
 _ERROR:
 
@@ -2922,7 +2923,6 @@ _ERROR:
 px_bool PX_ScriptVM_InstanceRunFunction(PX_ScriptVM_Instance *Ins,px_int threadID,const px_char *functionName,PX_SCRIPTVM_VARIABLE args[],px_int paramcount)
 {
 	int i,j,ip=-1;
-	px_char	uprname[__PX_SCRIPT_ASM_MNEMONIC_NAME_LEN];
 	px_int old_T;
 	if (paramcount>16||threadID>=Ins->maxThreadCount)
 	{
@@ -2936,9 +2936,7 @@ px_bool PX_ScriptVM_InstanceRunFunction(PX_ScriptVM_Instance *Ins,px_int threadI
 
 	for (i=0;i<Ins->funcCount;i++)
 	{
-		PX_strcpy(uprname,functionName,sizeof(uprname));
-		PX_strupr(uprname);
-		if(PX_strequ(Ins->_func[i].name,uprname))
+		if(PX_strequ2(Ins->_func[i].name, functionName))
 		{
 			ip=Ins->_func[i].Addr;
 			break;
@@ -4440,7 +4438,7 @@ static px_bool PX_ScriptVM_DebuggerSolveCmd(PX_ScriptVM_Instance *Ins,px_char *c
 	px_int u,i,oft,instrLen;
 	px_bool bContinue=PX_FALSE;
 
-	PX_LexerInit(&lexer,Ins->mp);
+	PX_LexerInitialize(&lexer,Ins->mp);
 	PX_LexerRegisterSpacer(&lexer,' ');
 	PX_LexerRegisterSpacer(&lexer,'\t');
 
@@ -4712,12 +4710,30 @@ px_void PX_ScriptVM_ThreadResume(PX_ScriptVM_Instance *Ins,px_int ThreadId)
 	}
 }
 
+px_bool PX_ScriptVM_InstanceIsRuning(PX_ScriptVM_Instance* Ins)
+{
+	px_int i;
+	for (i=0;i< Ins->maxThreadCount;i++)
+	{
+		if (Ins->pThread[i].Activated)
+		{
+			return PX_TRUE;
+		}
+	}
+	return PX_FALSE;
+}
+
 
 
 px_void PX_ScriptVM_InstanceRun(PX_ScriptVM_Instance *Ins,px_int tick)
 {
-	px_int i,activating=0;
-	for (i=0;i<Ins->maxThreadCount;i++)
+	PX_ScriptVM_InstanceRunTime(Ins, tick, 0);
+}
+
+px_void PX_ScriptVM_InstanceRunTime(PX_ScriptVM_Instance* Ins, px_int tick, px_dword elapsed)
+{
+	px_int i, activating = 0;
+	for (i = 0; i < Ins->maxThreadCount; i++)
 	{
 		if (Ins->pThread[i].Activated)
 		{
@@ -4729,28 +4745,35 @@ px_void PX_ScriptVM_InstanceRun(PX_ScriptVM_Instance *Ins,px_int tick)
 		return;
 	}
 
-	if (tick<activating*PX_SCRIPTVM_ATOM_INSTRUCTMENTS)
+	if (tick < activating * PX_SCRIPTVM_ATOM_INSTRUCTMENTS)
 	{
-		tick=activating*PX_SCRIPTVM_ATOM_INSTRUCTMENTS;
+		tick = activating * PX_SCRIPTVM_ATOM_INSTRUCTMENTS;
 	}
-	
+
 	while (1)
 	{
-		for (i=0;i<Ins->maxThreadCount;i++)
+		for (i = 0; i < Ins->maxThreadCount; i++)
 			if (Ins->pThread[i].Activated)
 			{
-				PX_ScriptVM_InstanceThreadSwitch(Ins,i);
-				PX_ScriptVM_InstanceRunThread(Ins,PX_SCRIPTVM_ATOM_INSTRUCTMENTS);
-				tick-=PX_SCRIPTVM_ATOM_INSTRUCTMENTS;
-				if (tick<=0)
+				if (Ins->pThread[i].sleep>elapsed)
+				{
+					Ins->pThread[i].sleep -= elapsed;
+				}
+				else
+				{
+					Ins->pThread[i].sleep = 0;
+				}
+
+				PX_ScriptVM_InstanceThreadSwitch(Ins, i);
+				PX_ScriptVM_InstanceRunThread(Ins, PX_SCRIPTVM_ATOM_INSTRUCTMENTS);
+				tick -= PX_SCRIPTVM_ATOM_INSTRUCTMENTS;
+				if (tick <= 0)
 				{
 					return;
 				}
 			}
 	}
-	
 }
-
 
 
 

@@ -63,8 +63,8 @@ px_float PX_atof(const px_char fstr[])
 	}
 	if (be)
 	{
-		int e=PX_atoi(fstr);
-		float e10=1;
+		px_int e=PX_atoi(fstr);
+		px_float e10=1;
 		if (e>0)
 		{
 			while (e)
@@ -351,9 +351,304 @@ px_double PX_fast_exp(px_double x) {
 	return x;
 }
 
+/* PX_pow_dd & PX_scalbn & PX_log function(s)
+/*
+ * ====================================================
+ * Copyright (C) 2004 by Sun Microsystems, Inc. All rights reserved.
+ *
+ * Permission to use, copy, modify, and distribute this
+ * software is freely granted, provided that this notice
+ * is preserved.
+ * ====================================================
+ */
+px_double64 PX_copysign(px_double64 x, px_double64 y)
+{
+	*(1 + (px_int32*)&x) = (*(1 + (px_int32*)&x) & 0x7fffffff) | (*(1 + (px_int32*)&y) & 0x80000000);
+	return x;
+}
+
+px_double64 PX_scalbn(px_double64 x, px_double64 n)
+{
+	px_int32  k, hx, lx;
+	static px_double64	two54 = 1.80143985094819840000e+16, /* 0x43500000, 0x00000000 */
+		twom54 = 5.55111512312578270212e-17, /* 0x3C900000, 0x00000000 */
+		huge = 1.0e+300,
+		tiny = 1.0e-300;
+
+	hx = *(1 + (px_int32*)&x);
+	lx = *(px_int32*)&x;
+	k = (hx & 0x7ff00000) >> 20;		/* extract exponent */
+	if (k == 0) {				/* 0 or subnormal x */
+		if ((lx | (hx & 0x7fffffff)) == 0) return x; /* +-0 */
+		x *= two54;
+		hx = *(1 + (px_int32*)&x);
+		k = ((hx & 0x7ff00000) >> 20) - 54;
+		if (n < -50000) return tiny * x; 	/*underflow*/
+	}
+	if (k == 0x7ff) return x + x;		/* NaN or Inf */
+	k = (px_int32)(k + n);
+	if (k > 0x7fe) return huge * PX_copysign(huge, x); /* overflow  */
+	if (k > 0) 				/* normal result */
+	{
+		*(1 + (px_int32*)&x) = (hx & 0x800fffff) | (k << 20); return x;
+	}
+	if (k <= -54)
+		if (n > 50000) 	/* in case integer overflow in n+k */
+			return huge * PX_copysign(huge, x);	/*overflow*/
+		else return tiny * PX_copysign(tiny, x); 	/*underflow*/
+	k += 54;				/* subnormal result */
+	*(1 + (px_int32*)&x) = (hx & 0x800fffff) | (k << 20);
+	return x * twom54;
+}
+
+px_double64 __px_pow_dd(px_double64 x, px_double64 y)
+{
+	px_double64 z, ax, z_h, z_l, p_h, p_l;
+	px_double64 y1, t1, t2, r, s, t, u, v, w;
+	px_int32 i0, i1, i, j, k, yisint, n;
+	px_int32 hx, hy, ix, iy;
+	unsigned lx, ly;
+
+	static px_double64 bp[] = { 1.0, 1.5, },
+		dp_h[] = { 0.0, 5.84962487220764160156e-01, }, /* 0x3FE2B803, 0x40000000 */
+		dp_l[] = { 0.0, 1.35003920212974897128e-08, }, /* 0x3E4CFDEB, 0x43CFD006 */
+		zero = 0.0,
+		one = 1.0,
+		two = 2.0,
+		two53 = 9007199254740992.0,	/* 0x43400000, 0x00000000 */
+		huge = 1.0e300,
+		tiny = 1.0e-300,
+		/* poly coefs for (3/2)*(log(x)-2s-2/3*s**3 */
+		L1 = 5.99999999999994648725e-01, /* 0x3FE33333, 0x33333303 */
+		L2 = 4.28571428578550184252e-01, /* 0x3FDB6DB6, 0xDB6FABFF */
+		L3 = 3.33333329818377432918e-01, /* 0x3FD55555, 0x518F264D */
+		L4 = 2.72728123808534006489e-01, /* 0x3FD17460, 0xA91D4101 */
+		L5 = 2.30660745775561754067e-01, /* 0x3FCD864A, 0x93C9DB65 */
+		L6 = 2.06975017800338417784e-01, /* 0x3FCA7E28, 0x4A454EEF */
+		P1 = 1.66666666666666019037e-01, /* 0x3FC55555, 0x5555553E */
+		P2 = -2.77777777770155933842e-03, /* 0xBF66C16C, 0x16BEBD93 */
+		P3 = 6.61375632143793436117e-05, /* 0x3F11566A, 0xAF25DE2C */
+		P4 = -1.65339022054652515390e-06, /* 0xBEBBBD41, 0xC5D26BF1 */
+		P5 = 4.13813679705723846039e-08, /* 0x3E663769, 0x72BEA4D0 */
+		lg2 = 6.93147180559945286227e-01, /* 0x3FE62E42, 0xFEFA39EF */
+		lg2_h = 6.93147182464599609375e-01, /* 0x3FE62E43, 0x00000000 */
+		lg2_l = -1.90465429995776804525e-09, /* 0xBE205C61, 0x0CA86C39 */
+		ovt = 8.0085662595372944372e-0017, /* -(1024-log2(ovfl+.5ulp)) */
+		cp = 9.61796693925975554329e-01, /* 0x3FEEC709, 0xDC3A03FD =2/(3ln2) */
+		cp_h = 9.61796700954437255859e-01, /* 0x3FEEC709, 0xE0000000 =(float)cp */
+		cp_l = -7.02846165095275826516e-09, /* 0xBE3E2FE0, 0x145B01F5 =tail of cp_h*/
+		ivln2 = 1.44269504088896338700e+00, /* 0x3FF71547, 0x652B82FE =1/ln2 */
+		ivln2_h = 1.44269502162933349609e+00, /* 0x3FF71547, 0x60000000 =24b 1/ln2*/
+		ivln2_l = 1.92596299112661746887e-08; /* 0x3E54AE0B, 0xF85DDF44 =1/ln2 tail*/
+
+
+	i0 = ((*(px_int32*)&one) >> 29) ^ 1; i1 = 1 - i0;
+	hx = *(1 + (px_int32*)&x); lx = *(px_int32*)&x;
+	hy = *(1 + (px_int32*)&y); ly = *(px_int32*)&y;
+	ix = hx & 0x7fffffff;  iy = hy & 0x7fffffff;
+
+	/* y==zero: x**0 = 1 */
+	if ((iy | ly) == 0) return one;
+
+	/* +-NaN return x+y */
+	if (ix > 0x7ff00000 || ((ix == 0x7ff00000) && (lx != 0)) ||
+		iy > 0x7ff00000 || ((iy == 0x7ff00000) && (ly != 0)))
+		return x + y;
+
+	/* determine if y is an odd px_int32 when x < 0
+	 * yisint = 0	... y is not an integer
+	 * yisint = 1	... y is an odd px_int32
+	 * yisint = 2	... y is an even px_int32
+	 */
+	yisint = 0;
+	if (hx < 0) {
+		if (iy >= 0x43400000) yisint = 2; /* even integer y */
+		else if (iy >= 0x3ff00000) {
+			k = (iy >> 20) - 0x3ff;	   /* exponent */
+			if (k > 20) {
+				j = ly >> (52 - k);
+				if ((j << (52 - k)) == ly) yisint = 2 - (j & 1);
+			}
+			else if (ly == 0) {
+				j = iy >> (20 - k);
+				if ((j << (20 - k)) == iy) yisint = 2 - (j & 1);
+			}
+		}
+	}
+
+	/* special value of y */
+	if (ly == 0) {
+		if (iy == 0x7ff00000) {	/* y is +-inf */
+			if (((ix - 0x3ff00000) | lx) == 0)
+				return  y - y;	/* inf**+-1 is NaN */
+			else if (ix >= 0x3ff00000)/* (|x|>1)**+-inf = inf,0 */
+				return (hy >= 0) ? y : zero;
+			else			/* (|x|<1)**-,+inf = inf,0 */
+				return (hy < 0) ? -y : zero;
+		}
+		if (iy == 0x3ff00000) {	/* y is  +-1 */
+			if (hy < 0) return one / x; else return x;
+		}
+		if (hy == 0x40000000) return x * x; /* y is  2 */
+		if (hy == 0x3fe00000) {	/* y is  0.5 */
+			if (hx >= 0)	/* x >= +0 */
+				return PX_sqrtd(x);
+		}
+	}
+
+	ax = PX_ABS(x);
+	/* special value of x */
+	if (lx == 0) {
+		if (ix == 0x7ff00000 || ix == 0 || ix == 0x3ff00000) {
+			z = ax;			/*x is +-0,+-inf,+-1*/
+			if (hy < 0) z = one / z;	/* z = (1/|x|) */
+			if (hx < 0) {
+				if (((ix - 0x3ff00000) | yisint) == 0) {
+					z = (z - z) / (z - z); /* (-1)**non-int is NaN */
+				}
+				else if (yisint == 1)
+					z = -z;		/* (x<0)**odd = -(|x|**odd) */
+			}
+			return z;
+		}
+	}
+
+	n = (hx >> 31) + 1;
+
+	/* (x<0)**(non-int) is NaN */
+	if ((n | yisint) == 0) return (x - x) / (x - x);
+
+	s = one; /* s (sign of result -ve**odd) = -1 else = 1 */
+	if ((n | (yisint - 1)) == 0) s = -one;/* (-ve)**(odd int) */
+
+	/* |y| is huge */
+	if (iy > 0x41e00000) { /* if |y| > 2**31 */
+		if (iy > 0x43f00000) {	/* if |y| > 2**64, must o/uflow */
+			if (ix <= 0x3fefffff) return (hy < 0) ? huge  : tiny ;
+			if (ix >= 0x3ff00000) return (hy > 0) ? huge  : tiny ;
+		}
+		/* over/underflow if x is not close to one */
+		if (ix < 0x3fefffff) return (hy < 0) ? s * huge * huge : s * tiny * tiny;
+		if (ix > 0x3ff00000) return (hy > 0) ? s * huge * huge : s * tiny * tiny;
+		/* now |1-x| is tiny <= 2**-20, suffice to compute
+		   log(x) by x-x^2/2+x^3/3-x^4/4 */
+		t = ax - one;		/* t has 20 trailing zeros */
+		w = (t * t) * (0.5 - t * (0.3333333333333333333333 - t * 0.25));
+		u = ivln2_h * t;	/* ivln2_h has 21 sig. bits */
+		v = t * ivln2_l - w * ivln2;
+		t1 = u + v;
+		*(px_int32*)&t1 = 0;
+		t2 = v - (t1 - u);
+	}
+	else {
+		px_double64 ss, s2, s_h, s_l, t_h, t_l;
+		n = 0;
+		/* take care subnormal number */
+		if (ix < 0x00100000)
+		{
+			ax *= two53; n -= 53; ix = *(1 + (px_int32*)&ax);
+		}
+		n += ((ix) >> 20) - 0x3ff;
+		j = ix & 0x000fffff;
+		/* determine interval */
+		ix = j | 0x3ff00000;		/* normalize ix */
+		if (j <= 0x3988E) k = 0;		/* |x|<sqrt(3/2) */
+		else if (j < 0xBB67A) k = 1;	/* |x|<sqrt(3)   */
+		else { k = 0; n += 1; ix -= 0x00100000; }
+		*(1 + (px_int32*)&ax) = ix;
+
+		/* compute ss = s_h+s_l = (x-1)/(x+1) or (x-1.5)/(x+1.5) */
+		u = ax - bp[k];		/* bp[0]=1.0, bp[1]=1.5 */
+		v = one / (ax + bp[k]);
+		ss = u * v;
+		s_h = ss;
+		*(px_int32*)&s_h = 0;
+		/* t_h=ax+bp[k] High */
+		t_h = zero;
+		*(1 + (px_int32*)&t_h) = ((ix >> 1) | 0x20000000) + 0x00080000 + (k << 18);
+		t_l = ax - (t_h - bp[k]);
+		s_l = v * ((u - s_h * t_h) - s_h * t_l);
+		/* compute log(ax) */
+		s2 = ss * ss;
+		r = s2 * s2 * (L1 + s2 * (L2 + s2 * (L3 + s2 * (L4 + s2 * (L5 + s2 * L6)))));
+		r += s_l * (s_h + ss);
+		s2 = s_h * s_h;
+		t_h = 3.0 + s2 + r;
+		*(px_int32*)&t_h = 0;
+		t_l = r - ((t_h - 3.0) - s2);
+		/* u+v = ss*(1+...) */
+		u = s_h * t_h;
+		v = s_l * t_h + t_l * ss;
+		/* 2/(3log2)*(ss+...) */
+		p_h = u + v;
+		*(px_int32*)&p_h = 0;
+		p_l = v - (p_h - u);
+		z_h = cp_h * p_h;		/* cp_h+cp_l = 2/(3*log2) */
+		z_l = cp_l * p_h + p_l * cp + dp_l[k];
+		/* log2(ax) = (ss+..)*2/(3*log2) = n + dp_h + z_h + z_l */
+		t = (px_double64)n;
+		t1 = (((z_h + z_l) + dp_h[k]) + t);
+		*(px_int32*)&t1 = 0;
+		t2 = z_l - (((t1 - t) - dp_h[k]) - z_h);
+	}
+
+	/* split up y into y1+y2 and compute (y1+y2)*(t1+t2) */
+	y1 = y;
+	*(px_int32*)&y1 = 0;
+	p_l = (y - y1) * t1 + y * t2;
+	p_h = y1 * t1;
+	z = p_l + p_h;
+	j = *(1 + (px_int32*)&z);
+	i = *(px_int32*)&z;
+	if (j >= 0x40900000) {				/* z >= 1024 */
+		if (((j - 0x40900000) | i) != 0)			/* if z > 1024 */
+			return s * huge * huge;			/* overflow */
+		else {
+			if (p_l + ovt > z - p_h) return s * huge * huge;	/* overflow */
+		}
+	}
+	else if ((j & 0x7fffffff) >= 0x4090cc00) {	/* z <= -1075 */
+		if (((j - 0xc090cc00) | i) != 0) 		/* z < -1075 */
+			return s * tiny * tiny;		/* underflow */
+		else {
+			if (p_l <= z - p_h) return s * tiny * tiny;	/* underflow */
+		}
+	}
+	/*
+	 * compute 2**(p_h+p_l)
+	 */
+	i = j & 0x7fffffff;
+	k = (i >> 20) - 0x3ff;
+	n = 0;
+	if (i > 0x3fe00000) {		/* if |z| > 0.5, set n = [z+0.5] */
+		n = j + (0x00100000 >> (k + 1));
+		k = ((n & 0x7fffffff) >> 20) - 0x3ff;	/* new k for n */
+		t = zero;
+		*(1 + (px_int32*)&t) = (n & ~(0x000fffff >> k));
+		n = ((n & 0x000fffff) | 0x00100000) >> (20 - k);
+		if (j < 0) n = -n;
+		p_h -= t;
+	}
+	t = p_l + p_h;
+	*(px_int32*)&t = 0;
+	u = t * lg2_h;
+	v = (p_l - (t - p_h)) * lg2 + t * lg2_l;
+	z = u + v;
+	w = v - (z - u);
+	t = z * z;
+	t1 = z - t * (P1 + t * (P2 + t * (P3 + t * (P4 + t * P5))));
+	r = (z * t1) / (t1 - two) - (w + z * w);
+	z = one - (r - z);
+	j = *(1 + (px_int32*)&z);
+	j += (n << 20);
+	if ((j >> 20) <= 0) z = PX_scalbn(z, n);	/* subnormal output */
+	else *(1 + (px_int32*)&z) += (n << 20);
+	return s * z;
+}
+
 px_double PX_exp(px_double x)
 {
-	return PX_pow_dd(PX_e,x);
+	return __px_pow_dd(PX_e, x);
 }
 
 px_double PX_tanh(px_double x)
@@ -423,6 +718,20 @@ px_double PX_sind(px_double x)
 	term*=(-x*x)/(32*33);
 	return result;
 
+}
+
+px_double PX_sinc(px_double i)
+{
+	return i?PX_sind(i * PX_PI) / (i * PX_PI):1;
+}
+
+px_double PX_sinc_interpolate(px_double x[], px_int size, px_double d)
+{
+	px_int i;
+	px_double sum = 0;
+	for (i = 0; i < size; i++)
+		sum += x[i] * PX_sinc(d - i);
+	return sum;
 }
 
 px_double PX_cosd(px_double radian)
@@ -1324,6 +1633,15 @@ px_color PX_COLOR(px_uchar a,px_uchar r,px_uchar g,px_uchar b)
 	return color;
 }
 
+px_color PX_ColorInverse(px_color clr)
+{
+	px_color color;
+	color._argb.a = clr._argb.a;
+	color._argb.r = 255-clr._argb.r;
+	color._argb.g = 255 - clr._argb.g;
+	color._argb.b = 255 - clr._argb.b;
+	return color;
+}
 
 px_void PX_ColorIncrease(px_color *color,px_uchar inc)
 {
@@ -2645,7 +2963,7 @@ px_complex PX_complexExp(px_complex a)
 
 px_complex PX_complexSin(px_complex a)
 {
-	double q,p;
+	px_double64 q,p;
 	px_complex ret;
 	p=PX_exp(a.im);
 	q=1/p;
@@ -2682,6 +3000,11 @@ void PX_DCT(_IN px_double x[],_OUT px_double X[],px_int N)
 {
 	px_int n,m;
 	px_double v;
+	if (x == X)
+	{
+		//overlap error
+		PX_ASSERT();
+	}
 	PX_memset(X,0,sizeof(px_double)*N);
 	for (n=0;n<N;n++)
 	{
@@ -2914,7 +3237,6 @@ void PX_FFT_2(_IN px_complex x[],_OUT px_complex X[],px_int N)
 		}
 	}
 }
-
 void PX_IFFT_2(_IN px_complex X[],_OUT px_complex x[],px_int N)
 {
 	px_int cx,cy,i;
@@ -2976,6 +3298,34 @@ void PX_FFT_2_Shift(_IN px_complex _in[],_OUT px_complex _out[],px_int N)
 			_ext=_t[y*N+x];
 			_t[y*N+x]=_t[y*N+N*N/2+x-N/2];
 			_t[y*N+N*N/2+x-N/2]=_ext;
+		}
+	}
+}
+
+void PX_DCT_2_Shift(_IN px_double _in[], _OUT px_double _out[], px_int N)
+{
+	px_int x, y;
+	px_double* _t = _out;
+	px_double _ext;
+	PX_memcpy(_t, _in, sizeof(px_double) * N * N);
+
+	for (y = 0; y < N / 2; y++)
+	{
+		for (x = 0; x < N / 2; x++)
+		{
+			_ext = _t[y * N + x];
+			_t[y * N + x] = _t[y * N + N * N / 2 + x + N / 2];
+			_t[y * N + N * N / 2 + x + N / 2] = _ext;
+		}
+	}
+
+	for (y = 0; y < N / 2; y++)
+	{
+		for (x = N / 2; x < N; x++)
+		{
+			_ext = _t[y * N + x];
+			_t[y * N + x] = _t[y * N + N * N / 2 + x - N / 2];
+			_t[y * N + N * N / 2 + x - N / 2] = _ext;
 		}
 	}
 }
@@ -3091,7 +3441,7 @@ px_int PX_PitchEstimation(_IN px_complex x[],px_int N,px_int sampleRate,px_int l
 	return sampleRate/idx;
 }
 
-void PX_PreEmphasise(const px_double *data, int len, px_double *out, px_double preF)//0.9<preF<1.0 suggest 0.9
+void PX_PreEmphasise(const px_double *data, px_int len, px_double *out, px_double preF)//0.9<preF<1.0 suggest 0.9
 {
 	px_int i;
 	for(i = len - 1; i >= 1; i--)
@@ -3125,6 +3475,16 @@ void PX_LinearInterpolationResample(_IN px_double x[],_OUT px_double X[],px_int 
 			
 		}
 		X[k]=d1;
+	}
+}
+
+void PX_SincInterpolationResample(_IN px_double x[], _OUT px_double X[], px_int N, px_int M)
+{
+	px_double step = 1 / (M-1);
+	px_int i;
+	for ( i = 0; i < M; i++)
+	{
+		X[i] = PX_sinc_interpolate(x, N, step * i);
 	}
 }
 
@@ -3391,61 +3751,16 @@ static px_double __px_pow_i(px_double num,px_int n)
 
 static px_double __px_pow_f(px_double num,px_double m)
 {
-	px_int i,j;
-	px_double powd=0,x,tmpm=1;
-	x=num-1;
-	for(i=1;tmpm>0.0000000001 || tmpm<-0.0000000001;i++)
-	{
-		for(j=1,tmpm=1;j<=i;j++) 
-		{
-			tmpm*=(m-j+1)*x/j;
-		}
-		powd+=tmpm;
-		
-		if (powd==0)
-		{
-			break; 
-		}
-		if (powd>0)
-		{
-			if (powd>=PX_DBL_POSITIVE_MAX||powd<=PX_DBL_POSITIVE_MIN)
-			{
-				PX_ASSERT();
-				break;
-			}
-		}
-		else
-		{
-			if (powd<=PX_DBL_NEGATIVE_MIN||powd>=PX_DBL_NEGATIVE_MAX)
-			{
-				PX_ASSERT();
-				break;
-			}
-		}
-	}
-	return powd+1;
+	return PX_exp(m*PX_log(num));
 }
 
-px_double PX_pow_dd(px_double num,px_double m)
+px_double PX_pow(px_double num,px_double m)
 {
-	while (num>2)
-	{
-		num=PX_sqrtd(num);
-		m*=2;
-	}
-	if(num==0 && m!=0) return 0;
-	else if(num==0 && m==0) return 1;
-	else if(num<0 && m-(px_int)(m)!=0) return 0;
-	if(num>2)
-	{
-		num=1/num;
-		m=-m;
-	}
-	if(m<0) return 1/PX_pow_dd(num,-m);
+
 	if(m-(px_int)(m)==0) 
 		return __px_pow_i(num,(px_int)m);
 	else 
-		return __px_pow_f(num,m-(px_int)(m))*__px_pow_i(num,(px_int)(m));
+		return __px_pow_dd(num,m);
 	//return __px_pow_f(num,m);
 }
 
@@ -3465,28 +3780,86 @@ px_int PX_pow_ii(px_int i,px_int n)
 	return fin;
 }
 
-
-px_double PX_ln(px_double __x)
+static px_float __int_as_float(px_int32 a)
 {
-	px_int N = 128;
-	px_int k,nk;
-	px_double x,xx,y;
-	px_double m=1;
-	while (__x>PX_e)
-	{
-		__x=PX_sqrtd(__x);
-		m*=2;
+	px_float r; 
+	PX_memcpy(&r, &a, sizeof (r)); 
+	return r; 
+}
+static px_int32 __float_as_int(px_float a) 
+{ 
+	px_int32 r; 
+	PX_memcpy(&r, &a, sizeof(px_int32));
+	return r; 
+}
+
+
+px_double64 PX_ln(px_double x)
+{
+	px_double64 hfsq, f, s, z, R, w, t1, t2, dk;
+	int k, hx, i, j;
+	unsigned lx;
+	static px_double64	ln2_hi = 6.93147180369123816490e-01,	/* 3fe62e42 fee00000 */
+		ln2_lo = 1.90821492927058770002e-10,	/* 3dea39ef 35793c76 */
+		two54 = 1.80143985094819840000e+16,  /* 43500000 00000000 */
+		Lg1 = 6.666666666666735130e-01,  /* 3FE55555 55555593 */
+		Lg2 = 3.999999999940941908e-01,  /* 3FD99999 9997FA04 */
+		Lg3 = 2.857142874366239149e-01,  /* 3FD24924 94229359 */
+		Lg4 = 2.222219843214978396e-01,  /* 3FCC71C5 1D8E78AF */
+		Lg5 = 1.818357216161805012e-01,  /* 3FC74664 96CB03DE */
+		Lg6 = 1.531383769920937332e-01,  /* 3FC39A09 D078C69F */
+		Lg7 = 1.479819860511658591e-01;  /* 3FC2F112 DF3E5244 */
+
+	static px_double64 zero = 0.0;
+
+	hx = *(1 + (px_int32*)&x);
+	lx = *(px_int32*)&x;
+
+	k = 0;
+	if (hx < 0x00100000) {			/* x < 2**-1022  */
+		if (((hx & 0x7fffffff) | lx) == 0)
+			return -two54 / zero;		/* log(+-0)=-inf */
+		if (hx < 0) return (x - x) / zero;	/* log(-#) = NaN */
+		k -= 54; x *= two54; /* subnormal number, scale up x */
+		hx = *(1 + (px_int32*)&x);		/* high word of x */
 	}
-	x = (__x-1)/(__x+1);
-	xx = x*x;
-	nk = 2*N+1;
-	y = 1.0/nk;
-	for(k=N;k>0;k--)
-	{
-		nk = nk - 2;
-		y = 1.0/nk+xx*y;
+	if (hx >= 0x7ff00000) return x + x;
+	k += (hx >> 20) - 1023;
+	hx &= 0x000fffff;
+	i = (hx + 0x95f64) & 0x100000;
+	*(1 + (px_int32*)&x) = hx | (i ^ 0x3ff00000);	/* normalize x or x/2 */
+	k += (i >> 20);
+	f = x - 1.0;
+	if ((0x000fffff & (2 + hx)) < 3) {	/* |f| < 2**-20 */
+		if (f == zero) if (k == 0) return zero;  else {
+			dk = (px_double64)k;
+			return dk * ln2_hi + dk * ln2_lo;
+		}
+		R = f * f * (0.5 - 0.33333333333333333 * f);
+		if (k == 0) return f - R; else {
+			dk = (px_double64)k;
+			return dk * ln2_hi - ((R - dk * ln2_lo) - f);
+		}
 	}
-	return 2.0*x*y*m;
+	s = f / (2.0 + f);
+	dk = (px_double64)k;
+	z = s * s;
+	i = hx - 0x6147a;
+	w = z * z;
+	j = 0x6b851 - hx;
+	t1 = w * (Lg2 + w * (Lg4 + w * Lg6));
+	t2 = z * (Lg1 + w * (Lg3 + w * (Lg5 + w * Lg7)));
+	i |= j;
+	R = t2 + t1;
+	if (i > 0) {
+		hfsq = 0.5 * f * f;
+		if (k == 0) return f - (hfsq - s * (hfsq + R)); else
+			return dk * ln2_hi - ((hfsq - (s * (hfsq + R) + dk * ln2_lo)) - f);
+	}
+	else {
+		if (k == 0) return f - s * (f - R); else
+			return dk * ln2_hi - ((s * (f - R) - dk * ln2_lo) - f);
+	}
 }
 
 px_double PX_log(px_double __x)
@@ -3505,6 +3878,11 @@ px_double PX_log10(px_double __x)
 }
 
 
+
+px_double PX_tand(px_double radian)
+{
+	return PX_tan_radian((px_float)radian);
+}
 
 static px_uint64 px_srand_seed=0x31415926;
 
@@ -3850,11 +4228,28 @@ px_dword  PX_inet_addr( const px_char cp[] )
 	return *(px_dword*)ipBytes;
 }
 
+px_dword  PX_inet_port(const px_char cp[])
+{
+	const px_char *p=cp;
+	while (*p)
+	{
+		if (*p==':')
+		{
+			p++;
+			break;
+		}
+		p++;
+	}
+	return (px_dword)PX_atoi(p);
+}
 
-px_char* PX_inet_ntoa(px_dword ipv4)
+
+
+PX_RETURN_STRING PX_inet_ntoa(px_dword ipv4)
 {
 	px_int b[4];
-	static px_char a[17];
+	PX_RETURN_STRING ret = {0};
+	px_char *a=ret.data;
 	a[0]='\0';
 	b[0]=((ipv4 & 0xff000000)>>24);
 	b[1]=((ipv4 & 0x00ff0000)>>16);
@@ -3868,7 +4263,8 @@ px_char* PX_inet_ntoa(px_dword ipv4)
 	PX_itoa(b[1],a+PX_strlen(a),5,10);
 	PX_strcat(a,".");
 	PX_itoa(b[0],a+PX_strlen(a),5,10);
-	return a;
+	
+	return ret;
 }
 
 px_bool PX_IsValidIPAddress(const px_char *ip_addr)
@@ -4270,7 +4666,7 @@ static px_double PX_FIRKaiser(px_int i,px_int n,px_double beta)
 {
 	px_double a,w,a2,b1,b2,beta1;
 	b1=PX_Bessel(0,beta);
-	a=2.0*i/(px_double)(n-1)-1.0;
+	a=2.0*i/(px_double)(n-1.0)-1.0;
 	a2=a*a;
 	beta1=beta*PX_sqrtd(1.0-a2);
 	b2=PX_Bessel(0,beta1);
@@ -4296,11 +4692,11 @@ static px_double PX_FIRWindow(PX_FIRFILTER_WINDOW_TYPE type,px_int n,px_int i,px
 			k=(n-2)/10;
 			if (i<=k)
 			{
-				w=0.5*(1.0-PX_cos_radian((px_float)(i*pi/(k+1))));
+				w=0.5*(1.0-PX_cos_radian((px_float)(i*pi/(k+1.0f))));
 			}
 			if (i>n-k-2)
 			{
-				w=0.5*((px_float)(1.0-PX_cos_radian((px_float)((n-i-1)*pi/(k+1)))));
+				w=0.5*((px_float)(1.0-PX_cos_radian((px_float)((n-i-1.0f)*pi/(k+1.0f)))));
 			}
 			break;
 		}
@@ -4311,17 +4707,17 @@ static px_double PX_FIRWindow(PX_FIRFILTER_WINDOW_TYPE type,px_int n,px_int i,px
 		}
 	case PX_FIRFILTER_WINDOW_TYPE_HANNING:
 		{
-			w=0.5*(1.0-PX_cos_radian((px_float)(2*i*pi/(n-1))));
+			w=0.5*(1.0-PX_cos_radian((px_float)(2.0f*i*pi/(n-1.0f))));
 			break;
 		}
 	case PX_FIRFILTER_WINDOW_TYPE_HAMMING:
 		{
-			w=0.54-0.46*PX_cos_radian((px_float)(2*i*pi/(n-1)));
+			w=0.54-0.46*PX_cos_radian((px_float)(2.0f*i*pi/(n-1.0)));
 			break;
 		}
 	case PX_FIRFILTER_WINDOW_TYPE_BLACKMAN:
 		{
-			w=0.42-0.5*PX_cos_radian((px_float)(2*i*pi/(n-1)))+0.08*PX_cos_radian((px_float)(4*i*pi/(n-1)));
+			w=0.42-0.5*PX_cos_radian((px_float)(2.0f*i*pi/(n-1.0f)))+0.08*PX_cos_radian((px_float)(4.0f*i*pi/(n-1.0f)));
 			break;
 		}
 	case PX_FIRFILTER_WINDOW_TYPE_KAISER:
@@ -4436,4 +4832,99 @@ px_void PX_FIRFilterBuild(PX_FIRFILTER_TYPE bandtype,px_double fln,px_double fhn
 		}
 		break;
 	}
+}
+
+
+px_float PX_GroupDelay(px_float f, px_float* B, px_int sizeB, px_float* A, px_int sizeA, px_float FS) 
+{
+	px_int i;
+	px_float omega;
+	px_float Br[2] = { 0 }; 
+	px_float Be[2] = { 0 }; 
+	px_float Ar[2] = { 0 }; 
+	px_float Ae[2] = { 1,0 };
+	px_float BrxAe[2] = { 0 };
+	px_float BexAr[2] = { 0 }; 
+	px_float AxB[2] = { 0 }; 
+	px_float Num[2] = { 0 };
+	px_float c[2] = { 0 }; 
+	px_float magd2;
+
+	omega = (px_float)(2.0f * PX_PI * f / FS);
+
+	for (i = 1; i < sizeB; i++) 
+	{
+		Br[0] += i * (px_float)PX_cosd(i *1.0* omega) * B[i];
+		Br[1] -= i * (px_float)PX_sind(i *1.0* omega) * B[i];
+	}
+
+	for (i = 0; i < sizeB; i++) 
+	{
+		Be[0] += (px_float)PX_cosd(i *1.0* omega) * B[i];
+		Be[1] -= (px_float)PX_sind(i *1.0* omega) * B[i];
+	}
+
+	for (i = 0; i < sizeA; i++) {
+		Ar[0] += (i + 1) * (px_float)PX_cosd((i + 1.0) * omega) * A[i];
+		Ar[1] -= (i + 1) * (px_float)PX_sind((i + 1.0) * omega) * A[i];
+	}
+
+	for (i = 0; i < sizeA; i++) {
+		Ae[0] += (px_float)PX_cosd((i + 1.0) * omega) * A[i];
+		Ae[1] -= (px_float)PX_sind((i + 1.0) * omega) * A[i];
+	}
+
+	BrxAe[0] = Br[0] * Ae[0] - Br[1] * Ae[1];
+	BrxAe[1] = Br[0] * Ae[1] + Br[1] * Ae[0];
+
+	BexAr[0] = Be[0] * Ar[0] - Be[1] * Ar[1];
+	BexAr[1] = Be[0] * Ar[1] + Be[1] * Ar[0];
+
+	AxB[0] = Ae[0] * Be[0] - Ae[1] * Be[1];
+	AxB[1] = Ae[0] * Be[1] + Ae[1] * Be[0];
+
+	Num[0] = BrxAe[0] - BexAr[0]; 
+	Num[1] = BrxAe[1] - BexAr[1];
+
+	magd2 = AxB[0] * AxB[0] + AxB[1] * AxB[1];
+	c[0] = (Num[0] * AxB[0] + Num[1] * AxB[1]) / magd2;
+	c[1] = (Num[1] * AxB[0] - Num[0] * AxB[1]) / magd2;
+	
+	return c[0];
+}
+
+
+static px_float PX_PhaseIIR(px_float omega, px_float* B, px_int sizeB, px_float* A, px_int sizeA) {
+	px_float C[2];
+	px_float HB[2] = { 0 };
+	px_float HA[2] = { 0 };
+	px_float magd2;
+	px_int i;
+	for (i = 0; i < sizeB; i++) {
+		HB[0] += (px_float)PX_cosd((px_float)i * omega) * B[i];
+		HB[1] -= (px_float)PX_sind((px_float)i * omega) * B[i];
+	}
+
+	for (i = 0; i < sizeA; i++) {
+		HA[0] += (px_float)PX_cosd((i + 1.0) * omega) * A[i];
+		HA[1] -= (px_float)PX_sind((i + 1.0) * omega) * A[i];
+	}
+	magd2 = HA[0] * HA[0] + HA[1] * HA[1];
+
+	C[0] = (HB[0] * HA[0] + HB[1] * HA[1]) / magd2;
+	C[1] = (HB[1] * HA[0] - HB[0] * HA[1]) / magd2;
+
+	return (px_float)PX_atan2(C[1], C[0]);
+}
+px_float PX_PhaseDelayDerive(px_float omega, px_float* B, px_int sizeB, px_float* A, px_int sizeA, px_float delta) {
+	px_float omega1 = omega - delta;
+	px_float omega2 = omega + delta;
+	px_float p1 = PX_PhaseIIR(omega1, B, sizeB, A, sizeA);
+	px_float p2 = PX_PhaseIIR(omega2, B, sizeB, A, sizeA);
+	return (-omega1 * p2 + omega2 * p1) / (2 * delta * omega1 * omega2);
+}
+px_float PX_PhaseDelay(px_float f, px_float* B, px_int sizeB, px_float* A, px_int sizeA, px_float FS) {
+	px_float grpdel = PX_GroupDelay(f, B, sizeB, A, sizeA, FS);
+	px_float omega = (px_float)(2.0 * PX_PI * f / FS);
+	return grpdel - omega * PX_PhaseDelayDerive(omega, B, sizeB, A, sizeA, 0.0005f);
 }

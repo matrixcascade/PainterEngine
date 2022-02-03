@@ -12,7 +12,7 @@ typedef enum
 
 typedef struct  
 {
-	px_int radius;
+	px_float radius;
 	px_float startAngle;
 	px_float endAngle;
 	px_bool bselect;

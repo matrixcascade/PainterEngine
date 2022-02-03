@@ -8,19 +8,54 @@
 
 typedef struct
 {
-	px_word  protocol;
+	px_word  counter;
 	px_word  magic;
-	px_byte size;
+	px_byte  size[2];
 	px_byte unit;
 	px_byte opcode;
 	px_byte startAddress[2];
 	px_byte regcount[2];
-	px_byte data[247];
-}PX_ModbusPacket;
+}PX_ModbusTCP_Read;
 
-px_int PX_ModbusPacketBuild(PX_ModbusPacket *packet,px_byte opcode,px_word startAddr,px_word regcount, px_byte *buffer,px_int size);
-px_int PX_ModbusWrite(PX_ModbusPacket *packet,px_word startAddr,px_word regcount, px_word *buffer,px_int size); 
-px_int PX_ModbusRead(PX_ModbusPacket *packet,px_word startAddr,px_word regcount); 
+typedef struct
+{
+	px_word  counter;
+	px_word  magic;
+	px_byte  size[2];//5
+	px_byte unit;
+	px_byte opcode;//03
+	px_byte bytesize;//02
+}PX_ModbusTCP_ReadResponse;
 
+
+
+typedef struct
+{
+	px_word  counter;
+	px_word  magic;
+	px_byte  size[2];
+	px_byte unit;
+	px_byte opcode;
+	px_byte startAddress[2];
+	px_byte regcount[2];
+}PX_ModbusTCP_ReadBoolResponse;
+
+
+
+typedef struct
+{
+	px_word  counter;
+	px_word  magic;
+	px_byte  size[2];
+	px_byte unit;
+	px_byte opcode;
+	px_byte startAddress[2];
+	px_byte regdata[2];
+}PX_ModbusTCP_Write;
+
+PX_ModbusTCP_Write PX_ModbusTCPWriteSingleReg(px_word counter,px_byte unit,px_word startAddr,px_word regdata);
+PX_ModbusTCP_Write PX_ModbusTCPWriteSingleBool(px_word counter, px_byte unit, px_word startAddr, px_bool b);
+PX_ModbusTCP_Read PX_ModbusTCPReadReg(px_word counter, px_byte unit, px_word startAddr,px_int count);
+PX_ModbusTCP_Read PX_ModbusTCPReadBool(px_word counter, px_byte unit, px_word startAddr, px_int count);
 #endif
 

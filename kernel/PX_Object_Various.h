@@ -46,5 +46,6 @@ px_void		PX_Object_VariousSetAlign(PX_Object* pObject, PX_ALIGN Align);
 px_void	 PX_Object_VariousSetString(PX_Object* pObject, const px_char* Text);
 px_void	 PX_Object_VariousSetFloat(PX_Object* pObject, px_float f);
 px_void	 PX_Object_VariousSetInt(PX_Object* pObject, px_int i);
+px_void PX_Object_VariousSetHex(PX_Object* pObject, px_dword i);
 px_void	 PX_Object_VariousSetBool(PX_Object* pObject, px_bool b);
 #endif
