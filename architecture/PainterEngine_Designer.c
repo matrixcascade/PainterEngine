@@ -58,7 +58,6 @@ static px_void PX_Designer_RefreshProperties(PX_Object *pObject)
 					}
 					continue;
 				}
-
 				if(pObjectDesc->properties[j].getint)
 				{
 					px_int v=pObjectDesc->properties[j].getint(pdobject->pObject);

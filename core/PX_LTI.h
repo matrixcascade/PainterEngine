@@ -2,20 +2,21 @@
 #define __PX_LTI_H
 #include "PX_Memory.h"
 
+#define PX_LTI_MAX_ORDER 16
 typedef struct 
 {
 	px_memorypool* mp;
-	px_float *KernelB;
-	px_float* KernelA;
-	px_int kernel_sizeB;
-	px_int kernel_sizeA;
+	px_float b[PX_LTI_MAX_ORDER];
+	px_float a[PX_LTI_MAX_ORDER];
+	px_int b_count;
+	px_int a_count;
 	PX_CircularBuffer cbuf, cbufout;
 	px_bool dirty_grdel;
 	px_float grdel;
 }PX_LTI;
 
 px_bool PX_LTIInitialize(PX_LTI* pLTI, px_memorypool* mp, px_int sizeB, px_int sizeA);
-px_void PX_LTISetKernel(PX_LTI* pLTI, px_float kernelA[], px_float kernelB[]);
+px_void PX_LTISetKernel(PX_LTI* pLTI, px_float a[], px_float b[]);
 px_void PX_LTIPush(PX_LTI* pLTI, px_float v);
 px_float PX_LTIFilter(PX_LTI* pLTI, px_float v);
 px_float PX_LTIConvol(PX_LTI* pLTI);
@@ -50,7 +51,7 @@ typedef enum  {
 	PX_BIQUAD_TYPE_HIGH,
 	PX_BIQUAD_TYPE_NOTCH
 }PX_BIQUAD_TYPE;
-typedef struct  //: public LTITv<3, 2>
+typedef struct 
 {
 	PX_LTI LTI;
 }PX_Biquad;

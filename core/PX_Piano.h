@@ -98,11 +98,8 @@ typedef struct
 	PX_Piano_UnitDelay undel;
 }PX_Piano_BanksHammer;
 
-typedef struct {
-	px_float Z;
-	px_float Zb;
-	px_float Zh;
-
+typedef struct 
+{
 	px_float f;
 	px_float Fs;
 	px_float weight;
@@ -112,7 +109,7 @@ typedef struct {
 	px_float amprr;
 	px_float mult_radius_core_string;
 	px_float minL;
-	px_float maxL; 
+	px_float maxL;
 	px_float ampLl;
 	px_float ampLr;
 	px_float mult_density_string;
@@ -127,6 +124,21 @@ typedef struct {
 	px_float mult_loss_filter;
 	px_float detune;
 	px_int hammer_type;
+}PX_PianoKey_Parameters;
+
+typedef struct 
+{
+	px_float eq1, eq2, eq3;
+	px_float c1, c3;
+}PX_PianoSoundboard_Parameters;
+
+
+typedef struct {
+	px_float Z;
+	px_float Zb;
+	px_float Zh;
+
+	PX_PianoKey_Parameters param;
 
 
 	px_int nstrings;
@@ -154,8 +166,7 @@ typedef struct {
 
 typedef struct
 {
-	px_float c1b;
-	px_float c3b;
+	PX_PianoSoundboard_Parameters param;
 	PX_Piano_DWGReverb soundboard;
 	PX_Biquad shaping1;
 	PX_Biquad shaping2;
@@ -168,18 +179,27 @@ typedef struct
 	PX_PianoSoundBoard soundboard;
 }PX_Piano;
 
-px_bool PX_PianoKeyInitialize(px_memorypool* mp, PX_PianoKey* pPianoKey,  px_float f, px_float Fs, px_float weight, px_float minr, px_float maxr, px_float amprl, px_float amprr, px_float mult_radius_core_string, px_float minL, px_float maxL, px_float ampLl, px_float ampLr, px_float mult_density_string, px_float mult_modulus_string, px_float mult_impedance_bridge, px_float mult_impedance_hammer, px_float mult_mass_hammer, px_float mult_force_hammer, px_float mult_hysteresis_hammer, px_float mult_stiffness_exponent_hammer, px_float position_hammer, px_float mult_loss_filter, px_float detune, px_int hammer_type);
+typedef enum 
+{
+	PX_PIANO_STYLE_DEFAULT,
+	PX_PIANO_STYLE_DEBUG
+}PX_PIANO_STYLE;
+
+px_bool PX_PianoKeyInitialize(px_memorypool* mp, PX_PianoKey* pPianoKey,  PX_PianoKey_Parameters param);
 px_void PX_PianoKeyTrigger(PX_PianoKey* pPianoKey, px_float v);
 px_int PX_PianoKeyGo(PX_PianoKey* pPianoKey, px_float* out, px_int samples);
 px_void PX_PianoKeyFree(PX_PianoKey* pPianoKey);
+px_int PX_PianoKeyNameToIndex(const px_char keyName[]);
+px_void PX_PianoIndexToKey(px_int index, px_char keyName[]);
 
-px_bool PX_PianoSoundBoardInitialize(px_memorypool* mp,PX_PianoSoundBoard* psb);
+px_bool PX_PianoSoundBoardInitialize(px_memorypool* mp, PX_PianoSoundBoard* psb, PX_PianoSoundboard_Parameters param);
 px_void PX_PianoSoundBoardGo(PX_PianoSoundBoard* psb, px_float in[], px_float out[], px_int count);
 px_void PX_PianoSoundBoardFree(PX_PianoSoundBoard* psb);
 
 
-px_bool PX_PianoInitialize(px_memorypool* mp,PX_Piano* pPiano);
-px_int PX_PianoKeyNameToIndex(const px_char keyName[]);
+px_bool PX_PianoInitialize(px_memorypool* mp,PX_Piano* pPiano, PX_PIANO_STYLE style);
+px_bool PX_PianoInitializeEx(px_memorypool* mp, PX_Piano* pPiano, PX_PianoKey_Parameters keyparam[88], PX_PianoSoundboard_Parameters soundboardparam);
+px_void PX_PianoIndexToKey(px_int index, px_char keyName[]);
 px_void PX_PianoTriggerKey(PX_Piano* pPiano, const px_char keyName[], px_float v);
 px_void PX_PianoTriggerIndex(PX_Piano* pPiano, const px_int index, px_float v);
 px_void PX_PianoGo(PX_Piano* pPiano, px_float* out, px_int samples);

@@ -289,6 +289,7 @@ px_void PX_Object_ScrollAreaRender(px_surface *psurface, PX_Object *pObject,px_u
 		{
 			return;
 		}
+		PX_Object_ScrollAreaUpdateRange(pObject);
 	}
 
 

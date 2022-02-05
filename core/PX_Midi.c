@@ -236,6 +236,9 @@ px_void PX_MidiReset(PX_Midi* pmidi)
 	{
 		PX_Midi_Track* pTrack = PX_VECTORAT(PX_Midi_Track, &pmidi->track, i);
 		pTrack->ip = 0;
+		pTrack->wait_tick = 0;
+		pTrack->instrument = 0;
+		PX_MidiUpdate_handleTick(pmidi, i);
 	}
 }
 

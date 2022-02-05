@@ -1,5 +1,9 @@
 #include "PX_Piano.h"
 
+//////////////////////////////////////////////////////////////////////////
+/// Algorithm implementation by Clayton Otey, Dec 2007 
+/// reWritten by DBinay,Feb 2022
+/// ///////////////////////////////////////////////////////////////////////
 
 px_void PX_Piano_DelayInitialize(PX_Piano_Delay* c,px_memorypool *mp, px_int di)
 {
@@ -417,10 +421,10 @@ px_void PX_Piano_ThirianDispersion(px_float B, px_float f, px_int M, PX_Thirian*
 		k3 = -2.8743f;
 	}
 	else {
-		C1 = .071089f;
+		C1 = 0.071089f;
 		C2 = 2.1074f;
-		k1 = -.0026580f;
-		k2 = -.014811f;
+		k1 = -0.0026580f;
+		k2 = -0.014811f;
 		k3 = -2.9018f;
 	}
 	
@@ -585,18 +589,7 @@ static px_float sigmoidal(px_float midi, px_float minV, px_float maxV, px_float 
 }
 
 
-px_bool PX_PianoKeyInitialize(px_memorypool* mp, \
-	PX_PianoKey *pPianoKey,\
-	px_float f, px_float Fs, px_float weight,\
-	px_float minr, px_float maxr, px_float amprl,\
-	px_float amprr, px_float mult_radius_core_string,\
-	px_float minL, px_float maxL, px_float ampLl,\
-	px_float ampLr, px_float mult_density_string,\
-	px_float mult_modulus_string, px_float mult_impedance_bridge,\
-	px_float mult_impedance_hammer, px_float mult_mass_hammer,\
-	px_float mult_force_hammer, px_float mult_hysteresis_hammer,\
-	px_float mult_stiffness_exponent_hammer, px_float position_hammer,\
-	px_float mult_loss_filter, px_float detune, px_int hammer_type)
+px_bool PX_PianoKeyInitialize(px_memorypool* mp,PX_PianoKey *pPianoKey,PX_PianoKey_Parameters param)
 {
 	px_int k;
 	px_float f0,midinote,L,r,rho,logff0,m,alpha,p,K,rcore,E,pos,c1,c3,rhoL,T,B;
@@ -608,58 +601,35 @@ px_bool PX_PianoKeyInitialize(px_memorypool* mp, \
 
 	pPianoKey->nSampleCount = -1;
 	f0 = 27.5;
-	midinote = 12 * (px_float)PX_log(f / f0) / (px_float)PX_log(2) + 21;
-	L = (px_float)sigmoidal(midinote, minL, maxL, ampLl, ampLr);
-	r = (px_float)sigmoidal(midinote, minr, maxr, amprl, amprr) * 0.001f;
+	midinote = 12 * (px_float)PX_log(param.f / f0) / (px_float)PX_log(2) + 21;
+	L = (px_float)sigmoidal(midinote, param.minL, param.maxL, param.ampLl, param.ampLr);
+	r = (px_float)sigmoidal(midinote, param.minr, param.maxr, param.amprl, param.amprr) * 0.001f;
 	rho = 7850.0f;
-	rho *= mult_density_string;
-	logff0 = (px_float)PX_log(f / f0) / (px_float)PX_log(4192 / f0);
+	rho *= param.mult_density_string;
+	logff0 = (px_float)PX_log(param.f / f0) / (px_float)PX_log(4192 / f0);
 	logff0 = (0>logff0)?0: logff0;
 	m = 0.06f - 0.058f * (px_float)PX_pow(logff0, 0.1);
-	m *= mult_mass_hammer;
-	alpha = 0.1e-4f * logff0;
-	alpha *= mult_hysteresis_hammer;
+	m *= param.mult_mass_hammer;
+	alpha = 0.00001f * logff0;
+	alpha *= param.mult_hysteresis_hammer;
 	p = 2.0f + 1.0f * logff0;
-	p *= mult_stiffness_exponent_hammer;
-	K = 40.0f / (px_float)PX_pow(.7e-3, p);
-	K *= mult_force_hammer;
-	pPianoKey->Zb = 4000.0f * mult_impedance_bridge;
-	pPianoKey->Zh = 1.0f * mult_impedance_hammer;
+	p *= param.mult_stiffness_exponent_hammer;
+	K = 40.0f / (px_float)PX_pow(0.0007, p);
+	K *= param.mult_force_hammer;
+	pPianoKey->Zb = 4000.0f * param.mult_impedance_bridge;
+	pPianoKey->Zh = 1.0f * param.mult_impedance_hammer;
 	rcore = (r < 0.0006f) ? r : 0.0006f;
-	rcore *= mult_radius_core_string;
+	rcore *= param.mult_radius_core_string;
 	E = (px_float)200e9;
-	E *= mult_modulus_string;
-	pos = position_hammer;
+	E *= param.mult_modulus_string;
+	pos = param.position_hammer;
 
-	pPianoKey->f = f;
-	pPianoKey->Fs = Fs;
-	pPianoKey->weight = weight;
-	pPianoKey->minr= minr;
-	pPianoKey->maxr= maxr;
-	pPianoKey->amprl= amprl;
-	pPianoKey->amprr= amprr;
-	pPianoKey->mult_radius_core_string= mult_radius_core_string;
-	pPianoKey->minL= minL;
-	pPianoKey->maxL= maxL;
-	pPianoKey->ampLl= ampLl;
-	pPianoKey->ampLr= ampLr;
-	pPianoKey->mult_density_string= mult_density_string;
-	pPianoKey->mult_modulus_string= mult_modulus_string;
-	pPianoKey->mult_impedance_bridge= mult_impedance_bridge;
-	pPianoKey->mult_impedance_hammer= mult_impedance_hammer;
-	pPianoKey->mult_mass_hammer= mult_mass_hammer;
-	pPianoKey->mult_force_hammer= mult_force_hammer;
-	pPianoKey->mult_hysteresis_hammer= mult_hysteresis_hammer;
-	pPianoKey->mult_stiffness_exponent_hammer= mult_stiffness_exponent_hammer;
-	pPianoKey->position_hammer= position_hammer;
-	pPianoKey->mult_loss_filter= mult_loss_filter;
-	pPianoKey->detune= detune;
-	pPianoKey->hammer_type= hammer_type;
+	pPianoKey->param = param;
 	
 
-	if (f < (48.9994278f))
+	if (param.f < (48.9994278f))
 		pPianoKey->nstrings = 1;
-	else if (f < (87.3070602f))
+	else if (param.f < (87.3070602f))
 		pPianoKey->nstrings = 2;
 	else
 		pPianoKey->nstrings = 3;
@@ -667,27 +637,27 @@ px_bool PX_PianoKeyInitialize(px_memorypool* mp, \
 	 
 	c1 = 0.25f;
 	c3 = 5.85f;
-	c3 *= mult_loss_filter;
+	c3 *= param.mult_loss_filter;
 
 	rhoL = (px_float)(PX_PI * r * r * rho);
-	T = (2 * L * f) * (2 * L * f) * rhoL;
+	T = (2 * L * param.f) * (2 * L * param.f) * rhoL;
 	pPianoKey->Z = (px_float)PX_sqrtd(T * rhoL);
 	B = (px_float)((PX_PI * PX_PI * PX_PI) * E * rcore * rcore * rcore * rcore / (4.0 * L * L * T));
 
 	for (k = 0; k < pPianoKey->nstrings; k++) {
 		
-		if(!PX_Piano_dwgsInitialize(&pPianoKey->string[k], mp, f * (1.0f + TUNE[k] * detune), Fs, pos, c1, c3, B, pPianoKey->Z, pPianoKey->Zb + (pPianoKey->nstrings - 1) * pPianoKey->Z, pPianoKey->Zh))return PX_FALSE;
+		if(!PX_Piano_dwgsInitialize(&pPianoKey->string[k], mp, param.f * (1.0f + TUNE[k] * param.detune), param.Fs, pos, c1, c3, B, pPianoKey->Z, pPianoKey->Zb + (pPianoKey->nstrings - 1) * pPianoKey->Z, pPianoKey->Zh))return PX_FALSE;
 	}
 
-	switch (hammer_type) {
+	switch (param.hammer_type) {
 	default:
 	case 1:
 
-		PX_Piano_StulovHammerInitialize(&pPianoKey->StulovHammer, f, Fs, m, K, p, pPianoKey->Z, alpha);
+		PX_Piano_StulovHammerInitialize(&pPianoKey->StulovHammer, param.f, param.Fs, m, K, p, pPianoKey->Z, alpha);
 		break;
 	case 2:
 
-		PX_Piano_BanksHammerInitialize(&pPianoKey->BanksHammer, f, Fs, m, K, p, pPianoKey->Z, alpha);
+		PX_Piano_BanksHammerInitialize(&pPianoKey->BanksHammer, param.f, param.Fs, m, K, p, pPianoKey->Z, alpha);
 		break;
 	}
 	return PX_TRUE;
@@ -696,13 +666,13 @@ px_bool PX_PianoKeyInitialize(px_memorypool* mp, \
 px_void PX_PianoKeyTrigger(PX_PianoKey* pPiano,px_float v) {
 
 	pPiano->nSampleCount = 0;
-	switch (pPiano->hammer_type) {
+	switch (pPiano->param.hammer_type) {
 	default:
 	case 1:
-		PX_Piano_StulovHammerTrigger(&pPiano->StulovHammer, v*pPiano->weight);
+		PX_Piano_StulovHammerTrigger(&pPiano->StulovHammer, v*pPiano->param.weight);
 		break;
 	case 2:
-		PX_Piano_BanksHammerTrigger(&pPiano->BanksHammer, v * pPiano->weight);
+		PX_Piano_BanksHammerTrigger(&pPiano->BanksHammer, v * pPiano->param.weight);
 		break;
 	}
 }
@@ -723,7 +693,7 @@ px_int PX_PianoKeyGo(PX_PianoKey* pPiano,px_float* out, px_int samples)
 		}
 		
 	
-		switch (pPiano->hammer_type) {
+		switch (pPiano->param.hammer_type) {
 		default:
 		case 1:
 			hload=PX_Piano_StulovHammerLoad(&pPiano->StulovHammer, vstring / pPiano->nstrings);
@@ -760,20 +730,23 @@ px_void PX_PianoKeyFree(PX_PianoKey* pPiano)
 	}
 }
 
-px_bool PX_PianoSoundBoardInitialize(px_memorypool* mp,PX_PianoSoundBoard* psb)
+px_bool PX_PianoSoundBoardInitialize(px_memorypool* mp,PX_PianoSoundBoard* psb,PX_PianoSoundboard_Parameters param)
 {
-	psb->c1b = 20;
-	psb->c3b = 20;
+	psb->param.c1 = param.c1;
+	psb->param.c3 = param.c3;
+	psb->param.eq1 = param.eq1;
+	psb->param.eq2 = param.eq2;
+	psb->param.eq3 = param.eq3;
 	if (!PX_BiquadInitialize(&psb->shaping1, mp))return PX_FALSE;
 	if (!PX_BiquadInitialize(&psb->shaping2, mp))return PX_FALSE;
 	if (!PX_BiquadInitialize(&psb->shaping3, mp))return PX_FALSE;
 	if (!PX_Piano_DWGReverbInitialize(&psb->soundboard, mp))return PX_FALSE;
 
-	PX_BiquadSetCoeffs(&psb->shaping1, 500, 44100, 10, PX_BIQUAD_TYPE_NOTCH);
-	PX_BiquadSetCoeffs(&psb->shaping2, 200, 44100, 1, PX_BIQUAD_TYPE_HIGH);
-	PX_BiquadSetCoeffs(&psb->shaping3, 800, 44100, 1, PX_BIQUAD_TYPE_LOW);
+	PX_BiquadSetCoeffs(&psb->shaping1, param.eq1, 44100, 10, PX_BIQUAD_TYPE_NOTCH);
+	PX_BiquadSetCoeffs(&psb->shaping2, param.eq2, 44100, 1, PX_BIQUAD_TYPE_HIGH);
+	PX_BiquadSetCoeffs(&psb->shaping3, param.eq3, 44100, 1, PX_BIQUAD_TYPE_LOW);
 
-	PX_Piano_DWGReverbSetCoeffs(&psb->soundboard, 20, 20, -0.25f, 1, 44100);
+	PX_Piano_DWGReverbSetCoeffs(&psb->soundboard, param.c1, param.c3, -0.25f, 1, 44100);
 	return PX_TRUE;
 }
 
@@ -799,18 +772,77 @@ px_void PX_PianoSoundBoardFree(PX_PianoSoundBoard* psb)
 }
 
 
-px_bool PX_PianoInitialize(px_memorypool* mp,PX_Piano* pPiano)
+px_bool PX_PianoInitialize(px_memorypool* mp,PX_Piano* pPiano, PX_PIANO_STYLE style)
 {
 	px_int i;
 	const px_float PX_Piano_KeyFrequency[] = {27.5f,29.135f,30.868f,32.703f,34.648f,36.708f,38.891f,41.203f,43.654f,46.249f,48.999f,51.913f};
+	const px_float PX_Piano_AmpMap[] = { 3.047837f,3.967463f,4.068119f,4.147177f,4.195764f,4.250195f,4.312485f,4.366438f,4.393855f,4.413116f,4.429189f,2.233078f,2.242712f,2.258232f,2.275072f,2.294975f,2.309848f,2.336400f,2.353222f,2.383314f,1.599312f,1.599385f,1.591346f,1.592523f,1.585473f,1.583628f,1.589321f,1.600980f,1.613558f,1.629661f,1.648730f,1.692481f,1.736692f,1.780722f,1.832306f,1.832437f,1.894783f,1.970879f,2.062356f,2.171813f,2.171074f,2.304099f,2.305844f,2.468208f,2.663217f,2.666740f,2.902329f,2.909418f,2.915839f,3.198942f,3.208551f,3.565721f,3.574121f,3.584794f,3.595176f,4.090815f,4.099084f,4.108564f,4.884596f,4.886070f,4.888009f,4.888111f,4.884447f,6.323071f,6.307468f,6.285368f,6.258748f,6.230694f,6.195814f,5.837747f,10.067566f,9.370760f,8.710139f,8.128731f,7.626956f,7.191919f,6.811775f,6.468780f,6.176325f,5.900831f,5.542097f,5.172136f,4.831508f,4.520650f,4.243360f,3.995601f,3.753256f,3.500318f, };
 	for (i=0;i<PX_COUNTOF(pPiano->keys);i++)
 	{
-		if(!PX_PianoKeyInitialize(mp, &pPiano->keys[i],  PX_Piano_KeyFrequency[i%12] * PX_pow_ii(2, i / 12),
-			44100, 1, 0.35f, 2, 4, 8, 1, 0.07f, 1.4f, -4.f, 4.f, 1, 1, 1, 0, 1, 0.2f, 1, 1, 0.142f, 1, 0.0003f, 1))return PX_FALSE;
+		PX_PianoKey_Parameters param;
+		param.f = PX_Piano_KeyFrequency[i % 12] * PX_pow_ii(2, i / 12);
+		param.Fs = 44100;
+		if (style==PX_PIANO_STYLE_DEBUG)
+		{
+			param.weight = 1;
+		}
+		else
+		{
+			param.weight = PX_Piano_AmpMap[i] * 0.5f;
+		}
+		
+		param.minr= 0.35f;
+		param.maxr= 2;
+		param.amprl= 4;
+		param.amprr= 8;
+		param.mult_radius_core_string= 1;
+		param.minL= 0.07f;
+		param.maxL= 1.4f;
+		param.ampLl= -4.f;
+		param.ampLr= 4.f;
+		param.mult_density_string= 1;
+		param.mult_modulus_string= 1;
+		param.mult_impedance_bridge= 1;
+		param.mult_impedance_hammer= 0;
+		param.mult_mass_hammer= 1;
+		param.mult_force_hammer= 0.2f;
+		param.mult_hysteresis_hammer= 1;
+		param.mult_stiffness_exponent_hammer= 1;
+		param.position_hammer= 0.142f;
+		param.mult_loss_filter= 1;
+		param.detune= 0.0003f;
+		param.hammer_type= 1;
+		
+		if(!PX_PianoKeyInitialize(mp, &pPiano->keys[i], param))return PX_FALSE;
 	}
-	if (!PX_PianoSoundBoardInitialize(mp ,&pPiano->soundboard))return PX_FALSE;
+	do 
+	{
+		PX_PianoSoundboard_Parameters param;
+		param.c1 = 20;
+		param.c3 = 20;
+		param.eq1 = 500;
+		param.eq2 = 200;
+		param.eq3 = 800;
+		if (!PX_PianoSoundBoardInitialize(mp, &pPiano->soundboard, param))return PX_FALSE;
+	} while (0);
+	
 	return PX_TRUE;
 }
+
+px_bool PX_PianoInitializeEx(px_memorypool* mp, PX_Piano* pPiano, PX_PianoKey_Parameters keyparam[88], PX_PianoSoundboard_Parameters soundboardparam)
+{
+	px_int i;
+	for (i = 0; i < PX_COUNTOF(pPiano->keys); i++)
+	{
+		if (!PX_PianoKeyInitialize(mp, &pPiano->keys[i], keyparam[i]))return PX_FALSE;
+	}
+	do
+	{
+		if (!PX_PianoSoundBoardInitialize(mp, &pPiano->soundboard, soundboardparam))return PX_FALSE;
+	} while (0);
+	return PX_TRUE;
+}
+
 px_int PX_PianoKeyNameToIndex(const px_char keyName[])
 {
 	const px_char* incstep[] = { "A","#A","bB","B","C","#C","bD","D","#D","bE","E","F","#F","bG","G","#G","bA" };
@@ -825,6 +857,14 @@ px_int PX_PianoKeyNameToIndex(const px_char keyName[])
 	return index;
 }
 
+px_void PX_PianoIndexToKey(px_int index,px_char keyName[])
+{
+	const px_char* incstep[] = { "A","#A","B","C","#C","D","#D","E","F","#F","G","#G"};
+	keyName[0] = '\0';
+	PX_strcat(keyName, incstep[index % 12]);
+	PX_itoa(index / 12, keyName + PX_strlen(incstep[index % 12]), 2, 10);
+}
+
 px_void PX_PianoTriggerKey(PX_Piano* pPiano, const px_char keyName[], px_float v)
 {
 	px_int index = PX_PianoKeyNameToIndex(keyName);
@@ -834,7 +874,7 @@ px_void PX_PianoTriggerKey(PX_Piano* pPiano, const px_char keyName[], px_float v
 
 px_void PX_PianoTriggerIndex(PX_Piano* pPiano, const px_int index, px_float v)
 {
-	if (index>0&&index<88)
+	if (index>=0&&index<88)
 	{
 		PX_PianoKeyTrigger(&pPiano->keys[index], v);
 	}
