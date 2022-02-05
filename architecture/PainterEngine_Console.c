@@ -1,9 +1,6 @@
 #include "PainterEngine_Console.h"
 
-static char const fox_console_logo[]=\
-{
-#include "PainterEngine_FoxLogo.h"
-};
+
 
 static char const PC_ScriptPreload[]="#name \"shell\"\r\n\
 							  #runtime stack 1024\r\n\
@@ -479,6 +476,10 @@ px_void PX_ConsoleOnMouseDown(PX_Object *Obj,PX_Object_Event e,px_void *user_ptr
 
 px_bool PX_ConsoleInitializeEx(PX_Runtime *runtime,PX_Console *pc,px_int x,px_int y,px_int width,px_int height)
 {
+	char const fox_console_logo[] = \
+	{
+#include "PainterEngine_FoxLogo.h"
+	};
 	//console initialize
 	pc->runtime=runtime;
 	pc->registry_call=PX_NULL;

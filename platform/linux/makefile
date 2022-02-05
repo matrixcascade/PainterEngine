@@ -1,4 +1,4 @@
-#mingw32-64 makefile
+#gcc freeglut makefile
 #####################################################
 target :=PainterEngine
 project_path := ../../project

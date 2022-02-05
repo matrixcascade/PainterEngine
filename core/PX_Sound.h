@@ -61,6 +61,7 @@ px_void PX_SoundPlayFree(PX_SoundPlay *pSoundPlay);
 px_void PX_SoundPlayClear(PX_SoundPlay *pSoundPlay);
 px_int  PX_SoundPlayGetDataCount(PX_SoundPlay *pSoundPlay);
 PX_Sound PX_SoundCreate(PX_SoundData *data,px_bool loop);
+PX_SoundData PX_SoundDataCreate(PX_SOUND_CHANNEL channel, px_byte* data, px_int datasize);
 px_bool PX_SoundStaticDataCopy(px_memorypool *mp,PX_SoundData *resSounddata,PX_SoundData *targetSounddata);
 px_bool PX_SoundStaticDataCreate(PX_SoundData *sounddata,px_memorypool *mp,px_byte *data,px_int datasize);
 px_void PX_SoundStaticDataFree(PX_SoundData *sounddata);

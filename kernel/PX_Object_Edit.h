@@ -14,6 +14,14 @@ typedef enum
 	PX_OBJECT_EDIT_STYLE_ROUNDRECT,
 }PX_OBJECT_EDIT_STYLE;
 
+typedef enum
+{
+	PX_OBJECT_EDIT_INPUT_MODE_NORMAL,
+	PX_OBJECT_EDIT_INPUT_MODE_LOWERCASE,
+	PX_OBJECT_EDIT_INPUT_MODE_UPPERCASE,
+}PX_OBJECT_EDIT_INPUT_MODE;
+
+
 typedef struct 
 {
 	px_string text;
@@ -36,6 +44,7 @@ typedef struct
 	px_surface EditSurface;
 	PX_FontModule *fontModule;
 	px_char Limit[128];
+	PX_OBJECT_EDIT_INPUT_MODE inputmode;
 	PX_OBJECT_EDIT_STATE state;
 	PX_OBJECT_EDIT_STYLE style;
 }PX_Object_Edit;
@@ -62,5 +71,6 @@ px_void PX_Object_EditBackspace(PX_Object *pObject);
 px_void PX_Object_EditAutoNewLine(PX_Object *pObject,px_bool b,px_int AutoNewLineSpacing);
 px_void PX_Object_EditSetOffset(PX_Object *pObject,px_int TopOffset,px_int LeftOffset);
 px_void PX_Object_EditSetXYOffset(PX_Object* pObject, px_int XOffset, px_int YOffset);
+px_void PX_Object_EditSetInputMode(PX_Object* pObject, PX_OBJECT_EDIT_INPUT_MODE mode);
 #endif
 

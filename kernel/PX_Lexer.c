@@ -247,7 +247,7 @@ px_char * PX_LexerIsContainerEnd(px_lexer *lexer,const px_char startch[],const p
 // 	lexer->Tokens.push_back(Token);
 // 
 // }
-px_void PX_LexerInit(px_lexer *lexer,px_memorypool *mp)
+px_void PX_LexerInitialize(px_lexer *lexer,px_memorypool *mp)
 {
 	lexer->CommentCount=0;
 	lexer->SpacerCount=0;

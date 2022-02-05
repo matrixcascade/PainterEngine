@@ -26,6 +26,6 @@ PX_Object_MemoryView *PX_Object_GetMemoryView(PX_Object *pObject);
 px_void		PX_Object_MemoryViewSetFontColor(PX_Object *pObject,px_color Color);
 px_void		PX_Object_MemoryViewSetBackgroundColor(PX_Object *pObject,px_color Color);
 px_void		PX_Object_MemoryViewSetData(PX_Object *pObject,px_void *pdata,px_dword size);
-
+px_bool		PX_Object_MemoryViewReadData(PX_Object* pObject,px_dword offset, px_void* poutdata, px_dword size);
 #endif
 

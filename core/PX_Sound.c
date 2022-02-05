@@ -313,6 +313,16 @@ PX_Sound PX_SoundCreate(PX_SoundData *data,px_bool loop)
 }
 
 
+PX_SoundData PX_SoundDataCreate(PX_SOUND_CHANNEL channel, px_byte* data, px_int datasize)
+{
+	PX_SoundData sdata;
+	sdata.buffer = data;
+	sdata.channel = channel;
+	sdata.mp = PX_NULL;
+	sdata.size = datasize;
+	return sdata;
+}
+
 px_bool PX_SoundStaticDataCopy(px_memorypool *mp,PX_SoundData *resSounddata,PX_SoundData *targetSounddata)
 {
 	targetSounddata->buffer=(px_byte *)MP_Malloc(mp,resSounddata->size);

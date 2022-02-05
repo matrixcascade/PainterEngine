@@ -454,7 +454,7 @@ px_bool PX_JsonParse(PX_Json *pjson,const px_char *json_content)
 {
 	px_lexer lexer;
 	
-	PX_LexerInit(&lexer,pjson->mp);
+	PX_LexerInitialize(&lexer,pjson->mp);
 	PX_LexerRegisterDelimiter(&lexer,',');
 	PX_LexerRegisterDelimiter(&lexer,':');
 	PX_LexerRegisterDelimiter(&lexer,'{');

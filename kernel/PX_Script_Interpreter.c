@@ -74,7 +74,7 @@ px_bool PX_ScriptCompilerLoad(PX_SCRIPT_LIBRARY *lib,const px_char *code)
 	scode.bInclude=PX_FALSE;
 	
 	
-	PX_LexerInit(&lexer,lib->mp);
+	PX_LexerInitialize(&lexer,lib->mp);
 	PX_LexerRegisterComment(&lexer,"//","\n");
 	PX_LexerRegisterComment(&lexer,"/*","*/");
 	PX_LexerRegisterDelimiter(&lexer,',');
@@ -152,7 +152,7 @@ static px_bool PX_ScriptParseInclude(px_string *codes,PX_SCRIPT_LIBRARY *lib,con
 	px_char *exchangeBuffer;
 	PX_LEXER_LEXEME_TYPE type;
 
-	PX_LexerInit(&lexer,lib->mp);
+	PX_LexerInitialize(&lexer,lib->mp);
 	PX_LexerRegisterDelimiter(&lexer,',');
 	PX_LexerRegisterDelimiter(&lexer,';');
 	PX_LexerRegisterDelimiter(&lexer,'+');
@@ -303,7 +303,7 @@ static px_bool PX_ScriptParseDefine(px_string *codes,PX_SCRIPT_LIBRARY *lib,cons
 
 	PX_VectorInitialize(lib->mp,&defines,sizeof(PX_SCRIPT_TRANSLATOR_DEFINE_ST),32);
 
-	PX_LexerInit(&lexer,lib->mp);
+	PX_LexerInitialize(&lexer,lib->mp);
 	PX_LexerRegisterDelimiter(&lexer,',');
 	PX_LexerRegisterDelimiter(&lexer,';');
 	PX_LexerRegisterDelimiter(&lexer,'+');
@@ -6528,7 +6528,7 @@ static px_bool PX_ScriptParseExpression(PX_SCRIPT_Analysis *analysis,px_char *ex
 	PX_StringClear(out);
 
 
-	PX_LexerInit(&lexer,analysis->mp);
+	PX_LexerInitialize(&lexer,analysis->mp);
 	PX_LexerRegisterDelimiter(&lexer,',');
 	PX_LexerRegisterDelimiter(&lexer,';');
 	PX_LexerRegisterDelimiter(&lexer,'+');
@@ -9364,7 +9364,7 @@ px_bool PX_ScriptCompilerCompile(PX_SCRIPT_LIBRARY *lib,const px_char *name,px_s
 	analysis.functionReturn=PX_FALSE;
 	analysis._jFlag=0;
 
-	PX_LexerInit(&analysis.lexer,lib->mp);
+	PX_LexerInitialize(&analysis.lexer,lib->mp);
 	PX_LexerRegisterDelimiter(&analysis.lexer,',');
 	PX_LexerRegisterDelimiter(&analysis.lexer,';');
 	PX_LexerRegisterDelimiter(&analysis.lexer,'+');

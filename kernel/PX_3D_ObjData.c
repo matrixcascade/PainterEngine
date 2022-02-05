@@ -26,7 +26,7 @@ px_bool PX_3D_ObjectDataLoad(PX_3D_ObjectData *ObjectData,const px_byte *data,px
 	PX_LEXER_STATE state;
 	px_lexer Lexer;
 	PX_LEXER_LEXEME_TYPE type;
-	PX_LexerInit(&Lexer,ObjectData->mp);
+	PX_LexerInitialize(&Lexer,ObjectData->mp);
 	PX_LexerRegisterSpacer(&Lexer,' ');
 	PX_LexerRegisterSpacer(&Lexer,'\t');
 	PX_LexerRegisterComment(&Lexer,"#","\n");

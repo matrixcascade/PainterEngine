@@ -42,7 +42,7 @@ PX_Object* PX_Object_IPBoxCreate(px_memorypool* mp, PX_Object* Parent, int x, in
 	PX_Object* pObject;
 	pObject = PX_ObjectCreateEx(mp, Parent, (px_float)x, (px_float)y, 0, (px_float)width, (px_float)height, 0, PX_OBJECT_TYPE_IPBOX, PX_NULL, PX_NULL, PX_NULL, &desc, sizeof(desc));
 	pdesc = PX_ObjectGetDesc(PX_Object_IPBox, pObject);
-	pdesc->widget = PX_Object_WidgetCreate(mp, pObject, 0, 0, width, height, "", fontmodule);
+	pdesc->widget = PX_Object_WidgetCreate(mp, pObject, 0, 0, width, height, title, fontmodule);
 	PX_Object_WidgetShowHideCloseButton(pdesc->widget, PX_FALSE);
 	pdesc->various_ip = PX_Object_VariousCreate(mp, pdesc->widget , width / 2 - 128, height / 2 - 64, 256, 32, "IP:",PX_OBJECT_VARIOUS_TYPE_EDIT,fontmodule);
 	PX_Object_VariousSetEditStyle(pdesc->various_ip, PX_OBJECT_VARIOUS_EDIT_TYPE_STRING);
@@ -62,18 +62,45 @@ PX_Object* PX_Object_IPBoxCreate(px_memorypool* mp, PX_Object* Parent, int x, in
 
 px_void PX_Object_IPBoxShow(PX_Object* pObject)
 {
+	if (pObject->Type != PX_OBJECT_TYPE_IPBOX)
+	{
+		PX_ASSERT();
+		return;
+	}
 	pObject->Visible = PX_TRUE;
 	PX_ObjectSetFocus(pObject);
 }
 
 px_void PX_Object_IPBoxClose(PX_Object* pObject)
 {
+	if (pObject->Type != PX_OBJECT_TYPE_IPBOX)
+	{
+		PX_ASSERT();
+		return;
+	}
 	pObject->Visible = PX_FALSE;
 	PX_ObjectClearFocus(pObject);
 }
 
+px_void PX_Object_IPBoxSetDefault(PX_Object* pObject, const px_char ip[], const px_char port[])
+{
+	if (pObject->Type != PX_OBJECT_TYPE_IPBOX)
+	{
+		PX_ASSERT();
+		return;
+	}
+	PX_Object_VariousSetText(PX_Object_GetIPBox(pObject)->various_ip, ip);
+	PX_Object_VariousSetText(PX_Object_GetIPBox(pObject)->various_port, port);
+	return;
+}
+
 px_void PX_Object_IPBoxHide(PX_Object* pObject)
 {
+	if (pObject->Type != PX_OBJECT_TYPE_IPBOX)
+	{
+		PX_ASSERT();
+		return;
+	}
 	pObject->Visible = PX_FALSE;
 	PX_ObjectClearFocus(pObject);
 }

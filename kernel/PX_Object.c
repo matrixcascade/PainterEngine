@@ -193,6 +193,14 @@ PX_Object_Event PX_OBJECT_BUILD_EVENT_STRING(px_uint Event,const px_char *conten
 	return e;
 }
 
+PX_Object_Event PX_OBJECT_BUILD_EVENT_INT(px_uint Event, px_int i)
+{
+	PX_Object_Event e;
+	PX_memset(&e, 0, sizeof(e));
+	e.Event = Event;
+	PX_Object_Event_SetIndex(&e, i);
+	return e;
+}
 PX_Object_Event PX_Object_Event_CursorOffset(PX_Object_Event e,px_point offset)
 {
 	switch(e.Event)
