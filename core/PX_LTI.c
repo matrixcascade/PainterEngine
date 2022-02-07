@@ -103,6 +103,7 @@ static px_int PX_Nchoose(px_int n, px_int k) {
 
 px_bool PX_ThirianInitialize(PX_Thirian* pThi, px_memorypool* mp, px_int N)
 {
+	PX_memset(pThi, 0, sizeof(PX_Thirian));
 	if (!PX_LTIInitialize(&pThi->LTI,mp,N+1,N))
 	{
 		return PX_FALSE;
