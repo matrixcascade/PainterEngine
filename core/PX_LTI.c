@@ -103,6 +103,7 @@ static px_int PX_Nchoose(px_int n, px_int k) {
 
 px_bool PX_ThirianInitialize(PX_Thirian* pThi, px_memorypool* mp, px_int N)
 {
+	PX_memset(pThi, 0, sizeof(PX_Thirian));
 	if (!PX_LTIInitialize(&pThi->LTI,mp,N+1,N))
 	{
 		return PX_FALSE;
@@ -222,5 +223,63 @@ px_void PX_BiquadSetCoeffs(PX_Biquad* pBiquad, px_float f0, px_float fs, px_floa
 px_void PX_BiquadFree(PX_Biquad* pBiquad)
 {
 	PX_LTIFree(&pBiquad->LTI);
+}
+
+
+px_bool PX_DelayInitialize(PX_Delay* pdelay, px_memorypool* mp, px_int inv_z, PX_DELAY_DATA_TYPE type)
+{
+	pdelay->mp = mp;
+	pdelay->inv_z = inv_z;
+	pdelay->cursor = 0;
+	if (type==PX_DELAY_DATA_TYPE_FLOAT)
+	{
+		pdelay->buffer = MP_Malloc(mp, sizeof(px_float) * inv_z);
+		if (!pdelay->buffer)
+		{
+			return PX_FALSE;
+		}
+		PX_memset(pdelay->buffer, 0, sizeof(px_float) * inv_z);
+	}
+	else
+	{
+		pdelay->buffer = MP_Malloc(mp, sizeof(px_int) * inv_z);
+		if (!pdelay->buffer)
+		{
+			return PX_FALSE;
+		}
+		PX_memset(pdelay->buffer, 0, sizeof(px_int) * inv_z);
+	}
+	
+	return PX_TRUE;
+}
+
+px_int PX_DelayGo_float(PX_Delay* pdelay, px_float in[], px_float out[], px_int size)
+{
+	px_int i;
+	for (i=0;i<size;i++)
+	{
+		out[i] = ((px_float *)pdelay->buffer)[pdelay->cursor];
+		((px_float*)pdelay->buffer)[pdelay->cursor] = in[pdelay->cursor];
+		pdelay->cursor++;
+		pdelay->cursor %= pdelay->inv_z;
+	}
+}
+
+px_int PX_DelayGo_int(PX_Delay* pdelay, px_float in[], px_float out[], px_int size)
+{
+	px_int i;
+	for (i = 0; i < size; i++)
+	{
+		out[i] = ((px_int*)pdelay->buffer)[pdelay->cursor];
+		((px_int*)pdelay->buffer)[pdelay->cursor] = in[pdelay->cursor];
+		pdelay->cursor++;
+		pdelay->cursor %= pdelay->inv_z;
+	}
+}
+
+
+px_void PX_DelayFree(PX_Delay* pDelay)
+{
+	MP_Free(pDelay->mp,pDelay->buffer);
 }
 

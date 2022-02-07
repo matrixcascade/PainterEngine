@@ -192,13 +192,13 @@ px_void PX_PianoKeyFree(PX_PianoKey* pPianoKey);
 px_int PX_PianoKeyNameToIndex(const px_char keyName[]);
 px_void PX_PianoIndexToKey(px_int index, px_char keyName[]);
 
-px_bool PX_PianoSoundBoardInitialize(px_memorypool* mp, PX_PianoSoundBoard* psb, PX_PianoSoundboard_Parameters param);
+px_bool PX_PianoSoundBoardInitialize(px_memorypool* mp, PX_PianoSoundBoard* psb, PX_PianoSoundboard_Parameters *param);
 px_void PX_PianoSoundBoardGo(PX_PianoSoundBoard* psb, px_float in[], px_float out[], px_int count);
 px_void PX_PianoSoundBoardFree(PX_PianoSoundBoard* psb);
 
 
 px_bool PX_PianoInitialize(px_memorypool* mp,PX_Piano* pPiano, PX_PIANO_STYLE style);
-px_bool PX_PianoInitializeEx(px_memorypool* mp, PX_Piano* pPiano, PX_PianoKey_Parameters keyparam[88], PX_PianoSoundboard_Parameters soundboardparam);
+px_bool PX_PianoInitializeEx(px_memorypool* mp, PX_Piano* pPiano, PX_PianoKey_Parameters keyparam[88], PX_PianoSoundboard_Parameters *soundboardparam);
 px_void PX_PianoIndexToKey(px_int index, px_char keyName[]);
 px_void PX_PianoTriggerKey(PX_Piano* pPiano, const px_char keyName[], px_float v);
 px_void PX_PianoTriggerIndex(PX_Piano* pPiano, const px_int index, px_float v);
@@ -206,4 +206,19 @@ px_void PX_PianoGo(PX_Piano* pPiano, px_float* out, px_int samples);
 px_void PX_PianoFree(PX_Piano* pPiano);
 
 
+typedef struct
+{
+	px_int cursor;
+	px_float pcm[44100 * 3];
+}PX_PianoSoundNote;
+
+typedef struct 
+{
+	PX_PianoSoundNote note[88];
+}PX_PainoSoundReverb;
+
+px_bool PX_PainoSoundReverbInitialize(PX_PainoSoundReverb* pReverb, PX_PianoKey_Parameters keyparam[88], PX_PianoSoundboard_Parameters *soundboardparam);
+px_void PX_PainoSoundReverbGo(PX_PainoSoundReverb* pReverb, px_float in[], px_float out[], px_int count);
+px_void PX_PainoSoundReverbTrigger(PX_PainoSoundReverb* pReverb,px_int index);
+px_void PX_PainoSoundReverbFree(PX_PainoSoundReverb* pReverb);
 #endif

@@ -59,4 +59,24 @@ typedef struct
 px_bool PX_BiquadInitialize(PX_Biquad* pBiquad, px_memorypool* mp);
 px_void PX_BiquadSetCoeffs(PX_Biquad* pBiquad, px_float f0, px_float fs, px_float Q, PX_BIQUAD_TYPE type);
 px_void PX_BiquadFree(PX_Biquad* pBiquad);
+
+
+typedef enum 
+{
+	PX_DELAY_DATA_TYPE_FLOAT,
+	PX_DELAY_DATA_TYPE_INT,
+}PX_DELAY_DATA_TYPE;
+typedef struct  
+{
+	px_memorypool* mp;
+	px_int	  inv_z;
+	px_int cursor;
+	PX_DELAY_DATA_TYPE type;
+	px_void* buffer;
+}PX_Delay;
+
+px_bool PX_DelayInitialize(PX_Delay* pdelay, px_memorypool* mp, px_int inv_z, PX_DELAY_DATA_TYPE type);
+px_int  PX_DelayGo_float(PX_Delay* pdelay, px_float in[], px_float out[], px_int size);
+px_int  PX_DelayGo_int(PX_Delay* pdelay, px_float in[], px_float out[], px_int size);
+px_void PX_DelayFree(PX_Delay* pDelay);
 #endif

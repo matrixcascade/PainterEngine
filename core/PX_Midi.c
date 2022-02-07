@@ -24,13 +24,13 @@ typedef struct
 	px_dword length;
 }PX_Midi_MTrk;
 
-px_void PX_MidiUpdate_handleTick(PX_Midi* pmidi, px_int i)
+px_void PX_MidiUpdate_handleTick(PX_Midi* pmidi, px_int iTrack)
 {
 	px_int delay = 0;
 	px_int counter = 0;
 	px_int ip;
 	px_byte pl;
-	PX_Midi_Track* pTrack = PX_VECTORAT(PX_Midi_Track, &pmidi->track, i);
+	PX_Midi_Track* pTrack = PX_VECTORAT(PX_Midi_Track, &pmidi->track, iTrack);
 	if (pTrack->ip >= pTrack->payloadSize)
 	{
 		return;
@@ -80,7 +80,8 @@ px_void PX_MidiUpdate_handleOpcode(PX_Midi* pmidi, px_int i)
 		pTrack->ip++;
 		v = pTrack->payload[pTrack->ip];
 		pTrack->ip++;
-		pmidi->callback(pmidi, pl & 0xf0, track, pTrack->instrument,  note, v, pmidi->userptr);
+		if(pmidi->callback)
+			pmidi->callback(pmidi, pl & 0xf0, track, pTrack->instrument,  note, v, pmidi->userptr);
 	}
 	break;
 	case 0xB0:
@@ -286,3 +287,114 @@ px_void PX_MidiFree(PX_Midi* pmidi)
 	PX_VectorFree(&pmidi->track);
 }
 
+px_int PX_MidiGetTrackCount(PX_Midi* pmidi)
+{
+	return pmidi->track.size;
+}
+
+px_int PX_MidiReadTick(PX_Midi* pmidi, px_int iTrack)
+{
+	px_int delay = 0;
+	px_int counter = 0;
+	px_int ip;
+	px_byte pl;
+	PX_Midi_Track* pTrack = PX_VECTORAT(PX_Midi_Track, &pmidi->track, iTrack);
+	if (pTrack->ip >= pTrack->payloadSize)
+	{
+		return -1;
+	}
+	ip = pTrack->ip;
+	pl = pTrack->payload[ip];
+	ip++;
+	while (pl & 0x80)
+	{
+		counter++;
+		delay = ((pl & 0x7f) << 7);
+		pl = pTrack->payload[ip];
+		ip++;
+		if (counter == 3)
+		{
+			break ;
+		}
+		if (ip >= pTrack->payloadSize)
+		{
+			return -1;
+		}
+	}
+	delay += pl;
+	pTrack->ip = ip;
+	return delay;
+}
+px_int PX_MidiReadNote(PX_Midi* pmidi, px_int iTrack)
+{
+	PX_Midi_Track* pTrack = PX_VECTORAT(PX_Midi_Track, &pmidi->track, iTrack);
+	px_byte pl;
+	while (PX_TRUE)
+	{
+		if (pTrack->ip >= pTrack->payloadSize)
+		{
+			return -1;
+		}
+		pl = pTrack->payload[pTrack->ip];
+		pTrack->ip++;
+		switch (pl & 0xf0)
+		{
+		case 0x80:
+		case 0x90:
+		case 0xA0:
+		{
+			px_int track = (pl & 0x0f);
+			px_byte note;
+			px_byte v;
+			note = pTrack->payload[pTrack->ip];
+			pTrack->ip++;
+			v = pTrack->payload[pTrack->ip];
+			pTrack->ip++;
+			return note;
+		}
+		break;
+		case 0xB0:
+		{
+			pTrack->ip += 2;
+		}
+		break;
+		case 0xC0:
+		{
+			px_int track = (pl & 0x0f);
+			pTrack->instrument = pTrack->payload[pTrack->ip++];
+		}
+		break;
+		case 0xD0:
+		{
+			pTrack->ip++;
+		}
+		break;
+		case 0xE0:
+		{
+			pTrack->ip++;
+			pTrack->ip++;
+		}
+		break;
+		case 0xF0:
+		{
+			if (pl == 0xff)
+			{
+				px_int type = pTrack->payload[pTrack->ip++];
+				px_int size = pTrack->payload[pTrack->ip++];
+				pTrack->ip += size;
+			}
+			else
+			{
+				px_int size = pTrack->payload[pTrack->ip++];
+				pTrack->ip += size;
+			}
+
+		}
+		break;
+		default:
+			PX_ASSERT();
+			break;
+		}
+	}
+
+}

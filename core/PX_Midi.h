@@ -44,4 +44,7 @@ px_void PX_MidiNoteToString( px_byte note,px_char out[8]);
 px_void PX_MidiUpdate(PX_Midi* pmidi, px_dword elapsed);
 px_void PX_MidiFree(PX_Midi* pmidi);
 
+px_int PX_MidiGetTrackCount(PX_Midi* pmidi);
+px_int PX_MidiReadTick(PX_Midi* pmidi, px_int iTrack);
+px_int PX_MidiReadNote(PX_Midi* pmidi, px_int iTrack);
 #endif
