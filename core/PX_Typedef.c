@@ -352,7 +352,6 @@ px_double PX_fast_exp(px_double x) {
 }
 
 /* PX_pow_dd & PX_scalbn & PX_log function(s)
-/*
  * ====================================================
  * Copyright (C) 2004 by Sun Microsystems, Inc. All rights reserved.
  *
@@ -393,9 +392,12 @@ px_double64 PX_scalbn(px_double64 x, px_double64 n)
 		*(1 + (px_int32*)&x) = (hx & 0x800fffff) | (k << 20); return x;
 	}
 	if (k <= -54)
+	{
 		if (n > 50000) 	/* in case integer overflow in n+k */
 			return huge * PX_copysign(huge, x);	/*overflow*/
-		else return tiny * PX_copysign(tiny, x); 	/*underflow*/
+		else
+			return tiny * PX_copysign(tiny, x); 	/*underflow*/
+	}
 	k += 54;				/* subnormal result */
 	*(1 + (px_int32*)&x) = (hx & 0x800fffff) | (k << 20);
 	return x * twom54;
@@ -3831,9 +3833,17 @@ px_double64 PX_ln(px_double x)
 	k += (i >> 20);
 	f = x - 1.0;
 	if ((0x000fffff & (2 + hx)) < 3) {	/* |f| < 2**-20 */
-		if (f == zero) if (k == 0) return zero;  else {
-			dk = (px_double64)k;
-			return dk * ln2_hi + dk * ln2_lo;
+		if (f == zero)
+		{
+			if (k == 0)
+			{
+				return zero;
+			}
+			else
+			{
+				dk = (px_double64)k;
+				return dk * ln2_hi + dk * ln2_lo;
+			}
 		}
 		R = f * f * (0.5 - 0.33333333333333333 * f);
 		if (k == 0) return f - R; else {

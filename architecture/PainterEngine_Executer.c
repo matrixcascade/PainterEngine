@@ -1,9 +1,6 @@
 #include "PainterEngine_Executer.h"
 
-static char const fox_executer_logo[]=
-{
-#include "PainterEngine_FoxLogo.h"
-};
+
 
 px_void PX_ExecuterUpdateEx(PX_Executer *pExecute)
 {
@@ -442,6 +439,10 @@ PX_Object * PX_ExecuterShowImage(PX_Executer *pExecute,const px_char *res_image_
 
 px_bool PX_ExecuterInitialize(PX_Runtime *runtime,PX_Executer *pExecute)
 {
+	char const fox_executer_logo[] =
+	{
+	#include "PainterEngine_FoxLogo.h"
+	};
 	//console initialize
 	PX_memset(pExecute,0,sizeof(PX_Executer));
 

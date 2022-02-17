@@ -142,7 +142,7 @@ static px_void PX_SelectbarOnCursorDown(PX_Object *pObject,px_float x,px_float y
 				PX_Object_Event e;
 				e.Event=PX_OBJECT_EVENT_VALUECHANGED;
 				PX_Object_Event_SetIndex(&e,index);
-				PX_ObjectPostEvent(pObject,e);
+				PX_ObjectExecuteEvent(pObject,e);
 			} while (0);
 		}
 		pSelectbar->onCursor=PX_FALSE;
