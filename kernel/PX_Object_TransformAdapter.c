@@ -49,7 +49,7 @@ px_void PX_Object_TransformAdapterRender(px_surface *rendersurface,PX_Object *pO
 
 	//draw point
 	vnow=PX_Point2DMul(vnow,pTransformAdapter->stretch);
-	PX_GeoDrawSector(rendersurface,(px_int)objx,(px_int)objy,(px_int)PX_Point2DMod(vnow),1,PX_COLOR(16,0,255,255),(px_int)pTransformAdapter->startAngle,(px_int)pTransformAdapter->endAngle);
+	PX_GeoDrawSector(rendersurface,(px_int)objx,(px_int)objy,PX_Point2DMod(vnow),1,PX_COLOR(16,0,255,255),(px_int)pTransformAdapter->startAngle, (px_int)pTransformAdapter->endAngle);
 
 	PX_GeoDrawSolidCircle(rendersurface,(px_int)(vnow.x+pObject->x),(px_int)(vnow.y+pObject->y),5,pTransformAdapter->color);
 	if (pTransformAdapter->bSelect)

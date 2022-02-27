@@ -2,6 +2,12 @@
 
 //////////////////////////////////////////////////////////////////////////
 //
+px_void PX_Object_SelectBarSliderOnChanged(PX_Object* pObject, PX_Object_Event e, px_void* ptr)
+{
+	PX_Object_SelectBar* pSelectbar = (PX_Object_SelectBar*)ptr;
+	pSelectbar->currentDisplayOffsetIndex = PX_Object_SliderBarGetValue(pObject);
+}
+
 PX_Object_SelectBar *PX_Object_GetSelectBar(PX_Object *pSelecrBar)
 {
 	if (pSelecrBar->Type==PX_OBJECT_TYPE_SELECTBAR)
@@ -136,7 +142,7 @@ static px_void PX_SelectbarOnCursorDown(PX_Object *pObject,px_float x,px_float y
 				PX_Object_Event e;
 				e.Event=PX_OBJECT_EVENT_VALUECHANGED;
 				PX_Object_Event_SetIndex(&e,index);
-				PX_ObjectPostEvent(pObject,e);
+				PX_ObjectExecuteEvent(pObject,e);
 			} while (0);
 		}
 		pSelectbar->onCursor=PX_FALSE;
@@ -192,7 +198,9 @@ static px_void PX_SelectbarOnCursorEvent(PX_Object *pSelectBarObject,PX_Object_E
 		break;
 	case PX_OBJECT_EVENT_CURSORWHEEL:
 		{
+		PX_Object_SelectBar* pDesc = PX_ObjectGetDesc(PX_Object_SelectBar, pSelectBarObject);
 			PX_SelectbarOnCursorWheel(pSelectBarObject,PX_Object_Event_GetCursorZ(e));
+			PX_Object_SelectBarSliderOnChanged(pDesc->sliderBar, PX_OBJECT_BUILD_EVENT(PX_OBJECT_EVENT_VALUECHANGED), pDesc);
 		}
 		break;
 	default:
@@ -337,11 +345,7 @@ static px_void PX_SelectbarRender(px_surface *pRenderSurface,PX_Object *pObject,
 
 }
 
-px_void PX_Object_SelectBarSliderOnChanged(PX_Object *pObject,PX_Object_Event e,px_void *ptr)
-{
-	PX_Object_SelectBar *pSelectbar=(PX_Object_SelectBar *)ptr;
-	pSelectbar->currentDisplayOffsetIndex=PX_Object_SliderBarGetValue(pObject);
-}
+
 
 PX_Object * PX_Object_SelectBarCreate(px_memorypool *mp,PX_Object *Parent,px_int x,int y,px_int width,px_int height,PX_FontModule *fontmodule)
 {
@@ -549,6 +553,15 @@ px_void PX_Object_SelectBarSetBackgroundColor(PX_Object *pObject,px_color color)
 	if (pSelectBar)
 	{
 		pSelectBar->backgroundColor=color;
+	}
+}
+
+px_void PX_Object_SelectBarSetMaxDisplayCount(PX_Object* pObject, px_int i)
+{
+	PX_Object_SelectBar* pSelectBar = PX_Object_GetSelectBar(pObject);
+	if (pSelectBar)
+	{
+		pSelectBar->maxDisplayCount = i;
 	}
 }
 

@@ -33,12 +33,14 @@ typedef struct
 	PX_ExplorerGetPathFileCount func_getpathfilecount;
 	PX_ExplorerGetPathFolderName func_getpathfoldername;
 	PX_ExplorerGetPathFileName func_getpathfilename;
+	px_bool savemode;
 	px_int ItemCount;
 	px_int MaxSelectedCount;
 	PX_FontModule *fontmodule;
 	PX_Object_Explorer_Item Items[PX_EXPLORER_MAX_ITEMS];
 
 	PX_Object *edit_Path;
+	PX_Object* edit_FileName;
 	PX_Object *btn_Back,*btn_go,*btn_Ok,*btn_Cancel;
 	PX_Object *SliderBar;
 	px_char filter[PX_EXPLORER_MAX_PATH_LEN];
@@ -67,6 +69,7 @@ px_void PX_Object_ExplorerRefresh(PX_Object *Object);
 px_int PX_Object_ExplorerGetSelectedCount(PX_Object *Object);
 px_void PX_Object_ExplorerGetPath(PX_Object *Object,px_char path[PX_EXPLORER_MAX_PATH_LEN],px_int index);
 px_void PX_Object_ExplorerOpen(PX_Object *Object);
+px_void PX_Object_ExplorerSave(PX_Object* Object);
 px_void PX_Object_ExplorerClose(PX_Object *Object);
 px_void PX_Object_ExplorerSetFilter(PX_Object *Object,const px_char *filter);
 px_void PX_Object_ExplorerSetMaxSelectCount(PX_Object *Object,int selectCount);

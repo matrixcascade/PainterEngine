@@ -375,6 +375,10 @@ PX_Object_Menu_Item * PX_Object_MenuAddItem(PX_Object *pObject,PX_Object_Menu_It
 	PX_Object_Menu *pMenu=PX_Object_GetMenu(pObject);
 	px_float objx,objy,objWidth,objHeight;
 	px_float inheritX,inheritY;
+	if (parent==PX_NULL)
+	{
+		parent = PX_Object_MenuGetRootItem(pObject);
+	}
 
 	PX_ObjectGetInheritXY(pObject,&inheritX,&inheritY);
 

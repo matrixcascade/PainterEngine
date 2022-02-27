@@ -35,6 +35,7 @@ typedef		int					px_bool;
 typedef		unsigned int		px_dword;//typedef     uint32_t		       px_dword;
 typedef     short               px_short;
 typedef     short				px_int16;
+typedef		unsigned short		px_uint16;
 typedef     unsigned short		px_word; //typedef     uint16_t		       px_word;
 typedef		unsigned short		px_ushort;
 typedef     unsigned int		px_uint;
@@ -58,12 +59,7 @@ typedef     long long           px_int64;//typedef      int64_t				px_int64;
 
 typedef struct
 {
-	union
-	{
-		px_char data[256];
-		px_word wdata[128];
-	};
-	
+	px_char data[64];
 }PX_RETURN_STRING;
 
 #include	"PX_Log.h"
@@ -226,7 +222,7 @@ px_uint32 PX_sum32(px_void *buffer, px_uint size);
 //////////////////////////////////////////////////////////////////////////
 //maths
 px_int	PX_pow_ii(px_int i,px_int n);
-px_double PX_pow_dd(px_double num,px_double m);
+px_double PX_pow(px_double num,px_double m);
 px_float PX_sqrt( px_float number );
 px_double PX_sqrtd( px_double number );
 px_float PX_SqrtRec( px_float number );
@@ -238,7 +234,10 @@ px_double PX_log10(px_double __x);
 #define  PX_RadianToAngle(radian) ((radian)*180/PX_PI)
 #define  PX_AngleToRadian(angle) ((angle)*PX_PI/180)
 
+px_double PX_tand(px_double radian);
 px_double PX_sind(px_double radian);
+px_double PX_sinc(px_double i);
+px_double PX_sinc_interpolate(px_double x[], px_int size, px_double d);
 px_double PX_cosd(px_double radian);
 px_float PX_sin_radian(px_float radian);
 px_float PX_cos_radian(px_float radian);
@@ -299,6 +298,7 @@ px_double PX_Variance(px_double x[],px_int n);
 //memory
 void PX_memset(void *dst,px_byte byte,px_int size);
 void PX_memdwordset(void *dst,px_dword dw,px_int count);
+#define PX_zeromemory(dst,size) PX_memset(dst,0,size)
 px_bool PX_memequ(const void *dst,const void *src,px_int size);
 px_void PX_memcpy(px_void *dst,const px_void *src,px_int size);
 px_void PX_strcpy(px_char *dst,const px_char *src,px_int size);
@@ -421,7 +421,8 @@ px_void PX_MatrixTranspose(px_matrix *matrix);
 //////////////////////////////////////////////////////////////////////////
 //color
 px_color PX_COLOR(px_uchar a,px_uchar r,px_uchar g,px_uchar b); 
-px_void  PX_ColorIncrease(px_color *color,px_uchar inc);
+px_color PX_ColorInverse(px_color clr);
+px_void  PX_ColorIncrease(px_color* color, px_uchar inc);
 px_color PX_ColorAdd(px_color color1,px_color color2);
 px_color PX_ColorSub(px_color color1,px_color color2);
 px_color PX_ColorMul(px_color color1,px_double muls);
@@ -512,7 +513,10 @@ void PX_IFFT(_IN px_complex X[],_OUT px_complex x[],px_int N);
 void PX_FFT_2(_IN px_complex x[],_OUT px_complex X[],px_int N_N);
 void PX_IFFT_2(_IN px_complex X[],_OUT px_complex x[],px_int N_N);
 void PX_FFT_2_Shift(_IN px_complex _in[],_OUT px_complex _out[],px_int N_N);
-void PX_FT_Symmetry(_IN px_complex x[],_OUT px_complex X[],px_int N);
+void PX_DCT_2_Shift(_IN px_double _in[], _OUT px_double _out[], px_int N_N);
+
+
+void PX_FT_Symmetry(_IN px_complex x[], _OUT px_complex X[], px_int N);
 
 //////////////////////////////////////////////////////////////////////////
 //cepstrum
@@ -537,17 +541,20 @@ void PX_PreEmphasise(const px_double *data, int len, px_double *out, px_double p
 //////////////////////////////////////////////////////////////////////////
 //up/down sampling
 void PX_LinearInterpolationResample(_IN px_double x[],_OUT px_double X[],px_int N,px_int M);
+void PX_SincInterpolationResample(_IN px_double x[], _OUT px_double X[], px_int N, px_int M);
 void PX_DownSampled(_IN px_complex x[],_OUT px_complex X[],px_int N,px_int M);
 void PX_UpSampled(_IN px_complex x[],_OUT px_complex X[],px_int N,px_int L);
 
 //////////////////////////////////////////////////////////////////////////
 //ipv4
 px_dword PX_inet_addr( const px_char cp[] );
-px_char* PX_inet_ntoa( px_dword ipv4 );
+px_dword PX_inet_port(const px_char cp[]);
+PX_RETURN_STRING PX_inet_ntoa(px_dword ipv4);
+px_bool PX_IsValidIPAddress(const px_char *ip_addr);
 
 //////////////////////////////////////////////////////////////////////////
 //Bessel
-px_double PX_Bessel(int n,double x);
+px_double PX_Bessel(int n,px_double x);
 //////////////////////////////////////////////////////////////////////////
 //Window Functions
 px_void PX_WindowFunction_tukey(px_double data[],px_int N);
@@ -606,7 +613,9 @@ typedef enum
 
 px_void PX_FIRFilterBuild(PX_FIRFILTER_TYPE bandtype,px_double fln,px_double fhn,PX_FIRFILTER_WINDOW_TYPE wn,px_double h[],px_int n,px_double beta);
 
-
-
-
+///////////////////////////////////////////////////////////////////////////////
+//LTI
+px_float PX_GroupDelay(px_float f, px_float* B, px_int sizeB, px_float* A, px_int sizeA, px_float FS);
+px_float PX_PhaseDelayDerive(px_float omega, px_float* B, px_int sizeB, px_float* A, px_int sizeA, px_float delta);
+px_float PX_PhaseDelay(px_float f, px_float* B, px_int sizeB, px_float* A, px_int sizeA, px_float FS);
 #endif

@@ -73,11 +73,13 @@ px_uint MP_Size(px_memorypool *Pool,px_void *Ptr);
 //Return - if succeeded return the begin address of memories
 //         if faith return null           
 px_void		*MP_Malloc	(px_memorypool *Pool,px_uint Size);
+#define		PX_Malloc(t,mp,s) ((t *)MP_Malloc(mp,s))
 
 //Free the memory from memory pool
 //Pool: Pool MemoryPool structure pointer
 //pAddress: Pointer memory need to be free
 px_void		MP_Free		(px_memorypool *Pool,px_void *pAddress);
+#define     PX_Free		MP_Free
 px_void		MP_Release	(px_memorypool *Pool);
 px_void     MP_Reset    (px_memorypool *Pool);
 

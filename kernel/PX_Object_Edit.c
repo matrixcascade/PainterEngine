@@ -258,7 +258,7 @@ PX_Object* PX_Object_EditCreate(px_memorypool *mp, PX_Object *Parent,px_int x,px
 
 	pEdit->TextColor=PX_OBJECT_UI_DEFAULT_FONTCOLOR;
 
-	pEdit->CursorColor=PX_OBJECT_UI_DEFAULT_CURSORCOLOR;
+	pEdit->CursorColor=PX_COLOR_WHITE;
 	pEdit->BorderColor=PX_OBJECT_UI_DEFAULT_BORDERCOLOR;
 	pEdit->BackgroundColor=PX_OBJECT_UI_DEFAULT_BACKGROUNDCOLOR;
 	pEdit->XOffset=0;
@@ -787,6 +787,20 @@ px_void PX_Object_EditAddString(PX_Object *pObject,px_char *Text)
 						{
 							ch='\n';
 						}
+						if (pEdit->inputmode == PX_OBJECT_EDIT_INPUT_MODE_LOWERCASE)
+						{
+							if (ch>='A'&& ch <= 'Z')
+							{
+								ch += 'a' - 'A';
+							}
+						}
+						else if(pEdit->inputmode == PX_OBJECT_EDIT_INPUT_MODE_UPPERCASE)
+						{
+							if (ch >= 'a' && ch <= 'z')
+							{
+								ch += 'A' - 'a';
+							}
+						}
 						PX_StringInsertChar(&pEdit->text,pEdit->cursor_index,ch);
 						pEdit->cursor_index++;
 					}
@@ -797,6 +811,20 @@ px_void PX_Object_EditAddString(PX_Object *pObject,px_char *Text)
 					if (ch=='\r')
 					{
 						ch='\n';
+					}
+					if (pEdit->inputmode == PX_OBJECT_EDIT_INPUT_MODE_LOWERCASE)
+					{
+						if (ch >= 'A' && ch <= 'Z')
+						{
+							ch += 'a' - 'A';
+						}
+					}
+					else if (pEdit->inputmode == PX_OBJECT_EDIT_INPUT_MODE_UPPERCASE)
+					{
+						if (ch >= 'a' && ch <= 'z')
+						{
+							ch += 'A' - 'a';
+						}
 					}
 					PX_StringInsertChar(&pEdit->text,pEdit->cursor_index,ch);
 					pEdit->cursor_index++;
@@ -947,5 +975,23 @@ px_void PX_Object_EditSetOffset(PX_Object *pObject,px_int TopOffset,px_int LeftO
 	{
 		pEdit->VerticalOffset=TopOffset;
 		pEdit->HorizontalOffset=LeftOffset;
+	}
+}
+
+px_void PX_Object_EditSetXYOffset(PX_Object* pObject, px_int XOffset, px_int YOffset)
+{
+	PX_Object_Edit* pEdit = PX_Object_GetEdit(pObject);
+	if (pEdit != PX_NULL)
+	{
+		pEdit->XOffset = XOffset;
+		pEdit->YOffset = YOffset;
+	}
+}
+px_void PX_Object_EditSetInputMode(PX_Object* pObject, PX_OBJECT_EDIT_INPUT_MODE mode)
+{
+	PX_Object_Edit* pEdit = PX_Object_GetEdit(pObject);
+	if (pEdit != PX_NULL)
+	{
+		pEdit->inputmode = mode;
 	}
 }

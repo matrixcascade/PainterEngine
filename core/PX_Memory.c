@@ -156,3 +156,60 @@ px_bool PX_MemoryCopy(px_memory *memory,const px_void *buffer,px_int startoffset
 	return PX_TRUE;
 }
 
+px_bool PX_CircularBufferInitialize(px_memorypool* mp, PX_CircularBuffer* pcbuffer, px_int size)
+{
+	PX_memset(pcbuffer, 0, sizeof(PX_CircularBuffer));
+	pcbuffer->buffer = (px_float *)MP_Malloc(mp, sizeof(px_float) * size);
+	if (!pcbuffer)
+	{
+		return PX_FALSE;
+	}
+	PX_memset(pcbuffer->buffer, 0, sizeof(px_float) * size);
+	pcbuffer->mp = mp;
+	pcbuffer->pointer = 0;
+	pcbuffer->size = size;
+	return PX_TRUE;
+}
+
+px_void PX_CircularBufferPush(PX_CircularBuffer* pcbuffer, px_float v)
+{
+	pcbuffer->pointer--;
+	if (pcbuffer->pointer<0)
+	{
+		pcbuffer->pointer = pcbuffer->size - 1;
+	}
+	pcbuffer->buffer[pcbuffer->pointer] = v;
+}
+px_void PX_CircularBufferAdd(PX_CircularBuffer* pcbuffer, px_int pos, px_float v)
+{
+	pos = pos % pcbuffer->size;
+	if (pos < 0) { pos += pcbuffer->size; }
+	pcbuffer->buffer[pos] += v;
+}
+px_void PX_CircularBufferSet(PX_CircularBuffer* pcbuffer, px_int pos, px_float v)
+{
+	pos = pos % pcbuffer->size;
+	if (pos < 0) { pos += pcbuffer->size; }
+	pcbuffer->buffer[pos] = v;
+}
+px_float  PX_CircularBufferGet(PX_CircularBuffer* pcbuffer, px_int pos)
+{
+	pos = pos % pcbuffer->size;
+	if (pos < 0) { pos += pcbuffer->size; }
+	return pcbuffer->buffer[pos];
+}
+
+px_void PX_CircularBufferFree(PX_CircularBuffer* pcbuffer)
+{
+	if (pcbuffer->mp)
+	{
+		MP_Free(pcbuffer->mp, pcbuffer->buffer);
+		PX_memset(pcbuffer, 0, sizeof(PX_CircularBuffer));
+	}
+	
+}
+
+px_float PX_CircularBufferDelay(PX_CircularBuffer* pcbuffer, px_int pos)
+{
+	return pcbuffer->buffer[(pcbuffer->pointer + pos) %pcbuffer->size];
+}

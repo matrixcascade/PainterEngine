@@ -454,7 +454,7 @@ px_bool PX_JsonParse(PX_Json *pjson,const px_char *json_content)
 {
 	px_lexer lexer;
 	
-	PX_LexerInit(&lexer,pjson->mp);
+	PX_LexerInitialize(&lexer,pjson->mp);
 	PX_LexerRegisterDelimiter(&lexer,',');
 	PX_LexerRegisterDelimiter(&lexer,':');
 	PX_LexerRegisterDelimiter(&lexer,'{');
@@ -775,7 +775,7 @@ px_bool PX_JsonCreateNumberValue(px_memorypool *mp,PX_Json_Value *pValue,const p
 px_bool PX_JsonCreateBooleanValue(px_memorypool *mp,PX_Json_Value *pValue,const px_char name[],px_bool b)
 {
 	PX_memset(pValue,0,sizeof(PX_Json_Value));
-	pValue->type=PX_JSON_VALUE_TYPE_NUMBER;
+	pValue->type=PX_JSON_VALUE_TYPE_BOOLEAN;
 
 	if (!PX_StringInitialize(mp,&pValue->name))
 	{

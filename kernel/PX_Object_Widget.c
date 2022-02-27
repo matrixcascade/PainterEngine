@@ -48,8 +48,9 @@ px_void PX_Object_WidgetShowHideCloseButton(PX_Object *pObject,px_bool show)
 static px_void PX_Object_WidgetOnButtonClose(PX_Object *pObject,PX_Object_Event e,px_void *ptr)
 {
 	PX_Object *pWidgetObject=(PX_Object *)ptr;
+	PX_ObjectExecuteEvent(pWidgetObject, PX_OBJECT_BUILD_EVENT(PX_OBJECT_EVENT_CLOSE));
 	PX_Object_WidgetHide(pWidgetObject);
-	PX_ObjectExecuteEvent(pWidgetObject,PX_OBJECT_BUILD_EVENT(PX_OBJECT_EVENT_CLOSE));
+	
 }
 
 px_void PX_Object_Widget_EventDispatcher(PX_Object *pObject,PX_Object_Event e,px_void *ptr)
@@ -174,6 +175,12 @@ px_void PX_Object_WidgetRender(px_surface *psurface, PX_Object *pObject,px_uint 
 		PX_SurfaceClear(&pwidget->renderTarget,0,0,pwidget->renderTarget.width-1,pwidget->renderTarget.height-1,pwidget->backgroundcolor);
 		PX_ObjectRender(&pwidget->renderTarget,pwidget->root,elapsed);
 		PX_SurfaceRender(psurface,&pwidget->renderTarget,(px_int)objx,(px_int)objy+PX_OBJECT_WIDGET_BAR_SIZE,PX_ALIGN_LEFTTOP,PX_NULL);
+		if (pwidget->showShader)
+		{
+			PX_GeoDrawRect(psurface, (px_int)(objx + objWidth), (px_int)objy + 6, (px_int)(objx + objWidth + 6), (px_int)(objy + objHeight + 6), PX_COLOR(128, 0, 0, 0));
+			PX_GeoDrawRect(psurface, (px_int)(objx + 6), (px_int)(objy + objHeight), (px_int)(objx + objWidth - 1), (px_int)(objy + objHeight + 6), PX_COLOR(128, 0, 0, 0));
+		}
+		
 	} while (0);
 
 
@@ -232,13 +239,13 @@ PX_Object * PX_Object_WidgetCreate(px_memorypool *mp,PX_Object *Parent,int x,int
 	pWidget->fontmodule=fontmodule;
 
 	pWidget->backgroundcolor=PX_OBJECT_UI_DEFAULT_BACKGROUNDCOLOR;
-	pWidget->barColor=PX_COLOR(255,48,48,48);
+	pWidget->barColor=PX_COLOR(255,128,128,128);
 	pWidget->borderColor=PX_OBJECT_UI_DEFAULT_BORDERCOLOR;
 	pWidget->focusColor=PX_COLOR_WHITE;
 	pWidget->bevent_update=PX_TRUE;
 	pWidget->bmoveable=PX_TRUE;
 	pWidget->fontcolor=PX_OBJECT_UI_DEFAULT_FONTCOLOR;
-
+	pWidget->showShader = PX_TRUE;
 	PX_ObjectRegisterEvent(pWidget->btn_close,PX_OBJECT_EVENT_EXECUTE,PX_Object_WidgetOnButtonClose,pObject);
 	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_ANY,PX_Object_Widget_EventDispatcher,PX_NULL);
 

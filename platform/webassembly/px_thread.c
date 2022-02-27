@@ -15,5 +15,8 @@ void *PX_ThreadRun(void *ptr)
 int PX_ThreadCreate(px_thread *pthread,func_thread func,void *ptr)
 {
     pthread_t t;
+	pthread->pfunc=func;
+	pthread->userptr=ptr;
+	pthread->isRun=0;
     return pthread_create( &t, NULL, PX_ThreadRun, pthread)==0; 
 }

@@ -261,6 +261,10 @@ px_void * MP_Malloc(px_memorypool *MP, px_uint Size )
 				break;
 			}
 		}
+		if (DEBUG_i ==PX_COUNTOF(MP->DEBUG_allocdata))
+		{
+			//PX_ERROR("Not enough of memory debug node!");
+		}
 		pAppend=(MP_Append_data *)((px_uchar *)MemNode->EndAddr-sizeof(MP_Append_data)+1);
 		pAppend->append=MP_APPENDDATA_MAGIC;
 	#endif
@@ -283,6 +287,10 @@ px_void * MP_Malloc(px_memorypool *MP, px_uint Size )
 				MP->DEBUG_allocdata[DEBUG_i].endAddr=MemNode->EndAddr;
 				break;
 			}
+		}
+		if (DEBUG_i == PX_COUNTOF(MP->DEBUG_allocdata))
+		{
+			//PX_ERROR("Not enough of memory debug node!");
 		}
 		pAppend=(MP_Append_data *)((px_uchar *)MemNode->EndAddr-sizeof(MP_Append_data)+1);
 		pAppend->append=MP_APPENDDATA_MAGIC;

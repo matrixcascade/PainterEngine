@@ -12,7 +12,9 @@ typedef struct
 	px_int mark_start_cursor;
 	px_int mark_end_cursor;
 
-	px_dword cursor_elpased;
+	px_dword cursor_elapsed;
+
+	px_color bordercolor;
 	px_color backgroundcolor;
 	px_color fontcolor;
 	px_color cursorcolor;
@@ -24,6 +26,6 @@ PX_Object_MemoryView *PX_Object_GetMemoryView(PX_Object *pObject);
 px_void		PX_Object_MemoryViewSetFontColor(PX_Object *pObject,px_color Color);
 px_void		PX_Object_MemoryViewSetBackgroundColor(PX_Object *pObject,px_color Color);
 px_void		PX_Object_MemoryViewSetData(PX_Object *pObject,px_void *pdata,px_dword size);
-
+px_bool		PX_Object_MemoryViewReadData(PX_Object* pObject,px_dword offset, px_void* poutdata, px_dword size);
 #endif
 
