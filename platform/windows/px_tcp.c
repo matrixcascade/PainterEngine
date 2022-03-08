@@ -97,12 +97,15 @@ int PX_TCPSend(PX_TCP *tcp,void *buffer,int size)
 int PX_TCPReceived(PX_TCP *tcp,void *buffer,int buffersize,int timeout)
 {
 	size_t ReturnSize;
-	int ret =setsockopt(tcp->socket,SOL_SOCKET,SO_RCVTIMEO,(const char *)&timeout,sizeof(timeout));
-
-	if(ret!=0)  
-	{  
-		return 0;  
-	}  
+	if (timeout>0)
+	{
+		int ret = setsockopt(tcp->socket, SOL_SOCKET, SO_RCVTIMEO, (const char*)&timeout, sizeof(timeout));
+		if (ret != 0)
+		{
+			return 0;
+		}
+	}
+	 
 
 	switch (tcp->type)
 	{
@@ -127,6 +130,49 @@ int PX_TCPReceived(PX_TCP *tcp,void *buffer,int buffersize,int timeout)
 		break;
 	}
 	return 0;
+}
+
+int PX_TCPSocketReceived(unsigned int socket, void* buffer, int buffersize, int timeout)
+{
+	int ReturnSize;
+	int SockAddrSize = sizeof(SOCKADDR);
+
+	if (timeout > 0)
+	{
+		int ret = setsockopt(socket, SOL_SOCKET, SO_RCVTIMEO, (const char*)&timeout, sizeof(timeout));
+		if (ret != 0)
+		{
+			return 0;
+		}
+	}
+
+	
+	ReturnSize= recv(socket, (char*)buffer, buffersize, 0);
+	if (ReturnSize==-1)
+	{
+		int error = WSAGetLastError();
+		if (error == 10060)
+			return 0;
+	}
+	return ReturnSize;
+}
+
+int PX_TCPSocketSend(unsigned int socket, void* buffer, int size)
+{
+	char* sendBuffer = (char*)buffer;
+	int length;
+	int sendsize = size;
+	do
+	{
+		if ((length = send(socket, (const char*)sendBuffer, size, 0)) == SOCKET_ERROR)
+		{
+			int error = WSAGetLastError();
+			return 0;
+		}
+		sendBuffer += length;
+		size -= length;
+	} while (size > 0);
+	return sendsize;
 }
 
 int PX_TCPAccept(PX_TCP *tcp,unsigned int *socket,PX_TCP_ADDR *fromAddr)
@@ -181,6 +227,10 @@ int PX_TCPReConnect(PX_TCP *tcp)
 void PX_TCPFree(PX_TCP *tcp)
 {
 	closesocket(tcp->socket);
+}
+void PX_TCPSocketFree(unsigned int socket)
+{
+	closesocket(socket);
 }
 
 

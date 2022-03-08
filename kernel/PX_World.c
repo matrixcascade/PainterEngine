@@ -369,13 +369,13 @@ static px_void PX_WorldClildRender(PX_World *pworld,px_surface *pSurface, PX_Obj
 	}
 	if (Object->pChilds!=PX_NULL)
 	{
-		PX_WorldClildRender(pworld,pSurface,Object->pNextBrother,elapsed,oftX,oftY);
+		PX_WorldClildRender(pworld,pSurface,Object->pChilds,elapsed,oftX,oftY);
 	}
 }
 
 
 
-px_void PX_WorldRender(px_surface *psurface,PX_World *pw,px_uint elapsed)
+px_void PX_WorldRender(px_surface *psurface,PX_World *pw,px_dword elapsed)
 {
 	px_int i,j;
 	px_int surface_width,surface_height;
@@ -399,7 +399,7 @@ px_void PX_WorldRender(px_surface *psurface,PX_World *pw,px_uint elapsed)
 	surface_height=pw->surface_height;
 
 
-	if (pw->auxiliaryline)
+	if (pw->auxiliaryline&& pw->auxiliaryline_color._argb.a)
 	{
 		for (sy=pw->auxiliaryYSpacer-((px_int)pw->offsety%pw->auxiliaryYSpacer);sy<surface_height;sy+=pw->auxiliaryYSpacer)
 		{
@@ -414,28 +414,34 @@ px_void PX_WorldRender(px_surface *psurface,PX_World *pw,px_uint elapsed)
 	}
 
 	ArrayIndex=(PX_QuickSortAtom *)MP_Malloc(calcmp,pw->aliveCount*sizeof(PX_QuickSortAtom));
-	j=0;
-
-	for (i=0;i<pw->pObjects.size;i++)
+	if (pw->aliveCount&&!ArrayIndex)
 	{
-		pwo=PX_VECTORAT(PX_WorldObject,&pw->pObjects,i);
-		if (!pwo->pObject)
+		PX_ERROR("out of memory");
+	}
+	if (ArrayIndex)
+	{
+		j = 0;
+
+		for (i = 0; i < pw->pObjects.size; i++)
 		{
-			continue;
+			pwo = PX_VECTORAT(PX_WorldObject, &pw->pObjects, i);
+			if (!pwo->pObject)
+			{
+				continue;
+			}
+			ArrayIndex[j].weight = pwo->pObject->z;
+			ArrayIndex[j].pData = pwo->pObject;
+			j++;
 		}
-		ArrayIndex[j].weight=pwo->pObject->z;
-		ArrayIndex[j].pData=pwo->pObject;
-		j++;
+
+		PX_Quicksort_MaxToMin(ArrayIndex, 0, pw->aliveCount - 1);
+
+		for (i = 0; i < pw->aliveCount; i++)
+		{
+			PX_WorldClildRender(pw, psurface, (PX_Object*)ArrayIndex[i].pData, elapsed, pw->offsetx, pw->offsety);
+		}
 	}
-
- 	PX_Quicksort_MaxToMin(ArrayIndex,0,pw->aliveCount-1);
-
-
-
-	for (i=0;i<pw->aliveCount;i++)
-	{
-		PX_WorldClildRender(pw,psurface,(PX_Object *)ArrayIndex[i].pData,elapsed,pw->offsetx,pw->offsety);
-	}
+	
 	MP_Reset(calcmp);
 }
 

@@ -69,7 +69,6 @@ typedef struct
 #define BigLittleSwap16(A)  ((((px_word)(A) & 0xff00) >> 8)|(((px_word)(A) & 0x00ff) << 8))
 #define BigLittleSwap32(A)  ((((px_dword)(A) & 0xff000000) >> 24)|(((px_dword)(A) & 0x00ff0000) >> 8)|(((px_dword)(A) & 0x0000ff00) << 8)|(((px_dword)(A) & 0x000000ff)<<24))
 
-
 typedef enum
 {
 	PX_ALIGN_LEFTTOP,
@@ -269,11 +268,11 @@ px_float PX_atof(const px_char fstr[]);
 PX_RETURN_STRING PX_ftos(px_float f, int precision);
 PX_RETURN_STRING PX_itos(px_int num,px_int radix);
 px_void PX_AscToWord(const px_char *asc,px_word *u16);
-px_int PX_ftoa(px_float f, char *outbuf, int maxlen, int precision);
+px_int PX_ftoa(px_float f, px_char *outbuf, int maxlen, int precision);
 px_int PX_itoa(px_int num,px_char *str,px_int MaxStrSize,px_int radix);
 px_dword PX_SwapEndian(px_dword val);
-px_char *PX_strchr(const char *s,int ch);
-px_char* PX_strstr(const char* dest, const char* src);
+px_char *PX_strchr(const px_char *s,int ch);
+px_char* PX_strstr(const px_char* dest, const px_char* src);
 
 ///////////////////////////////////////////////////////////////////////////
 //rectangle circle
@@ -304,14 +303,14 @@ px_void PX_memcpy(px_void *dst,const px_void *src,px_int size);
 px_void PX_strcpy(px_char *dst,const px_char *src,px_int size);
 px_void PX_wstrcpy(px_word *dst,const px_word *src,px_int size);
 px_void PX_strcat(px_char *src,const px_char *cat);
-px_void PX_strcat_s(px_char* src, const px_char* cat,px_int size);
+px_void PX_strcat_s(px_char* src, px_int size, const px_char* cat);
 px_void PX_wstrcat(px_word *src,const px_word *cat);
 px_void PX_strset(px_char *dst,const px_char *src);
 px_int PX_strlen(const px_char *dst);
 px_int PX_wstrlen(const px_word *dst);
 px_int PX_strcmp(const px_char *str1, const px_char *str2);
-px_bool PX_strequ(const px_char *src,const char *dst);
-px_bool PX_strequ2(const px_char* src, const char* dst);
+px_bool PX_strequ(const px_char *src,const px_char *dst);
+px_bool PX_strequ2(const px_char* src, const px_char* dst);
 px_void PX_strupr(px_char *src);
 px_void PX_strlwr(px_char *src);
 px_bool PX_strIsNumeric(const px_char *str);
@@ -547,6 +546,16 @@ void PX_UpSampled(_IN px_complex x[],_OUT px_complex X[],px_int N,px_int L);
 
 //////////////////////////////////////////////////////////////////////////
 //ipv4
+typedef struct 
+{
+	px_dword port;
+	union
+	{
+		px_dword ipv4;
+		px_dword ipv6[4];
+	};
+}PX_Network_Addr;
+
 px_dword PX_inet_addr( const px_char cp[] );
 px_dword PX_inet_port(const px_char cp[]);
 PX_RETURN_STRING PX_inet_ntoa(px_dword ipv4);

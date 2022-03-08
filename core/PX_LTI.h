@@ -1,6 +1,7 @@
 #ifndef __PX_LTI_H
 #define __PX_LTI_H
 #include "PX_Memory.h"
+#include "PX_Signal.h"
 
 #define PX_LTI_MAX_ORDER 16
 typedef struct 
@@ -76,7 +77,7 @@ typedef struct
 }PX_Delay;
 
 px_bool PX_DelayInitialize(PX_Delay* pdelay, px_memorypool* mp, px_int inv_z, PX_DELAY_DATA_TYPE type);
-px_int  PX_DelayGo_float(PX_Delay* pdelay, px_float in[], px_float out[], px_int size);
-px_int  PX_DelayGo_int(PX_Delay* pdelay, px_float in[], px_float out[], px_int size);
+px_void  PX_DelayGo_float(PX_Delay* pdelay, px_float in[], px_float out[], px_int size);
+px_void  PX_DelayGo_int(PX_Delay* pdelay, px_int in[], px_int out[], px_int size);
 px_void PX_DelayFree(PX_Delay* pDelay);
 #endif

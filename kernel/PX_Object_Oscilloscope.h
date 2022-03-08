@@ -172,12 +172,12 @@ px_void PX_Object_OscilloscopeSetDashLineColor(PX_Object *pObject,px_color clr);
 px_void PX_Object_OscilloscopeSetLeftTextShow(PX_Object *pObject,px_bool bshow);
 px_void PX_Object_OscilloscopeSetRightTextShow(PX_Object *pObject,px_bool bshow);
 px_void PX_Object_OscilloscopeSetHorizontalTextShow(PX_Object *pObject,px_bool bshow);
-px_void PX_Object_OscilloscopeSetFloatFlagFormatHorizontal(PX_Object *pObject,const char *fmt);
-px_void PX_Object_OscilloscopeSetIntFlagFormatHorizontal(PX_Object *pObject,const char *fmt);
-px_void PX_Object_OscilloscopeSetFloatFlagFormatVerticalLeft(PX_Object *pObject,const char *fmt);
-px_void PX_Object_OscilloscopeSetIntFlagFormatVerticalLeft(PX_Object *pObject,const char *fmt);
-px_void PX_Object_OscilloscopeSetFloatFlagFormatVerticalRight(PX_Object *pObject,const char *fmt);
-px_void PX_Object_OscilloscopeSetIntFlagFormatVericalRight(PX_Object *pObject,const char *fmt);
+px_void PX_Object_OscilloscopeSetFloatFlagFormatHorizontal(PX_Object *pObject,const px_char *fmt);
+px_void PX_Object_OscilloscopeSetIntFlagFormatHorizontal(PX_Object *pObject,const px_char *fmt);
+px_void PX_Object_OscilloscopeSetFloatFlagFormatVerticalLeft(PX_Object *pObject,const px_char *fmt);
+px_void PX_Object_OscilloscopeSetIntFlagFormatVerticalLeft(PX_Object *pObject,const px_char *fmt);
+px_void PX_Object_OscilloscopeSetFloatFlagFormatVerticalRight(PX_Object *pObject,const px_char *fmt);
+px_void PX_Object_OscilloscopeSetIntFlagFormatVericalRight(PX_Object *pObject,const px_char *fmt);
 
 
 px_void PX_Object_OscilloscopeSetLeftTextMode(PX_Object *pObject,PX_OBJECT_OSCILLOSCOPE_TEXT_DISPLAYMODE mode);

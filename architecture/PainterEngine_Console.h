@@ -49,7 +49,7 @@ PX_Object * PX_ConsolePrintImage(PX_Console *pc,px_char *res_image_key);
 PX_Object * PX_ConsolePrintAnimation(PX_Console *pc,px_char *res_animation_key);
 PX_Object * PX_ConsoleShowImage(PX_Console *pc,px_char *res_image_key);
 px_void     PX_ConsoleClear(PX_Console *pc);
-px_bool		PX_ConsoleExecute(PX_Console *pc,char *pshellstr);
+px_bool		PX_ConsoleExecute(PX_Console *pc,px_char *pshellstr);
 
 #endif
 

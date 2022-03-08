@@ -85,6 +85,7 @@ typedef struct
 	PX_SYNC_SERVERCLIENT_STATUS status;
 	px_int send_cache_instr_size;
 	px_byte send_cache_instr_buffer[PX_SYNC_CACHESIZE];
+	PX_LinkerData linkerData;
 }PX_SyncFrame_Server_Clients;
 
 
@@ -121,7 +122,8 @@ typedef struct _PX_SyncFrame_Server
 	px_uint instr_once_maxsize;
 	px_byte recv_cache_buffer[PX_SYNC_CACHESIZE];
 	px_byte send_cache_buffer[PX_SYNC_CACHESIZE];
-}PX_SyncFrame_Server;
+	px_int send_times;
+}PX_SyncFrameServer;
 
 
 
@@ -153,30 +155,31 @@ typedef struct _PX_SyncFrame_Client
 	px_byte recv_cache_buffer[PX_SYNC_CACHESIZE];
 	px_int send_cache_Instr_size;
 	px_byte send_cache_Instr_buffer[PX_SYNC_CACHESIZE];
-}PX_SyncFrame_Client;
+	px_int send_times;
+}PX_SyncFrameClient;
 
 
 
 
-px_bool PX_SyncFrameServerInit(PX_SyncFrame_Server *sync,px_memorypool *mp,px_dword updateDuration,PX_Linker *linker);
-px_void PX_SyncFrameServerSetVersion(PX_SyncFrame_Server *sync,px_dword version);
-px_bool PX_SyncFrameServerAddClient(PX_SyncFrame_Server *sync,px_dword server_verify_id,px_dword client_id,px_dword c_id);
-px_void PX_SyncFrameServerSetInstrOnceMaxSize(PX_SyncFrame_Server *sync,px_int maxsize);
-px_void PX_SyncFrameServerRun(PX_SyncFrame_Server *sync);
-px_void PX_SyncFrameServerStop(PX_SyncFrame_Server *sync);
-px_void PX_SyncFrameServerUpdate(PX_SyncFrame_Server *sync,px_dword elapsed);
-px_void PX_SyncFrameServerFree(PX_SyncFrame_Server *sync);
-px_int  PX_SyncFrameServerGetReadyFrameCount(PX_SyncFrame_Server *sync);
-px_uint32 PX_SyncFrameServerSum32(PX_SyncFrame_Server *sync);
+px_bool PX_SyncFrameServerInitialize(PX_SyncFrameServer *sync,px_memorypool *mp,px_dword updateDuration,PX_Linker *linker);
+px_void PX_SyncFrameServerSetVersion(PX_SyncFrameServer *sync,px_dword version);
+px_bool PX_SyncFrameServerAddClient(PX_SyncFrameServer *sync,px_dword server_verify_id,px_dword client_id,px_dword c_id);
+px_void PX_SyncFrameServerSetInstrOnceMaxSize(PX_SyncFrameServer *sync,px_int maxsize);
+px_void PX_SyncFrameServerRun(PX_SyncFrameServer *sync);
+px_void PX_SyncFrameServerStop(PX_SyncFrameServer *sync);
+px_void PX_SyncFrameServerUpdate(PX_SyncFrameServer *sync,px_dword elapsed);
+px_void PX_SyncFrameServerFree(PX_SyncFrameServer *sync);
+px_int  PX_SyncFrameServerGetReadyFrameCount(PX_SyncFrameServer *sync);
+px_uint32 PX_SyncFrameServerSum32(PX_SyncFrameServer *sync);
 
 
-px_bool PX_SyncFrameClientInit(PX_SyncFrame_Client *client,px_memorypool *mp,px_dword updateDuration,px_dword server_verify_id,px_dword client_id,PX_Linker *linker);
-px_void PX_SyncFrameClientAddInstr(PX_SyncFrame_Client *client,px_void *instr,px_int size);
-px_void PX_SyncFrameClientSetVersion(PX_SyncFrame_Client *sync,px_dword version);
-px_void PX_SyncFrameClientUpdate(PX_SyncFrame_Client *sync,px_dword elapsed);
-px_int  PX_SyncFrameClientGetReadyFrameCount(PX_SyncFrame_Client *sync);
-px_void PX_SyncFrameClientFree(PX_SyncFrame_Client *sync);
-px_uint32 PX_SyncFrameClientSum32(PX_SyncFrame_Client *sync);
+px_bool PX_SyncFrameClientInitialize(PX_SyncFrameClient *client,px_memorypool *mp,px_dword updateDuration,px_dword server_verify_id,px_dword client_id,PX_Linker *linker);
+px_void PX_SyncFrameClientAddInstr(PX_SyncFrameClient *client,px_void *instr,px_int size);
+px_void PX_SyncFrameClientSetVersion(PX_SyncFrameClient *sync,px_dword version);
+px_void PX_SyncFrameClientUpdate(PX_SyncFrameClient *sync,px_dword elapsed);
+px_int  PX_SyncFrameClientGetReadyFrameCount(PX_SyncFrameClient *sync);
+px_void PX_SyncFrameClientFree(PX_SyncFrameClient *sync);
+px_uint32 PX_SyncFrameClientSum32(PX_SyncFrameClient *sync);
 
 
 #define PX_SYNCDATA_DATAGRAM_MAX_SIZE			1460
@@ -222,7 +225,7 @@ typedef struct _PX_SyncData_Server
 
 	px_void *user;
 	px_vector clients;// vector for PX_SyncData_Server_Client
-}PX_SyncData_Server;
+}PX_SyncDataServer;
 
 typedef struct _PX_SyncData_Client
 {
@@ -243,7 +246,7 @@ typedef struct _PX_SyncData_Client
 	
 	px_dword query_elapsed;
 	px_dword last_recv_elapsed;
-}PX_SyncData_Client;
+}PX_SyncDataClient;
 
 #define PX_SYNCDATA_OPCODE_QUERY 0x680
 #define PX_SYNCDATA_OPCODE_QUERYACK 0x6802
@@ -299,15 +302,15 @@ typedef union
 	PX_SyncData_RequestAck requestAck;
 }PX_SyncData_Datagram;
 
-px_bool PX_SyncDataServerInit(PX_SyncData_Server *syncdata_server,px_memorypool *mp,px_dword serverID,PX_Linker *linker);
-px_bool PX_SyncDataServerAddClient(PX_SyncData_Server *syncdata_server,px_dword clientID);
-px_bool PX_SyncDataServerSetSyncData(PX_SyncData_Server *s,px_void *data,px_dword size);
-px_bool PX_SyncDataServerUpdate(PX_SyncData_Server *syncdata_server,px_int elapsed);
-px_void PX_SyncDataServerFree(PX_SyncData_Server *syncdata_server);
+px_bool PX_SyncDataServerInitialize(PX_SyncDataServer *syncdata_server,px_memorypool *mp,px_dword serverID,PX_Linker *linker);
+px_bool PX_SyncDataServerAddClient(PX_SyncDataServer *syncdata_server,px_dword clientID);
+px_bool PX_SyncDataServerSetSyncData(PX_SyncDataServer *s,px_void *data,px_dword size);
+px_bool PX_SyncDataServerUpdate(PX_SyncDataServer *syncdata_server,px_int elapsed);
+px_void PX_SyncDataServerFree(PX_SyncDataServer *syncdata_server);
 
 
-px_bool PX_SyncDataClientInit(PX_SyncData_Client *syncdata_client,px_memorypool *mp,px_dword serverID,px_dword clientID,PX_Linker *linker);
-px_bool PX_SyncDataClientIsCompleted(PX_SyncData_Client *syncdata_client);
-px_bool PX_SyncDataClientUpdate(PX_SyncData_Client *syncdata_client,px_int elapsed);
-px_void PX_SyncDataClientFree(PX_SyncData_Client *syncdata_client);
+px_bool PX_SyncDataClientInitialize(PX_SyncDataClient *syncdata_client,px_memorypool *mp,px_dword serverID,px_dword clientID,PX_Linker *linker);
+px_bool PX_SyncDataClientIsCompleted(PX_SyncDataClient *syncdata_client);
+px_bool PX_SyncDataClientUpdate(PX_SyncDataClient *syncdata_client,px_int elapsed);
+px_void PX_SyncDataClientFree(PX_SyncDataClient *syncdata_client);
 #endif

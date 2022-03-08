@@ -2,7 +2,7 @@
 
 //////////////////////////////////////////////////////////////////////////
 /// Algorithm implementation by Clayton Otey, Dec 2007 
-/// reWritten by DBinay,Feb 2022
+/// Code by DBinary,Feb 2022
 /// ///////////////////////////////////////////////////////////////////////
 
 px_void PX_Piano_DelayInitialize(PX_Piano_Delay* c,px_memorypool *mp, px_int di)
@@ -429,11 +429,11 @@ px_void PX_Piano_ThirianDispersion(px_float B, px_float f, px_int M, PX_Thirian*
 	}
 	
 	logB = (px_float)PX_log(B);
-	kd = (px_float)PX_exp(k1 * logB * logB + k2 * logB + k3);
-	Cd = (px_float)PX_exp(C1 * logB + C2);
+	kd = (px_float)PX_exp(1.0*k1 * logB * logB + 1.0*k2 * logB + k3);
+	Cd = (px_float)PX_exp(1.0*C1 * logB + C2);
 	halfstep = (px_float)PX_pow(2.0, 1.0 / 12.0);
 	Ikey = (px_float)(PX_log(f * halfstep / 27.5f) / PX_log(halfstep));
-	D = (px_float)PX_exp(Cd - Ikey * kd);
+	D = (px_float)PX_exp(1.0*Cd - 1.0*Ikey * kd);
 
     if (D <= 1.0) 
     {
@@ -642,7 +642,7 @@ px_bool PX_PianoKeyInitialize(px_memorypool* mp,PX_PianoKey *pPianoKey,PX_PianoK
 
 	rhoL = (px_float)(PX_PI * r * r * rho);
 	T = (2 * L * param->f) * (2 * L * param->f) * rhoL;
-	pPianoKey->Z = (px_float)PX_sqrtd(T * rhoL);
+	pPianoKey->Z = (px_float)PX_sqrtd(1.0*T * rhoL);
 	B = (px_float)((PX_PI * PX_PI * PX_PI) * E * rcore * rcore * rcore * rcore / (4.0 * L * L * T));
 
 	for (k = 0; k < pPianoKey->nstrings; k++) {
@@ -784,7 +784,7 @@ px_bool PX_PianoInitialize(px_memorypool* mp,PX_Piano* pPiano, PX_PIANO_STYLE st
 	for (i=0;i<PX_COUNTOF(pPiano->keys);i++)
 	{
 		PX_PianoKey_Parameters *param= (PX_PianoKey_Parameters*)piano_mod_default;
-		if(!PX_PianoKeyInitialize(mp, &pPiano->keys[i], param))return PX_FALSE;
+		if(!PX_PianoKeyInitialize(mp, &pPiano->keys[i], &param[i]))return PX_FALSE;
 	}
 	do 
 	{
@@ -820,6 +820,7 @@ px_int PX_PianoKeyNameToIndex(const px_char keyName[])
 			break;
 	if (i == 17)return -1; else row = map[i];
 	column = keyName[oft] - '1';
+	if (i <= 1) column++;
 	if (column >= 0 && column < 8 && row + column * 12 < 88)	index = row + column * 12; else return -1;
 	return index;
 }
@@ -879,79 +880,117 @@ px_void PX_PianoFree(PX_Piano* pPiano)
 	PX_PianoSoundBoardFree(&pPiano->soundboard);
 }
 
-
-px_bool PX_PainoSoundReverbInitialize(PX_PainoSoundReverb* pReverb, PX_PianoKey_Parameters keyparam[88], PX_PianoSoundboard_Parameters *soundboardparam)
+px_void PX_PianoModelInitializeData(PX_PianoModel* pReverb)
 {
 	px_int i;
-	
-	const px_float PX_Piano_KeyFrequency[] = { 27.5f,29.135f,30.868f,32.703f,34.648f,36.708f,38.891f,41.203f,43.654f,46.249f,48.999f,51.913f };
-	const px_float PX_Piano_AmpMap[] = { 3.047837f,3.967463f,4.068119f,4.147177f,4.195764f,4.250195f,4.312485f,4.366438f,4.393855f,4.413116f,4.429189f,2.233078f,2.242712f,2.258232f,2.275072f,2.294975f,2.309848f,2.336400f,2.353222f,2.383314f,1.599312f,1.599385f,1.591346f,1.592523f,1.585473f,1.583628f,1.589321f,1.600980f,1.613558f,1.629661f,1.648730f,1.692481f,1.736692f,1.780722f,1.832306f,1.832437f,1.894783f,1.970879f,2.062356f,2.171813f,2.171074f,2.304099f,2.305844f,2.468208f,2.663217f,2.666740f,2.902329f,2.909418f,2.915839f,3.198942f,3.208551f,3.565721f,3.574121f,3.584794f,3.595176f,4.090815f,4.099084f,4.108564f,4.884596f,4.886070f,4.888009f,4.888111f,4.884447f,6.323071f,6.307468f,6.285368f,6.258748f,6.230694f,6.195814f,5.837747f,10.067566f,9.370760f,8.710139f,8.128731f,7.626956f,7.191919f,6.811775f,6.468780f,6.176325f,5.900831f,5.542097f,5.172136f,4.831508f,4.520650f,4.243360f,3.995601f,3.753256f,3.500318f, };
-	px_char calcBuffer[64 * 1024] = {0};
+	PX_memset(pReverb, 0, sizeof(PX_PianoModel));
+
+	pReverb->lock = PX_FALSE;
+
+	for (i = 0; i < PX_COUNTOF(pReverb->pulsation); i++)
+	{
+		pReverb->pulsation[i].cursor = -1;
+		pReverb->pulsation[i].note = -1;
+	}
+}
+
+px_bool PX_PianoModelInitializeNote(PX_PianoModel* pReverb, px_int i, PX_PianoKey_Parameters *keyparam, PX_PianoSoundboard_Parameters* soundboardparam)
+{
+	px_int j;
+	px_float keyout;
+	px_char calcBuffer[64 * 1024] = { 0 };
+	px_memorypool mp = MP_Create(calcBuffer, sizeof(calcBuffer));
 	PX_PianoSoundBoard soundboard;
 	PX_PianoKey key;
-	px_memorypool mp = MP_Create(calcBuffer, sizeof(calcBuffer));
-	#include "PX_Piano_mod.h"
-	
-	if (keyparam==PX_NULL)
+
+#include "PX_Piano_mod.h"
+
+	if (keyparam == PX_NULL)
 	{
-		keyparam = (PX_PianoKey_Parameters *)piano_mod_default;
-	}
-	
-	if (soundboardparam == PX_NULL)
-	{
-		soundboardparam = (PX_PianoSoundboard_Parameters*)(piano_mod_default+sizeof(PX_PianoKey_Parameters)*88);
+		keyparam = (PX_PianoKey_Parameters*)piano_mod_default;
 	}
 
+	if (soundboardparam == PX_NULL)
+	{
+		soundboardparam = (PX_PianoSoundboard_Parameters*)(piano_mod_default + sizeof(PX_PianoKey_Parameters) * 88);
+	}
+
+	if (!PX_PianoSoundBoardInitialize(&mp, &soundboard, soundboardparam))
+		return PX_FALSE;
+
+	if (!PX_PianoKeyInitialize(&mp, &key, &keyparam[i]))
+	{
+		PX_PianoSoundBoardFree(&soundboard);
+		return PX_FALSE;
+	}
+	PX_PianoKeyTrigger(&key, 1);
+	for (j = 0; j < PX_COUNTOF(pReverb->note[i].pcm); j++)
+	{
+		PX_PianoKeyGo(&key, &keyout, 1);
+		PX_PianoSoundBoardGo(&soundboard, &keyout, &pReverb->note[i].pcm[j], 1);
+	}
+	PX_PianoSoundBoardFree(&soundboard);
+	PX_PianoKeyFree(&key);
+	return PX_TRUE;
+}
+px_bool PX_PianoModelInitialize(PX_PianoModel* pReverb, PX_PianoKey_Parameters keyparam[88], PX_PianoSoundboard_Parameters *soundboardparam)
+{
+	px_int i;
+	PX_PianoModelInitializeData(pReverb);
 	for (i = 0; i < PX_COUNTOF(pReverb->note); i++)
 	{
-		px_int j;
-		px_float keyout;
-		if (!PX_PianoSoundBoardInitialize(&mp, &soundboard, soundboardparam))
-			return PX_FALSE;
-		
-		if (!PX_PianoKeyInitialize(&mp, &key, &keyparam[i]))
-		{
-			PX_PianoSoundBoardFree(&soundboard);
-			return PX_FALSE;
-		}
-		for (j=0;j<PX_COUNTOF(pReverb->note[i].pcm);j++)
-		{
-			PX_PianoKeyGo(&key, &keyout, 1);
-			PX_PianoSoundBoardGo(&soundboard, &keyout, &pReverb->note[i].pcm[j], 1);
-		}
-		PX_PianoSoundBoardFree(&soundboard);
-		PX_PianoKeyFree(&key);
-		pReverb->note[i].cursor = PX_COUNTOF(pReverb->note[i].pcm);
+		PX_PianoModelInitializeNote(pReverb, i, keyparam , soundboardparam);
 	}
 	return PX_TRUE;
 }
 
-px_void PX_PainoSoundReverbGo(PX_PainoSoundReverb* pReverb, px_float in[], px_float out[], px_int count)
+px_void PX_PianoModelGo(PX_PianoModel* pReverb, px_float out[], px_int count)
 {
 	px_int i,j;
+	while (pReverb->lock);
+	pReverb->lock = PX_TRUE;
 	for (j=0;j<count;j++)
 	{
 		px_float reverb = 0;
-		for (i = 0; i < PX_COUNTOF(pReverb->note); i++)
+		for (i = 0; i < PX_COUNTOF(pReverb->pulsation); i++)
 		{
-			if (pReverb->note[i].cursor >= 0 && pReverb->note[i].cursor < PX_COUNTOF(pReverb->note[i].pcm))
+			if (pReverb->pulsation[i].note>=0&&pReverb->pulsation[i].cursor >= 0 && pReverb->pulsation[i].cursor < PX_COUNTOF(pReverb->note[i].pcm))
 			{
-				reverb += pReverb->note[i].pcm[pReverb->note[i].cursor];
-				pReverb->note[i].cursor++;
+				reverb += pReverb->note[pReverb->pulsation[i].note].pcm[pReverb->pulsation[i].cursor];
+				pReverb->pulsation[i].cursor++;
+			}
+			else
+			{
+				pReverb->pulsation[i].note = -1;
+				pReverb->pulsation[i].cursor = -1;
 			}
 		}
 		out[j] = reverb / 88;
 	}
+	pReverb->lock = PX_FALSE;
 	
 }
 
-px_void PX_PainoSoundReverbTrigger(PX_PainoSoundReverb* pReverb, px_int index)
+px_void PX_PianoModelTrigger(PX_PianoModel* pReverb, px_int index)
 {
-	if (index>=0&&index<88)
+	px_int i;
+	if (index<0||index>=88)
 	{
-		pReverb->note[index].cursor = 0;
+		return;
+	}
+	for (i=0;i<PX_COUNTOF(pReverb->pulsation);i++)
+	{
+		if (pReverb->pulsation[i].note==-1|| pReverb->pulsation[i].cursor==-1)
+		{
+			while (pReverb->lock);
+			pReverb->lock = PX_TRUE;
+			pReverb->pulsation[i].note = index;
+			pReverb->pulsation[i].cursor = 0;
+			pReverb->lock = PX_FALSE;
+			return;
+		}
 	}
 }
 
-px_void PX_PainoSoundReverbFree(PX_PainoSoundReverb* pReverb){}
+px_void PX_PianoModelFree(PX_PianoModel* pReverb){}
 

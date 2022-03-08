@@ -102,11 +102,24 @@ px_byte *PX_MemoryFind(px_memory *memory,const px_void *buffer,px_int size)
 
 px_void PX_MemoryRemove(px_memory *memory,px_int start,px_int end)
 {
-	if (start<0||start<end||end>=memory->usedsize)
+	if (start>end)
 	{
+		px_int t = end;
+		end = start;
+		start = t;
+	}
+	if (start<0)
+	{
+		PX_ASSERT();
 		return;
 	}
-	PX_memcpy(memory->buffer+start,memory->buffer+end+1,start-end+1);
+	if (end >= memory->usedsize)
+	{
+		PX_ASSERT();
+		return;
+	}
+	PX_memcpy(memory->buffer+start,memory->buffer+end+1,memory->usedsize-end-1);
+	memory->usedsize += (start - end - 1);
 }
 
 

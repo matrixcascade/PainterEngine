@@ -54,7 +54,7 @@ _LIMIT px_int	PX_WorldSearchRegion(PX_World *world,px_float centerX,px_float cen
 px_bool			PX_WorldAddObject(PX_World *World,PX_Object *pObject);
 px_void			PX_WorldUpdate(PX_World *World,px_uint elapsed );
 px_void			PX_WorldUpdateOffset(PX_World *pw);
-px_void			PX_WorldRender(px_surface *psurface,PX_World *World,px_uint elapsed );
+px_void			PX_WorldRender(px_surface *psurface,PX_World *World,px_dword elapsed );
 px_void         PX_WorldSetCamera(PX_World *World,px_point camera_center_point);
 px_void			PX_WorldSetImpact(PX_Object *pObj,px_dword type,px_dword impact);
 px_void			PX_WorldSetAuxiliaryXYSpacer(PX_World *pw,px_int x,px_int y);
