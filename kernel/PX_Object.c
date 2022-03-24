@@ -259,6 +259,12 @@ px_int PX_Object_Event_GetIndex(PX_Object_Event e)
 	return e.Param_int[0];
 }
 
+px_int PX_Object_Event_GetInt(PX_Object_Event e)
+{
+	return e.Param_int[0];
+}
+
+
 px_void PX_Object_Event_SetWidth(PX_Object_Event *e,px_float w)
 {
 	e->Param_float[0]=w;
@@ -502,7 +508,7 @@ px_void PX_ObjectDelete( PX_Object *pObject )
 			}
 			else
 			{
-				PX_ERROR("Invalid GUI Object struct");
+				PX_ERROR("Invalid Object struct");
 			}
 		}
 	}

@@ -2,7 +2,7 @@
 
 
 
-static char const PC_ScriptPreload[]="#name \"shell\"\r\n\
+static px_char const PC_ScriptPreload[]="#name \"shell\"\r\n\
 							  #runtime stack 1024\r\n\
 							  host int print(string s);\r\n\
 							  host int printimage(string s);\r\n\
@@ -344,7 +344,7 @@ px_bool PC_ConsoleVM_RunScriptFunction(PX_ScriptVM_Instance *Ins,px_void *userpt
 	return PX_TRUE;
 }
 
-px_bool PX_ConsoleExecute(PX_Console *pc,char *pshellstr)
+px_bool PX_ConsoleExecute(PX_Console *pc,px_char *pshellstr)
 {
 	px_memory bin;
 	px_string shell;
@@ -359,9 +359,9 @@ px_bool PX_ConsoleExecute(PX_Console *pc,char *pshellstr)
 	MP_Reset(&mp_calc);
 	PX_MemoryInitialize(&mp_calc,&bin);
 	PX_StringInitialize(&mp_calc,&shell);
-	PX_StringCat(&shell,(char *)PC_ScriptPreload);
+	PX_StringCat(&shell,(px_char *)PC_ScriptPreload);
 	if(pc->script_header_append)
-	PX_StringCat(&shell,(char *)pc->script_header_append);
+	PX_StringCat(&shell,(px_char *)pc->script_header_append);
 	PX_StringCat(&shell,"export void main(){\r\n");
 	PX_StringCat(&shell,pshellstr);
 	PX_StringCat(&shell,"\r\n}");
@@ -476,7 +476,7 @@ px_void PX_ConsoleOnMouseDown(PX_Object *Obj,PX_Object_Event e,px_void *user_ptr
 
 px_bool PX_ConsoleInitializeEx(PX_Runtime *runtime,PX_Console *pc,px_int x,px_int y,px_int width,px_int height)
 {
-	char const fox_console_logo[] = \
+	px_char const fox_console_logo[] = \
 	{
 #include "PainterEngine_FoxLogo.h"
 	};

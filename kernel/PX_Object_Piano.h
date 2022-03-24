@@ -58,7 +58,8 @@ typedef struct
 }PX_Object_PianoTune;
 PX_Object* PX_Object_PianoCreate(px_memorypool* mp, PX_Object* Parent, px_float x, px_float y, px_float width, px_float height);
 px_void PX_Object_PianoSetKeyFocus(PX_Object* pObject, px_int index);
-px_void PX_Object_PianoClearKeyFocus(PX_Object* pObject);
+px_void PX_Object_PianoSetKeyDown(PX_Object* pObject, px_int index, px_bool bdown);
+px_void PX_Object_PianoClearKeyState(PX_Object* pObject);
 PX_Object* PX_Object_PianoTuneCreate(px_memorypool* mp, PX_Object* Parent, px_float x, px_float y, px_float width, px_float height);
 px_void PX_Object_PianoTuneSetParameters(PX_Object* pObject, PX_Piano* pPiano, px_int keyIndex);
 #endif

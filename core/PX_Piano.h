@@ -185,7 +185,7 @@ typedef enum
 	PX_PIANO_STYLE_DEBUG
 }PX_PIANO_STYLE;
 
-px_bool PX_PianoKeyInitialize(px_memorypool* mp, PX_PianoKey* pPianoKey,  PX_PianoKey_Parameters param);
+px_bool PX_PianoKeyInitialize(px_memorypool* mp, PX_PianoKey* pPianoKey, PX_PianoKey_Parameters* param);
 px_void PX_PianoKeyTrigger(PX_PianoKey* pPianoKey, px_float v);
 px_int PX_PianoKeyGo(PX_PianoKey* pPianoKey, px_float* out, px_int samples);
 px_void PX_PianoKeyFree(PX_PianoKey* pPianoKey);
@@ -206,19 +206,29 @@ px_void PX_PianoGo(PX_Piano* pPiano, px_float* out, px_int samples);
 px_void PX_PianoFree(PX_Piano* pPiano);
 
 
+#define PX_PIANOREVERB_MAX_PULSATION 64
+
 typedef struct
 {
-	px_int cursor;
 	px_float pcm[44100 * 3];
 }PX_PianoSoundNote;
 
+typedef struct  
+{
+	px_int cursor;
+	px_int note;
+}PX_PianoModelPulsation;
+
 typedef struct 
 {
+	volatile px_bool lock;
+	PX_PianoModelPulsation pulsation[PX_PIANOREVERB_MAX_PULSATION];
 	PX_PianoSoundNote note[88];
-}PX_PainoSoundReverb;
-
-px_bool PX_PainoSoundReverbInitialize(PX_PainoSoundReverb* pReverb, PX_PianoKey_Parameters keyparam[88], PX_PianoSoundboard_Parameters *soundboardparam);
-px_void PX_PainoSoundReverbGo(PX_PainoSoundReverb* pReverb, px_float in[], px_float out[], px_int count);
-px_void PX_PainoSoundReverbTrigger(PX_PainoSoundReverb* pReverb,px_int index);
-px_void PX_PainoSoundReverbFree(PX_PainoSoundReverb* pReverb);
+}PX_PianoModel;
+px_void PX_PianoModelInitializeData(PX_PianoModel* pModel);
+px_bool PX_PianoModelInitializeNote(PX_PianoModel* pModel, px_int i, PX_PianoKey_Parameters* keyparam, PX_PianoSoundboard_Parameters* soundboardparam);
+px_bool PX_PianoModelInitialize(PX_PianoModel* pModel, PX_PianoKey_Parameters keyparam[88], PX_PianoSoundboard_Parameters* soundboardparam);
+px_void PX_PianoModelGo(PX_PianoModel* pModel, px_float out[], px_int count);
+px_void PX_PianoModelTrigger(PX_PianoModel* pModel,px_int index);
+px_void PX_PianoModelFree(PX_PianoModel* pModel);
 #endif

@@ -8,6 +8,7 @@ px_bool PX_SoundPlayInitialize(px_memorypool *mp, PX_SoundPlay *pSoundPlay)
     pSoundPlay->mix_mode=PX_SOUND_MIX_MODE_PARALLEL;
     pSoundPlay->parallel=PX_SOUND_DEFAULT_PARALLEL;
     pSoundPlay->pause=PX_FALSE;
+	pSoundPlay->current_amplitude = 0;
 	PX_memset(pSoundPlay->Sounds, 0, sizeof(pSoundPlay->Sounds));
 	return PX_TRUE;
 }
@@ -83,7 +84,20 @@ px_bool PX_SoundPlayRead(PX_SoundPlay *pSoundPlay,px_byte *pBuffer,px_int readSi
 
 	if (pSoundPlay->userread)
 	{
+
 		pSoundPlay->userread(pSoundPlay->userptr,pBuffer,readSize);
+		for (i=0;i<readSize/4;i++)
+		{
+			pSoundPlay->amplitude_sum += PX_ABS(pTargetPCM16[i]);
+			pSoundPlay->amplitude_sample++;
+			if (pSoundPlay->amplitude_sample>2205)
+			{
+				pSoundPlay->current_amplitude = pSoundPlay->amplitude_sum / 2205.f/32768.f;
+				pSoundPlay->amplitude_sum = 0;
+				pSoundPlay->amplitude_sample = 0;
+			}
+		}
+
 		return PX_TRUE;
 	}
 
@@ -95,6 +109,9 @@ px_bool PX_SoundPlayRead(PX_SoundPlay *pSoundPlay,px_byte *pBuffer,px_int readSi
 	if (pSoundPlay->pause)
 	{
 		pSoundPlay->bLock=PX_FALSE;
+		pSoundPlay->current_amplitude = 0;
+		pSoundPlay->amplitude_sum = 0;
+		pSoundPlay->amplitude_sample = 0;
 		return PX_TRUE;
 	}
 
@@ -215,6 +232,19 @@ px_bool PX_SoundPlayRead(PX_SoundPlay *pSoundPlay,px_byte *pBuffer,px_int readSi
 	}
 		
 	pSoundPlay->bLock=PX_FALSE;
+
+	for (i = 0; i < readSize / 4; i++)
+	{
+		pSoundPlay->amplitude_sum += PX_ABS(pTargetPCM16[i]);
+		pSoundPlay->amplitude_sample++;
+		if (pSoundPlay->amplitude_sample > 2205)
+		{
+			pSoundPlay->current_amplitude = pSoundPlay->amplitude_sum / 2205.f / 32768.f;
+			pSoundPlay->amplitude_sum = 0;
+			pSoundPlay->amplitude_sample = 0;
+		}
+	}
+
 	return PX_TRUE;
 }
 
@@ -283,6 +313,11 @@ px_void PX_SoundPlayClear(PX_SoundPlay *pSoundPlay)
 		pSoundPlay->Sounds[j].data=PX_NULL;
 		pSoundPlay->Sounds[j].offset=0;
 	}
+}
+
+px_float PX_SoundPlayGetCurrentAmplitude(PX_SoundPlay* pSoundPlay)
+{
+	return pSoundPlay->current_amplitude;
 }
 
 px_int PX_SoundPlayGetDataCount(PX_SoundPlay *pSoundPlay)

@@ -4,7 +4,7 @@ static px_bool PX_isBigEndianCPU()
 {
 	union{
 		px_dword i;
-		unsigned char s[4];
+		px_uchar s[4];
 	}c;
 	c.i = 0x12345678;
 	return (0x12 == c.s[0]);
@@ -126,7 +126,7 @@ px_void PX_AscToWord(const px_char *asc,px_word *u16)
 	*u16=0;
 }
 
-px_int  PX_ftoa(px_float f, char *outbuf, px_int maxlen, px_int precision)   
+px_int  PX_ftoa(px_float f, px_char *outbuf, px_int maxlen, px_int precision)   
 {  
 	px_int i_value;
 	px_int f_value;
@@ -1269,6 +1269,10 @@ px_int PX_sprintf8(px_char *_out_str,px_int str_size,const px_char fmt[], px_str
 		if(*p != '%') {
 			_out_str[length]=*p;
 			length++;
+			if (length >= str_size)
+			{
+				PX_ASSERT();
+			}
 			continue;
 		}
 		switch(*(p+1)) 
@@ -1284,6 +1288,10 @@ px_int PX_sprintf8(px_char *_out_str,px_int str_size,const px_char fmt[], px_str
 		default:
 			_out_str[length]=*p;
 			length++;
+			if (length >= str_size)
+			{
+				PX_ASSERT();
+			}
 			continue;
 		}
 
@@ -1317,7 +1325,9 @@ px_int PX_sprintf8(px_char *_out_str,px_int str_size,const px_char fmt[], px_str
 				length+=PX_strlen(tret.data);
 			}
 			else
+			{
 				return length;
+			}
 			break;
 		case PX_STRINGFORMAT_TYPE_STRING:
 			if(length+PX_strlen(pstringfmt._pstring)<str_size)
@@ -1326,11 +1336,17 @@ px_int PX_sprintf8(px_char *_out_str,px_int str_size,const px_char fmt[], px_str
 				length+=PX_strlen(pstringfmt._pstring);
 			}
 			else
+			{
 				return length;
+			}
 			break;
 		default:
 			return 0;
 		}
+	}
+	if (length >= str_size)
+	{
+		PX_ASSERT();
 	}
 	return length;
 }
@@ -2501,7 +2517,10 @@ px_void PX_memcpy(px_void *dst,const px_void *src,px_int size)
 	PX_MEMCPY_16 *_16byteMovSrc,*_16byteMovDst;
 	px_uint _movTs;
 
-
+	if (size<=0)
+	{
+		return;
+	}
 	//is overlap?
 	if (dst>src&&(px_char *)dst<(px_char *)src+size)
 	{
@@ -2731,7 +2750,7 @@ px_void PX_strcat(px_char *src,const px_char *cat)
 	*src='\0';
 }
 
-px_void PX_strcat_s(px_char* src, const px_char* cat, px_int size)
+px_void PX_strcat_s(px_char* src, px_int size, const px_char* cat)
 {
 	if (PX_strlen(src)+PX_strlen(cat)<size)
 	{
@@ -2779,7 +2798,7 @@ px_int PX_wstrlen(const px_word *dst)
 }
 
 
-px_bool PX_strequ2(const px_char* src, const char* dst)
+px_bool PX_strequ2(const px_char* src, const px_char* dst)
 {
 	px_char _l, _r;
 	while (PX_TRUE)
@@ -4160,7 +4179,7 @@ px_word PX_crc16(px_void *buffer,px_uint size)
 	
 }
 
-px_char *PX_strchr(const char *s,px_int ch)
+px_char *PX_strchr(const px_char *s,px_int ch)
 {
 
 	while(*s!='\0')
@@ -4183,7 +4202,7 @@ px_int PX_strcmp(const px_char *str1, const px_char *str2)
 	return ret;   
 }
 
-px_char* PX_strstr(const char* dest, const char* src)
+px_char* PX_strstr(const px_char* dest, const px_char* src)
 {
 	px_char* start = (px_char*)dest;
 	px_char* substart = (px_char*)src;

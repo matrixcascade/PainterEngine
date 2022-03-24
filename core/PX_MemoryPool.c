@@ -190,6 +190,7 @@ px_memorypool MP_Create( px_void *MemoryAddr,px_uint MemorySize )
 		MP.DEBUG_allocdata[DEBUG_i].startAddr=PX_NULL;
 		MP.DEBUG_allocdata[DEBUG_i].endAddr=PX_NULL;
 	}
+	MP.enable_allocdata_tracert = PX_TRUE;
 #endif
 	return MP;
 
@@ -236,6 +237,7 @@ px_void * MP_Malloc(px_memorypool *MP, px_uint Size )
 #endif
 	if (Size==0)
 	{
+		//zero size
 		return PX_NULL;
 	}
 #if defined(PX_DEBUG_MODE) && defined(PX_MEMORYPOOL_DEBUG_CHECK)
@@ -263,6 +265,7 @@ px_void * MP_Malloc(px_memorypool *MP, px_uint Size )
 		}
 		if (DEBUG_i ==PX_COUNTOF(MP->DEBUG_allocdata))
 		{
+			MP->enable_allocdata_tracert = PX_FALSE;
 			//PX_ERROR("Not enough of memory debug node!");
 		}
 		pAppend=(MP_Append_data *)((px_uchar *)MemNode->EndAddr-sizeof(MP_Append_data)+1);
@@ -290,6 +293,7 @@ px_void * MP_Malloc(px_memorypool *MP, px_uint Size )
 		}
 		if (DEBUG_i == PX_COUNTOF(MP->DEBUG_allocdata))
 		{
+			MP->enable_allocdata_tracert = PX_FALSE;
 			//PX_ERROR("Not enough of memory debug node!");
 		}
 		pAppend=(MP_Append_data *)((px_uchar *)MemNode->EndAddr-sizeof(MP_Append_data)+1);
@@ -354,7 +358,7 @@ px_void MP_Free(px_memorypool *MP, px_void *pAddress )
 		}
 	}
 
-	if (MP->DEBUG_allocdata[PX_COUNTOF(MP->DEBUG_allocdata)-1].addr==PX_NULL)
+	if (MP->enable_allocdata_tracert)
 	{
 		if(DEBUG_i==sizeof(MP->DEBUG_allocdata)/sizeof(MP->DEBUG_allocdata[0]))
 		{

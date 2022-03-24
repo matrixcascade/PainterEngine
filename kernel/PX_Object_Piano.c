@@ -3,7 +3,7 @@
 px_void PX_Object_PianoRender(px_surface* psurface, PX_Object* pObject, px_dword elapsed)
 {
 	px_int step=0, i,j=2;
-	px_int x,white_key_w,keyw, keyh;
+	px_float x,white_key_w,keyw, keyh;
 
 	PX_Object_Piano* pPiano = (PX_Object_Piano*)pObject->pObject;
 	const px_char* note_content[] = { "A","#A","B", "C","#C","D","#D","E","F","#F","G","#G", };
@@ -16,8 +16,8 @@ px_void PX_Object_PianoRender(px_surface* psurface, PX_Object* pObject, px_dword
 	objWidth = pObject->Width;
 	objHeight = pObject->Height;
 
-	keyh = (px_int)objHeight;
-	white_key_w = (px_int)objWidth / 52;
+	keyh = objHeight;
+	white_key_w = objWidth / 52;
 	if (white_key_w <=2||!keyh)
 	{
 		return;
@@ -31,9 +31,9 @@ px_void PX_Object_PianoRender(px_surface* psurface, PX_Object* pObject, px_dword
 			if (note_content[i % 12][0] == '#')
 			{
 				if (j == 1)continue;
-				keyh = (px_int)objHeight *5/8;
-				keyw = (px_int)objWidth / 52 *4 / 5;
-				x = (px_int)(objx + step * white_key_w - white_key_w*2 / 5);
+				keyh = objHeight *5/8;
+				keyw = objWidth / 52 *4 / 5;
+				x = (objx + step * white_key_w - white_key_w*2 / 5);
 				color = PX_COLOR_BLACK;
 			}
 			else
@@ -43,27 +43,27 @@ px_void PX_Object_PianoRender(px_surface* psurface, PX_Object* pObject, px_dword
 					step++;
 					continue;
 				}
-				keyh = (px_int)objHeight;
-				keyw = (px_int)objWidth / 52;
-				x = (px_int)(objx + step * white_key_w);
+				keyh = objHeight;
+				keyw = objWidth / 52;
+				x = (objx + step * white_key_w);
 				color = PX_COLOR_WHITE;
 				step++;
 			}
-			PX_GeoDrawRect(psurface, x, (px_int)objy, x + keyw, (px_int)(objy + keyh), color);
-			PX_GeoDrawBorder(psurface,x , (px_int)objy, (px_int)x + keyw, (px_int)(objy + keyh), 1, PX_COLOR_BLACK);
+			PX_GeoDrawRect(psurface, (px_int)x, (px_int)objy, (px_int)(x + keyw), (px_int)(objy + keyh), color);
+			PX_GeoDrawBorder(psurface, (px_int)x , (px_int)objy, (px_int)(x + keyw), (px_int)(objy + keyh), 1, PX_COLOR_BLACK);
 
 			switch (pPiano->keyState[i])
 			{
 			case PX_OBJECT_PIANO_KEYSTATE_STANDBY:
 				break;
 			case PX_OBJECT_PIANO_KEYSTATE_DOWN:
-				PX_GeoDrawRect(psurface, x, (px_int)objy, x + keyw, (px_int)(objy + keyh), PX_COLOR(128, 64, 64, 255) );
+				PX_GeoDrawRect(psurface, (px_int)x, (px_int)objy, (px_int)(x + keyw), (px_int)(objy + keyh), PX_COLOR(128, 64, 64, 255) );
 				break;
 			case PX_OBJECT_PIANO_KEYSTATE_CURSOR:
-				PX_GeoDrawRect(psurface, x, (px_int)objy, x + keyw, (px_int)(objy + keyh), PX_COLOR(96, 192, 255, 64));
+				PX_GeoDrawRect(psurface, (px_int)x, (px_int)objy, (px_int)(x + keyw), (px_int)(objy + keyh), PX_COLOR(96, 192, 255, 64));
 				break;
 			case PX_OBJECT_PIANO_KEYSTATE_ONFOCUS:
-				PX_GeoDrawRect(psurface, x, (px_int)objy, x + keyw, (px_int)(objy + keyh), PX_COLOR(96, 255, 192, 64));
+				PX_GeoDrawRect(psurface, (px_int)x, (px_int)objy, (px_int)(x + keyw), (px_int)(objy + keyh), PX_COLOR(96, 255, 192, 64));
 				break;
 			}
 		}
@@ -74,7 +74,7 @@ px_void PX_Object_PianoRender(px_surface* psurface, PX_Object* pObject, px_dword
 px_int PX_Object_PianoCursorInkeyIndex(PX_Object* pObject, px_float cursorx, px_float cursory)
 {
 	px_int step = 0, x,i, j = 2;
-	px_int  white_key_w, keyw, keyh;
+	px_float  white_key_w, keyw, keyh;
 	px_int lastIndex = -1;
 	PX_Object_Piano* pPiano = (PX_Object_Piano*)pObject->pObject;
 	const px_char* note_content[] = { "A","#A","B", "C","#C","D","#D","E","F","#F","G","#G", };
@@ -87,8 +87,8 @@ px_int PX_Object_PianoCursorInkeyIndex(PX_Object* pObject, px_float cursorx, px_
 	objWidth = pObject->Width;
 	objHeight = pObject->Height;
 
-	keyh = (px_int)objHeight;
-	white_key_w = (px_int)objWidth / 52;
+	keyh = objHeight;
+	white_key_w = objWidth / 52;
 
 	while (j--)
 	{
@@ -98,9 +98,9 @@ px_int PX_Object_PianoCursorInkeyIndex(PX_Object* pObject, px_float cursorx, px_
 			if (note_content[i % 12][0] == '#')
 			{
 				if (j == 1)continue;
-				keyh = (px_int)objHeight * 5 / 8;
-				keyw = (px_int)objWidth / 52 * 4 / 5;
-				x = (px_int)(objx + step * white_key_w - white_key_w * 2 / 5);
+				keyh = objHeight * 5 / 8;
+				keyw = objWidth / 52 * 4 / 5;
+				x =(px_int)(objx + step * white_key_w - white_key_w * 2 / 5);
 			}
 			else
 			{
@@ -109,12 +109,12 @@ px_int PX_Object_PianoCursorInkeyIndex(PX_Object* pObject, px_float cursorx, px_
 					step++;
 					continue;
 				}
-				keyh = (px_int)objHeight;
-				keyw = (px_int)objWidth / 52;
+				keyh = objHeight;
+				keyw = objWidth / 52;
 				x = (px_int)(objx + step * white_key_w);
 				step++;
 			}
-			if (PX_isXYInRegion(cursorx, cursory,(px_float)x,objy,(px_float)keyw, (px_float)keyh))
+			if (PX_isXYInRegion(cursorx, cursory,x*1.0f,objy,keyw, keyh))
 			{
 				lastIndex = i;
 			}
@@ -231,7 +231,19 @@ px_void PX_Object_PianoSetKeyFocus(PX_Object* pObject, px_int index)
 	
 }
 
-px_void PX_Object_PianoClearKeyFocus(PX_Object* pObject)
+px_void PX_Object_PianoSetKeyDown(PX_Object* pObject, px_int index,px_bool bdown)
+{
+	if (pObject->Type == PX_OBJECT_TYPE_PIANO)
+	{
+		PX_Object_Piano* pPiano = PX_ObjectGetDesc(PX_Object_Piano, pObject);
+		if(bdown)
+			pPiano->keyState[index] = PX_OBJECT_PIANO_KEYSTATE_DOWN;
+		else
+			pPiano->keyState[index] = PX_OBJECT_PIANO_KEYSTATE_STANDBY;
+	}
+}
+
+px_void PX_Object_PianoClearKeyState(PX_Object* pObject)
 {
 	if (pObject->Type == PX_OBJECT_TYPE_PIANO)
 	{
@@ -252,6 +264,10 @@ px_void PX_Object_PianoTuneOnRender(px_surface* psurface, PX_Object* pObject, px
 	ofty = 5;
 	step = 52;
 	
+	if (pObject->Width<24)
+	{
+		return;
+	}
 	pTune->scrollArea->x = pObject->x;
 	pTune->scrollArea->y = pObject->y;
 	pTune->scrollArea->Width = pObject->Width-24;
@@ -1032,7 +1048,7 @@ PX_Object* PX_Object_PianoTuneCreate(px_memorypool* mp, PX_Object* Parent, px_fl
 	PX_Object* pObject;
 	px_int width = (px_int)_width;
 	PX_memset(&Tune, 0, sizeof(Tune));
-	pObject = PX_ObjectCreateEx(mp, Parent, 0, 0, 0, 0, 0, 0, PX_OBJECT_TYPE_PIANOTUNE,PX_NULL, PX_Object_PianoTuneOnRender,PX_NULL,&Tune,sizeof(Tune));
+	pObject = PX_ObjectCreateEx(mp, Parent, x, y ,0, _width, height, 0, PX_OBJECT_TYPE_PIANOTUNE,PX_NULL, PX_Object_PianoTuneOnRender,PX_NULL,&Tune,sizeof(Tune));
 	pTune = PX_ObjectGetDesc(PX_Object_PianoTune, pObject);
 
 	pTune->scrollArea = PX_Object_ScrollAreaCreate(mp, pObject, 0, 0, (px_int)width, (px_int)height);
