@@ -253,7 +253,7 @@ px_bool PX_DelayInitialize(PX_Delay* pdelay, px_memorypool* mp, px_int inv_z, PX
 	return PX_TRUE;
 }
 
-px_int PX_DelayGo_float(PX_Delay* pdelay, px_float in[], px_float out[], px_int size)
+px_void PX_DelayGo_float(PX_Delay* pdelay, px_float in[], px_float out[], px_int size)
 {
 	px_int i;
 	for (i=0;i<size;i++)
@@ -265,7 +265,7 @@ px_int PX_DelayGo_float(PX_Delay* pdelay, px_float in[], px_float out[], px_int 
 	}
 }
 
-px_int PX_DelayGo_int(PX_Delay* pdelay, px_float in[], px_float out[], px_int size)
+px_void PX_DelayGo_int(PX_Delay* pdelay, px_int in[], px_int out[], px_int size)
 {
 	px_int i;
 	for (i = 0; i < size; i++)

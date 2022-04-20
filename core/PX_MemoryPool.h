@@ -44,6 +44,7 @@ typedef struct _memoryPool
 	PX_MP_ErrorCall ErrorCall_Ptr;
 #if defined(PX_DEBUG_MODE) && defined(PX_MEMORYPOOL_DEBUG_CHECK)
 	MP_alloc_debug DEBUG_allocdata[1024];
+	px_bool enable_allocdata_tracert;
 #endif
 }px_memorypool;
 

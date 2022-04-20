@@ -31,6 +31,9 @@ int PX_TCPInitialize(PX_TCP *tcp,PX_TCP_IP_TYPE type);
 int PX_TCPConnect(PX_TCP *tcp,PX_TCP_ADDR addr);
 int PX_TCPSend(PX_TCP *tcp,void *buffer,int size);
 int PX_TCPReceived(PX_TCP *tcp,void *buffer,int buffersize,int timeout);
-int PX_TCPAccept(PX_TCP *tcp,unsigned int *socket,PX_TCP_ADDR *fromAddr);
+int PX_TCPSocketReceived(unsigned int socket, void* buffer, int buffersize, int timeout);
+int PX_TCPSocketSend(unsigned int socket, void* buffer, int size);
+int PX_TCPAccept(PX_TCP* tcp, unsigned int* socket, PX_TCP_ADDR* fromAddr);
 void PX_TCPFree(PX_TCP *tcp);
+void PX_TCPSocketFree(unsigned int socket);
 #endif

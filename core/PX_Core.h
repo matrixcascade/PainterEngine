@@ -25,6 +25,7 @@
 #include "PX_Quicksort.h"
 #include "PX_Quadtree.h"
 #include "PX_curve25519.h"
+#include "PX_Sha1.h"
 #include "PX_Sha256.h"
 #include "PX_Arle.h"
 #include "PX_Huffman.h"
@@ -40,4 +41,5 @@
 #include "PX_Midi.h"
 #include "PX_KarplusStrong.h"
 #include "PX_Piano.h"
+#include "PX_WebSocket.h"
 #endif

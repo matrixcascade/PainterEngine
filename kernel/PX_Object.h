@@ -84,6 +84,7 @@ enum PX_OBJECT_TYPE
   PX_OBJECT_TYPE_RINGPROCESSBAR,
   PX_OBJECT_TYPE_PIANO,
   PX_OBJECT_TYPE_PIANOTUNE,
+  PX_OBJECT_TYPE_COUNTERDOWN,
 };
 
 
@@ -248,7 +249,8 @@ px_float PX_Object_Event_GetWidth(PX_Object_Event e);
 px_float PX_Object_Event_GetHeight(PX_Object_Event e);
 px_int PX_Object_Event_GetIndex(PX_Object_Event e);
 
-px_void PX_Object_Event_SetWidth(PX_Object_Event *e,px_float w);
+px_int PX_Object_Event_GetInt(PX_Object_Event e);
+px_void PX_Object_Event_SetWidth(PX_Object_Event* e, px_float w);
 px_void PX_Object_Event_SetHeight(PX_Object_Event *e,px_float h);
 px_void PX_Object_Event_SetCursorX(PX_Object_Event *e,px_float x);
 px_void PX_Object_Event_SetCursorY(PX_Object_Event *e,px_float y);
@@ -484,6 +486,9 @@ px_void PX_ObjectExecuteEvent(PX_Object *pPost,PX_Object_Event Event);
 //piano
 #include "PX_Object_Piano.h"
 
+//////////////////////////////////////////////////////////////////////////
+//counter down
+#include "PX_Object_CounterDown.h"
 #endif
 
 

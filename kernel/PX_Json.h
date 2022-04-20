@@ -44,7 +44,8 @@ typedef struct
 
 PX_Json_Value *PX_JsonGetObjectValue(PX_Json_Value *json_value,const px_char name[]);
 PX_Json_Value *PX_JsonGetObjectValueByIndex(PX_Json_Value *json_value,px_int i);
-PX_Json_Value * PX_JsonGetValue(PX_Json *json,const px_char payload[]);
+PX_Json_Value* PX_JsonValueGetValue(PX_Json_Value* it, const px_char _payload[]);
+PX_Json_Value* PX_JsonGetValue(PX_Json* json, const px_char payload[]);
 PX_Json_Value * PX_JsonGetArrayValue(PX_Json_Value *value,px_int i);
 
 
@@ -72,6 +73,10 @@ px_bool PX_JsonAddObject(PX_Json *pjson,const px_char parent_payload[],const px_
 const px_char *PX_JsonGetString(PX_Json *pjson,const px_char payload[]);
 px_double PX_JsonGetNumber(PX_Json *pjson,const px_char payload[]);
 px_bool  PX_JsonGetBoolean(PX_Json *pjson,const px_char payload[]);
+
+const px_char* PX_JsonValueGetString(PX_Json_Value* pValue, const px_char payload[]);
+px_double PX_JsonValueGetNumber(PX_Json_Value* pValue, const px_char payload[]);
+px_bool  PX_JsonValueGetBoolean(PX_Json_Value* pValue, const px_char payload[]);
 
 px_bool PX_JsonSetString(PX_Json *pjson,const px_char payload[],const px_char text[]);
 px_bool PX_JsonSetNumber(PX_Json *pjson,const px_char payload[],const px_double number);

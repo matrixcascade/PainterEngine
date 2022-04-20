@@ -48,6 +48,9 @@ typedef struct
 	PX_SOUND_MIX_MODE mix_mode;
 	px_soundplay_userread userread;
 	px_void *userptr;
+	px_float current_amplitude;
+	px_int amplitude_sum;
+	px_int amplitude_sample;
 	PX_Sound Sounds[PX_SOUND_DEFAULT_PARALLEL];
 }PX_SoundPlay;
 
@@ -59,6 +62,7 @@ px_bool PX_SoundPlayRead(PX_SoundPlay *pSoundPlay,px_byte *pBuffer,px_int readSi
 px_bool PX_SoundPlayReadCurrentPlayingData(PX_SoundPlay *pSoundPlay,px_int soundIndex,px_int channel,px_int16 *out,px_int count);
 px_void PX_SoundPlayFree(PX_SoundPlay *pSoundPlay);
 px_void PX_SoundPlayClear(PX_SoundPlay *pSoundPlay);
+px_float PX_SoundPlayGetCurrentAmplitude(PX_SoundPlay* pSoundPlay);
 px_int  PX_SoundPlayGetDataCount(PX_SoundPlay *pSoundPlay);
 PX_Sound PX_SoundCreate(PX_SoundData *data,px_bool loop);
 PX_SoundData PX_SoundDataCreate(PX_SOUND_CHANNEL channel, px_byte* data, px_int datasize);

@@ -293,7 +293,7 @@ px_void PX_Object_OscilloscopeSetHorizontalTextShow(PX_Object *pObject,px_bool b
 	pcd->HorizontalTextShow=bshow;
 }
 
-px_void PX_Object_OscilloscopeSetFloatFlagFormatHorizontal(PX_Object *pObject,const char *fmt)
+px_void PX_Object_OscilloscopeSetFloatFlagFormatHorizontal(PX_Object *pObject,const px_char *fmt)
 {
 	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
 	if (!pcd)
@@ -304,7 +304,7 @@ px_void PX_Object_OscilloscopeSetFloatFlagFormatHorizontal(PX_Object *pObject,co
 	pcd->FloatFlagFormat_H=fmt;
 }
 
-px_void PX_Object_OscilloscopeSetIntFlagFormatHorizontal(PX_Object *pObject,const char *fmt)
+px_void PX_Object_OscilloscopeSetIntFlagFormatHorizontal(PX_Object *pObject,const px_char *fmt)
 {
 	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
 	if (!pcd)
@@ -315,7 +315,7 @@ px_void PX_Object_OscilloscopeSetIntFlagFormatHorizontal(PX_Object *pObject,cons
 	pcd->IntFlagFormat_H=fmt;
 }
 
-px_void PX_Object_OscilloscopeSetFloatFlagFormatVerticalLeft(PX_Object *pObject,const char *fmt)
+px_void PX_Object_OscilloscopeSetFloatFlagFormatVerticalLeft(PX_Object *pObject,const px_char *fmt)
 {
 	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
 	if (!pcd)
@@ -326,7 +326,7 @@ px_void PX_Object_OscilloscopeSetFloatFlagFormatVerticalLeft(PX_Object *pObject,
 	pcd->FloatFlagFormat_L=fmt;
 }
 
-px_void PX_Object_OscilloscopeSetIntFlagFormatVerticalLeft(PX_Object *pObject,const char *fmt)
+px_void PX_Object_OscilloscopeSetIntFlagFormatVerticalLeft(PX_Object *pObject,const px_char *fmt)
 {
 	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
 	if (!pcd)
@@ -337,7 +337,7 @@ px_void PX_Object_OscilloscopeSetIntFlagFormatVerticalLeft(PX_Object *pObject,co
 	pcd->IntFlagFormat_L=fmt;
 }
 
-px_void PX_Object_OscilloscopeSetFloatFlagFormatVerticalRight(PX_Object *pObject,const char *fmt)
+px_void PX_Object_OscilloscopeSetFloatFlagFormatVerticalRight(PX_Object *pObject,const px_char *fmt)
 {
 	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
 	if (!pcd)
@@ -348,7 +348,7 @@ px_void PX_Object_OscilloscopeSetFloatFlagFormatVerticalRight(PX_Object *pObject
 	pcd->FloatFlagFormat_R=fmt;
 }
 
-px_void PX_Object_OscilloscopeSetIntFlagFormatVericalRight(PX_Object *pObject,const char *fmt)
+px_void PX_Object_OscilloscopeSetIntFlagFormatVericalRight(PX_Object *pObject,const px_char *fmt)
 {
 	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
 	if (!pcd)
@@ -910,9 +910,9 @@ static px_void PX_Object_OscilloscopeDrawDashText(px_surface *psurface,PX_Object
 						else
 						{
 							if(IsFloat)
-								PX_sprintf1(text,sizeof(text),pcd->FloatFlagFormat_L,PX_STRINGFORMAT_FLOAT((px_float)(pcd->LeftVerticalRangeMin+i*ValInc)));
+								PX_sprintf1(text,sizeof(text),pcd->FloatFlagFormat_R,PX_STRINGFORMAT_FLOAT((px_float)(pcd->LeftVerticalRangeMin+i*ValInc)));
 							else
-								PX_sprintf1(text,sizeof(text),pcd->IntFlagFormat_L,PX_STRINGFORMAT_INT((px_int)(pcd->LeftVerticalRangeMin+i*ValInc)));
+								PX_sprintf1(text,sizeof(text),pcd->IntFlagFormat_R,PX_STRINGFORMAT_INT((px_int)(pcd->LeftVerticalRangeMin+i*ValInc)));
 						}
 
 
@@ -922,9 +922,9 @@ static px_void PX_Object_OscilloscopeDrawDashText(px_surface *psurface,PX_Object
 				case PX_OBJECT_OSCILLOSCOPE_TEXT_DISPLAYMODE_NORMAL:
 					{
 						if(IsFloat)
-							PX_sprintf1(text,sizeof(text),pcd->FloatFlagFormat_L,PX_STRINGFORMAT_FLOAT((px_float)(pcd->RightVerticalRangeMin+i*ValInc)));
+							PX_sprintf1(text,sizeof(text),pcd->FloatFlagFormat_R,PX_STRINGFORMAT_FLOAT((px_float)(pcd->RightVerticalRangeMin+i*ValInc)));
 						else
-							PX_sprintf1(text,sizeof(text),pcd->IntFlagFormat_L,PX_STRINGFORMAT_INT((px_int)(pcd->RightVerticalRangeMin+i*ValInc)));
+							PX_sprintf1(text,sizeof(text),pcd->IntFlagFormat_R,PX_STRINGFORMAT_INT((px_int)(pcd->RightVerticalRangeMin+i*ValInc)));
 					}
 					break;
 				}

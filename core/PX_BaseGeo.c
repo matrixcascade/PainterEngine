@@ -1463,7 +1463,7 @@ px_void PX_GeoDrawPath(px_surface *psurface, px_point path[],px_int pathCount,px
 
 
 
-px_void PX_GeoDrawCircle(px_surface *psurface, px_int x,px_int y,px_int Radius,px_int lineWidth,px_color color )
+px_void PX_GeoDrawCircle(px_surface *psurface, px_int x,px_int y,px_int Radius, px_int lineWidth,px_color color )
 {
 	px_int rx,ry,dy,i,xleft,xright,Sy,cY,drx,dry;
 	px_float rad,rad2,xoft1,xoft2,xoft3,xoft4,S,fy,fdis;
