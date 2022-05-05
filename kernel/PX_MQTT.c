@@ -370,10 +370,10 @@ px_bool PX_MQTT_SendPublih(PX_MQTT *Mqtt,PX_MQTT_PublishDesc publishDesc)
 	{
 		typedef struct
 		{
-			unsigned int ratain:1;
-			unsigned int QoS:2;
-			unsigned int DUP:1;
-			unsigned int Type:4;
+			px_uint32 ratain:1;
+			px_uint32 QoS:2;
+			px_uint32 DUP:1;
+			px_uint32 Type:4;
 		}PX_MQTT_FixedHeader;
 		px_int size=0;
 		PX_MQTT_FixedHeader header;
@@ -885,10 +885,10 @@ px_bool PX_MQTTListen(PX_MQTT *Mqtt)
 	{
 		typedef struct
 		{
-			unsigned int ratain:1;
-			unsigned int QoS:2;
-			unsigned int DUP:1;
-			unsigned int Type:4;
+			px_uint32 ratain:1;
+			px_uint32 QoS:2;
+			px_uint32 DUP:1;
+			px_uint32 Type:4;
 		}PX_MQTT_FixedHeader;
 
 		PX_MQTT_FixedHeader *pFixHeader=(PX_MQTT_FixedHeader *)&rByte;

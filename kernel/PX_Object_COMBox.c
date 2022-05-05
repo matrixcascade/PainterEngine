@@ -136,7 +136,7 @@ PX_Object_COMBox* PX_Object_GetCOMBox(PX_Object* pObject)
 	return PX_NULL;
 }
 
-PX_Object* PX_Object_COMBoxCreate(px_memorypool* mp, PX_Object* Parent, int x, int y, int width, int height, const px_char title[], PX_FontModule* fontmodule)
+PX_Object* PX_Object_COMBoxCreate(px_memorypool* mp, PX_Object* Parent, px_int x, px_int y, px_int width, px_int height, const px_char title[], PX_FontModule* fontmodule)
 {
 	PX_Object_COMBox desc, * pdesc;
 	PX_Object* pObject;

@@ -16,7 +16,7 @@ typedef struct
 }PX_Object_VarBox;
 
 PX_Object_VarBox* PX_Object_GetVarBox( PX_Object *Object );
-PX_Object * PX_Object_VarBoxCreate(px_memorypool *mp,PX_Object *Parent,int x,int y,int width,int height,const px_char title[],PX_FontModule *fontmodule);
+PX_Object * PX_Object_VarBoxCreate(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y,px_int width,px_int height,const px_char title[],PX_FontModule *fontmodule);
 px_void PX_Object_VarBoxShow(PX_Object *pObject);
 px_void PX_Object_VarBoxClose(PX_Object* pObject);
 #endif

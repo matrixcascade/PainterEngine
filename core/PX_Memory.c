@@ -226,3 +226,125 @@ px_float PX_CircularBufferDelay(PX_CircularBuffer* pcbuffer, px_int pos)
 {
 	return pcbuffer->buffer[(pcbuffer->pointer + pos) %pcbuffer->size];
 }
+
+px_void PX_FifoBufferInitialize(px_memorypool* mp, px_fifobuffer* pfifo)
+{
+	PX_MemoryInitialize(mp, pfifo);
+}
+
+px_int PX_FifoBufferPop(px_fifobuffer* pfifo, px_void* data, px_int size)
+{
+	if (pfifo->usedsize)
+	{
+		px_int rsize = *(px_int*)pfifo->buffer;
+		if (rsize>pfifo->usedsize-(px_int)sizeof(px_int))
+		{
+			PX_ASSERT();//fifo error
+			return 0;
+		}
+		if (size<rsize)
+		{
+			return 0;
+		}
+		PX_memcpy(data, pfifo->buffer + sizeof(px_int), rsize);
+		PX_MemoryRemove(pfifo, 0, rsize + sizeof(px_int) - 1);
+		return rsize;
+
+	}
+	return 0;
+	
+}
+
+px_bool PX_FifoBufferPush(px_fifobuffer* pfifo, px_void* data, px_int size)
+{
+	px_int wsize = size;
+	if (wsize<0)
+	{
+		PX_ASSERT();
+	}
+	if (wsize==0)
+	{
+		return PX_TRUE;
+	}
+	if (PX_MemoryCat(pfifo, &wsize, sizeof(wsize)))
+	{
+		if (PX_MemoryCat(pfifo,data,size))
+		{
+			return PX_TRUE;
+		}
+	}
+	return PX_FALSE;
+
+}
+
+px_int PX_FifoBufferGetPopSize(px_fifobuffer* pfifo)
+{
+	if (pfifo->usedsize>sizeof(px_int))
+	{
+		return *(px_int*)pfifo->buffer;
+	}
+	return 0;
+}
+
+px_void PX_FifoBufferFree(px_fifobuffer* pfifo)
+{
+	PX_MemoryFree(pfifo);
+}
+
+px_void PX_StackInitialize(px_memorypool* mp, px_stack* pstack)
+{
+	PX_MemoryInitialize(mp, pstack);
+}
+
+px_int PX_StackPop(px_stack* pstack, px_void* data, px_int size)
+{
+	if (pstack->usedsize>sizeof(px_int))
+	{
+		px_int rsize = *(px_int*)(pstack->buffer+pstack->usedsize-sizeof(px_int));
+		if (rsize > pstack->usedsize - (px_int)sizeof(px_int))
+		{
+			PX_ASSERT();//stack error
+			return 0;
+		}
+		if (size < rsize)
+		{
+			return 0;
+		}
+		PX_memcpy(data, pstack->buffer + pstack->usedsize - sizeof(px_int)- rsize, rsize);
+		PX_MemoryRemove(pstack, pstack->usedsize - sizeof(px_int) - rsize, pstack->usedsize - 1);
+		return rsize;
+
+	}
+	return 0;
+}
+
+px_bool PX_StackPush(px_stack* pstack, px_void* data, px_int size)
+{
+	px_int wsize = size;
+	if (wsize < 0)
+	{
+		PX_ASSERT();
+	}
+	if (wsize == 0)
+	{
+		return PX_TRUE;
+	}
+	
+	if (PX_MemoryCat(pstack, data, size))
+	{
+		if (PX_MemoryCat(pstack, &wsize, sizeof(wsize)))
+		{
+			return PX_TRUE;
+		}
+	}
+	return PX_FALSE;
+}
+
+px_int PX_StackGetPopSize(px_stack* pstack)
+{
+	return *(px_int*)(pstack->buffer + pstack->usedsize - sizeof(px_int));
+}
+px_void PX_StackFree(px_stack* pstack)
+{
+	PX_MemoryFree(pstack);
+}

@@ -526,6 +526,11 @@ px_void PX_ObjectDelete( PX_Object *pObject )
 }
 
 
+px_void PX_ObjectDelayDelete(PX_Object* pObject)
+{
+	pObject->delay_delete = PX_TRUE;
+}
+
 px_void PX_ObjectDeleteChilds( PX_Object *pObject )
 {
 	if (pObject==PX_NULL) 
@@ -539,150 +544,208 @@ px_void PX_ObjectDeleteChilds( PX_Object *pObject )
 	}
 }
 
-px_void PX_Object_ObjectLinkerUpdate( PX_Object *Object,px_uint elapsed)
+px_void PX_Object_ObjectLinkerUpdate( PX_Object *pObject,px_uint elapsed)
 {
-	if (Object==PX_NULL)
+	if (pObject==PX_NULL)
 	{
 		return;
 	}
-	if (Object->Enabled)
+	if (pObject->Enabled)
 	{
-		if (Object->Func_ObjectUpdate!=0)
+		if (pObject->Func_ObjectUpdate!=0)
 		{
-			Object->Func_ObjectUpdate(Object,elapsed);
+			pObject->Func_ObjectUpdate(pObject,elapsed);
 		}
-		PX_Object_ObjectLinkerUpdate(Object->pChilds,elapsed);
+		if (!pObject->delay_delete)
+		{
+			PX_Object_ObjectLinkerUpdate(pObject->pChilds, elapsed);
+		}
+		
 	}
-	PX_Object_ObjectLinkerUpdate(Object->pNextBrother,elapsed);	
+	PX_Object_ObjectLinkerUpdate(pObject->pNextBrother,elapsed);	
 }
 
 
-px_void PX_ObjectUpdate(PX_Object *Object,px_uint elapsed )
+static px_void PX_ObjectUpdateDelayDelete(PX_Object* pObject)
 {
-	if (Object==PX_NULL)
+	if (pObject==PX_NULL)
+	{
+		return;
+	}
+	PX_ObjectUpdateDelayDelete(pObject->pNextBrother);
+	if (pObject->delay_delete)
+	{
+		PX_ObjectDelete(pObject);
+	}
+	else
+	{
+		PX_ObjectUpdateDelayDelete(pObject->pChilds);
+	}
+}
+
+px_void PX_ObjectUpdate(PX_Object *pObject,px_uint elapsed )
+{
+	if (pObject==PX_NULL)
 	{
 		PX_ASSERT();
 		return;
 	}
-	if (Object->Enabled==PX_FALSE)
+	if (pObject->Enabled==PX_FALSE)
 	{
 		return;
 	}
-	if (Object->Func_ObjectUpdate!=0)
+	if (pObject->Func_ObjectUpdate!=0)
 	{
-		Object->Func_ObjectUpdate(Object,elapsed);
+		pObject->Func_ObjectUpdate(pObject,elapsed);
 	}
-	if (Object->pChilds!=PX_NULL)
+	if (pObject->pChilds!=PX_NULL&&!pObject->delay_delete)
 	{
-		PX_Object_ObjectLinkerUpdate(Object->pChilds,elapsed);
+		PX_Object_ObjectLinkerUpdate(pObject->pChilds,elapsed);
 	}
+
+	if (pObject->delay_delete)
+	{
+		PX_ObjectDelete(pObject);
+	}
+	else
+	{
+		PX_ObjectUpdateDelayDelete(pObject->pChilds);
+	}
+
 }
 
-static px_void PX_ObjectRenderEx(px_surface *pSurface, PX_Object *Object,px_uint elapsed )
+static px_void PX_ObjectRenderEx(px_surface *pSurface, PX_Object *pObject,px_uint elapsed )
 {
-	if (Object==PX_NULL)
+	if (pObject==PX_NULL)
 	{
 		return;
 	}
 
-	if (Object->OnFocus)
+	if (pObject->OnFocus)
 	{
-		PX_ObjectRenderEx(pSurface,Object->pNextBrother,elapsed);	
+		PX_ObjectRenderEx(pSurface,pObject->pNextBrother,elapsed);	
 
-		if (Object->Visible!=PX_FALSE)
+		if (pObject->Visible!=PX_FALSE)
 		{
-			if (Object->Func_ObjectBeginRender)
+			if (pObject->Width>=0&&pObject->Height>=0)
 			{
-				Object->Func_ObjectBeginRender(pSurface,Object,elapsed);
+				if (pObject->Func_ObjectBeginRender)
+				{
+					pObject->Func_ObjectBeginRender(pSurface, pObject, elapsed);
+				}
+
+				if (pObject->Func_ObjectRender != 0)
+				{
+					pObject->Func_ObjectRender(pSurface, pObject, elapsed);
+				}
 			}
 			
-			if (Object->Func_ObjectRender!=0)
+			PX_ObjectRenderEx(pSurface,pObject->pChilds,elapsed);
+
+			if (pObject->Width >= 0 && pObject->Height >= 0)
 			{
-				Object->Func_ObjectRender(pSurface,Object,elapsed);
+				if (pObject->Func_ObjectEndRender)
+				{
+					pObject->Func_ObjectEndRender(pSurface, pObject, elapsed);
+				}
 			}
-
-			PX_ObjectRenderEx(pSurface,Object->pChilds,elapsed);
-
 			
-			if (Object->Func_ObjectEndRender)
-			{
-				Object->Func_ObjectEndRender(pSurface,Object,elapsed);
-			}
 		}
 	}
 	else
 	{
-		if (Object->Visible!=PX_FALSE)
+		if (pObject->Visible!=PX_FALSE)
 		{
-			if (Object->Func_ObjectBeginRender)
+			if (pObject->Width >= 0 && pObject->Height >= 0)
 			{
-				Object->Func_ObjectBeginRender(pSurface,Object,elapsed);
+				if (pObject->Func_ObjectBeginRender)
+				{
+					pObject->Func_ObjectBeginRender(pSurface, pObject, elapsed);
+				}
+				if (pObject->Func_ObjectRender != 0)
+				{
+					pObject->Func_ObjectRender(pSurface, pObject, elapsed);
+				}
 			}
-			if (Object->Func_ObjectRender!=0)
-			{
-				Object->Func_ObjectRender(pSurface,Object,elapsed);
-			}
-			PX_ObjectRenderEx(pSurface,Object->pChilds,elapsed);
 			
-			if (Object->Func_ObjectEndRender)
+
+			PX_ObjectRenderEx(pSurface,pObject->pChilds,elapsed);
+			
+			if (pObject->Width >= 0 && pObject->Height >= 0)
 			{
-				Object->Func_ObjectEndRender(pSurface,Object,elapsed);
+				if (pObject->Func_ObjectEndRender)
+				{
+					pObject->Func_ObjectEndRender(pSurface, pObject, elapsed);
+				}
 			}
+			
 		}
-		PX_ObjectRenderEx(pSurface,Object->pNextBrother,elapsed);	
+		PX_ObjectRenderEx(pSurface,pObject->pNextBrother,elapsed);	
 	}
 }
 
-px_void PX_ObjectRender(px_surface *pSurface, PX_Object *Object,px_uint elapsed )
+px_void PX_ObjectRender(px_surface *pSurface, PX_Object *pObject,px_uint elapsed )
 {
-	if (Object==PX_NULL)
+	if (pObject==PX_NULL)
 	{
 		return;
 	}
 
-	if (Object->OnFocus)
+	if (pObject->OnFocus)
 	{
 		
-		if (Object->Visible!=PX_FALSE)
+		if (pObject->Visible!=PX_FALSE)
 		{
-			if (Object->Func_ObjectBeginRender)
+			if (pObject->Func_ObjectBeginRender)
 			{
-				Object->Func_ObjectBeginRender(pSurface,Object,elapsed);
+				pObject->Func_ObjectBeginRender(pSurface,pObject,elapsed);
 			}
 
-			if (Object->Func_ObjectRender!=0)
+			if (pObject->Func_ObjectRender!=0)
 			{
-				Object->Func_ObjectRender(pSurface,Object,elapsed);
+				pObject->Func_ObjectRender(pSurface,pObject,elapsed);
 			}
-
-			PX_ObjectRenderEx(pSurface,Object->pChilds,elapsed);
-
-
-			if (Object->Func_ObjectEndRender)
+			if (!pObject->delay_delete)
 			{
-				Object->Func_ObjectEndRender(pSurface,Object,elapsed);
+				PX_ObjectRenderEx(pSurface, pObject->pChilds, elapsed);
+			}
+			
+			if (pObject->Func_ObjectEndRender)
+			{
+				pObject->Func_ObjectEndRender(pSurface,pObject,elapsed);
 			}
 		}
 	}
 	else
 	{
-		if (Object->Visible!=PX_FALSE)
+		if (pObject->Visible!=PX_FALSE)
 		{
-			if (Object->Func_ObjectBeginRender)
+			if (pObject->Func_ObjectBeginRender)
 			{
-				Object->Func_ObjectBeginRender(pSurface,Object,elapsed);
+				pObject->Func_ObjectBeginRender(pSurface,pObject,elapsed);
 			}
-			if (Object->Func_ObjectRender!=0)
+			if (pObject->Func_ObjectRender!=0)
 			{
-				Object->Func_ObjectRender(pSurface,Object,elapsed);
+				pObject->Func_ObjectRender(pSurface,pObject,elapsed);
 			}
-			PX_ObjectRenderEx(pSurface,Object->pChilds,elapsed);
-
-			if (Object->Func_ObjectEndRender)
+			if (!pObject->delay_delete)
 			{
-				Object->Func_ObjectEndRender(pSurface,Object,elapsed);
+				PX_ObjectRenderEx(pSurface, pObject->pChilds, elapsed);
+			}
+			if (pObject->Func_ObjectEndRender)
+			{
+				pObject->Func_ObjectEndRender(pSurface,pObject,elapsed);
 			}
 		}
+	}
+
+	if (pObject->delay_delete)
+	{
+		PX_ObjectDelete(pObject);
+	}
+	else
+	{
+		PX_ObjectUpdateDelayDelete(pObject->pChilds);
 	}
 }
 

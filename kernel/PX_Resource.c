@@ -31,67 +31,7 @@ px_bool PX_ResourceLibraryLoad(PX_ResourceLibrary *lib,PX_RESOURCE_TYPE type,px_
 			return PX_FALSE;
 		break;
 	case PX_RESOURCE_TYPE_SCRIPT:
-		/*
-		if (data[0]!='P'||data[1]!='A'||data[2]!='S'||data[3]!='M')
-		{
-			PX_SCRIPT_LIBRARY compilelib;
-			px_string asmcodeString;
-			px_memory bin;
-			MP_Reset(mptemp);
-			if(!PX_ScriptCompilerInit(&compilelib,mptemp))
-			{
-				return PX_FALSE;
-			}
-
-			if(!PX_ScriptCompilerLoad(&compilelib,(px_char *)data))
-			{
-				PX_ScriptCompilerFree(&compilelib);
-				return PX_FALSE;
-			}
-
-			PX_VectorInitialize(mptemp,&asmcodeString);
-
-
-			if(PX_ScriptCompilerCompile(&compilelib,"main",&asmcodeString,256))
-			{
-				PX_ScriptCompilerFree(&compilelib);
-
-				PX_ScriptAsmOptimization(&asmcodeString);
-				PX_MemoryInit(mptemp,&bin);
-				
-				if(!PX_ScriptAsmCompile(mptemp,asmcodeString.buffer,&bin))
-				{
-					PX_MemoryFree(&bin);
-					PX_StringFree(&asmcodeString);
-					PX_ScriptCompilerFree(&compilelib);
-					return PX_FALSE;
-				}
-
-				if(!PX_ScriptVM_InstanceInit(&res.Script,lib->mp,bin.buffer,bin.usedsize))
-					{
-						PX_MemoryFree(&bin);
-						PX_StringFree(&asmcodeString);
-						PX_ScriptCompilerFree(&compilelib);
-						return PX_FALSE;
-					}
-
-				PX_MemoryFree(&bin);
-			}
-			else
-			{
-				PX_StringFree(&asmcodeString);
-				PX_ScriptCompilerFree(&compilelib);
-				MP_Reset(mptemp);
-				return PX_FALSE;
-			}
-
-			PX_StringFree(&asmcodeString);
-			
-			MP_Reset(mptemp);
-		}
-		else
-		*/
-		if(!PX_ScriptVM_InstanceInitialize(&res.Script,lib->mp,data,datasize))
+		if(!PX_VMInitialize(&res.Script,lib->mp,data,datasize))
 			return PX_FALSE;
 		break;
 	case PX_RESOURCE_TYPE_ANIMATIONLIBRARY:
@@ -175,7 +115,7 @@ px_void PX_ResourceLibraryFree(PX_ResourceLibrary *lib)
 			PX_TextureFree(&pres->texture);
 			break;
 		case PX_RESOURCE_TYPE_SCRIPT:
-			PX_ScriptVM_InstanceFree(&pres->Script);
+			PX_VMFree(&pres->Script);
 			break;
 		case PX_RESOURCE_TYPE_ANIMATIONLIBRARY:
 			PX_AnimationLibraryFree(&pres->animationlibrary);
@@ -232,7 +172,7 @@ px_void PX_ResourceLibraryDelete(PX_ResourceLibrary *lib,const px_char key[])
 					PX_TextureFree(&pres->texture);
 					break;
 				case PX_RESOURCE_TYPE_SCRIPT:
-					PX_ScriptVM_InstanceFree(&pres->Script);
+					PX_VMFree(&pres->Script);
 					break;
 				case PX_RESOURCE_TYPE_ANIMATIONLIBRARY:
 					PX_AnimationLibraryFree(&pres->animationlibrary);
@@ -286,7 +226,7 @@ PX_AnimationLibrary * PX_ResourceLibraryGetAnimationLibrary(PX_ResourceLibrary *
 	return PX_NULL;
 }
 
-PX_ScriptVM_Instance * PX_ResourceLibraryGetScript(PX_ResourceLibrary *lib,const px_char key[])
+PX_VM * PX_ResourceLibraryGetScript(PX_ResourceLibrary *lib,const px_char key[])
 {
 	PX_Resource *pres=PX_ResourceLibraryGet(lib,key);
 	if (pres&&pres->Type==PX_RESOURCE_TYPE_SCRIPT)

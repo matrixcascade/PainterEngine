@@ -56,7 +56,7 @@ px_bool PX_Piano_DWGReverbInitialize(PX_Piano_DWGReverb* preverb, px_memorypool*
 }
 
 void PX_Piano_DWGReverbSetCoeffs(PX_Piano_DWGReverb *preverb, px_float c1, px_float c3, px_float a, px_float mix, px_float Fs) {
-	const int lengths[8] = { 37,87,181,271,359,593,688,721 };
+	const px_int lengths[8] = { 37,87,181,271,359,593,688,721 };
 	px_float aa[8] = { a,1 + a,a,a,a,a,a,a };
 	px_int j, k;
 	preverb->mix = mix;
@@ -774,11 +774,9 @@ px_void PX_PianoSoundBoardFree(PX_PianoSoundBoard* psb)
 }
 
 
-px_bool PX_PianoInitialize(px_memorypool* mp,PX_Piano* pPiano, PX_PIANO_STYLE style)
+px_bool PX_PianoInitialize(px_memorypool* mp,PX_Piano* pPiano)
 {
 	px_int i;
-	const px_float PX_Piano_KeyFrequency[] = {27.5f,29.135f,30.868f,32.703f,34.648f,36.708f,38.891f,41.203f,43.654f,46.249f,48.999f,51.913f};
-	const px_float PX_Piano_AmpMap[] = { 3.047837f,3.967463f,4.068119f,4.147177f,4.195764f,4.250195f,4.312485f,4.366438f,4.393855f,4.413116f,4.429189f,2.233078f,2.242712f,2.258232f,2.275072f,2.294975f,2.309848f,2.336400f,2.353222f,2.383314f,1.599312f,1.599385f,1.591346f,1.592523f,1.585473f,1.583628f,1.589321f,1.600980f,1.613558f,1.629661f,1.648730f,1.692481f,1.736692f,1.780722f,1.832306f,1.832437f,1.894783f,1.970879f,2.062356f,2.171813f,2.171074f,2.304099f,2.305844f,2.468208f,2.663217f,2.666740f,2.902329f,2.909418f,2.915839f,3.198942f,3.208551f,3.565721f,3.574121f,3.584794f,3.595176f,4.090815f,4.099084f,4.108564f,4.884596f,4.886070f,4.888009f,4.888111f,4.884447f,6.323071f,6.307468f,6.285368f,6.258748f,6.230694f,6.195814f,5.837747f,10.067566f,9.370760f,8.710139f,8.128731f,7.626956f,7.191919f,6.811775f,6.468780f,6.176325f,5.900831f,5.542097f,5.172136f,4.831508f,4.520650f,4.243360f,3.995601f,3.753256f,3.500318f, };
 	#include "PX_Piano_mod.h"
 	PX_memset(pPiano, 0, sizeof(PX_Piano));
 	for (i=0;i<PX_COUNTOF(pPiano->keys);i++)
@@ -820,7 +818,7 @@ px_int PX_PianoKeyNameToIndex(const px_char keyName[])
 			break;
 	if (i == 17)return -1; else row = map[i];
 	column = keyName[oft] - '1';
-	if (i <= 1) column++;
+	if (i <= 3) column++;
 	if (column >= 0 && column < 8 && row + column * 12 < 88)	index = row + column * 12; else return -1;
 	return index;
 }
@@ -971,7 +969,14 @@ px_void PX_PianoModelGo(PX_PianoModel* pReverb, px_float out[], px_int count)
 	
 }
 
-px_void PX_PianoModelTrigger(PX_PianoModel* pReverb, px_int index)
+px_void PX_PianoModelTriggerKey(PX_PianoModel* pPiano, const px_char keyName[])
+{
+	px_int index = PX_PianoKeyNameToIndex(keyName);
+	if (index != -1)
+		PX_PianoModelTriggerIndex(pPiano, index);
+}
+
+px_void PX_PianoModelTriggerIndex(PX_PianoModel* pReverb, px_int index)
 {
 	px_int i;
 	if (index<0||index>=88)
@@ -990,6 +995,11 @@ px_void PX_PianoModelTrigger(PX_PianoModel* pReverb, px_int index)
 			return;
 		}
 	}
+}
+
+px_void PX_PianoModelTrigger(PX_PianoModel* pModel, px_int index)
+{
+	PX_PianoModelTriggerIndex(pModel, index);
 }
 
 px_void PX_PianoModelFree(PX_PianoModel* pReverb){}

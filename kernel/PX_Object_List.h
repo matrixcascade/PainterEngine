@@ -1,7 +1,7 @@
 #ifndef PX_OBJECT_LIST_H
 #define PX_OBJECT_LIST_H
 #include "PX_Object.h"
-
+#define PX_OBJECT_LIST_SLIDERBAR_WIDTH 18
 
 typedef px_bool (*PX_Object_ListItemOnCreate)(px_memorypool *mp,PX_Object *ItemObject,px_void *userptr);
 typedef px_void (*PX_Object_ListArrayItemOnRender)(px_surface* psurface, PX_Object* ItemObject,px_dword elapsed,px_byte *pdata,px_int index,px_void* userptr);
@@ -47,16 +47,19 @@ PX_Object* PX_Object_ListContentCreate(px_memorypool* mp, PX_Object* Parent, px_
 px_bool PX_Object_ListItemIsOnDisplayPresent(PX_Object* pObject,px_int index);
 px_int PX_Object_ListItemGetIndex(PX_Object* pObject);
 px_void PX_Object_ListMoveToTop(PX_Object *pObject);
-px_void PX_Object_ListClear(PX_Object *pListObj);
+px_void PX_Object_ListMoveToBottom(PX_Object* pObject);
+px_void PX_Object_ListClear(PX_Object* pListObj);
 px_void PX_Object_ListSetCurrentSelectIndex(PX_Object *pObject,px_int index);
 px_int PX_Object_ListGetCurrentSelectIndex(PX_Object *pObject);
 px_int PX_Object_ListAdd(PX_Object *pListObj,px_void *ptr);
 px_void *PX_Object_ListGetItemData(PX_Object *pListObject,px_int index);
+px_int  PX_Object_ListGetItemCount(PX_Object* pListObject);
 px_void* PX_Object_ListItemGetData(PX_Object* pItemObject);
 px_void PX_Object_ListRemoveItem(PX_Object *pListObject,px_int index);
 px_void PX_Object_ListSetBackgroundColor(PX_Object *pListObject,px_color color);
 px_void PX_Object_ListSetBorderColor(PX_Object *pListObject,px_color color);
 px_void PX_Object_ListSetDoubleClickCancel(PX_Object *pListObject,px_bool b);
+px_void PX_Object_ListViewFocus(PX_Object* pListObject, px_int index);
 
 PX_Object* PX_Object_ListArrayCreate(px_memorypool* mp, PX_Object* Parent, px_int x, px_int y, px_int Width, px_int Height, px_int ItemHeight, Function_ObjectRender render, px_void* userptr);
 px_void  PX_Object_ListArraySetData(PX_Object* pListObject, px_void *ArrayData,px_int ArrayDataCount);

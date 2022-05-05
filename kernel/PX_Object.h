@@ -70,21 +70,24 @@ enum PX_OBJECT_TYPE
   PX_OBJECT_TYPE_MESSAGEBOX		,
   PX_OBJECT_TYPE_PROTRACTOR		,
   PX_OBJECT_TYPE_TRANSFORMADAPTER,
-  PX_OBJECT_TYPE_PANC,
-  PX_OBJECT_TYPE_DESIGNERBOX,
-  PX_OBJECT_TYPE_JOYSTICK,
-  PX_OBJECT_TYPE_MEMORYVIEW,
-  PX_OBJECT_TYPE_VARIOUS,
-  PX_OBJECT_TYPE_IPBOX,
-  PX_OBJECT_TYPE_VARBOX,
-  PX_OBJECT_TYPE_MODBUSVARBOX,
-  PX_OBJECT_TYPE_COMBOX,
-  PX_OBJECT_TYPE_RANKPANEL,
-  PX_OBJECT_TYPE_RINGPROGRESS,
-  PX_OBJECT_TYPE_RINGPROCESSBAR,
-  PX_OBJECT_TYPE_PIANO,
-  PX_OBJECT_TYPE_PIANOTUNE,
-  PX_OBJECT_TYPE_COUNTERDOWN,
+  PX_OBJECT_TYPE_PANC			,
+  PX_OBJECT_TYPE_DESIGNERBOX	,
+  PX_OBJECT_TYPE_JOYSTICK		,
+  PX_OBJECT_TYPE_MEMORYVIEW		,
+  PX_OBJECT_TYPE_VARIOUS		,
+  PX_OBJECT_TYPE_IPBOX			,
+  PX_OBJECT_TYPE_VARBOX			,
+  PX_OBJECT_TYPE_MODBUSVARBOX	,
+  PX_OBJECT_TYPE_COMBOX			,
+  PX_OBJECT_TYPE_RANKPANEL		,
+  PX_OBJECT_TYPE_RINGPROGRESS	,
+  PX_OBJECT_TYPE_RINGPROCESSBAR	,
+  PX_OBJECT_TYPE_PIANO			,
+  PX_OBJECT_TYPE_PIANOTUNE		,
+  PX_OBJECT_TYPE_COUNTERDOWN	,
+  PX_OBJECT_TYPE_PRINTER		,
+  PX_OBJECT_TYPE_EXECUTER		,
+  PX_OBJECT_TYPE_ASMDEBUGGER	,
 };
 
 
@@ -175,6 +178,7 @@ struct _PX_Object
 	};
 	
 	px_int   world_index;
+	px_bool  delay_delete;
 	px_dword impact_object_type;
 	px_dword impact_target_type;
 	px_void *pObject;
@@ -302,6 +306,7 @@ px_void    PX_ObjectSetId(PX_Object *pObject,const px_char id[]);
 px_void    PX_ObjectSetUserCode(PX_Object *pObject,px_int user_int);
 px_void    PX_ObjectSetUserPointer(PX_Object *pObject,px_void *user_ptr);
 px_void    PX_ObjectDelete(PX_Object *pObject);
+px_void    PX_ObjectDelayDelete(PX_Object* pObject);
 px_void	   PX_ObjectDeleteChilds( PX_Object *pObject );
 px_void	   PX_ObjectSetPosition(PX_Object *Object,px_float x,px_float y,px_float z);
 px_void    PX_ObjectSetSize(PX_Object *Object,px_float Width,px_float Height,px_float length);
@@ -489,6 +494,18 @@ px_void PX_ObjectExecuteEvent(PX_Object *pPost,PX_Object_Event Event);
 //////////////////////////////////////////////////////////////////////////
 //counter down
 #include "PX_Object_CounterDown.h"
+
+//////////////////////////////////////////////////////////////////////////
+//printer
+#include "PX_Object_Printer.h"
+
+//////////////////////////////////////////////////////////////////////////
+//execute
+#include "PX_Object_Executer.h"
+
+//////////////////////////////////////////////////////////////////////////
+//execute
+#include "PX_Object_AsmDebugger.h"
 #endif
 
 

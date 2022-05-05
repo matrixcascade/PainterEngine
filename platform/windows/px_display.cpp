@@ -564,7 +564,7 @@ char *PX_OpenFileDialog(const char Filter[])
 	ofn.lpstrFile = szFile;
 	ofn.lpstrFile[0] = TEXT('\0');
 	ofn.nMaxFile = sizeof(szFile);
-	ofn.lpstrFilter = Filter;//TEXT("MirrorÎÄ¼þ(.mirror)\0*.mirror");
+	ofn.lpstrFilter = Filter;//TEXT("Mirror(.mirror)\0*.mirror");
 	ofn.nFilterIndex = 1;
 	ofn.lpstrFileTitle = NULL;
 	ofn.nMaxFileTitle = 0;

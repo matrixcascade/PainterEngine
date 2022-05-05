@@ -115,7 +115,7 @@ px_bool PX_ThirianInitialize(PX_Thirian* pThi, px_memorypool* mp, px_int N)
 
 px_void PX_ThirianSetCoeffs(PX_Thirian* pThi, px_float D)
 {
-	int k,n,i;
+	px_int k,n,i;
 	if (D < pThi->N - 1)
 		D = pThi->N - 1.0f;
 	pThi->D = D;

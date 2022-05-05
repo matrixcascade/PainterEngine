@@ -287,37 +287,22 @@ px_void PX_Object_SliderBarOnCursorDrag(PX_Object *pObject,PX_Object_Event e,px_
 PX_Object * PX_Object_SliderBarCreate(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y,px_int Width,px_int Height,PX_OBJECT_SLIDERBAR_TYPE Type,PX_OBJECT_SLIDERBAR_STYLE style)
 {
 	PX_Object *pObject;
-	PX_Object_SliderBar *pSliderbar=(PX_Object_SliderBar *)MP_Malloc(mp,sizeof(PX_Object_SliderBar));
-	if (pSliderbar==PX_NULL)
-	{
-		return PX_NULL;
-	}
-	pObject=PX_ObjectCreate(mp,Parent,(px_float)x,(px_float)y,0,(px_float)Width,(px_float)Height,0);
-	if (pObject==PX_NULL)
-	{
-		MP_Free(pObject->mp,pSliderbar);
-		return PX_NULL;
-	}
-
-	pObject->pObject=pSliderbar;
-	pObject->Enabled=PX_TRUE;
-	pObject->Visible=PX_TRUE;
-	pObject->Type=PX_OBJECT_TYPE_SLIDERBAR;
-	pObject->ReceiveEvents=PX_TRUE;
-	pObject->Func_ObjectFree=PX_Object_SliderBarFree;
-	pObject->Func_ObjectRender=PX_Object_SliderBarRender;
-	pSliderbar->Max=100;
-	pSliderbar->Value=0;
-	pSliderbar->SliderButtonLength=16;
-	pSliderbar->style=style;
-	pSliderbar->status=PX_OBJECT_SLIDERBAR_STATUS_NORMAL;
-	pSliderbar->Type=Type;
-	pSliderbar->color=PX_OBJECT_UI_DEFAULT_FONTCOLOR;
-	pSliderbar->BackgroundColor=PX_OBJECT_UI_DEFAULT_BACKGROUNDCOLOR;
-	pSliderbar->btnDownX=0;
-	pSliderbar->btnDownY=0;
-	pSliderbar->DargButtonX=0;
-	pSliderbar->DargButtonY=0;
+	PX_Object_SliderBar Desc,*pDesc;
+	PX_memset(&Desc, 0, sizeof(PX_Object_SliderBar));
+	pObject=PX_ObjectCreateEx(mp,Parent,(px_float)x,(px_float)y,0,(px_float)Width,(px_float)Height,0, PX_OBJECT_TYPE_SLIDERBAR,0, PX_Object_SliderBarRender,0,&Desc,sizeof(Desc));
+	pDesc = PX_ObjectGetDesc(PX_Object_SliderBar, pObject);
+	pDesc->Max=100;
+	pDesc->Value=0;
+	pDesc->SliderButtonLength=16;
+	pDesc->style=style;
+	pDesc->status=PX_OBJECT_SLIDERBAR_STATUS_NORMAL;
+	pDesc->Type=Type;
+	pDesc->color=PX_OBJECT_UI_DEFAULT_FONTCOLOR;
+	pDesc->BackgroundColor=PX_OBJECT_UI_DEFAULT_BACKGROUNDCOLOR;
+	pDesc->btnDownX=0;
+	pDesc->btnDownY=0;
+	pDesc->DargButtonX=0;
+	pDesc->DargButtonY=0;
 
 	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_CURSORDOWN,PX_Object_SliderBarOnMouseLButtonDown,PX_NULL);
 	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_CURSORMOVE,PX_Object_SliderBarOnCursorNormal,PX_NULL);

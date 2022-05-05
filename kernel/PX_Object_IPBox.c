@@ -36,7 +36,7 @@ px_void PX_Object_IPBoxOnEditChanged(PX_Object* pObject, PX_Object_Event e, px_v
 	PX_Object_VariousSetTextColor(pdesc->various_ip, PX_OBJECT_UI_DEFAULT_FONTCOLOR);
 }
 
-PX_Object* PX_Object_IPBoxCreate(px_memorypool* mp, PX_Object* Parent, int x, int y, int width, int height, const px_char title[], PX_FontModule* fontmodule)
+PX_Object* PX_Object_IPBoxCreate(px_memorypool* mp, PX_Object* Parent, px_int x, px_int y, px_int width, px_int height, const px_char title[], PX_FontModule* fontmodule)
 {
 	PX_Object_IPBox desc, * pdesc;
 	PX_Object* pObject;

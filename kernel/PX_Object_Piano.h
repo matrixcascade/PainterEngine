@@ -3,20 +3,6 @@
 
 #include "PX_Object.h"
 
-typedef enum 
-{
-	PX_OBJECT_PIANO_KEYSTATE_STANDBY=0,
-	PX_OBJECT_PIANO_KEYSTATE_DOWN,
-	PX_OBJECT_PIANO_KEYSTATE_CURSOR,
-	PX_OBJECT_PIANO_KEYSTATE_ONFOCUS,
-}PX_OBJECT_PIANO_KEYSTATE;
-
-typedef struct  
-{
-	px_memorypool* mp;
-	px_int lastKeyDownIndex;
-	PX_OBJECT_PIANO_KEYSTATE keyState[88];
-}PX_Object_Piano;
 
 typedef struct 
 {
@@ -55,11 +41,35 @@ typedef struct
 	PX_PianoKey_Parameters key_param;
 	PX_PianoSoundboard_Parameters soundboard_param;
 	PX_Piano *pPiano;
+	
 }PX_Object_PianoTune;
+
+PX_Object* PX_Object_PianoTuneCreate(px_memorypool* mp, PX_Object* Parent, px_float x, px_float y, px_float width, px_float height);
+px_void PX_Object_PianoTuneSetParameters(PX_Object* pObject, PX_Piano* pPiano, px_int keyIndex);
+
+
+typedef enum
+{
+	PX_OBJECT_PIANO_KEYSTATE_STANDBY = 0,
+	PX_OBJECT_PIANO_KEYSTATE_DOWN,
+	PX_OBJECT_PIANO_KEYSTATE_CURSOR,
+	PX_OBJECT_PIANO_KEYSTATE_ONFOCUS,
+}PX_OBJECT_PIANO_KEYSTATE;
+
+typedef struct
+{
+	px_memorypool* mp;
+	px_int lastKeyDownIndex;
+	PX_OBJECT_PIANO_KEYSTATE keyState[88];
+
+	PX_Piano* pPiano;
+	PX_PianoModel* pPianoModel;
+}PX_Object_Piano;
 PX_Object* PX_Object_PianoCreate(px_memorypool* mp, PX_Object* Parent, px_float x, px_float y, px_float width, px_float height);
+px_void PX_Object_PianoLinkPiano(PX_Object* pObject, PX_Piano* pPiano);
+px_void PX_Object_PianoLinkPianoModel(PX_Object* pObject, PX_PianoModel* pPianoModel);
 px_void PX_Object_PianoSetKeyFocus(PX_Object* pObject, px_int index);
 px_void PX_Object_PianoSetKeyDown(PX_Object* pObject, px_int index, px_bool bdown);
 px_void PX_Object_PianoClearKeyState(PX_Object* pObject);
-PX_Object* PX_Object_PianoTuneCreate(px_memorypool* mp, PX_Object* Parent, px_float x, px_float y, px_float width, px_float height);
-px_void PX_Object_PianoTuneSetParameters(PX_Object* pObject, PX_Piano* pPiano, px_int keyIndex);
+
 #endif

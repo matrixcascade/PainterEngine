@@ -3917,13 +3917,13 @@ static px_uint64 px_srand_seed=0x31415926;
 
 px_void PX_srand(px_uint64 seed)
 {
-	  seed = (seed*16807)%(0xefffffff);
+	  seed = (seed*16807+1)%(0xefffffff);
 	  px_srand_seed=seed;
 }
 
 px_uint32 PX_rand()
 {
-	return  ((px_uint32)(px_srand_seed = (px_srand_seed*764261123)%(0xefffffff)))&PX_RAND_MAX;
+	return  ((px_uint32)(px_srand_seed = (px_srand_seed*764261123+1)%(0xefffffff)))&PX_RAND_MAX;
 }
 
 

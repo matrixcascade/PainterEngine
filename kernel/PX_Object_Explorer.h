@@ -9,8 +9,8 @@
 #define PX_OBJECT_EXPOLRER_BUTTON_WIDTH 64
 typedef px_int (*PX_ExplorerGetPathFolderCount)(const px_char *path,const char *filter);
 typedef px_int (*PX_ExplorerGetPathFileCount)(const px_char *path,const char *filter);
-typedef px_int (*PX_ExplorerGetPathFolderName)(const char path[],int count,char FileName[][260],const char *filter);
-typedef px_int (*PX_ExplorerGetPathFileName)(const char path[],int count,char FileName[][260],const char *filter);
+typedef px_int (*PX_ExplorerGetPathFolderName)(const char path[],px_int count,char FileName[][260],const char *filter);
+typedef px_int (*PX_ExplorerGetPathFileName)(const char path[],px_int count,char FileName[][260],const char *filter);
 
 typedef struct  
 {
@@ -72,7 +72,7 @@ px_void PX_Object_ExplorerOpen(PX_Object *Object);
 px_void PX_Object_ExplorerSave(PX_Object* Object);
 px_void PX_Object_ExplorerClose(PX_Object *Object);
 px_void PX_Object_ExplorerSetFilter(PX_Object *Object,const px_char *filter);
-px_void PX_Object_ExplorerSetMaxSelectCount(PX_Object *Object,int selectCount);
+px_void PX_Object_ExplorerSetMaxSelectCount(PX_Object *Object,px_int selectCount);
 
 
 #endif

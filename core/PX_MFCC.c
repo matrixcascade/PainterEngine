@@ -12,9 +12,9 @@ static px_double PX_MelToHz(px_double  freq)
 }
 
 
-void PX_liftwindow(px_double* p, int m)
+void PX_liftwindow(px_double* p, px_int m)
 {
-	int i;
+	px_int i;
 	px_double  max_value = 0.0f;
 	for(i = 1; i <= m; i++)
 	{

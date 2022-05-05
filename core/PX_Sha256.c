@@ -101,7 +101,7 @@ void
     px_uint32    t0;
     px_uint32    t1;
     px_uint32    t;
-    int         i;
+    px_int         i;
 
     // Copy state into S
     for( i=0; i<8; i++ )
@@ -230,7 +230,7 @@ void
         PX_SHA256_HASH*        Digest          // [out]
     )
 {
-    int i;
+    px_int i;
 
     if( Context->curlen >= sizeof(Context->buf) )
     {

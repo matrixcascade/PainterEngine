@@ -252,6 +252,19 @@ px_bool PX_MidiIsEnd(PX_Midi* pmidi)
 	return PX_TRUE;
 }
 
+px_bool PX_MidiTrackIsEnd(PX_Midi* pmidi,px_int i)
+{
+	if (i>=0&&i< pmidi->track.size)
+	{
+		PX_Midi_Track* pTrack = PX_VECTORAT(PX_Midi_Track, &pmidi->track, i);
+		if (pTrack->ip < pTrack->payloadSize)
+		{
+			return PX_FALSE;
+		}
+	}
+	return PX_TRUE;
+}
+
 px_void PX_MidiPlay(PX_Midi* pmidi)
 {
 	pmidi->state = PX_Midi_State_Play;
@@ -347,7 +360,7 @@ px_int PX_MidiReadTick(PX_Midi* pmidi, px_int iTrack)
 	px_byte pl;
 	PX_Midi_Track* pTrack = PX_VECTORAT(PX_Midi_Track, &pmidi->track, iTrack);
 	
-	if (pTrack->nextType == PX_MIDI_NEXT_TYPE_ERROR)
+	if (pTrack->nextType != PX_MIDI_NEXT_TYPE_TICK)
 	{
 		return -1;
 	}
@@ -392,7 +405,7 @@ PX_Midi_Note PX_MidiReadNote(PX_Midi* pmidi, px_int iTrack)
 	note.opcode = PX_MIDI_OPCODE_UNDEFINE;
 	note.note = -1;
 	note.v = 0;
-	if (pTrack->nextType==PX_MIDI_NEXT_TYPE_ERROR)
+	if (pTrack->nextType!=PX_MIDI_NEXT_TYPE_OPCODE)
 	{
 		return note;
 	}

@@ -178,6 +178,17 @@ px_void PX_Object_PianoOnCursorDown(PX_Object* pObject, PX_Object_Event e, px_vo
 			pPiano->keyState[index] = PX_OBJECT_PIANO_KEYSTATE_DOWN;
 		pPiano->lastKeyDownIndex = index;
 		PX_ObjectPostEvent(pObject, PX_OBJECT_BUILD_EVENT_INT(PX_OBJECT_EVENT_VALUECHANGED, index));
+
+		if (pPiano->pPiano)
+		{
+			PX_PianoTriggerIndex(pPiano->pPiano, index, 1);
+		}
+
+		if (pPiano->pPianoModel)
+		{
+			PX_PianoModelTriggerIndex(pPiano->pPianoModel, index);
+		}
+
 	}
 }
 
@@ -216,6 +227,19 @@ PX_Object *PX_Object_PianoCreate(px_memorypool* mp, PX_Object* Parent, px_float 
 	PX_ObjectRegisterEvent(pObject, PX_OBJECT_EVENT_CURSORDRAG, PX_Object_PianoOnCursorDrag, PX_NULL);
 	PX_ObjectRegisterEvent(pObject, PX_OBJECT_EVENT_CURSORUP, PX_Object_PianoOnCursorUp, PX_NULL);
 	return pObject;
+}
+
+px_void PX_Object_PianoLinkPiano(PX_Object* pObject, PX_Piano* pPiano)
+{
+	PX_Object_Piano* pObjectPiano = PX_ObjectGetDesc(PX_Object_Piano, pObject);
+	pObjectPiano->pPiano = pPiano;
+
+}
+
+px_void PX_Object_PianoLinkPianoModel(PX_Object* pObject, PX_PianoModel* pPianoModel)
+{
+	PX_Object_Piano* pObjectPiano = PX_ObjectGetDesc(PX_Object_Piano, pObject);
+	pObjectPiano->pPianoModel = pPianoModel;
 }
 
 px_void PX_Object_PianoSetKeyFocus(PX_Object* pObject, px_int index)

@@ -39,4 +39,18 @@ px_float PX_CircularBufferGet(PX_CircularBuffer* pcbuffer, px_int pos);
 px_void PX_CircularBufferFree(PX_CircularBuffer* pcbuffer);
 px_float PX_CircularBufferDelay(PX_CircularBuffer* pcbuffer, px_int pos);
 
+
+typedef px_memory px_fifobuffer;
+px_void PX_FifoBufferInitialize(px_memorypool* mp, px_fifobuffer* pfifo);
+px_int PX_FifoBufferPop(px_fifobuffer* pfifo, px_void* data, px_int size);
+px_bool PX_FifoBufferPush(px_fifobuffer* pfifo, px_void* data, px_int size);
+px_int PX_FifoBufferGetPopSize(px_fifobuffer* pfifo);
+px_void PX_FifoBufferFree(px_fifobuffer* pfifo);
+
+typedef px_memory px_stack;
+px_void PX_StackInitialize(px_memorypool* mp, px_stack* pstack);
+px_int PX_StackPop(px_stack* pstack, px_void* data, px_int size);
+px_bool PX_StackPush(px_stack* pstack, px_void* data, px_int size);
+px_int PX_StackGetPopSize(px_stack* pstack);
+px_void PX_StackFree(px_stack* pstack);
 #endif

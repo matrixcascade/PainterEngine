@@ -53,6 +53,7 @@ typedef struct _PX_Midi
 px_bool PX_MidiInitialize(PX_Midi* pmidi, px_memorypool* mp, PX_MidiCallback callback,px_void *userptr);
 px_bool PX_MidiLoad(PX_Midi* pmidi, const px_byte data[], px_int datasize);
 px_bool PX_MidiIsEnd(PX_Midi* pmidi);
+px_bool PX_MidiTrackIsEnd(PX_Midi* pmidi, px_int i);
 px_void PX_MidiPlay(PX_Midi* pmidi);
 px_void PX_MidiPause(PX_Midi* pmidi);
 px_void PX_MidiReset(PX_Midi* pmidi);

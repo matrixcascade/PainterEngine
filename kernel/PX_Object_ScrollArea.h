@@ -14,7 +14,7 @@ typedef struct
 }PX_Object_ScrollArea;
 
 
-PX_Object *PX_Object_ScrollAreaCreate(px_memorypool *mp,PX_Object *Parent,int x,int y,int width,int height);
+PX_Object *PX_Object_ScrollAreaCreate(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y, px_int width, px_int height);
 PX_Object_ScrollArea * PX_Object_GetScrollArea( PX_Object *Object );
 PX_Object * PX_Object_ScrollAreaGetIncludedObjects(PX_Object *pObj);
 px_void PX_Object_ScrollAreaMoveToBottom(PX_Object *pObject);

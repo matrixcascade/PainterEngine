@@ -57,7 +57,7 @@ typedef struct __Pt_Lexer
 	px_int	     CommentCount;
 	px_char		*Sources;
 	px_char      SortComment;
-	px_ulong    SourceOffset;
+	px_int      SourceOffset;
 	px_int		SpacerCount;
 	px_char		Symbol;
 	px_bool     NumericMath;
@@ -76,7 +76,7 @@ typedef struct __Pt_Lexer
 	PX_LEXER_CA_Container Container[PX_LEXER_CA_CONTAINER_MAX_COUNT];
 	px_char	     Spacer[PX_LEXER_CA_SPACER_MAX_COUNT];
 	px_char      Delimiter[PX_LEXER_CA_DELIMITER_MAX_COUNT];
-
+	px_vector    symbolmap;
 }px_lexer;
 
 typedef  struct __PX_LEXER_START
@@ -97,7 +97,8 @@ px_int PX_LexerGetContainerType(px_lexer *lexer,px_char *pContainerText);
 px_int PX_LexerGetCurrentContainerType(px_lexer *lexer);
 px_int PX_LexerGetCurrentDelimiterType(px_lexer *lexer);
 px_void PX_LexerFree(px_lexer *lexer);
-px_bool PX_LexerSortText(px_lexer *lexer,const px_char *SourceText);
+px_bool PX_LexerSortTextMap(px_lexer* lexer, const px_char* SourceText, px_bool map);
+px_bool PX_LexerSortText(px_lexer* lexer, const px_char* SourceText);
 px_bool  PX_LexerLoadSourceFromMemory(px_lexer *lexer,const px_char *buffer);
 px_bool  PX_LexerSetSourcePointer(px_lexer *lexer,const px_char *buffer);
 px_bool PX_LexerReadString(px_lexer *lexer,px_string *str,px_uint size);
