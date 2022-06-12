@@ -4226,6 +4226,42 @@ px_char* PX_strstr(const px_char* dest, const px_char* src)
 }
 
 
+px_void PX_strcut(px_char* dest, px_int left, px_int right)
+{
+	px_int len = PX_strlen(dest);
+
+	if (len==0)
+	{
+		return;
+	}
+
+	if (right < left)
+	{
+		px_int t = left;
+		left = right;
+		right = t;
+	}
+	if (left<0)
+	{
+		left = 0;
+	}
+	if (left>len-1)
+	{
+		left = len-1;
+	}
+	if (right < 0)
+	{
+		right = 0;
+	}
+	if (right > len-1)
+	{
+		right = len-1;
+	}
+	
+	PX_memcpy(dest, dest + left, right-left+1);
+	dest[right - left + 1] = 0;
+}
+
 
 px_bool PX_isPointInCircle(px_point p,px_point circle,px_float radius)
 {
@@ -4328,6 +4364,38 @@ px_bool PX_IsValidIPAddress(const px_char *ip_addr)
 	}
 	if (bitsNumber != 4) return PX_FALSE;
 	return PX_TRUE;
+}
+
+px_timestamp PX_TimeFormString(const px_char* t)
+{
+	px_timestamp time = { 0 };
+	px_char data[20] = { 0 };
+	if (PX_strlen(t)==10)
+	{
+		PX_memcpy(data, t, 10);
+		data[4] = 0;
+		data[7] = 0;
+		time.year = PX_atoi(data);
+		time.month= PX_atoi(data + 5);
+		time.day = PX_atoi(data + 8);
+	}
+	else
+	if (PX_strlen(t)==19)
+	{
+		PX_memcpy(data, t, 19);
+		data[4] = 0;
+		data[7] = 0;
+		data[10] = 0;
+		data[13] = 0;
+		data[16] = 0;
+		time.year = PX_atoi(data);
+		time.month = PX_atoi(data + 5);
+		time.day = PX_atoi(data + 8);
+		time.hour = PX_atoi(data + 11);
+		time.minute = PX_atoi(data + 14);
+		time.second = PX_atoi(data + 17);
+	}
+	return time;
 }
 
 px_dword PX_htonl(px_dword h)

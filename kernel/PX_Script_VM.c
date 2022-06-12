@@ -854,7 +854,11 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 			}
 
 			pVar=PX_VMGetVariablePointer(Ins,opType[0],PX_SCRIPT_VM_PARAM(0));
-			
+			if (pVar==PX_NULL)
+			{
+				PX_VM_Error(Ins, "MOV crash.");
+				goto _ERROR;
+			}
 			PX_VM_VaribaleFree(Ins,pVar);
 			
 			if (cVar.type==PX_VM_VARIABLE_TYPE_STRING)
@@ -1667,6 +1671,26 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 		}
 		break;
 
+	case PX_SCRIPT_ASM_INSTR_OPCODE_STRCUT:
+	{
+		pVar = PX_VMGetVariablePointer(Ins, opType[0], PX_SCRIPT_VM_PARAM(0));
+		sVar = PX_VM_GetParamConst(Ins, opType[1], PX_SCRIPT_VM_PARAM(1), &bOutofMemory);
+		if (bOutofMemory) goto _ERROR;
+		tVar = PX_VM_GetParamConst(Ins, opType[2], PX_SCRIPT_VM_PARAM(2), &bOutofMemory);
+		if (bOutofMemory) goto _ERROR;
+	
+		if (pVar->type!= PX_VM_VARIABLE_TYPE_STRING||sVar.type != PX_VM_VARIABLE_TYPE_INT || tVar.type != PX_VM_VARIABLE_TYPE_INT)
+		{
+			PX_VM_Error(Ins, "strcut parameters error.");
+			goto _ERROR;
+		}
+		
+		PX_strcut(pVar->_string.buffer,sVar._int, tVar._int);
+		PX_StringUpdateExReg(&pVar->_string);
+		pT->IP += (4 + 3 * 4);
+	}
+	break;
+
 	case PX_SCRIPT_ASM_INSTR_OPCODE_ASC:
 		{
 			pVar=PX_VMGetVariablePointer(Ins,opType[0],PX_SCRIPT_VM_PARAM(0));
@@ -2399,6 +2423,28 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 						}
 				}
 			}
+			else
+			{
+				if (sVar.type == PX_VM_VARIABLE_TYPE_INT && tVar.type == PX_VM_VARIABLE_TYPE_FLOAT)
+				{
+					if (sVar._int == tVar._float)
+					{
+						pVar->_int = 1;
+						pT->IP += (4 + 3 * 4);
+						break;
+					}
+				}
+
+				if (sVar.type == PX_VM_VARIABLE_TYPE_FLOAT && tVar.type == PX_VM_VARIABLE_TYPE_INT)
+				{
+					if (sVar._float == tVar._int)
+					{
+						pVar->_int = 1;
+						pT->IP += (4 + 3 * 4);
+						break;
+					}
+				}
+			}
 			pT->IP+=(4+3*4);
 		}
 		break;
@@ -2443,6 +2489,28 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 								pT->IP+=(4+3*4);
 								break;
 							}
+				}
+			}
+			else
+			{
+				if (sVar.type== PX_VM_VARIABLE_TYPE_INT&&tVar.type== PX_VM_VARIABLE_TYPE_FLOAT)
+				{
+					if (sVar._int == tVar._float)
+					{
+						pVar->_int = 0;
+						pT->IP += (4 + 3 * 4);
+						break;
+					}
+				}
+
+				if (sVar.type == PX_VM_VARIABLE_TYPE_FLOAT && tVar.type == PX_VM_VARIABLE_TYPE_INT)
+				{
+					if (sVar._float == tVar._int)
+					{
+						pVar->_int = 0;
+						pT->IP += (4 + 3 * 4);
+						break;
+					}
 				}
 			}
 			pT->IP+=(4+3*4);
@@ -2960,7 +3028,7 @@ _ERROR:
 	PX_VM_VaribaleFree(Ins,&cVar);
 	PX_VM_VaribaleFree(Ins,&sVar);
 	PX_VM_VaribaleFree(Ins,&tVar);
-
+	PX_VMSuspend(Ins);
 	PX_VM_Error(Ins,"Virtual Machine runtime error");
 	return PX_VM_RUNRETURN_ERROR;
 }

@@ -451,8 +451,13 @@ BOOL PX_SystemRender(void *raw,int width,int height)
 			pData[i]=(pData[i]&0xFF00FF00)+((pData[i]>>16)&0x000000FF)+((pData[i]<<16)&0x00FF0000);
 		}
 	}
-	D2D_pSurface->CopyFromMemory(&size,raw,width*sizeof(DWORD));
-	D2D_pRenderTarget->DrawBitmap(D2D_pSurface,screenSize);
+	if (D2D_pSurface)
+	{
+		D2D_pSurface->CopyFromMemory(&size, raw, width * sizeof(DWORD));
+		D2D_pRenderTarget->DrawBitmap(D2D_pSurface, screenSize);
+	}
+	
+	
 	D2D_pRenderTarget->EndDraw();
 	
 	return TRUE;

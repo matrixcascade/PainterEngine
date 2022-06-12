@@ -479,7 +479,7 @@ px_bool PX_SyncFrameServerAddClient(PX_SyncFrameServer *sync,px_dword server_ver
 	client.timeIndexOffset=0;
 	client.timeStreamOffset=0;
 	client.sendDurationTick=PX_SYNC_SERVER_SEND_DURATION;
-	client.status=PX_SYNC_CLIENT_STATUS_QUERYDATA;
+	client.status=PX_SYNC_SERVERCLIENT_STATUS_CONNECT;
 	for(i=0;i<PX_SYNC_UNIQUE_ARRAY_SIZE;i++)
 	client.acceptuniqueQueue[i]=0;
 	client.uniqueQueuewIndex=0;

@@ -27,7 +27,7 @@ px_bool PX_CompilerCompile(PX_Compiler *compiler,px_memory *bin, PX_VM_DebuggerM
 	
 	PX_StringInitialize(compiler->mp,&asmcodeString);
 	
-	if(PX_ScriptCompilerCompile(&compiler->lib,entryScript,&asmcodeString,128,compiler->error,sizeof(compiler->error)))
+	if(PX_ScriptCompilerCompile(&compiler->lib,entryScript,&asmcodeString, PX_COMPILER_DEFAULT_STACK_SIZE,compiler->error,sizeof(compiler->error)))
 	{
 		PX_ScriptAsmOptimization(&asmcodeString);
 

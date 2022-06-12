@@ -275,7 +275,7 @@ px_bool PX_ExecuterRegistryHostFunction(PX_Object *pObject,const px_char Name[],
 px_void PX_Object_ExecuterUpdate(PX_Object* pObject, px_dword elapsed)
 {
 	PX_Object_Executer *pdesc = PX_ObjectGetDesc(PX_Object_Executer, pObject);
-	PX_VMRun(&pdesc->vm, elapsed*3, elapsed);
+	PX_VMRun(&pdesc->vm, elapsed, elapsed);
 }
 
 px_void PX_Object_ExecuterRender(px_surface *psurface,PX_Object* pObject, px_dword elapsed)
@@ -320,7 +320,7 @@ PX_Object* PX_Object_ExecuterCreate(px_memorypool* mp, PX_Object* Parent, px_int
 
 	PX_Object_ExecuterPrintImage(pObject, &pdesc->fox);
 	PX_Object_ExecuterPrintText(pObject, "----------------------------------------");
-	PX_Object_ExecuterPrintText(pObject, " PainterEngine Script Executer          \n Code By DBinary Build on v2022          \n Refer To:www.GitHub.com/matrixcascade  ");
+	PX_Object_ExecuterPrintText(pObject, "--------------Fox Console---------------");
 	PX_Object_ExecuterPrintText(pObject, "----------------------------------------");
 
 	return pObject;

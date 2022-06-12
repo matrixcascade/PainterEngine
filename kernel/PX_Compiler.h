@@ -4,6 +4,8 @@
 #include "PX_Script_Interpreter.h"
 #include "PX_Script_ASMCompiler.h"
 #include "PX_Script_VM.h"
+
+#define PX_COMPILER_DEFAULT_STACK_SIZE 256
 typedef struct
 {
 	px_memorypool *mp;

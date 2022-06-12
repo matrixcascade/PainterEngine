@@ -656,7 +656,7 @@ static px_bool PX_ScriptParse_AST_PushToken(PX_ScriptInterpreter *analysis,px_ve
 						{
 							operand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_INT;
 							operand._oft=psetmem->offset;
-							operand.pSet=PX_NULL;
+							operand.pStruct=PX_NULL;
 							PX_VectorPushback(tk,&operand);
 							return PX_TRUE;
 						}
@@ -665,7 +665,7 @@ static px_bool PX_ScriptParse_AST_PushToken(PX_ScriptInterpreter *analysis,px_ve
 						{
 							operand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_FLOAT;
 							operand._oft=psetmem->offset;
-							operand.pSet=PX_NULL;
+							operand.pStruct=PX_NULL;
 							PX_VectorPushback(tk,&operand);
 							return PX_TRUE;
 						}
@@ -674,7 +674,7 @@ static px_bool PX_ScriptParse_AST_PushToken(PX_ScriptInterpreter *analysis,px_ve
 						{
 							operand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_STRING;
 							operand._oft=psetmem->offset;
-							operand.pSet=PX_NULL;
+							operand.pStruct=PX_NULL;
 							PX_VectorPushback(tk,&operand);
 							return PX_TRUE;
 						}
@@ -683,7 +683,7 @@ static px_bool PX_ScriptParse_AST_PushToken(PX_ScriptInterpreter *analysis,px_ve
 						{
 							operand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_MEMORY;
 							operand._oft=psetmem->offset;
-							operand.pSet=PX_NULL;
+							operand.pStruct=PX_NULL;
 							PX_VectorPushback(tk,&operand);
 							return PX_TRUE;
 						}
@@ -692,8 +692,8 @@ static px_bool PX_ScriptParse_AST_PushToken(PX_ScriptInterpreter *analysis,px_ve
 						{
 							operand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_STRUCT;
 							operand._oft=psetmem->offset;
-							operand.pSet=PX_ScriptParseGetStructByIndex(analysis,psetmem->defvar.setIndex);
-							*_outset=operand.pSet;
+							operand.pStruct=PX_ScriptParseGetStructByIndex(analysis,psetmem->defvar.setIndex);
+							*_outset=operand.pStruct;
 							PX_VectorPushback(tk,&operand);
 							return PX_TRUE;
 						}
@@ -702,7 +702,7 @@ static px_bool PX_ScriptParse_AST_PushToken(PX_ScriptInterpreter *analysis,px_ve
 						{
 							operand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_INT_PTR_CONST;
 							operand._oft=psetmem->offset;
-							operand.pSet=PX_NULL;
+							operand.pStruct=PX_NULL;
 							PX_VectorPushback(tk,&operand);
 							return PX_TRUE;
 						}
@@ -711,7 +711,7 @@ static px_bool PX_ScriptParse_AST_PushToken(PX_ScriptInterpreter *analysis,px_ve
 						{
 							operand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_FLOAT_PTR_CONST;
 							operand._oft=psetmem->offset;
-							operand.pSet=PX_NULL;
+							operand.pStruct=PX_NULL;
 							PX_VectorPushback(tk,&operand);
 							return PX_TRUE;
 						}
@@ -720,7 +720,7 @@ static px_bool PX_ScriptParse_AST_PushToken(PX_ScriptInterpreter *analysis,px_ve
 						{
 							operand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_STRING_PTR_CONST;
 							operand._oft=psetmem->offset;
-							operand.pSet=PX_NULL;
+							operand.pStruct=PX_NULL;
 							PX_VectorPushback(tk,&operand);
 							return PX_TRUE;
 						}
@@ -729,7 +729,7 @@ static px_bool PX_ScriptParse_AST_PushToken(PX_ScriptInterpreter *analysis,px_ve
 						{
 							operand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_MEMORY_PTR_CONST;
 							operand._oft=psetmem->offset;
-							operand.pSet=PX_NULL;
+							operand.pStruct=PX_NULL;
 							PX_VectorPushback(tk,&operand);
 							return PX_TRUE;
 						}
@@ -737,10 +737,10 @@ static px_bool PX_ScriptParse_AST_PushToken(PX_ScriptInterpreter *analysis,px_ve
 					case PX_SCRIPT_PARSER_VAR_TYPE_SET_ARRAY:
 						{
 
-							operand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_SET_PTR_CONST;
+							operand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR_CONST;
 							operand._oft=psetmem->offset;
-							operand.pSet=PX_ScriptParseGetStructByIndex(analysis,psetmem->defvar.setIndex);
-							*_outset=operand.pSet;
+							operand.pStruct=PX_ScriptParseGetStructByIndex(analysis,psetmem->defvar.setIndex);
+							*_outset=operand.pStruct;
 							PX_VectorPushback(tk,&operand);
 							return PX_TRUE;
 						}
@@ -749,7 +749,7 @@ static px_bool PX_ScriptParse_AST_PushToken(PX_ScriptInterpreter *analysis,px_ve
 						{
 							operand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_INT_PTR;
 							operand._oft=psetmem->offset;
-							operand.pSet=PX_NULL;
+							operand.pStruct=PX_NULL;
 							PX_VectorPushback(tk,&operand);
 							return PX_TRUE;
 						}
@@ -758,7 +758,7 @@ static px_bool PX_ScriptParse_AST_PushToken(PX_ScriptInterpreter *analysis,px_ve
 						{
 							operand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_FLOAT_PTR;
 							operand._oft=psetmem->offset;
-							operand.pSet=PX_NULL;
+							operand.pStruct=PX_NULL;
 							PX_VectorPushback(tk,&operand);
 							return PX_TRUE;
 						}
@@ -767,7 +767,7 @@ static px_bool PX_ScriptParse_AST_PushToken(PX_ScriptInterpreter *analysis,px_ve
 						{
 							operand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_STRING_PTR;
 							operand._oft=psetmem->offset;
-							operand.pSet=PX_NULL;
+							operand.pStruct=PX_NULL;
 							PX_VectorPushback(tk,&operand);
 							return PX_TRUE;
 						}
@@ -776,7 +776,7 @@ static px_bool PX_ScriptParse_AST_PushToken(PX_ScriptInterpreter *analysis,px_ve
 						{
 							operand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_MEMORY_PTR;
 							operand._oft=psetmem->offset;
-							operand.pSet=PX_NULL;
+							operand.pStruct=PX_NULL;
 							PX_VectorPushback(tk,&operand);
 							return PX_TRUE;
 						}
@@ -785,8 +785,8 @@ static px_bool PX_ScriptParse_AST_PushToken(PX_ScriptInterpreter *analysis,px_ve
 						{
 							operand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_MEMORY_PTR;
 							operand._oft=psetmem->offset;
-							operand.pSet=PX_ScriptParseGetStructByIndex(analysis,psetmem->defvar.setIndex);
-							*_outset=operand.pSet;
+							operand.pStruct=PX_ScriptParseGetStructByIndex(analysis,psetmem->defvar.setIndex);
+							*_outset=operand.pStruct;
 							PX_VectorPushback(tk,&operand);
 							return PX_TRUE;
 						}
@@ -833,7 +833,7 @@ static px_bool PX_ScriptParse_AST_PushToken(PX_ScriptInterpreter *analysis,px_ve
 			{
 				operand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_INT;
 				operand._oft=pvar->BeginIndex;
-				operand.pSet=PX_NULL;
+				operand.pStruct=PX_NULL;
 				PX_VectorPushback(tk,&operand);
 			}
 			break;
@@ -841,7 +841,7 @@ static px_bool PX_ScriptParse_AST_PushToken(PX_ScriptInterpreter *analysis,px_ve
 			{
 				operand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_FLOAT;
 				operand._oft=pvar->BeginIndex;
-				operand.pSet=PX_NULL;
+				operand.pStruct=PX_NULL;
 				PX_VectorPushback(tk,&operand);
 			}
 			break;
@@ -849,7 +849,7 @@ static px_bool PX_ScriptParse_AST_PushToken(PX_ScriptInterpreter *analysis,px_ve
 			{
 				operand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_STRING;
 				operand._oft=pvar->BeginIndex;
-				operand.pSet=PX_NULL;
+				operand.pStruct=PX_NULL;
 				PX_VectorPushback(tk,&operand);
 			}
 			break;
@@ -857,7 +857,7 @@ static px_bool PX_ScriptParse_AST_PushToken(PX_ScriptInterpreter *analysis,px_ve
 			{
 				operand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_MEMORY;
 				operand._oft=pvar->BeginIndex;
-				operand.pSet=PX_NULL;
+				operand.pStruct=PX_NULL;
 				PX_VectorPushback(tk,&operand);
 			}
 			break;
@@ -866,7 +866,7 @@ static px_bool PX_ScriptParse_AST_PushToken(PX_ScriptInterpreter *analysis,px_ve
 				*_outset=PX_ScriptParseGetStructByIndex(analysis,pvar->setIndex);
 				operand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_STRUCT;
 				operand._oft=pvar->BeginIndex;
-				operand.pSet=PX_ScriptParseGetStructByIndex(analysis,pvar->setIndex);
+				operand.pStruct=PX_ScriptParseGetStructByIndex(analysis,pvar->setIndex);
 				PX_VectorPushback(tk,&operand);
 			}
 			break;
@@ -875,7 +875,7 @@ static px_bool PX_ScriptParse_AST_PushToken(PX_ScriptInterpreter *analysis,px_ve
 			{
 				operand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_INT_PTR_CONST;
 				operand._oft=pvar->BeginIndex;
-				operand.pSet=PX_NULL;
+				operand.pStruct=PX_NULL;
 				PX_VectorPushback(tk,&operand);
 			}
 			break;
@@ -883,7 +883,7 @@ static px_bool PX_ScriptParse_AST_PushToken(PX_ScriptInterpreter *analysis,px_ve
 			{
 				operand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_FLOAT_PTR_CONST;
 				operand._oft=pvar->BeginIndex;
-				operand.pSet=PX_NULL;
+				operand.pStruct=PX_NULL;
 				PX_VectorPushback(tk,&operand);
 			}
 			break;
@@ -891,7 +891,7 @@ static px_bool PX_ScriptParse_AST_PushToken(PX_ScriptInterpreter *analysis,px_ve
 			{
 				operand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_STRING_PTR_CONST;
 				operand._oft=pvar->BeginIndex;
-				operand.pSet=PX_NULL;
+				operand.pStruct=PX_NULL;
 				PX_VectorPushback(tk,&operand);
 			}
 			break;
@@ -899,16 +899,16 @@ static px_bool PX_ScriptParse_AST_PushToken(PX_ScriptInterpreter *analysis,px_ve
 			{
 				operand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_MEMORY_PTR_CONST;
 				operand._oft=pvar->BeginIndex;
-				operand.pSet=PX_NULL;
+				operand.pStruct=PX_NULL;
 				PX_VectorPushback(tk,&operand);
 			}
 			break;
 		case PX_SCRIPT_PARSER_VAR_TYPE_SET_ARRAY:
 			{
 				*_outset=PX_ScriptParseGetStructByIndex(analysis,pvar->setIndex);
-				operand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_SET_PTR_CONST;
+				operand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR_CONST;
 				operand._oft=pvar->BeginIndex;
-				operand.pSet=PX_ScriptParseGetStructByIndex(analysis,pvar->setIndex);
+				operand.pStruct=PX_ScriptParseGetStructByIndex(analysis,pvar->setIndex);
 				PX_VectorPushback(tk,&operand);
 			}
 			break;
@@ -917,7 +917,7 @@ static px_bool PX_ScriptParse_AST_PushToken(PX_ScriptInterpreter *analysis,px_ve
 				*_outset=PX_NULL;
 				operand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_INT_PTR;
 				operand._oft=pvar->BeginIndex;
-				operand.pSet=PX_NULL;
+				operand.pStruct=PX_NULL;
 				PX_VectorPushback(tk,&operand);
 			}
 			break;
@@ -926,7 +926,7 @@ static px_bool PX_ScriptParse_AST_PushToken(PX_ScriptInterpreter *analysis,px_ve
 				*_outset=PX_NULL;
 				operand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_FLOAT_PTR;
 				operand._oft=pvar->BeginIndex;
-				operand.pSet=PX_NULL;
+				operand.pStruct=PX_NULL;
 				PX_VectorPushback(tk,&operand);
 			}
 			break;
@@ -935,7 +935,7 @@ static px_bool PX_ScriptParse_AST_PushToken(PX_ScriptInterpreter *analysis,px_ve
 				*_outset=PX_NULL;
 				operand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_STRING_PTR;
 				operand._oft=pvar->BeginIndex;
-				operand.pSet=PX_NULL;
+				operand.pStruct=PX_NULL;
 				PX_VectorPushback(tk,&operand);
 			}
 			break;
@@ -944,7 +944,7 @@ static px_bool PX_ScriptParse_AST_PushToken(PX_ScriptInterpreter *analysis,px_ve
 				*_outset=PX_NULL;
 				operand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_MEMORY_PTR;
 				operand._oft=pvar->BeginIndex;
-				operand.pSet=PX_NULL;
+				operand.pStruct=PX_NULL;
 				PX_VectorPushback(tk,&operand);
 			}
 			break;
@@ -953,7 +953,7 @@ static px_bool PX_ScriptParse_AST_PushToken(PX_ScriptInterpreter *analysis,px_ve
 				*_outset=PX_ScriptParseGetStructByIndex(analysis,pvar->setIndex);
 				operand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR;
 				operand._oft=pvar->BeginIndex;
-				operand.pSet=PX_ScriptParseGetStructByIndex(analysis,pvar->setIndex);
+				operand.pStruct=PX_ScriptParseGetStructByIndex(analysis,pvar->setIndex);
 				PX_VectorPushback(tk,&operand);
 			}
 			break;
@@ -1328,7 +1328,7 @@ static px_bool PX_ScriptParseAST_MapTokenToR2(PX_ScriptInterpreter *analysis,PX_
 	case PX_SCRIPT_AST_OPERAND_TYPE_FLOAT_PTR_CONST:
 	case PX_SCRIPT_AST_OPERAND_TYPE_STRING_PTR_CONST:
 	case PX_SCRIPT_AST_OPERAND_TYPE_MEMORY_PTR_CONST:
-	case PX_SCRIPT_AST_OPERAND_TYPE_SET_PTR_CONST:
+	case PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR_CONST:
 		{
 			PX_StringInitialize(analysis->mp,&fmrString);
 
@@ -1652,7 +1652,7 @@ static px_bool PX_ScriptParseAST_MapTokenToR1(PX_ScriptInterpreter *analysis,PX_
 	case PX_SCRIPT_AST_OPERAND_TYPE_FLOAT_PTR_CONST:
 	case PX_SCRIPT_AST_OPERAND_TYPE_STRING_PTR_CONST:
 	case PX_SCRIPT_AST_OPERAND_TYPE_MEMORY_PTR_CONST:
-	case PX_SCRIPT_AST_OPERAND_TYPE_SET_PTR_CONST:
+	case PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR_CONST:
 		{
 			PX_StringInitialize(analysis->mp,&fmrString);
 
@@ -2301,12 +2301,12 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_ScriptInterpreter *analysis,px_v
 			}
 			else
 			{
-				pTop->operandType=PX_SCRIPT_AST_OPERAND_TYPE_SET_PTR_CONST;
+				pTop->operandType=PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR_CONST;
 			}
 
 			pTop->region=PX_SCRIPT_VARIABLE_REGION_POP;
 			pTop->_oft=0;
-			pTop->pSet=operandLeft.pSet;
+			pTop->pStruct=operandLeft.pStruct;
 
 			if (operandLeft.operandType!=operandRight.operandType)
 			{
@@ -2386,7 +2386,7 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_ScriptInterpreter *analysis,px_v
 			{
 				return PX_FALSE;
 			}
-			if (operandLeft.pSet!=operandRight.pSet)
+			if (operandLeft.pStruct!=operandRight.pStruct)
 			{
 				return PX_FALSE;
 			}
@@ -2402,7 +2402,7 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_ScriptInterpreter *analysis,px_v
 			}
 
 
-			PX_StringFormat1(&fmrString,"DATACPY R1,R2,%1\n",PX_STRINGFORMAT_INT(operandLeft.pSet->size));
+			PX_StringFormat1(&fmrString,"DATACPY R1,R2,%1\n",PX_STRINGFORMAT_INT(operandLeft.pStruct->size));
 			PX_StringCat(out,fmrString.buffer);
 			PX_StringSet(&fmrString,"PUSH R1\n");
 			PX_StringCat(out,fmrString.buffer);
@@ -2410,7 +2410,7 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_ScriptInterpreter *analysis,px_v
 			pTop->operandType=PX_SCRIPT_AST_OPERAND_TYPE_STRUCT;
 			pTop->region=PX_SCRIPT_VARIABLE_REGION_POP;
 			pTop->_oft=0;
-			pTop->pSet=operandLeft.pSet;
+			pTop->pStruct=operandLeft.pStruct;
 		}
 		break;
 
@@ -2418,7 +2418,7 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_ScriptInterpreter *analysis,px_v
 	case PX_SCRIPT_AST_OPERAND_TYPE_FLOAT_PTR_CONST:
 	case PX_SCRIPT_AST_OPERAND_TYPE_STRING_PTR_CONST:
 	case PX_SCRIPT_AST_OPERAND_TYPE_MEMORY_PTR_CONST:
-	case PX_SCRIPT_AST_OPERAND_TYPE_SET_PTR_CONST:
+	case PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR_CONST:
 		{
 			if (operandRight.operandType==PX_SCRIPT_AST_OPERAND_TYPE_INT_PTR_CONST&&operandLeft.operandType!=PX_SCRIPT_AST_OPERAND_TYPE_INT_PTR)
 			{
@@ -2436,7 +2436,7 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_ScriptInterpreter *analysis,px_v
 			{
 				return PX_FALSE;
 			}
-			if (operandRight.operandType==PX_SCRIPT_AST_OPERAND_TYPE_SET_PTR_CONST&&operandLeft.operandType!=PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR)
+			if (operandRight.operandType==PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR_CONST&&operandLeft.operandType!=PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR)
 			{
 				return PX_FALSE;
 			}
@@ -2503,7 +2503,7 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_ScriptInterpreter *analysis,px_v
 			pTop->operandType=operandRight.operandType;
 			pTop->region=PX_SCRIPT_VARIABLE_REGION_POP;
 			pTop->_oft=0;
-			pTop->pSet=operandLeft.pSet;
+			pTop->pStruct=operandLeft.pStruct;
 		}
 		break;
 
@@ -3357,28 +3357,28 @@ static px_bool PX_ScriptParseLastInstr_IDX(PX_ScriptInterpreter *analysis,px_vec
 			if (operand1.operandType==PX_SCRIPT_AST_OPERAND_TYPE_INT_PTR)
 			{
 				resOperand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_INT;
-				resOperand.pSet=PX_NULL;
+				resOperand.pStruct=PX_NULL;
 			}
 			if (operand1.operandType==PX_SCRIPT_AST_OPERAND_TYPE_FLOAT_PTR)
 			{
 				resOperand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_FLOAT;
-				resOperand.pSet=PX_NULL;
+				resOperand.pStruct=PX_NULL;
 			}
 			if (operand1.operandType==PX_SCRIPT_AST_OPERAND_TYPE_STRING_PTR)
 			{
 				resOperand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_STRING;
-				resOperand.pSet=PX_NULL;
+				resOperand.pStruct=PX_NULL;
 			}
 			if (operand1.operandType==PX_SCRIPT_AST_OPERAND_TYPE_MEMORY_PTR)
 			{
 				resOperand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_MEMORY;
-				resOperand.pSet=PX_NULL;
+				resOperand.pStruct=PX_NULL;
 			}
 			if (operand1.operandType==PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR)
 			{
 				resOperand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_STRUCT;
-				resOperand.pSet=operand1.pSet;
-				PX_StringFormat1(&fmrString,"MUL R2,%1\n",PX_STRINGFORMAT_INT(operand1.pSet->size));
+				resOperand.pStruct=operand1.pStruct;
+				PX_StringFormat1(&fmrString,"MUL R2,%1\n",PX_STRINGFORMAT_INT(operand1.pStruct->size));
 				PX_StringCat(out,fmrString.buffer);
 			}
 
@@ -3410,33 +3410,33 @@ static px_bool PX_ScriptParseLastInstr_IDX(PX_ScriptInterpreter *analysis,px_vec
 		case PX_SCRIPT_AST_OPERAND_TYPE_FLOAT_PTR_CONST:
 		case PX_SCRIPT_AST_OPERAND_TYPE_STRING_PTR_CONST:
 		case PX_SCRIPT_AST_OPERAND_TYPE_MEMORY_PTR_CONST:
-		case PX_SCRIPT_AST_OPERAND_TYPE_SET_PTR_CONST:
+		case PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR_CONST:
 			{
 				if (operand1.operandType==PX_SCRIPT_AST_OPERAND_TYPE_INT_PTR_CONST)
 				{
 					resOperand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_INT;
-					resOperand.pSet=PX_NULL;
+					resOperand.pStruct=PX_NULL;
 				}
 				if (operand1.operandType==PX_SCRIPT_AST_OPERAND_TYPE_FLOAT_PTR_CONST)
 				{
 					resOperand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_FLOAT;
-					resOperand.pSet=PX_NULL;
+					resOperand.pStruct=PX_NULL;
 				}
 				if (operand1.operandType==PX_SCRIPT_AST_OPERAND_TYPE_STRING_PTR_CONST)
 				{
 					resOperand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_STRING;
-					resOperand.pSet=PX_NULL;
+					resOperand.pStruct=PX_NULL;
 				}
 				if (operand1.operandType==PX_SCRIPT_AST_OPERAND_TYPE_MEMORY_PTR_CONST)
 				{
 					resOperand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_MEMORY;
-					resOperand.pSet=PX_NULL;
+					resOperand.pStruct=PX_NULL;
 				}
-				if (operand1.operandType==PX_SCRIPT_AST_OPERAND_TYPE_SET_PTR_CONST)
+				if (operand1.operandType==PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR_CONST)
 				{
 					resOperand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_STRUCT;
-					resOperand.pSet=operand1.pSet;
-					PX_StringFormat1(&fmrString,"MUL R2,%1\n",PX_STRINGFORMAT_INT(operand1.pSet->size));
+					resOperand.pStruct=operand1.pStruct;
+					PX_StringFormat1(&fmrString,"MUL R2,%1\n",PX_STRINGFORMAT_INT(operand1.pStruct->size));
 					PX_StringCat(out,fmrString.buffer);
 
 				}
@@ -3561,53 +3561,53 @@ static px_bool PX_ScriptParseLastInstr_PTR(PX_ScriptInterpreter *analysis,px_vec
 	if (operand1.operandType==PX_SCRIPT_AST_OPERAND_TYPE_INT_PTR)
 	{
 		resOperand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_INT;
-		resOperand.pSet=PX_NULL;
+		resOperand.pStruct=PX_NULL;
 	}
 	else if (operand1.operandType==PX_SCRIPT_AST_OPERAND_TYPE_FLOAT_PTR)
 	{
 		resOperand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_FLOAT;
-		resOperand.pSet=PX_NULL;
+		resOperand.pStruct=PX_NULL;
 	}
 	else if (operand1.operandType==PX_SCRIPT_AST_OPERAND_TYPE_STRING_PTR)
 	{
 		resOperand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_STRING;
-		resOperand.pSet=PX_NULL;
+		resOperand.pStruct=PX_NULL;
 	}
 	else if (operand1.operandType==PX_SCRIPT_AST_OPERAND_TYPE_MEMORY_PTR)
 	{
 		resOperand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_MEMORY;
-		resOperand.pSet=PX_NULL;
+		resOperand.pStruct=PX_NULL;
 	}
 	else if (operand1.operandType==PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR)
 	{
 		resOperand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_STRUCT;
-		resOperand.pSet=operand1.pSet;
+		resOperand.pStruct=operand1.pStruct;
 	}
 
 	else if (operand1.operandType==PX_SCRIPT_AST_OPERAND_TYPE_INT_PTR_CONST)
 	{
 		resOperand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_INT;
-		resOperand.pSet=PX_NULL;
+		resOperand.pStruct=PX_NULL;
 	}
 	else if (operand1.operandType==PX_SCRIPT_AST_OPERAND_TYPE_FLOAT_PTR_CONST)
 	{
 		resOperand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_FLOAT;
-		resOperand.pSet=PX_NULL;
+		resOperand.pStruct=PX_NULL;
 	}
 	else if (operand1.operandType==PX_SCRIPT_AST_OPERAND_TYPE_STRING_PTR_CONST)
 	{
 		resOperand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_STRING;
-		resOperand.pSet=PX_NULL;
+		resOperand.pStruct=PX_NULL;
 	}
 	else if (operand1.operandType==PX_SCRIPT_AST_OPERAND_TYPE_MEMORY_PTR_CONST)
 	{
 		resOperand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_MEMORY;
-		resOperand.pSet=PX_NULL;
+		resOperand.pStruct=PX_NULL;
 	}
-	else if (operand1.operandType==PX_SCRIPT_AST_OPERAND_TYPE_SET_PTR_CONST)
+	else if (operand1.operandType==PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR_CONST)
 	{
 		resOperand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_STRUCT;
-		resOperand.pSet=operand1.pSet;
+		resOperand.pStruct=operand1.pStruct;
 
 	}
 	else
@@ -3658,7 +3658,7 @@ static px_bool PX_ScriptParseLastInstr_ADR(PX_ScriptInterpreter *analysis,px_vec
 		pTop->operandType=PX_SCRIPT_AST_OPERAND_TYPE_MEMORY_PTR_CONST;
 		break;
 	case PX_SCRIPT_AST_OPERAND_TYPE_STRUCT:
-		pTop->operandType=PX_SCRIPT_AST_OPERAND_TYPE_SET_PTR_CONST;
+		pTop->operandType=PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR_CONST;
 		break;
 	default:
 		return PX_FALSE;
@@ -3926,7 +3926,7 @@ static px_bool PX_ScriptParseLastInstr_ADD(PX_ScriptInterpreter *analysis,px_vec
 					if(!PX_ScriptParseAST_MapTokenToR2(analysis,operand2,out)) return PX_FALSE;
 					if(!PX_ScriptParseAST_MapTokenToR1(analysis,operand1,out)) return PX_FALSE;
 					PX_StringInitialize(analysis->mp,&fmrString);
-					PX_StringFormat1(&fmrString,"MUL R2,%1\n",PX_STRINGFORMAT_INT(operand1.pSet->size));
+					PX_StringFormat1(&fmrString,"MUL R2,%1\n",PX_STRINGFORMAT_INT(operand1.pStruct->size));
 					PX_StringCat(out,fmrString.buffer);
 					PX_StringFree(&fmrString);
 					PX_StringCat(out,"ADD R1,R2\nPUSH R1\n");
@@ -4018,7 +4018,7 @@ static px_bool PX_ScriptParseLastInstr_ADD(PX_ScriptInterpreter *analysis,px_vec
 		break;
 
 	case PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR:
-	case PX_SCRIPT_AST_OPERAND_TYPE_SET_PTR_CONST:
+	case PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR_CONST:
 		{
 			switch(operand2.operandType)
 			{
@@ -4032,7 +4032,7 @@ static px_bool PX_ScriptParseLastInstr_ADD(PX_ScriptInterpreter *analysis,px_vec
 					
 					PX_StringCat(out,"ADD R1,R2\nPUSH R1\n");
 					pTop=PX_VECTORLAST(PX_SCRIPT_AST_OPERAND,tk);
-					pTop->operandType=PX_SCRIPT_AST_OPERAND_TYPE_SET_PTR_CONST;
+					pTop->operandType=PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR_CONST;
 					pTop->region=PX_SCRIPT_VARIABLE_REGION_POP;
 					pTop->_oft=0;
 				}
@@ -4338,7 +4338,7 @@ static px_bool PX_ScriptParseLastInstr_SUB(PX_ScriptInterpreter *analysis,px_vec
 		break;
 
 	case PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR:
-	case PX_SCRIPT_AST_OPERAND_TYPE_SET_PTR_CONST:
+	case PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR_CONST:
 		{
 			switch(operand2.operandType)
 			{
@@ -4351,7 +4351,7 @@ static px_bool PX_ScriptParseLastInstr_SUB(PX_ScriptInterpreter *analysis,px_vec
 					if(!PX_ScriptParseAST_MapTokenToR1(analysis,operand1,out)) return PX_FALSE;
 					PX_StringCat(out,"SUB R1,R2\nPUSH R1\n");
 					pTop=PX_VECTORLAST(PX_SCRIPT_AST_OPERAND,tk);
-					pTop->operandType=PX_SCRIPT_AST_OPERAND_TYPE_SET_PTR_CONST;
+					pTop->operandType=PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR_CONST;
 					pTop->region=PX_SCRIPT_VARIABLE_REGION_POP;
 					pTop->_oft=0;
 				}
@@ -4462,7 +4462,7 @@ static px_bool PX_ScriptParseLastInstr_NEGATIVE(PX_ScriptInterpreter *analysis,p
 	}
 	pTop->region=PX_SCRIPT_VARIABLE_REGION_POP;
 	pTop->_oft=0;
-	pTop->pSet=PX_NULL;
+	pTop->pStruct=PX_NULL;
 	pTop->_int=0;
 	if(!PX_ScriptParseAST_MapTokenToR1(analysis,operand1,out)) return PX_FALSE;
 	PX_StringCat(out,"NEG R1\n");
@@ -4868,7 +4868,7 @@ static px_bool PX_ScriptParseLastInstr_NOT(PX_ScriptInterpreter *analysis,px_vec
 	}
 	pTop->region=PX_SCRIPT_VARIABLE_REGION_POP;
 	pTop->_oft=0;
-	pTop->pSet=PX_NULL;
+	pTop->pStruct=PX_NULL;
 	pTop->_int=0;
 	if(!PX_ScriptParseAST_MapTokenToR1(analysis,operand1,out)) return PX_FALSE;
 	PX_StringCat(out,"NOT R1\n");
@@ -4966,7 +4966,7 @@ static px_bool PX_ScriptParseLastInstr_INV(PX_ScriptInterpreter *analysis,px_vec
 	}
 	pTop->region=PX_SCRIPT_VARIABLE_REGION_POP;
 	pTop->_oft=0;
-	pTop->pSet=PX_NULL;
+	pTop->pStruct=PX_NULL;
 	pTop->_int=0;
 	if(!PX_ScriptParseAST_MapTokenToR1(analysis,operand1,out)) return PX_FALSE;
 	PX_StringCat(out,"INV R1\n");
@@ -5173,7 +5173,7 @@ static px_bool PX_ScriptParseLastInstr_INT(PX_ScriptInterpreter *analysis,px_vec
 	PX_VectorPop(op);
 	pTop->region=PX_SCRIPT_VARIABLE_REGION_POP;
 	pTop->_oft=0;
-	pTop->pSet=PX_NULL;
+	pTop->pStruct=PX_NULL;
 	pTop->_int=0;
 	if(!PX_ScriptParseAST_MapTokenToR1(analysis,operand1,out)) return PX_FALSE;
 	pTop->operandType=PX_SCRIPT_AST_OPERAND_TYPE_INT_CONST;
@@ -5211,7 +5211,7 @@ static px_bool PX_ScriptParseLastInstr_FLOAT(PX_ScriptInterpreter *analysis,px_v
 	PX_VectorPop(op);
 	pTop->region=PX_SCRIPT_VARIABLE_REGION_POP;
 	pTop->_oft=0;
-	pTop->pSet=PX_NULL;
+	pTop->pStruct=PX_NULL;
 	pTop->_int=0;
 	if(!PX_ScriptParseAST_MapTokenToR1(analysis,operand1,out)) return PX_FALSE;
 	pTop->operandType=PX_SCRIPT_AST_OPERAND_TYPE_FLOAT_CONST;
@@ -5249,7 +5249,7 @@ static px_bool PX_ScriptParseLastInstr_STRING(PX_ScriptInterpreter *analysis,px_
 	PX_VectorPop(op);
 	pTop->region=PX_SCRIPT_VARIABLE_REGION_POP;
 	pTop->_oft=0;
-	pTop->pSet=PX_NULL;
+	pTop->pStruct=PX_NULL;
 	pTop->_int=0;
 	if(!PX_ScriptParseAST_MapTokenToR1(analysis,operand1,out)) return PX_FALSE;
 	pTop->operandType=PX_SCRIPT_AST_OPERAND_TYPE_STRING_CONST;
@@ -5292,7 +5292,7 @@ static px_bool PX_ScriptParseLastInstr_MEMORY(PX_ScriptInterpreter *analysis,px_
 	PX_VectorPop(op);
 	pTop->region=PX_SCRIPT_VARIABLE_REGION_POP;
 	pTop->_oft=0;
-	pTop->pSet=PX_NULL;
+	pTop->pStruct=PX_NULL;
 	pTop->_int=0;
 	if(!PX_ScriptParseAST_MapTokenToR1(analysis,operand1,out)) return PX_FALSE;
 	pTop->operandType=PX_SCRIPT_AST_OPERAND_TYPE_MEMORY_CONST;
@@ -5322,7 +5322,7 @@ static px_bool PX_ScriptParseLastInstr_STRLEN(PX_ScriptInterpreter *analysis,px_
 	PX_VectorPop(op);
 	pTop->region=PX_SCRIPT_VARIABLE_REGION_POP;
 	pTop->_oft=0;
-	pTop->pSet=PX_NULL;
+	pTop->pStruct=PX_NULL;
 	pTop->_int=0;
 	if(!PX_ScriptParseAST_MapTokenToR2(analysis,operand1,out)) return PX_FALSE;
 	pTop->operandType=PX_SCRIPT_AST_OPERAND_TYPE_INT_CONST;
@@ -5352,7 +5352,7 @@ static px_bool PX_ScriptParseLastInstr_MEMLEN(PX_ScriptInterpreter *analysis,px_
 	PX_VectorPop(op);
 	pTop->region=PX_SCRIPT_VARIABLE_REGION_POP;
 	pTop->_oft=0;
-	pTop->pSet=PX_NULL;
+	pTop->pStruct=PX_NULL;
 	pTop->_int=0;
 	if(!PX_ScriptParseAST_MapTokenToR2(analysis,operand1,out)) return PX_FALSE;
 	pTop->operandType=PX_SCRIPT_AST_OPERAND_TYPE_INT_CONST;
@@ -6146,9 +6146,9 @@ _EXPR_OUT:
 					}
 				}
 				
-				if (retOperand.operandType==PX_SCRIPT_AST_OPERAND_TYPE_STRUCT||retOperand.operandType==PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR||retOperand.operandType==PX_SCRIPT_AST_OPERAND_TYPE_SET_PTR_CONST)
+				if (retOperand.operandType==PX_SCRIPT_AST_OPERAND_TYPE_STRUCT||retOperand.operandType==PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR||retOperand.operandType==PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR_CONST)
 				{
-					pcurrentSet=retOperand.pSet;
+					pcurrentSet=retOperand.pStruct;
 				}
 
 				switch (retOperand.operandType)
@@ -6220,8 +6220,8 @@ _EXPR_OUT:
 					}
 					break;
 				case PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR:
-				case PX_SCRIPT_AST_OPERAND_TYPE_SET_PTR_CONST:
-					if (pfunc->parameters[i].type!=PX_SCRIPT_PARSER_VAR_TYPE_STRUCT_PTR||PX_ScriptParseGetStructByIndex(analysis,pfunc->parameters[i].setIndex)!=retOperand.pSet)
+				case PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR_CONST:
+					if (pfunc->parameters[i].type!=PX_SCRIPT_PARSER_VAR_TYPE_STRUCT_PTR||PX_ScriptParseGetStructByIndex(analysis,pfunc->parameters[i].setIndex)!=retOperand.pStruct)
 					{
 						PX_ScriptTranslatorError(analysis,"Parameter not matched.");
 						goto _ERROR;
@@ -6319,8 +6319,8 @@ _EXPR_OUT:
 				retOperand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_MEMORY_PTR_CONST;
 				break;
 			case PX_SCRIPT_PARSER_VAR_TYPE_STRUCT_PTR:
-				retOperand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_SET_PTR_CONST;
-				retOperand.pSet=PX_ScriptParseGetStructByIndex(analysis,pfunc->retSetIndex);
+				retOperand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR_CONST;
+				retOperand.pStruct=PX_ScriptParseGetStructByIndex(analysis,pfunc->retSetIndex);
 				break;
 			case PX_SCRIPT_PARSER_VAR_TYPE_VOID:
 				retOperand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_INT_CONST;
@@ -6350,9 +6350,9 @@ _EXPR_OUT:
 				goto _ERROR;
 
 				PX_VectorPushback(tk,&retOperand);
-				if (retOperand.operandType==PX_SCRIPT_AST_OPERAND_TYPE_STRUCT||retOperand.operandType==PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR||retOperand.operandType==PX_SCRIPT_AST_OPERAND_TYPE_SET_PTR_CONST)
+				if (retOperand.operandType==PX_SCRIPT_AST_OPERAND_TYPE_STRUCT||retOperand.operandType==PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR||retOperand.operandType==PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR_CONST)
 				{
-					pcurrentSet=retOperand.pSet;
+					pcurrentSet=retOperand.pStruct;
 				}
 			}
 			break;
@@ -6386,9 +6386,9 @@ _EXPR_OUT:
 
 			PX_VectorPushback(tk,&retOperand);
 
-			if (retOperand.operandType==PX_SCRIPT_AST_OPERAND_TYPE_STRUCT||retOperand.operandType==PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR||retOperand.operandType==PX_SCRIPT_AST_OPERAND_TYPE_SET_PTR_CONST)
+			if (retOperand.operandType==PX_SCRIPT_AST_OPERAND_TYPE_STRUCT||retOperand.operandType==PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR||retOperand.operandType==PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR_CONST)
 			{
-				pcurrentSet=retOperand.pSet;
+				pcurrentSet=retOperand.pStruct;
 			}
 		}
 		break;
@@ -7767,12 +7767,11 @@ static px_bool PX_ScriptParseVar(PX_ScriptInterpreter *analysis)
 			}
 
 			pvar=PX_VECTORAT(PX_SCRIPT_VARIABLES,&analysis->v_variablesStackTable,analysis->v_variablesStackTable.size-1);
-			variable.BeginIndex=pvar->BeginIndex+variable.size;
+			variable.BeginIndex=pvar->BeginIndex+ variable.size;
 
-			if (variable.BeginIndex+variable.size-1>analysis->currentAllocStackSize)
-			{
-				analysis->currentAllocStackSize=variable.BeginIndex+variable.size-1;
-			}
+			if (analysis->currentAllocStackSize < variable.BeginIndex)
+				analysis->currentAllocStackSize=variable.BeginIndex;
+			
 
 			PX_VectorPushback(&analysis->v_variablesStackTable,&variable);
 
@@ -8059,12 +8058,11 @@ static px_bool PX_ScriptParseStruct(PX_ScriptInterpreter *analysis)
 			}
 			
 			pvar=PX_VECTORLAST(PX_SCRIPT_VARIABLES,&analysis->v_variablesStackTable);
-			variable.BeginIndex=pvar->BeginIndex+variable.size;
+			variable.BeginIndex=pvar->BeginIndex+ variable.size;
 			
-			if (variable.BeginIndex+variable.size-1>analysis->currentAllocStackSize)
-			{
-				analysis->currentAllocStackSize=variable.BeginIndex+variable.size-1;
-			}
+			if(analysis->currentAllocStackSize < variable.BeginIndex)
+				analysis->currentAllocStackSize=variable.BeginIndex;
+		
 
 			PX_VectorPushback(&analysis->v_variablesStackTable,&variable);
 		}
@@ -8169,6 +8167,14 @@ px_bool PX_ScriptParseStructDefine(PX_ScriptInterpreter *analysis)
 
 		if (type==PX_LEXER_LEXEME_TYPE_DELIMITER&&analysis->lexer.Symbol=='}')
 		{
+			if ((PX_ScriptTranslatorNextTokenSN(&analysis->lexer)) != PX_LEXER_LEXEME_TYPE_DELIMITER)
+			{
+				goto _ERROR;
+			}
+			if (analysis->lexer.Symbol != ';')
+			{
+				goto _ERROR;
+			}
 			break;
 		}
 
@@ -10512,12 +10518,12 @@ _CONTINUEOUT:
 				}
 				break;
 			case PX_SCRIPT_PARSER_VAR_TYPE_STRUCT_PTR:
-				if (retOperand.operandType!=PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR&&retOperand.operandType!=PX_SCRIPT_AST_OPERAND_TYPE_SET_PTR_CONST)
+				if (retOperand.operandType!=PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR&&retOperand.operandType!=PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR_CONST)
 				{
 					PX_ScriptTranslatorError(&analysis,"Return-type not matched.");
 						goto _ERROR;
 				}
-				if (retOperand.pSet!=PX_ScriptParseGetStructByIndex(&analysis,analysis.currentFunc.retSetIndex))
+				if (retOperand.pStruct!=PX_ScriptParseGetStructByIndex(&analysis,analysis.currentFunc.retSetIndex))
 				{
 					PX_ScriptTranslatorError(&analysis,"Return-type not matched.");
 						goto _ERROR;

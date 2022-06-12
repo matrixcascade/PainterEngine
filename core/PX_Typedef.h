@@ -171,8 +171,17 @@ typedef struct __px_complex
 	px_double im;// imaginary
 }px_complex;
 
+typedef struct __px_timestamp
+{
+	px_int16 year;
+	px_int16 month;
+	px_int16 day;
+	px_int16 hour;
+	px_int16 minute;
+	px_int16 second;
+}px_timestamp;
 
-
+px_timestamp PX_TimeFormString(const px_char* t);
 //////////////////////////////////////////////////////////////////////////
 //endian
 
@@ -273,7 +282,7 @@ px_int PX_itoa(px_int num,px_char *str,px_int MaxStrSize,px_int radix);
 px_dword PX_SwapEndian(px_dword val);
 px_char *PX_strchr(const px_char *s,int ch);
 px_char* PX_strstr(const px_char* dest, const px_char* src);
-
+px_void PX_strcut(px_char* dest, px_int left, px_int right);
 ///////////////////////////////////////////////////////////////////////////
 //rectangle circle
 px_bool PX_isPointInCircle(px_point p,px_point circle,px_float radius);
@@ -435,8 +444,8 @@ px_color PX_ColorHSLToRGB(px_color_hsl color_hsl);
 //point
 px_point PX_POINT(px_float x,px_float y,px_float z);
 px_point2D PX_POINT2D(px_float x,px_float y);
-px_point4D PX_POINT4D(px_float x,px_float y,px_float z);
-px_point PX_PointRotate(px_point p,px_float angle);
+px_point4D PX_POINT4D(px_float x, px_float y, px_float z);
+px_point PX_PointRotate(px_point p, px_float angle);
 px_point2D PX_Point2DRotate(px_point2D p,px_float angle);
 px_float PX_PointDistance(px_point p1,px_point p2);
 

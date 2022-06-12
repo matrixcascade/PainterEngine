@@ -148,7 +148,7 @@ px_void PX_Object_AsmDebuggerRender(px_surface* prendersurface, PX_Object* pObje
 
 		pDesc->autotext_data->x = pDesc->list_source->Width;
 		pDesc->autotext_data->y = pDesc->label_name->y+ pDesc->label_name->Height;
-		pDesc->label_name->Width = pObject->Width / 3;
+		pDesc->autotext_data->Width = pObject->Width / 3;
 
 
 
