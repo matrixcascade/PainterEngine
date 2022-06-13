@@ -7,7 +7,6 @@ extern "C"
 {
 	#include "../../core/PX_Sound.h"
 	int PX_AudioInitialize(PX_SoundPlay *soundPlay);
-	int PX_AudioInitializeEx();
 	int PX_AudioInitializeHwnd(HWND hwnd);
 	void PX_AudioSetVolume( unsigned int Vol );
 	void PX_AudioPlay( unsigned long Vol );
