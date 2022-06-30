@@ -20,50 +20,61 @@ _ERROR:
 	return PX_FALSE;
 }
 
-px_void PX_LTISetKernel(PX_LTI* pLTI, px_float a[], px_float b[])
+px_void PX_LTISetKernel(PX_LTI* pLTI, px_double a[], px_double b[])
 {
-	
-	PX_memcpy(pLTI->a, a, sizeof(pLTI->a_count));
-	PX_memcpy(pLTI->b, b, sizeof(pLTI->b_count));
+	if (a)
+		PX_memcpy(pLTI->a, a, sizeof(px_double) * pLTI->a_count);
+	else
+		PX_memset(pLTI->a, 0, sizeof(px_double) * pLTI->a_count);
+	if(b)
+		PX_memcpy(pLTI->b, b, sizeof(px_double)* pLTI->b_count);
+	else
+		PX_memset(pLTI->b, 0, sizeof(px_double) * pLTI->b_count);
+
 	pLTI->dirty_grdel = PX_TRUE;
 }
 
-px_void PX_LTIPush(PX_LTI* pLTI, px_float v)
+px_void PX_LTIPush(PX_LTI* pLTI, px_double v)
 {
 	PX_CircularBufferPush(&pLTI->cbuf, v);
 }
 
-px_float PX_LTIFilter(PX_LTI* pLTI, px_float v)
+px_void PX_LTIReset(PX_LTI* pLTI)
+{
+	PX_CircularBufferZeroClear(&pLTI->cbufout);
+}
+
+px_double PX_LTIGo(PX_LTI* pLTI, px_double v)
 {
 	PX_CircularBufferPush(&pLTI->cbuf, v);
 	return PX_LTIConvol(pLTI);
 }
 
-px_float PX_LTIConvol(PX_LTI* pLTI)
+px_double PX_LTIConvol(PX_LTI* pLTI)
 {
-	px_float sum = 0;
+	px_double sum = 0;
 	px_int i;
-	px_int pAl2 = pLTI->cbuf.pointer;
-	px_int count = pLTI->b_count - pAl2;
+	px_int pcursor = pLTI->cbuf.pointer;
+	px_int count = pLTI->b_count - pcursor;
 	
 	for (i = 0; i < count; i++)
-		sum += pLTI->b[i] * PX_CircularBufferGet(&pLTI->cbuf, pAl2 + i);
-	for (i = 0; i < pAl2; i++)
+		sum += pLTI->b[i] * PX_CircularBufferGet(&pLTI->cbuf, pcursor + i);
+	for (i = 0; i < pcursor; i++)
 		sum += pLTI->b[count + i] * PX_CircularBufferGet(&pLTI->cbuf,  i);
 
-	pAl2 = pLTI->cbufout.pointer;
+	pcursor = pLTI->cbufout.pointer;
 
-	count = pLTI->a_count - pAl2;
+	count = pLTI->a_count - pcursor;
 	for (i = 0; i < count; i++)
-		sum -= pLTI->a[i] * PX_CircularBufferGet(&pLTI->cbufout,pAl2 + i);
-	for (i = 0; i < pAl2; i++)
+		sum -= pLTI->a[i] * PX_CircularBufferGet(&pLTI->cbufout,pcursor + i);
+	for (i = 0; i < pcursor; i++)
 		sum -= pLTI->a[count + i] * PX_CircularBufferGet(&pLTI->cbufout,i);
 
 	PX_CircularBufferPush(&pLTI->cbufout,sum);
 	return sum;
 }
 
-px_float PX_LTIGroupDelay(PX_LTI* pLTI, px_float f, px_float fs)
+px_double PX_LTIGroupDelay(PX_LTI* pLTI, px_double f, px_double fs)
 {
 	if (pLTI->dirty_grdel) {
 		pLTI->grdel =PX_GroupDelay(f, pLTI->b, pLTI->b_count, pLTI->a, pLTI->a_count, fs);
@@ -72,11 +83,11 @@ px_float PX_LTIGroupDelay(PX_LTI* pLTI, px_float f, px_float fs)
 	return pLTI->grdel;
 }
 
-px_float PX_LTIPhaseDelay(PX_LTI* pLTI, px_float f, px_float fs)
+px_double PX_LTIPhaseDelay(PX_LTI* pLTI, px_double f, px_double fs)
 {
-	px_float grpdel = PX_LTIGroupDelay(pLTI,f, fs);
-	px_float omega = (px_float)(2.0f * PX_PI * f / fs);
-	px_float phdel = grpdel - omega * PX_PhaseDelayDerive(omega, pLTI->b, pLTI->b_count, pLTI->a, pLTI->a_count, 0.0005f);
+	px_double grpdel = PX_LTIGroupDelay(pLTI,f, fs);
+	px_double omega = (px_double)(2.0f * PX_PI * f / fs);
+	px_double phdel = grpdel - omega * PX_PhaseDelayDerive(omega, pLTI->b, pLTI->b_count, pLTI->a, pLTI->a_count, 0.0005f);
 
 	return phdel;
 }
@@ -113,7 +124,7 @@ px_bool PX_ThirianInitialize(PX_Thirian* pThi, px_memorypool* mp, px_int N)
 	return PX_TRUE;
 }
 
-px_void PX_ThirianSetCoeffs(PX_Thirian* pThi, px_float D)
+px_void PX_ThirianSetCoeffs(PX_Thirian* pThi, px_double D)
 {
 	px_int k,n,i;
 	if (D < pThi->N - 1)
@@ -128,8 +139,8 @@ px_void PX_ThirianSetCoeffs(PX_Thirian* pThi, px_float D)
 			ak *= ((px_double)D - ((px_double)pThi->N - n));
 		for (i = 0; i < k; i++)
 			ak /= ((px_double)D -((px_double)-k + i));
-		pThi->LTI.a[k - 1] = (px_float)ak;
-		pThi->LTI.b[pThi->N - k] = (px_float)ak;
+		pThi->LTI.a[k - 1] = (px_double)ak;
+		pThi->LTI.b[pThi->N - k] = (px_double)ak;
 	}
 	pThi->LTI.dirty_grdel = PX_TRUE;
 }
@@ -150,16 +161,16 @@ px_bool PX_FilterC1C3Initialize(PX_FilterC1C3* pFilter, px_memorypool* mp)
 	return PX_TRUE;
 }
 
-px_void PX_FilterC1C3SetCoeffs(PX_FilterC1C3* pFilter, px_float freq, px_float c1, px_float c3)
+px_void PX_FilterC1C3SetCoeffs(PX_FilterC1C3* pFilter, px_double freq, px_double c1, px_double c3)
 {
 	if (pFilter->freq == freq && pFilter->c1 == c1 && pFilter->c3 == c3)
 		return;
 
 	do 
 	{
-		px_float g = (px_float)(1.0 - c1 / freq);
-		px_float b = (px_float)(4.0 * c3 + freq);
-		px_float a1 = (px_float)((-b + PX_sqrtd((px_double)b * b - 16.0 * c3 * c3)) / (4.0 * c3));
+		px_double g = (px_double)(1.0 - c1 / freq);
+		px_double b = (px_double)(4.0 * c3 + freq);
+		px_double a1 = (px_double)((-b + PX_sqrtd((px_double)b * b - 16.0 * c3 * c3)) / (4.0 * c3));
 		pFilter->LTI.b[0] = g * (1 + a1);
 		pFilter->LTI.a[0] = a1;
 		pFilter->freq = freq;
@@ -185,12 +196,12 @@ px_bool PX_BiquadInitialize(PX_Biquad* pBiquad, px_memorypool* mp)
 	return PX_TRUE;
 }
 
-px_void PX_BiquadSetCoeffs(PX_Biquad* pBiquad, px_float f0, px_float fs, px_float Q, PX_BIQUAD_TYPE type)
+px_void PX_BiquadSetCoeffs(PX_Biquad* pBiquad, px_double f0, px_double fs, px_double Q, PX_BIQUAD_TYPE type)
 {
-	px_float a = 1 / (2 * (px_float)PX_tand(PX_PI * f0 / fs));
-	px_float a2 = a * a;
-	px_float aoQ = a / Q;
-	px_float d = (4 * a2 + 2 * aoQ + 1);
+	px_double a = 1 / (2 * (px_double)PX_tand(PX_PI * f0 / fs));
+	px_double a2 = a * a;
+	px_double aoQ = a / Q;
+	px_double d = (4 * a2 + 2 * aoQ + 1);
 
 	pBiquad->LTI.a[0] = -(8 * a2 - 2) / d;
 	pBiquad->LTI.a[1] = (4 * a2 - 2 * aoQ + 1) / d;
@@ -233,12 +244,12 @@ px_bool PX_DelayInitialize(PX_Delay* pdelay, px_memorypool* mp, px_int inv_z, PX
 	pdelay->cursor = 0;
 	if (type==PX_DELAY_DATA_TYPE_FLOAT)
 	{
-		pdelay->buffer = MP_Malloc(mp, sizeof(px_float) * inv_z);
+		pdelay->buffer = MP_Malloc(mp, sizeof(px_double) * inv_z);
 		if (!pdelay->buffer)
 		{
 			return PX_FALSE;
 		}
-		PX_memset(pdelay->buffer, 0, sizeof(px_float) * inv_z);
+		PX_memset(pdelay->buffer, 0, sizeof(px_double) * inv_z);
 	}
 	else
 	{
@@ -253,13 +264,13 @@ px_bool PX_DelayInitialize(PX_Delay* pdelay, px_memorypool* mp, px_int inv_z, PX
 	return PX_TRUE;
 }
 
-px_void PX_DelayGo_float(PX_Delay* pdelay, px_float in[], px_float out[], px_int size)
+px_void PX_DelayGo_float(PX_Delay* pdelay, px_double in[], px_double out[], px_int size)
 {
 	px_int i;
 	for (i=0;i<size;i++)
 	{
-		out[i] = ((px_float *)pdelay->buffer)[pdelay->cursor];
-		((px_float*)pdelay->buffer)[pdelay->cursor] = in[pdelay->cursor];
+		out[i] = ((px_double *)pdelay->buffer)[pdelay->cursor];
+		((px_double*)pdelay->buffer)[pdelay->cursor] = in[pdelay->cursor];
 		pdelay->cursor++;
 		pdelay->cursor %= pdelay->inv_z;
 	}

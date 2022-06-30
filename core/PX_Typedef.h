@@ -633,7 +633,7 @@ px_void PX_FIRFilterBuild(PX_FIRFILTER_TYPE bandtype,px_double fln,px_double fhn
 
 ///////////////////////////////////////////////////////////////////////////////
 //LTI
-px_float PX_GroupDelay(px_float f, px_float* B, px_int sizeB, px_float* A, px_int sizeA, px_float FS);
-px_float PX_PhaseDelayDerive(px_float omega, px_float* B, px_int sizeB, px_float* A, px_int sizeA, px_float delta);
-px_float PX_PhaseDelay(px_float f, px_float* B, px_int sizeB, px_float* A, px_int sizeA, px_float FS);
+px_double PX_GroupDelay(px_double f, px_double* B, px_int sizeB, px_double* A, px_int sizeA, px_double FS);
+px_double PX_PhaseDelayDerive(px_double omega, px_double* B, px_int sizeB, px_double* A, px_int sizeA, px_double delta);
+px_double PX_PhaseDelay(px_double f, px_double* B, px_int sizeB, px_double* A, px_int sizeA, px_double FS);
 #endif

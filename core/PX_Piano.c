@@ -2,7 +2,7 @@
 
 //////////////////////////////////////////////////////////////////////////
 /// Algorithm implementation by Clayton Otey, Dec 2007 
-/// Code by DBinary,Feb 2022
+/// reCode by DBinary,Feb 2022
 /// ///////////////////////////////////////////////////////////////////////
 
 px_void PX_Piano_DelayInitialize(PX_Piano_Delay* c,px_memorypool *mp, px_int di)
@@ -89,7 +89,7 @@ float PX_Piano_DWGReverbGo(PX_Piano_DWGReverb* preverb, float in)
 	for (j = 0; j < 8; j++) {
 
 		PX_CircularBufferPush(&preverb->delay[j], i[j]);
-		preverb->o[j]=PX_LTIFilter(&preverb->decay[j].LTI, PX_CircularBufferDelay(&preverb->delay[j], lengths[j]));
+		preverb->o[j]=(px_float)PX_LTIGo(&preverb->decay[j].LTI, PX_CircularBufferDelay(&preverb->delay[j], lengths[j]));
 
 		preverb->o[j]+= 1e-18f;
 		preverb->o[j]-= 1e-18f;
@@ -389,7 +389,7 @@ px_void PX_Piano_dwgUpdate(PX_Piano_dwg* pdwg) {
 	if (pdwg->commute) {
 		px_int m;
 		for (m = 0; m < pdwg->parent->M; m++) {
-			a = PX_LTIFilter(&pdwg->parent->dispersion[m].LTI, a);;
+			a = (px_float)PX_LTIGo(&pdwg->parent->dispersion[m].LTI, a);;
 		}
 	}
 	pdwg->l->a[1] = a;
@@ -397,9 +397,9 @@ px_void PX_Piano_dwgUpdate(PX_Piano_dwg* pdwg) {
 	a = (pdwg->loadr - pdwg->r->a[1]);
 	if (pdwg->commute) {
 		
-		a = PX_LTIFilter(&pdwg->parent->lowpass.LTI, a);
+		a = (px_float)PX_LTIGo(&pdwg->parent->lowpass.LTI, a);
 		PX_CircularBufferPush(&pdwg->parent->fracdelay3.circularbuffer, a);
-		a=PX_LagrangeActivingDelay(&pdwg->parent->fracdelay3);
+		a=(px_float)PX_LagrangeActivingDelay(&pdwg->parent->fracdelay3);
 	}
 	pdwg->r->a[0] = a;
 }
@@ -478,12 +478,12 @@ px_bool PX_Piano_dwgsInitialize(PX_Piano_dwgs *pdwgs,px_memorypool *mp,px_float 
 	}
 	//px_float dispersiondelay = M*groupdelay(&(dispersion[0]),f,Fs);
 	
-	dispersiondelay = pdwgs->M * PX_LTIGroupDelay(&pdwgs->dispersion[0].LTI, f, Fs);
+	dispersiondelay = (px_float)(pdwgs->M * PX_LTIGroupDelay(&pdwgs->dispersion[0].LTI, f, Fs));
 
 	//loss(f,Fs,c1,c3,&lowpass);
     PX_FilterC1C3SetCoeffs(&pdwgs->lowpass,f, c1, c3);
 	
-	lowpassdelay = PX_LTIGroupDelay(&pdwgs->lowpass.LTI,f, Fs);
+	lowpassdelay = (px_float)PX_LTIGroupDelay(&pdwgs->lowpass.LTI,f, Fs);
 	del2 = (px_int)(0.5 * (deltot - 2.0 * del1) - dispersiondelay);
 	del3 = 1;
 	if (del2 < 2)
@@ -757,10 +757,10 @@ px_void PX_PianoSoundBoardGo(PX_PianoSoundBoard* psb, px_float in[], px_float ou
 	px_int i;
 	px_float signal;
 	for (i = 0; i < count; i++) {
-		signal = PX_Piano_DWGReverbGo(&psb->soundboard, in[i]);
-		signal += PX_LTIFilter(&psb->shaping1.LTI, signal);
-		signal = PX_LTIFilter(&psb->shaping2.LTI, signal);
-		signal += PX_LTIFilter(&psb->shaping3.LTI, signal);
+		signal = (px_float)PX_Piano_DWGReverbGo(&psb->soundboard, in[i]);
+		signal += (px_float)PX_LTIGo(&psb->shaping1.LTI, signal);
+		signal = (px_float)PX_LTIGo(&psb->shaping2.LTI, signal);
+		signal += (px_float)PX_LTIGo(&psb->shaping3.LTI, signal);
 		out[i] = signal;
 	}
 }

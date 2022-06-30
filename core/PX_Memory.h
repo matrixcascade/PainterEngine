@@ -26,18 +26,19 @@ px_byte *PX_MemoryData(px_memory *memory);
 typedef struct  
 {
 	px_memorypool* mp;
-	px_float *buffer;
+	px_double *buffer;
 	px_int size;
 	px_int pointer;
 }PX_CircularBuffer;
 
 px_bool PX_CircularBufferInitialize(px_memorypool* mp, PX_CircularBuffer* pcbuffer, px_int size);
-px_void PX_CircularBufferPush(PX_CircularBuffer* pcbuffer, px_float v);
-px_void PX_CircularBufferAdd(PX_CircularBuffer* pcbuffer, px_int pos,px_float v);
-px_void PX_CircularBufferSet(PX_CircularBuffer* pcbuffer, px_int pos,px_float v);
-px_float PX_CircularBufferGet(PX_CircularBuffer* pcbuffer, px_int pos);
+px_void PX_CircularBufferPush(PX_CircularBuffer* pcbuffer, px_double v);
+px_void PX_CircularBufferAdd(PX_CircularBuffer* pcbuffer, px_int pos,px_double v);
+px_void PX_CircularBufferSet(PX_CircularBuffer* pcbuffer, px_int pos,px_double v);
+px_double PX_CircularBufferGet(PX_CircularBuffer* pcbuffer, px_int pos);
+px_void PX_CircularBufferZeroClear(PX_CircularBuffer* pcbuffer);
 px_void PX_CircularBufferFree(PX_CircularBuffer* pcbuffer);
-px_float PX_CircularBufferDelay(PX_CircularBuffer* pcbuffer, px_int pos);
+px_double PX_CircularBufferDelay(PX_CircularBuffer* pcbuffer, px_int pos);
 
 
 typedef px_memory px_fifobuffer;

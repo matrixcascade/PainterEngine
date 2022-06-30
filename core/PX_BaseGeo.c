@@ -1463,6 +1463,17 @@ px_void PX_GeoDrawPath(px_surface *psurface, px_point path[],px_int pathCount,px
 
 
 
+px_void PX_GeoDrawPenLine(px_surface* psurface, px_float x0, px_float y0, px_float x1, px_float y1, px_float lineWidth, px_color color)
+{
+	px_point p[2] = {0};
+	p[0].x = x0;
+	p[0].y = y0;
+
+	p[1].x = x1;
+	p[1].y = y1;
+	PX_GeoDrawPath(psurface, p, 2, lineWidth, color);
+}
+
 px_void PX_GeoDrawCircle(px_surface *psurface, px_int x,px_int y,px_int Radius, px_int lineWidth,px_color color )
 {
 	px_int rx,ry,dy,i,xleft,xright,Sy,cY,drx,dry;

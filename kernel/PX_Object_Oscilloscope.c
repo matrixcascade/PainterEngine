@@ -447,6 +447,17 @@ px_void PX_Object_OscilloscopeSetRightVerticalMin(PX_Object *pObject,px_double M
 	pcd->RightVerticalRangeMin=Min;
 }
 
+px_void PX_Object_OscilloscopeSetRenderMode(PX_Object* pObject, PX_OBJECT_OSCILLOSCOPE_RENDER_MODE mode)
+{
+	PX_Object_Oscilloscope* pcd = PX_Object_GetOscilloscope(pObject);
+	if (!pcd)
+	{
+		PX_ASSERT();
+		return;
+	}
+	pcd->rendermode = mode;
+}
+
 px_void PX_Object_OscilloscopeSetBorderColor(PX_Object *pObject,px_color clr)
 {
 	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
@@ -1080,7 +1091,15 @@ static px_void PX_Object_OscilloscopeDrawDataInfo(px_surface *psurface,PX_Object
 
 						if(PX_isLineCrossRect(PX_POINT((px_float)dx1,(px_float)dy1,0),PX_POINT((px_float)dx2,(px_float)dy2,0),PX_RECT((px_float)pcd->LeftSpacer,(px_float)pcd->TopSpacer,(px_float)PX_Object_OscilloscopeGetOscilloscopeWidth(pObject),(px_float)PX_Object_OscilloscopeGetOscilloscopeHeight(pObject)),&pt1,&pt2))
 						{
-							PX_GeoDrawLine(psurface,(px_int)(offsetx+pt1.x),(px_int)(offsety+pt1.y),(px_int)(offsetx+pt2.x),(px_int)(offsety+pt2.y),linewidth,Color);
+							if (pcd->rendermode==PX_OBJECT_OSCILLOSCOPE_RENDER_MODE_SMOOTH)
+							{
+								PX_GeoDrawPenLine(psurface, (offsetx + pt1.x), (offsety + pt1.y), (offsetx + pt2.x), (offsety + pt2.y), linewidth*1.0f, Color);
+							}
+							else
+							{
+								PX_GeoDrawLine(psurface, (px_int)(offsetx + pt1.x), (px_int)(offsety + pt1.y), (px_int)(offsetx + pt2.x), (px_int)(offsety + pt2.y), linewidth, Color);
+							}
+							
 						}
 
 					}
@@ -1094,8 +1113,13 @@ static px_void PX_Object_OscilloscopeDrawDataInfo(px_surface *psurface,PX_Object
 						dy1=PX_Object_OscilloscopeMapVerticalValueToPixel(pObject,Vertical[i-1]/n,Map);
 						dx2=PX_Object_OscilloscopeMapHorizontalValueToPixel(pObject,Horizontal[i]);
 						dy2=PX_Object_OscilloscopeMapVerticalValueToPixel(pObject,Vertical[i]/n,Map);
-						if(PX_isLineCrossRect(PX_POINT((px_float)dx1,(px_float)dy1,0),PX_POINT((px_float)dx2,(px_float)dy2,0),PX_RECT((px_float)pcd->TopSpacer,(px_float)pcd->LeftSpacer,(px_float)PX_Object_OscilloscopeGetOscilloscopeWidth(pObject),(px_float)PX_Object_OscilloscopeGetOscilloscopeHeight(pObject)),&pt1,&pt2))
-							PX_GeoDrawLine(psurface,(px_int)(offsetx+pt1.x),(px_int)(offsety+pt1.y),(px_int)(offsetx+pt2.x),(px_int)(offsety+pt2.y),linewidth,Color);
+						if (PX_isLineCrossRect(PX_POINT((px_float)dx1, (px_float)dy1, 0), PX_POINT((px_float)dx2, (px_float)dy2, 0), PX_RECT((px_float)pcd->TopSpacer, (px_float)pcd->LeftSpacer, (px_float)PX_Object_OscilloscopeGetOscilloscopeWidth(pObject), (px_float)PX_Object_OscilloscopeGetOscilloscopeHeight(pObject)), &pt1, &pt2))
+						{
+							if (pcd->rendermode == PX_OBJECT_OSCILLOSCOPE_RENDER_MODE_SMOOTH)
+								PX_GeoDrawPenLine(psurface, (offsetx + pt1.x), (offsety + pt1.y),(offsetx + pt2.x), (offsety + pt2.y), linewidth*1.0f, Color);
+							else
+								PX_GeoDrawLine(psurface, (px_int)(offsetx + pt1.x), (px_int)(offsety + pt1.y), (px_int)(offsetx + pt2.x), (px_int)(offsety + pt2.y), linewidth, Color);
+						}
 					}
 					break;
 				}
@@ -1798,6 +1822,7 @@ PX_Object *PX_Object_OscilloscopeCreate(px_memorypool *mp, PX_Object *Parent,px_
 
 	Oscilloscope.FontSize=PX_OBJECT_OSCILLOSCOPE_DEFAULT_FONT_SIZE;
 	Oscilloscope.DataLineWidth=PX_OBJECT_OSCILLOSCOPE_DEFAULT_LINE_WIDTH;
+	Oscilloscope.rendermode = PX_OBJECT_OSCILLOSCOPE_RENDER_MODE_FASTER;
 	Oscilloscope.FontColor= PX_OBJECT_UI_DEFAULT_FONTCOLOR;
 	Oscilloscope.borderColor= PX_OBJECT_UI_DEFAULT_BORDERCOLOR;
 	Oscilloscope.DashColor=PX_COLOR(PX_OBJECT_OSCILLOSCOPE_DEFAULT_DASH_RGB);

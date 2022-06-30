@@ -9,6 +9,7 @@ px_void PX_GeoDrawRect(px_surface *psurface, px_int left, px_int top, px_int rig
 px_void PX_GeoDrawSolidCircle(px_surface *psurface, px_int x,px_int y,px_int Radius,px_color color );
 px_void PX_GeoDrawPenCircle(px_surface *psurface, px_float x,px_float y,px_float Radius,px_color color );
 px_void PX_GeoDrawPath(px_surface *psurface, px_point path[],px_int pathCount,px_float linewidth,px_color color);
+px_void PX_GeoDrawPenLine(px_surface* psurface, px_float x0, px_float y0, px_float x1, px_float y1, px_float lineWidth, px_color color);
 px_void PX_GeoDrawCircle(px_surface *psurface,px_int x,px_int y,px_int Radius,px_int lineWidth,px_color color);
 px_void PX_GeoDrawRing(px_surface* psurface, px_int x, px_int y, px_float Radius, px_float lineWidth, px_color color, px_int start_angle, px_int end_angle);
 px_void PX_GeoDrawSector(px_surface* psurface, px_int x, px_int y, px_float Radius_outside, px_float Radius_inside, px_color color, px_int start_angle, px_int end_angle);

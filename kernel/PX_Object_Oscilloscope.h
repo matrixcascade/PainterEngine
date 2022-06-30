@@ -58,6 +58,11 @@ typedef enum
 	PX_OBJECT_OSCILLOSCOPE_TEXT_DISPLAYMODE_EXPONENTRAL,
 }PX_OBJECT_OSCILLOSCOPE_TEXT_DISPLAYMODE;
 
+typedef enum
+{
+	PX_OBJECT_OSCILLOSCOPE_RENDER_MODE_FASTER,
+	PX_OBJECT_OSCILLOSCOPE_RENDER_MODE_SMOOTH,
+}PX_OBJECT_OSCILLOSCOPE_RENDER_MODE;
 
 typedef struct  
 {
@@ -136,7 +141,7 @@ typedef struct
 
 	PX_OBJECT_OSCILLOSCOPE_LINEMODE LineMode;
 	PX_OBJECT_OSCILLOSCOPE_GUIDESSHOWMODE guidesShowMode;
-
+	PX_OBJECT_OSCILLOSCOPE_RENDER_MODE rendermode;
 	px_float DataLineWidth;
 	px_float DataPillarWidth;
 
@@ -188,7 +193,7 @@ px_void PX_Object_OscilloscopeSetLeftVerticalMin(PX_Object *pObject,double Min);
 px_void PX_Object_OscilloscopeSetLeftVerticalMax(PX_Object *pObject,double Max);
 px_void PX_Object_OscilloscopeSetRightVerticalMax(PX_Object *pObject,double Max);
 px_void PX_Object_OscilloscopeSetRightVerticalMin(PX_Object *pObject,double Min);
-
+px_void PX_Object_OscilloscopeSetRenderMode(PX_Object* pObject, PX_OBJECT_OSCILLOSCOPE_RENDER_MODE mode);
 px_void PX_Object_OscilloscopeSetBorderColor(PX_Object *pObject,px_color clr);
 PX_Object_OscilloscopeData *PX_Object_OscilloscopeGetOscilloscopeData(PX_Object *pObject,px_int index);
 px_int PX_Object_OscilloscopeGetOscilloscopeWidth(PX_Object *pObject);
