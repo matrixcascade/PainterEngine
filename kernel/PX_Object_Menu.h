@@ -35,7 +35,7 @@ typedef struct
 }PX_Object_Menu;
 
 
-PX_Object * PX_Object_MenuCreate(px_memorypool *mp,PX_Object *Parent,px_int x,int y,px_int width,PX_FontModule *fontmodule);
+PX_Object * PX_Object_MenuCreate(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y,px_int width,PX_FontModule *fontmodule);
 PX_Object_Menu_Item * PX_Object_MenuGetRootItem(PX_Object *pMenuObject);
 PX_Object_Menu_Item * PX_Object_MenuAddItem(PX_Object *pMenuObject,PX_Object_Menu_Item *parent,const px_char Text[],PX_MenuExecuteFunc _callback,px_void *ptr);
 

@@ -129,6 +129,7 @@ px_void PX_Object_ScrollAreaMoveToBottom(PX_Object *pObject)
 		if (bottom-top>=pObject->Height)
 		{
 			psa->root->y=-(bottom-top-pObject->Height);
+			PX_Object_SliderBarSetValue(psa->vscroll, -(px_int)psa->root->y);
 		}
 		else
 		{
@@ -152,8 +153,13 @@ px_void PX_Object_ScrollAreaGetRegion(PX_Object *pObject,px_float *left,px_float
 	px_float objx,objy,objWidth,objHeight;
 	px_float inheritX,inheritY;
 
-	if (pObject==PX_NULL||pObject->Visible==PX_FALSE)
+	if (pObject==PX_NULL)
 	{
+		return;
+	}
+	if (pObject->Visible == PX_FALSE)
+	{
+		PX_Object_ScrollAreaGetRegion(pObject->pNextBrother, left, top, right, bottom);
 		return;
 	}
 
@@ -185,7 +191,7 @@ px_void PX_Object_ScrollAreaGetRegion(PX_Object *pObject,px_float *left,px_float
 		*bottom=objy+objHeight;
 	}
 
-	PX_Object_ScrollAreaGetRegion(pObject->pNextBrother,left,top,right,bottom);
+	PX_Object_ScrollAreaGetRegion(pObject->pNextBrother, left, top, right, bottom);
 	PX_Object_ScrollAreaGetRegion(pObject->pChilds,left,top,right,bottom);
 }
 
@@ -213,7 +219,7 @@ px_void PX_Object_ScrollAreaUpdateRange( PX_Object *pObject)
 	{	
 		px_float rWidth=right-left;
 		pSA->hscroll->x=0;
-		pSA->hscroll->y=objHeight;
+		pSA->hscroll->y=objHeight-16;
 		pSA->hscroll->Width=pObject->Width;
 		pSA->hscroll->Height=16;
 		if (rWidth>pObject->Width)
@@ -238,7 +244,7 @@ px_void PX_Object_ScrollAreaUpdateRange( PX_Object *pObject)
 	{	
 		px_float rHeight=bottom-top;
 
-		pSA->vscroll->x=objWidth;
+		pSA->vscroll->x=objWidth-16;
 		pSA->vscroll->y=0;
 		pSA->vscroll->Width=16;
 		pSA->vscroll->Height=objHeight;

@@ -77,8 +77,9 @@ px_void PX_Object_ExplorerOnButtonOk(PX_Object *pObject,PX_Object_Event e,px_voi
 	PX_Object_Explorer *pExp=PX_Object_GetExplorer((PX_Object *)ptr);
 	PX_ObjectClearFocus((PX_Object *)ptr);
 	pExp->returnType=PX_OBJECT_EXPLORER_RETURN_CONFIRM;
+	((PX_Object*)ptr)->Visible = PX_FALSE;
 	PX_ObjectExecuteEvent((PX_Object *)ptr,e);
-	((PX_Object *)ptr)->Visible=PX_FALSE;
+	
 
 }
 px_void PX_Object_ExplorerOnButtonCancel(PX_Object *pObject,PX_Object_Event e,px_void *ptr)
@@ -86,8 +87,8 @@ px_void PX_Object_ExplorerOnButtonCancel(PX_Object *pObject,PX_Object_Event e,px
 	PX_Object_Explorer *pExp=PX_Object_GetExplorer((PX_Object *)ptr);
 	PX_ObjectClearFocus((PX_Object *)ptr);
 	pExp->returnType=PX_OBJECT_EXPLORER_RETURN_CANCEL;
-	PX_ObjectExecuteEvent((PX_Object*)ptr, PX_OBJECT_BUILD_EVENT(PX_OBJECT_EVENT_CANCEL));
 	((PX_Object *)ptr)->Visible=PX_FALSE;
+	PX_ObjectExecuteEvent((PX_Object*)ptr, PX_OBJECT_BUILD_EVENT(PX_OBJECT_EVENT_CANCEL));
 }
 
 px_void PX_Object_ExplorerOnCursorDown(PX_Object *pObject,PX_Object_Event e,px_void *ptr)
@@ -695,7 +696,7 @@ px_void PX_Object_ExplorerSetFilter(PX_Object *Object,const px_char *filter)
 	}
 
 }
-px_void PX_Object_ExplorerSetMaxSelectCount(PX_Object *Object,int selectCount)
+px_void PX_Object_ExplorerSetMaxSelectCount(PX_Object *Object,px_int selectCount)
 {
 	PX_Object_Explorer *pExp=PX_Object_GetExplorer(Object);
 	if (pExp)

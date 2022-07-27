@@ -143,10 +143,8 @@ px_bool PX_3D_ObjectDataLoad(PX_3D_ObjectData *ObjectData,const px_byte *data,px
 				ov.x=v[0];
 				ov.y=v[1];
 				ov.z=v[2];
-				if(!PX_VectorPushback(&ObjectData->vn,&ov)) goto _ERROR;
-
-
-
+				if(!PX_VectorPushback(&ObjectData->vn,&ov)) 
+					goto _ERROR;
 				continue;
 			}
 
@@ -182,7 +180,7 @@ px_bool PX_3D_ObjectDataLoad(PX_3D_ObjectData *ObjectData,const px_byte *data,px
 				continue;
 			}
 
-			//f <v/vt/vn> <v/vt/vn> <v/vt/vn>
+			//f <v/vt/vn> <v/vt/vn> <v/vt/vn> [<v/vt/vn>]
 			PX_LexerGetState(&Lexer);
 			if (PX_strequ(Lexer.CurLexeme.buffer,"f"))
 			{
@@ -194,11 +192,37 @@ px_bool PX_3D_ObjectDataLoad(PX_3D_ObjectData *ObjectData,const px_byte *data,px
 				Face.mtlNameIndex=ObjectData->mtlName.size-1;
 				Face.mtlFileNameIndex=ObjectData->mtlFile.size-1;
 
-				for (i=0;i<3;i++)
+				for (i=0;i<4;i++)
 				{
-					Face.v[i].v=-1;
-					Face.v[i].vt=-1;
-					Face.v[i].vn=-1;
+					Face.v[i].v = -1;
+					Face.v[i].vt = -1;
+					Face.v[i].vn = -1;
+
+					if (i==3)
+					{
+						PX_LEXER_LEXEME_TYPE type;
+						state = PX_LexerGetState(&Lexer);
+						while (PX_TRUE)
+						{
+							type = PX_LexerGetNextLexeme(&Lexer);
+							if (type==PX_LEXER_LEXEME_TYPE_SPACER)
+							{
+								continue;
+							}
+							else
+							{
+								break;
+							}
+						}
+						if (type==PX_LEXER_LEXEME_TYPE_NEWLINE)
+						{
+							break;
+						}
+						PX_LexerSetState(state);
+					}
+
+
+					
 					type=PX_3D_ObjectDataNextTokenSN(&Lexer);
 					if (!PX_LexerIsLememeIsNumeric(&Lexer))
 					{
@@ -263,7 +287,6 @@ px_bool PX_3D_ObjectDataLoad(PX_3D_ObjectData *ObjectData,const px_byte *data,px
 						PX_LexerSetState(state);
 						continue;
 					}
-
 				}
 				if(!PX_VectorPushback(&ObjectData->face,&Face)) goto _ERROR;
 				continue;
@@ -295,37 +318,159 @@ px_bool PX_3D_ObjectDataToRenderList(PX_3D_ObjectData *ObjectData,PX_3D_RenderLi
 	{
 		pObjFace=PX_VECTORAT(PX_3D_ObjectDataFace,&ObjectData->face,i);
 		PX_memset(&face,0,sizeof(PX_3D_Face));
-		for (j=0;j<3;j++)
+		if (pObjFace->v[3].v != -1)
 		{
-			if(pObjFace->v[j].v>0&&pObjFace->v[j].v<=ObjectData->v.size)
+			px_int k = 0;
+			for (j = 0; j < 3; j++)
 			{
-				PX_3D_ObjectData_v *pv=PX_VECTORAT(PX_3D_ObjectData_v,&ObjectData->v,pObjFace->v[j].v-1);
-				face.vertex[j].position=PX_POINT4D(pv->x,pv->y,pv->z);
+				if (pObjFace->v[j].v > 0 && pObjFace->v[j].v <= ObjectData->v.size)
+				{
+					PX_3D_ObjectData_v* pv = PX_VECTORAT(PX_3D_ObjectData_v, &ObjectData->v, pObjFace->v[j].v - 1);
+					face.vertex[j].position = PX_POINT4D(pv->x, pv->y, pv->z);
+				}
+				else
+					goto _ERROR;
+
+				if (pObjFace->v[j].vn > 0 && pObjFace->v[j].vn <= ObjectData->vn.size)
+				{
+					PX_3D_ObjectData_vn* pvn = PX_VECTORAT(PX_3D_ObjectData_vn, &ObjectData->vn, pObjFace->v[j].vn - 1);
+					face.vertex[j].normal = PX_POINT4D(pvn->x, pvn->y, pvn->z);
+				}
+				else
+				{
+					if (pObjFace->v[j].vn==-1)
+					{
+						face.vertex[j].normal = PX_POINT4D(0, 1, 0);
+					}
+					else
+					goto _ERROR;
+				}
+
+				if (pObjFace->v[j].vt > 0 && pObjFace->v[j].vt <= ObjectData->vt.size)
+				{
+					PX_3D_ObjectData_vt* pvt = PX_VECTORAT(PX_3D_ObjectData_vt, &ObjectData->vt, pObjFace->v[j].vt - 1);
+					face.vertex[j].u = pvt->u;
+					face.vertex[j].v = pvt->v;
+				}
+				else
+				{
+					if (pObjFace->v[j].vt == -1)
+					{
+						face.vertex[j].u = 0;
+						face.vertex[j].v = 0;
+					}
+					else
+						goto _ERROR;
+				}
+
+				face.vertex[j].clr = PX_COLOR(255, 0, 0, 0);
 			}
-			else
+			if (!PX_3D_RenderListPush(renderList, face))
 				goto _ERROR;
 
-			if(pObjFace->v[j].vn>0&&pObjFace->v[j].vn<=ObjectData->vn.size)
+			PX_memset(&face, 0, sizeof(PX_3D_Face));
+			for (j = 0; j < 3; j++)
 			{
-				PX_3D_ObjectData_vn *pvn=PX_VECTORAT(PX_3D_ObjectData_vn,&ObjectData->vn,pObjFace->v[j].vn-1);
-				face.vertex[j].normal=PX_POINT4D(pvn->x,pvn->y,pvn->z);
-			}
-			else
-				goto _ERROR;
+				k = j;
+				if (k>0)
+				{
+					k++;
+				}
+				if (pObjFace->v[k].v > 0 && pObjFace->v[k].v <= ObjectData->v.size)
+				{
+					PX_3D_ObjectData_v* pv = PX_VECTORAT(PX_3D_ObjectData_v, &ObjectData->v, pObjFace->v[k].v - 1);
+					face.vertex[j].position = PX_POINT4D(pv->x, pv->y, pv->z);
+				}
+				else
+					goto _ERROR;
 
-			if(pObjFace->v[j].vt>0&&pObjFace->v[j].vt<=ObjectData->vt.size)
-			{
-				PX_3D_ObjectData_vt *pvt=PX_VECTORAT(PX_3D_ObjectData_vt,&ObjectData->vt,pObjFace->v[j].vt-1);
-				face.vertex[j].u=pvt->u;
-				face.vertex[j].v=pvt->v;
-			}
-			else
-				goto _ERROR;
+				if (pObjFace->v[k].vn > 0 && pObjFace->v[k].vn <= ObjectData->vn.size)
+				{
+					PX_3D_ObjectData_vn* pvn = PX_VECTORAT(PX_3D_ObjectData_vn, &ObjectData->vn, pObjFace->v[k].vn - 1);
+					face.vertex[j].normal = PX_POINT4D(pvn->x, pvn->y, pvn->z);
+				}
+				else
+				{
+					if (pObjFace->v[k].vn == -1)
+					{
+						face.vertex[j].normal = PX_POINT4D(0, 1, 0);
+					}
+					else
+						goto _ERROR;
+				}
 
-			face.vertex[j].clr=PX_COLOR(255,0,0,0);
+				if (pObjFace->v[k].vt > 0 && pObjFace->v[k].vt <= ObjectData->vt.size)
+				{
+					PX_3D_ObjectData_vt* pvt = PX_VECTORAT(PX_3D_ObjectData_vt, &ObjectData->vt, pObjFace->v[k].vt - 1);
+					face.vertex[j].u = pvt->u;
+					face.vertex[j].v = pvt->v;
+				}
+				else
+				{
+					if (pObjFace->v[k].vt == -1)
+					{
+						face.vertex[j].u = 0;
+						face.vertex[j].v = 0;
+					}
+					else
+						goto _ERROR;
+				}
+
+				face.vertex[j].clr = PX_COLOR(255, 0, 0, 0);
+			}
+			if (!PX_3D_RenderListPush(renderList, face))
+				goto _ERROR;
 		}
-		if(!PX_3D_RenderListPush(renderList,face))
-			goto _ERROR;
+		else
+		{
+			for (j = 0; j < 3; j++)
+			{
+				if (pObjFace->v[j].v > 0 && pObjFace->v[j].v <= ObjectData->v.size)
+				{
+					PX_3D_ObjectData_v* pv = PX_VECTORAT(PX_3D_ObjectData_v, &ObjectData->v, pObjFace->v[j].v - 1);
+					face.vertex[j].position = PX_POINT4D(pv->x, pv->y, pv->z);
+				}
+				else
+					goto _ERROR;
+
+				if (pObjFace->v[j].vn > 0 && pObjFace->v[j].vn <= ObjectData->vn.size)
+				{
+					PX_3D_ObjectData_vn* pvn = PX_VECTORAT(PX_3D_ObjectData_vn, &ObjectData->vn, pObjFace->v[j].vn - 1);
+					face.vertex[j].normal = PX_POINT4D(pvn->x, pvn->y, pvn->z);
+				}
+				else
+				{
+					if (pObjFace->v[j].vn == -1)
+					{
+						face.vertex[j].normal = PX_POINT4D(0, 1, 0);
+					}
+					else
+						goto _ERROR;
+				}
+
+				if (pObjFace->v[j].vt > 0 && pObjFace->v[j].vt <= ObjectData->vt.size)
+				{
+					PX_3D_ObjectData_vt* pvt = PX_VECTORAT(PX_3D_ObjectData_vt, &ObjectData->vt, pObjFace->v[j].vt - 1);
+					face.vertex[j].u = pvt->u;
+					face.vertex[j].v = pvt->v;
+				}
+				else
+				{
+					if (pObjFace->v[j].vt == -1)
+					{
+						face.vertex[j].u = 0;
+						face.vertex[j].v = 0;
+					}
+					else
+						goto _ERROR;
+				}
+
+				face.vertex[j].clr = PX_COLOR(255, 0, 0, 0);
+			}
+			if (!PX_3D_RenderListPush(renderList, face))
+				goto _ERROR;
+		}
+		
 	}
 	return PX_TRUE;
 _ERROR:

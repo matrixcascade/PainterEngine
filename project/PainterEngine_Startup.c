@@ -9,15 +9,20 @@ px_bool PX_ApplicationInitializeDefault(PX_Runtime *runtime, px_int screen_width
 	px_int surface_width=0,surface_height=0;
 	px_int window_width=0,window_height=0;
 	px_double wdh;
-	wdh=screen_width*1.0/screen_height;
-	surface_height=(px_int)(PX_sqrtd(PX_APPLICATION_SURFACE_SIZE*PX_APPLICATION_SURFACE_SIZE/wdh));
-	surface_width=(px_int)(surface_height*wdh);
-
-
-	window_width=screen_width/2;
-	window_height=screen_height/2;
-
-
+	if (screen_width==0|| screen_height==0)
+	{
+		window_width = 0;
+		window_height = 0;
+	}
+	else
+	{
+		wdh = screen_width * 1.0 / screen_height;
+		surface_height = (px_int)(PX_sqrtd(PX_APPLICATION_SURFACE_SIZE * PX_APPLICATION_SURFACE_SIZE / wdh));
+		surface_width = (px_int)(surface_height * wdh);
+		window_width = screen_width / 2;
+		window_height = screen_height / 2;
+	}
+	
 	if(!PX_RuntimeInitialize(runtime,surface_width,surface_height,window_width,window_height,PX_ApplicationRuntime,sizeof(PX_ApplicationRuntime),PX_APPLICATION_MEMORYPOOL_UI_SIZE,PX_APPLICATION_MEMORYPOOL_RESOURCES_SIZE,PX_APPLICATION_MEMORYPOOL_GAME_SIZE))
 		return PX_FALSE;
 	return PX_TRUE;
@@ -175,14 +180,14 @@ _ERROR:
 }
 
 
-px_bool PX_LoadScriptInstanceFromFile(px_memorypool *mp,PX_ScriptVM_Instance *ins,const px_char path[])
+px_bool PX_LoadScriptInstanceFromFile(px_memorypool *mp,PX_VM *ins,const px_char path[])
 {
 	PX_IO_Data io=PX_LoadFileToIOData(path);
 	if (!io.size)
 	{
 		return PX_FALSE;
 	}
-	if(!PX_ScriptVM_InstanceInitialize(ins,mp,io.buffer,io.size))
+	if(!PX_VMInitialize(ins,mp,io.buffer,io.size))
 		goto _ERROR;
 
 	PX_FreeIOData(&io);

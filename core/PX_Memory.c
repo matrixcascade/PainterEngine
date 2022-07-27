@@ -172,19 +172,19 @@ px_bool PX_MemoryCopy(px_memory *memory,const px_void *buffer,px_int startoffset
 px_bool PX_CircularBufferInitialize(px_memorypool* mp, PX_CircularBuffer* pcbuffer, px_int size)
 {
 	PX_memset(pcbuffer, 0, sizeof(PX_CircularBuffer));
-	pcbuffer->buffer = (px_float *)MP_Malloc(mp, sizeof(px_float) * size);
+	pcbuffer->buffer = (px_double *)MP_Malloc(mp, sizeof(px_double) * size);
 	if (!pcbuffer)
 	{
 		return PX_FALSE;
 	}
-	PX_memset(pcbuffer->buffer, 0, sizeof(px_float) * size);
+	PX_memset(pcbuffer->buffer, 0, sizeof(px_double) * size);
 	pcbuffer->mp = mp;
 	pcbuffer->pointer = 0;
 	pcbuffer->size = size;
 	return PX_TRUE;
 }
 
-px_void PX_CircularBufferPush(PX_CircularBuffer* pcbuffer, px_float v)
+px_void PX_CircularBufferPush(PX_CircularBuffer* pcbuffer, px_double v)
 {
 	pcbuffer->pointer--;
 	if (pcbuffer->pointer<0)
@@ -193,23 +193,28 @@ px_void PX_CircularBufferPush(PX_CircularBuffer* pcbuffer, px_float v)
 	}
 	pcbuffer->buffer[pcbuffer->pointer] = v;
 }
-px_void PX_CircularBufferAdd(PX_CircularBuffer* pcbuffer, px_int pos, px_float v)
+px_void PX_CircularBufferAdd(PX_CircularBuffer* pcbuffer, px_int pos, px_double v)
 {
 	pos = pos % pcbuffer->size;
 	if (pos < 0) { pos += pcbuffer->size; }
 	pcbuffer->buffer[pos] += v;
 }
-px_void PX_CircularBufferSet(PX_CircularBuffer* pcbuffer, px_int pos, px_float v)
+px_void PX_CircularBufferSet(PX_CircularBuffer* pcbuffer, px_int pos, px_double v)
 {
 	pos = pos % pcbuffer->size;
 	if (pos < 0) { pos += pcbuffer->size; }
 	pcbuffer->buffer[pos] = v;
 }
-px_float  PX_CircularBufferGet(PX_CircularBuffer* pcbuffer, px_int pos)
+px_double  PX_CircularBufferGet(PX_CircularBuffer* pcbuffer, px_int pos)
 {
 	pos = pos % pcbuffer->size;
 	if (pos < 0) { pos += pcbuffer->size; }
 	return pcbuffer->buffer[pos];
+}
+
+px_void PX_CircularBufferZeroClear(PX_CircularBuffer* pcbuffer)
+{
+	PX_memset(pcbuffer->buffer, 0, sizeof(px_double) * pcbuffer->size);
 }
 
 px_void PX_CircularBufferFree(PX_CircularBuffer* pcbuffer)
@@ -222,7 +227,129 @@ px_void PX_CircularBufferFree(PX_CircularBuffer* pcbuffer)
 	
 }
 
-px_float PX_CircularBufferDelay(PX_CircularBuffer* pcbuffer, px_int pos)
+px_double PX_CircularBufferDelay(PX_CircularBuffer* pcbuffer, px_int pos)
 {
 	return pcbuffer->buffer[(pcbuffer->pointer + pos) %pcbuffer->size];
+}
+
+px_void PX_FifoBufferInitialize(px_memorypool* mp, px_fifobuffer* pfifo)
+{
+	PX_MemoryInitialize(mp, pfifo);
+}
+
+px_int PX_FifoBufferPop(px_fifobuffer* pfifo, px_void* data, px_int size)
+{
+	if (pfifo->usedsize)
+	{
+		px_int rsize = *(px_int*)pfifo->buffer;
+		if (rsize>pfifo->usedsize-(px_int)sizeof(px_int))
+		{
+			PX_ASSERT();//fifo error
+			return 0;
+		}
+		if (size<rsize)
+		{
+			return 0;
+		}
+		PX_memcpy(data, pfifo->buffer + sizeof(px_int), rsize);
+		PX_MemoryRemove(pfifo, 0, rsize + sizeof(px_int) - 1);
+		return rsize;
+
+	}
+	return 0;
+	
+}
+
+px_bool PX_FifoBufferPush(px_fifobuffer* pfifo, px_void* data, px_int size)
+{
+	px_int wsize = size;
+	if (wsize<0)
+	{
+		PX_ASSERT();
+	}
+	if (wsize==0)
+	{
+		return PX_TRUE;
+	}
+	if (PX_MemoryCat(pfifo, &wsize, sizeof(wsize)))
+	{
+		if (PX_MemoryCat(pfifo,data,size))
+		{
+			return PX_TRUE;
+		}
+	}
+	return PX_FALSE;
+
+}
+
+px_int PX_FifoBufferGetPopSize(px_fifobuffer* pfifo)
+{
+	if (pfifo->usedsize>sizeof(px_int))
+	{
+		return *(px_int*)pfifo->buffer;
+	}
+	return 0;
+}
+
+px_void PX_FifoBufferFree(px_fifobuffer* pfifo)
+{
+	PX_MemoryFree(pfifo);
+}
+
+px_void PX_StackInitialize(px_memorypool* mp, px_stack* pstack)
+{
+	PX_MemoryInitialize(mp, pstack);
+}
+
+px_int PX_StackPop(px_stack* pstack, px_void* data, px_int size)
+{
+	if (pstack->usedsize>sizeof(px_int))
+	{
+		px_int rsize = *(px_int*)(pstack->buffer+pstack->usedsize-sizeof(px_int));
+		if (rsize > pstack->usedsize - (px_int)sizeof(px_int))
+		{
+			PX_ASSERT();//stack error
+			return 0;
+		}
+		if (size < rsize)
+		{
+			return 0;
+		}
+		PX_memcpy(data, pstack->buffer + pstack->usedsize - sizeof(px_int)- rsize, rsize);
+		PX_MemoryRemove(pstack, pstack->usedsize - sizeof(px_int) - rsize, pstack->usedsize - 1);
+		return rsize;
+
+	}
+	return 0;
+}
+
+px_bool PX_StackPush(px_stack* pstack, px_void* data, px_int size)
+{
+	px_int wsize = size;
+	if (wsize < 0)
+	{
+		PX_ASSERT();
+	}
+	if (wsize == 0)
+	{
+		return PX_TRUE;
+	}
+	
+	if (PX_MemoryCat(pstack, data, size))
+	{
+		if (PX_MemoryCat(pstack, &wsize, sizeof(wsize)))
+		{
+			return PX_TRUE;
+		}
+	}
+	return PX_FALSE;
+}
+
+px_int PX_StackGetPopSize(px_stack* pstack)
+{
+	return *(px_int*)(pstack->buffer + pstack->usedsize - sizeof(px_int));
+}
+px_void PX_StackFree(px_stack* pstack)
+{
+	PX_MemoryFree(pstack);
 }

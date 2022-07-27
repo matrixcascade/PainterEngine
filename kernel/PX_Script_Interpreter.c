@@ -1,29 +1,33 @@
 #include "PX_Script_Interpreter.h"
 
 static px_char *PX_Script_Keywords[]={"IF","ELSE","SWITCH","CASE","WHILE","FOR","BREAK","RETURN","STRUCT","FUNCTION","EXPORT","HOST","INT","FLOAT","STRING","MEMORY","_BOOT","RETURN","_ASM"};
-static px_char PX_Script_InterpreterError[256];
 
-px_void PX_ScriptTranslatorError(px_lexer *lexer,px_char *info)
+
+px_void PX_ScriptTranslatorError(PX_ScriptInterpreter* analysis,px_char *info)
 {
-	if (lexer)
+	px_lexer* lexer = &analysis->lexer;
+	PX_memset(analysis->PX_Script_InterpreterError, 0, sizeof(analysis->PX_Script_InterpreterError));
+	if (lexer->Sources)
 	{
-		lexer->Sources[lexer->SourceOffset]='\0';
-		PX_Script_InterpreterError[0]='\0';
-		if (lexer->SourceOffset>200)
+		lexer->Sources[lexer->SourceOffset] = '\0';
+		analysis->PX_Script_InterpreterError[0] = '\0';
+		if (lexer->SourceOffset > 200)
 		{
-			PX_strcpy(PX_Script_InterpreterError,lexer->Sources+lexer->SourceOffset-200,200);	
+			PX_strcpy(analysis->PX_Script_InterpreterError, lexer->Sources + lexer->SourceOffset - 200, 200);
 		}
 		else
 		{
-			PX_strcpy(PX_Script_InterpreterError,lexer->Sources,200);	
+			PX_strcpy(analysis->PX_Script_InterpreterError, lexer->Sources, 200);
 		}
 	}
-	PX_LOG(info);
+	PX_strcat(analysis->PX_Script_InterpreterError, "\n");
+	PX_strcat(analysis->PX_Script_InterpreterError, info);
+	PX_strcat(analysis->PX_Script_InterpreterError, "\n");
 }
 
-px_void PX_ScriptParserClearStack(PX_SCRIPT_Analysis *analysis)
+px_void PX_ScriptParserClearStack(PX_ScriptInterpreter *analysis)
 {
-	int i;
+	px_int i;
 	PX_SCRIPT_VARIABLES *pvar;
 	for (i=0;i<analysis->v_variablesStackTable.size;i++)
 	{
@@ -58,7 +62,7 @@ px_bool PX_ScriptCompilerInitialize(PX_SCRIPT_LIBRARY *lib,px_memorypool *mp)
 }
 px_void PX_ScriptCompilerFree(PX_SCRIPT_LIBRARY *lib)
 {
-	int i;
+	px_int i;
 	for (i=0;i<lib->codeLibraries.size;i++)
 	{
 		PX_StringFree(&PX_VECTORAT(PX_SCRIPT_CODE,&lib->codeLibraries,i)->name);
@@ -70,7 +74,7 @@ px_bool PX_ScriptCompilerLoad(PX_SCRIPT_LIBRARY *lib,const px_char *code)
 {
 	px_lexer lexer;
 	PX_SCRIPT_CODE scode;
-	int i;
+	px_int i;
 	scode.bInclude=PX_FALSE;
 	
 	
@@ -142,7 +146,7 @@ px_bool PX_ScriptCompilerLoad(PX_SCRIPT_LIBRARY *lib,const px_char *code)
 
 	return PX_TRUE;
 }
-static px_bool PX_ScriptParseInclude(px_string *codes,PX_SCRIPT_LIBRARY *lib,const px_char *name)
+static px_bool PX_ScriptParseInclude(PX_ScriptInterpreter *analysis,px_string *codes,PX_SCRIPT_LIBRARY *lib,const px_char *name)
 {
 	px_lexer lexer;
 	PX_LEXER_STATE lexerState;
@@ -191,7 +195,7 @@ static px_bool PX_ScriptParseInclude(px_string *codes,PX_SCRIPT_LIBRARY *lib,con
 		type=PX_ScriptTranslatorNextToken(&lexer);
 		if (type==PX_LEXER_LEXEME_TYPE_ERR)
 		{
-			PX_ScriptTranslatorError(&lexer,"lexer error.");
+			PX_ScriptTranslatorError(analysis,"lexer error.");
 			goto _ERROR;
 		}
 		if (type==PX_LEXER_LEXEME_TYPE_END)
@@ -206,7 +210,7 @@ static px_bool PX_ScriptParseInclude(px_string *codes,PX_SCRIPT_LIBRARY *lib,con
 					{
 						if (PX_LexerGetCurrentContainerType(&lexer)!=quotes)
 						{
-							PX_ScriptTranslatorError(&lexer,"syntactic error: include \"name\" expected but not found.");
+							PX_ScriptTranslatorError(analysis,"syntactic error: include \"name\" expected but not found.");
 							goto _ERROR;
 						}
 						PX_LexerGetIncludedString(&lexer,&lexer.CurLexeme);
@@ -217,7 +221,7 @@ static px_bool PX_ScriptParseInclude(px_string *codes,PX_SCRIPT_LIBRARY *lib,con
 							{
 								if (PX_VECTORAT(PX_SCRIPT_CODE,&lib->codeLibraries,i)->bInclude!=PX_FALSE)
 								{
-									PX_ScriptTranslatorError(&lexer,"syntactic error: reduplicate included-name.");
+									PX_ScriptTranslatorError(analysis,"syntactic error: reduplicate included-name.");
 									goto _ERROR;
 								}
 								PX_VECTORAT(PX_SCRIPT_CODE,&lib->codeLibraries,i)->bInclude=PX_TRUE;
@@ -228,12 +232,12 @@ static px_bool PX_ScriptParseInclude(px_string *codes,PX_SCRIPT_LIBRARY *lib,con
 								{
 									if (type==PX_LEXER_LEXEME_TYPE_END)
 									{
-										PX_ScriptTranslatorError(&lexer,"syntactic error:include on last line without newline");
+										PX_ScriptTranslatorError(analysis,"syntactic error:include on last line without newline");
 										goto _ERROR;
 									}
 									else
 									{
-										PX_ScriptTranslatorError(&lexer,"syntactic error:new line expected but not found.");
+										PX_ScriptTranslatorError(analysis,"syntactic error:new line expected but not found.");
 										goto _ERROR;
 									}
 									
@@ -243,7 +247,7 @@ static px_bool PX_ScriptParseInclude(px_string *codes,PX_SCRIPT_LIBRARY *lib,con
 
 								if (exchangeBuffer==PX_NULL)
 								{
-									PX_ScriptTranslatorError(&lexer,"memory error.");
+									PX_ScriptTranslatorError(analysis,"memory error.");
 									goto _ERROR;
 								}
 
@@ -266,13 +270,13 @@ static px_bool PX_ScriptParseInclude(px_string *codes,PX_SCRIPT_LIBRARY *lib,con
 						}
 						if (!bfound)
 						{
-							PX_ScriptTranslatorError(&lexer,"include error: source not found.");
+							PX_ScriptTranslatorError(analysis,"include error: source not found.");
 							goto _ERROR;
 						}
 					}
 					else
 					{
-						PX_ScriptTranslatorError(&lexer,"syntactic error:include-name expected but not found.");
+						PX_ScriptTranslatorError(analysis,"syntactic error:include-name expected but not found.");
 						goto _ERROR;
 					}
 			}
@@ -292,7 +296,7 @@ typedef struct
 	px_string name;
 	px_string token;
 }PX_SCRIPT_TRANSLATOR_DEFINE_ST;
-static px_bool PX_ScriptParseDefine(px_string *codes,PX_SCRIPT_LIBRARY *lib,const px_char *name)
+static px_bool PX_ScriptParseDefine(PX_ScriptInterpreter *analysis,px_string *codes,PX_SCRIPT_LIBRARY *lib,const px_char *name)
 {
 	px_lexer lexer;
 	px_int startIndex;
@@ -340,7 +344,7 @@ static px_bool PX_ScriptParseDefine(px_string *codes,PX_SCRIPT_LIBRARY *lib,cons
 		type=PX_ScriptTranslatorNextToken(&lexer);
 		if (type==PX_LEXER_LEXEME_TYPE_ERR)
 		{
-			PX_ScriptTranslatorError(&lexer,"lexer error.");
+			PX_ScriptTranslatorError(analysis,"lexer error.");
 			goto _ERROR;
 		}
 		if (type==PX_LEXER_LEXEME_TYPE_END)
@@ -354,7 +358,7 @@ static px_bool PX_ScriptParseDefine(px_string *codes,PX_SCRIPT_LIBRARY *lib,cons
 				startIndex=lexer.SourceOffset-7;
 				if (PX_ScriptTranslatorNextToken(&lexer)!=PX_LEXER_LEXEME_TYPE_TOKEN)
 				{
-					PX_ScriptTranslatorError(&lexer,"syntactic error:include-name expected but not found.");
+					PX_ScriptTranslatorError(analysis,"syntactic error:include-name expected but not found.");
 					goto _ERROR;
 				}
 
@@ -365,7 +369,7 @@ static px_bool PX_ScriptParseDefine(px_string *codes,PX_SCRIPT_LIBRARY *lib,cons
 				
 				if (PX_LexerGetNextLexeme(&lexer)!=PX_LEXER_LEXEME_TYPE_SPACER)
 				{
-					PX_ScriptTranslatorError(&lexer,"syntactic error:spacer expected but not found.");
+					PX_ScriptTranslatorError(analysis,"syntactic error:spacer expected but not found.");
 					goto _ERROR;
 				}
 
@@ -402,7 +406,7 @@ static px_bool PX_ScriptParseDefine(px_string *codes,PX_SCRIPT_LIBRARY *lib,cons
 		type=PX_ScriptTranslatorNextToken(&lexer);
 		if (type==PX_LEXER_LEXEME_TYPE_ERR)
 		{
-			PX_ScriptTranslatorError(&lexer,"lexer error.");
+			PX_ScriptTranslatorError(analysis,"lexer error.");
 			goto _ERROR;
 		}
 		if (type==PX_LEXER_LEXEME_TYPE_END)
@@ -444,13 +448,13 @@ _ERROR:
 	PX_VectorFree(&defines);
 	return PX_FALSE;
 }
-static px_bool PX_ScriptParsePretreatment(px_string *codes,PX_SCRIPT_LIBRARY *lib,const px_char *name)
+static px_bool PX_ScriptParsePretreatment(PX_ScriptInterpreter *analysis,px_string *codes,PX_SCRIPT_LIBRARY *lib,const px_char *name)
 {
 	
-	if(!PX_ScriptParseInclude(codes,lib,name))
+	if(!PX_ScriptParseInclude(analysis,codes,lib,name))
 		goto _ERROR;
 
- 	if(!PX_ScriptParseDefine(codes,lib,name))
+ 	if(!PX_ScriptParseDefine(analysis,codes,lib,name))
  		goto _ERROR;
 
 	return PX_TRUE;
@@ -528,7 +532,7 @@ static px_bool PX_ScriptParseCheckBrackets(px_char *pstr)
 	}
 	return PX_TRUE;
 }
-static PX_SCRIPT_STRUCT *PX_ScriptParseGetStructByIndex(PX_SCRIPT_Analysis *analysis,px_int index)
+static PX_SCRIPT_STRUCT *PX_ScriptParseGetStructByIndex(PX_ScriptInterpreter *analysis,px_int index)
 {
 	if (index>=analysis->v_struct.size||index<0)
 	{
@@ -630,7 +634,7 @@ static px_char PX_ScriptParseGetOpLevel(px_char *op,px_bool binary)
 	}
 	return -1;
 }
-static px_bool PX_ScriptParse_AST_PushToken(PX_SCRIPT_Analysis *analysis,px_vector *op,px_vector *tk,PX_SCRIPT_EXPR_STREAM atom,PX_SCRIPT_STRUCT *_inset,PX_SCRIPT_STRUCT **_outset)
+static px_bool PX_ScriptParse_AST_PushToken(PX_ScriptInterpreter *analysis,px_vector *op,px_vector *tk,PX_SCRIPT_EXPR_STREAM atom,PX_SCRIPT_STRUCT *_inset,PX_SCRIPT_STRUCT **_outset)
 {
 	px_int i;
 	PX_SCRIPT_VARIABLES *pvar;
@@ -652,7 +656,7 @@ static px_bool PX_ScriptParse_AST_PushToken(PX_SCRIPT_Analysis *analysis,px_vect
 						{
 							operand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_INT;
 							operand._oft=psetmem->offset;
-							operand.pSet=PX_NULL;
+							operand.pStruct=PX_NULL;
 							PX_VectorPushback(tk,&operand);
 							return PX_TRUE;
 						}
@@ -661,7 +665,7 @@ static px_bool PX_ScriptParse_AST_PushToken(PX_SCRIPT_Analysis *analysis,px_vect
 						{
 							operand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_FLOAT;
 							operand._oft=psetmem->offset;
-							operand.pSet=PX_NULL;
+							operand.pStruct=PX_NULL;
 							PX_VectorPushback(tk,&operand);
 							return PX_TRUE;
 						}
@@ -670,7 +674,7 @@ static px_bool PX_ScriptParse_AST_PushToken(PX_SCRIPT_Analysis *analysis,px_vect
 						{
 							operand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_STRING;
 							operand._oft=psetmem->offset;
-							operand.pSet=PX_NULL;
+							operand.pStruct=PX_NULL;
 							PX_VectorPushback(tk,&operand);
 							return PX_TRUE;
 						}
@@ -679,7 +683,7 @@ static px_bool PX_ScriptParse_AST_PushToken(PX_SCRIPT_Analysis *analysis,px_vect
 						{
 							operand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_MEMORY;
 							operand._oft=psetmem->offset;
-							operand.pSet=PX_NULL;
+							operand.pStruct=PX_NULL;
 							PX_VectorPushback(tk,&operand);
 							return PX_TRUE;
 						}
@@ -688,8 +692,8 @@ static px_bool PX_ScriptParse_AST_PushToken(PX_SCRIPT_Analysis *analysis,px_vect
 						{
 							operand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_STRUCT;
 							operand._oft=psetmem->offset;
-							operand.pSet=PX_ScriptParseGetStructByIndex(analysis,psetmem->defvar.setIndex);
-							*_outset=operand.pSet;
+							operand.pStruct=PX_ScriptParseGetStructByIndex(analysis,psetmem->defvar.setIndex);
+							*_outset=operand.pStruct;
 							PX_VectorPushback(tk,&operand);
 							return PX_TRUE;
 						}
@@ -698,7 +702,7 @@ static px_bool PX_ScriptParse_AST_PushToken(PX_SCRIPT_Analysis *analysis,px_vect
 						{
 							operand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_INT_PTR_CONST;
 							operand._oft=psetmem->offset;
-							operand.pSet=PX_NULL;
+							operand.pStruct=PX_NULL;
 							PX_VectorPushback(tk,&operand);
 							return PX_TRUE;
 						}
@@ -707,7 +711,7 @@ static px_bool PX_ScriptParse_AST_PushToken(PX_SCRIPT_Analysis *analysis,px_vect
 						{
 							operand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_FLOAT_PTR_CONST;
 							operand._oft=psetmem->offset;
-							operand.pSet=PX_NULL;
+							operand.pStruct=PX_NULL;
 							PX_VectorPushback(tk,&operand);
 							return PX_TRUE;
 						}
@@ -716,7 +720,7 @@ static px_bool PX_ScriptParse_AST_PushToken(PX_SCRIPT_Analysis *analysis,px_vect
 						{
 							operand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_STRING_PTR_CONST;
 							operand._oft=psetmem->offset;
-							operand.pSet=PX_NULL;
+							operand.pStruct=PX_NULL;
 							PX_VectorPushback(tk,&operand);
 							return PX_TRUE;
 						}
@@ -725,7 +729,7 @@ static px_bool PX_ScriptParse_AST_PushToken(PX_SCRIPT_Analysis *analysis,px_vect
 						{
 							operand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_MEMORY_PTR_CONST;
 							operand._oft=psetmem->offset;
-							operand.pSet=PX_NULL;
+							operand.pStruct=PX_NULL;
 							PX_VectorPushback(tk,&operand);
 							return PX_TRUE;
 						}
@@ -733,10 +737,10 @@ static px_bool PX_ScriptParse_AST_PushToken(PX_SCRIPT_Analysis *analysis,px_vect
 					case PX_SCRIPT_PARSER_VAR_TYPE_SET_ARRAY:
 						{
 
-							operand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_SET_PTR_CONST;
+							operand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR_CONST;
 							operand._oft=psetmem->offset;
-							operand.pSet=PX_ScriptParseGetStructByIndex(analysis,psetmem->defvar.setIndex);
-							*_outset=operand.pSet;
+							operand.pStruct=PX_ScriptParseGetStructByIndex(analysis,psetmem->defvar.setIndex);
+							*_outset=operand.pStruct;
 							PX_VectorPushback(tk,&operand);
 							return PX_TRUE;
 						}
@@ -745,7 +749,7 @@ static px_bool PX_ScriptParse_AST_PushToken(PX_SCRIPT_Analysis *analysis,px_vect
 						{
 							operand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_INT_PTR;
 							operand._oft=psetmem->offset;
-							operand.pSet=PX_NULL;
+							operand.pStruct=PX_NULL;
 							PX_VectorPushback(tk,&operand);
 							return PX_TRUE;
 						}
@@ -754,7 +758,7 @@ static px_bool PX_ScriptParse_AST_PushToken(PX_SCRIPT_Analysis *analysis,px_vect
 						{
 							operand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_FLOAT_PTR;
 							operand._oft=psetmem->offset;
-							operand.pSet=PX_NULL;
+							operand.pStruct=PX_NULL;
 							PX_VectorPushback(tk,&operand);
 							return PX_TRUE;
 						}
@@ -763,7 +767,7 @@ static px_bool PX_ScriptParse_AST_PushToken(PX_SCRIPT_Analysis *analysis,px_vect
 						{
 							operand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_STRING_PTR;
 							operand._oft=psetmem->offset;
-							operand.pSet=PX_NULL;
+							operand.pStruct=PX_NULL;
 							PX_VectorPushback(tk,&operand);
 							return PX_TRUE;
 						}
@@ -772,7 +776,7 @@ static px_bool PX_ScriptParse_AST_PushToken(PX_SCRIPT_Analysis *analysis,px_vect
 						{
 							operand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_MEMORY_PTR;
 							operand._oft=psetmem->offset;
-							operand.pSet=PX_NULL;
+							operand.pStruct=PX_NULL;
 							PX_VectorPushback(tk,&operand);
 							return PX_TRUE;
 						}
@@ -781,8 +785,8 @@ static px_bool PX_ScriptParse_AST_PushToken(PX_SCRIPT_Analysis *analysis,px_vect
 						{
 							operand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_MEMORY_PTR;
 							operand._oft=psetmem->offset;
-							operand.pSet=PX_ScriptParseGetStructByIndex(analysis,psetmem->defvar.setIndex);
-							*_outset=operand.pSet;
+							operand.pStruct=PX_ScriptParseGetStructByIndex(analysis,psetmem->defvar.setIndex);
+							*_outset=operand.pStruct;
 							PX_VectorPushback(tk,&operand);
 							return PX_TRUE;
 						}
@@ -829,7 +833,7 @@ static px_bool PX_ScriptParse_AST_PushToken(PX_SCRIPT_Analysis *analysis,px_vect
 			{
 				operand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_INT;
 				operand._oft=pvar->BeginIndex;
-				operand.pSet=PX_NULL;
+				operand.pStruct=PX_NULL;
 				PX_VectorPushback(tk,&operand);
 			}
 			break;
@@ -837,7 +841,7 @@ static px_bool PX_ScriptParse_AST_PushToken(PX_SCRIPT_Analysis *analysis,px_vect
 			{
 				operand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_FLOAT;
 				operand._oft=pvar->BeginIndex;
-				operand.pSet=PX_NULL;
+				operand.pStruct=PX_NULL;
 				PX_VectorPushback(tk,&operand);
 			}
 			break;
@@ -845,7 +849,7 @@ static px_bool PX_ScriptParse_AST_PushToken(PX_SCRIPT_Analysis *analysis,px_vect
 			{
 				operand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_STRING;
 				operand._oft=pvar->BeginIndex;
-				operand.pSet=PX_NULL;
+				operand.pStruct=PX_NULL;
 				PX_VectorPushback(tk,&operand);
 			}
 			break;
@@ -853,7 +857,7 @@ static px_bool PX_ScriptParse_AST_PushToken(PX_SCRIPT_Analysis *analysis,px_vect
 			{
 				operand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_MEMORY;
 				operand._oft=pvar->BeginIndex;
-				operand.pSet=PX_NULL;
+				operand.pStruct=PX_NULL;
 				PX_VectorPushback(tk,&operand);
 			}
 			break;
@@ -862,7 +866,7 @@ static px_bool PX_ScriptParse_AST_PushToken(PX_SCRIPT_Analysis *analysis,px_vect
 				*_outset=PX_ScriptParseGetStructByIndex(analysis,pvar->setIndex);
 				operand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_STRUCT;
 				operand._oft=pvar->BeginIndex;
-				operand.pSet=PX_ScriptParseGetStructByIndex(analysis,pvar->setIndex);
+				operand.pStruct=PX_ScriptParseGetStructByIndex(analysis,pvar->setIndex);
 				PX_VectorPushback(tk,&operand);
 			}
 			break;
@@ -871,7 +875,7 @@ static px_bool PX_ScriptParse_AST_PushToken(PX_SCRIPT_Analysis *analysis,px_vect
 			{
 				operand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_INT_PTR_CONST;
 				operand._oft=pvar->BeginIndex;
-				operand.pSet=PX_NULL;
+				operand.pStruct=PX_NULL;
 				PX_VectorPushback(tk,&operand);
 			}
 			break;
@@ -879,7 +883,7 @@ static px_bool PX_ScriptParse_AST_PushToken(PX_SCRIPT_Analysis *analysis,px_vect
 			{
 				operand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_FLOAT_PTR_CONST;
 				operand._oft=pvar->BeginIndex;
-				operand.pSet=PX_NULL;
+				operand.pStruct=PX_NULL;
 				PX_VectorPushback(tk,&operand);
 			}
 			break;
@@ -887,7 +891,7 @@ static px_bool PX_ScriptParse_AST_PushToken(PX_SCRIPT_Analysis *analysis,px_vect
 			{
 				operand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_STRING_PTR_CONST;
 				operand._oft=pvar->BeginIndex;
-				operand.pSet=PX_NULL;
+				operand.pStruct=PX_NULL;
 				PX_VectorPushback(tk,&operand);
 			}
 			break;
@@ -895,16 +899,16 @@ static px_bool PX_ScriptParse_AST_PushToken(PX_SCRIPT_Analysis *analysis,px_vect
 			{
 				operand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_MEMORY_PTR_CONST;
 				operand._oft=pvar->BeginIndex;
-				operand.pSet=PX_NULL;
+				operand.pStruct=PX_NULL;
 				PX_VectorPushback(tk,&operand);
 			}
 			break;
 		case PX_SCRIPT_PARSER_VAR_TYPE_SET_ARRAY:
 			{
 				*_outset=PX_ScriptParseGetStructByIndex(analysis,pvar->setIndex);
-				operand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_SET_PTR_CONST;
+				operand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR_CONST;
 				operand._oft=pvar->BeginIndex;
-				operand.pSet=PX_ScriptParseGetStructByIndex(analysis,pvar->setIndex);
+				operand.pStruct=PX_ScriptParseGetStructByIndex(analysis,pvar->setIndex);
 				PX_VectorPushback(tk,&operand);
 			}
 			break;
@@ -913,7 +917,7 @@ static px_bool PX_ScriptParse_AST_PushToken(PX_SCRIPT_Analysis *analysis,px_vect
 				*_outset=PX_NULL;
 				operand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_INT_PTR;
 				operand._oft=pvar->BeginIndex;
-				operand.pSet=PX_NULL;
+				operand.pStruct=PX_NULL;
 				PX_VectorPushback(tk,&operand);
 			}
 			break;
@@ -922,7 +926,7 @@ static px_bool PX_ScriptParse_AST_PushToken(PX_SCRIPT_Analysis *analysis,px_vect
 				*_outset=PX_NULL;
 				operand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_FLOAT_PTR;
 				operand._oft=pvar->BeginIndex;
-				operand.pSet=PX_NULL;
+				operand.pStruct=PX_NULL;
 				PX_VectorPushback(tk,&operand);
 			}
 			break;
@@ -931,7 +935,7 @@ static px_bool PX_ScriptParse_AST_PushToken(PX_SCRIPT_Analysis *analysis,px_vect
 				*_outset=PX_NULL;
 				operand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_STRING_PTR;
 				operand._oft=pvar->BeginIndex;
-				operand.pSet=PX_NULL;
+				operand.pStruct=PX_NULL;
 				PX_VectorPushback(tk,&operand);
 			}
 			break;
@@ -940,7 +944,7 @@ static px_bool PX_ScriptParse_AST_PushToken(PX_SCRIPT_Analysis *analysis,px_vect
 				*_outset=PX_NULL;
 				operand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_MEMORY_PTR;
 				operand._oft=pvar->BeginIndex;
-				operand.pSet=PX_NULL;
+				operand.pStruct=PX_NULL;
 				PX_VectorPushback(tk,&operand);
 			}
 			break;
@@ -949,7 +953,7 @@ static px_bool PX_ScriptParse_AST_PushToken(PX_SCRIPT_Analysis *analysis,px_vect
 				*_outset=PX_ScriptParseGetStructByIndex(analysis,pvar->setIndex);
 				operand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR;
 				operand._oft=pvar->BeginIndex;
-				operand.pSet=PX_ScriptParseGetStructByIndex(analysis,pvar->setIndex);
+				operand.pStruct=PX_ScriptParseGetStructByIndex(analysis,pvar->setIndex);
 				PX_VectorPushback(tk,&operand);
 			}
 			break;
@@ -1024,7 +1028,7 @@ static px_bool PX_ScriptParse_AST_PushToken(PX_SCRIPT_Analysis *analysis,px_vect
 		return PX_FALSE;
 	}
 }
-static px_bool PX_ScriptParseAST_PushOpcode(PX_SCRIPT_Analysis *analysis,px_vector *op,PX_SCRIPT_EXPR_STREAM atom)
+static px_bool PX_ScriptParseAST_PushOpcode(PX_ScriptInterpreter *analysis,px_vector *op,PX_SCRIPT_EXPR_STREAM atom)
 {
 	PX_SCRIPT_AST_OPCODE opc;
 	switch(atom.type)
@@ -1167,7 +1171,7 @@ static px_bool PX_ScriptParseIsOperandNumericType(PX_SCRIPT_AST_OPERAND ope)
 	}
 	return PX_FALSE;
 }
-static PX_SCRIPT_STRUCT *PX_ScriptParseGetStructInfo(PX_SCRIPT_Analysis *analysis,px_char *name)
+static PX_SCRIPT_STRUCT *PX_ScriptParseGetStructInfo(PX_ScriptInterpreter *analysis,px_char *name)
 {
 	px_int i;
 	PX_SCRIPT_STRUCT *pset;
@@ -1181,7 +1185,7 @@ static PX_SCRIPT_STRUCT *PX_ScriptParseGetStructInfo(PX_SCRIPT_Analysis *analysi
 	}
 	return PX_NULL;
 }
-static px_int PX_ScriptParseGetSetIndex(PX_SCRIPT_Analysis *analysis,px_char *name)
+static px_int PX_ScriptParseGetSetIndex(PX_ScriptInterpreter *analysis,px_char *name)
 {
 	px_int i;
 	PX_SCRIPT_STRUCT *pset;
@@ -1240,7 +1244,7 @@ static px_bool PX_ScriptParseIsCompareAbleOperand(PX_SCRIPT_AST_OPERAND operand1
 	}
 	return PX_TRUE;
 }
-static px_bool PX_ScriptParseAST_MapTokenToR2(PX_SCRIPT_Analysis *analysis,PX_SCRIPT_AST_OPERAND operand,px_string *out)
+static px_bool PX_ScriptParseAST_MapTokenToR2(PX_ScriptInterpreter *analysis,PX_SCRIPT_AST_OPERAND operand,px_string *out)
 {
 	px_string fmrString;
 
@@ -1324,7 +1328,7 @@ static px_bool PX_ScriptParseAST_MapTokenToR2(PX_SCRIPT_Analysis *analysis,PX_SC
 	case PX_SCRIPT_AST_OPERAND_TYPE_FLOAT_PTR_CONST:
 	case PX_SCRIPT_AST_OPERAND_TYPE_STRING_PTR_CONST:
 	case PX_SCRIPT_AST_OPERAND_TYPE_MEMORY_PTR_CONST:
-	case PX_SCRIPT_AST_OPERAND_TYPE_SET_PTR_CONST:
+	case PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR_CONST:
 		{
 			PX_StringInitialize(analysis->mp,&fmrString);
 
@@ -1564,7 +1568,7 @@ static px_bool PX_ScriptParseAST_MapTokenToR2(PX_SCRIPT_Analysis *analysis,PX_SC
 	}
 	return PX_TRUE;
 }
-static px_bool PX_ScriptParseAST_MapTokenToR1(PX_SCRIPT_Analysis *analysis,PX_SCRIPT_AST_OPERAND operand,px_string *out)
+static px_bool PX_ScriptParseAST_MapTokenToR1(PX_ScriptInterpreter *analysis,PX_SCRIPT_AST_OPERAND operand,px_string *out)
 {
 	px_string fmrString;
 
@@ -1648,7 +1652,7 @@ static px_bool PX_ScriptParseAST_MapTokenToR1(PX_SCRIPT_Analysis *analysis,PX_SC
 	case PX_SCRIPT_AST_OPERAND_TYPE_FLOAT_PTR_CONST:
 	case PX_SCRIPT_AST_OPERAND_TYPE_STRING_PTR_CONST:
 	case PX_SCRIPT_AST_OPERAND_TYPE_MEMORY_PTR_CONST:
-	case PX_SCRIPT_AST_OPERAND_TYPE_SET_PTR_CONST:
+	case PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR_CONST:
 		{
 			PX_StringInitialize(analysis->mp,&fmrString);
 
@@ -1889,7 +1893,7 @@ static px_bool PX_ScriptParseAST_MapTokenToR1(PX_SCRIPT_Analysis *analysis,PX_SC
 
 	return PX_TRUE;
 }
-static px_bool PX_ScriptParseLastInstr_DOT(PX_SCRIPT_Analysis *analysis,px_vector *op,px_vector *tk,px_string *out)
+static px_bool PX_ScriptParseLastInstr_DOT(PX_ScriptInterpreter *analysis,px_vector *op,px_vector *tk,px_string *out)
 {
 	PX_SCRIPT_AST_OPERAND operand1,operand2,*pTop;
 	px_string fmrString;
@@ -1939,7 +1943,7 @@ static px_bool PX_ScriptParseLastInstr_DOT(PX_SCRIPT_Analysis *analysis,px_vecto
 	return PX_TRUE;
 
 }
-static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vector *op,px_vector *tk,px_string *out)
+static px_bool PX_ScriptParseLastInstr_EQUAL(PX_ScriptInterpreter *analysis,px_vector *op,px_vector *tk,px_string *out)
 {
 	PX_SCRIPT_AST_OPERAND operandLeft,operandRight,*pTop;
 	px_string fmrString;
@@ -2297,12 +2301,12 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 			}
 			else
 			{
-				pTop->operandType=PX_SCRIPT_AST_OPERAND_TYPE_SET_PTR_CONST;
+				pTop->operandType=PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR_CONST;
 			}
 
 			pTop->region=PX_SCRIPT_VARIABLE_REGION_POP;
 			pTop->_oft=0;
-			pTop->pSet=operandLeft.pSet;
+			pTop->pStruct=operandLeft.pStruct;
 
 			if (operandLeft.operandType!=operandRight.operandType)
 			{
@@ -2369,7 +2373,7 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 				}
 				break;
 				default:
-					PX_ScriptTranslatorError(&analysis->lexer,"Invalid left-value.");
+					PX_ScriptTranslatorError(analysis,"Invalid left-value.");
 					return PX_FALSE;
 			}
 			
@@ -2382,7 +2386,7 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 			{
 				return PX_FALSE;
 			}
-			if (operandLeft.pSet!=operandRight.pSet)
+			if (operandLeft.pStruct!=operandRight.pStruct)
 			{
 				return PX_FALSE;
 			}
@@ -2398,7 +2402,7 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 			}
 
 
-			PX_StringFormat1(&fmrString,"DATACPY R1,R2,%1\n",PX_STRINGFORMAT_INT(operandLeft.pSet->size));
+			PX_StringFormat1(&fmrString,"DATACPY R1,R2,%1\n",PX_STRINGFORMAT_INT(operandLeft.pStruct->size));
 			PX_StringCat(out,fmrString.buffer);
 			PX_StringSet(&fmrString,"PUSH R1\n");
 			PX_StringCat(out,fmrString.buffer);
@@ -2406,7 +2410,7 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 			pTop->operandType=PX_SCRIPT_AST_OPERAND_TYPE_STRUCT;
 			pTop->region=PX_SCRIPT_VARIABLE_REGION_POP;
 			pTop->_oft=0;
-			pTop->pSet=operandLeft.pSet;
+			pTop->pStruct=operandLeft.pStruct;
 		}
 		break;
 
@@ -2414,7 +2418,7 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 	case PX_SCRIPT_AST_OPERAND_TYPE_FLOAT_PTR_CONST:
 	case PX_SCRIPT_AST_OPERAND_TYPE_STRING_PTR_CONST:
 	case PX_SCRIPT_AST_OPERAND_TYPE_MEMORY_PTR_CONST:
-	case PX_SCRIPT_AST_OPERAND_TYPE_SET_PTR_CONST:
+	case PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR_CONST:
 		{
 			if (operandRight.operandType==PX_SCRIPT_AST_OPERAND_TYPE_INT_PTR_CONST&&operandLeft.operandType!=PX_SCRIPT_AST_OPERAND_TYPE_INT_PTR)
 			{
@@ -2432,7 +2436,7 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 			{
 				return PX_FALSE;
 			}
-			if (operandRight.operandType==PX_SCRIPT_AST_OPERAND_TYPE_SET_PTR_CONST&&operandLeft.operandType!=PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR)
+			if (operandRight.operandType==PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR_CONST&&operandLeft.operandType!=PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR)
 			{
 				return PX_FALSE;
 			}
@@ -2490,7 +2494,7 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 				break;
 				default:
 				{
-					PX_ScriptTranslatorError(&analysis->lexer,"Invalid left-value.");
+					PX_ScriptTranslatorError(analysis,"Invalid left-value.");
 					PX_StringFree(&fmrString);
 					return PX_FALSE;
 				}
@@ -2499,7 +2503,7 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 			pTop->operandType=operandRight.operandType;
 			pTop->region=PX_SCRIPT_VARIABLE_REGION_POP;
 			pTop->_oft=0;
-			pTop->pSet=operandLeft.pSet;
+			pTop->pStruct=operandLeft.pStruct;
 		}
 		break;
 
@@ -3305,7 +3309,7 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_SCRIPT_Analysis *analysis,px_vec
 
 	return PX_TRUE;
 }
-static px_bool PX_ScriptParseLastInstr_IDX(PX_SCRIPT_Analysis *analysis,px_vector *op,px_vector *tk,px_string *out)
+static px_bool PX_ScriptParseLastInstr_IDX(PX_ScriptInterpreter *analysis,px_vector *op,px_vector *tk,px_string *out)
 {
 	PX_SCRIPT_AST_OPERAND operand1,operand2,resOperand;
 	px_string fmrString;
@@ -3353,28 +3357,28 @@ static px_bool PX_ScriptParseLastInstr_IDX(PX_SCRIPT_Analysis *analysis,px_vecto
 			if (operand1.operandType==PX_SCRIPT_AST_OPERAND_TYPE_INT_PTR)
 			{
 				resOperand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_INT;
-				resOperand.pSet=PX_NULL;
+				resOperand.pStruct=PX_NULL;
 			}
 			if (operand1.operandType==PX_SCRIPT_AST_OPERAND_TYPE_FLOAT_PTR)
 			{
 				resOperand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_FLOAT;
-				resOperand.pSet=PX_NULL;
+				resOperand.pStruct=PX_NULL;
 			}
 			if (operand1.operandType==PX_SCRIPT_AST_OPERAND_TYPE_STRING_PTR)
 			{
 				resOperand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_STRING;
-				resOperand.pSet=PX_NULL;
+				resOperand.pStruct=PX_NULL;
 			}
 			if (operand1.operandType==PX_SCRIPT_AST_OPERAND_TYPE_MEMORY_PTR)
 			{
 				resOperand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_MEMORY;
-				resOperand.pSet=PX_NULL;
+				resOperand.pStruct=PX_NULL;
 			}
 			if (operand1.operandType==PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR)
 			{
 				resOperand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_STRUCT;
-				resOperand.pSet=operand1.pSet;
-				PX_StringFormat1(&fmrString,"MUL R2,%1\n",PX_STRINGFORMAT_INT(operand1.pSet->size));
+				resOperand.pStruct=operand1.pStruct;
+				PX_StringFormat1(&fmrString,"MUL R2,%1\n",PX_STRINGFORMAT_INT(operand1.pStruct->size));
 				PX_StringCat(out,fmrString.buffer);
 			}
 
@@ -3406,33 +3410,33 @@ static px_bool PX_ScriptParseLastInstr_IDX(PX_SCRIPT_Analysis *analysis,px_vecto
 		case PX_SCRIPT_AST_OPERAND_TYPE_FLOAT_PTR_CONST:
 		case PX_SCRIPT_AST_OPERAND_TYPE_STRING_PTR_CONST:
 		case PX_SCRIPT_AST_OPERAND_TYPE_MEMORY_PTR_CONST:
-		case PX_SCRIPT_AST_OPERAND_TYPE_SET_PTR_CONST:
+		case PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR_CONST:
 			{
 				if (operand1.operandType==PX_SCRIPT_AST_OPERAND_TYPE_INT_PTR_CONST)
 				{
 					resOperand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_INT;
-					resOperand.pSet=PX_NULL;
+					resOperand.pStruct=PX_NULL;
 				}
 				if (operand1.operandType==PX_SCRIPT_AST_OPERAND_TYPE_FLOAT_PTR_CONST)
 				{
 					resOperand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_FLOAT;
-					resOperand.pSet=PX_NULL;
+					resOperand.pStruct=PX_NULL;
 				}
 				if (operand1.operandType==PX_SCRIPT_AST_OPERAND_TYPE_STRING_PTR_CONST)
 				{
 					resOperand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_STRING;
-					resOperand.pSet=PX_NULL;
+					resOperand.pStruct=PX_NULL;
 				}
 				if (operand1.operandType==PX_SCRIPT_AST_OPERAND_TYPE_MEMORY_PTR_CONST)
 				{
 					resOperand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_MEMORY;
-					resOperand.pSet=PX_NULL;
+					resOperand.pStruct=PX_NULL;
 				}
-				if (operand1.operandType==PX_SCRIPT_AST_OPERAND_TYPE_SET_PTR_CONST)
+				if (operand1.operandType==PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR_CONST)
 				{
 					resOperand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_STRUCT;
-					resOperand.pSet=operand1.pSet;
-					PX_StringFormat1(&fmrString,"MUL R2,%1\n",PX_STRINGFORMAT_INT(operand1.pSet->size));
+					resOperand.pStruct=operand1.pStruct;
+					PX_StringFormat1(&fmrString,"MUL R2,%1\n",PX_STRINGFORMAT_INT(operand1.pStruct->size));
 					PX_StringCat(out,fmrString.buffer);
 
 				}
@@ -3512,7 +3516,7 @@ static px_bool PX_ScriptParseLastInstr_IDX(PX_SCRIPT_Analysis *analysis,px_vecto
 	PX_StringFree(&fmrString);
 	return PX_TRUE;
 }
-static px_bool PX_ScriptParseLastInstr_OFT(PX_SCRIPT_Analysis *analysis,px_vector *op,px_vector *tk,px_string *out)
+static px_bool PX_ScriptParseLastInstr_OFT(PX_ScriptInterpreter *analysis,px_vector *op,px_vector *tk,px_string *out)
 {
 	PX_SCRIPT_AST_OPERAND operand1,operand2,*pTop;
 	px_string fmrString;
@@ -3539,7 +3543,7 @@ static px_bool PX_ScriptParseLastInstr_OFT(PX_SCRIPT_Analysis *analysis,px_vecto
 	pTop->_oft=0;
 	return PX_TRUE;
 }
-static px_bool PX_ScriptParseLastInstr_PTR(PX_SCRIPT_Analysis *analysis,px_vector *op,px_vector *tk,px_string *out)
+static px_bool PX_ScriptParseLastInstr_PTR(PX_ScriptInterpreter *analysis,px_vector *op,px_vector *tk,px_string *out)
 {
 	PX_SCRIPT_AST_OPERAND operand1,resOperand;
 	px_string fmrString;
@@ -3557,53 +3561,53 @@ static px_bool PX_ScriptParseLastInstr_PTR(PX_SCRIPT_Analysis *analysis,px_vecto
 	if (operand1.operandType==PX_SCRIPT_AST_OPERAND_TYPE_INT_PTR)
 	{
 		resOperand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_INT;
-		resOperand.pSet=PX_NULL;
+		resOperand.pStruct=PX_NULL;
 	}
 	else if (operand1.operandType==PX_SCRIPT_AST_OPERAND_TYPE_FLOAT_PTR)
 	{
 		resOperand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_FLOAT;
-		resOperand.pSet=PX_NULL;
+		resOperand.pStruct=PX_NULL;
 	}
 	else if (operand1.operandType==PX_SCRIPT_AST_OPERAND_TYPE_STRING_PTR)
 	{
 		resOperand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_STRING;
-		resOperand.pSet=PX_NULL;
+		resOperand.pStruct=PX_NULL;
 	}
 	else if (operand1.operandType==PX_SCRIPT_AST_OPERAND_TYPE_MEMORY_PTR)
 	{
 		resOperand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_MEMORY;
-		resOperand.pSet=PX_NULL;
+		resOperand.pStruct=PX_NULL;
 	}
 	else if (operand1.operandType==PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR)
 	{
 		resOperand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_STRUCT;
-		resOperand.pSet=operand1.pSet;
+		resOperand.pStruct=operand1.pStruct;
 	}
 
 	else if (operand1.operandType==PX_SCRIPT_AST_OPERAND_TYPE_INT_PTR_CONST)
 	{
 		resOperand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_INT;
-		resOperand.pSet=PX_NULL;
+		resOperand.pStruct=PX_NULL;
 	}
 	else if (operand1.operandType==PX_SCRIPT_AST_OPERAND_TYPE_FLOAT_PTR_CONST)
 	{
 		resOperand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_FLOAT;
-		resOperand.pSet=PX_NULL;
+		resOperand.pStruct=PX_NULL;
 	}
 	else if (operand1.operandType==PX_SCRIPT_AST_OPERAND_TYPE_STRING_PTR_CONST)
 	{
 		resOperand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_STRING;
-		resOperand.pSet=PX_NULL;
+		resOperand.pStruct=PX_NULL;
 	}
 	else if (operand1.operandType==PX_SCRIPT_AST_OPERAND_TYPE_MEMORY_PTR_CONST)
 	{
 		resOperand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_MEMORY;
-		resOperand.pSet=PX_NULL;
+		resOperand.pStruct=PX_NULL;
 	}
-	else if (operand1.operandType==PX_SCRIPT_AST_OPERAND_TYPE_SET_PTR_CONST)
+	else if (operand1.operandType==PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR_CONST)
 	{
 		resOperand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_STRUCT;
-		resOperand.pSet=operand1.pSet;
+		resOperand.pStruct=operand1.pStruct;
 
 	}
 	else
@@ -3625,7 +3629,7 @@ static px_bool PX_ScriptParseLastInstr_PTR(PX_SCRIPT_Analysis *analysis,px_vecto
 	PX_StringFree(&fmrString);
 	return PX_TRUE;
 }
-static px_bool PX_ScriptParseLastInstr_ADR(PX_SCRIPT_Analysis *analysis,px_vector *op,px_vector *tk,px_string *out)
+static px_bool PX_ScriptParseLastInstr_ADR(PX_ScriptInterpreter *analysis,px_vector *op,px_vector *tk,px_string *out)
 {
 	PX_SCRIPT_AST_OPERAND operand1,*pTop;
 	px_string fmrString;
@@ -3654,7 +3658,7 @@ static px_bool PX_ScriptParseLastInstr_ADR(PX_SCRIPT_Analysis *analysis,px_vecto
 		pTop->operandType=PX_SCRIPT_AST_OPERAND_TYPE_MEMORY_PTR_CONST;
 		break;
 	case PX_SCRIPT_AST_OPERAND_TYPE_STRUCT:
-		pTop->operandType=PX_SCRIPT_AST_OPERAND_TYPE_SET_PTR_CONST;
+		pTop->operandType=PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR_CONST;
 		break;
 	default:
 		return PX_FALSE;
@@ -3691,7 +3695,7 @@ static px_bool PX_ScriptParseLastInstr_ADR(PX_SCRIPT_Analysis *analysis,px_vecto
 
 	return PX_TRUE;
 }
-static px_bool PX_ScriptParseLastInstr_ADD(PX_SCRIPT_Analysis *analysis,px_vector *op,px_vector *tk,px_string *out)
+static px_bool PX_ScriptParseLastInstr_ADD(PX_ScriptInterpreter *analysis,px_vector *op,px_vector *tk,px_string *out)
 {
 	PX_SCRIPT_AST_OPERAND operand1,operand2,*pTop;
 	px_string fmrString;
@@ -3922,7 +3926,7 @@ static px_bool PX_ScriptParseLastInstr_ADD(PX_SCRIPT_Analysis *analysis,px_vecto
 					if(!PX_ScriptParseAST_MapTokenToR2(analysis,operand2,out)) return PX_FALSE;
 					if(!PX_ScriptParseAST_MapTokenToR1(analysis,operand1,out)) return PX_FALSE;
 					PX_StringInitialize(analysis->mp,&fmrString);
-					PX_StringFormat1(&fmrString,"MUL R2,%1\n",PX_STRINGFORMAT_INT(operand1.pSet->size));
+					PX_StringFormat1(&fmrString,"MUL R2,%1\n",PX_STRINGFORMAT_INT(operand1.pStruct->size));
 					PX_StringCat(out,fmrString.buffer);
 					PX_StringFree(&fmrString);
 					PX_StringCat(out,"ADD R1,R2\nPUSH R1\n");
@@ -4014,7 +4018,7 @@ static px_bool PX_ScriptParseLastInstr_ADD(PX_SCRIPT_Analysis *analysis,px_vecto
 		break;
 
 	case PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR:
-	case PX_SCRIPT_AST_OPERAND_TYPE_SET_PTR_CONST:
+	case PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR_CONST:
 		{
 			switch(operand2.operandType)
 			{
@@ -4028,7 +4032,7 @@ static px_bool PX_ScriptParseLastInstr_ADD(PX_SCRIPT_Analysis *analysis,px_vecto
 					
 					PX_StringCat(out,"ADD R1,R2\nPUSH R1\n");
 					pTop=PX_VECTORLAST(PX_SCRIPT_AST_OPERAND,tk);
-					pTop->operandType=PX_SCRIPT_AST_OPERAND_TYPE_SET_PTR_CONST;
+					pTop->operandType=PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR_CONST;
 					pTop->region=PX_SCRIPT_VARIABLE_REGION_POP;
 					pTop->_oft=0;
 				}
@@ -4046,7 +4050,7 @@ static px_bool PX_ScriptParseLastInstr_ADD(PX_SCRIPT_Analysis *analysis,px_vecto
 	return PX_TRUE;
 
 }
-static px_bool PX_ScriptParseLastInstr_INC(PX_SCRIPT_Analysis *analysis,px_vector *op,px_vector *tk,px_string *out)
+static px_bool PX_ScriptParseLastInstr_INC(PX_ScriptInterpreter *analysis,px_vector *op,px_vector *tk,px_string *out)
 {
 	PX_SCRIPT_AST_OPERAND operand1;
 	px_string fmrString;
@@ -4095,7 +4099,7 @@ static px_bool PX_ScriptParseLastInstr_INC(PX_SCRIPT_Analysis *analysis,px_vecto
 	}
 	return PX_TRUE;
 }
-static px_bool PX_ScriptParseLastInstr_POSITIVE(PX_SCRIPT_Analysis *analysis,px_vector *op,px_vector *tk,px_string *out)
+static px_bool PX_ScriptParseLastInstr_POSITIVE(PX_ScriptInterpreter *analysis,px_vector *op,px_vector *tk,px_string *out)
 {
 	PX_SCRIPT_AST_OPERAND operand1;
 
@@ -4120,7 +4124,7 @@ static px_bool PX_ScriptParseLastInstr_POSITIVE(PX_SCRIPT_Analysis *analysis,px_
 	PX_VectorPop(op);
 	return PX_TRUE;
 }
-static px_bool PX_ScriptParseLastInstr_SUB(PX_SCRIPT_Analysis *analysis,px_vector *op,px_vector *tk,px_string *out)
+static px_bool PX_ScriptParseLastInstr_SUB(PX_ScriptInterpreter *analysis,px_vector *op,px_vector *tk,px_string *out)
 {
 	PX_SCRIPT_AST_OPERAND operand1,operand2,*pTop;
 
@@ -4334,7 +4338,7 @@ static px_bool PX_ScriptParseLastInstr_SUB(PX_SCRIPT_Analysis *analysis,px_vecto
 		break;
 
 	case PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR:
-	case PX_SCRIPT_AST_OPERAND_TYPE_SET_PTR_CONST:
+	case PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR_CONST:
 		{
 			switch(operand2.operandType)
 			{
@@ -4347,7 +4351,7 @@ static px_bool PX_ScriptParseLastInstr_SUB(PX_SCRIPT_Analysis *analysis,px_vecto
 					if(!PX_ScriptParseAST_MapTokenToR1(analysis,operand1,out)) return PX_FALSE;
 					PX_StringCat(out,"SUB R1,R2\nPUSH R1\n");
 					pTop=PX_VECTORLAST(PX_SCRIPT_AST_OPERAND,tk);
-					pTop->operandType=PX_SCRIPT_AST_OPERAND_TYPE_SET_PTR_CONST;
+					pTop->operandType=PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR_CONST;
 					pTop->region=PX_SCRIPT_VARIABLE_REGION_POP;
 					pTop->_oft=0;
 				}
@@ -4365,7 +4369,7 @@ static px_bool PX_ScriptParseLastInstr_SUB(PX_SCRIPT_Analysis *analysis,px_vecto
 	return PX_TRUE;
 
 }
-static px_bool PX_ScriptParseLastInstr_DEC(PX_SCRIPT_Analysis *analysis,px_vector *op,px_vector *tk,px_string *out)
+static px_bool PX_ScriptParseLastInstr_DEC(PX_ScriptInterpreter *analysis,px_vector *op,px_vector *tk,px_string *out)
 {
 	PX_SCRIPT_AST_OPERAND operand1;
 	px_string fmrString;
@@ -4415,7 +4419,7 @@ static px_bool PX_ScriptParseLastInstr_DEC(PX_SCRIPT_Analysis *analysis,px_vecto
 	}
 	return PX_TRUE;
 }
-static px_bool PX_ScriptParseLastInstr_NEGATIVE(PX_SCRIPT_Analysis *analysis,px_vector *op,px_vector *tk,px_string *out)
+static px_bool PX_ScriptParseLastInstr_NEGATIVE(PX_ScriptInterpreter *analysis,px_vector *op,px_vector *tk,px_string *out)
 {
 	PX_SCRIPT_AST_OPERAND operand1,*pTop;
 
@@ -4458,14 +4462,14 @@ static px_bool PX_ScriptParseLastInstr_NEGATIVE(PX_SCRIPT_Analysis *analysis,px_
 	}
 	pTop->region=PX_SCRIPT_VARIABLE_REGION_POP;
 	pTop->_oft=0;
-	pTop->pSet=PX_NULL;
+	pTop->pStruct=PX_NULL;
 	pTop->_int=0;
 	if(!PX_ScriptParseAST_MapTokenToR1(analysis,operand1,out)) return PX_FALSE;
 	PX_StringCat(out,"NEG R1\n");
 	PX_StringCat(out,"PUSH R1\n");
 	return PX_TRUE;
 }
-static px_bool PX_ScriptParseLastInstr_MUL(PX_SCRIPT_Analysis *analysis,px_vector *op,px_vector *tk,px_string *out)
+static px_bool PX_ScriptParseLastInstr_MUL(PX_ScriptInterpreter *analysis,px_vector *op,px_vector *tk,px_string *out)
 {
 	PX_SCRIPT_AST_OPERAND operand1,operand2,*pTop;
 
@@ -4584,7 +4588,7 @@ static px_bool PX_ScriptParseLastInstr_MUL(PX_SCRIPT_Analysis *analysis,px_vecto
 	return PX_TRUE;
 
 }
-static px_bool PX_ScriptParseLastInstr_DIV(PX_SCRIPT_Analysis *analysis,px_vector *op,px_vector *tk,px_string *out)
+static px_bool PX_ScriptParseLastInstr_DIV(PX_ScriptInterpreter *analysis,px_vector *op,px_vector *tk,px_string *out)
 {
 	PX_SCRIPT_AST_OPERAND operand1,operand2,*pTop;
 
@@ -4601,7 +4605,7 @@ static px_bool PX_ScriptParseLastInstr_DIV(PX_SCRIPT_Analysis *analysis,px_vecto
 	{
 		if (operand2._int==0)
 		{
-			PX_ScriptTranslatorError(&analysis->lexer,"Divide by zero error.");
+			PX_ScriptTranslatorError(analysis,"Divide by zero error.");
 			return PX_FALSE;
 		}
 
@@ -4625,7 +4629,7 @@ static px_bool PX_ScriptParseLastInstr_DIV(PX_SCRIPT_Analysis *analysis,px_vecto
 	{
 		if (operand2._int==0)
 		{
-			PX_ScriptTranslatorError(&analysis->lexer,"Divide by zero error.");
+			PX_ScriptTranslatorError(analysis,"Divide by zero error.");
 			return PX_FALSE;
 		}
 		if (operand2.operandType==PX_SCRIPT_AST_OPERAND_TYPE_INT_CONST&&operand2.region==PX_SCRIPT_VARIABLE_REGION_GLOBAL)
@@ -4713,7 +4717,7 @@ static px_bool PX_ScriptParseLastInstr_DIV(PX_SCRIPT_Analysis *analysis,px_vecto
 	return PX_TRUE;
 
 }
-static px_bool PX_ScriptParseLastInstr_AND(PX_SCRIPT_Analysis *analysis,px_vector *op,px_vector *tk,px_string *out)
+static px_bool PX_ScriptParseLastInstr_AND(PX_ScriptInterpreter *analysis,px_vector *op,px_vector *tk,px_string *out)
 {
 	PX_SCRIPT_AST_OPERAND operand1,operand2,*pTop;
 
@@ -4773,7 +4777,7 @@ static px_bool PX_ScriptParseLastInstr_AND(PX_SCRIPT_Analysis *analysis,px_vecto
 	return PX_TRUE;
 
 }
-static px_bool PX_ScriptParseLastInstr_OR(PX_SCRIPT_Analysis *analysis,px_vector *op,px_vector *tk,px_string *out)
+static px_bool PX_ScriptParseLastInstr_OR(PX_ScriptInterpreter *analysis,px_vector *op,px_vector *tk,px_string *out)
 {
 	PX_SCRIPT_AST_OPERAND operand1,operand2,*pTop;
 
@@ -4833,7 +4837,7 @@ static px_bool PX_ScriptParseLastInstr_OR(PX_SCRIPT_Analysis *analysis,px_vector
 	return PX_TRUE;
 
 }
-static px_bool PX_ScriptParseLastInstr_NOT(PX_SCRIPT_Analysis *analysis,px_vector *op,px_vector *tk,px_string *out)
+static px_bool PX_ScriptParseLastInstr_NOT(PX_ScriptInterpreter *analysis,px_vector *op,px_vector *tk,px_string *out)
 {
 	PX_SCRIPT_AST_OPERAND operand1,*pTop;
 
@@ -4864,14 +4868,14 @@ static px_bool PX_ScriptParseLastInstr_NOT(PX_SCRIPT_Analysis *analysis,px_vecto
 	}
 	pTop->region=PX_SCRIPT_VARIABLE_REGION_POP;
 	pTop->_oft=0;
-	pTop->pSet=PX_NULL;
+	pTop->pStruct=PX_NULL;
 	pTop->_int=0;
 	if(!PX_ScriptParseAST_MapTokenToR1(analysis,operand1,out)) return PX_FALSE;
 	PX_StringCat(out,"NOT R1\n");
 	PX_StringCat(out,"PUSH R1\n");
 	return PX_TRUE;
 }
-static px_bool PX_ScriptParseLastInstr_XOR(PX_SCRIPT_Analysis *analysis,px_vector *op,px_vector *tk,px_string *out)
+static px_bool PX_ScriptParseLastInstr_XOR(PX_ScriptInterpreter *analysis,px_vector *op,px_vector *tk,px_string *out)
 {
 	PX_SCRIPT_AST_OPERAND operand1,operand2,*pTop;
 
@@ -4931,7 +4935,7 @@ static px_bool PX_ScriptParseLastInstr_XOR(PX_SCRIPT_Analysis *analysis,px_vecto
 	return PX_TRUE;
 
 }
-static px_bool PX_ScriptParseLastInstr_INV(PX_SCRIPT_Analysis *analysis,px_vector *op,px_vector *tk,px_string *out)
+static px_bool PX_ScriptParseLastInstr_INV(PX_ScriptInterpreter *analysis,px_vector *op,px_vector *tk,px_string *out)
 {
 	PX_SCRIPT_AST_OPERAND operand1,*pTop;
 
@@ -4962,14 +4966,14 @@ static px_bool PX_ScriptParseLastInstr_INV(PX_SCRIPT_Analysis *analysis,px_vecto
 	}
 	pTop->region=PX_SCRIPT_VARIABLE_REGION_POP;
 	pTop->_oft=0;
-	pTop->pSet=PX_NULL;
+	pTop->pStruct=PX_NULL;
 	pTop->_int=0;
 	if(!PX_ScriptParseAST_MapTokenToR1(analysis,operand1,out)) return PX_FALSE;
 	PX_StringCat(out,"INV R1\n");
 	PX_StringCat(out,"PUSH R1\n");
 	return PX_TRUE;
 }
-static px_bool PX_ScriptParseLastInstr_MOD(PX_SCRIPT_Analysis *analysis,px_vector *op,px_vector *tk,px_string *out)
+static px_bool PX_ScriptParseLastInstr_MOD(PX_ScriptInterpreter *analysis,px_vector *op,px_vector *tk,px_string *out)
 {
 	PX_SCRIPT_AST_OPERAND operand1,operand2,*pTop;
 
@@ -4986,7 +4990,7 @@ static px_bool PX_ScriptParseLastInstr_MOD(PX_SCRIPT_Analysis *analysis,px_vecto
 	{
 		if (operand2._int==0)
 		{
-			PX_ScriptTranslatorError(&analysis->lexer,"mod by zero error.");
+			PX_ScriptTranslatorError(analysis,"mod by zero error.");
 			return PX_FALSE;
 		}
 
@@ -5034,7 +5038,7 @@ static px_bool PX_ScriptParseLastInstr_MOD(PX_SCRIPT_Analysis *analysis,px_vecto
 	return PX_TRUE;
 
 }
-static px_bool PX_ScriptParseLastInstr_SHL(PX_SCRIPT_Analysis *analysis,px_vector *op,px_vector *tk,px_string *out)
+static px_bool PX_ScriptParseLastInstr_SHL(PX_ScriptInterpreter *analysis,px_vector *op,px_vector *tk,px_string *out)
 {
 	PX_SCRIPT_AST_OPERAND operand1,operand2,*pTop;
 
@@ -5095,7 +5099,7 @@ static px_bool PX_ScriptParseLastInstr_SHL(PX_SCRIPT_Analysis *analysis,px_vecto
 	return PX_TRUE;
 
 }
-static px_bool PX_ScriptParseLastInstr_SHR(PX_SCRIPT_Analysis *analysis,px_vector *op,px_vector *tk,px_string *out)
+static px_bool PX_ScriptParseLastInstr_SHR(PX_ScriptInterpreter *analysis,px_vector *op,px_vector *tk,px_string *out)
 {
 	PX_SCRIPT_AST_OPERAND operand1,operand2,*pTop;
 
@@ -5156,7 +5160,7 @@ static px_bool PX_ScriptParseLastInstr_SHR(PX_SCRIPT_Analysis *analysis,px_vecto
 	return PX_TRUE;
 
 }
-static px_bool PX_ScriptParseLastInstr_INT(PX_SCRIPT_Analysis *analysis,px_vector *op,px_vector *tk,px_string *out)
+static px_bool PX_ScriptParseLastInstr_INT(PX_ScriptInterpreter *analysis,px_vector *op,px_vector *tk,px_string *out)
 {
 	PX_SCRIPT_AST_OPERAND operand1,*pTop;
 
@@ -5169,7 +5173,7 @@ static px_bool PX_ScriptParseLastInstr_INT(PX_SCRIPT_Analysis *analysis,px_vecto
 	PX_VectorPop(op);
 	pTop->region=PX_SCRIPT_VARIABLE_REGION_POP;
 	pTop->_oft=0;
-	pTop->pSet=PX_NULL;
+	pTop->pStruct=PX_NULL;
 	pTop->_int=0;
 	if(!PX_ScriptParseAST_MapTokenToR1(analysis,operand1,out)) return PX_FALSE;
 	pTop->operandType=PX_SCRIPT_AST_OPERAND_TYPE_INT_CONST;
@@ -5194,7 +5198,7 @@ static px_bool PX_ScriptParseLastInstr_INT(PX_SCRIPT_Analysis *analysis,px_vecto
 	PX_StringCat(out,"PUSH R1\n");
 	return PX_TRUE;
 }
-static px_bool PX_ScriptParseLastInstr_FLOAT(PX_SCRIPT_Analysis *analysis,px_vector *op,px_vector *tk,px_string *out)
+static px_bool PX_ScriptParseLastInstr_FLOAT(PX_ScriptInterpreter *analysis,px_vector *op,px_vector *tk,px_string *out)
 {
 	PX_SCRIPT_AST_OPERAND operand1,*pTop;
 
@@ -5207,7 +5211,7 @@ static px_bool PX_ScriptParseLastInstr_FLOAT(PX_SCRIPT_Analysis *analysis,px_vec
 	PX_VectorPop(op);
 	pTop->region=PX_SCRIPT_VARIABLE_REGION_POP;
 	pTop->_oft=0;
-	pTop->pSet=PX_NULL;
+	pTop->pStruct=PX_NULL;
 	pTop->_int=0;
 	if(!PX_ScriptParseAST_MapTokenToR1(analysis,operand1,out)) return PX_FALSE;
 	pTop->operandType=PX_SCRIPT_AST_OPERAND_TYPE_FLOAT_CONST;
@@ -5232,7 +5236,7 @@ static px_bool PX_ScriptParseLastInstr_FLOAT(PX_SCRIPT_Analysis *analysis,px_vec
 	PX_StringCat(out,"PUSH R1\n");
 	return PX_TRUE;
 }
-static px_bool PX_ScriptParseLastInstr_STRING(PX_SCRIPT_Analysis *analysis,px_vector *op,px_vector *tk,px_string *out)
+static px_bool PX_ScriptParseLastInstr_STRING(PX_ScriptInterpreter *analysis,px_vector *op,px_vector *tk,px_string *out)
 {
 	PX_SCRIPT_AST_OPERAND operand1,*pTop;
 
@@ -5245,7 +5249,7 @@ static px_bool PX_ScriptParseLastInstr_STRING(PX_SCRIPT_Analysis *analysis,px_ve
 	PX_VectorPop(op);
 	pTop->region=PX_SCRIPT_VARIABLE_REGION_POP;
 	pTop->_oft=0;
-	pTop->pSet=PX_NULL;
+	pTop->pStruct=PX_NULL;
 	pTop->_int=0;
 	if(!PX_ScriptParseAST_MapTokenToR1(analysis,operand1,out)) return PX_FALSE;
 	pTop->operandType=PX_SCRIPT_AST_OPERAND_TYPE_STRING_CONST;
@@ -5275,7 +5279,7 @@ static px_bool PX_ScriptParseLastInstr_STRING(PX_SCRIPT_Analysis *analysis,px_ve
 	PX_StringCat(out,"PUSH R1\n");
 	return PX_TRUE;
 }
-static px_bool PX_ScriptParseLastInstr_MEMORY(PX_SCRIPT_Analysis *analysis,px_vector *op,px_vector *tk,px_string *out)
+static px_bool PX_ScriptParseLastInstr_MEMORY(PX_ScriptInterpreter *analysis,px_vector *op,px_vector *tk,px_string *out)
 {
 	PX_SCRIPT_AST_OPERAND operand1,*pTop;
 
@@ -5288,7 +5292,7 @@ static px_bool PX_ScriptParseLastInstr_MEMORY(PX_SCRIPT_Analysis *analysis,px_ve
 	PX_VectorPop(op);
 	pTop->region=PX_SCRIPT_VARIABLE_REGION_POP;
 	pTop->_oft=0;
-	pTop->pSet=PX_NULL;
+	pTop->pStruct=PX_NULL;
 	pTop->_int=0;
 	if(!PX_ScriptParseAST_MapTokenToR1(analysis,operand1,out)) return PX_FALSE;
 	pTop->operandType=PX_SCRIPT_AST_OPERAND_TYPE_MEMORY_CONST;
@@ -5305,7 +5309,7 @@ static px_bool PX_ScriptParseLastInstr_MEMORY(PX_SCRIPT_Analysis *analysis,px_ve
 	PX_StringCat(out,"PUSH R1\n");
 	return PX_TRUE;
 }
-static px_bool PX_ScriptParseLastInstr_STRLEN(PX_SCRIPT_Analysis *analysis,px_vector *op,px_vector *tk,px_string *out)
+static px_bool PX_ScriptParseLastInstr_STRLEN(PX_ScriptInterpreter *analysis,px_vector *op,px_vector *tk,px_string *out)
 {
 	PX_SCRIPT_AST_OPERAND operand1,*pTop;
 
@@ -5318,7 +5322,7 @@ static px_bool PX_ScriptParseLastInstr_STRLEN(PX_SCRIPT_Analysis *analysis,px_ve
 	PX_VectorPop(op);
 	pTop->region=PX_SCRIPT_VARIABLE_REGION_POP;
 	pTop->_oft=0;
-	pTop->pSet=PX_NULL;
+	pTop->pStruct=PX_NULL;
 	pTop->_int=0;
 	if(!PX_ScriptParseAST_MapTokenToR2(analysis,operand1,out)) return PX_FALSE;
 	pTop->operandType=PX_SCRIPT_AST_OPERAND_TYPE_INT_CONST;
@@ -5335,7 +5339,7 @@ static px_bool PX_ScriptParseLastInstr_STRLEN(PX_SCRIPT_Analysis *analysis,px_ve
 	PX_StringCat(out,"PUSH R1\n");
 	return PX_TRUE;
 }
-static px_bool PX_ScriptParseLastInstr_MEMLEN(PX_SCRIPT_Analysis *analysis,px_vector *op,px_vector *tk,px_string *out)
+static px_bool PX_ScriptParseLastInstr_MEMLEN(PX_ScriptInterpreter *analysis,px_vector *op,px_vector *tk,px_string *out)
 {
 	PX_SCRIPT_AST_OPERAND operand1,*pTop;
 
@@ -5348,7 +5352,7 @@ static px_bool PX_ScriptParseLastInstr_MEMLEN(PX_SCRIPT_Analysis *analysis,px_ve
 	PX_VectorPop(op);
 	pTop->region=PX_SCRIPT_VARIABLE_REGION_POP;
 	pTop->_oft=0;
-	pTop->pSet=PX_NULL;
+	pTop->pStruct=PX_NULL;
 	pTop->_int=0;
 	if(!PX_ScriptParseAST_MapTokenToR2(analysis,operand1,out)) return PX_FALSE;
 	pTop->operandType=PX_SCRIPT_AST_OPERAND_TYPE_INT_CONST;
@@ -5366,7 +5370,7 @@ static px_bool PX_ScriptParseLastInstr_MEMLEN(PX_SCRIPT_Analysis *analysis,px_ve
 	return PX_TRUE;
 }
 
-static px_bool PX_ScriptParseLastInstr_LARGE(PX_SCRIPT_Analysis *analysis,px_vector *op,px_vector *tk,px_string *out)
+static px_bool PX_ScriptParseLastInstr_LARGE(PX_ScriptInterpreter *analysis,px_vector *op,px_vector *tk,px_string *out)
 {
 	PX_SCRIPT_AST_OPERAND operand1,operand2,*pTop;
 
@@ -5395,7 +5399,7 @@ static px_bool PX_ScriptParseLastInstr_LARGE(PX_SCRIPT_Analysis *analysis,px_vec
 	PX_StringCat(out,"PUSH R1\n");
 	return PX_TRUE;
 }
-static px_bool PX_ScriptParseLastInstr_LARGEEQU(PX_SCRIPT_Analysis *analysis,px_vector *op,px_vector *tk,px_string *out)
+static px_bool PX_ScriptParseLastInstr_LARGEEQU(PX_ScriptInterpreter *analysis,px_vector *op,px_vector *tk,px_string *out)
 {
 	PX_SCRIPT_AST_OPERAND operand1,operand2,*pTop;
 
@@ -5424,7 +5428,7 @@ static px_bool PX_ScriptParseLastInstr_LARGEEQU(PX_SCRIPT_Analysis *analysis,px_
 	PX_StringCat(out,"PUSH R1\n");
 	return PX_TRUE;
 }
-static px_bool PX_ScriptParseLastInstr_LESS(PX_SCRIPT_Analysis *analysis,px_vector *op,px_vector *tk,px_string *out)
+static px_bool PX_ScriptParseLastInstr_LESS(PX_ScriptInterpreter *analysis,px_vector *op,px_vector *tk,px_string *out)
 {
 	PX_SCRIPT_AST_OPERAND operand1,operand2,*pTop;
 
@@ -5453,7 +5457,7 @@ static px_bool PX_ScriptParseLastInstr_LESS(PX_SCRIPT_Analysis *analysis,px_vect
 	PX_StringCat(out,"PUSH R1\n");
 	return PX_TRUE;
 }
-static px_bool PX_ScriptParseLastInstr_LAND(PX_SCRIPT_Analysis *analysis,px_vector *op,px_vector *tk,px_string *out)
+static px_bool PX_ScriptParseLastInstr_LAND(PX_ScriptInterpreter *analysis,px_vector *op,px_vector *tk,px_string *out)
 {
 	PX_SCRIPT_AST_OPERAND operand1,operand2,*pTop;
 
@@ -5481,7 +5485,7 @@ static px_bool PX_ScriptParseLastInstr_LAND(PX_SCRIPT_Analysis *analysis,px_vect
 	PX_StringCat(out,"PUSH R1\n");
 	return PX_TRUE;
 }
-static px_bool PX_ScriptParseLastInstr_LOR(PX_SCRIPT_Analysis *analysis,px_vector *op,px_vector *tk,px_string *out)
+static px_bool PX_ScriptParseLastInstr_LOR(PX_ScriptInterpreter *analysis,px_vector *op,px_vector *tk,px_string *out)
 {
 	PX_SCRIPT_AST_OPERAND operand1,operand2,*pTop;
 
@@ -5509,7 +5513,7 @@ static px_bool PX_ScriptParseLastInstr_LOR(PX_SCRIPT_Analysis *analysis,px_vecto
 	PX_StringCat(out,"PUSH R1\n");
 	return PX_TRUE;
 }
-static px_bool PX_ScriptParseLastInstr_LESSEQU(PX_SCRIPT_Analysis *analysis,px_vector *op,px_vector *tk,px_string *out)
+static px_bool PX_ScriptParseLastInstr_LESSEQU(PX_ScriptInterpreter *analysis,px_vector *op,px_vector *tk,px_string *out)
 {
 	PX_SCRIPT_AST_OPERAND operand1,operand2,*pTop;
 
@@ -5538,7 +5542,7 @@ static px_bool PX_ScriptParseLastInstr_LESSEQU(PX_SCRIPT_Analysis *analysis,px_v
 	PX_StringCat(out,"PUSH R1\n");
 	return PX_TRUE;
 }
-static px_bool PX_ScriptParseLastInstr_LGEQU(PX_SCRIPT_Analysis *analysis,px_vector *op,px_vector *tk,px_string *out)
+static px_bool PX_ScriptParseLastInstr_LGEQU(PX_ScriptInterpreter *analysis,px_vector *op,px_vector *tk,px_string *out)
 {
 	PX_SCRIPT_AST_OPERAND operand1,operand2,*pTop;
 
@@ -5568,7 +5572,7 @@ static px_bool PX_ScriptParseLastInstr_LGEQU(PX_SCRIPT_Analysis *analysis,px_vec
 				case PX_SCRIPT_AST_OPERAND_TYPE_MEMORY_CONST:
 					break;
 				default:
-					PX_ScriptTranslatorError(&analysis->lexer,"Matched-type difference.");
+					PX_ScriptTranslatorError(analysis,"Matched-type difference.");
 					return PX_FALSE;
 				}
 			}
@@ -5582,18 +5586,18 @@ static px_bool PX_ScriptParseLastInstr_LGEQU(PX_SCRIPT_Analysis *analysis,px_vec
 				case PX_SCRIPT_AST_OPERAND_TYPE_STRING_CONST:
 					break;
 				default:
-					PX_ScriptTranslatorError(&analysis->lexer,"Matched-type difference.");
+					PX_ScriptTranslatorError(analysis,"Matched-type difference.");
 					return PX_FALSE;
 				}
 			}
 			break;
 		case PX_SCRIPT_AST_OPERAND_TYPE_STRUCT:
-			PX_ScriptTranslatorError(&analysis->lexer,"Struct-type could not be compared.");
+			PX_ScriptTranslatorError(analysis,"Struct-type could not be compared.");
 			return PX_FALSE;
 		default:
 			if (operand1.operandType!=operand2.operandType)
 			{
-				PX_ScriptTranslatorError(&analysis->lexer,"Matched-type difference.");
+				PX_ScriptTranslatorError(analysis,"Matched-type difference.");
 				return PX_FALSE;
 			}
 		}
@@ -5604,7 +5608,7 @@ static px_bool PX_ScriptParseLastInstr_LGEQU(PX_SCRIPT_Analysis *analysis,px_vec
 	PX_StringCat(out,"PUSH R1\n");
 	return PX_TRUE;
 }
-static px_bool PX_ScriptParseLastInstr_UNEQU(PX_SCRIPT_Analysis *analysis,px_vector *op,px_vector *tk,px_string *out)
+static px_bool PX_ScriptParseLastInstr_UNEQU(PX_ScriptInterpreter *analysis,px_vector *op,px_vector *tk,px_string *out)
 {
 	PX_SCRIPT_AST_OPERAND operand1,operand2,*pTop;
 
@@ -5634,7 +5638,7 @@ static px_bool PX_ScriptParseLastInstr_UNEQU(PX_SCRIPT_Analysis *analysis,px_vec
 					case PX_SCRIPT_AST_OPERAND_TYPE_MEMORY_CONST:
 						break;
 					default:
-						PX_ScriptTranslatorError(&analysis->lexer,"Matched-type difference.");
+						PX_ScriptTranslatorError(analysis,"Matched-type difference.");
 						return PX_FALSE;
 				}
 			}
@@ -5648,18 +5652,18 @@ static px_bool PX_ScriptParseLastInstr_UNEQU(PX_SCRIPT_Analysis *analysis,px_vec
 				case PX_SCRIPT_AST_OPERAND_TYPE_STRING_CONST:
 					break;
 				default:
-					PX_ScriptTranslatorError(&analysis->lexer,"Matched-type difference.");
+					PX_ScriptTranslatorError(analysis,"Matched-type difference.");
 					return PX_FALSE;
 				}
 			}
 			break;
 		case PX_SCRIPT_AST_OPERAND_TYPE_STRUCT:
-			PX_ScriptTranslatorError(&analysis->lexer,"Struct-type could not be compared.");
+			PX_ScriptTranslatorError(analysis,"Struct-type could not be compared.");
 			return PX_FALSE;
 		default:
 			if (operand1.operandType!=operand2.operandType)
 			{
-				PX_ScriptTranslatorError(&analysis->lexer,"Matched-type difference.");
+				PX_ScriptTranslatorError(analysis,"Matched-type difference.");
 				return PX_FALSE;
 			}
 		}
@@ -5670,7 +5674,7 @@ static px_bool PX_ScriptParseLastInstr_UNEQU(PX_SCRIPT_Analysis *analysis,px_vec
 	PX_StringCat(out,"PUSH R1\n");
 	return PX_TRUE;
 }
-static px_bool PX_ScriptParseLastInstr(PX_SCRIPT_Analysis *analysis,px_vector *op,px_vector *tk,px_string *out)
+static px_bool PX_ScriptParseLastInstr(PX_ScriptInterpreter *analysis,px_vector *op,px_vector *tk,px_string *out)
 {
 	
 	PX_SCRIPT_AST_OPCODE opcode;
@@ -5687,7 +5691,7 @@ static px_bool PX_ScriptParseLastInstr(PX_SCRIPT_Analysis *analysis,px_vector *o
 		{
 			if(!PX_ScriptParseLastInstr_EQUAL(analysis,op,tk,out)) 
 			{
-				PX_ScriptTranslatorError(&analysis->lexer,"'=' not match error.");
+				PX_ScriptTranslatorError(analysis,"'=' not match error.");
 				return PX_FALSE;
 			}
 		}
@@ -5695,7 +5699,7 @@ static px_bool PX_ScriptParseLastInstr(PX_SCRIPT_Analysis *analysis,px_vector *o
 	case PX_SCRIPT_AST_OPCODE_TYPE_DOT:
 		{
 			if(!PX_ScriptParseLastInstr_DOT(analysis,op,tk,out)){
-				PX_ScriptTranslatorError(&analysis->lexer,"'.' not match error.");
+				PX_ScriptTranslatorError(analysis,"'.' not match error.");
 				return PX_FALSE;
 			}
 		}
@@ -5703,7 +5707,7 @@ static px_bool PX_ScriptParseLastInstr(PX_SCRIPT_Analysis *analysis,px_vector *o
 	case PX_SCRIPT_AST_OPCODE_TYPE_IDX:
 		{
 			if(!PX_ScriptParseLastInstr_IDX(analysis,op,tk,out)){
-				PX_ScriptTranslatorError(&analysis->lexer,"'.' not match error.");
+				PX_ScriptTranslatorError(analysis,"'.' not match error.");
 				return PX_FALSE;
 			}
 		}
@@ -5711,7 +5715,7 @@ static px_bool PX_ScriptParseLastInstr(PX_SCRIPT_Analysis *analysis,px_vector *o
 	case PX_SCRIPT_AST_OPCODE_TYPE_OFT:
 		{
 			if(!PX_ScriptParseLastInstr_OFT(analysis,op,tk,out)) {
-				PX_ScriptTranslatorError(&analysis->lexer,"'[]' not match error.");
+				PX_ScriptTranslatorError(analysis,"'[]' not match error.");
 				return PX_FALSE;
 			}
 		}
@@ -5719,7 +5723,7 @@ static px_bool PX_ScriptParseLastInstr(PX_SCRIPT_Analysis *analysis,px_vector *o
 	case PX_SCRIPT_AST_OPCODE_TYPE_PTR:
 		{
 			if(!PX_ScriptParseLastInstr_PTR(analysis,op,tk,out)) {
-				PX_ScriptTranslatorError(&analysis->lexer,"'->' not match error.");
+				PX_ScriptTranslatorError(analysis,"'->' not match error.");
 				return PX_FALSE;
 			}
 		}
@@ -5727,7 +5731,7 @@ static px_bool PX_ScriptParseLastInstr(PX_SCRIPT_Analysis *analysis,px_vector *o
 	case PX_SCRIPT_AST_OPCODE_TYPE_ADR:
 		{
 			if(!PX_ScriptParseLastInstr_ADR(analysis,op,tk,out)) {
-				PX_ScriptTranslatorError(&analysis->lexer,"'&' not match error.");
+				PX_ScriptTranslatorError(analysis,"'&' not match error.");
 				return PX_FALSE;
 			}
 		}
@@ -5735,7 +5739,7 @@ static px_bool PX_ScriptParseLastInstr(PX_SCRIPT_Analysis *analysis,px_vector *o
 	case PX_SCRIPT_AST_OPCODE_TYPE_ADD:
 		{
 			if(!PX_ScriptParseLastInstr_ADD(analysis,op,tk,out)) {
-				PX_ScriptTranslatorError(&analysis->lexer,"'+' not match error.");
+				PX_ScriptTranslatorError(analysis,"'+' not match error.");
 				return PX_FALSE;
 			}
 		}
@@ -5743,7 +5747,7 @@ static px_bool PX_ScriptParseLastInstr(PX_SCRIPT_Analysis *analysis,px_vector *o
 	case PX_SCRIPT_AST_OPCODE_TYPE_INC:
 		{
 			if(!PX_ScriptParseLastInstr_INC(analysis,op,tk,out)) {
-				PX_ScriptTranslatorError(&analysis->lexer,"'++' not match error.");
+				PX_ScriptTranslatorError(analysis,"'++' not match error.");
 				return PX_FALSE;
 			}
 		}
@@ -5751,7 +5755,7 @@ static px_bool PX_ScriptParseLastInstr(PX_SCRIPT_Analysis *analysis,px_vector *o
 	case PX_SCRIPT_AST_OPCODE_TYPE_POSITIVE:
 		{
 			if(!PX_ScriptParseLastInstr_POSITIVE(analysis,op,tk,out)) {
-				PX_ScriptTranslatorError(&analysis->lexer,"'+' not match error.");
+				PX_ScriptTranslatorError(analysis,"'+' not match error.");
 				return PX_FALSE;
 			}
 		}
@@ -5759,7 +5763,7 @@ static px_bool PX_ScriptParseLastInstr(PX_SCRIPT_Analysis *analysis,px_vector *o
 	case PX_SCRIPT_AST_OPCODE_TYPE_SUB:
 		{
 			if(!PX_ScriptParseLastInstr_SUB(analysis,op,tk,out)) {
-				PX_ScriptTranslatorError(&analysis->lexer,"'-' not match error.");
+				PX_ScriptTranslatorError(analysis,"'-' not match error.");
 				return PX_FALSE;
 			}
 		}
@@ -5767,7 +5771,7 @@ static px_bool PX_ScriptParseLastInstr(PX_SCRIPT_Analysis *analysis,px_vector *o
 	case PX_SCRIPT_AST_OPCODE_TYPE_DEC:
 		{
 			if(!PX_ScriptParseLastInstr_DEC(analysis,op,tk,out)) {
-				PX_ScriptTranslatorError(&analysis->lexer,"'--' not match error.");
+				PX_ScriptTranslatorError(analysis,"'--' not match error.");
 				return PX_FALSE;
 			}
 		}
@@ -5775,7 +5779,7 @@ static px_bool PX_ScriptParseLastInstr(PX_SCRIPT_Analysis *analysis,px_vector *o
 	case PX_SCRIPT_AST_OPCODE_TYPE_NEGATIVE:
 		{
 			if(!PX_ScriptParseLastInstr_NEGATIVE(analysis,op,tk,out)) {
-				PX_ScriptTranslatorError(&analysis->lexer,"'-' not match error.");
+				PX_ScriptTranslatorError(analysis,"'-' not match error.");
 				return PX_FALSE;
 			}
 		}
@@ -5783,7 +5787,7 @@ static px_bool PX_ScriptParseLastInstr(PX_SCRIPT_Analysis *analysis,px_vector *o
 	case PX_SCRIPT_AST_OPCODE_TYPE_MUL:
 		{
 			if(!PX_ScriptParseLastInstr_MUL(analysis,op,tk,out)) {
-				PX_ScriptTranslatorError(&analysis->lexer,"'*' not match error.");
+				PX_ScriptTranslatorError(analysis,"'*' not match error.");
 				return PX_FALSE;
 			}
 		}
@@ -5791,7 +5795,7 @@ static px_bool PX_ScriptParseLastInstr(PX_SCRIPT_Analysis *analysis,px_vector *o
 	case PX_SCRIPT_AST_OPCODE_TYPE_DIV:
 		{
 			if(!PX_ScriptParseLastInstr_DIV(analysis,op,tk,out)) {
-				PX_ScriptTranslatorError(&analysis->lexer,"'/' not match error.");
+				PX_ScriptTranslatorError(analysis,"'/' not match error.");
 				return PX_FALSE;
 			}
 		}
@@ -5799,7 +5803,7 @@ static px_bool PX_ScriptParseLastInstr(PX_SCRIPT_Analysis *analysis,px_vector *o
 	case PX_SCRIPT_AST_OPCODE_TYPE_AND:
 		{
 			if(!PX_ScriptParseLastInstr_AND(analysis,op,tk,out)) {
-				PX_ScriptTranslatorError(&analysis->lexer,"'&' not match error.");
+				PX_ScriptTranslatorError(analysis,"'&' not match error.");
 				return PX_FALSE;
 			}
 		}
@@ -5807,7 +5811,7 @@ static px_bool PX_ScriptParseLastInstr(PX_SCRIPT_Analysis *analysis,px_vector *o
 	case PX_SCRIPT_AST_OPCODE_TYPE_OR:
 		{
 			if(!PX_ScriptParseLastInstr_OR(analysis,op,tk,out)) {
-				PX_ScriptTranslatorError(&analysis->lexer,"'|' not match error.");
+				PX_ScriptTranslatorError(analysis,"'|' not match error.");
 				return PX_FALSE;
 			}
 		}
@@ -5815,7 +5819,7 @@ static px_bool PX_ScriptParseLastInstr(PX_SCRIPT_Analysis *analysis,px_vector *o
 	case PX_SCRIPT_AST_OPCODE_TYPE_NOT:
 		{
 			if(!PX_ScriptParseLastInstr_NOT(analysis,op,tk,out)) {
-				PX_ScriptTranslatorError(&analysis->lexer,"'!' not match error.");
+				PX_ScriptTranslatorError(analysis,"'!' not match error.");
 				return PX_FALSE;
 			}
 		}
@@ -5823,7 +5827,7 @@ static px_bool PX_ScriptParseLastInstr(PX_SCRIPT_Analysis *analysis,px_vector *o
 	case PX_SCRIPT_AST_OPCODE_TYPE_XOR:
 		{
 			if(!PX_ScriptParseLastInstr_XOR(analysis,op,tk,out)) {
-				PX_ScriptTranslatorError(&analysis->lexer,"'^' not match error.");
+				PX_ScriptTranslatorError(analysis,"'^' not match error.");
 				return PX_FALSE;
 			}
 		}
@@ -5831,7 +5835,7 @@ static px_bool PX_ScriptParseLastInstr(PX_SCRIPT_Analysis *analysis,px_vector *o
 	case PX_SCRIPT_AST_OPCODE_TYPE_INV:
 		{
 			if(!PX_ScriptParseLastInstr_INV(analysis,op,tk,out)) {
-				PX_ScriptTranslatorError(&analysis->lexer,"'~' not match error.");
+				PX_ScriptTranslatorError(analysis,"'~' not match error.");
 				return PX_FALSE;
 			}
 		}
@@ -5839,7 +5843,7 @@ static px_bool PX_ScriptParseLastInstr(PX_SCRIPT_Analysis *analysis,px_vector *o
 	case PX_SCRIPT_AST_OPCODE_TYPE_MOD:
 		{
 			if(!PX_ScriptParseLastInstr_MOD(analysis,op,tk,out)) {
-				PX_ScriptTranslatorError(&analysis->lexer,"'%' not match error.");
+				PX_ScriptTranslatorError(analysis,"'%' not match error.");
 				return PX_FALSE;
 			}
 		}
@@ -5847,7 +5851,7 @@ static px_bool PX_ScriptParseLastInstr(PX_SCRIPT_Analysis *analysis,px_vector *o
 	case PX_SCRIPT_AST_OPCODE_TYPE_SHL:
 		{
 			if(!PX_ScriptParseLastInstr_SHL(analysis,op,tk,out)) {
-				PX_ScriptTranslatorError(&analysis->lexer,"'<<' not match error.");
+				PX_ScriptTranslatorError(analysis,"'<<' not match error.");
 				return PX_FALSE;
 			}
 		}
@@ -5855,7 +5859,7 @@ static px_bool PX_ScriptParseLastInstr(PX_SCRIPT_Analysis *analysis,px_vector *o
 	case PX_SCRIPT_AST_OPCODE_TYPE_SHR:
 		{
 			if(!PX_ScriptParseLastInstr_SHR(analysis,op,tk,out)) {
-				PX_ScriptTranslatorError(&analysis->lexer,"'>>' not match error.");
+				PX_ScriptTranslatorError(analysis,"'>>' not match error.");
 				return PX_FALSE;
 			}
 		}
@@ -5863,7 +5867,7 @@ static px_bool PX_ScriptParseLastInstr(PX_SCRIPT_Analysis *analysis,px_vector *o
 	case PX_SCRIPT_AST_OPCODE_TYPE_LARGE:
 		{
 			if(!PX_ScriptParseLastInstr_LARGE(analysis,op,tk,out)) {
-				PX_ScriptTranslatorError(&analysis->lexer,"'>' not match error.");
+				PX_ScriptTranslatorError(analysis,"'>' not match error.");
 				return PX_FALSE;
 			}
 		}
@@ -5871,7 +5875,7 @@ static px_bool PX_ScriptParseLastInstr(PX_SCRIPT_Analysis *analysis,px_vector *o
 	case PX_SCRIPT_AST_OPCODE_TYPE_LARGEEQU:
 		{
 			if(!PX_ScriptParseLastInstr_LARGEEQU(analysis,op,tk,out)) {
-				PX_ScriptTranslatorError(&analysis->lexer,"'>=' not match error.");
+				PX_ScriptTranslatorError(analysis,"'>=' not match error.");
 				return PX_FALSE;
 			}
 		}
@@ -5879,7 +5883,7 @@ static px_bool PX_ScriptParseLastInstr(PX_SCRIPT_Analysis *analysis,px_vector *o
 	case PX_SCRIPT_AST_OPCODE_TYPE_LESS:
 		{
 			if(!PX_ScriptParseLastInstr_LESS(analysis,op,tk,out)) {
-				PX_ScriptTranslatorError(&analysis->lexer,"'<' not match error.");
+				PX_ScriptTranslatorError(analysis,"'<' not match error.");
 				return PX_FALSE;
 			}
 		}
@@ -5887,7 +5891,7 @@ static px_bool PX_ScriptParseLastInstr(PX_SCRIPT_Analysis *analysis,px_vector *o
 	case PX_SCRIPT_AST_OPCODE_TYPE_LESSEQU:
 		{
 			if(!PX_ScriptParseLastInstr_LESSEQU(analysis,op,tk,out)) {
-				PX_ScriptTranslatorError(&analysis->lexer,"'<=' not match error.");
+				PX_ScriptTranslatorError(analysis,"'<=' not match error.");
 				return PX_FALSE;
 			}
 		}
@@ -5895,7 +5899,7 @@ static px_bool PX_ScriptParseLastInstr(PX_SCRIPT_Analysis *analysis,px_vector *o
 	case PX_SCRIPT_AST_OPCODE_TYPE_LGEQU:
 		{
 			if(!PX_ScriptParseLastInstr_LGEQU(analysis,op,tk,out)) {
-				PX_ScriptTranslatorError(&analysis->lexer,"'>=' not match error.");
+				PX_ScriptTranslatorError(analysis,"'>=' not match error.");
 				return PX_FALSE;
 			}
 		}
@@ -5903,7 +5907,7 @@ static px_bool PX_ScriptParseLastInstr(PX_SCRIPT_Analysis *analysis,px_vector *o
 	case PX_SCRIPT_AST_OPCODE_TYPE_UNEQU:
 		{
 			if(!PX_ScriptParseLastInstr_UNEQU(analysis,op,tk,out)) {
-				PX_ScriptTranslatorError(&analysis->lexer,"'!=' not match error.");
+				PX_ScriptTranslatorError(analysis,"'!=' not match error.");
 				return PX_FALSE;
 			}
 		}
@@ -5911,7 +5915,7 @@ static px_bool PX_ScriptParseLastInstr(PX_SCRIPT_Analysis *analysis,px_vector *o
 	case PX_SCRIPT_AST_OPCODE_TYPE_LAND:
 		{
 			if(!PX_ScriptParseLastInstr_LAND(analysis,op,tk,out)) {
-				PX_ScriptTranslatorError(&analysis->lexer,"'&&' not match error.");
+				PX_ScriptTranslatorError(analysis,"'&&' not match error.");
 				return PX_FALSE;
 			}
 		}
@@ -5919,7 +5923,7 @@ static px_bool PX_ScriptParseLastInstr(PX_SCRIPT_Analysis *analysis,px_vector *o
 	case PX_SCRIPT_AST_OPCODE_TYPE_LOR:
 		{
 			if(!PX_ScriptParseLastInstr_LOR(analysis,op,tk,out)) {
-				PX_ScriptTranslatorError(&analysis->lexer,"'||' not match error.");
+				PX_ScriptTranslatorError(analysis,"'||' not match error.");
 				return PX_FALSE;
 			}
 		}
@@ -5927,7 +5931,7 @@ static px_bool PX_ScriptParseLastInstr(PX_SCRIPT_Analysis *analysis,px_vector *o
 	case PX_SCRIPT_AST_OPCODE_TYPE_INT:
 		{
 			if(!PX_ScriptParseLastInstr_INT(analysis,op,tk,out)) {
-				PX_ScriptTranslatorError(&analysis->lexer,"'int' not match error.");
+				PX_ScriptTranslatorError(analysis,"'int' not match error.");
 				return PX_FALSE;
 			}
 		}
@@ -5935,7 +5939,7 @@ static px_bool PX_ScriptParseLastInstr(PX_SCRIPT_Analysis *analysis,px_vector *o
 	case PX_SCRIPT_AST_OPCODE_TYPE_FLOAT:
 		{
 			if(!PX_ScriptParseLastInstr_FLOAT(analysis,op,tk,out)) {
-				PX_ScriptTranslatorError(&analysis->lexer,"'float' not match error.");
+				PX_ScriptTranslatorError(analysis,"'float' not match error.");
 				return PX_FALSE;
 			}
 		}
@@ -5943,7 +5947,7 @@ static px_bool PX_ScriptParseLastInstr(PX_SCRIPT_Analysis *analysis,px_vector *o
 	case PX_SCRIPT_AST_OPCODE_TYPE_STRING:
 		{
 			if(!PX_ScriptParseLastInstr_STRING(analysis,op,tk,out)) {
-				PX_ScriptTranslatorError(&analysis->lexer,"'string' not match error.");
+				PX_ScriptTranslatorError(analysis,"'string' not match error.");
 				return PX_FALSE;
 			}
 		}
@@ -5951,7 +5955,7 @@ static px_bool PX_ScriptParseLastInstr(PX_SCRIPT_Analysis *analysis,px_vector *o
 	case PX_SCRIPT_AST_OPCODE_TYPE_MEMORY:
 		{
 			if(!PX_ScriptParseLastInstr_MEMORY(analysis,op,tk,out)) {
-				PX_ScriptTranslatorError(&analysis->lexer,"'memory' not match error.");
+				PX_ScriptTranslatorError(analysis,"'memory' not match error.");
 				return PX_FALSE;
 			}
 		}
@@ -5959,7 +5963,7 @@ static px_bool PX_ScriptParseLastInstr(PX_SCRIPT_Analysis *analysis,px_vector *o
 	case PX_SCRIPT_AST_OPCODE_TYPE_STRLEN:
 		{
 			if(!PX_ScriptParseLastInstr_STRLEN(analysis,op,tk,out)) {
-				PX_ScriptTranslatorError(&analysis->lexer,"'strlen' not match error.");
+				PX_ScriptTranslatorError(analysis,"'strlen' not match error.");
 				return PX_FALSE;
 			}
 		}
@@ -5967,7 +5971,7 @@ static px_bool PX_ScriptParseLastInstr(PX_SCRIPT_Analysis *analysis,px_vector *o
 	case PX_SCRIPT_AST_OPCODE_TYPE_MEMLEN:
 		{
 			if(!PX_ScriptParseLastInstr_MEMLEN(analysis,op,tk,out)) {
-				PX_ScriptTranslatorError(&analysis->lexer,"'memlen' not match error.");
+				PX_ScriptTranslatorError(analysis,"'memlen' not match error.");
 				return PX_FALSE;
 			}
 		}
@@ -5977,7 +5981,7 @@ static px_bool PX_ScriptParseLastInstr(PX_SCRIPT_Analysis *analysis,px_vector *o
 	}
 	return PX_TRUE;
 }
-static px_bool PX_ScriptParseExpressionStream(PX_SCRIPT_Analysis *analysis,px_vector *stream,px_int *offset,PX_SCRIPT_AST_OPERAND *pretOperand,PX_SCRIPT_TRANSLATOR_EXPRESSION_TYPE expectedEndl,px_string *out)
+static px_bool PX_ScriptParseExpressionStream(PX_ScriptInterpreter *analysis,px_vector *stream,px_int *offset,PX_SCRIPT_AST_OPERAND *pretOperand,PX_SCRIPT_TRANSLATOR_EXPRESSION_TYPE expectedEndl,px_string *out)
 {
 	px_vector vOp;
 	px_vector vTk;
@@ -6017,7 +6021,7 @@ static px_bool PX_ScriptParseExpressionStream(PX_SCRIPT_Analysis *analysis,px_ve
 		{
 			if(!PX_ScriptParse_AST_PushToken(analysis,op,tk,pVec[*offset],pcurrentSet,&pcurrentSet)) 
 			{
-				PX_ScriptTranslatorError(&analysis->lexer,"Function error.");
+				PX_ScriptTranslatorError(analysis,"Function error.");
 				goto _ERROR;
 			}
 		}
@@ -6035,7 +6039,7 @@ static px_bool PX_ScriptParseExpressionStream(PX_SCRIPT_Analysis *analysis,px_ve
 			}
 			if (i==analysis->v_functions.size)
 			{
-				PX_ScriptTranslatorError(&analysis->lexer,"Function name undefined.");
+				PX_ScriptTranslatorError(analysis,"Function name undefined.");
 				goto _ERROR;
 			}
 
@@ -6043,7 +6047,7 @@ static px_bool PX_ScriptParseExpressionStream(PX_SCRIPT_Analysis *analysis,px_ve
 			(*offset)++;
 			if (pVec[*offset].type!=PX_SCRIPT_TRANSLATOR_EXPRESSION_OP_LBRACKETBEGIN)
 			{
-				PX_ScriptTranslatorError(&analysis->lexer,"'(' expected but not found.");
+				PX_ScriptTranslatorError(analysis,"'(' expected but not found.");
 				goto _ERROR;
 			}
 			(*offset)++;
@@ -6067,7 +6071,7 @@ static px_bool PX_ScriptParseExpressionStream(PX_SCRIPT_Analysis *analysis,px_ve
 				{
 					if (*offset==stream->size)
 					{
-						PX_ScriptTranslatorError(&analysis->lexer,"Function parse error.");
+						PX_ScriptTranslatorError(analysis,"Function parse error.");
 						goto _ERROR;
 					}
 					switch(pVec[*offset].type)
@@ -6117,7 +6121,7 @@ _EXPR_OUT:
 			}
 			if (paramcount!=pfunc->parametersCount)
 			{
-				PX_ScriptTranslatorError(&analysis->lexer,"Function parameter-count error.");
+				PX_ScriptTranslatorError(analysis,"Function parameter-count error.");
 				goto _ERROR;
 			}
 
@@ -6129,7 +6133,7 @@ _EXPR_OUT:
 				{
 					if (!PX_ScriptParseExpressionStream(analysis,stream,&paramBeginIndex[paramcount-1],&retOperand,PX_SCRIPT_TRANSLATOR_EXPRESSION_OP_LBRACKETEND,out))
 					{
-						PX_ScriptTranslatorError(&analysis->lexer,"Function left-bracket-end missing.");
+						PX_ScriptTranslatorError(analysis,"Function left-bracket-end missing.");
 						goto _ERROR;
 					}
 				}
@@ -6137,14 +6141,14 @@ _EXPR_OUT:
 				{
 					if (!PX_ScriptParseExpressionStream(analysis,stream,&paramBeginIndex[i],&retOperand,PX_SCRIPT_TRANSLATOR_EXPRESSION_OP_COMMA,out))
 					{
-						PX_ScriptTranslatorError(&analysis->lexer,"Function comma missing.");
+						PX_ScriptTranslatorError(analysis,"Function comma missing.");
 						goto _ERROR;
 					}
 				}
 				
-				if (retOperand.operandType==PX_SCRIPT_AST_OPERAND_TYPE_STRUCT||retOperand.operandType==PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR||retOperand.operandType==PX_SCRIPT_AST_OPERAND_TYPE_SET_PTR_CONST)
+				if (retOperand.operandType==PX_SCRIPT_AST_OPERAND_TYPE_STRUCT||retOperand.operandType==PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR||retOperand.operandType==PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR_CONST)
 				{
-					pcurrentSet=retOperand.pSet;
+					pcurrentSet=retOperand.pStruct;
 				}
 
 				switch (retOperand.operandType)
@@ -6155,7 +6159,7 @@ _EXPR_OUT:
 				case PX_SCRIPT_AST_OPERAND_TYPE_MEMORY_IDX:
 // 					if (pfunc->parameters[i].type!=PX_SCRIPT_PARSER_VAR_TYPE_INT)
 // 					{
-// 						PX_ScriptTranslatorError(&analysis->lexer,"Parameter not matched.");
+// 						PX_ScriptTranslatorError(analysis,"Parameter not matched.");
 // 						goto _ERROR;
 // 					}
 // 					break;
@@ -6163,7 +6167,7 @@ _EXPR_OUT:
 				case PX_SCRIPT_AST_OPERAND_TYPE_FLOAT_CONST:
 					if (pfunc->parameters[i].type!=PX_SCRIPT_PARSER_VAR_TYPE_FLOAT&&pfunc->parameters[i].type!=PX_SCRIPT_PARSER_VAR_TYPE_INT)
 					{
-						PX_ScriptTranslatorError(&analysis->lexer,"Parameter not matched.");
+						PX_ScriptTranslatorError(analysis,"Parameter not matched.");
 						goto _ERROR;
 					}
 					break;
@@ -6171,7 +6175,7 @@ _EXPR_OUT:
 				case PX_SCRIPT_AST_OPERAND_TYPE_STRING_CONST:
 					if (pfunc->parameters[i].type!=PX_SCRIPT_PARSER_VAR_TYPE_STRING)
 					{
-						PX_ScriptTranslatorError(&analysis->lexer,"Parameter not matched.");
+						PX_ScriptTranslatorError(analysis,"Parameter not matched.");
 						goto _ERROR;
 					}
 					break;
@@ -6179,7 +6183,7 @@ _EXPR_OUT:
 				case PX_SCRIPT_AST_OPERAND_TYPE_MEMORY_CONST:
 					if (pfunc->parameters[i].type!=PX_SCRIPT_PARSER_VAR_TYPE_MEMORY)
 					{
-						PX_ScriptTranslatorError(&analysis->lexer,"Parameter not matched.");
+						PX_ScriptTranslatorError(analysis,"Parameter not matched.");
 						goto _ERROR;
 					}
 					break;
@@ -6187,7 +6191,7 @@ _EXPR_OUT:
 				case PX_SCRIPT_AST_OPERAND_TYPE_INT_PTR_CONST:
 					if (pfunc->parameters[i].type!=PX_SCRIPT_PARSER_VAR_TYPE_INT_ARRAY&&pfunc->parameters[i].type!=PX_SCRIPT_PARSER_VAR_TYPE_INT_PTR)
 					{
-						PX_ScriptTranslatorError(&analysis->lexer,"Parameter not matched.");
+						PX_ScriptTranslatorError(analysis,"Parameter not matched.");
 						goto _ERROR;
 					}
 					break;
@@ -6195,7 +6199,7 @@ _EXPR_OUT:
 				case PX_SCRIPT_AST_OPERAND_TYPE_FLOAT_PTR_CONST:
 					if (pfunc->parameters[i].type!=PX_SCRIPT_PARSER_VAR_TYPE_FLOAT_ARRAY&&pfunc->parameters[i].type!=PX_SCRIPT_PARSER_VAR_TYPE_FLOAT_PTR)
 					{
-						PX_ScriptTranslatorError(&analysis->lexer,"Parameter not matched.");
+						PX_ScriptTranslatorError(analysis,"Parameter not matched.");
 						goto _ERROR;
 					}
 					break;
@@ -6203,7 +6207,7 @@ _EXPR_OUT:
 				case PX_SCRIPT_AST_OPERAND_TYPE_STRING_PTR_CONST:
 					if (pfunc->parameters[i].type!=PX_SCRIPT_PARSER_VAR_TYPE_STRING_ARRAY&&pfunc->parameters[i].type!=PX_SCRIPT_PARSER_VAR_TYPE_STRING_PTR)
 					{
-						PX_ScriptTranslatorError(&analysis->lexer,"Parameter not matched.");
+						PX_ScriptTranslatorError(analysis,"Parameter not matched.");
 						goto _ERROR;
 					}
 					break;
@@ -6211,20 +6215,20 @@ _EXPR_OUT:
 				case PX_SCRIPT_AST_OPERAND_TYPE_MEMORY_PTR_CONST:
 					if (pfunc->parameters[i].type!=PX_SCRIPT_PARSER_VAR_TYPE_MEMORY_ARRAY&&pfunc->parameters[i].type!=PX_SCRIPT_PARSER_VAR_TYPE_MEMORY_PTR)
 					{
-						PX_ScriptTranslatorError(&analysis->lexer,"Parameter not matched.");
+						PX_ScriptTranslatorError(analysis,"Parameter not matched.");
 						goto _ERROR;
 					}
 					break;
 				case PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR:
-				case PX_SCRIPT_AST_OPERAND_TYPE_SET_PTR_CONST:
-					if (pfunc->parameters[i].type!=PX_SCRIPT_PARSER_VAR_TYPE_STRUCT_PTR||PX_ScriptParseGetStructByIndex(analysis,pfunc->parameters[i].setIndex)!=retOperand.pSet)
+				case PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR_CONST:
+					if (pfunc->parameters[i].type!=PX_SCRIPT_PARSER_VAR_TYPE_STRUCT_PTR||PX_ScriptParseGetStructByIndex(analysis,pfunc->parameters[i].setIndex)!=retOperand.pStruct)
 					{
-						PX_ScriptTranslatorError(&analysis->lexer,"Parameter not matched.");
+						PX_ScriptTranslatorError(analysis,"Parameter not matched.");
 						goto _ERROR;
 					}
 					break;
 				default:
-					PX_ScriptTranslatorError(&analysis->lexer,"unexpected error.");
+					PX_ScriptTranslatorError(analysis,"unexpected error.");
 					goto _ERROR;
 				}
 				if (!PX_ScriptParseAST_MapTokenToR1(analysis,retOperand,out))
@@ -6315,8 +6319,8 @@ _EXPR_OUT:
 				retOperand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_MEMORY_PTR_CONST;
 				break;
 			case PX_SCRIPT_PARSER_VAR_TYPE_STRUCT_PTR:
-				retOperand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_SET_PTR_CONST;
-				retOperand.pSet=PX_ScriptParseGetStructByIndex(analysis,pfunc->retSetIndex);
+				retOperand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR_CONST;
+				retOperand.pStruct=PX_ScriptParseGetStructByIndex(analysis,pfunc->retSetIndex);
 				break;
 			case PX_SCRIPT_PARSER_VAR_TYPE_VOID:
 				retOperand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_INT_CONST;
@@ -6346,9 +6350,9 @@ _EXPR_OUT:
 				goto _ERROR;
 
 				PX_VectorPushback(tk,&retOperand);
-				if (retOperand.operandType==PX_SCRIPT_AST_OPERAND_TYPE_STRUCT||retOperand.operandType==PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR||retOperand.operandType==PX_SCRIPT_AST_OPERAND_TYPE_SET_PTR_CONST)
+				if (retOperand.operandType==PX_SCRIPT_AST_OPERAND_TYPE_STRUCT||retOperand.operandType==PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR||retOperand.operandType==PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR_CONST)
 				{
-					pcurrentSet=retOperand.pSet;
+					pcurrentSet=retOperand.pStruct;
 				}
 			}
 			break;
@@ -6382,9 +6386,9 @@ _EXPR_OUT:
 
 			PX_VectorPushback(tk,&retOperand);
 
-			if (retOperand.operandType==PX_SCRIPT_AST_OPERAND_TYPE_STRUCT||retOperand.operandType==PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR||retOperand.operandType==PX_SCRIPT_AST_OPERAND_TYPE_SET_PTR_CONST)
+			if (retOperand.operandType==PX_SCRIPT_AST_OPERAND_TYPE_STRUCT||retOperand.operandType==PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR||retOperand.operandType==PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR_CONST)
 			{
-				pcurrentSet=retOperand.pSet;
+				pcurrentSet=retOperand.pStruct;
 			}
 		}
 		break;
@@ -6502,7 +6506,7 @@ _ERROR:
 #define PX_SCRIPT_EXPRESSION_ACCEPT_MBRACKET_END 16
 #define PX_SCRIPT_EXPRESSION_ACCEPT_BRACKET_START (PX_SCRIPT_EXPRESSION_ACCEPT_LBRACKET_START|PX_SCRIPT_EXPRESSION_ACCEPT_MBRACKET_START)
 #define PX_SCRIPT_EXPRESSION_ACCEPT_BRACKET_END (PX_SCRIPT_EXPRESSION_ACCEPT_LBRACKET_END|PX_SCRIPT_EXPRESSION_ACCEPT_MBRACKET_END)
-static px_bool PX_ScriptParseExpression(PX_SCRIPT_Analysis *analysis,px_char *expr,px_string *out,PX_SCRIPT_AST_OPERAND *retOperand)
+static px_bool PX_ScriptParseExpression(PX_ScriptInterpreter *analysis,px_char *expr,px_string *out,PX_SCRIPT_AST_OPERAND *retOperand)
 {
 	px_int i;
 	px_uint quotes;
@@ -6755,7 +6759,7 @@ static px_bool PX_ScriptParseExpression(PX_SCRIPT_Analysis *analysis,px_char *ex
 					else
 					{
 						ret=PX_FALSE;
-						PX_ScriptTranslatorError(&analysis->lexer,"Illegal hexadecimal.");
+						PX_ScriptTranslatorError(analysis,"Illegal hexadecimal.");
 						goto _CLEAR;
 					}
 				}
@@ -6770,7 +6774,7 @@ static px_bool PX_ScriptParseExpression(PX_SCRIPT_Analysis *analysis,px_char *ex
 			else
 			{
 				ret=PX_FALSE;
-				PX_ScriptTranslatorError(&analysis->lexer,"Unexpected opcode.");
+				PX_ScriptTranslatorError(analysis,"Unexpected opcode.");
 				goto _CLEAR;
 			}
 		}
@@ -6962,7 +6966,7 @@ static px_bool PX_ScriptParseExpression(PX_SCRIPT_Analysis *analysis,px_char *ex
 					if ((accept_type&PX_SCRIPT_EXPRESSION_ACCEPT_BINARY)==0)
 					{
 						ret=PX_FALSE;
-						PX_ScriptTranslatorError(&analysis->lexer,"Unexpected opcode.");
+						PX_ScriptTranslatorError(analysis,"Unexpected opcode.");
 						goto _CLEAR;
 					}
 					Op.type=PX_SCRIPT_TRANSLATOR_EXPRESSION_OP_DIV;
@@ -6980,7 +6984,7 @@ static px_bool PX_ScriptParseExpression(PX_SCRIPT_Analysis *analysis,px_char *ex
 					if ((accept_type&PX_SCRIPT_EXPRESSION_ACCEPT_MBRACKET_START)==0)
 					{
 						ret=PX_FALSE;
-						PX_ScriptTranslatorError(&analysis->lexer,"Unexpected opcode.");
+						PX_ScriptTranslatorError(analysis,"Unexpected opcode.");
 						goto _CLEAR;
 					}
 					Op.type=PX_SCRIPT_TRANSLATOR_EXPRESSION_OP_MBRACKETBEGIN;
@@ -6998,7 +7002,7 @@ static px_bool PX_ScriptParseExpression(PX_SCRIPT_Analysis *analysis,px_char *ex
 					if ((accept_type&PX_SCRIPT_EXPRESSION_ACCEPT_MBRACKET_END)==0)
 					{
 						ret=PX_FALSE;
-						PX_ScriptTranslatorError(&analysis->lexer,"Unexpected opcode.");
+						PX_ScriptTranslatorError(analysis,"Unexpected opcode.");
 						goto _CLEAR;
 					}
 					Op.type=PX_SCRIPT_TRANSLATOR_EXPRESSION_OP_MBRACKETEND;
@@ -7016,7 +7020,7 @@ static px_bool PX_ScriptParseExpression(PX_SCRIPT_Analysis *analysis,px_char *ex
 					if ((accept_type&PX_SCRIPT_EXPRESSION_ACCEPT_LBRACKET_START)==0)
 					{
 						ret=PX_FALSE;
-						PX_ScriptTranslatorError(&analysis->lexer,"Unexpected opcode.");
+						PX_ScriptTranslatorError(analysis,"Unexpected opcode.");
 						goto _CLEAR;
 					}
 
@@ -7035,7 +7039,7 @@ static px_bool PX_ScriptParseExpression(PX_SCRIPT_Analysis *analysis,px_char *ex
 					if ((accept_type&PX_SCRIPT_EXPRESSION_ACCEPT_LBRACKET_END)==0)
 					{
 						ret=PX_FALSE;
-						PX_ScriptTranslatorError(&analysis->lexer,"Unexpected opcode.");
+						PX_ScriptTranslatorError(analysis,"Unexpected opcode.");
 						goto _CLEAR;
 					}
 					Op.type=PX_SCRIPT_TRANSLATOR_EXPRESSION_OP_LBRACKETEND;
@@ -7053,7 +7057,7 @@ static px_bool PX_ScriptParseExpression(PX_SCRIPT_Analysis *analysis,px_char *ex
 					if ((accept_type&PX_SCRIPT_EXPRESSION_ACCEPT_BINARY)==0)
 					{
 						ret=PX_FALSE;
-						PX_ScriptTranslatorError(&analysis->lexer,"Unexpected opcode.");
+						PX_ScriptTranslatorError(analysis,"Unexpected opcode.");
 						goto _CLEAR;
 					}
 					Op.type=PX_SCRIPT_TRANSLATOR_EXPRESSION_OP_DOT;
@@ -7077,7 +7081,7 @@ static px_bool PX_ScriptParseExpression(PX_SCRIPT_Analysis *analysis,px_char *ex
 						if ((accept_type&PX_SCRIPT_EXPRESSION_ACCEPT_SINGLE)==0)
 						{
 							ret=PX_FALSE;
-							PX_ScriptTranslatorError(&analysis->lexer,"Unexpected opcode.");
+							PX_ScriptTranslatorError(analysis,"Unexpected opcode.");
 							goto _CLEAR;
 						}
 						Op.type=PX_SCRIPT_TRANSLATOR_EXPRESSION_OP_NOT;
@@ -7093,7 +7097,7 @@ static px_bool PX_ScriptParseExpression(PX_SCRIPT_Analysis *analysis,px_char *ex
 						if ((accept_type&PX_SCRIPT_EXPRESSION_ACCEPT_BINARY)==0)
 						{
 							ret=PX_FALSE;
-							PX_ScriptTranslatorError(&analysis->lexer,"Unexpected opcode.");
+							PX_ScriptTranslatorError(analysis,"Unexpected opcode.");
 							goto _CLEAR;
 						}
 						Op.type=PX_SCRIPT_TRANSLATOR_EXPRESSION_OP_UNEQU;
@@ -7111,7 +7115,7 @@ static px_bool PX_ScriptParseExpression(PX_SCRIPT_Analysis *analysis,px_char *ex
 						if ((accept_type&PX_SCRIPT_EXPRESSION_ACCEPT_SINGLE)==0)
 						{
 							ret=PX_FALSE;
-							PX_ScriptTranslatorError(&analysis->lexer,"Unexpected opcode.");
+							PX_ScriptTranslatorError(analysis,"Unexpected opcode.");
 							goto _CLEAR;
 						}
 						Op.type=PX_SCRIPT_TRANSLATOR_EXPRESSION_OP_NOT;
@@ -7125,7 +7129,7 @@ static px_bool PX_ScriptParseExpression(PX_SCRIPT_Analysis *analysis,px_char *ex
 					else
 					{
 						ret=PX_FALSE;
-						PX_ScriptTranslatorError(&analysis->lexer,"Unexpected opcode.");
+						PX_ScriptTranslatorError(analysis,"Unexpected opcode.");
 						goto _CLEAR;
 					}
 
@@ -7137,7 +7141,7 @@ static px_bool PX_ScriptParseExpression(PX_SCRIPT_Analysis *analysis,px_char *ex
 					if ((accept_type&PX_SCRIPT_EXPRESSION_ACCEPT_SINGLE)==0)
 					{
 						ret=PX_FALSE;
-						PX_ScriptTranslatorError(&analysis->lexer,"Unexpected opcode.");
+						PX_ScriptTranslatorError(analysis,"Unexpected opcode.");
 						goto _CLEAR;
 					}
 					Op.type=PX_SCRIPT_TRANSLATOR_EXPRESSION_OP_INV;
@@ -7155,7 +7159,7 @@ static px_bool PX_ScriptParseExpression(PX_SCRIPT_Analysis *analysis,px_char *ex
 					if ((accept_type&PX_SCRIPT_EXPRESSION_ACCEPT_BINARY)==0)
 					{
 						ret=PX_FALSE;
-						PX_ScriptTranslatorError(&analysis->lexer,"Unexpected opcode.");
+						PX_ScriptTranslatorError(analysis,"Unexpected opcode.");
 						goto _CLEAR;
 					}
 					Op.type=PX_SCRIPT_TRANSLATOR_EXPRESSION_OP_XOR;
@@ -7173,7 +7177,7 @@ static px_bool PX_ScriptParseExpression(PX_SCRIPT_Analysis *analysis,px_char *ex
 					if ((accept_type&PX_SCRIPT_EXPRESSION_ACCEPT_BINARY)==0)
 					{
 						ret=PX_FALSE;
-						PX_ScriptTranslatorError(&analysis->lexer,"Unexpected opcode.");
+						PX_ScriptTranslatorError(analysis,"Unexpected opcode.");
 						goto _CLEAR;
 					}
 					Op.type=PX_SCRIPT_TRANSLATOR_EXPRESSION_OP_MOD;
@@ -7192,7 +7196,7 @@ static px_bool PX_ScriptParseExpression(PX_SCRIPT_Analysis *analysis,px_char *ex
 					if ((accept_type&PX_SCRIPT_EXPRESSION_ACCEPT_BINARY)==0)
 					{
 						ret=PX_FALSE;
-						PX_ScriptTranslatorError(&analysis->lexer,"Unexpected opcode.");
+						PX_ScriptTranslatorError(analysis,"Unexpected opcode.");
 						goto _CLEAR;
 					}
 
@@ -7233,7 +7237,7 @@ static px_bool PX_ScriptParseExpression(PX_SCRIPT_Analysis *analysis,px_char *ex
 					else
 					{
 						ret=PX_FALSE;
-						PX_ScriptTranslatorError(&analysis->lexer,"Unexpected opcode.");
+						PX_ScriptTranslatorError(analysis,"Unexpected opcode.");
 						goto _CLEAR;
 					}
 
@@ -7245,7 +7249,7 @@ static px_bool PX_ScriptParseExpression(PX_SCRIPT_Analysis *analysis,px_char *ex
 					if ((accept_type&PX_SCRIPT_EXPRESSION_ACCEPT_BINARY)==0)
 					{
 						ret=PX_FALSE;
-						PX_ScriptTranslatorError(&analysis->lexer,"Unexpected opcode.");
+						PX_ScriptTranslatorError(analysis,"Unexpected opcode.");
 						goto _CLEAR;
 					}
 
@@ -7286,7 +7290,7 @@ static px_bool PX_ScriptParseExpression(PX_SCRIPT_Analysis *analysis,px_char *ex
 					else
 					{
 						ret=PX_FALSE;
-						PX_ScriptTranslatorError(&analysis->lexer,"Unexpected opcode.");
+						PX_ScriptTranslatorError(analysis,"Unexpected opcode.");
 						goto _CLEAR;
 					}
 
@@ -7298,7 +7302,7 @@ static px_bool PX_ScriptParseExpression(PX_SCRIPT_Analysis *analysis,px_char *ex
 					if ((accept_type&PX_SCRIPT_EXPRESSION_ACCEPT_BINARY)==0)
 					{
 						ret=PX_FALSE;
-						PX_ScriptTranslatorError(&analysis->lexer,"Unexpected opcode.");
+						PX_ScriptTranslatorError(analysis,"Unexpected opcode.");
 						goto _CLEAR;
 					}
 
@@ -7396,7 +7400,7 @@ static px_bool PX_ScriptParseExpression(PX_SCRIPT_Analysis *analysis,px_char *ex
 						else
 						{
 							ret=PX_FALSE;
-							PX_ScriptTranslatorError(&analysis->lexer,"Unexpected opcode.");
+							PX_ScriptTranslatorError(analysis,"Unexpected opcode.");
 							goto _CLEAR;
 						}
 					}
@@ -7420,7 +7424,7 @@ static px_bool PX_ScriptParseExpression(PX_SCRIPT_Analysis *analysis,px_char *ex
 					if ((accept_type&PX_SCRIPT_EXPRESSION_ACCEPT_BINARY)==0)
 					{
 						ret=PX_FALSE;
-						PX_ScriptTranslatorError(&analysis->lexer,"Unexpected opcode.");
+						PX_ScriptTranslatorError(analysis,"Unexpected opcode.");
 						goto _CLEAR;
 					}
 
@@ -7440,7 +7444,7 @@ static px_bool PX_ScriptParseExpression(PX_SCRIPT_Analysis *analysis,px_char *ex
 					}
 					else if (lexer.Symbol=='|')
 					{
-						Op.type=PX_SCRIPT_TRANSLATOR_EXPRESSION_OP_LAND;
+						Op.type= PX_SCRIPT_TRANSLATOR_EXPRESSION_OP_LOR;
 						Op.opclass=PX_SCRIPT_TRANSLATOR_OP_CLASS_BINARY;
 						Op.oplevel=PX_ScriptParseGetOpLevel("||",PX_TRUE);
 						PX_StringInitialize(analysis->mp,&Op.code);
@@ -7462,7 +7466,7 @@ static px_bool PX_ScriptParseExpression(PX_SCRIPT_Analysis *analysis,px_char *ex
 					else
 					{
 						ret=PX_FALSE;
-						PX_ScriptTranslatorError(&analysis->lexer,"Unexpected opcode.");
+						PX_ScriptTranslatorError(analysis,"Unexpected opcode.");
 						goto _CLEAR;
 					}
 
@@ -7474,7 +7478,7 @@ static px_bool PX_ScriptParseExpression(PX_SCRIPT_Analysis *analysis,px_char *ex
 					if ((accept_type&PX_SCRIPT_EXPRESSION_ACCEPT_BINARY)==0)
 					{
 						ret=PX_FALSE;
-						PX_ScriptTranslatorError(&analysis->lexer,"Unexpected opcode.");
+						PX_ScriptTranslatorError(analysis,"Unexpected opcode.");
 						goto _CLEAR;
 					}
 
@@ -7497,7 +7501,7 @@ static px_bool PX_ScriptParseExpression(PX_SCRIPT_Analysis *analysis,px_char *ex
 	PX_StringInitialize(analysis->mp,&Op.code);
 	PX_StringCat(&Op.code,lexer.CurLexeme.buffer);
 	PX_VectorPushback(&stream,&Op);
-	PX_StringCat(out,";--------");
+	PX_StringCat(out,";");
 
 	for(i=0;i<PX_strlen(expr);i++)
 	{
@@ -7541,7 +7545,7 @@ _CLEAR:
 	PX_LexerFree(&lexer);
 	return ret;
 }
-static px_bool PX_ScriptParseVar(PX_SCRIPT_Analysis *analysis)
+static px_bool PX_ScriptParseVar(PX_ScriptInterpreter *analysis)
 {
 	PX_LEXER_LEXEME_TYPE type;
 	PX_SCRIPT_VARIABLES variable,*pvar;
@@ -7627,7 +7631,7 @@ static px_bool PX_ScriptParseVar(PX_SCRIPT_Analysis *analysis)
 
 		if (!PX_ScriptParseIsValidToken(analysis->lexer.CurLexeme.buffer))
 		{
-			PX_ScriptTranslatorError(&analysis->lexer,"Invalid var token");
+			PX_ScriptTranslatorError(analysis,"Invalid var token");
 			goto _ERROR;
 		}
 
@@ -7638,7 +7642,7 @@ static px_bool PX_ScriptParseVar(PX_SCRIPT_Analysis *analysis)
 
 		if (type!=PX_LEXER_LEXEME_TYPE_DELIMITER)
 		{
-			PX_ScriptTranslatorError(&analysis->lexer,"Invalid var token");
+			PX_ScriptTranslatorError(analysis,"Invalid var token");
 			PX_StringFree(&variable.Mnemonic);
 			goto _ERROR;
 		}
@@ -7676,21 +7680,21 @@ static px_bool PX_ScriptParseVar(PX_SCRIPT_Analysis *analysis)
 
 			if(PX_ScriptTranslatorNextToken(&analysis->lexer)!=PX_LEXER_LEXEME_TYPE_TOKEN)
 			{
-				PX_ScriptTranslatorError(&analysis->lexer,"Invalid var token");
+				PX_ScriptTranslatorError(analysis,"Invalid var token");
 				PX_StringFree(&variable.Mnemonic);
 				goto _ERROR;
 			}
 
 			if(!PX_strIsNumeric(analysis->lexer.CurLexeme.buffer))
 			{
-				PX_ScriptTranslatorError(&analysis->lexer,"Invalid var token");
+				PX_ScriptTranslatorError(analysis,"Invalid var token");
 			}
 
 			variable.size=PX_atoi(analysis->lexer.CurLexeme.buffer);
 
 			if (variable.size==0)
 			{
-				PX_ScriptTranslatorError(&analysis->lexer,"Invalid array");
+				PX_ScriptTranslatorError(analysis,"Invalid array");
 				PX_StringFree(&variable.Mnemonic);
 				goto _ERROR;
 			}
@@ -7699,7 +7703,7 @@ static px_bool PX_ScriptParseVar(PX_SCRIPT_Analysis *analysis)
 
 			if (type!=PX_LEXER_LEXEME_TYPE_DELIMITER||analysis->lexer.Symbol!=']')
 			{
-				PX_ScriptTranslatorError(&analysis->lexer,"Invalid var token");
+				PX_ScriptTranslatorError(analysis,"Invalid var token");
 				PX_StringFree(&variable.Mnemonic);
 				goto _ERROR;
 			}
@@ -7724,7 +7728,7 @@ static px_bool PX_ScriptParseVar(PX_SCRIPT_Analysis *analysis)
 				}
 				if (type==PX_LEXER_LEXEME_TYPE_END)
 				{
-					PX_ScriptTranslatorError(&analysis->lexer,"Error Expression.");
+					PX_ScriptTranslatorError(analysis,"Error Expression.");
 					PX_StringFree(&variable.Mnemonic);
 					PX_StringFree(&variable.GlobalInitializeValue);
 					goto _ERROR;
@@ -7734,7 +7738,7 @@ static px_bool PX_ScriptParseVar(PX_SCRIPT_Analysis *analysis)
 
 			if (PX_strlen(variable.GlobalInitializeValue.buffer)==0)
 			{
-				PX_ScriptTranslatorError(&analysis->lexer,"Error Expression.");
+				PX_ScriptTranslatorError(analysis,"Error Expression.");
 				PX_StringFree(&variable.Mnemonic);
 				PX_StringFree(&variable.GlobalInitializeValue);
 				goto _ERROR;
@@ -7754,7 +7758,7 @@ static px_bool PX_ScriptParseVar(PX_SCRIPT_Analysis *analysis)
 			{
 				if (PX_strequ(variable.Mnemonic.buffer,PX_VECTORAT(PX_SCRIPT_VARIABLES,&analysis->v_variablesStackTable,i)->Mnemonic.buffer))
 				{
-					PX_ScriptTranslatorError(&analysis->lexer,"variable redefined.");
+					PX_ScriptTranslatorError(analysis,"variable redefined.");
 					PX_StringFree(&variable.Mnemonic);
 					if(variable.bInitialized)
 						PX_StringFree(&variable.GlobalInitializeValue);
@@ -7763,12 +7767,11 @@ static px_bool PX_ScriptParseVar(PX_SCRIPT_Analysis *analysis)
 			}
 
 			pvar=PX_VECTORAT(PX_SCRIPT_VARIABLES,&analysis->v_variablesStackTable,analysis->v_variablesStackTable.size-1);
-			variable.BeginIndex=pvar->BeginIndex+variable.size;
+			variable.BeginIndex=pvar->BeginIndex+ variable.size;
 
-			if (variable.BeginIndex+variable.size-1>analysis->currentAllocStackSize)
-			{
-				analysis->currentAllocStackSize=variable.BeginIndex+variable.size-1;
-			}
+			if (analysis->currentAllocStackSize < variable.BeginIndex)
+				analysis->currentAllocStackSize=variable.BeginIndex;
+			
 
 			PX_VectorPushback(&analysis->v_variablesStackTable,&variable);
 
@@ -7867,7 +7870,7 @@ static px_bool PX_ScriptParseVar(PX_SCRIPT_Analysis *analysis)
 			{
 				if (PX_strequ(variable.Mnemonic.buffer,PX_VECTORAT(PX_SCRIPT_VARIABLES,&analysis->v_variablesGlobalTable,i)->Mnemonic.buffer))
 				{
-					PX_ScriptTranslatorError(&analysis->lexer,"variable redefined.");
+					PX_ScriptTranslatorError(analysis,"variable redefined.");
 					PX_StringFree(&variable.Mnemonic);
 					if(variable.bInitialized)
 						PX_StringFree(&variable.GlobalInitializeValue);
@@ -7899,7 +7902,7 @@ static px_bool PX_ScriptParseVar(PX_SCRIPT_Analysis *analysis)
 		}
 		else
 		{
-			PX_ScriptTranslatorError(&analysis->lexer,"Invalid var token");
+			PX_ScriptTranslatorError(analysis,"Invalid var token");
 			PX_StringFree(&variable.Mnemonic);
 			goto _ERROR;
 		}
@@ -7909,7 +7912,7 @@ static px_bool PX_ScriptParseVar(PX_SCRIPT_Analysis *analysis)
 _ERROR:
 	return PX_FALSE;
 }
-static px_bool PX_ScriptParseStruct(PX_SCRIPT_Analysis *analysis)
+static px_bool PX_ScriptParseStruct(PX_ScriptInterpreter *analysis)
 {
 	PX_LEXER_LEXEME_TYPE type;
 	PX_SCRIPT_VARIABLES variable,*pvar;
@@ -7932,13 +7935,13 @@ static px_bool PX_ScriptParseStruct(PX_SCRIPT_Analysis *analysis)
 
 	if (!PX_ScriptParseIsValidToken(analysis->lexer.CurLexeme.buffer))
 	{
-		PX_ScriptTranslatorError(&analysis->lexer,"Invalid struct name");
+		PX_ScriptTranslatorError(analysis,"Invalid struct name");
 		goto _ERROR;
 	}
 
 	if (!(pset=PX_ScriptParseGetStructInfo(analysis,analysis->lexer.CurLexeme.buffer)))
 	{
-		PX_ScriptTranslatorError(&analysis->lexer,"Invalid struct type");
+		PX_ScriptTranslatorError(analysis,"Invalid struct type");
 		goto _ERROR;
 	}
 
@@ -7963,7 +7966,7 @@ static px_bool PX_ScriptParseStruct(PX_SCRIPT_Analysis *analysis)
 
 		if (!PX_ScriptParseIsValidToken(analysis->lexer.CurLexeme.buffer))
 		{
-			PX_ScriptTranslatorError(&analysis->lexer,"Invalid struct name");
+			PX_ScriptTranslatorError(analysis,"Invalid struct name");
 			goto _ERROR;
 		}
 
@@ -7977,7 +7980,7 @@ static px_bool PX_ScriptParseStruct(PX_SCRIPT_Analysis *analysis)
 
 		if (type!=PX_LEXER_LEXEME_TYPE_DELIMITER)
 		{
-			PX_ScriptTranslatorError(&analysis->lexer,"Invalid var token");
+			PX_ScriptTranslatorError(analysis,"Invalid var token");
 			PX_StringFree(&variable.Mnemonic);
 			goto _ERROR;
 		}
@@ -7987,7 +7990,7 @@ static px_bool PX_ScriptParseStruct(PX_SCRIPT_Analysis *analysis)
 		{
 			if (variable.type==PX_SCRIPT_PARSER_VAR_TYPE_STRUCT_PTR)
 			{
-				PX_ScriptTranslatorError(&analysis->lexer,"Array of struct pointers is not support.");
+				PX_ScriptTranslatorError(analysis,"Array of struct pointers is not support.");
 				PX_StringFree(&variable.Mnemonic);
 				goto _ERROR;
 			}
@@ -7996,14 +7999,14 @@ static px_bool PX_ScriptParseStruct(PX_SCRIPT_Analysis *analysis)
 
 			if(PX_ScriptTranslatorNextToken(&analysis->lexer)!=PX_LEXER_LEXEME_TYPE_TOKEN)
 			{
-				PX_ScriptTranslatorError(&analysis->lexer,"Invalid var token");
+				PX_ScriptTranslatorError(analysis,"Invalid var token");
 				PX_StringFree(&variable.Mnemonic);
 				goto _ERROR;
 			}
 
 			if(!PX_strIsNumeric(analysis->lexer.CurLexeme.buffer))
 			{
-				PX_ScriptTranslatorError(&analysis->lexer,"Invalid var token");
+				PX_ScriptTranslatorError(analysis,"Invalid var token");
 			}
 
 
@@ -8014,7 +8017,7 @@ static px_bool PX_ScriptParseStruct(PX_SCRIPT_Analysis *analysis)
 
 			if (variable.size==0)
 			{
-				PX_ScriptTranslatorError(&analysis->lexer,"Invalid array");
+				PX_ScriptTranslatorError(analysis,"Invalid array");
 				PX_StringFree(&variable.Mnemonic);
 				goto _ERROR;
 			}
@@ -8022,7 +8025,7 @@ static px_bool PX_ScriptParseStruct(PX_SCRIPT_Analysis *analysis)
 
 			if (type!=PX_LEXER_LEXEME_TYPE_DELIMITER||analysis->lexer.Symbol!=']')
 			{
-				PX_ScriptTranslatorError(&analysis->lexer,"Invalid var token");
+				PX_ScriptTranslatorError(analysis,"Invalid var token");
 				PX_StringFree(&variable.Mnemonic);
 				goto _ERROR;
 			}
@@ -8046,7 +8049,7 @@ static px_bool PX_ScriptParseStruct(PX_SCRIPT_Analysis *analysis)
 			{
 				if (PX_strequ(variable.Mnemonic.buffer,PX_VECTORAT(PX_SCRIPT_VARIABLES,&analysis->v_variablesStackTable,i)->Mnemonic.buffer))
 				{
-					PX_ScriptTranslatorError(&analysis->lexer,"variable redefined.");
+					PX_ScriptTranslatorError(analysis,"variable redefined.");
 					PX_StringFree(&variable.Mnemonic);
 					if(variable.bInitialized)
 						PX_StringFree(&variable.GlobalInitializeValue);
@@ -8055,12 +8058,11 @@ static px_bool PX_ScriptParseStruct(PX_SCRIPT_Analysis *analysis)
 			}
 			
 			pvar=PX_VECTORLAST(PX_SCRIPT_VARIABLES,&analysis->v_variablesStackTable);
-			variable.BeginIndex=pvar->BeginIndex+variable.size;
+			variable.BeginIndex=pvar->BeginIndex+ variable.size;
 			
-			if (variable.BeginIndex+variable.size-1>analysis->currentAllocStackSize)
-			{
-				analysis->currentAllocStackSize=variable.BeginIndex+variable.size-1;
-			}
+			if(analysis->currentAllocStackSize < variable.BeginIndex)
+				analysis->currentAllocStackSize=variable.BeginIndex;
+		
 
 			PX_VectorPushback(&analysis->v_variablesStackTable,&variable);
 		}
@@ -8070,7 +8072,7 @@ static px_bool PX_ScriptParseStruct(PX_SCRIPT_Analysis *analysis)
 			{
 				if (PX_strequ(variable.Mnemonic.buffer,PX_VECTORAT(PX_SCRIPT_VARIABLES,&analysis->v_variablesGlobalTable,i)->Mnemonic.buffer))
 				{
-					PX_ScriptTranslatorError(&analysis->lexer,"variable redefined.");
+					PX_ScriptTranslatorError(analysis,"variable redefined.");
 					PX_StringFree(&variable.Mnemonic);
 					if(variable.bInitialized)
 						PX_StringFree(&variable.GlobalInitializeValue);
@@ -8095,7 +8097,7 @@ static px_bool PX_ScriptParseStruct(PX_SCRIPT_Analysis *analysis)
 
 		if (type!=PX_LEXER_LEXEME_TYPE_DELIMITER)
 		{
-			PX_ScriptTranslatorError(&analysis->lexer,"\";\" is expected but not found.");
+			PX_ScriptTranslatorError(analysis,"\";\" is expected but not found.");
 			PX_StringFree(&variable.Mnemonic);
 			goto _ERROR;
 		}
@@ -8110,7 +8112,7 @@ static px_bool PX_ScriptParseStruct(PX_SCRIPT_Analysis *analysis)
 		}
 		else
 		{
-			PX_ScriptTranslatorError(&analysis->lexer,"\";\" is expected but not found.");
+			PX_ScriptTranslatorError(analysis,"\";\" is expected but not found.");
 			PX_StringFree(&variable.Mnemonic);
 			goto _ERROR;
 		}
@@ -8120,7 +8122,7 @@ static px_bool PX_ScriptParseStruct(PX_SCRIPT_Analysis *analysis)
 _ERROR:
 	return PX_FALSE;
 }
-px_bool PX_ScriptParseStructDefine(PX_SCRIPT_Analysis *analysis)
+px_bool PX_ScriptParseStructDefine(PX_ScriptInterpreter *analysis)
 {
 	PX_SCRIPT_SETMEMBER member,*pmember;
 	PX_SCRIPT_STRUCT vSet,*pSet;
@@ -8165,6 +8167,14 @@ px_bool PX_ScriptParseStructDefine(PX_SCRIPT_Analysis *analysis)
 
 		if (type==PX_LEXER_LEXEME_TYPE_DELIMITER&&analysis->lexer.Symbol=='}')
 		{
+			if ((PX_ScriptTranslatorNextTokenSN(&analysis->lexer)) != PX_LEXER_LEXEME_TYPE_DELIMITER)
+			{
+				goto _ERROR;
+			}
+			if (analysis->lexer.Symbol != ';')
+			{
+				goto _ERROR;
+			}
 			break;
 		}
 
@@ -8196,7 +8206,7 @@ px_bool PX_ScriptParseStructDefine(PX_SCRIPT_Analysis *analysis)
 
 					if (!PX_ScriptParseIsValidToken(analysis->lexer.CurLexeme.buffer))
 					{
-						PX_ScriptTranslatorError(&analysis->lexer,"Invalid var token");
+						PX_ScriptTranslatorError(analysis,"Invalid var token");
 						goto _ERROR;
 					}
 
@@ -8207,7 +8217,7 @@ px_bool PX_ScriptParseStructDefine(PX_SCRIPT_Analysis *analysis)
 
 					if (type!=PX_LEXER_LEXEME_TYPE_DELIMITER)
 					{
-						PX_ScriptTranslatorError(&analysis->lexer,"Invalid var token");
+						PX_ScriptTranslatorError(analysis,"Invalid var token");
 						PX_StringFree(&member.defvar.Mnemonic);
 						goto _ERROR;
 					}
@@ -8217,7 +8227,7 @@ px_bool PX_ScriptParseStructDefine(PX_SCRIPT_Analysis *analysis)
 					{
 						if (member.defvar.type==PX_SCRIPT_PARSER_VAR_TYPE_STRUCT_PTR)
 						{
-							PX_ScriptTranslatorError(&analysis->lexer,"Array of struct is not support.");
+							PX_ScriptTranslatorError(analysis,"Array of struct is not support.");
 							PX_StringFree(&member.defvar.Mnemonic);
 							goto _ERROR;
 						}
@@ -8226,14 +8236,14 @@ px_bool PX_ScriptParseStructDefine(PX_SCRIPT_Analysis *analysis)
 
 						if(PX_ScriptTranslatorNextToken(&analysis->lexer)!=PX_LEXER_LEXEME_TYPE_TOKEN)
 						{
-							PX_ScriptTranslatorError(&analysis->lexer,"Invalid var token");
+							PX_ScriptTranslatorError(analysis,"Invalid var token");
 							PX_StringFree(&member.defvar.Mnemonic);
 							goto _ERROR;
 						}
 
 						if(!PX_strIsNumeric(analysis->lexer.CurLexeme.buffer))
 						{
-							PX_ScriptTranslatorError(&analysis->lexer,"Invalid var token");
+							PX_ScriptTranslatorError(analysis,"Invalid var token");
 							PX_StringFree(&member.defvar.Mnemonic);
 							goto _ERROR;
 						}
@@ -8243,7 +8253,7 @@ px_bool PX_ScriptParseStructDefine(PX_SCRIPT_Analysis *analysis)
 
 						if (vSet.size==0)
 						{
-							PX_ScriptTranslatorError(&analysis->lexer,"Invalid array");
+							PX_ScriptTranslatorError(analysis,"Invalid array");
 							PX_StringFree(&member.defvar.Mnemonic);
 							goto _ERROR;
 						}
@@ -8251,7 +8261,7 @@ px_bool PX_ScriptParseStructDefine(PX_SCRIPT_Analysis *analysis)
 
 						if (type!=PX_LEXER_LEXEME_TYPE_DELIMITER||analysis->lexer.Symbol!=']')
 						{
-							PX_ScriptTranslatorError(&analysis->lexer,"Invalid var token");
+							PX_ScriptTranslatorError(analysis,"Invalid var token");
 							PX_StringFree(&member.defvar.Mnemonic);
 							goto _ERROR;
 						}
@@ -8262,7 +8272,7 @@ px_bool PX_ScriptParseStructDefine(PX_SCRIPT_Analysis *analysis)
 
 						if (type!=PX_LEXER_LEXEME_TYPE_DELIMITER)
 						{
-							PX_ScriptTranslatorError(&analysis->lexer,"\";\" is expected but not found.");
+							PX_ScriptTranslatorError(analysis,"\";\" is expected but not found.");
 							PX_StringFree(&member.defvar.Mnemonic);
 							goto _ERROR;
 						}
@@ -8279,7 +8289,7 @@ px_bool PX_ScriptParseStructDefine(PX_SCRIPT_Analysis *analysis)
 						}
 						else
 						{
-							PX_ScriptTranslatorError(&analysis->lexer,"\";\" is expected but not found.");
+							PX_ScriptTranslatorError(analysis,"\";\" is expected but not found.");
 							PX_StringFree(&member.defvar.Mnemonic);
 							goto _ERROR;
 						}
@@ -8303,7 +8313,7 @@ px_bool PX_ScriptParseStructDefine(PX_SCRIPT_Analysis *analysis)
 					}
 					else
 					{
-						PX_ScriptTranslatorError(&analysis->lexer,"Invalid var token");
+						PX_ScriptTranslatorError(analysis,"Invalid var token");
 						PX_StringFree(&member.defvar.Mnemonic);
 						goto _ERROR;
 					}
@@ -8382,7 +8392,7 @@ px_bool PX_ScriptParseStructDefine(PX_SCRIPT_Analysis *analysis)
 
 				if (!PX_ScriptParseIsValidToken(analysis->lexer.CurLexeme.buffer))
 				{
-				PX_ScriptTranslatorError(&analysis->lexer,"Invalid var token");
+				PX_ScriptTranslatorError(analysis,"Invalid var token");
 				goto _ERROR;
 				}
 
@@ -8394,7 +8404,7 @@ px_bool PX_ScriptParseStructDefine(PX_SCRIPT_Analysis *analysis)
 
 				if (type!=PX_LEXER_LEXEME_TYPE_DELIMITER)
 				{
-				PX_ScriptTranslatorError(&analysis->lexer,"Invalid var token");
+				PX_ScriptTranslatorError(analysis,"Invalid var token");
 				PX_StringFree(&member.defvar.Mnemonic);
 				goto _ERROR;
 				}
@@ -8431,14 +8441,14 @@ px_bool PX_ScriptParseStructDefine(PX_SCRIPT_Analysis *analysis)
 
 				if(PX_ScriptTranslatorNextToken(&analysis->lexer)!=PX_LEXER_LEXEME_TYPE_TOKEN)
 				{
-					PX_ScriptTranslatorError(&analysis->lexer,"Invalid var token");
+					PX_ScriptTranslatorError(analysis,"Invalid var token");
 					PX_StringFree(&member.defvar.Mnemonic);
 					goto _ERROR;
 				}
 
 				if(!PX_strIsNumeric(analysis->lexer.CurLexeme.buffer))
 				{
-					PX_ScriptTranslatorError(&analysis->lexer,"Invalid var token");
+					PX_ScriptTranslatorError(analysis,"Invalid var token");
 					PX_StringFree(&member.defvar.Mnemonic);
 					goto _ERROR;
 				}
@@ -8449,7 +8459,7 @@ px_bool PX_ScriptParseStructDefine(PX_SCRIPT_Analysis *analysis)
 
 				if (member.defvar.size==0)
 				{
-					PX_ScriptTranslatorError(&analysis->lexer,"Invalid array");
+					PX_ScriptTranslatorError(analysis,"Invalid array");
 					PX_StringFree(&member.defvar.Mnemonic);
 					goto _ERROR;
 				}
@@ -8457,7 +8467,7 @@ px_bool PX_ScriptParseStructDefine(PX_SCRIPT_Analysis *analysis)
 
 				if (type!=PX_LEXER_LEXEME_TYPE_DELIMITER||analysis->lexer.Symbol!=']')
 				{
-					PX_ScriptTranslatorError(&analysis->lexer,"Invalid var token");
+					PX_ScriptTranslatorError(analysis,"Invalid var token");
 					PX_StringFree(&member.defvar.Mnemonic);
 					goto _ERROR;
 				}
@@ -8467,14 +8477,14 @@ px_bool PX_ScriptParseStructDefine(PX_SCRIPT_Analysis *analysis)
 
 				if(analysis->lexer.Symbol=='=')
 				{
-					PX_ScriptTranslatorError(&analysis->lexer,"Initialize of array is not support.");
+					PX_ScriptTranslatorError(analysis,"Initialize of array is not support.");
 					PX_StringFree(&member.defvar.Mnemonic);
 					goto _ERROR;
 				}
 
 				if (type!=PX_LEXER_LEXEME_TYPE_DELIMITER)
 				{
-					PX_ScriptTranslatorError(&analysis->lexer,"\";\" is expected but not found.");
+					PX_ScriptTranslatorError(analysis,"\";\" is expected but not found.");
 					PX_StringFree(&member.defvar.Mnemonic);
 					goto _ERROR;
 				}
@@ -8491,7 +8501,7 @@ px_bool PX_ScriptParseStructDefine(PX_SCRIPT_Analysis *analysis)
 				}
 				else
 				{
-					PX_ScriptTranslatorError(&analysis->lexer,"\";\" is expected but not found.");
+					PX_ScriptTranslatorError(analysis,"\";\" is expected but not found.");
 					PX_StringFree(&member.defvar.Mnemonic);
 					PX_VectorPushback(&vSet.members,&member);
 					goto _ERROR;
@@ -8519,7 +8529,7 @@ px_bool PX_ScriptParseStructDefine(PX_SCRIPT_Analysis *analysis)
 				}
 				else
 				{
-				PX_ScriptTranslatorError(&analysis->lexer,"Invalid var token");
+				PX_ScriptTranslatorError(analysis,"Invalid var token");
 				PX_StringFree(&member.defvar.Mnemonic);
 				goto _ERROR;
 				}
@@ -8530,7 +8540,7 @@ px_bool PX_ScriptParseStructDefine(PX_SCRIPT_Analysis *analysis)
 	}
 	if (vSet.size==0)
 	{
-		PX_ScriptTranslatorError(&analysis->lexer,"Zero size of struct");
+		PX_ScriptTranslatorError(analysis,"Zero size of struct");
 		goto _ERROR;
 	}
 	PX_VectorPushback(&analysis->v_struct,&vSet);
@@ -8550,7 +8560,7 @@ _ERROR:
 	PX_VectorFree(&vSet.members);
 	return PX_FALSE;
 }
-px_bool PX_ScriptParseFunctionDefined(PX_SCRIPT_Analysis *analysis,PX_SCRIPT_TRANSLATOR_FUNCTION_TYPE functype)
+px_bool PX_ScriptParseFunctionDefined(PX_ScriptInterpreter *analysis,PX_SCRIPT_TRANSLATOR_FUNCTION_TYPE functype)
 {
 	PX_SCRIPT_FUNCTION func,*pfunc=PX_NULL;
 	PX_SCRIPT_VARIABLES fvar;
@@ -8625,7 +8635,7 @@ px_bool PX_ScriptParseFunctionDefined(PX_SCRIPT_Analysis *analysis,PX_SCRIPT_TRA
 	}
 	if (func.retType==PX_SCRIPT_PARSER_VAR_TYPE_STRUCT)
 	{
-		PX_ScriptTranslatorError(&analysis->lexer,"Could not return a struct-type");
+		PX_ScriptTranslatorError(analysis,"Could not return a struct-type");
 		goto _ERROR;
 	}
 	if (type!=PX_LEXER_LEXEME_TYPE_TOKEN)
@@ -8723,7 +8733,7 @@ px_bool PX_ScriptParseFunctionDefined(PX_SCRIPT_Analysis *analysis,PX_SCRIPT_TRA
 		
 		if (fvar.type==PX_SCRIPT_PARSER_VAR_TYPE_STRUCT)
 		{
-			PX_ScriptTranslatorError(&analysis->lexer,"Could not use a struct for parameter.consider use a struct pointer.");
+			PX_ScriptTranslatorError(analysis,"Could not use a struct for parameter.consider use a struct pointer.");
 			goto _ERROR;
 		}
 
@@ -8795,14 +8805,14 @@ px_bool PX_ScriptParseFunctionDefined(PX_SCRIPT_Analysis *analysis,PX_SCRIPT_TRA
 		{
 			if (pfunc->parametersCount!=func.parametersCount)
 			{
-				PX_ScriptTranslatorError(&analysis->lexer,"Function redefined error.");
+				PX_ScriptTranslatorError(analysis,"Function redefined error.");
 				goto _ERROR;
 			}
 			for (j=0;j<func.parametersCount;j++)
 			{
 				if (func.parameters[j].type!=pfunc->parameters[j].type)
 				{
-					PX_ScriptTranslatorError(&analysis->lexer,"Function parameters are not compatible");
+					PX_ScriptTranslatorError(analysis,"Function parameters are not compatible");
 					goto _ERROR;
 				}
 			}
@@ -8820,9 +8830,9 @@ px_bool PX_ScriptParseFunctionDefined(PX_SCRIPT_Analysis *analysis,PX_SCRIPT_TRA
 _ERROR:
 	return PX_FALSE;
 }
-px_bool PX_ScriptParseFunctionGuiderCode(PX_SCRIPT_Analysis *analysis)
+px_bool PX_ScriptParseFunctionGuiderCode(PX_ScriptInterpreter *analysis)
 {
-	int stacksize;
+	px_int stacksize;
 	px_string code;
 
 	px_string guiderCode;
@@ -8869,7 +8879,7 @@ px_bool PX_ScriptParseFunctionGuiderCode(PX_SCRIPT_Analysis *analysis)
 	PX_StringFree(&guiderCode);
 	return PX_TRUE;
 }
-px_bool PX_ScriptParseBootCode(PX_SCRIPT_Analysis *analysis)
+px_bool PX_ScriptParseBootCode(PX_ScriptInterpreter *analysis)
 {
 	px_int i;
 	PX_SCRIPT_VARIABLES *pvar;
@@ -8897,10 +8907,10 @@ px_bool PX_ScriptParseBootCode(PX_SCRIPT_Analysis *analysis)
 	}
 	return PX_TRUE;
 }
-px_bool PX_ScriptParseFunctionReturn(PX_SCRIPT_Analysis *analysis)
+px_bool PX_ScriptParseFunctionReturn(PX_ScriptInterpreter *analysis)
 {
 	px_string code;
-	int stacksize=0;
+	px_int stacksize=0;
 	PX_StringInitialize(analysis->mp,&code);
 
 	stacksize=analysis->currentAllocStackSize;
@@ -8918,7 +8928,7 @@ px_bool PX_ScriptParseFunctionReturn(PX_SCRIPT_Analysis *analysis)
 	PX_StringFree(&code);
 	return PX_TRUE;
 }
-px_bool PX_ScriptParsePopAstStructure(PX_SCRIPT_Analysis *analysis)
+px_bool PX_ScriptParsePopAstStructure(PX_ScriptInterpreter *analysis)
 {
 	PX_SCRIPT_AST_STRUCTURE *plast;
 	if (analysis->v_astStructure.size==0)
@@ -8929,9 +8939,9 @@ px_bool PX_ScriptParsePopAstStructure(PX_SCRIPT_Analysis *analysis)
 	PX_VectorPop(&analysis->v_astStructure);
 	return PX_TRUE;
 }
-px_bool PX_ScriptParseLastCodeblockEnd(PX_SCRIPT_Analysis *analysis);
+px_bool PX_ScriptParseLastCodeblockEnd(PX_ScriptInterpreter *analysis);
 
-px_bool PX_ScriptParseLastBlockEnd(PX_SCRIPT_Analysis *analysis)
+px_bool PX_ScriptParseLastBlockEnd(PX_ScriptInterpreter *analysis)
 {
 	PX_SCRIPT_AST_STRUCTURE astStruct;
 
@@ -8993,7 +9003,7 @@ px_bool PX_ScriptParseLastBlockEnd(PX_SCRIPT_Analysis *analysis)
 	}
 	return PX_TRUE;
 }
-px_bool PX_ScriptParseLastCodeblockEnd(PX_SCRIPT_Analysis *analysis)
+px_bool PX_ScriptParseLastCodeblockEnd(PX_ScriptInterpreter *analysis)
 {
 	PX_LEXER_STATE state;
 	PX_LEXER_LEXEME_TYPE type;
@@ -9191,7 +9201,7 @@ px_bool PX_ScriptParseLastCodeblockEnd(PX_SCRIPT_Analysis *analysis)
 
 	return PX_TRUE;
 }
-px_bool PX_ScriptParseIfLastAST(PX_SCRIPT_Analysis *analysis)
+px_bool PX_ScriptParseIfLastAST(PX_ScriptInterpreter *analysis)
 {
 	PX_SCRIPT_AST_STRUCTURE astStruct;
 	
@@ -9237,7 +9247,7 @@ px_bool PX_ScriptParseIfLastAST(PX_SCRIPT_Analysis *analysis)
 			{
 				if (astStruct._compare.oneline_expr)
 				{
-					PX_ScriptTranslatorError(&analysis->lexer,"expression in useless compared.");
+					PX_ScriptTranslatorError(analysis,"expression in useless compared.");
 					return PX_FALSE;
 				}
 			}
@@ -9259,9 +9269,9 @@ px_bool PX_ScriptParseIfLastAST(PX_SCRIPT_Analysis *analysis)
 
 	return PX_TRUE;
 }
-px_bool PX_ScriptParseGetExpression(PX_SCRIPT_Analysis *analysis,px_string *expr,px_char end)
+px_bool PX_ScriptParseGetExpression(PX_ScriptInterpreter *analysis,px_string *expr,px_char end)
 {
-	int mBracket=0,lBracket=0;
+	px_int mBracket=0,lBracket=0;
 	PX_LEXER_LEXEME_TYPE type;
 
 	PX_StringClear(expr);
@@ -9313,7 +9323,7 @@ px_bool PX_ScriptParseGetExpression(PX_SCRIPT_Analysis *analysis,px_string *expr
 	}
 	return PX_TRUE;
 }
-px_bool PX_ScriptCompilerCompile(PX_SCRIPT_LIBRARY *lib,const px_char *name,px_string *ASM,px_int LocalStackSize)
+px_bool PX_ScriptCompilerCompile(PX_SCRIPT_LIBRARY *lib,const px_char *name,px_string *ASM,px_int LocalStackSize,px_char error[],px_int err_size)
 {
 	PX_SCRIPT_SETMEMBER *psetmem;
 	PX_SCRIPT_STRUCT *pset;
@@ -9322,20 +9332,24 @@ px_bool PX_ScriptCompilerCompile(PX_SCRIPT_LIBRARY *lib,const px_char *name,px_s
 	px_int i,j,globalSize;
 	px_uint quotes;
 	PX_LEXER_LEXEME_TYPE type;
-	PX_SCRIPT_Analysis analysis;
+	PX_ScriptInterpreter analysis;
 	PX_SCRIPT_AST_STRUCTURE buildAstStruct;
 	PX_SCRIPT_AST_STRUCTURE astStruct;
 	px_string expression,fmrString,condCodes;
 	px_string expCode;
 	px_bool hasLastReturn=PX_FALSE;
 	PX_SCRIPT_AST_OPERAND retOperand;
-	int mBracket=0,lBracket=0;
+	px_int mBracket=0,lBracket=0;
 	PX_SCRIPT_VARIABLES *pvar;
 	px_int thread=1;
 	px_bool caseEnd;
 	//////////////////////////////////////////////////////////////////////////
 
 	//////////////////////////////////////////////////////////////////////////
+	if (error&& err_size)
+	{
+		error[0] = 0;
+	}
 	PX_memset(&astStruct, 0, sizeof(&astStruct));
 	PX_StringInitialize(lib->mp,&codes);
 
@@ -9351,11 +9365,11 @@ px_bool PX_ScriptCompilerCompile(PX_SCRIPT_LIBRARY *lib,const px_char *name,px_s
 	
 	if (i==lib->codeLibraries.size)
 	{
-		PX_ScriptTranslatorError(PX_NULL,"Code of name was not existed");
+		PX_ScriptTranslatorError(&analysis,"Code of name was not existed");
 		return PX_FALSE;
 	}
 
-	if(!PX_ScriptParsePretreatment(&codes,lib,name))
+	if(!PX_ScriptParsePretreatment(&analysis, &codes,lib,name))
 		return PX_FALSE;
 
 	PX_memset(&analysis,0,sizeof(analysis));
@@ -9563,7 +9577,7 @@ px_bool PX_ScriptCompilerCompile(PX_SCRIPT_LIBRARY *lib,const px_char *name,px_s
 // 
 // 					if (isBeginExpression)
 // 					{
-// 						PX_ScriptTranslatorError(&analysis.lexer,"Define variable before expression");
+// 						PX_ScriptTranslatorError(&analysis,"Define variable before expression");
 // 						goto _ERROR;
 // 					}
 					if(!PX_ScriptParseVar(&analysis)) goto _ERROR;
@@ -9639,7 +9653,7 @@ px_bool PX_ScriptCompilerCompile(PX_SCRIPT_LIBRARY *lib,const px_char *name,px_s
 
 			if (type==PX_LEXER_LEXEME_TYPE_DELIMITER&&analysis.lexer.Symbol=='{')
 			{
-				PX_ScriptTranslatorError(&analysis.lexer,"Could not implement host function.");
+				PX_ScriptTranslatorError(&analysis,"Could not implement host function.");
 				goto _ERROR;
 			}
 			else if (analysis.lexer.Symbol==';')
@@ -9683,6 +9697,7 @@ px_bool PX_ScriptCompilerCompile(PX_SCRIPT_LIBRARY *lib,const px_char *name,px_s
 			}
 			else
 			{
+
 				goto _ERROR;
 			}
 
@@ -9736,7 +9751,7 @@ px_bool PX_ScriptCompilerCompile(PX_SCRIPT_LIBRARY *lib,const px_char *name,px_s
 				PX_StringFree(&expCode);
 				goto _ERROR;
 			}
-			PX_StringCat(&analysis.code,";--------IF (CONDITION) \n");
+			PX_StringCat(&analysis.code,";IF (CONDITION) \n");
 			if(!PX_ScriptParseExpression(&analysis,expression.buffer,&expCode,&retOperand))
 			{
 				PX_StringFree(&expression);
@@ -9805,7 +9820,7 @@ px_bool PX_ScriptCompilerCompile(PX_SCRIPT_LIBRARY *lib,const px_char *name,px_s
 				PX_StringFree(&expCode);
 				goto _ERROR;
 			}
-			PX_StringCat(&analysis.code,";--------WHILE (CONDITION) \n");
+			PX_StringCat(&analysis.code,";WHILE (CONDITION) \n");
 			buildAstStruct.type=PX_SCRIPT_AST_STRUCTURE_TYPE_WHILE;
 			buildAstStruct._while.loopflag=analysis._jFlag++;
 			buildAstStruct._while.endflag=analysis._jFlag++;
@@ -9939,7 +9954,7 @@ _CONTINUE:
 			buildAstStruct._for.endFlag=analysis._jFlag++;
 
 			//condition expression
-			PX_StringCat(&analysis.code,";--------FOR (INIT;CONDITION;ADDITION) \n");
+			PX_StringCat(&analysis.code,";FOR (INIT;CONDITION;ADDITION) \n");
 
 			PX_StringInitialize(analysis.mp,&expression);
 			PX_StringInitialize(analysis.mp,&expCode);
@@ -10076,7 +10091,7 @@ _CONTINUE:
 				goto _ERROR;
 			}
 
-			PX_StringCat(&analysis.code,";--------SWITCH (ORIGINAL) \n");
+			PX_StringCat(&analysis.code,";SWITCH (ORIGINAL) \n");
 
 			//condition expression
 			PX_StringInitialize(analysis.mp,&expression);
@@ -10156,7 +10171,7 @@ _CONTINUE:
 			buildAstStruct.type=PX_SCRIPT_AST_STRUCTURE_TYPE_CASE;
 			buildAstStruct._with.endFlag=analysis._jFlag++;
 
-			PX_StringCat(&analysis.code,";--------WITH (CONDITION) \n");
+			PX_StringCat(&analysis.code,";WITH (CONDITION) \n");
 			
 			//condition expression
 			PX_StringInitialize(analysis.mp,&expression);
@@ -10246,7 +10261,7 @@ _CONTINUE:
 				{
 					PX_StringFree(&expression);
 					PX_StringFree(&expCode);
-					PX_ScriptTranslatorError(&analysis.lexer,"Invalid operand-type.");
+					PX_ScriptTranslatorError(&analysis,"Invalid operand-type.");
 					goto _ERROR;
 				}
 
@@ -10336,7 +10351,7 @@ _CONTINUE:
 			_BREAKOUT:
 			if (i<0)
 			{
-				PX_ScriptTranslatorError(&analysis.lexer,"Could not matched  break to block.");
+				PX_ScriptTranslatorError(&analysis,"Could not matched  break to block.");
 				goto _ERROR;
 			}
 			if(!PX_ScriptParseIfLastAST(&analysis)) goto _ERROR;
@@ -10386,7 +10401,7 @@ _CONTINUE:
 _CONTINUEOUT:
 			if (i<0)
 			{
-				PX_ScriptTranslatorError(&analysis.lexer,"Could not matched  break to block.");
+				PX_ScriptTranslatorError(&analysis,"Could not matched  break to block.");
 				goto _ERROR;
 			}
 			if(!PX_ScriptParseIfLastAST(&analysis)) goto _ERROR;
@@ -10430,7 +10445,7 @@ _CONTINUEOUT:
 			case PX_SCRIPT_PARSER_VAR_TYPE_VOID:
 				if (retOperand.operandType!=PX_SCRIPT_AST_OPERAND_TYPE_VOID)
 				{
-					PX_ScriptTranslatorError(&analysis.lexer,"Return-type not matched.");
+					PX_ScriptTranslatorError(&analysis,"Return-type not matched.");
 					goto _ERROR;
 				}
 				break;
@@ -10439,7 +10454,7 @@ _CONTINUEOUT:
 					retOperand.operandType!=PX_SCRIPT_AST_OPERAND_TYPE_FLOAT&&retOperand.operandType!=PX_SCRIPT_AST_OPERAND_TYPE_FLOAT_CONST&&\
 					retOperand.operandType!=PX_SCRIPT_AST_OPERAND_TYPE_STRING_IDX&&retOperand.operandType!=PX_SCRIPT_AST_OPERAND_TYPE_MEMORY_IDX)
 				{
-					PX_ScriptTranslatorError(&analysis.lexer,"Return-type not matched.");
+					PX_ScriptTranslatorError(&analysis,"Return-type not matched.");
 						goto _ERROR;
 				}
 				if (retOperand.operandType==PX_SCRIPT_AST_OPERAND_TYPE_FLOAT||retOperand.operandType==PX_SCRIPT_AST_OPERAND_TYPE_FLOAT_CONST)
@@ -10452,7 +10467,7 @@ _CONTINUEOUT:
 					retOperand.operandType!=PX_SCRIPT_AST_OPERAND_TYPE_FLOAT&&retOperand.operandType!=PX_SCRIPT_AST_OPERAND_TYPE_FLOAT_CONST&&\
 					retOperand.operandType!=PX_SCRIPT_AST_OPERAND_TYPE_STRING_IDX&&retOperand.operandType!=PX_SCRIPT_AST_OPERAND_TYPE_MEMORY_IDX)
 				{
-					PX_ScriptTranslatorError(&analysis.lexer,"Return-type not matched.");
+					PX_ScriptTranslatorError(&analysis,"Return-type not matched.");
 						goto _ERROR;
 				}
 				if (retOperand.operandType==PX_SCRIPT_AST_OPERAND_TYPE_INT||retOperand.operandType==PX_SCRIPT_AST_OPERAND_TYPE_INT_CONST)
@@ -10463,54 +10478,54 @@ _CONTINUEOUT:
 			case PX_SCRIPT_PARSER_VAR_TYPE_STRING:
 				if (retOperand.operandType!=PX_SCRIPT_AST_OPERAND_TYPE_STRING&&retOperand.operandType!=PX_SCRIPT_AST_OPERAND_TYPE_STRING_CONST)
 				{
-					PX_ScriptTranslatorError(&analysis.lexer,"Return-type not matched.");
+					PX_ScriptTranslatorError(&analysis,"Return-type not matched.");
 						goto _ERROR;
 				}
 				break;
 			case PX_SCRIPT_PARSER_VAR_TYPE_MEMORY:
 				if (retOperand.operandType!=PX_SCRIPT_AST_OPERAND_TYPE_MEMORY&&retOperand.operandType!=PX_SCRIPT_AST_OPERAND_TYPE_MEMORY_CONST)
 				{
-					PX_ScriptTranslatorError(&analysis.lexer,"Return-type not matched.");
+					PX_ScriptTranslatorError(&analysis,"Return-type not matched.");
 						goto _ERROR;
 				}
 				break;
 			case PX_SCRIPT_PARSER_VAR_TYPE_INT_PTR:
 				if (retOperand.operandType!=PX_SCRIPT_AST_OPERAND_TYPE_INT_PTR&&retOperand.operandType!=PX_SCRIPT_AST_OPERAND_TYPE_INT_PTR_CONST)
 				{
-					PX_ScriptTranslatorError(&analysis.lexer,"Return-type not matched.");
+					PX_ScriptTranslatorError(&analysis,"Return-type not matched.");
 						goto _ERROR;
 				}
 				break;
 			case PX_SCRIPT_PARSER_VAR_TYPE_FLOAT_PTR:
 				if (retOperand.operandType!=PX_SCRIPT_AST_OPERAND_TYPE_FLOAT_PTR&&retOperand.operandType!=PX_SCRIPT_AST_OPERAND_TYPE_FLOAT_PTR_CONST)
 				{
-					PX_ScriptTranslatorError(&analysis.lexer,"Return-type not matched.");
+					PX_ScriptTranslatorError(&analysis,"Return-type not matched.");
 						goto _ERROR;
 				}
 				break;
 			case PX_SCRIPT_PARSER_VAR_TYPE_STRING_PTR:
 				if (retOperand.operandType!=PX_SCRIPT_AST_OPERAND_TYPE_STRING_PTR&&retOperand.operandType!=PX_SCRIPT_AST_OPERAND_TYPE_STRING_PTR_CONST)
 				{
-					PX_ScriptTranslatorError(&analysis.lexer,"Return-type not matched.");
+					PX_ScriptTranslatorError(&analysis,"Return-type not matched.");
 						goto _ERROR;
 				}
 				break;
 			case PX_SCRIPT_PARSER_VAR_TYPE_MEMORY_PTR:
 				if (retOperand.operandType!=PX_SCRIPT_AST_OPERAND_TYPE_MEMORY_PTR&&retOperand.operandType!=PX_SCRIPT_AST_OPERAND_TYPE_MEMORY_PTR_CONST)
 				{
-					PX_ScriptTranslatorError(&analysis.lexer,"Return-type not matched.");
+					PX_ScriptTranslatorError(&analysis,"Return-type not matched.");
 						goto _ERROR;
 				}
 				break;
 			case PX_SCRIPT_PARSER_VAR_TYPE_STRUCT_PTR:
-				if (retOperand.operandType!=PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR&&retOperand.operandType!=PX_SCRIPT_AST_OPERAND_TYPE_SET_PTR_CONST)
+				if (retOperand.operandType!=PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR&&retOperand.operandType!=PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR_CONST)
 				{
-					PX_ScriptTranslatorError(&analysis.lexer,"Return-type not matched.");
+					PX_ScriptTranslatorError(&analysis,"Return-type not matched.");
 						goto _ERROR;
 				}
-				if (retOperand.pSet!=PX_ScriptParseGetStructByIndex(&analysis,analysis.currentFunc.retSetIndex))
+				if (retOperand.pStruct!=PX_ScriptParseGetStructByIndex(&analysis,analysis.currentFunc.retSetIndex))
 				{
-					PX_ScriptTranslatorError(&analysis.lexer,"Return-type not matched.");
+					PX_ScriptTranslatorError(&analysis,"Return-type not matched.");
 						goto _ERROR;
 				}
 				break;
@@ -10573,7 +10588,7 @@ _CONTINUEOUT:
 		//////////////////////////////////////////////////////////////////////////
 		//
 
-		PX_ScriptTranslatorError(&analysis.lexer,"Invalid expression.");
+		PX_ScriptTranslatorError(&analysis,"Invalid expression.");
 		goto _ERROR;
 
 	}
@@ -10678,8 +10693,11 @@ _CONTINUEOUT:
 	PX_LexerFree(&analysis.lexer);
 	return PX_TRUE;
 _ERROR:
-	PX_ScriptTranslatorError(&analysis.lexer,"ERROR:Compile terminated.");
-
+	PX_ScriptTranslatorError(&analysis,"ERROR:Compile terminated.");
+	if (error)
+	{
+		PX_strcpy(error, PX_ScriptCompilerError(&analysis), err_size);
+	}
 	if (analysis.v_astStructure.size)
 	{
 		while(analysis.v_astStructure.size)
@@ -10741,12 +10759,12 @@ _ERROR:
 	return PX_FALSE;
 }
 
-px_char * PX_ScriptCompilerError(void)
+px_char * PX_ScriptCompilerError(PX_ScriptInterpreter* analysis)
 {
-	return PX_Script_InterpreterError;
+	return analysis->PX_Script_InterpreterError;
 }
 
-px_bool PX_ScriptInterpreterExpression(PX_SCRIPT_Analysis *analysis,px_char *expr,px_string *out,PX_SCRIPT_AST_OPERAND *retOperand)
+px_bool PX_ScriptInterpreterExpression(PX_ScriptInterpreter *analysis,px_char *expr,px_string *out,PX_SCRIPT_AST_OPERAND *retOperand)
 {
 	return PX_ScriptParseExpression(analysis,expr,out,retOperand);
 }

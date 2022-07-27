@@ -333,7 +333,7 @@ px_void PX_Object_VariousSetFloat(PX_Object* pObject, float f)
 	PX_Object_VariousSetText(pObject, content);
 }
 
-px_void PX_Object_VariousSetInt(PX_Object* pObject, int i)
+px_void PX_Object_VariousSetInt(PX_Object* pObject, px_int i)
 {
 	px_char content[32];
 	if (pObject->Type != PX_OBJECT_TYPE_VARIOUS)

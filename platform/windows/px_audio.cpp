@@ -7,7 +7,7 @@ extern "C"
 {
 	#include "../../core/PX_Sound.h"
 	int PX_AudioInitialize(PX_SoundPlay *soundPlay);
-	int PX_AudioInitializeEx();
+	int PX_AudioInitializeHwnd(HWND hwnd);
 	void PX_AudioSetVolume( unsigned int Vol );
 	void PX_AudioPlay( unsigned long Vol );
 	int  PX_AudioGetStandbyBufferSize();
@@ -63,20 +63,19 @@ DWORD  _stdcall DEMO_DSoundProc(LPVOID p)
 	}
 }
 
-extern HWND	Win_Hwnd;
 int PX_AudioInitialize(PX_SoundPlay *soundPlay)
 {
 	DSound_soundplay=soundPlay;
 	return 1;
 }
-int PX_AudioInitializeEx()
+
+int PX_AudioInitializeHwnd(HWND hwnd)
 {
-	VOID* pDSLockedBuffer =NULL;
-	DWORD dwDSLockedBufferSize =0; 
+	VOID* pDSLockedBuffer = NULL;
+	DWORD dwDSLockedBufferSize = 0;
 	HANDLE hThread;
 	DWORD  threadId;
-	HWND hwnd=Win_Hwnd;
-	BOOL startThread=TRUE;
+	BOOL startThread = TRUE;
 	/*Sound Play*/
 	if (!DSound_soundplay)
 	{
@@ -84,21 +83,23 @@ int PX_AudioInitializeEx()
 	}
 
 	//DSound created
-	if(DSound_lpds==NULL)
+	if (DSound_lpds == NULL)
 	{
-		if(DirectSoundCreate(NULL,&DSound_lpds,NULL) == DS_OK)
+		if (DirectSoundCreate(NULL, &DSound_lpds, NULL) == DS_OK)
 		{
-			if(DSound_lpds ->SetCooperativeLevel(hwnd,DSSCL_NORMAL)!=DS_OK)
+			if (DSound_lpds->SetCooperativeLevel(hwnd, DSSCL_NORMAL) != DS_OK)
 			{
 				return FALSE;
 			}
 		}
+		else
+			return FALSE;
 	}
 
-	
+
 	///////////////////////////////////////////////////////////////////////////
 	//Create Sound buffer
-	
+
 
 	DSound_waveformat.wFormatTag = WAVE_FORMAT_PCM;
 	DSound_waveformat.nSamplesPerSec = 44100;//44100;
@@ -108,36 +109,97 @@ int PX_AudioInitializeEx()
 	DSound_waveformat.nAvgBytesPerSec = DSound_waveformat.nBlockAlign * DSound_waveformat.nSamplesPerSec;
 	DSound_waveformat.cbSize = 0;
 
-	memset(&DSound_dsbd,0,sizeof(DSBUFFERDESC));
+	memset(&DSound_dsbd, 0, sizeof(DSBUFFERDESC));
 	DSound_dsbd.dwSize = sizeof(DSBUFFERDESC);
-	DSound_dsbd.dwFlags=DSBCAPS_GLOBALFOCUS | DSBCAPS_CTRLPOSITIONNOTIFY |DSBCAPS_GETCURRENTPOSITION2|DSBCAPS_CTRLVOLUME ;
-	DSound_dsbd.dwBufferBytes =DSOUND_BUFFER_SIZE;
-	DSound_dsbd.lpwfxFormat =&DSound_waveformat; 
-	DSound_dsbd.dwReserved=0;
-	
+	DSound_dsbd.dwFlags = DSBCAPS_GLOBALFOCUS | DSBCAPS_CTRLPOSITIONNOTIFY | DSBCAPS_GETCURRENTPOSITION2 | DSBCAPS_CTRLVOLUME;
+	DSound_dsbd.dwBufferBytes = DSOUND_BUFFER_SIZE;
+	DSound_dsbd.lpwfxFormat = &DSound_waveformat;
+	DSound_dsbd.dwReserved = 0;
+
 
 	HRESULT hr;
-	if(FAILED(hr=DSound_lpds ->CreateSoundBuffer(&DSound_dsbd,&DSound_lpdbsBuffer,NULL)))
+	if (FAILED(hr = DSound_lpds->CreateSoundBuffer(&DSound_dsbd, &DSound_lpdbsBuffer, NULL)))
 	{
 		return FALSE;
 	}
 
 	PX_AudioSetVolume(0);
 
-	if(DSound_lpdbsBuffer ->Lock(0,DSOUND_BUFFER_SIZE,&pDSLockedBuffer,&dwDSLockedBufferSize,NULL,NULL,0))
+	if (DSound_lpdbsBuffer->Lock(0, DSOUND_BUFFER_SIZE, &pDSLockedBuffer, &dwDSLockedBufferSize, NULL, NULL, 0))
 		return FALSE;
 
-	memset(pDSLockedBuffer,0,dwDSLockedBufferSize); 
+	memset(pDSLockedBuffer, 0, dwDSLockedBufferSize);
 
-	DSound_lpdbsBuffer->Unlock(pDSLockedBuffer,dwDSLockedBufferSize,NULL,0);
-	DSound_lpdbsBuffer->Play(0,0,DSBPLAY_LOOPING);
+	DSound_lpdbsBuffer->Unlock(pDSLockedBuffer, dwDSLockedBufferSize, NULL, 0);
+	DSound_lpdbsBuffer->Play(0, 0, DSBPLAY_LOOPING);
 
-	if(startThread)
+	if (startThread)
 		hThread = CreateThread(NULL, 0, DEMO_DSoundProc, 0, 0, &threadId);
 
 	return TRUE;
 }
 
+
+int PX_AudioPlaySoundBuffer(HWND hwnd, void* _44100hz_1channel_16b_buffer, int size)
+{
+	VOID* pDSLockedBuffer = NULL;
+	DWORD dwDSLockedBufferSize = 0;
+	/*Sound Play*/
+	if (!DSound_soundplay)
+	{
+		return 1;
+	}
+
+	//DSound created
+	if (DSound_lpds == NULL)
+	{
+		if (DirectSoundCreate(NULL, &DSound_lpds, NULL) == DS_OK)
+		{
+			if (DSound_lpds->SetCooperativeLevel(hwnd, DSSCL_NORMAL) != DS_OK)
+			{
+				return FALSE;
+			}
+		}
+	}
+
+
+	///////////////////////////////////////////////////////////////////////////
+	//Create Sound buffer
+
+
+	DSound_waveformat.wFormatTag = WAVE_FORMAT_PCM;
+	DSound_waveformat.nSamplesPerSec = 44100;//44100;
+	DSound_waveformat.wBitsPerSample = 16;//
+	DSound_waveformat.nChannels = 1;//
+	DSound_waveformat.nBlockAlign = (DSound_waveformat.wBitsPerSample >> 3) * DSound_waveformat.nChannels;;
+	DSound_waveformat.nAvgBytesPerSec = DSound_waveformat.nBlockAlign * DSound_waveformat.nSamplesPerSec;
+	DSound_waveformat.cbSize = 0;
+
+	memset(&DSound_dsbd, 0, sizeof(DSBUFFERDESC));
+	DSound_dsbd.dwSize = sizeof(DSBUFFERDESC);
+	DSound_dsbd.dwFlags = DSBCAPS_GLOBALFOCUS | DSBCAPS_CTRLPOSITIONNOTIFY | DSBCAPS_GETCURRENTPOSITION2 | DSBCAPS_CTRLVOLUME;
+	DSound_dsbd.dwBufferBytes = size;
+	DSound_dsbd.lpwfxFormat = &DSound_waveformat;
+	DSound_dsbd.dwReserved = 0;
+
+
+	HRESULT hr;
+	if (FAILED(hr = DSound_lpds->CreateSoundBuffer(&DSound_dsbd, &DSound_lpdbsBuffer, NULL)))
+	{
+		return FALSE;
+	}
+
+	PX_AudioSetVolume(0);
+
+	if (DSound_lpdbsBuffer->Lock(0, size, &pDSLockedBuffer, &dwDSLockedBufferSize, NULL, NULL, 0))
+		return FALSE;
+
+	memcpy(pDSLockedBuffer, _44100hz_1channel_16b_buffer, dwDSLockedBufferSize);
+
+	DSound_lpdbsBuffer->Unlock(pDSLockedBuffer, dwDSLockedBufferSize, NULL, 0);
+	DSound_lpdbsBuffer->Play(0, 0, DSBPLAY_LOOPING);
+	return 1;
+}
 LPDIRECTSOUNDBUFFER PX_AudioGetDirectSoundBuffer()
 {
 	return DSound_lpdbsBuffer;

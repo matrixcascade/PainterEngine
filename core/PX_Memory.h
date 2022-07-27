@@ -26,17 +26,32 @@ px_byte *PX_MemoryData(px_memory *memory);
 typedef struct  
 {
 	px_memorypool* mp;
-	px_float *buffer;
+	px_double *buffer;
 	px_int size;
 	px_int pointer;
 }PX_CircularBuffer;
 
 px_bool PX_CircularBufferInitialize(px_memorypool* mp, PX_CircularBuffer* pcbuffer, px_int size);
-px_void PX_CircularBufferPush(PX_CircularBuffer* pcbuffer, px_float v);
-px_void PX_CircularBufferAdd(PX_CircularBuffer* pcbuffer, px_int pos,px_float v);
-px_void PX_CircularBufferSet(PX_CircularBuffer* pcbuffer, px_int pos,px_float v);
-px_float PX_CircularBufferGet(PX_CircularBuffer* pcbuffer, px_int pos);
+px_void PX_CircularBufferPush(PX_CircularBuffer* pcbuffer, px_double v);
+px_void PX_CircularBufferAdd(PX_CircularBuffer* pcbuffer, px_int pos,px_double v);
+px_void PX_CircularBufferSet(PX_CircularBuffer* pcbuffer, px_int pos,px_double v);
+px_double PX_CircularBufferGet(PX_CircularBuffer* pcbuffer, px_int pos);
+px_void PX_CircularBufferZeroClear(PX_CircularBuffer* pcbuffer);
 px_void PX_CircularBufferFree(PX_CircularBuffer* pcbuffer);
-px_float PX_CircularBufferDelay(PX_CircularBuffer* pcbuffer, px_int pos);
+px_double PX_CircularBufferDelay(PX_CircularBuffer* pcbuffer, px_int pos);
 
+
+typedef px_memory px_fifobuffer;
+px_void PX_FifoBufferInitialize(px_memorypool* mp, px_fifobuffer* pfifo);
+px_int PX_FifoBufferPop(px_fifobuffer* pfifo, px_void* data, px_int size);
+px_bool PX_FifoBufferPush(px_fifobuffer* pfifo, px_void* data, px_int size);
+px_int PX_FifoBufferGetPopSize(px_fifobuffer* pfifo);
+px_void PX_FifoBufferFree(px_fifobuffer* pfifo);
+
+typedef px_memory px_stack;
+px_void PX_StackInitialize(px_memorypool* mp, px_stack* pstack);
+px_int PX_StackPop(px_stack* pstack, px_void* data, px_int size);
+px_bool PX_StackPush(px_stack* pstack, px_void* data, px_int size);
+px_int PX_StackGetPopSize(px_stack* pstack);
+px_void PX_StackFree(px_stack* pstack);
 #endif

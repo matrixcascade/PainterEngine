@@ -179,11 +179,6 @@ typedef struct
 	PX_PianoSoundBoard soundboard;
 }PX_Piano;
 
-typedef enum 
-{
-	PX_PIANO_STYLE_DEFAULT,
-	PX_PIANO_STYLE_DEBUG
-}PX_PIANO_STYLE;
 
 px_bool PX_PianoKeyInitialize(px_memorypool* mp, PX_PianoKey* pPianoKey, PX_PianoKey_Parameters* param);
 px_void PX_PianoKeyTrigger(PX_PianoKey* pPianoKey, px_float v);
@@ -197,7 +192,7 @@ px_void PX_PianoSoundBoardGo(PX_PianoSoundBoard* psb, px_float in[], px_float ou
 px_void PX_PianoSoundBoardFree(PX_PianoSoundBoard* psb);
 
 
-px_bool PX_PianoInitialize(px_memorypool* mp,PX_Piano* pPiano, PX_PIANO_STYLE style);
+px_bool PX_PianoInitialize(px_memorypool* mp,PX_Piano* pPiano);
 px_bool PX_PianoInitializeEx(px_memorypool* mp, PX_Piano* pPiano, PX_PianoKey_Parameters keyparam[88], PX_PianoSoundboard_Parameters *soundboardparam);
 px_void PX_PianoIndexToKey(px_int index, px_char keyName[]);
 px_void PX_PianoTriggerKey(PX_Piano* pPiano, const px_char keyName[], px_float v);
@@ -229,6 +224,8 @@ px_void PX_PianoModelInitializeData(PX_PianoModel* pModel);
 px_bool PX_PianoModelInitializeNote(PX_PianoModel* pModel, px_int i, PX_PianoKey_Parameters* keyparam, PX_PianoSoundboard_Parameters* soundboardparam);
 px_bool PX_PianoModelInitialize(PX_PianoModel* pModel, PX_PianoKey_Parameters keyparam[88], PX_PianoSoundboard_Parameters* soundboardparam);
 px_void PX_PianoModelGo(PX_PianoModel* pModel, px_float out[], px_int count);
-px_void PX_PianoModelTrigger(PX_PianoModel* pModel,px_int index);
+px_void PX_PianoModelTriggerKey(PX_PianoModel* pPiano, const px_char keyName[]);
+px_void PX_PianoModelTriggerIndex(PX_PianoModel* pModel, px_int index);
+px_void PX_PianoModelTrigger(PX_PianoModel* pModel, px_int index);
 px_void PX_PianoModelFree(PX_PianoModel* pModel);
 #endif

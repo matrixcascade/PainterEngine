@@ -1,7 +1,7 @@
 #emscripten makefile
 #####################################################
 target :=PainterEngine.html
-project_path := ../../../PainterEngine_MathematicalSoundGame_Sources
+project_path := ../../../project
 painterengine_path := ../..
 #####################################################
 

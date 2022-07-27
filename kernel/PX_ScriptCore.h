@@ -114,6 +114,7 @@ enum PX_SCRIPT_ASM_INSTR_OPCODE
 	PX_SCRIPT_ASM_INSTR_OPCODE_STRFRF,
 	PX_SCRIPT_ASM_INSTR_OPCODE_STRSET,
 	PX_SCRIPT_ASM_INSTR_OPCODE_STRFIND,
+	PX_SCRIPT_ASM_INSTR_OPCODE_STRCUT,
 	PX_SCRIPT_ASM_INSTR_OPCODE_STRTMEM,
 	PX_SCRIPT_ASM_INSTR_OPCODE_ASC,
 	PX_SCRIPT_ASM_INSTR_OPCODE_MEMBYTE,
@@ -205,7 +206,7 @@ typedef struct __PX_SCRIPT_EXPORT_FUNCTION
 {
 	px_char		name[__PX_SCRIPT_ASM_MNEMONIC_NAME_LEN];
 	px_int		Addr;
-}PX_SCRIPT_EXPORT_FUNCTION;
+}PX_VM_EXPORT_FUNCTION;
 
 typedef struct __PX_SCRIPT_ASM_LABEL_NODE 
 {
@@ -240,7 +241,7 @@ typedef struct __PX_SCRIPT_ASM_HOST_NODE
 	px_char		name[__PX_SCRIPT_ASM_MNEMONIC_NAME_LEN];
 	const px_void	*map;
 	px_void *userptr;
-}PX_SCRIPT_ASM_HOST_NODE;
+}PX_ASM_HOST_NODE;
 
 typedef struct __PX_SCRIPT_ASM_GRAMMAR_INSTR
 {
@@ -250,6 +251,12 @@ typedef struct __PX_SCRIPT_ASM_GRAMMAR_INSTR
 	px_int      operandAccTypes[3]; 
 }PX_SCRIPT_ASM_GRAMMAR_INSTR;
 
+typedef struct
+{
+	px_int map_to_source_line;
+	px_int instr_addr;
+}PX_SCRIPT_ASM_SOURCE_MAP;
+
 typedef struct __PX_SCRIPT_ASM_INSTR_BIN
 {
 	px_char opCode;
@@ -257,6 +264,7 @@ typedef struct __PX_SCRIPT_ASM_INSTR_BIN
 	px_dword  param[3];
 	px_dword  addr;
 	px_int    opcount;
+	px_int   map_to_source_line;
 }PX_SCRIPT_ASM_INSTR_BIN;
 
 
@@ -277,6 +285,12 @@ typedef struct __PX_SCRIPT_ASM_COMPILER
 
 }PX_SCRIPT_ASM_COMPILER;
 
+typedef struct
+{
+	px_memorypool* mp;
+	px_string source;
+	px_vector map;
+}PX_VM_DebuggerMap;
 
 typedef struct __PX_SCRIPT_ASM_HEADER
 {
@@ -303,15 +317,15 @@ typedef struct __PX_SCRIPT_ASM_HEADER
 
 typedef enum __PX_SCRIPT_VM_VARIABLE_TYPE
 {
-	PX_SCRIPTVM_VARIABLE_TYPE_INT,
-	PX_SCRIPTVM_VARIABLE_TYPE_FLOAT,
-	PX_SCRIPTVM_VARIABLE_TYPE_STRING,
-	PX_SCRIPTVM_VARIABLE_TYPE_MEMORY,
-}PX_SCRIPTVM_VARIABLE_TYPE;
+	PX_VM_VARIABLE_TYPE_INT,
+	PX_VM_VARIABLE_TYPE_FLOAT,
+	PX_VM_VARIABLE_TYPE_STRING,
+	PX_VM_VARIABLE_TYPE_MEMORY,
+}PX_VM_VARIABLE_TYPE;
 
-#define PX_SCRIPTVM_VARIABLE_TYPE_PTR PX_SCRIPTVM_VARIABLE_TYPE_INT
+#define PX_VM_VARIABLE_TYPE_PTR PX_VM_VARIABLE_TYPE_INT
 
-typedef struct __PX_SCRIPT_VM_VARIABLE
+typedef struct __PX_VM_VARIABLE
 {
 	px_int type;
 	union
@@ -327,7 +341,7 @@ typedef struct __PX_SCRIPT_VM_VARIABLE
 		px_string _string;
 		px_memory _memory;
 	};
-}PX_SCRIPTVM_VARIABLE;
+}PX_VM_VARIABLE;
 
 typedef struct __PX_ASM_GRAMMAR
 {

@@ -7,43 +7,44 @@
 typedef struct 
 {
 	px_memorypool* mp;
-	px_float b[PX_LTI_MAX_ORDER];
-	px_float a[PX_LTI_MAX_ORDER];
+	px_double b[PX_LTI_MAX_ORDER];
+	px_double a[PX_LTI_MAX_ORDER];
 	px_int b_count;
 	px_int a_count;
 	PX_CircularBuffer cbuf, cbufout;
 	px_bool dirty_grdel;
-	px_float grdel;
+	px_double grdel;
 }PX_LTI;
 
 px_bool PX_LTIInitialize(PX_LTI* pLTI, px_memorypool* mp, px_int sizeB, px_int sizeA);
-px_void PX_LTISetKernel(PX_LTI* pLTI, px_float a[], px_float b[]);
-px_void PX_LTIPush(PX_LTI* pLTI, px_float v);
-px_float PX_LTIFilter(PX_LTI* pLTI, px_float v);
-px_float PX_LTIConvol(PX_LTI* pLTI);
-px_float PX_LTIGroupDelay(PX_LTI* pLTI, px_float f, px_float fs);
-px_float PX_LTIPhaseDelay(PX_LTI* pLTI, px_float f, px_float fs);
+px_void PX_LTISetKernel(PX_LTI* pLTI, px_double a[], px_double b[]);
+px_void PX_LTIPush(PX_LTI* pLTI, px_double v);
+px_void PX_LTIReset(PX_LTI* pLTI);
+px_double PX_LTIGo(PX_LTI* pLTI, px_double v);
+px_double PX_LTIConvol(PX_LTI* pLTI);
+px_double PX_LTIGroupDelay(PX_LTI* pLTI, px_double f, px_double fs);
+px_double PX_LTIPhaseDelay(PX_LTI* pLTI, px_double f, px_double fs);
 px_void PX_LTIFree(PX_LTI* pLTI);
 
 typedef struct 
 {
-	px_float D;
+	px_double D;
 	px_int N;
 	PX_LTI LTI;
 }PX_Thirian;
 px_bool PX_ThirianInitialize(PX_Thirian* pThi, px_memorypool* mp, px_int N);
-px_void PX_ThirianSetCoeffs(PX_Thirian* pThi, px_float D);
+px_void PX_ThirianSetCoeffs(PX_Thirian* pThi, px_double D);
 px_void PX_ThirianFree(PX_Thirian* pThi);
 
 typedef struct 
 {
-	px_float freq;
-	px_float c1;
-	px_float c3;
+	px_double freq;
+	px_double c1;
+	px_double c3;
 	PX_LTI LTI;
 }PX_FilterC1C3;
 px_bool PX_FilterC1C3Initialize(PX_FilterC1C3* pFilter, px_memorypool* mp);
-px_void PX_FilterC1C3SetCoeffs(PX_FilterC1C3* pFilter, px_float freq, px_float c1, px_float c3);
+px_void PX_FilterC1C3SetCoeffs(PX_FilterC1C3* pFilter, px_double freq, px_double c1, px_double c3);
 px_void PX_FilterC1C3Free(PX_FilterC1C3* pFilter);
 
 typedef enum  {
@@ -58,7 +59,7 @@ typedef struct
 }PX_Biquad;
 
 px_bool PX_BiquadInitialize(PX_Biquad* pBiquad, px_memorypool* mp);
-px_void PX_BiquadSetCoeffs(PX_Biquad* pBiquad, px_float f0, px_float fs, px_float Q, PX_BIQUAD_TYPE type);
+px_void PX_BiquadSetCoeffs(PX_Biquad* pBiquad, px_double f0, px_double fs, px_double Q, PX_BIQUAD_TYPE type);
 px_void PX_BiquadFree(PX_Biquad* pBiquad);
 
 
@@ -77,7 +78,7 @@ typedef struct
 }PX_Delay;
 
 px_bool PX_DelayInitialize(PX_Delay* pdelay, px_memorypool* mp, px_int inv_z, PX_DELAY_DATA_TYPE type);
-px_void  PX_DelayGo_float(PX_Delay* pdelay, px_float in[], px_float out[], px_int size);
+px_void  PX_DelayGo_float(PX_Delay* pdelay, px_double in[], px_double out[], px_int size);
 px_void  PX_DelayGo_int(PX_Delay* pdelay, px_int in[], px_int out[], px_int size);
 px_void PX_DelayFree(PX_Delay* pDelay);
 #endif

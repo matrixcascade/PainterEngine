@@ -920,6 +920,19 @@ px_void PX_3D_Present(px_surface *psurface, PX_3D_RenderList *list,PX_3D_Camera 
 		for (i=0;i<list->facestream.size;i++)
 		{
 			pface=PX_VECTORAT(PX_3D_Face,&list->facestream,i);
+			if (!PX_isPointInRect(PX_POINT(pface->transform_vertex[0].position.x, pface->transform_vertex[0].position.y,0),PX_RECT(0,0,1.f*psurface->width, 1.f * psurface->width)))
+			{
+				continue;
+			}
+			if (!PX_isPointInRect(PX_POINT(pface->transform_vertex[1].position.x, pface->transform_vertex[1].position.y, 0), PX_RECT(0, 0, 1.f * psurface->width, 1.f * psurface->width)))
+			{
+				continue;
+			}
+			if (!PX_isPointInRect(PX_POINT(pface->transform_vertex[2].position.x, pface->transform_vertex[2].position.y, 0), PX_RECT(0, 0, 1.f * psurface->width, 1.f * psurface->width)))
+			{
+				continue;
+			}
+
 			if (!(pface->state&PX_3D_FACESTATE_BACKFACE||pface->state&PX_3D_FACESTATE_CLIPPED))
 			{
 				if (list->PX_3D_PRESENTMODE&PX_3D_PRESENTMODE_PURE)

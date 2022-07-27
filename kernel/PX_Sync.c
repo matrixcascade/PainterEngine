@@ -22,12 +22,18 @@ px_bool PX_SyncFrameServerInitialize(PX_SyncFrameServer *sync,px_memorypool *mp,
 	PX_VectorInitialize(mp,&sync->clients,sizeof(PX_SyncFrame_Server_Clients),32);
 	PX_VectorInitialize(mp,&sync->stampsIndexTable,sizeof(PX_SyncFrame_InstrStream_StampIndex),PX_SYNC_INSTRS_SIZE);
 	PX_MemoryInitialize(mp,&sync->stampsInstrStream);
+	PX_MemoryInitialize(mp, &sync->data);
 	return PX_MemoryResize(&sync->stampsInstrStream,PX_SYNC_INSTRS_BYTES_SIZE);
 }
 
 px_void PX_SyncFrameServerSetVersion(PX_SyncFrameServer *sync,px_dword version)
 {
 	sync->version=version;
+}
+
+px_bool PX_SyncFrameServerSetData(PX_SyncFrameServer* sync, px_void* data, px_int size)
+{
+	return PX_MemoryCat(&sync->data, data, size);
 }
 
 static px_bool PX_SyncFrameServer_Write(PX_SyncFrameServer *sync_server,PX_SyncFrame_Server_Clients *pClient,px_void *data,px_uint size)
@@ -46,7 +52,7 @@ __RE_RECV:
 	
 	while ((server->recv_cache_size=PX_LinkerRead(server->linker,server->recv_cache_buffer,sizeof(server->recv_cache_buffer)))!=0)
 	{
-		int i;
+		px_int i;
 		packet=(PX_Sync_IO_Packet *)(server->recv_cache_buffer);
 		for (i=0;i<server->clients.size;i++)
 		{
@@ -85,6 +91,40 @@ __RE_RECV:
 		
 	}
 	return PX_FALSE;
+}
+
+static px_void PX_SyncFrameServerHandleQueryDate(PX_SyncFrameServer* sync_server, PX_SyncFrame_Server_Clients* pClient)
+{
+	
+	PX_Sync_IO_Packet *recv_packet = (PX_Sync_IO_Packet*)(sync_server->recv_cache_buffer);
+	PX_Sync_IO_Packet *send_packet = (PX_Sync_IO_Packet*)(sync_server->send_cache_buffer);
+	px_int offset = recv_packet->param1;
+	px_int size = sizeof(sync_server->send_cache_buffer) - sizeof(PX_Sync_IO_Packet);
+
+	if (offset >= sync_server->data.usedsize)
+	{
+		size = 0;
+		offset = sync_server->data.usedsize;
+	}
+	else if (offset > sync_server->data.usedsize - size)
+	{
+		size = sync_server->data.usedsize - offset;
+	}
+
+	if (size < 0)
+	{
+		size = 0;
+	}
+
+
+	send_packet = (PX_Sync_IO_Packet*)(sync_server->send_cache_buffer);
+	send_packet->verify_id = 0;
+	send_packet->type = PX_SYNC_IO_TYPE_QUERYDATAACK;
+	send_packet->unique = 0;
+	send_packet->param1 = sync_server->data.usedsize;
+	send_packet->param2 = offset;
+	PX_memcpy(sync_server->send_cache_buffer + sizeof(PX_Sync_IO_Packet), sync_server->data.buffer + offset, size);
+	PX_SyncFrameServer_Write(sync_server, pClient, send_packet, sizeof(PX_Sync_IO_Packet)+size);
 }
 
 static px_void PX_SyncFrameServerHandle_StatusConnect(PX_SyncFrameServer *sync_server,px_dword elapsed)
@@ -152,6 +192,10 @@ static px_void PX_SyncFrameServerHandle_StatusConnect(PX_SyncFrameServer *sync_s
 			send_packet->param1=count;
 			send_packet->param2=sync_server->clients.size;
 			PX_SyncFrameServer_Write(sync_server,pClient,send_packet,sizeof(PX_Sync_IO_Packet));
+		}
+		else if (recv_packet->type == PX_SYNC_IO_TYPE_QUERYDATA)
+		{
+			PX_SyncFrameServerHandleQueryDate(sync_server,pClient);
 		}
 	}
 }
@@ -266,6 +310,11 @@ static px_void PX_SyncFrameServerHandle_StatusProcess(PX_SyncFrameServer *sync_s
 
 					plastStamp->size+=sizeof(pClient->c_id)+sizeof(px_dword)+datasize;
 
+				}
+				break;
+			case PX_SYNC_IO_TYPE_QUERYDATA:
+				{
+					PX_SyncFrameServerHandleQueryDate(sync_server, pClient);
 				}
 				break;
 			}
@@ -536,6 +585,48 @@ static px_bool PX_SyncFrameClient_Write(PX_SyncFrameClient *client,px_void *data
 	return PX_LinkerWrite(client->linker,data,size)!=0;
 }
 
+static px_void PX_SyncFrame_ClientHandle_StatusQueryData(PX_SyncFrameClient* client, px_dword elapsed)
+{
+	//read 
+	PX_Sync_IO_Packet* packet;
+
+	while (PX_SyncFrameClient_Read(client))
+	{
+		PX_Sync_IO_Packet* packet = (PX_Sync_IO_Packet*)(client->recv_cache_buffer);
+		if (packet->type == PX_SYNC_IO_TYPE_QUERYDATAACK)
+		{
+			px_dword sumsize = packet->param1;
+			px_dword offset = packet->param2;
+			px_int size;
+			if (offset==client->data.usedsize)
+			{
+				size = sumsize - offset;
+				if (!PX_MemoryCat(&client->data, client->recv_cache_buffer + sizeof(PX_Sync_IO_Packet), size))
+					PX_ASSERT();//out of memory
+			}
+
+			if (sumsize==client->data.usedsize)
+			{
+				client->status = PX_SYNC_CLIENT_STATUS_CONNECTING;
+				return;
+			}
+			
+		}
+	}
+
+	if (elapsed)
+	{
+		packet = (PX_Sync_IO_Packet*)(client->send_cache_buffer);
+		packet->verify_id = 0;
+		packet->type = PX_SYNC_IO_TYPE_QUERYDATA;
+		packet->unique = 0;
+		packet->param1 = client->data.usedsize;
+		packet->param2 = 0;
+		PX_SyncFrameClient_Write(client, packet, sizeof(PX_Sync_IO_Packet));
+	}
+
+}
+
 static px_void PX_SyncFrame_ClientHandle_StatusConneting(PX_SyncFrameClient *client,px_dword elapsed)
 {
 	//read 
@@ -751,6 +842,11 @@ px_void PX_SyncFrameClientUpdate(PX_SyncFrameClient *client,px_dword elapsed)
 {
 	switch (client->status)
 	{
+	case PX_SYNC_CLIENT_STATUS_QUERYDATA:
+		{
+		PX_SyncFrame_ClientHandle_StatusQueryData(client, elapsed);
+		}
+		break;
 	case PX_SYNC_CLIENT_STATUS_CONNECTING:
 		{
 			PX_SyncFrame_ClientHandle_StatusConneting(client,elapsed);
@@ -936,7 +1032,7 @@ px_bool PX_SyncDataServerUpdate(PX_SyncDataServer *s,px_int elapsed)
 			{
 				for (i=0;i<s->clients.size;i++)
 				{
-					int j=0;
+					px_int j=0;
 					pClient=PX_VECTORAT(PX_SyncData_Server_Client,&s->clients,i);
 
 					if ((px_int)R_datagram.request.blockIndex<PX_SyncDataCalculateBlockCount(s->size))

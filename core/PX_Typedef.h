@@ -171,8 +171,17 @@ typedef struct __px_complex
 	px_double im;// imaginary
 }px_complex;
 
+typedef struct __px_timestamp
+{
+	px_int16 year;
+	px_int16 month;
+	px_int16 day;
+	px_int16 hour;
+	px_int16 minute;
+	px_int16 second;
+}px_timestamp;
 
-
+px_timestamp PX_TimeFormString(const px_char* t);
 //////////////////////////////////////////////////////////////////////////
 //endian
 
@@ -273,7 +282,7 @@ px_int PX_itoa(px_int num,px_char *str,px_int MaxStrSize,px_int radix);
 px_dword PX_SwapEndian(px_dword val);
 px_char *PX_strchr(const px_char *s,int ch);
 px_char* PX_strstr(const px_char* dest, const px_char* src);
-
+px_void PX_strcut(px_char* dest, px_int left, px_int right);
 ///////////////////////////////////////////////////////////////////////////
 //rectangle circle
 px_bool PX_isPointInCircle(px_point p,px_point circle,px_float radius);
@@ -435,8 +444,8 @@ px_color PX_ColorHSLToRGB(px_color_hsl color_hsl);
 //point
 px_point PX_POINT(px_float x,px_float y,px_float z);
 px_point2D PX_POINT2D(px_float x,px_float y);
-px_point4D PX_POINT4D(px_float x,px_float y,px_float z);
-px_point PX_PointRotate(px_point p,px_float angle);
+px_point4D PX_POINT4D(px_float x, px_float y, px_float z);
+px_point PX_PointRotate(px_point p, px_float angle);
 px_point2D PX_Point2DRotate(px_point2D p,px_float angle);
 px_float PX_PointDistance(px_point p1,px_point p2);
 
@@ -624,7 +633,7 @@ px_void PX_FIRFilterBuild(PX_FIRFILTER_TYPE bandtype,px_double fln,px_double fhn
 
 ///////////////////////////////////////////////////////////////////////////////
 //LTI
-px_float PX_GroupDelay(px_float f, px_float* B, px_int sizeB, px_float* A, px_int sizeA, px_float FS);
-px_float PX_PhaseDelayDerive(px_float omega, px_float* B, px_int sizeB, px_float* A, px_int sizeA, px_float delta);
-px_float PX_PhaseDelay(px_float f, px_float* B, px_int sizeB, px_float* A, px_int sizeA, px_float FS);
+px_double PX_GroupDelay(px_double f, px_double* B, px_int sizeB, px_double* A, px_int sizeA, px_double FS);
+px_double PX_PhaseDelayDerive(px_double omega, px_double* B, px_int sizeB, px_double* A, px_int sizeA, px_double delta);
+px_double PX_PhaseDelay(px_double f, px_double* B, px_int sizeB, px_double* A, px_int sizeA, px_double FS);
 #endif

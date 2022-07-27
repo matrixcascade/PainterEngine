@@ -114,7 +114,6 @@ int PX_TCPReceived(PX_TCP *tcp,void *buffer,int buffersize,int timeout)
 int PX_TCPSocketReceived(unsigned int socket, void* buffer, int buffersize, int timeout)
 {
 	int SockAddrSize = sizeof(struct sockaddr_in);
-	int ReturnSize;
 	size_t ReturnSize;
 	struct timeval stimeout = { 0,timeout * 1000 };
 	setsockopt(socket, SOL_SOCKET, SO_SNDTIMEO, (int*)&stimeout, sizeof(struct timeval));

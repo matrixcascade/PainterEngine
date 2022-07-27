@@ -42,4 +42,5 @@
 #include "PX_KarplusStrong.h"
 #include "PX_Piano.h"
 #include "PX_WebSocket.h"
+#include "PX_Wavelet.h"
 #endif

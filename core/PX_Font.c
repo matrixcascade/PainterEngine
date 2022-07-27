@@ -638,7 +638,7 @@ px_void PX_FontModuleTextGetRenderWidthHeight(PX_FontModule *module,const px_cha
 	*height=max_height;
 }
 
-px_int PX_FontModuleDrawCharacter(px_surface *psurface,PX_FontModule *mod,int x,int y,const px_dword code,px_color Color)
+px_int PX_FontModuleDrawCharacter(px_surface *psurface,PX_FontModule *mod,px_int x,px_int y,const px_dword code,px_color Color)
 {
 	px_char hex[16];
 	PX_FontModule_Charactor *pChar;
@@ -653,7 +653,7 @@ px_int PX_FontModuleDrawCharacter(px_surface *psurface,PX_FontModule *mod,int x,
 	return 0;
 }
 
-px_int PX_FontModuleDrawText(px_surface *psurface,PX_FontModule *mod,int x,int y,PX_ALIGN align,const px_char *Text,px_color Color)
+px_int PX_FontModuleDrawText(px_surface *psurface,PX_FontModule *mod,px_int x,px_int y,PX_ALIGN align,const px_char *Text,px_color Color)
 {
 	px_int dx,dy,content_width=0;
 	px_int frWidth,frHeight;

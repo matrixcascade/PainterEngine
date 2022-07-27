@@ -39,7 +39,7 @@ px_void PX_Object_ListOnCursorMove(PX_Object *pObject,PX_Object_Event e,px_void 
 	{
 		if (pList->ArrayDataCount * pList->ItemHeight > pObject->Height)
 		{
-			if (PX_Object_Event_GetCursorX(e) > objx + objWidth - 32)
+			if (PX_Object_Event_GetCursorX(e) > objx + objWidth - PX_OBJECT_LIST_SLIDERBAR_WIDTH)
 			{
 				return;
 			}
@@ -49,7 +49,7 @@ px_void PX_Object_ListOnCursorMove(PX_Object *pObject,PX_Object_Event e,px_void 
 	{
 		if (pList->pData.size * pList->ItemHeight > pObject->Height)
 		{
-			if (PX_Object_Event_GetCursorX(e) > objx + objWidth - 32)
+			if (PX_Object_Event_GetCursorX(e) > objx + objWidth - PX_OBJECT_LIST_SLIDERBAR_WIDTH)
 			{
 				return;
 			}
@@ -98,7 +98,7 @@ px_void PX_Object_ListOnCursorDown(PX_Object *pObject,PX_Object_Event e,px_void 
 	{
 		if (pList->ArrayDataCount * pList->ItemHeight > pObject->Height)
 		{
-			if (PX_Object_Event_GetCursorX(e) > objx + objWidth - 32)
+			if (PX_Object_Event_GetCursorX(e) > objx + objWidth - PX_OBJECT_LIST_SLIDERBAR_WIDTH)
 			{
 				return;
 			}
@@ -108,7 +108,7 @@ px_void PX_Object_ListOnCursorDown(PX_Object *pObject,PX_Object_Event e,px_void 
 	{
 		if (pList->pData.size * pList->ItemHeight > pObject->Height)
 		{
-			if (PX_Object_Event_GetCursorX(e) > objx + objWidth - 32)
+			if (PX_Object_Event_GetCursorX(e) > objx + objWidth - PX_OBJECT_LIST_SLIDERBAR_WIDTH)
 			{
 				return;
 			}
@@ -221,6 +221,24 @@ px_void PX_Object_ListMoveToTop(PX_Object *pObject)
 	PX_Object_SliderBarSetValue(pList->SliderBar,0);
 }
 
+px_void PX_Object_ListMoveToBottom(PX_Object* pObject)
+{
+	PX_Object_List* pList = PX_Object_GetList(pObject);
+	if (pList->ItemHeight*pList->pData.size>pObject->Height)
+	{
+		pList->offsety = (px_int)(pList->ItemHeight * pList->pData.size - pObject->Height);
+		PX_Object_SliderBarSetRange(pList->SliderBar, 0, (px_int)(pList->ItemHeight * pList->pData.size - pObject->Height));
+		PX_Object_SliderBarSetValue(pList->SliderBar, (px_int)(pList->ItemHeight * pList->pData.size - pObject->Height));
+	}
+	else
+	{
+		pList->offsety = 0;
+		PX_Object_SliderBarSetValue(pList->SliderBar, 0);
+	}
+	
+}
+
+
 px_void PX_Object_ListRender(px_surface *psurface, PX_Object *pObject,px_uint elapsed)
 {
 	PX_Object *pItemObject;
@@ -267,7 +285,7 @@ px_void PX_Object_ListRender(px_surface *psurface, PX_Object *pObject,px_uint el
 		PX_Object_SliderBar *pSliderBar=PX_Object_GetSliderBar(pList->SliderBar);
 		pList->SliderBar->Visible=PX_TRUE;
 		pList->SliderBar->y=0;
-		pList->SliderBar->x=objWidth-32;
+		pList->SliderBar->x=objWidth- PX_OBJECT_LIST_SLIDERBAR_WIDTH;
 		pList->SliderBar->Height = objHeight;
 		pSliderBar->SliderButtonLength=(px_int)(pList->SliderBar->Height*objHeight/(pList->ItemHeight*pList->pData.size));
 		if(pSliderBar->SliderButtonLength<32) pSliderBar->SliderButtonLength=32;
@@ -410,6 +428,7 @@ px_int PX_Object_ListAdd(PX_Object *pListObj,px_void *ptr)
 		if(PX_VectorPushback(&pList->pData,&ptr))
 			return pList->pData.size-1;
 	}
+	PX_ASSERT();
 	return -1;
 }
 
@@ -481,7 +500,7 @@ PX_Object * PX_Object_ListCreate(px_memorypool *mp, PX_Object *Parent,px_int x,p
 	PX_Object *pListObject;
 	PX_memset(&List,0,sizeof(List));
 	List.mp=mp;
-	List.ItemWidth=Width-32;
+	List.ItemWidth=Width- PX_OBJECT_LIST_SLIDERBAR_WIDTH;
 	List.ItemHeight=ItemHeight;
 	List.CreateFunctions=_CreateFunc;
 
@@ -503,7 +522,7 @@ PX_Object * PX_Object_ListCreate(px_memorypool *mp, PX_Object *Parent,px_int x,p
 	if(!(pListObject=PX_ObjectCreateEx(mp,Parent,(px_float)x,(px_float)y,0,(px_float)Width,(px_float)Height,0,PX_OBJECT_TYPE_LIST,PX_NULL,PX_Object_ListRender,PX_Object_ListFree,&List,sizeof(PX_Object_List)))) return PX_NULL;
 
 	pList=PX_Object_GetList(pListObject);
-	pList->SliderBar=PX_Object_SliderBarCreate(mp,pListObject,(px_int)pListObject->Width-32,0,32,(px_int)pListObject->Height,PX_OBJECT_SLIDERBAR_TYPE_VERTICAL,PX_OBJECT_SLIDERBAR_STYLE_BOX);
+	pList->SliderBar=PX_Object_SliderBarCreate(mp,pListObject,(px_int)pListObject->Width- PX_OBJECT_LIST_SLIDERBAR_WIDTH,0, PX_OBJECT_LIST_SLIDERBAR_WIDTH,(px_int)pListObject->Height,PX_OBJECT_SLIDERBAR_TYPE_VERTICAL,PX_OBJECT_SLIDERBAR_STYLE_BOX);
 
 	PX_ObjectRegisterEvent(pListObject,PX_OBJECT_EVENT_CURSORWHEEL,PX_Object_ListOnWheel,pListObject);
 	PX_ObjectRegisterEvent(pListObject,PX_OBJECT_EVENT_CURSORDOWN,PX_Object_ListOnCursorDown,pListObject);
@@ -610,6 +629,36 @@ px_void PX_Object_ListSetDoubleClickCancel(PX_Object *pListObject,px_bool b)
 	}
 }
 
+px_void PX_Object_ListViewFocus(PX_Object* pListObject, px_int index)
+{
+	PX_Object_List* pList = PX_Object_GetList(pListObject);
+	if (!pList)
+	{
+		PX_ASSERT();
+		return;
+	}
+	if (index>=0&&index<pList->pData.size)
+	{
+		px_int y = index  * pList->ItemHeight;
+		if (y<pList->offsety||y+pList->ItemHeight>pList->offsety+pListObject->Height)
+		{
+			if (y + pList->ItemHeight <pListObject->Height)
+			{
+				pList->offsety = 0;
+			}
+			else if (y > pList->pData.size * pList->ItemHeight - pListObject->Height)
+			{
+				pList->offsety = (px_int)(pList->pData.size * pList->ItemHeight - pListObject->Height);
+			}
+			else
+			{
+				pList->offsety = (px_int)(y- pListObject->Height/2);
+			}
+			PX_Object_SliderBarSetValue(pList->SliderBar, pList->offsety);
+		}
+	}
+}
+
 px_void * PX_Object_ListGetItemData(PX_Object *pListObject,px_int index)
 {
 	PX_Object_List *pList=PX_Object_GetList(pListObject);
@@ -618,6 +667,14 @@ px_void * PX_Object_ListGetItemData(PX_Object *pListObject,px_int index)
 		return *PX_VECTORAT(px_void *,&pList->pData,index);
 	}
 	return PX_NULL;
+}
+
+px_int PX_Object_ListGetItemCount(PX_Object* pListObject)
+{
+	PX_Object_List* pList = PX_Object_GetList(pListObject);
+	if(pList)
+	return pList->pData.size;
+	return 0;
 }
 
 px_void* PX_Object_ListItemGetData(PX_Object* pItemObject)
@@ -684,7 +741,7 @@ px_void PX_Object_ListArrayRender(px_surface* psurface, PX_Object* pObject, px_u
 		PX_Object_SliderBar* pSliderBar = PX_Object_GetSliderBar(pList->SliderBar);
 		pList->SliderBar->Visible = PX_TRUE;
 		pList->SliderBar->y = 0;
-		pList->SliderBar->x =  objWidth - 32;
+		pList->SliderBar->x =  objWidth - PX_OBJECT_LIST_SLIDERBAR_WIDTH;
 		pList->SliderBar->Height = objHeight;
 		pSliderBar->SliderButtonLength = (px_int)(pList->SliderBar->Height * objHeight / (pList->ItemHeight * pList->ArrayDataCount));
 		if (pSliderBar->SliderButtonLength < 32) pSliderBar->SliderButtonLength = 32;

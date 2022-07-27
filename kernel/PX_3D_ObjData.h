@@ -12,7 +12,7 @@ typedef struct
 {
 	px_uint  mtlFileNameIndex;
 	px_uint  mtlNameIndex;
-	PX_3D_ObjectDataVertex v[3];
+	PX_3D_ObjectDataVertex v[4];
 }PX_3D_ObjectDataFace;
 
 

@@ -99,7 +99,7 @@ px_void PX_Object_VarBoxOnTypeChanged(PX_Object* pObject, PX_Object_Event e, px_
 	}
 }
 
-PX_Object* PX_Object_VarBoxCreate(px_memorypool* mp, PX_Object* Parent, int x, int y, int width, int height, const px_char title[], PX_FontModule* fontmodule)
+PX_Object* PX_Object_VarBoxCreate(px_memorypool* mp, PX_Object* Parent, px_int x, px_int y, px_int width, px_int height, const px_char title[], PX_FontModule* fontmodule)
 {
 	PX_Object_VarBox desc, * pdesc;
 	PX_Object* pObject;

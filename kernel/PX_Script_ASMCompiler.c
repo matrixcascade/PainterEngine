@@ -743,10 +743,10 @@ px_dword PX_ScriptAsmGetMemoryAddr(PX_SCRIPT_ASM_COMPILER *compiler,px_char *Str
 px_void PX_ScriptAsmAddHost(PX_SCRIPT_ASM_COMPILER *compiler,px_char *Str)
 {
 	px_int i;
-	PX_SCRIPT_ASM_HOST_NODE Host;
+	PX_ASM_HOST_NODE Host;
 	for (i=0;i<compiler->HostTable.size;i++)
 	{
-		if (PX_strequ(((PX_SCRIPT_ASM_HOST_NODE *)(PX_ListNodeAt(&compiler->HostTable,i)->pdata))->name,Str))
+		if (PX_strequ(((PX_ASM_HOST_NODE *)(PX_ListNodeAt(&compiler->HostTable,i)->pdata))->name,Str))
 		{
 			return;
 		}
@@ -762,7 +762,7 @@ px_int PX_ScriptAsmGetHostIndex(PX_SCRIPT_ASM_COMPILER *compiler,px_char *Str)
 	px_int i;
 	for (i=0;i<compiler->HostTable.size;i++)
 	{
-		if (PX_strequ(((PX_SCRIPT_ASM_HOST_NODE *)(PX_ListNodeAt(&compiler->HostTable,i)->pdata))->name,Str))
+		if (PX_strequ(((PX_ASM_HOST_NODE *)(PX_ListNodeAt(&compiler->HostTable,i)->pdata))->name,Str))
 		{
 			return i;
 		}
@@ -1123,10 +1123,10 @@ _ERROR:
 
 
 
-px_bool PX_ScriptAsmCc(PX_SCRIPT_ASM_COMPILER *compiler)
+px_bool PX_ScriptAsmCc(PX_SCRIPT_ASM_COMPILER *pCompiler)
 {
 	px_string ParamMne;
-	PX_LEXER_STATE state=PX_LexerGetState(&compiler->lexer);
+	PX_LEXER_STATE state=PX_LexerGetState(&pCompiler->lexer);
 	PX_LEXER_LEXEME_TYPE type;
 	PX_SCRIPT_ASM_GRAMMAR_INSTR *pinstr;
 	PX_SCRIPT_ASM_INSTR_BIN instrbin;
@@ -1137,14 +1137,17 @@ px_bool PX_ScriptAsmCc(PX_SCRIPT_ASM_COMPILER *compiler)
 	px_char *pLexeme;
 	px_string strInc;
 
-	PX_StringInitialize(compiler->mp,&ParamMne);
-	PX_StringInitialize(compiler->mp,&assumeName);
-	PX_StringInitialize(compiler->mp,&assumeString);
+	px_int lastLineStamp=0;
+	px_int line_index=0;
+
+	PX_StringInitialize(pCompiler->mp,&ParamMne);
+	PX_StringInitialize(pCompiler->mp,&assumeName);
+	PX_StringInitialize(pCompiler->mp,&assumeString);
 
 	
-	while ((type=PX_ScriptAsmNexLexeme (&compiler->lexer))!=PX_LEXER_LEXEME_TYPE_END)
+	while ((type=PX_ScriptAsmNexLexeme (&pCompiler->lexer))!=PX_LEXER_LEXEME_TYPE_END)
 	{
-		pLexeme=compiler->lexer.CurLexeme.buffer;
+		pLexeme=pCompiler->lexer.CurLexeme.buffer;
 		switch(type)
 		{
 			case PX_LEXER_LEXEME_TYPE_CONATINER:
@@ -1162,44 +1165,44 @@ px_bool PX_ScriptAsmCc(PX_SCRIPT_ASM_COMPILER *compiler)
 				//special 
 
 				//ASSUME
-				pLexeme=compiler->lexer.CurLexeme.buffer;
+				pLexeme=pCompiler->lexer.CurLexeme.buffer;
 				if (PX_strequ("ASSUME",pLexeme))
 				{
-					if ((type=PX_ScriptAsmNexLexeme (&compiler->lexer))!=PX_LEXER_LEXEME_TYPE_TOKEN)
+					if ((type=PX_ScriptAsmNexLexeme (&pCompiler->lexer))!=PX_LEXER_LEXEME_TYPE_TOKEN)
 					{
-						PX_ScriptAsmError(&compiler->lexer,"ASSUME first token should be token!");
+						PX_ScriptAsmError(&pCompiler->lexer,"ASSUME first token should be token!");
 						goto _ERROR;
 					}
 
 					if (PX_strIsNumeric(pLexeme))
 					{
-						PX_ScriptAsmError(&compiler->lexer,"ASSUME first token should not be numeric!");
+						PX_ScriptAsmError(&pCompiler->lexer,"ASSUME first token should not be numeric!");
 						goto _ERROR;
 					}
 
 					PX_StringSet(&assumeName,pLexeme);
 
-					if ((type=PX_ScriptAsmNexLexeme (&compiler->lexer))!=PX_LEXER_LEXEME_TYPE_TOKEN)
+					if ((type=PX_ScriptAsmNexLexeme (&pCompiler->lexer))!=PX_LEXER_LEXEME_TYPE_TOKEN)
 					{
-						PX_ScriptAsmError(&compiler->lexer,"ASSUME second token should be token!");
+						PX_ScriptAsmError(&pCompiler->lexer,"ASSUME second token should be token!");
 						goto _ERROR;
 					}
-					pLexeme=compiler->lexer.CurLexeme.buffer;
+					pLexeme=pCompiler->lexer.CurLexeme.buffer;
 					PX_StringSet(&assumeString,pLexeme);
 
 					if (PX_strequ(assumeString.buffer,assumeName.buffer))
 					{
-						PX_ScriptAsmError(&compiler->lexer,"ASSUME token should not equal.");
+						PX_ScriptAsmError(&pCompiler->lexer,"ASSUME token should not equal.");
 						goto _ERROR;
 					}
 
-					if ((type=PX_ScriptAsmNexLexeme (&compiler->lexer))!=PX_LEXER_LEXEME_TYPE_NEWLINE&&type!=PX_LEXER_LEXEME_TYPE_END)
+					if ((type=PX_ScriptAsmNexLexeme (&pCompiler->lexer))!=PX_LEXER_LEXEME_TYPE_NEWLINE&&type!=PX_LEXER_LEXEME_TYPE_END)
 					{
-						PX_ScriptAsmError(&compiler->lexer,"New line is expected but not found.");
+						PX_ScriptAsmError(&pCompiler->lexer,"New line is expected but not found.");
 						goto _ERROR;
 					}
-					pLexeme=compiler->lexer.CurLexeme.buffer;
-					PX_ScriptAsmUpdateAssumeTable(compiler,assumeName.buffer,assumeString.buffer);
+					pLexeme=pCompiler->lexer.CurLexeme.buffer;
+					PX_ScriptAsmUpdateAssumeTable(pCompiler,assumeName.buffer,assumeString.buffer);
 					continue;
 				}
 
@@ -1209,7 +1212,7 @@ px_bool PX_ScriptAsmCc(PX_SCRIPT_ASM_COMPILER *compiler)
 					pLexeme[PX_strlen(pLexeme)-1]='\0';
 					if (PX_ScriptAsmIsValidToken(pLexeme))
 					{
-						if (!PX_ScriptAsmUpdateLabelAddr(compiler,pLexeme,InstrBinOffset))
+						if (!PX_ScriptAsmUpdateLabelAddr(pCompiler,pLexeme,InstrBinOffset))
 						{
 							goto _ERROR;
 						}
@@ -1219,13 +1222,13 @@ px_bool PX_ScriptAsmCc(PX_SCRIPT_ASM_COMPILER *compiler)
 
 				if (PX_strequ("EXPORT",pLexeme))
 				{
-					PX_ScriptAsmNexLexeme (&compiler->lexer);
-					PX_ScriptAsmNexLexeme (&compiler->lexer);
-					pLexeme=compiler->lexer.CurLexeme.buffer;
+					PX_ScriptAsmNexLexeme (&pCompiler->lexer);
+					PX_ScriptAsmNexLexeme (&pCompiler->lexer);
+					pLexeme=pCompiler->lexer.CurLexeme.buffer;
 					pLexeme[PX_strlen(pLexeme)-1]='\0';
 					if (PX_ScriptAsmIsValidToken(pLexeme))
 					{
-						if (!PX_ScriptAsmUpdateLabelAddr(compiler,pLexeme,InstrBinOffset))
+						if (!PX_ScriptAsmUpdateLabelAddr(pCompiler,pLexeme,InstrBinOffset))
 						{
 							goto _ERROR;
 						}
@@ -1235,12 +1238,12 @@ px_bool PX_ScriptAsmCc(PX_SCRIPT_ASM_COMPILER *compiler)
 
 				if (PX_strequ("FUNCTION",pLexeme))
 				{
-					PX_ScriptAsmNexLexeme (&compiler->lexer);
-					pLexeme=compiler->lexer.CurLexeme.buffer;
+					PX_ScriptAsmNexLexeme (&pCompiler->lexer);
+					pLexeme=pCompiler->lexer.CurLexeme.buffer;
 					pLexeme[PX_strlen(pLexeme)-1]='\0';
 					if (PX_ScriptAsmIsValidToken(pLexeme))
 					{
-						if (!PX_ScriptAsmUpdateLabelAddr(compiler,pLexeme,InstrBinOffset))
+						if (!PX_ScriptAsmUpdateLabelAddr(pCompiler,pLexeme,InstrBinOffset))
 						{
 							goto _ERROR;
 						}
@@ -1251,46 +1254,54 @@ px_bool PX_ScriptAsmCc(PX_SCRIPT_ASM_COMPILER *compiler)
 				//.Global
 				if (PX_strequ(".GLOBAL",pLexeme))
 				{
-					PX_ScriptAsmNexLexeme (&compiler->lexer);
-					PX_ScriptAsmNexLexeme (&compiler->lexer);
+					PX_ScriptAsmNexLexeme (&pCompiler->lexer);
+					PX_ScriptAsmNexLexeme (&pCompiler->lexer);
 					continue;
 				}
 
 				//.Stack
 				if (PX_strequ(".STACK",pLexeme))
 				{
-					PX_ScriptAsmNexLexeme (&compiler->lexer);
-					PX_ScriptAsmNexLexeme (&compiler->lexer);
+					PX_ScriptAsmNexLexeme (&pCompiler->lexer);
+					PX_ScriptAsmNexLexeme (&pCompiler->lexer);
 					continue;
 				}
 
 				//.Thread
 				if (PX_strequ(".THREAD",pLexeme))
 				{
-					PX_ScriptAsmNexLexeme (&compiler->lexer);
-					PX_ScriptAsmNexLexeme (&compiler->lexer);
+					PX_ScriptAsmNexLexeme (&pCompiler->lexer);
+					PX_ScriptAsmNexLexeme (&pCompiler->lexer);
 					continue;
 				}
 
 				//normal
 				hasMatched=PX_FALSE;
-				state=PX_LexerGetState(&compiler->lexer);
-				for (i=0;i<compiler->GrammarInstrTable.size;i++)
+				state=PX_LexerGetState(&pCompiler->lexer);
+				for (i=0;i<pCompiler->GrammarInstrTable.size;i++)
 				{
 					PX_memset(&instrbin,0,sizeof(instrbin));
-					pinstr=(PX_SCRIPT_ASM_GRAMMAR_INSTR *)PX_ListNodeAt(&compiler->GrammarInstrTable,i)->pdata;
+					pinstr=(PX_SCRIPT_ASM_GRAMMAR_INSTR *)PX_ListNodeAt(&pCompiler->GrammarInstrTable,i)->pdata;
 					if (PX_strequ(pinstr->mnemonic,pLexeme))
 					{
 						instrbin.opCode=pinstr->opcode;
+						for (;lastLineStamp<pCompiler->lexer.SourceOffset; lastLineStamp++)
+						{
+							if (pCompiler->lexer.Sources[lastLineStamp]=='\n')
+							{
+								line_index++;
+							}
+						}
+						instrbin.map_to_source_line = line_index;
 
 						for (j=0;j<pinstr->paramCount;j++)
 						{
-							type=PX_ScriptAsmNexLexeme (&compiler->lexer);
-							pLexeme=compiler->lexer.CurLexeme.buffer;
+							type=PX_ScriptAsmNexLexeme (&pCompiler->lexer);
+							pLexeme=pCompiler->lexer.CurLexeme.buffer;
 							PX_StringClear(&ParamMne);
 							PX_StringCat(&ParamMne,pLexeme);
 
-							PX_ScriptASMMapAssume(compiler,&ParamMne);
+							PX_ScriptASMMapAssume(pCompiler,&ParamMne);
 
 							if (type!=PX_LEXER_LEXEME_TYPE_TOKEN&&type!=PX_LEXER_LEXEME_TYPE_CONATINER)
 							{
@@ -1299,14 +1310,14 @@ px_bool PX_ScriptAsmCc(PX_SCRIPT_ASM_COMPILER *compiler)
 							}
 							else
 							{
-								if (((TokenType=PX_ScriptAsmTokenType(compiler,ParamMne.buffer))&pinstr->operandAccTypes[j])==0)
+								if (((TokenType=PX_ScriptAsmTokenType(pCompiler,ParamMne.buffer))&pinstr->operandAccTypes[j])==0)
 								{
 								PX_LexerSetState(state);
 								continue;
 								}
 								if (TokenType==PX_SCRIPT_ASM_OPERAND_ACC_TYPE_UNKNOW)
 								{
-									PX_ScriptAsmError(&compiler->lexer,"illegal Token Type");
+									PX_ScriptAsmError(&pCompiler->lexer,"illegal Token Type");
 									return PX_FALSE;
 								}
 								instrbin.optype[j]=PX_ScriptAsmTokenTypeToOpType(TokenType);
@@ -1319,26 +1330,26 @@ px_bool PX_ScriptAsmCc(PX_SCRIPT_ASM_COMPILER *compiler)
 											break;
 
 								case PX_SCRIPT_ASM_OPTYPE_MEMORY:
-									PX_StringInitialize(compiler->mp,&strInc);
+									PX_StringInitialize(pCompiler->mp,&strInc);
 									PX_StringCat(&strInc,ParamMne.buffer);
-									PX_LexerGetIncludedString(&compiler->lexer,&strInc);
-									instrbin.param[j]=PX_ScriptAsmGetMemoryAddr(compiler,strInc.buffer);
+									PX_LexerGetIncludedString(&pCompiler->lexer,&strInc);
+									instrbin.param[j]=PX_ScriptAsmGetMemoryAddr(pCompiler,strInc.buffer);
 									PX_StringFree(&strInc);
 									break;
 								case PX_SCRIPT_ASM_OPTYPE_STRING:
-									PX_StringInitialize(compiler->mp,&strInc);
+									PX_StringInitialize(pCompiler->mp,&strInc);
 									PX_StringCat(&strInc,ParamMne.buffer);
-									PX_LexerGetIncludedString(&compiler->lexer,&strInc);
+									PX_LexerGetIncludedString(&pCompiler->lexer,&strInc);
 									PX_ScriptAsmStringConvert(&strInc);
-									instrbin.param[j]=PX_ScriptAsmGetStringAddr(compiler,strInc.buffer);
+									instrbin.param[j]=PX_ScriptAsmGetStringAddr(pCompiler,strInc.buffer);
 									PX_StringFree(&strInc);
 									break;
 								case PX_SCRIPT_ASM_OPTYPE_LABEL:
-									instrbin.param[j]=PX_ScriptAsmGetLabelIndex(compiler,ParamMne.buffer);
+									instrbin.param[j]=PX_ScriptAsmGetLabelIndex(pCompiler,ParamMne.buffer);
 									break;
 								case PX_SCRIPT_ASM_OPTYPE_FLOAT:
 									itf=PX_atof(ParamMne.buffer);
-									instrbin.param[j]=*((int *)&itf);
+									instrbin.param[j]=*((px_int *)&itf);
 									break;
 								case PX_SCRIPT_ASM_OPTYPE_INT:
 									if(ParamMne.buffer[0]!='\'')
@@ -1350,26 +1361,26 @@ px_bool PX_ScriptAsmCc(PX_SCRIPT_ASM_COMPILER *compiler)
 									instrbin.param[j]=PX_ScriptAsm_atoi(ParamMne.buffer+1);
 									break;
 								case PX_SCRIPT_ASM_OPTYPE_LOCAL:
-									if (!PX_ScriptAsmLocalType(compiler,ParamMne.buffer,&instrbin.optype[j],&instrbin.param[j]))
+									if (!PX_ScriptAsmLocalType(pCompiler,ParamMne.buffer,&instrbin.optype[j],&instrbin.param[j]))
 									{
-										PX_ScriptAsmError(&compiler->lexer,"illegal local referenced");
+										PX_ScriptAsmError(&pCompiler->lexer,"illegal local referenced");
 										return PX_FALSE;
 									}
 
 									break;
 								case PX_SCRIPT_ASM_OPTYPE_GLOBAL:
-									if (!PX_ScriptAsmGlobalType(compiler,ParamMne.buffer,&instrbin.optype[j],&instrbin.param[j]))
+									if (!PX_ScriptAsmGlobalType(pCompiler,ParamMne.buffer,&instrbin.optype[j],&instrbin.param[j]))
 									{
-										PX_ScriptAsmError(&compiler->lexer,"illegal local referenced");
+										PX_ScriptAsmError(&pCompiler->lexer,"illegal local referenced");
 										return PX_FALSE;
 									}
 									break;
 								case PX_SCRIPT_ASM_OPTYPE_HOST:
-									instrbin.param[j]=PX_ScriptAsmGetHostIndex(compiler,ParamMne.buffer);
+									instrbin.param[j]=PX_ScriptAsmGetHostIndex(pCompiler,ParamMne.buffer);
 									break;
 								default:
 									{
-										PX_ScriptAsmError(&compiler->lexer,"Instrutment not match.");
+										PX_ScriptAsmError(&pCompiler->lexer,"Instrutment not match.");
 										PX_LexerSetState(state);
 										return PX_FALSE;
 									}
@@ -1378,11 +1389,11 @@ px_bool PX_ScriptAsmCc(PX_SCRIPT_ASM_COMPILER *compiler)
 							}
 							if (j!=pinstr->paramCount-1)
 							{
-								PX_ScriptAsmNexLexeme (&compiler->lexer);
+								PX_ScriptAsmNexLexeme (&pCompiler->lexer);
 							}
 						}
 
-						if ((type=PX_ScriptAsmNexLexeme (&compiler->lexer))!=PX_LEXER_LEXEME_TYPE_NEWLINE&&type!=PX_LEXER_LEXEME_TYPE_END)
+						if ((type=PX_ScriptAsmNexLexeme (&pCompiler->lexer))!=PX_LEXER_LEXEME_TYPE_NEWLINE&&type!=PX_LEXER_LEXEME_TYPE_END)
 						{
 							PX_LexerSetState(state);
 							continue;
@@ -1390,14 +1401,14 @@ px_bool PX_ScriptAsmCc(PX_SCRIPT_ASM_COMPILER *compiler)
 						hasMatched=PX_TRUE;
 						instrbin.addr=InstrBinOffset;
 						instrbin.opcount=pinstr->paramCount;
-						PX_VectorPushback(&compiler->StreamTable,&instrbin);
+						PX_VectorPushback(&pCompiler->StreamTable,&instrbin);
 						InstrBinOffset+=(4+sizeof(px_dword)*pinstr->paramCount);
 						break;
 					}
 				}
 				if (!hasMatched)
 				{
-					PX_ScriptAsmError(&compiler->lexer,"Instr not match.");
+					PX_ScriptAsmError(&pCompiler->lexer,"Instr not match.");
 					PX_LexerSetState(state);
 					return PX_FALSE;
 				}
@@ -1462,13 +1473,13 @@ static px_void PX_ScriptAsmRegistInstr_3(PX_SCRIPT_ASM_COMPILER *compiler,px_cha
 }
 
 
-px_bool PX_ScriptAsmCompile(px_memorypool *mp,px_char *asmcode,px_memory *binmemory)
+px_bool PX_ScriptAsmCompile(px_memorypool *mp,px_char *asmcode,px_memory *binmemory, PX_VM_DebuggerMap* pdebuggermap)
 {
 
 	PX_SCRIPT_ASM_COMPILER compiler;
 	PX_SCRIPT_ASM_HEADER header,*pheader;
-	PX_SCRIPT_EXPORT_FUNCTION expFunc;
-	PX_SCRIPT_ASM_HOST_NODE host;
+	PX_VM_EXPORT_FUNCTION expFunc;
+	PX_ASM_HOST_NODE host;
 	PX_SCRIPT_ASM_INSTR_BIN *pinstrs;
 	PX_LEXER_STATE lexerstate;
 	px_uint quotes;
@@ -1476,7 +1487,6 @@ px_bool PX_ScriptAsmCompile(px_memorypool *mp,px_char *asmcode,px_memory *binmem
 	px_char *pbuf;
 	px_dword woffset;
 	px_dword binsize,bufsize;
-	
 
 	//////////////////////////////////////////////////////////////////////////
 	//test 
@@ -1493,6 +1503,7 @@ px_bool PX_ScriptAsmCompile(px_memorypool *mp,px_char *asmcode,px_memory *binmem
 	PX_LexerRegisterContainerTransfer(&compiler.lexer,quotes,'\\');
 	PX_LexerRegisterContainer(&compiler.lexer,"\'","\'");
 	PX_LexerRegisterContainer(&compiler.lexer,"@","@");
+
 
 	PX_VectorInitialize(mp,&compiler.StreamTable,sizeof(PX_SCRIPT_ASM_INSTR_BIN),256);
 	PX_ListInitialize(mp,&compiler.assumeTable);
@@ -1655,6 +1666,13 @@ px_bool PX_ScriptAsmCompile(px_memorypool *mp,px_char *asmcode,px_memory *binmem
 		PX_SCRIPT_ASM_OPERAND_ACC_TYPE_REG|PX_SCRIPT_ASM_OPERAND_ACC_TYPE_LOCAL|PX_SCRIPT_ASM_OPERAND_ACC_TYPE_GLOBAL|PX_SCRIPT_ASM_OPERAND_ACC_TYPE_STRING,
 		PX_SCRIPT_ASM_OPERAND_ACC_TYPE_REG|PX_SCRIPT_ASM_OPERAND_ACC_TYPE_LOCAL|PX_SCRIPT_ASM_OPERAND_ACC_TYPE_GLOBAL|PX_SCRIPT_ASM_OPERAND_ACC_TYPE_STRING
 		);
+
+	PX_ScriptAsmRegistInstr_3(&compiler, "STRCUT", PX_SCRIPT_ASM_INSTR_OPCODE_STRCUT,
+		PX_SCRIPT_ASM_OPERAND_ACC_TYPE_REG | PX_SCRIPT_ASM_OPERAND_ACC_TYPE_LOCAL | PX_SCRIPT_ASM_OPERAND_ACC_TYPE_GLOBAL,
+		PX_SCRIPT_ASM_OPERAND_ACC_TYPE_REG | PX_SCRIPT_ASM_OPERAND_ACC_TYPE_LOCAL | PX_SCRIPT_ASM_OPERAND_ACC_TYPE_GLOBAL | PX_SCRIPT_ASM_OPERAND_ACC_TYPE_INT,
+		PX_SCRIPT_ASM_OPERAND_ACC_TYPE_REG | PX_SCRIPT_ASM_OPERAND_ACC_TYPE_LOCAL | PX_SCRIPT_ASM_OPERAND_ACC_TYPE_GLOBAL | PX_SCRIPT_ASM_OPERAND_ACC_TYPE_INT
+	);
+
 
 	PX_ScriptAsmRegistInstr_2(&compiler,"ASC",PX_SCRIPT_ASM_INSTR_OPCODE_ASC,
 		PX_SCRIPT_ASM_OPERAND_ACC_TYPE_REG|PX_SCRIPT_ASM_OPERAND_ACC_TYPE_LOCAL|PX_SCRIPT_ASM_OPERAND_ACC_TYPE_GLOBAL,
@@ -1829,7 +1847,7 @@ px_bool PX_ScriptAsmCompile(px_memorypool *mp,px_char *asmcode,px_memory *binmem
 		PX_SCRIPT_ASM_OPERAND_ACC_TYPE_REG|PX_SCRIPT_ASM_OPERAND_ACC_TYPE_LOCAL|PX_SCRIPT_ASM_OPERAND_ACC_TYPE_GLOBAL|PX_SCRIPT_ASM_OPERAND_ACC_TYPE_INT
 		);
 
-	if(!PX_LexerLoadSourceFromMemory(&compiler.lexer,asmcode))
+	if(!PX_LexerSortTextMap(&compiler.lexer,asmcode, pdebuggermap!=PX_NULL))
 	{
 		goto __ERROR;
 	}
@@ -1854,10 +1872,10 @@ px_bool PX_ScriptAsmCompile(px_memorypool *mp,px_char *asmcode,px_memory *binmem
 	header.threadcount=compiler.threadcount;
 	header.oftfunc=woffset;
 	header.funcCount=PX_ScriptAsmGetFuncCount(&compiler);
-	woffset+=header.funcCount*sizeof(PX_SCRIPT_EXPORT_FUNCTION);
+	woffset+=header.funcCount*sizeof(PX_VM_EXPORT_FUNCTION);
 	header.ofthost=woffset;
 	header.hostCount=compiler.HostTable.size;
-	woffset+=header.hostCount*sizeof(PX_SCRIPT_ASM_HOST_NODE);
+	woffset+=header.hostCount*sizeof(PX_ASM_HOST_NODE);
 	header.oftString=woffset;
 	header.stringSize=PX_ScriptAsmStringSize(&compiler);
 	woffset+=header.stringSize;
@@ -1881,7 +1899,7 @@ px_bool PX_ScriptAsmCompile(px_memorypool *mp,px_char *asmcode,px_memory *binmem
 	for (i=0;i<compiler.HostTable.size;i++)
 	{
 			PX_memset(host.name,0,sizeof(host.name));
-			PX_strcpy(host.name,PX_LISTAT(PX_SCRIPT_ASM_HOST_NODE,&compiler.HostTable,i)->name,sizeof(host.name));
+			PX_strcpy(host.name,PX_LISTAT(PX_ASM_HOST_NODE,&compiler.HostTable,i)->name,sizeof(host.name));
 			host.map=PX_NULL;
 			host.userptr=PX_NULL;
 			expFunc.Addr=0;
@@ -1912,6 +1930,22 @@ px_bool PX_ScriptAsmCompile(px_memorypool *mp,px_char *asmcode,px_memory *binmem
 		PX_MemoryCat(binmemory,pinstrs->optype,3);
 		PX_MemoryCat(binmemory,pinstrs->param,pinstrs->opcount*sizeof(px_dword));
 		binsize+=pinstrs->opcount*sizeof(px_dword)+4;
+
+		if (pdebuggermap)
+		{
+			px_int mapsize = compiler.lexer.symbolmap.size;
+			px_int* _map_to_source = (px_int *)compiler.lexer.symbolmap.data;
+			PX_SCRIPT_ASM_SOURCE_MAP map;
+			PX_StringSet(&pdebuggermap->source, asmcode);
+			map.instr_addr = pinstrs->addr;
+			if (pinstrs->map_to_source_line>=mapsize)
+			{
+				PX_ASSERT();
+			}
+			map.map_to_source_line = _map_to_source[pinstrs->map_to_source_line];
+			PX_VectorPushback(&pdebuggermap->map, &map);
+		}
+
 	}
 	pheader=(PX_SCRIPT_ASM_HEADER *)binmemory->buffer;
 	pheader->binsize=binsize;

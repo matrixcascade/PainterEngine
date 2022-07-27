@@ -249,6 +249,7 @@ px_char * PX_LexerIsContainerEnd(px_lexer *lexer,const px_char startch[],const p
 // }
 px_void PX_LexerInitialize(px_lexer *lexer,px_memorypool *mp)
 {
+	PX_memset(lexer, 0, sizeof(px_lexer));
 	lexer->CommentCount=0;
 	lexer->SpacerCount=0;
 	lexer->DelimiterCount=0;
@@ -259,6 +260,7 @@ px_void PX_LexerInitialize(px_lexer *lexer,px_memorypool *mp)
 	lexer->lexemeTokenCase=PX_LEXER_LEXEME_CASE_NORMAL;
 	lexer->NumericMath=PX_FALSE;
 	PX_StringInitialize(mp,&lexer->CurLexeme);
+	PX_VectorInitialize(lexer->mp, &lexer->symbolmap, sizeof(px_int), 8);
 	PX_memset(lexer->Delimiter,0,sizeof(lexer->Delimiter));
 	PX_memset(lexer->Spacer,0,sizeof(lexer->Spacer));
 	PX_memset(lexer->Container,0,sizeof(lexer->Container));
@@ -317,13 +319,21 @@ px_int PX_LexerFilterChar(px_lexer *lexer,px_char ch)
 	return PX_TRUE;
 }
 
-px_bool PX_LexerSortText(px_lexer *lexer,const px_char *SourceText)
+
+px_bool PX_LexerSortTextMap(px_lexer *lexer,const px_char *SourceText,px_bool map)
 {
 	px_char *chrst,*chred;
-	px_char *pNewSourceText;
-	unsigned long Offset=0;
+
+	px_int sourceLines=1;
+	px_int w_Offset = 0,r_Offset=0;
+
+	px_int lastNewLineStamp = 0;
+	px_int lastNewLineIndex = 0;
+	px_int currentDstSourceLine=0;
+
 	if (lexer->Sources)
 	{
+		PX_VectorClear(&lexer->symbolmap);
 		MP_Free(lexer->mp,lexer->Sources);
 		lexer->SourceOffset=0;
 		lexer->SortStatus=PX_LEXERSORT_STATUS_NORMAL;
@@ -334,86 +344,198 @@ px_bool PX_LexerSortText(px_lexer *lexer,const px_char *SourceText)
 	}
 	PX_memset(lexer->Sources,0,PX_strlen(SourceText)+1);
 	lexer->SortStatus=PX_LEXER_SORT_STATUS_NEWLINE;
+
+
 	
-	while(*SourceText)
+	while(SourceText[r_Offset])
 	{
 		//Comment trim
-		if ((chrst=PX_LexerIsCommentStart(lexer,SourceText))!=0)
+		if ((chrst=PX_LexerIsCommentStart(lexer,SourceText+r_Offset))!=0)
 		{
-			SourceText+=PX_strlen(chrst);
-			while (!(chred=PX_LexerIsCommentEnd(lexer,chrst,SourceText)))
+			r_Offset+=PX_strlen(chrst);
+			while (!(chred=PX_LexerIsCommentEnd(lexer,chrst,SourceText+ r_Offset)))
 			{
-				if (!*SourceText)
+				if (!SourceText[r_Offset])
 				{
 					return PX_FALSE;
 				}
-				SourceText++;
+
+				r_Offset++;
 			}
 			//special end '\n'
-			if(*SourceText=='\n')
-			SourceText+=PX_strlen(chred)-1;
+			if (SourceText[r_Offset] == '\n')
+			{
+				r_Offset += PX_strlen(chred) - 1;
+			}
 			else
-			SourceText+=PX_strlen(chred);
+				r_Offset +=PX_strlen(chred);
 			continue;
 		}
 
 		//container skip
-		if ((chrst=PX_LexerIsContainerStart(lexer,SourceText))!=0)
+		if ((chrst=PX_LexerIsContainerStart(lexer,SourceText+ r_Offset)) != 0)
 		{
-			PX_memcpy(lexer->Sources+Offset,chrst,PX_strlen(chrst));
-			Offset+=PX_strlen(chrst);;
-			SourceText+=PX_strlen(chrst);
-
-			while (!(chred=PX_LexerIsContainerEnd(lexer,chrst,SourceText)))
+			
+			do 
 			{
-				if (*SourceText=='\0')
+				px_int i;
+				for (i=0;i< PX_strlen(chrst);i++)
+				{
+					lexer->Sources[w_Offset] = chrst[i];
+					///////////////////////////////////////////
+					if (map && w_Offset > 0 && (lexer->Sources[w_Offset - 1] == '\n'))
+					{
+						for (; lastNewLineStamp < r_Offset; lastNewLineStamp++)
+							if (SourceText[lastNewLineStamp] == '\n')
+								lastNewLineIndex++;
+						PX_VectorPushback(&lexer->symbolmap, &lastNewLineIndex);
+						currentDstSourceLine++;
+					}
+					///////////////////////////////////////////
+					w_Offset++;
+					r_Offset++;
+				}
+			} while (0);
+
+			while (!(chred=PX_LexerIsContainerEnd(lexer,chrst,SourceText+ r_Offset)))
+			{
+				if (SourceText[r_Offset] == '\0')
 				{
 					return PX_FALSE;
 				}
 
-				if(PX_LexerIsContainerTransfer(lexer,chrst,*SourceText)&&PX_memequ(SourceText+1,chrst,PX_strlen(chrst)))
+				if(PX_LexerIsContainerTransfer(lexer,chrst,SourceText[r_Offset]) && PX_memequ(SourceText+r_Offset+1, chrst, PX_strlen(chrst)))
 				{
-					lexer->Sources[Offset++]=*(SourceText++);
-					lexer->Sources[Offset++]=*(SourceText++);
+					lexer->Sources[w_Offset]=(SourceText[r_Offset]);
+					///////////////////////////////////////////
+					if (map && w_Offset > 0 && (lexer->Sources[w_Offset - 1] == '\n'))
+					{
+						for (; lastNewLineStamp < r_Offset; lastNewLineStamp++)
+							if (SourceText[lastNewLineStamp] == '\n')
+								lastNewLineIndex++;
+						PX_VectorPushback(&lexer->symbolmap, &lastNewLineIndex);
+						currentDstSourceLine++;
+					}
+					///////////////////////////////////////////
+					w_Offset++;
+					r_Offset++;
+					lexer->Sources[w_Offset]=(SourceText[r_Offset]);
+					///////////////////////////////////////////
+					if (map && w_Offset > 0 && (lexer->Sources[w_Offset - 1] == '\n'))
+					{
+						for (; lastNewLineStamp < r_Offset; lastNewLineStamp++)
+							if (SourceText[lastNewLineStamp] == '\n')
+								lastNewLineIndex++;
+						PX_VectorPushback(&lexer->symbolmap, &lastNewLineIndex);
+						currentDstSourceLine++;
+					}
+					///////////////////////////////////////////
+					w_Offset++;
+					r_Offset++;
 				}
 				else
-				lexer->Sources[Offset++]=*(SourceText++);
+				{
+					lexer->Sources[w_Offset] = (SourceText[r_Offset]);
+					///////////////////////////////////////////
+					if (map && w_Offset > 0 && (lexer->Sources[w_Offset - 1] == '\n'))
+					{
+						for (; lastNewLineStamp < r_Offset; lastNewLineStamp++)
+							if (SourceText[lastNewLineStamp] == '\n')
+								lastNewLineIndex++;
+						PX_VectorPushback(&lexer->symbolmap, &lastNewLineIndex);
+						currentDstSourceLine++;
+					}
+					///////////////////////////////////////////
+					w_Offset++;
+					r_Offset++;
+				}
 			}
-			PX_memcpy(lexer->Sources+Offset,chred,PX_strlen(chred));
-			Offset+=PX_strlen(chred);;
-			SourceText+=PX_strlen(chred);
+
+			do
+			{
+				px_int i;
+				for (i = 0; i < PX_strlen(chred); i++)
+				{
+					lexer->Sources[w_Offset] = chred[i];
+					///////////////////////////////////////////
+					if (map && w_Offset > 0 && (lexer->Sources[w_Offset - 1] == '\n'))
+					{
+						for (; lastNewLineStamp < r_Offset; lastNewLineStamp++)
+							if ( SourceText[lastNewLineStamp] == '\n')
+								lastNewLineIndex++;
+						PX_VectorPushback(&lexer->symbolmap, &lastNewLineIndex);
+						currentDstSourceLine++;
+					}
+					///////////////////////////////////////////
+					w_Offset++;
+					r_Offset++;
+				}
+				lexer->SortStatus = PX_LEXERSORT_STATUS_NORMAL;
+			} while (0);
 			continue;
 		}
 
 
-		if (PX_LexerFilterChar(lexer,*SourceText))
+		if (PX_LexerFilterChar(lexer,SourceText[r_Offset]))
 		{
-			if(Offset>0)//forward trim
+			if(w_Offset>0)//forward trim
 			{
-				if(PX_LexerIsNewLine(*SourceText)&&PX_LexerIsSpacer(lexer,lexer->Sources[Offset-1]))
-					Offset--;
-				if(PX_LexerIsDelimiter(lexer,*SourceText)&&PX_LexerIsSpacer(lexer,lexer->Sources[Offset-1]))
-					Offset--;
+				if (PX_LexerIsNewLine(SourceText[r_Offset]) && PX_LexerIsSpacer(lexer, lexer->Sources[w_Offset - 1]))
+				{
+					lexer->Sources[w_Offset-1] = (SourceText[r_Offset])=='\r'?'\n': (SourceText[r_Offset]);
+				}
+				else if (PX_LexerIsDelimiter(lexer, SourceText[r_Offset]) && PX_LexerIsSpacer(lexer, lexer->Sources[w_Offset - 1]))
+				{
+					lexer->Sources[w_Offset - 1] = (SourceText[r_Offset]);
+				}
+				else
+				{
+					lexer->Sources[w_Offset] = (SourceText[r_Offset]) == '\r' ? '\n' : (SourceText[r_Offset]);
+
+					///////////////////////////////////////////
+					if (map && w_Offset > 0 && ( lexer->Sources[w_Offset - 1] == '\n'))
+					{
+						for (; lastNewLineStamp < r_Offset; lastNewLineStamp++)
+							if (SourceText[lastNewLineStamp] == '\n')
+								lastNewLineIndex++;
+						PX_VectorPushback(&lexer->symbolmap, &lastNewLineIndex);
+						currentDstSourceLine++;
+					}
+					///////////////////////////////////////////
+
+					w_Offset++;
+				}
 			}
-			lexer->Sources[Offset++]=*(SourceText);
+			else
+			{
+				lexer->Sources[w_Offset] = (SourceText[r_Offset]) == '\r' ? '\n' : (SourceText[r_Offset]);
+
+				///////////////////////////////////////////
+				if (map)
+				{
+					for (; lastNewLineStamp < r_Offset; lastNewLineStamp++)
+						if (SourceText[lastNewLineStamp] == '\n')
+							lastNewLineIndex++;
+					PX_VectorPushback(&lexer->symbolmap, &lastNewLineIndex);
+					currentDstSourceLine++;
+				}
+				///////////////////////////////////////////
+
+				w_Offset++;
+			}
+			
 		}
-		SourceText++;
+		r_Offset++;
 	}
-	lexer->Sources[Offset]='\0';
-	pNewSourceText=lexer->Sources;
-	
-	while (*pNewSourceText)
-	{
-		//replace \r
-		if(*pNewSourceText=='\r')
-			*pNewSourceText='\n';
-		pNewSourceText++;
-	}
+	lexer->Sources[w_Offset]='\0';
 
 	return PX_TRUE;
 }
 
-
+px_bool PX_LexerSortText(px_lexer* lexer, const px_char* SourceText)
+{
+	return PX_LexerSortTextMap(lexer, SourceText,PX_FALSE);
+}
 
 
 px_int PX_LexerIsSourcsEnd(px_lexer *lexer)
@@ -627,6 +749,7 @@ px_void PX_LexerFree(px_lexer *lexer)
 	if(lexer->Sources)
 	MP_Free(lexer->mp,lexer->Sources);
 
+	PX_VectorFree(&lexer->symbolmap);
 
 	PX_StringFree(&lexer->CurLexeme);
 	lexer->Sources=PX_NULL;

@@ -54,7 +54,7 @@ px_word PX_BitmapGetBitCount(void *BitmapBuffer);
 // param:int x -Offset of X
 // param:int y -Offset of Y
 /////////////////////////////////////////////////////////////////////////
-px_void PX_BitmapRender(px_surface *psurface,void *BitmapBuffer,px_int BufferSize,int x,int y);
+px_void PX_BitmapRender(px_surface *psurface,void *BitmapBuffer,px_int BufferSize,px_int x,px_int y);
 
 //////////////////////////////////////////////////////////////////////////
 // build bitmap from surface

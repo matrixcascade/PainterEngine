@@ -52,7 +52,7 @@ px_void PX_Object_ModbusVarBoxOnTypeChanged(PX_Object* pObject, PX_Object_Event 
 	PX_Object_ModbusVarBox* pDesc = (PX_Object_ModbusVarBox*)ptr;
 }
 
-PX_Object* PX_Object_ModbusVarBoxCreate(px_memorypool* mp, PX_Object* Parent, int x, int y, int width, int height, const px_char title[], PX_FontModule* fontmodule)
+PX_Object* PX_Object_ModbusVarBoxCreate(px_memorypool* mp, PX_Object* Parent, px_int x, px_int y, px_int width, px_int height, const px_char title[], PX_FontModule* fontmodule)
 {
 	PX_Object_ModbusVarBox desc, * pdesc;
 	PX_Object* pObject;

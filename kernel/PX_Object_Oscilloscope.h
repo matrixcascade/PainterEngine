@@ -58,6 +58,11 @@ typedef enum
 	PX_OBJECT_OSCILLOSCOPE_TEXT_DISPLAYMODE_EXPONENTRAL,
 }PX_OBJECT_OSCILLOSCOPE_TEXT_DISPLAYMODE;
 
+typedef enum
+{
+	PX_OBJECT_OSCILLOSCOPE_RENDER_MODE_FASTER,
+	PX_OBJECT_OSCILLOSCOPE_RENDER_MODE_SMOOTH,
+}PX_OBJECT_OSCILLOSCOPE_RENDER_MODE;
 
 typedef struct  
 {
@@ -132,11 +137,11 @@ typedef struct
 	px_color FontColor;
 	px_color borderColor;
 	px_color helpLineColor;
-	int      FontSize;
+	px_int      FontSize;
 
 	PX_OBJECT_OSCILLOSCOPE_LINEMODE LineMode;
 	PX_OBJECT_OSCILLOSCOPE_GUIDESSHOWMODE guidesShowMode;
-
+	PX_OBJECT_OSCILLOSCOPE_RENDER_MODE rendermode;
 	px_float DataLineWidth;
 	px_float DataPillarWidth;
 
@@ -151,11 +156,11 @@ typedef struct
 
 PX_Object_Oscilloscope *PX_Object_GetOscilloscope(PX_Object *pObject);
 // 
-px_void PX_Object_OscilloscopeSetMinVerticalPixelDividing(PX_Object *pObject,int val);
-px_void PX_Object_OscilloscopeSetMinHorizontalPixelDividing(PX_Object *pObject,int val);
-px_void PX_Object_OscilloscopeSetHorizontalDividing(PX_Object *pObject,int Count);
-px_void PX_Object_OscilloscopeSetLeftVerticalDividing(PX_Object *pObject,int Count);
-px_void PX_Object_OscilloscopeSetRightVerticalDividing(PX_Object *pObject,int Count);
+px_void PX_Object_OscilloscopeSetMinVerticalPixelDividing(PX_Object *pObject,px_int val);
+px_void PX_Object_OscilloscopeSetMinHorizontalPixelDividing(PX_Object *pObject,px_int val);
+px_void PX_Object_OscilloscopeSetHorizontalDividing(PX_Object *pObject,px_int Count);
+px_void PX_Object_OscilloscopeSetLeftVerticalDividing(PX_Object *pObject,px_int Count);
+px_void PX_Object_OscilloscopeSetRightVerticalDividing(PX_Object *pObject,px_int Count);
 px_void PX_Object_OscilloscopeSetStyle(PX_Object *pObject,PX_OBJECT_OSCILLOSCOPE_LINEMODE mode);
 px_void PX_Object_OscilloscopeSetScaleEnabled(PX_Object *pObject,px_bool Enabled);
 px_void PX_Object_OscilloscopeSetGuidesVisible(PX_Object *pObject,px_bool Visible); 
@@ -166,7 +171,7 @@ px_void PX_Object_OscilloscopeSetDataLineWidth(PX_Object *pObject,px_float linew
 px_void PX_Object_OscilloscopeSetDataShow(PX_Object *pObject,px_int index,px_bool show );
 px_void PX_Object_OscilloscopeSetGuidesLineWidth(PX_Object *pObject,px_float linewidth);
 px_void PX_Object_OscilloscopeSetGuidesLineColor(PX_Object *pObject,px_color clr);
-px_void PX_Object_OscilloscopeSetTitleFontSize(PX_Object *pObject,int size);
+px_void PX_Object_OscilloscopeSetTitleFontSize(PX_Object *pObject,px_int size);
 px_void PX_Object_OscilloscopeSetTitleFontColor(PX_Object *pObject,px_color clr);
 px_void PX_Object_OscilloscopeSetDashLineColor(PX_Object *pObject,px_color clr);
 px_void PX_Object_OscilloscopeSetLeftTextShow(PX_Object *pObject,px_bool bshow);
@@ -188,11 +193,11 @@ px_void PX_Object_OscilloscopeSetLeftVerticalMin(PX_Object *pObject,double Min);
 px_void PX_Object_OscilloscopeSetLeftVerticalMax(PX_Object *pObject,double Max);
 px_void PX_Object_OscilloscopeSetRightVerticalMax(PX_Object *pObject,double Max);
 px_void PX_Object_OscilloscopeSetRightVerticalMin(PX_Object *pObject,double Min);
-
+px_void PX_Object_OscilloscopeSetRenderMode(PX_Object* pObject, PX_OBJECT_OSCILLOSCOPE_RENDER_MODE mode);
 px_void PX_Object_OscilloscopeSetBorderColor(PX_Object *pObject,px_color clr);
 PX_Object_OscilloscopeData *PX_Object_OscilloscopeGetOscilloscopeData(PX_Object *pObject,px_int index);
-int PX_Object_OscilloscopeGetOscilloscopeWidth(PX_Object *pObject);
-int PX_Object_OscilloscopeGetOscilloscopeHeight(PX_Object *pObject);
+px_int PX_Object_OscilloscopeGetOscilloscopeWidth(PX_Object *pObject);
+px_int PX_Object_OscilloscopeGetOscilloscopeHeight(PX_Object *pObject);
 //px_void PX_Object_OscilloscopeSetTitleLeft(PX_Object *pObject,const px_char * title);
 //px_void PX_Object_OscilloscopeSetTitleRight(PX_Object *pObject,const px_char * title);
 px_void PX_Object_OscilloscopeSetTitleTop(PX_Object *pObject,const px_char * title);
@@ -238,7 +243,7 @@ typedef struct
 	px_color helpLineColor;
 	px_color ptColor;
 	px_bool showHorizontal;
-	int      FontSize;
+	px_int      FontSize;
 	px_int   HorizontalDividing;
 	px_int   VerticalDividing;
 	px_point DragStartPoint;

@@ -948,6 +948,16 @@ px_int PX_Designer_SliderBarGetValue(PX_Object* pobject)
 	return PX_Object_SliderBarGetValue(pobject);
 }
 
+/////////////////////////////////////////////////////////
+//Piano
+/////////////////////////////////////////////////////////
+PX_Object* PX_Designer_PianoCreate(px_memorypool* mp, PX_Object* pparent, px_float x, px_float y, px_float width, px_float height, PX_FontModule* fm)
+{
+	return PX_Object_PianoCreate(mp, pparent, x, y, 88*6, 48);
+}
+///
+
+
 
 px_bool PX_DesignerStandardInitialize(PX_Designer *designer)
 {
@@ -1459,6 +1469,53 @@ px_bool PX_DesignerStandardInitialize(PX_Designer *designer)
 		}
 		
 		
+	} while (0);
+
+	do
+	{
+		PX_Designer_ObjectDesc piano;
+		px_int i = 0;
+		PX_memset(&piano, 0, sizeof(piano));
+		PX_strcat(piano.Name, "piano");
+
+		piano.createfunc = PX_Designer_PianoCreate;
+		piano.type = PX_DESIGNER_OBJECT_TYPE_UI;
+
+		PX_strcat(piano.properties[i].Name, "id");
+		piano.properties[i].getstring = PX_Designer_GetID;
+		piano.properties[i].setstring = PX_Designer_SetID;
+		i++;
+
+		PX_strcat(piano.properties[i].Name, "x");
+		piano.properties[i].getfloat = PX_Designer_GetX;
+		piano.properties[i].setfloat = PX_Designer_SetX;
+		i++;
+
+		PX_strcat(piano.properties[i].Name, "y");
+		piano.properties[i].getfloat = PX_Designer_GetY;
+		piano.properties[i].setfloat = PX_Designer_SetY;
+		i++;
+
+		PX_strcat(piano.properties[i].Name, "width");
+		piano.properties[i].getfloat = PX_Designer_GetWidth;
+		piano.properties[i].setfloat = PX_Designer_SetWidth;
+		i++;
+
+		PX_strcat(piano.properties[i].Name, "height");
+		piano.properties[i].getfloat = PX_Designer_GetHeight;
+		piano.properties[i].setfloat = PX_Designer_SetHeight;
+		i++;
+
+		if (designer->pLinkObject)
+		{
+			PX_VectorPushback(&designer->ObjectDesc, &piano);
+		}
+		if (designer->pLinkWorld)
+		{
+			piano.type = PX_DESIGNER_OBJECT_TYPE_GAME;
+			PX_VectorPushback(&designer->ObjectDesc, &piano);
+		}
+
 	} while (0);
 
 	return PX_TRUE;

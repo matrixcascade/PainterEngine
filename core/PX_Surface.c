@@ -1,21 +1,25 @@
 #include "PX_Surface.h"
 
-px_bool PX_SurfaceCreate(px_memorypool *mp,px_uint width,px_uint height,px_surface *surface)
+px_bool PX_SurfaceCreate(px_memorypool *mp,px_int width,px_int height,px_surface *surface)
 {
-	px_void *p=MP_Malloc(mp,height*width*sizeof(px_color));
-	if (p!=PX_NULL)
+	if (width>0&&height>0)
 	{
-		surface->height=height;
-		surface->width=width;
-		surface->surfaceBuffer=(px_color *)p;
-		surface->MP=mp;
-		surface->limit_left=0;
-		surface->limit_top=0;
-		surface->limit_right=width-1;
-		surface->limit_bottom=height-1;
-		PX_memdwordset(p,0,height*width);
-		return PX_TRUE;
+		px_void* p = MP_Malloc(mp, height * width * sizeof(px_color));
+		if (p != PX_NULL)
+		{
+			surface->height = height;
+			surface->width = width;
+			surface->surfaceBuffer = (px_color*)p;
+			surface->MP = mp;
+			surface->limit_left = 0;
+			surface->limit_top = 0;
+			surface->limit_right = width - 1;
+			surface->limit_bottom = height - 1;
+			PX_memdwordset(p, 0, height * width);
+			return PX_TRUE;
+		}
 	}
+	
 	return PX_FALSE;
 }
 

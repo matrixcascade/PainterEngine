@@ -196,7 +196,7 @@ px_void PX_Object_WidgetRender(px_surface *psurface, PX_Object *pObject,px_uint 
 }
 
 
-PX_Object * PX_Object_WidgetCreate(px_memorypool *mp,PX_Object *Parent,int x,int y,int width,int height,const px_char title[],PX_FontModule *fontmodule)
+PX_Object * PX_Object_WidgetCreate(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y,px_int width,px_int height,const px_char title[],PX_FontModule *fontmodule)
 {
 	PX_Object *pObject;
 	PX_Object_Widget *pWidget=(PX_Object_Widget *)MP_Malloc(mp,sizeof(PX_Object_Widget));

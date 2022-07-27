@@ -18,6 +18,8 @@
 
 typedef enum
 {
+	PX_SYNC_IO_TYPE_QUERYDATA,
+	PX_SYNC_IO_TYPE_QUERYDATAACK,
 	PX_SYNC_IO_TYPE_CONNECT,
 	PX_SYNC_IO_TYPE_CONNECTACK,
 	PX_SYNC_IO_TYPE_QUERYSTATE,
@@ -42,6 +44,7 @@ typedef enum
 
 typedef enum
 {
+	PX_SYNC_CLIENT_STATUS_QUERYDATA,
 	PX_SYNC_CLIENT_STATUS_CONNECTING,
 	PX_SYNC_CLIENT_STATUS_WAITING,
 	PX_SYNC_CLIENT_STATUS_PROCESSING,
@@ -51,7 +54,6 @@ typedef enum
 
 struct _PX_SyncFrame_Server;
 struct _PX_SyncFrame_Client;
-
 
 typedef struct
 {
@@ -113,6 +115,7 @@ typedef struct _PX_SyncFrame_Server
 	px_dword updateDuration;
 	px_dword unique;
 	px_dword version;
+	px_memory data;
 	px_memory stampsInstrStream;
 	px_vector stampsIndexTable;//PX_Sync_Server_StampIndex *
 	px_vector clients;//PX_Sync_Server_Clients *
@@ -144,6 +147,7 @@ typedef struct _PX_SyncFrame_Client
 	px_dword uniqueQueuewIndex;
 	px_dword acceptuniqueQueue[PX_SYNC_UNIQUE_ARRAY_SIZE];
 	px_dword unique;
+	px_memory data;
 	px_memory stampsInstrStream;//instrments
 	px_vector stampsIndexTable;//PX_Sync_Server_StampIndex *
 	px_memory Input_InstrStream;

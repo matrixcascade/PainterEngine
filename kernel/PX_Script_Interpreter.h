@@ -163,7 +163,7 @@ typedef enum
 	PX_SCRIPT_AST_OPERAND_TYPE_FLOAT_PTR_CONST,//float var[]
 	PX_SCRIPT_AST_OPERAND_TYPE_STRING_PTR_CONST,//string var[]
 	PX_SCRIPT_AST_OPERAND_TYPE_MEMORY_PTR_CONST,//memory var[]
-	PX_SCRIPT_AST_OPERAND_TYPE_SET_PTR_CONST,//set xx var[]
+	PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR_CONST,//set xx var[]
 
 	PX_SCRIPT_AST_OPERAND_TYPE_STRING_IDX,
 	PX_SCRIPT_AST_OPERAND_TYPE_MEMORY_IDX,
@@ -278,7 +278,7 @@ typedef struct
 {
 	PX_SCRIPT_AST_OPERAND_TYPE operandType;
 	PX_SCRIPT_VARIABLE_REGION region;
-	PX_SCRIPT_STRUCT *pSet;
+	PX_SCRIPT_STRUCT *pStruct;
 	union
 	{
 		px_int	_oft;
@@ -418,12 +418,13 @@ typedef struct
 	px_int    currentAllocStackSize;
 	px_vector v_astStructure;
 	px_int _jFlag;
-}PX_SCRIPT_Analysis;
+	px_char PX_Script_InterpreterError[256];
+}PX_ScriptInterpreter;
 
 px_bool PX_ScriptCompilerInitialize(PX_SCRIPT_LIBRARY *lib,px_memorypool *mp);
 px_bool PX_ScriptCompilerLoad(PX_SCRIPT_LIBRARY *lib,const px_char *code);
-px_bool PX_ScriptCompilerCompile(PX_SCRIPT_LIBRARY *lib,const px_char *name,px_string *ASM,px_int StackSize);
-px_void PX_ScriptCompilerFree(PX_SCRIPT_LIBRARY *lib);
-px_char *PX_ScriptCompilerError(void);
-px_bool PX_ScriptInterpreterExpression(PX_SCRIPT_Analysis *analysis,px_char *expr,px_string *out,PX_SCRIPT_AST_OPERAND *retOperand);
+px_bool PX_ScriptCompilerCompile(PX_SCRIPT_LIBRARY* lib, const px_char* name, px_string* ASM, px_int LocalStackSize, px_char error[], px_int size);
+px_void PX_ScriptCompilerFree(PX_SCRIPT_LIBRARY* lib);
+px_char* PX_ScriptCompilerError(PX_ScriptInterpreter* analysis);
+px_bool PX_ScriptInterpreterExpression(PX_ScriptInterpreter* analysis, px_char* expr, px_string* out, PX_SCRIPT_AST_OPERAND* retOperand);
 #endif

@@ -167,6 +167,12 @@ px_memorypool MP_Create( px_void *MemoryAddr,px_uint MemorySize )
 {
 	px_uint Index=0;
 	px_memorypool MP;
+	PX_memset(&MP, 0, sizeof(MP));
+	if (MemorySize==0)
+	{
+		return MP;
+	}
+
 	MP.StartAddr=MemoryAddr;
 	MP.AllocAddr=MemoryAddr;
 	if(MemorySize)
@@ -303,11 +309,16 @@ px_void * MP_Malloc(px_memorypool *MP, px_uint Size )
 		return MemNode->StartAddr;
 	}
 
-	if(MP->ErrorCall_Ptr==PX_NULL)
-	PX_ERROR("MemoryPool Out Of Memory!");
+	if (MP->ErrorCall_Ptr == PX_NULL)
+	{
+		PX_ERROR("MemoryPool Out Of Memory!");
+		PX_ASSERT();
+	}
 	else
-	MP->ErrorCall_Ptr(PX_MEMORYPOOL_ERROR_OUTOFMEMORY);
-
+	{
+		MP->ErrorCall_Ptr(PX_MEMORYPOOL_ERROR_OUTOFMEMORY);
+		PX_ASSERT();
+	}
 	return PX_NULL;
 
 }

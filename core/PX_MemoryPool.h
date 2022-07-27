@@ -61,7 +61,7 @@ px_void MP_UnreleaseInfo(px_memorypool *mp);
 //MemoryAddr :Start address of memory
 //MemorySize :Size of memory pool
 px_memorypool	MP_Create	(px_void *MemoryAddr,px_uint MemorySize);
-
+#define PX_MemorypoolCreate		MP_Create
 //Get memory size of Ptr
 //Pool: Pool MemoryPool structure pointer
 //Ptr: memory pointer

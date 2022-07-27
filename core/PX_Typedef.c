@@ -3917,13 +3917,13 @@ static px_uint64 px_srand_seed=0x31415926;
 
 px_void PX_srand(px_uint64 seed)
 {
-	  seed = (seed*16807)%(0xefffffff);
+	  seed = (seed*16807+1)%(0xefffffff);
 	  px_srand_seed=seed;
 }
 
 px_uint32 PX_rand()
 {
-	return  ((px_uint32)(px_srand_seed = (px_srand_seed*764261123)%(0xefffffff)))&PX_RAND_MAX;
+	return  ((px_uint32)(px_srand_seed = (px_srand_seed*764261123+1)%(0xefffffff)))&PX_RAND_MAX;
 }
 
 
@@ -4226,6 +4226,42 @@ px_char* PX_strstr(const px_char* dest, const px_char* src)
 }
 
 
+px_void PX_strcut(px_char* dest, px_int left, px_int right)
+{
+	px_int len = PX_strlen(dest);
+
+	if (len==0)
+	{
+		return;
+	}
+
+	if (right < left)
+	{
+		px_int t = left;
+		left = right;
+		right = t;
+	}
+	if (left<0)
+	{
+		left = 0;
+	}
+	if (left>len-1)
+	{
+		left = len-1;
+	}
+	if (right < 0)
+	{
+		right = 0;
+	}
+	if (right > len-1)
+	{
+		right = len-1;
+	}
+	
+	PX_memcpy(dest, dest + left, right-left+1);
+	dest[right - left + 1] = 0;
+}
+
 
 px_bool PX_isPointInCircle(px_point p,px_point circle,px_float radius)
 {
@@ -4328,6 +4364,38 @@ px_bool PX_IsValidIPAddress(const px_char *ip_addr)
 	}
 	if (bitsNumber != 4) return PX_FALSE;
 	return PX_TRUE;
+}
+
+px_timestamp PX_TimeFormString(const px_char* t)
+{
+	px_timestamp time = { 0 };
+	px_char data[20] = { 0 };
+	if (PX_strlen(t)==10)
+	{
+		PX_memcpy(data, t, 10);
+		data[4] = 0;
+		data[7] = 0;
+		time.year = PX_atoi(data);
+		time.month= PX_atoi(data + 5);
+		time.day = PX_atoi(data + 8);
+	}
+	else
+	if (PX_strlen(t)==19)
+	{
+		PX_memcpy(data, t, 19);
+		data[4] = 0;
+		data[7] = 0;
+		data[10] = 0;
+		data[13] = 0;
+		data[16] = 0;
+		time.year = PX_atoi(data);
+		time.month = PX_atoi(data + 5);
+		time.day = PX_atoi(data + 8);
+		time.hour = PX_atoi(data + 11);
+		time.minute = PX_atoi(data + 14);
+		time.second = PX_atoi(data + 17);
+	}
+	return time;
 }
 
 px_dword PX_htonl(px_dword h)
@@ -4864,43 +4932,43 @@ px_void PX_FIRFilterBuild(PX_FIRFILTER_TYPE bandtype,px_double fln,px_double fhn
 }
 
 
-px_float PX_GroupDelay(px_float f, px_float* B, px_int sizeB, px_float* A, px_int sizeA, px_float FS) 
+px_double PX_GroupDelay(px_double f, px_double* B, px_int sizeB, px_double* A, px_int sizeA, px_double FS)
 {
 	px_int i;
-	px_float omega;
-	px_float Br[2] = { 0 }; 
-	px_float Be[2] = { 0 }; 
-	px_float Ar[2] = { 0 }; 
-	px_float Ae[2] = { 1,0 };
-	px_float BrxAe[2] = { 0 };
-	px_float BexAr[2] = { 0 }; 
-	px_float AxB[2] = { 0 }; 
-	px_float Num[2] = { 0 };
-	px_float c[2] = { 0 }; 
-	px_float magd2;
+	px_double omega;
+	px_double Br[2] = { 0 };
+	px_double Be[2] = { 0 };
+	px_double Ar[2] = { 0 };
+	px_double Ae[2] = { 1,0 };
+	px_double BrxAe[2] = { 0 };
+	px_double BexAr[2] = { 0 };
+	px_double AxB[2] = { 0 };
+	px_double Num[2] = { 0 };
+	px_double c[2] = { 0 };
+	px_double magd2;
 
-	omega = (px_float)(2.0f * PX_PI * f / FS);
+	omega = (px_double)(2.0f * PX_PI * f / FS);
 
 	for (i = 1; i < sizeB; i++) 
 	{
-		Br[0] += i * (px_float)PX_cosd(i *1.0* omega) * B[i];
-		Br[1] -= i * (px_float)PX_sind(i *1.0* omega) * B[i];
+		Br[0] += i * (px_double)PX_cosd(i *1.0* omega) * B[i];
+		Br[1] -= i * (px_double)PX_sind(i *1.0* omega) * B[i];
 	}
 
 	for (i = 0; i < sizeB; i++) 
 	{
-		Be[0] += (px_float)PX_cosd(i *1.0* omega) * B[i];
-		Be[1] -= (px_float)PX_sind(i *1.0* omega) * B[i];
+		Be[0] += (px_double)PX_cosd(i *1.0* omega) * B[i];
+		Be[1] -= (px_double)PX_sind(i *1.0* omega) * B[i];
 	}
 
 	for (i = 0; i < sizeA; i++) {
-		Ar[0] += (i + 1) * (px_float)PX_cosd((i + 1.0) * omega) * A[i];
-		Ar[1] -= (i + 1) * (px_float)PX_sind((i + 1.0) * omega) * A[i];
+		Ar[0] += (i + 1) * (px_double)PX_cosd((i + 1.0) * omega) * A[i];
+		Ar[1] -= (i + 1) * (px_double)PX_sind((i + 1.0) * omega) * A[i];
 	}
 
 	for (i = 0; i < sizeA; i++) {
-		Ae[0] += (px_float)PX_cosd((i + 1.0) * omega) * A[i];
-		Ae[1] -= (px_float)PX_sind((i + 1.0) * omega) * A[i];
+		Ae[0] += (px_double)PX_cosd((i + 1.0) * omega) * A[i];
+		Ae[1] -= (px_double)PX_sind((i + 1.0) * omega) * A[i];
 	}
 
 	BrxAe[0] = Br[0] * Ae[0] - Br[1] * Ae[1];
@@ -4923,37 +4991,37 @@ px_float PX_GroupDelay(px_float f, px_float* B, px_int sizeB, px_float* A, px_in
 }
 
 
-static px_float PX_PhaseIIR(px_float omega, px_float* B, px_int sizeB, px_float* A, px_int sizeA) {
-	px_float C[2];
-	px_float HB[2] = { 0 };
-	px_float HA[2] = { 0 };
-	px_float magd2;
+static px_double PX_PhaseIIR(px_double omega, px_double* B, px_int sizeB, px_double* A, px_int sizeA) {
+	px_double C[2];
+	px_double HB[2] = { 0 };
+	px_double HA[2] = { 0 };
+	px_double magd2;
 	px_int i;
 	for (i = 0; i < sizeB; i++) {
-		HB[0] += (px_float)PX_cosd((px_float)i * omega) * B[i];
-		HB[1] -= (px_float)PX_sind((px_float)i * omega) * B[i];
+		HB[0] += (px_double)PX_cosd((px_double)i * omega) * B[i];
+		HB[1] -= (px_double)PX_sind((px_double)i * omega) * B[i];
 	}
 
 	for (i = 0; i < sizeA; i++) {
-		HA[0] += (px_float)PX_cosd((i + 1.0) * omega) * A[i];
-		HA[1] -= (px_float)PX_sind((i + 1.0) * omega) * A[i];
+		HA[0] += (px_double)PX_cosd((i + 1.0) * omega) * A[i];
+		HA[1] -= (px_double)PX_sind((i + 1.0) * omega) * A[i];
 	}
 	magd2 = HA[0] * HA[0] + HA[1] * HA[1];
 
 	C[0] = (HB[0] * HA[0] + HB[1] * HA[1]) / magd2;
 	C[1] = (HB[1] * HA[0] - HB[0] * HA[1]) / magd2;
 
-	return (px_float)PX_atan2(C[1], C[0]);
+	return (px_double)PX_atan2(C[1], C[0]);
 }
-px_float PX_PhaseDelayDerive(px_float omega, px_float* B, px_int sizeB, px_float* A, px_int sizeA, px_float delta) {
-	px_float omega1 = omega - delta;
-	px_float omega2 = omega + delta;
-	px_float p1 = PX_PhaseIIR(omega1, B, sizeB, A, sizeA);
-	px_float p2 = PX_PhaseIIR(omega2, B, sizeB, A, sizeA);
+px_double PX_PhaseDelayDerive(px_double omega, px_double* B, px_int sizeB, px_double* A, px_int sizeA, px_double delta) {
+	px_double omega1 = omega - delta;
+	px_double omega2 = omega + delta;
+	px_double p1 = PX_PhaseIIR(omega1, B, sizeB, A, sizeA);
+	px_double p2 = PX_PhaseIIR(omega2, B, sizeB, A, sizeA);
 	return (-omega1 * p2 + omega2 * p1) / (2 * delta * omega1 * omega2);
 }
-px_float PX_PhaseDelay(px_float f, px_float* B, px_int sizeB, px_float* A, px_int sizeA, px_float FS) {
-	px_float grpdel = PX_GroupDelay(f, B, sizeB, A, sizeA, FS);
-	px_float omega = (px_float)(2.0 * PX_PI * f / FS);
+px_double PX_PhaseDelay(px_double f, px_double* B, px_int sizeB, px_double* A, px_int sizeA, px_double FS) {
+	px_double grpdel = PX_GroupDelay(f, B, sizeB, A, sizeA, FS);
+	px_double omega = (px_double)(2.0 * PX_PI * f / FS);
 	return grpdel - omega * PX_PhaseDelayDerive(omega, B, sizeB, A, sizeA, 0.0005f);
 }

@@ -103,7 +103,7 @@ static px_void PX_MenuSubMenuUpdate(px_int x,px_int y,PX_Object_Menu *pMenu)
 		PX_MenuSubMenuUpdateEx(pMenu,pSubItem,pSubItem->x,pSubItem->y+pSubItem->height);
 	}
 }
-static px_bool PX_Object_MenuInitialize(px_memorypool *mp,PX_Object_Menu *pMenu,px_int x,int y,px_int width,PX_FontModule *fontmodule)
+static px_bool PX_Object_MenuInitialize(px_memorypool *mp,PX_Object_Menu *pMenu,px_int x,px_int y,px_int width,PX_FontModule *fontmodule)
 {
 	PX_memset(pMenu,0,sizeof(PX_Object_Menu));
 	pMenu->fontmodule=fontmodule;
@@ -417,7 +417,7 @@ px_void PX_Object_MenuOnCursorEvent(PX_Object *pObject,PX_Object_Event e,px_void
 	PX_Object_MenuOnCursorEventEx(pObject,e);
 }
 
-PX_Object * PX_Object_MenuCreate(px_memorypool *mp,PX_Object *Parent,px_int x,int y,px_int width,PX_FontModule *fontmodule)
+PX_Object * PX_Object_MenuCreate(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y,px_int width,PX_FontModule *fontmodule)
 {
 	PX_Object *pObject;
 	PX_Object_Menu *pMenu=(PX_Object_Menu *)MP_Malloc(mp,sizeof(PX_Object_Menu));

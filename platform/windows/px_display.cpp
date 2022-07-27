@@ -451,8 +451,13 @@ BOOL PX_SystemRender(void *raw,int width,int height)
 			pData[i]=(pData[i]&0xFF00FF00)+((pData[i]>>16)&0x000000FF)+((pData[i]<<16)&0x00FF0000);
 		}
 	}
-	D2D_pSurface->CopyFromMemory(&size,raw,width*sizeof(DWORD));
-	D2D_pRenderTarget->DrawBitmap(D2D_pSurface,screenSize);
+	if (D2D_pSurface)
+	{
+		D2D_pSurface->CopyFromMemory(&size, raw, width * sizeof(DWORD));
+		D2D_pRenderTarget->DrawBitmap(D2D_pSurface, screenSize);
+	}
+	
+	
 	D2D_pRenderTarget->EndDraw();
 	
 	return TRUE;
@@ -564,7 +569,7 @@ char *PX_OpenFileDialog(const char Filter[])
 	ofn.lpstrFile = szFile;
 	ofn.lpstrFile[0] = TEXT('\0');
 	ofn.nMaxFile = sizeof(szFile);
-	ofn.lpstrFilter = Filter;//TEXT("MirrorÎÄ¼þ(.mirror)\0*.mirror");
+	ofn.lpstrFilter = Filter;//TEXT("Mirror(.mirror)\0*.mirror");
 	ofn.nFilterIndex = 1;
 	ofn.lpstrFileTitle = NULL;
 	ofn.nMaxFileTitle = 0;

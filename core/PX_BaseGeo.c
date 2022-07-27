@@ -1463,6 +1463,17 @@ px_void PX_GeoDrawPath(px_surface *psurface, px_point path[],px_int pathCount,px
 
 
 
+px_void PX_GeoDrawPenLine(px_surface* psurface, px_float x0, px_float y0, px_float x1, px_float y1, px_float lineWidth, px_color color)
+{
+	px_point p[2] = {0};
+	p[0].x = x0;
+	p[0].y = y0;
+
+	p[1].x = x1;
+	p[1].y = y1;
+	PX_GeoDrawPath(psurface, p, 2, lineWidth, color);
+}
+
 px_void PX_GeoDrawCircle(px_surface *psurface, px_int x,px_int y,px_int Radius, px_int lineWidth,px_color color )
 {
 	px_int rx,ry,dy,i,xleft,xright,Sy,cY,drx,dry;
@@ -2533,7 +2544,7 @@ px_void PX_GeoDrawBezierCurvePoint(px_surface *rendersurface,px_point pt[],px_in
 	PX_GeoDrawBezierCurvePoint(rendersurface,pt,pt_count-1,t,radius,clr);
 }
 
-px_void PX_GeoDrawBresenhamLine(px_surface *psurface,int x0, int y0, int x1, int y1,px_color color)
+px_void PX_GeoDrawBresenhamLine(px_surface *psurface,px_int x0, px_int y0, px_int x1, px_int y1,px_color color)
 {
 	px_point Cross2points[2];
 	px_int CrossCount=0;
@@ -2710,9 +2721,9 @@ px_void PX_GeoDrawBresenhamLine(px_surface *psurface,int x0, int y0, int x1, int
 
 	do 
 	{
-		int dx = PX_ABS(x1-x0), sx = x0<x1 ? 1 : -1;
-		int dy = PX_ABS(y1-y0), sy = y0<y1 ? 1 : -1; 
-		int err = (dx>dy ? dx : -dy)/2, e2;
+		px_int dx = PX_ABS(x1-x0), sx = x0<x1 ? 1 : -1;
+		px_int dy = PX_ABS(y1-y0), sy = y0<y1 ? 1 : -1; 
+		px_int err = (dx>dy ? dx : -dy)/2, e2;
 		while(PX_TRUE)
 		{
 			PX_SurfaceDrawPixel(psurface,x0,y0,color);

@@ -307,8 +307,8 @@ void setCurrentDirectory()
 #ifdef PX_AUDIO_H
 	do 
 	{
-		extern int PX_AudioInitializeEx();
-		if(!PX_AudioInitializeEx())return 0;
+		extern int PX_AudioInitializeHwnd(HWND hwnd);
+		if(!PX_AudioInitializeHwnd(PX_GetWindowHwnd()))return 0;
 	} while (0);
 #endif
 	//////////////////////////////////////////////////////////////////////////

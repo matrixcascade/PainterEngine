@@ -108,7 +108,7 @@ px_bool PX_StringInitialize(px_memorypool *mp,px_string *str)
 
 px_void PX_StringInitAlloc(px_memorypool *mp,px_string *str,px_int allocSize)
 {
-	int size=16;
+	px_int size=16;
 	while(size<allocSize)
 	{
 		size<<=1;
@@ -333,7 +333,7 @@ px_bool PX_StringRemoveChar(px_string *str,px_int index)
 px_void PX_StringReplace(px_string *str,px_char *source,px_char *replaceto)
 {
 	px_string tempstr;
-	int i;
+	px_int i;
 	if (PX_StringLen(str)==0)
 	{
 		return;   

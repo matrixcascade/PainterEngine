@@ -22,7 +22,7 @@ px_map_element * px_rbtree_search(struct px_rb_root *root,const char string[])
 
 	while (node) {
 		px_map_element *data =(px_map_element *)node;
-		int result;
+		px_int result;
 
 		result = PX_strcmp(string, data->string);
 
@@ -43,7 +43,7 @@ px_bool px_rbtree_insert(struct px_rb_root *root, px_map_element *data)
 	/* Figure out where to put new node */
 	while (*newnode) {
 		px_map_element *__this = (px_map_element *)(*newnode);
-		int result = PX_strcmp(data->string, __this->string);
+		px_int result = PX_strcmp(data->string, __this->string);
 
 		parent = *newnode;
 		if (result < 0)
