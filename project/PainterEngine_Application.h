@@ -6,14 +6,8 @@ extern "C"{
 #endif
 
 #include "PainterEngine_Startup.h"
-#define PX_APPLICATION_WAVE_LEN 1000
 	typedef struct
 	{
-		PX_Object *root,* wav1, * wav2,*wav3,*sliderbar;
-		px_double x1[PX_APPLICATION_WAVE_LEN], y1[PX_APPLICATION_WAVE_LEN];
-		px_double x2[PX_APPLICATION_WAVE_LEN], y2[PX_APPLICATION_WAVE_LEN];
-		px_double x3[PX_APPLICATION_WAVE_LEN], y3[PX_APPLICATION_WAVE_LEN];
-
 		PX_Runtime runtime;
 	}PX_Application;
 

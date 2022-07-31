@@ -1492,11 +1492,11 @@ px_void PX_TextureRenderEx(px_surface *psurface,px_texture *resTexture,px_int x,
 		{
 			for (i=left;i<=right;i++)
 			{
-				ref_x=i*1.0/newWidth-0.5;
-				ref_y=j*1.0/newHeight-0.5;
+				ref_x = (i - newWidth / 2.0);
+				ref_y = (j - newHeight / 2.0);
 
-				mapX=(px_int)((ref_x*invCosAgl-ref_y*invSinAgl)*resWidth+resWidth/2);
-				mapY=(px_int)((ref_x*invSinAgl+ref_y*invCosAgl)*resHeight+resHeight/2);
+				mapX = (px_int)((ref_x * invCosAgl - ref_y * invSinAgl) / scale + resWidth / 2);
+				mapY = (px_int)((ref_x * invSinAgl + ref_y * invCosAgl) / scale + resHeight / 2);
 
 				if (mapX<0||mapX>=resWidth)
 				{
@@ -1530,11 +1530,11 @@ px_void PX_TextureRenderEx(px_surface *psurface,px_texture *resTexture,px_int x,
 		{
 			for (i=left;i<=right;i++)
 			{
-				ref_x=i*1.0/newWidth-0.5;
-				ref_y=j*1.0/newHeight-0.5;
+				ref_x = (i - newWidth / 2.0);
+				ref_y=  (j - newHeight / 2.0);
 
-				mapX=(px_int)((ref_x*invCosAgl-ref_y*invSinAgl)*resWidth+resWidth/2);
-				mapY=(px_int)((ref_x*invSinAgl+ref_y*invCosAgl)*resHeight+resHeight/2);
+				mapX=(px_int)((ref_x*invCosAgl-ref_y*invSinAgl)/scale+resWidth/2);
+				mapY=(px_int)((ref_x*invSinAgl+ref_y*invCosAgl)/scale+resHeight/2);
 
 				if (mapX<0||mapX>=resWidth)
 				{
@@ -1719,11 +1719,11 @@ px_void PX_TextureRenderMaskEx(px_surface *psurface,px_texture *mask_tex,px_text
 		{
 			for (i=left;i<=right;i++)
 			{
-				ref_x=i*1.0/newWidth-0.5;
-				ref_y=j*1.0/newHeight-0.5;
+				ref_x = (i - newWidth / 2.0);
+				ref_y = (j - newHeight / 2.0);
 
-				mapX=(px_int)((ref_x*invCosAgl-ref_y*invSinAgl)*resWidth+resWidth/2);
-				mapY=(px_int)((ref_x*invSinAgl+ref_y*invCosAgl)*resHeight+resHeight/2);
+				mapX = (px_int)((ref_x * invCosAgl - ref_y * invSinAgl) / scale + resWidth / 2);
+				mapY = (px_int)((ref_x * invSinAgl + ref_y * invCosAgl) / scale + resHeight / 2);
 
 				if (mapX<0||mapX>=resWidth)
 				{
@@ -1759,11 +1759,11 @@ px_void PX_TextureRenderMaskEx(px_surface *psurface,px_texture *mask_tex,px_text
 		{
 			for (i=left;i<=right;i++)
 			{
-				ref_x=i*1.0/newWidth-0.5;
-				ref_y=j*1.0/newHeight-0.5;
+				ref_x = (i - newWidth / 2.0);
+				ref_y = (j - newHeight / 2.0);
 
-				mapX=(px_int)((ref_x*invCosAgl-ref_y*invSinAgl)*resWidth+resWidth/2);
-				mapY=(px_int)((ref_x*invSinAgl+ref_y*invCosAgl)*resHeight+resHeight/2);
+				mapX = (px_int)((ref_x * invCosAgl - ref_y * invSinAgl) / scale + resWidth / 2);
+				mapY = (px_int)((ref_x * invSinAgl + ref_y * invCosAgl) / scale + resHeight / 2);
 
 				if (mapX<0||mapX>=resWidth)
 				{
@@ -2475,11 +2475,11 @@ px_void PX_ShapeRenderEx(px_surface *psurface,px_shape *shape,px_int x,px_int y,
 	{
 		for (i=left;i<=right;i++)
 		{
-			ref_x=i*1.0/newWidth-0.5;
-			ref_y=j*1.0/newHeight-0.5;
+			ref_x = (i - newWidth / 2.0);
+			ref_y = (j - newHeight / 2.0);
 
-			mapX=(px_int)((ref_x*invCosAgl-ref_y*invSinAgl)*resWidth+resWidth/2);
-			mapY=(px_int)((ref_x*invSinAgl+ref_y*invCosAgl)*resHeight+resHeight/2);
+			mapX = (px_int)((ref_x * invCosAgl - ref_y * invSinAgl) / scale + resWidth / 2);
+			mapY = (px_int)((ref_x * invSinAgl + ref_y * invCosAgl) / scale + resHeight / 2);
 
 			if (mapX<0||mapX>=resWidth)
 			{
@@ -2658,11 +2658,11 @@ px_void PX_ShapeRenderEx_sincos(px_surface *psurface,px_shape *shape,px_int x,px
 	{
 		for (i=left;i<=right;i++)
 		{
-			ref_x=i*1.0/newWidth-0.5;
-			ref_y=j*1.0/newHeight-0.5;
+			ref_x = (i - newWidth / 2.0);
+			ref_y = (j - newHeight / 2.0);
 
-			mapX=(px_int)((ref_x*invCosAgl-ref_y*invSinAgl)*resWidth+resWidth/2);
-			mapY=(px_int)((ref_x*invSinAgl+ref_y*invCosAgl)*resHeight+resHeight/2);
+			mapX = (px_int)((ref_x * invCosAgl - ref_y * invSinAgl) / scale + resWidth / 2);
+			mapY = (px_int)((ref_x * invSinAgl + ref_y * invCosAgl) / scale + resHeight / 2);
 
 			if (mapX<0||mapX>=resWidth)
 			{
@@ -2818,11 +2818,11 @@ px_void PX_TextureRenderEx_sincos(px_surface *psurface,px_texture *resTexture,px
 		{
 			for (i=left;i<=right;i++)
 			{
-				ref_x=i*1.0/newWidth-0.5;
-				ref_y=j*1.0/newHeight-0.5;
+				ref_x = (i - newWidth / 2.0);
+				ref_y = (j - newHeight / 2.0);
 
-				mapX=(px_int)((ref_x*invCosAgl-ref_y*invSinAgl)*resWidth+resWidth/2);
-				mapY=(px_int)((ref_x*invSinAgl+ref_y*invCosAgl)*resHeight+resHeight/2);
+				mapX = (px_int)((ref_x * invCosAgl - ref_y * invSinAgl) / scale + resWidth / 2);
+				mapY = (px_int)((ref_x * invSinAgl + ref_y * invCosAgl) / scale + resHeight / 2);
 
 				if (mapX<0||mapX>=resWidth)
 				{
@@ -2856,11 +2856,11 @@ px_void PX_TextureRenderEx_sincos(px_surface *psurface,px_texture *resTexture,px
 		{
 			for (i=left;i<=right;i++)
 			{
-				ref_x=i*1.0/newWidth-0.5;
-				ref_y=j*1.0/newHeight-0.5;
+				ref_x = (i - newWidth / 2.0);
+				ref_y = (j - newHeight / 2.0);
 
-				mapX=(px_int)((ref_x*invCosAgl-ref_y*invSinAgl)*resWidth+resWidth/2);
-				mapY=(px_int)((ref_x*invSinAgl+ref_y*invCosAgl)*resHeight+resHeight/2);
+				mapX = (px_int)((ref_x * invCosAgl - ref_y * invSinAgl) / scale + resWidth / 2);
+				mapY = (px_int)((ref_x * invSinAgl + ref_y * invCosAgl) / scale + resHeight / 2);
 
 				if (mapX<0||mapX>=resWidth)
 				{

@@ -217,6 +217,7 @@ typedef struct
 typedef struct 
 {
 	volatile px_bool lock;
+	volatile px_float initialize_process;
 	PX_PianoModelPulsation pulsation[PX_PIANOREVERB_MAX_PULSATION];
 	PX_PianoSoundNote note[88];
 }PX_PianoModel;

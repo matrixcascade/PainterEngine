@@ -172,6 +172,10 @@ px_bool PX_MemoryCopy(px_memory *memory,const px_void *buffer,px_int startoffset
 px_bool PX_CircularBufferInitialize(px_memorypool* mp, PX_CircularBuffer* pcbuffer, px_int size)
 {
 	PX_memset(pcbuffer, 0, sizeof(PX_CircularBuffer));
+	if (size==0)
+	{
+		PX_ASSERT();
+	}
 	pcbuffer->buffer = (px_double *)MP_Malloc(mp, sizeof(px_double) * size);
 	if (!pcbuffer)
 	{

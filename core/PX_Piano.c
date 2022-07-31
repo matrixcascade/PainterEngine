@@ -896,7 +896,7 @@ px_bool PX_PianoModelInitializeNote(PX_PianoModel* pReverb, px_int i, PX_PianoKe
 {
 	px_int j;
 	px_float keyout;
-	px_char calcBuffer[64 * 1024] = { 0 };
+	px_char calcBuffer[128 * 1024] = { 0 };
 	px_memorypool mp = MP_Create(calcBuffer, sizeof(calcBuffer));
 	PX_PianoSoundBoard soundboard;
 	PX_PianoKey key;
@@ -925,20 +925,24 @@ px_bool PX_PianoModelInitializeNote(PX_PianoModel* pReverb, px_int i, PX_PianoKe
 	for (j = 0; j < PX_COUNTOF(pReverb->note[i].pcm); j++)
 	{
 		PX_PianoKeyGo(&key, &keyout, 1);
+		pReverb->initialize_process += 1 / 88.0f / PX_COUNTOF(pReverb->note[i].pcm);
 		PX_PianoSoundBoardGo(&soundboard, &keyout, &pReverb->note[i].pcm[j], 1);
 	}
 	PX_PianoSoundBoardFree(&soundboard);
 	PX_PianoKeyFree(&key);
 	return PX_TRUE;
 }
-px_bool PX_PianoModelInitialize(PX_PianoModel* pReverb, PX_PianoKey_Parameters keyparam[88], PX_PianoSoundboard_Parameters *soundboardparam)
+px_bool PX_PianoModelInitialize(PX_PianoModel* pmodel, PX_PianoKey_Parameters keyparam[88], PX_PianoSoundboard_Parameters *soundboardparam)
 {
 	px_int i;
-	PX_PianoModelInitializeData(pReverb);
-	for (i = 0; i < PX_COUNTOF(pReverb->note); i++)
+	PX_PianoModelInitializeData(pmodel);
+	pmodel->initialize_process = 0;
+	for (i = 0; i < PX_COUNTOF(pmodel->note); i++)
 	{
-		PX_PianoModelInitializeNote(pReverb, i, keyparam , soundboardparam);
+		PX_PianoModelInitializeNote(pmodel, i, keyparam , soundboardparam);
+		pmodel->initialize_process = i / 88.0f;
 	}
+	pmodel->initialize_process = 1;
 	return PX_TRUE;
 }
 

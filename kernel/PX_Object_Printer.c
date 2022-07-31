@@ -290,7 +290,7 @@ PX_Object* PX_Object_PrinterCreate(px_memorypool* mp, PX_Object* Parent, px_int 
 	PX_Object_EditSetTextColor(pDesc->Input, PX_COLOR(255, 0, 255, 0));
 	PX_Object_EditSetBorderColor(pDesc->Input, PX_COLOR(255, 0, 255, 0));
 	PX_Object_EditSetOffset(pDesc->Input, 2, 3);
-	PX_Object_EditSetLimit(pDesc->Input, "zxcvbnm,./asdfghjkl;'qwertyyuiop[]\\`1234567890-=ZXCVBNM<>?ASDFGHJKL:\"QWERTYUIOP{}|~!@#$%^&*()_+");
+	//PX_Object_EditSetLimit(pDesc->Input, "zxcvbnm,./asdfghjkl;'qwertyyuiop[]\\`1234567890-=ZXCVBNM<>?ASDFGHJKL:\"QWERTYUIOP{}|~!@#$%^&*()_+");
 	PX_Object_ScrollAreaSetBkColor(pDesc->Area, PX_COLOR(255, 0, 0, 0));
 	pDesc->id = 1;
 

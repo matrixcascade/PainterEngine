@@ -304,10 +304,10 @@ px_double PX_Variance(px_double x[],px_int n);
 
 //////////////////////////////////////////////////////////////////////////
 //memory
-void PX_memset(void *dst,px_byte byte,px_int size);
-void PX_memdwordset(void *dst,px_dword dw,px_int count);
+px_void PX_memset(px_void *dst,px_byte byte,px_int size);
+px_void PX_memdwordset(px_void *dst,px_dword dw,px_int count);
 #define PX_zeromemory(dst,size) PX_memset(dst,0,size)
-px_bool PX_memequ(const void *dst,const void *src,px_int size);
+px_bool PX_memequ(const px_void *dst,const px_void *src,px_int size);
 px_void PX_memcpy(px_void *dst,const px_void *src,px_int size);
 px_void PX_strcpy(px_char *dst,const px_char *src,px_int size);
 px_void PX_wstrcpy(px_word *dst,const px_word *src,px_int size);
@@ -407,8 +407,8 @@ px_int PX_sprintf0(px_char *str,px_int str_size,const px_char fmt[]);
 
 //////////////////////////////////////////////////////////////////////////
 //matrix
-void PX_MatrixZero(px_matrix *Mat);
-void PX_MatrixIdentity(px_matrix *Mat);
+px_void PX_MatrixZero(px_matrix *Mat);
+px_void PX_MatrixIdentity(px_matrix *Mat);
 px_matrix PX_MatrixMultiply(px_matrix Mat1,px_matrix Mat2);
 px_matrix PX_MatrixAdd(px_matrix Mat1,px_matrix Mat2);
 px_matrix PX_MatrixSub(px_matrix Mat1,px_matrix Mat2);
@@ -512,19 +512,21 @@ px_complex PX_complexSin(px_complex a);
 
 //////////////////////////////////////////////////////////////////////////
 //DFT/FFT
-void PX_DFT(_IN px_complex x[],_OUT px_complex X[],px_int N);
-void PX_DCT(_IN px_double x[],_OUT px_double X[],px_int N);
-void PX_IDFT(_IN px_complex X[],_OUT px_complex x[],px_int N);
-void PX_IDCT(_IN px_double x[],_OUT px_double X[],px_int N);
-void PX_FFT(_IN px_complex x[],_OUT px_complex X[],px_int N);
-void PX_IFFT(_IN px_complex X[],_OUT px_complex x[],px_int N);
-void PX_FFT_2(_IN px_complex x[],_OUT px_complex X[],px_int N_N);
-void PX_IFFT_2(_IN px_complex X[],_OUT px_complex x[],px_int N_N);
-void PX_FFT_2_Shift(_IN px_complex _in[],_OUT px_complex _out[],px_int N_N);
-void PX_DCT_2_Shift(_IN px_double _in[], _OUT px_double _out[], px_int N_N);
+px_void PX_DFT(_IN px_complex x[],_OUT px_complex X[],px_int N);
+px_void PX_DCT(_IN px_double x[],_OUT px_double X[],px_int N);
+px_void PX_IDFT(_IN px_complex X[],_OUT px_complex x[],px_int N);
+px_void PX_IDCT(_IN px_double x[],_OUT px_double X[],px_int N);
+px_void PX_FDCT(_IN _OUT px_complex x[], _OUT px_complex X[], px_int N);
+px_void PX_FIDCT(_IN _OUT px_complex x[], _OUT px_complex X[], px_int N);
+px_void PX_FFT(_IN px_complex x[], _OUT px_complex X[], px_int N);
+px_void PX_IFFT(_IN px_complex X[],_OUT px_complex x[],px_int N);
+px_void PX_FFT_2(_IN px_complex x[],_OUT px_complex X[],px_int N_N);
+px_void PX_IFFT_2(_IN px_complex X[],_OUT px_complex x[],px_int N_N);
+px_void PX_FFT_2_Shift(_IN px_complex _in[],_OUT px_complex _out[],px_int N_N);
+px_void PX_DCT_2_Shift(_IN px_double _in[], _OUT px_double _out[], px_int N_N);
 
 
-void PX_FT_Symmetry(_IN px_complex x[], _OUT px_complex X[], px_int N);
+px_void PX_FT_Symmetry(_IN px_complex x[], _OUT px_complex X[], px_int N);
 
 //////////////////////////////////////////////////////////////////////////
 //cepstrum
@@ -533,7 +535,7 @@ typedef enum
 	PX_CEPTRUM_TYPE_REAL,
 	PX_CEPSTRUM_TYPE_COMPLEX,
 }PX_CEPSTRUM_TYPE;
-void PX_Cepstrum(_IN px_complex x[],_OUT px_complex X[],px_int N,PX_CEPSTRUM_TYPE type);
+px_void PX_Cepstrum(_IN px_complex x[],_OUT px_complex X[],px_int N,PX_CEPSTRUM_TYPE type);
 
 //////////////////////////////////////////////////////////////////////////
 //zero-crossing rate,ZCR
@@ -544,14 +546,14 @@ px_double PX_ZeroCrossingRateComplex(_IN px_complex x[],px_int N);
 px_int PX_PitchEstimation(_IN px_complex x[],px_int N,px_int sampleRate,px_int low_Hz,px_int high_Hz);
 //////////////////////////////////////////////////////////////////////////
 //PreEmphasise
-void PX_PreEmphasise(const px_double *data, int len, px_double *out, px_double preF);//0.9<preF<1.0 suggest 0.9;
+px_void PX_PreEmphasise(const px_double *data, int len, px_double *out, px_double preF);//0.9<preF<1.0 suggest 0.9;
 
 //////////////////////////////////////////////////////////////////////////
 //up/down sampling
-void PX_LinearInterpolationResample(_IN px_double x[],_OUT px_double X[],px_int N,px_int M);
-void PX_SincInterpolationResample(_IN px_double x[], _OUT px_double X[], px_int N, px_int M);
-void PX_DownSampled(_IN px_complex x[],_OUT px_complex X[],px_int N,px_int M);
-void PX_UpSampled(_IN px_complex x[],_OUT px_complex X[],px_int N,px_int L);
+px_void PX_LinearInterpolationResample(_IN px_double x[],_OUT px_double X[],px_int N,px_int M);
+px_void PX_SincInterpolationResample(_IN px_double x[], _OUT px_double X[], px_int N, px_int M);
+px_void PX_DownSampled(_IN px_complex x[],_OUT px_complex X[],px_int N,px_int M);
+px_void PX_UpSampled(_IN px_complex x[],_OUT px_complex X[],px_int N,px_int L);
 
 //////////////////////////////////////////////////////////////////////////
 //ipv4

@@ -437,7 +437,8 @@ PX_Midi_Note PX_MidiReadNote(PX_Midi* pmidi, px_int iTrack)
 				pTrack->nextType = PX_MIDI_NEXT_TYPE_END;
 			else
 				pTrack->nextType = PX_MIDI_NEXT_TYPE_TICK;
-			if ((pl & 0xf0) == 0x90)
+
+			if ((pl & 0xf0) == 0x90&&v!=0)
 			{
 				note.opcode = PX_MIDI_OPCODE_KEYDOWN;
 				note.note = bnote;

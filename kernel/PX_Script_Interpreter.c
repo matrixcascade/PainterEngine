@@ -7712,20 +7712,50 @@ static px_bool PX_ScriptParseVar(PX_ScriptInterpreter *analysis)
 		}
 		else if(analysis->lexer.Symbol=='=')
 		{
+			px_int brack=0;
 			variable.size=1;
 			variable.bInitialized=PX_TRUE;
+
 			PX_StringInitialize(analysis->mp,&variable.GlobalInitializeValue);
 			while(PX_TRUE)
 			{
 				type=PX_ScriptTranslatorNextToken(&analysis->lexer);
+
+				if (type == PX_LEXER_LEXEME_TYPE_DELIMITER && analysis->lexer.Symbol == '(')
+				{
+					brack++;
+				}
+
+				if (type == PX_LEXER_LEXEME_TYPE_DELIMITER && analysis->lexer.Symbol == ')')
+				{
+					brack--;
+					if (brack<0)
+					{
+						PX_ScriptTranslatorError(analysis, "Error Expression.");
+						PX_StringFree(&variable.Mnemonic);
+						PX_StringFree(&variable.GlobalInitializeValue);
+						goto _ERROR;
+					}
+				}
+
 				if (type==PX_LEXER_LEXEME_TYPE_DELIMITER&&analysis->lexer.Symbol==';')
 				{
+					if (brack != 0)
+					{
+						PX_ScriptTranslatorError(analysis, "Error Expression.");
+						PX_StringFree(&variable.Mnemonic);
+						PX_StringFree(&variable.GlobalInitializeValue);
+						goto _ERROR;
+					}
 					break;
 				}
-				if (type==PX_LEXER_LEXEME_TYPE_DELIMITER&&analysis->lexer.Symbol==',')
+
+				if (type==PX_LEXER_LEXEME_TYPE_DELIMITER&&analysis->lexer.Symbol==','&&brack==0)
 				{
 					break;
 				}
+
+
 				if (type==PX_LEXER_LEXEME_TYPE_END)
 				{
 					PX_ScriptTranslatorError(analysis,"Error Expression.");

@@ -1398,7 +1398,7 @@ px_int PX_sprintf0(px_char *str,px_int str_size,const px_char fmt[])
 	return PX_sprintf8(str,str_size,fmt,PX_STRINGFORMAT_INT(0),PX_STRINGFORMAT_INT(0),PX_STRINGFORMAT_INT(0),PX_STRINGFORMAT_INT(0),PX_STRINGFORMAT_INT(0),PX_STRINGFORMAT_INT(0),PX_STRINGFORMAT_INT(0),PX_STRINGFORMAT_INT(0));
 }
 
-void PX_MatrixZero(px_matrix *Mat)
+px_void PX_MatrixZero(px_matrix *Mat)
 {
 	Mat->m[0][0]=0;Mat->m[0][1]=0;Mat->m[0][2]=0;Mat->m[0][3]=0;
 	Mat->m[1][0]=0;Mat->m[1][1]=0;Mat->m[1][2]=0;Mat->m[1][3]=0;
@@ -1406,7 +1406,7 @@ void PX_MatrixZero(px_matrix *Mat)
 	Mat->m[3][0]=0;Mat->m[3][1]=0;Mat->m[3][2]=0;Mat->m[3][3]=0;
 }
 
-void PX_MatrixIdentity(px_matrix *Mat)
+px_void PX_MatrixIdentity(px_matrix *Mat)
 {
 	Mat->_11=1.0f;	Mat->_12=0.0f;	Mat->_13=0.0f;	Mat->_14=0.0f;
 	Mat->_21=0.0f;	Mat->_22=1.0f;	Mat->_23=0.0f;	Mat->_24=0.0f;
@@ -2407,7 +2407,7 @@ px_bool PX_isLineCrossRect(px_point p1,px_point p2,px_rect rect,px_point *cp1,px
 	return bcross;
 }
 
-void PX_memset(void *dst,px_byte byte,px_int size)
+px_void PX_memset(px_void *dst,px_byte byte,px_int size)
 {
 	px_dword dw=byte?(byte<<24)|(byte<<16)|(byte<<8)|byte:0;
 	px_dword *_4byteMovDst=(px_dword *)dst;
@@ -2423,14 +2423,14 @@ void PX_memset(void *dst,px_byte byte,px_int size)
 }
 
 
-void PX_memdwordset(void *dst,px_dword dw,px_int count)
+px_void PX_memdwordset(px_void *dst,px_dword dw,px_int count)
 {
 	px_dword *p=(px_dword *)dst;
 	while(count--)*p++=dw;
 }
 
 
-px_bool PX_memequ(const void *dst,const void *src,px_int size)
+px_bool PX_memequ(const px_void *dst,const px_void *src,px_int size)
 {
 	px_dword *_4byteMovSrc=(px_dword *)src;
 	px_dword *_4byteMovDst=(px_dword *)dst;
@@ -2994,7 +2994,7 @@ px_complex PX_complexSin(px_complex a)
 }
 
 
-void PX_DFT(_IN px_complex x[],_OUT px_complex X[],px_int N)
+px_void PX_DFT(_IN px_complex x[],_OUT px_complex X[],px_int N)
 {
 	px_int k,n;
 	px_complex Wnk;
@@ -3017,7 +3017,7 @@ void PX_DFT(_IN px_complex x[],_OUT px_complex X[],px_int N)
 	}
 }
 
-void PX_DCT(_IN px_double x[],_OUT px_double X[],px_int N)
+px_void PX_DCT(_IN px_double x[],_OUT px_double X[],px_int N)
 {
 	px_int n,m;
 	px_double v;
@@ -3044,7 +3044,7 @@ void PX_DCT(_IN px_double x[],_OUT px_double X[],px_int N)
 	}
 }
 
-void PX_IDFT(_IN px_complex X[],_OUT px_complex x[],px_int N)
+px_void PX_IDFT(_IN px_complex X[],_OUT px_complex x[],px_int N)
 {
 	px_int k,n;
 	px_float im=0;
@@ -3071,7 +3071,7 @@ void PX_IDFT(_IN px_complex X[],_OUT px_complex x[],px_int N)
 	}
 }   
 
-void PX_IDCT(_IN px_double X[],_OUT px_double x[],px_int N)
+px_void PX_IDCT(_IN px_double X[],_OUT px_double x[],px_int N)
 {
 	px_int n,m;
 	px_double v0,v;
@@ -3096,7 +3096,116 @@ void PX_IDCT(_IN px_double X[],_OUT px_double x[],px_int N)
 	}	
 }
 
-void FFT_Base2(_IN _OUT px_complex x[],px_int N)
+static px_void PX_FDCT_SortArray(px_complex x[], px_int N,px_int sN)
+{
+	px_int i,j;
+	for (i=0;i<N/sN;i++)
+	{
+		if (sN==4)
+		{
+			px_complex temp = x[i * 4+1];
+			x[i * 4 + 1] = x[i * 4 + 2];
+			x[i * 4 + 2] = temp;
+		}
+		else
+		{
+			for (j=0;j<sN/4;j++)
+			{
+				px_complex temp = x[i * sN + sN / 4 + j];
+				x[i * sN + sN / 4 + j] = x[i * sN + sN / 2 + j];
+				x[i * sN + sN / 2 + j] = temp;
+			}
+		}
+	}
+}
+
+px_void PX_FDCT(_IN _OUT px_complex x[], _OUT px_complex X[], px_int N)
+{
+	px_int i;
+	px_int sLen = 4;
+	px_double v;
+	PX_memcpy(X, x, sizeof(px_complex) * N);
+
+	if (N&(N-1))
+	{
+		return;
+	}
+	if (N<4)
+	{
+		return;
+	}
+
+	while (sLen <= N)
+	{
+		PX_FDCT_SortArray(X, N, sLen);
+		sLen *= 2;
+	}
+	for (i=0;i<N/4;i++)
+	{
+		px_complex t = X[N / 2 + i];
+		X[N / 2 + i] = X[N - i - 1];
+		X[N - i - 1] = t;
+	}
+
+
+	PX_FFT(X, X, N);
+
+	for (i = 0; i < N; i++)
+	{
+		X[i].re = X[i].re * PX_cosd(i * PX_PI / (N * 2)) + X[i].im * PX_sind(i * PX_PI / (N * 2));
+		X[i].im = 0;
+	}
+
+	v = PX_sqrtd(2.0 / N);
+	X[0].re *= PX_sqrtd(1.0 / N);
+
+	for (i = 1; i < N; i++)
+	{
+		X[i].re *= v;
+	}
+}
+
+px_void PX_FIDCT(_IN _OUT px_complex x[], _OUT px_complex X[], px_int N) {
+	px_int i;
+	px_int sLen = N;
+	px_double v;
+
+	PX_memcpy(X, x, sizeof(px_complex) * N);
+	v = PX_sqrtd(2.0 / N);
+
+	for (i = 1; i < N; i++)
+	{
+		X[i].re *= v;
+	}
+	X[0].re *= PX_sqrtd(1.0 / N);
+
+
+	for (i = 0; i < N; i++) {
+		px_double t = X[i].re;
+		X[i].re = t * PX_cosd(i * PX_PI / (N * 2));
+		X[i].im =-t* PX_sind(i * PX_PI / (N * 2));
+	}
+
+	PX_FFT(X, X, N);
+
+	for (i = 0; i < N / 4; i++)
+	{
+		px_complex t = X[N / 2 + i];
+		X[N / 2 + i] = X[N - i - 1];
+		X[N - i - 1] = t;
+	}
+	while (sLen >= 4)
+	{
+		PX_FDCT_SortArray(X, N, sLen);
+		sLen /= 2;
+	}
+	for (i = 1; i < N; i++)
+	{
+		X[i].im = 0;
+	}
+}
+
+px_void FFT_Base2(_IN _OUT px_complex x[],px_int N)
 {
 	px_int exbase,exrang,i,j,k;
 	px_complex excomplex,Wnk,cx0,cx1;
@@ -3148,13 +3257,13 @@ void FFT_Base2(_IN _OUT px_complex x[],px_int N)
 
 
 }
-void PX_FFT(_IN px_complex x[],_OUT px_complex X[],px_int N)
+px_void PX_FFT(_IN px_complex x[],_OUT px_complex X[],px_int N)
 {
 	PX_memcpy(X,x,sizeof(px_complex)*N);
 	FFT_Base2(X,N);
 }
 
-void IFFT_Base2(_IN _OUT px_complex X[],px_int N)
+px_void IFFT_Base2(_IN _OUT px_complex X[],px_int N)
 {
 	px_int exbase,exrang,i,j,n;
 	px_complex excomplex,Wnnk,cx0,cx1;
@@ -3208,7 +3317,7 @@ void IFFT_Base2(_IN _OUT px_complex X[],px_int N)
 
 	}
 }
-void PX_IFFT(_IN px_complex X[],_OUT px_complex x[],px_int N)
+px_void PX_IFFT(_IN px_complex X[],_OUT px_complex x[],px_int N)
 {
 	px_int i;
 	PX_memcpy(X,x,sizeof(px_complex)*N);
@@ -3222,7 +3331,7 @@ void PX_IFFT(_IN px_complex X[],_OUT px_complex x[],px_int N)
 }
 
 
-void PX_FFT_2(_IN px_complex x[],_OUT px_complex X[],px_int N)
+px_void PX_FFT_2(_IN px_complex x[],_OUT px_complex X[],px_int N)
 {
 	px_int i,cx,cy;
 	px_complex _t;
@@ -3258,7 +3367,7 @@ void PX_FFT_2(_IN px_complex x[],_OUT px_complex X[],px_int N)
 		}
 	}
 }
-void PX_IFFT_2(_IN px_complex X[],_OUT px_complex x[],px_int N)
+px_void PX_IFFT_2(_IN px_complex X[],_OUT px_complex x[],px_int N)
 {
 	px_int cx,cy,i;
 	px_complex _t;
@@ -3295,7 +3404,7 @@ void PX_IFFT_2(_IN px_complex X[],_OUT px_complex x[],px_int N)
 	}
 }
 
-void PX_FFT_2_Shift(_IN px_complex _in[],_OUT px_complex _out[],px_int N)
+px_void PX_FFT_2_Shift(_IN px_complex _in[],_OUT px_complex _out[],px_int N)
 {
 	px_int x,y;
 	px_complex *_t=_out;
@@ -3323,7 +3432,7 @@ void PX_FFT_2_Shift(_IN px_complex _in[],_OUT px_complex _out[],px_int N)
 	}
 }
 
-void PX_DCT_2_Shift(_IN px_double _in[], _OUT px_double _out[], px_int N)
+px_void PX_DCT_2_Shift(_IN px_double _in[], _OUT px_double _out[], px_int N)
 {
 	px_int x, y;
 	px_double* _t = _out;
@@ -3351,7 +3460,7 @@ void PX_DCT_2_Shift(_IN px_double _in[], _OUT px_double _out[], px_int N)
 	}
 }
 
-void PX_FT_Symmetry(_IN px_complex x[],_OUT px_complex X[],px_int N)
+px_void PX_FT_Symmetry(_IN px_complex x[],_OUT px_complex X[],px_int N)
 {
 	px_int l=1,r=N-1;
 	PX_memcpy(X,x,N/2*sizeof(px_complex)+1);
@@ -3364,7 +3473,7 @@ void PX_FT_Symmetry(_IN px_complex x[],_OUT px_complex X[],px_int N)
 	}
 }
 
-void PX_Cepstrum(_IN px_complex x[],_OUT px_complex X[],px_int N,PX_CEPSTRUM_TYPE type)
+px_void PX_Cepstrum(_IN px_complex x[],_OUT px_complex X[],px_int N,PX_CEPSTRUM_TYPE type)
 {
 	px_int i;
 	PX_FFT(x,X,N);
@@ -3462,7 +3571,7 @@ px_int PX_PitchEstimation(_IN px_complex x[],px_int N,px_int sampleRate,px_int l
 	return sampleRate/idx;
 }
 
-void PX_PreEmphasise(const px_double *data, px_int len, px_double *out, px_double preF)//0.9<preF<1.0 suggest 0.9
+px_void PX_PreEmphasise(const px_double *data, px_int len, px_double *out, px_double preF)//0.9<preF<1.0 suggest 0.9
 {
 	px_int i;
 	for(i = len - 1; i >= 1; i--)
@@ -3472,7 +3581,7 @@ void PX_PreEmphasise(const px_double *data, px_int len, px_double *out, px_doubl
 	out[0] = data[0];
 }
 
-void PX_LinearInterpolationResample(_IN px_double x[],_OUT px_double X[],px_int N,px_int M)
+px_void PX_LinearInterpolationResample(_IN px_double x[],_OUT px_double X[],px_int N,px_int M)
 {
 	px_int k,m=0;
 	px_double d1=0,d2=0;
@@ -3499,7 +3608,7 @@ void PX_LinearInterpolationResample(_IN px_double x[],_OUT px_double X[],px_int 
 	}
 }
 
-void PX_SincInterpolationResample(_IN px_double x[], _OUT px_double X[], px_int N, px_int M)
+px_void PX_SincInterpolationResample(_IN px_double x[], _OUT px_double X[], px_int N, px_int M)
 {
 	px_double step = 1 / (M-1);
 	px_int i;
@@ -3509,7 +3618,7 @@ void PX_SincInterpolationResample(_IN px_double x[], _OUT px_double X[], px_int 
 	}
 }
 
-void PX_UpSampled(_IN px_complex x[],_OUT px_complex X[],px_int N,px_int L)
+px_void PX_UpSampled(_IN px_complex x[],_OUT px_complex X[],px_int N,px_int L)
 {
 	px_int i,j;
 	for (i=0;i<N;i++)
@@ -3552,7 +3661,7 @@ void PX_UpSampled(_IN px_complex x[],_OUT px_complex X[],px_int N,px_int L)
 	}
 }
 
-void PX_DownSampled(_IN px_complex x[],_OUT px_complex X[],px_int N,px_int M)
+px_void PX_DownSampled(_IN px_complex x[],_OUT px_complex X[],px_int N,px_int M)
 {
 	px_int i;
 	if (((N)&(N-1))==0)
@@ -3923,7 +4032,7 @@ px_void PX_srand(px_uint64 seed)
 
 px_uint32 PX_rand()
 {
-	return  ((px_uint32)(px_srand_seed = (px_srand_seed*764261123+1)%(0xefffffff)))&PX_RAND_MAX;
+	return  ((px_uint32)(px_srand_seed = (px_srand_seed*314159269+453806245)%(1<<31)))&PX_RAND_MAX;
 }
 
 
