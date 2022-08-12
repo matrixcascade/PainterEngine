@@ -20,3 +20,5 @@
 <br/><br/>
 更多内容请访问 PainterEngine.com
 <br/>
+社区交流请访问 faq.PainterEngine.com
+<br/>
