@@ -10,12 +10,8 @@ static px_void PX_VM_LOG(px_char *log)
 {
 	PX_LOG(log);
 }
-#ifdef PX_DEBUG_MODE
-#include "stdio.h"
-#define PX_SCRIPT_VM_LOG  printf
-#else
+
 #define PX_SCRIPT_VM_LOG
-#endif
 
 
 px_bool PX_VMInitialize(PX_VM *Ins,px_memorypool *mp,px_byte *code,px_int size)

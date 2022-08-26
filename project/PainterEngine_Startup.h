@@ -4,12 +4,12 @@
 //////////////////////////////////////////////////////////////////////////
 //Configures
 #include "platform/modules/px_file.h"
-
+#include "platform/modules/px_audio.h"
 #define PX_APPLICATION_NAME "PainterEngine"
 #define PX_APPLICATION_SURFACE_SIZE 680
 
 #define PX_APPLICATION_MEMORYPOOL_UI_SIZE 1024*1024*2
-#define PX_APPLICATION_MEMORYPOOL_RESOURCES_SIZE 1024*1024*32
+#define PX_APPLICATION_MEMORYPOOL_RESOURCES_SIZE 1024*1024*64
 #define PX_APPLICATION_MEMORYPOOL_GAME_SIZE 1024*1024*16
 #define PX_APPLICATION_MEMORYPOOL_SPACE_SIZE 1024*1024*8
 //////////////////////////////////////////////////////////////////////////

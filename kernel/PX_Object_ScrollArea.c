@@ -126,6 +126,7 @@ px_void PX_Object_ScrollAreaMoveToBottom(PX_Object *pObject)
 	if(psa)
 	{
 		PX_Object_ScrollAreaGetRegion(psa->root,&left,&top,&right,&bottom);
+
 		if (bottom-top>=pObject->Height)
 		{
 			psa->root->y=-(bottom-top-pObject->Height);

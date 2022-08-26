@@ -1,11 +1,7 @@
 #include "PX_Sync.h"
 
-#ifdef PX_DEBUG_MODE
-#include "stdio.h"
-#define PX_SYNC_LOG printf
-#else
 #define PX_SYNC_LOG
-#endif
+
 
 
 px_bool PX_SyncFrameServerInitialize(PX_SyncFrameServer *sync,px_memorypool *mp,px_dword updateDuration,PX_Linker *linker)

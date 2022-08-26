@@ -1,9 +1,7 @@
 #include "PX_Memory.h"
 px_void PX_MemoryInitialize(px_memorypool *mp,px_memory *memory)
 {
-	memory->buffer=PX_NULL;
-	memory->allocsize=0;
-	memory->usedsize=0;
+	PX_memset(memory, 0, sizeof(px_memory));
 	memory->mp=mp;
 }
 
@@ -39,6 +37,7 @@ px_bool PX_MemoryCat(px_memory *memory,const px_void *buffer,px_int size)
 		PX_memcpy(memory->buffer+memory->usedsize,buffer,size);
 	}
 	memory->usedsize+=size;
+	memory->bit_pointer = 0;
 	return PX_TRUE;
 }
 
@@ -52,6 +51,7 @@ px_void PX_MemoryFree(px_memory *memory)
 	memory->buffer=PX_NULL;
 	memory->usedsize=0;
 	memory->allocsize=0;
+	memory->bit_pointer = 0;
 }
 
 px_byte * PX_MemoryData(px_memory *memory)
@@ -59,11 +59,44 @@ px_byte * PX_MemoryData(px_memory *memory)
 	return memory->buffer;
 }
 
+px_bool PX_MemoryCatBit(px_memory* memory, px_bool b)
+{
+	if (memory->bit_pointer==0)
+	{
+		px_byte bit = (b==1);
+		if (!PX_MemoryCat(memory, &bit, 1))
+			return PX_FALSE;
+		memory->bit_pointer = 1;
+	}
+	else
+	{
+		px_byte* plastbyte = memory->buffer + memory->usedsize - 1;
+		if(b)
+			(*plastbyte) |= (1 << memory->bit_pointer);
+		memory->bit_pointer++;
+		memory->bit_pointer %= 8;
+	}
+	return PX_TRUE;
+}
+
+px_bool PX_MemoryCatBits(px_memory* memory, px_byte data[], px_int bit_count)
+{
+	px_int i;
+	px_uint bp=0;
+	for (i = 0; i < bit_count; i++)
+	{
+		if (!PX_MemoryCatBit(memory, PX_ReadBit(&bp, data)))
+			return PX_FALSE;
+	}
+	return PX_TRUE;
+}
+
 px_bool PX_MemoryAlloc(px_memory *memory,px_int size)
 {
 	PX_MemoryFree(memory);
 	memory->allocsize=size;
 	memory->usedsize=0;
+	memory->bit_pointer = 0;
 	if (size==0)
 	{
 		memory->buffer=PX_NULL;
@@ -120,12 +153,14 @@ px_void PX_MemoryRemove(px_memory *memory,px_int start,px_int end)
 	}
 	PX_memcpy(memory->buffer+start,memory->buffer+end+1,memory->usedsize-end-1);
 	memory->usedsize += (start - end - 1);
+	memory->bit_pointer = 0;
 }
 
 
 px_void PX_MemoryClear(px_memory *memory)
 {
 	memory->usedsize=0;
+	memory->bit_pointer = 0;
 }
 
 px_bool PX_MemoryCopy(px_memory *memory,const px_void *buffer,px_int startoffset,px_int size)

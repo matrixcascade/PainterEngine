@@ -1,6 +1,5 @@
 #include "PX_Quadtree.h"
 
-//#include "stdio.h"
 
 static px_bool PX_Quadtree_InitAABB(px_memorypool *mp,px_int PX_AABB_MAX_DEEP,PX_Quadtree_AABB *aabb)
 {

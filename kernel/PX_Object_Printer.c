@@ -64,6 +64,7 @@ PX_Object* PX_Object_PrinterPrintText(PX_Object* pObject, const px_char* text)
 			PX_VectorPushback(&pDesc->pObjects, &obj);
 			PX_Object_PrinterUpdateLines(pObject);
 			PX_Object_ScrollAreaMoveToBottom(pDesc->Area);
+
 		}
 		return pAutoObject;
 	}
@@ -108,7 +109,9 @@ PX_Object* PX_Object_PrinterPrintImage(PX_Object* pObject, px_texture* pTexture)
 		obj.id = pDesc->id++;
 		PX_VectorPushback(&pDesc->pObjects, &obj);
 		PX_Object_PrinterUpdateLines(pObject);
+
 		PX_Object_ScrollAreaMoveToBottom(pDesc->Area);
+
 
 	}
 	return pObject;
@@ -151,7 +154,9 @@ px_void PX_Object_PrinterGets(PX_Object* pObject)
 		PX_Object_Printer* pDesc = PX_ObjectGetDesc(PX_Object_Printer, pObject);
 		pDesc->bInput = PX_TRUE;
 		PX_Object_EditSetFocus(pDesc->Input,PX_TRUE);
+		pDesc->Input->Visible = PX_TRUE;
 		PX_Object_PrinterUpdateLines(pObject);
+		PX_Object_ScrollAreaMoveToBottom(pDesc->Area);
 	}
 }
 

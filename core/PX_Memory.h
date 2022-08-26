@@ -9,6 +9,7 @@ typedef struct __PX_memroy
 	px_memorypool *mp;
 	px_int  usedsize;
 	px_int  allocsize;
+	px_int  bit_pointer;
 }px_memory;
 
 px_void PX_MemoryInitialize(px_memorypool *mp,px_memory *memory);
@@ -21,7 +22,8 @@ px_byte *PX_MemoryFind(px_memory *memory,const px_void *buffer,px_int size);
 px_void PX_MemoryRemove(px_memory *memory,px_int start,px_int end);
 px_void PX_MemoryFree(px_memory *memory);
 px_byte *PX_MemoryData(px_memory *memory);
-
+px_bool PX_MemoryCatBit(px_memory* memory, px_bool b);
+px_bool PX_MemoryCatBits(px_memory* memory, px_byte data[],px_int bit_count);
 
 typedef struct  
 {

@@ -1398,7 +1398,28 @@ px_int PX_sprintf0(px_char *str,px_int str_size,const px_char fmt[])
 	return PX_sprintf8(str,str_size,fmt,PX_STRINGFORMAT_INT(0),PX_STRINGFORMAT_INT(0),PX_STRINGFORMAT_INT(0),PX_STRINGFORMAT_INT(0),PX_STRINGFORMAT_INT(0),PX_STRINGFORMAT_INT(0),PX_STRINGFORMAT_INT(0),PX_STRINGFORMAT_INT(0));
 }
 
-px_void PX_MatrixZero(px_matrix *Mat)
+px_void PX_trim(px_char* str)
+{
+	px_int l=0, r=PX_strlen(str)-1;
+	if (r < 0)return;
+	while (str[l]==' '||str[l]=='\t')
+	{
+		l++;
+	}
+	while (str[r]== ' '|| str[r] == '\t')
+	{
+		r--;
+	}
+	if (l>=r)
+	{
+		str[0] = '\0';
+		return;
+	}
+	PX_memcpy(str, str + l, r - l + 1);
+	str[r - l + 1] = '\0';
+}
+
+void PX_MatrixZero(px_matrix *Mat)
 {
 	Mat->m[0][0]=0;Mat->m[0][1]=0;Mat->m[0][2]=0;Mat->m[0][3]=0;
 	Mat->m[1][0]=0;Mat->m[1][1]=0;Mat->m[1][2]=0;Mat->m[1][3]=0;
@@ -4246,7 +4267,7 @@ static const px_uint32 crc32tab[] = {
 };  
 
 
-px_uint32 PX_crc32( px_void *buffer, px_uint size)  
+px_uint32 PX_crc32(const px_void *buffer, px_uint size)  
 {  
 	px_uint32 i, crc;  
 	crc = 0xFFFFFFFF;  
@@ -4261,7 +4282,7 @@ px_uint32 PX_crc32( px_void *buffer, px_uint size)
 
 
 
-px_word PX_crc16(px_void *buffer,px_uint size)
+px_word PX_crc16(const px_void *buffer,px_uint size)
 {
 	px_uint pos,i;
 	px_word crc = 0xFFFF;
@@ -5133,4 +5154,41 @@ px_double PX_PhaseDelay(px_double f, px_double* B, px_int sizeB, px_double* A, p
 	px_double grpdel = PX_GroupDelay(f, B, sizeB, A, sizeA, FS);
 	px_double omega = (px_double)(2.0 * PX_PI * f / FS);
 	return grpdel - omega * PX_PhaseDelayDerive(omega, B, sizeB, A, sizeA, 0.0005f);
+}
+
+px_byte PX_ReadBit(px_uint32* bitpointer, const px_byte* bitstream)
+{
+	px_byte result = (px_byte)((bitstream[(*bitpointer) >> 3] >> ((*bitpointer) & 0x7)) & 1);
+	(*bitpointer)++;
+	return result;
+}
+
+px_uint32 PX_ReadBits(px_uint32* bitpointer, const px_byte* bitstream, px_int nbits)
+{
+	px_uint32 result = 0;
+	px_int i;
+	for (i = 0; i < nbits; i++)
+		result |= ((px_uint32)PX_ReadBit(bitpointer, bitstream)) << i;
+	return result;
+}
+
+px_dword PX_adler32(const px_byte* data, px_dword len) 
+{
+	px_dword s1 = 1 & 0xffffu;
+	px_dword s2 = (1 >> 16u) & 0xffffu;
+
+	while (len != 0u) {
+		px_dword i;
+		/*at least 5552 sums can be done before the sums overflow, saving a lot of module divisions*/
+		px_dword amount = len > 5552u ? 5552u : len;
+		len -= amount;
+		for (i = 0; i != amount; ++i) {
+			s1 += (*data++);
+			s2 += s1;
+		}
+		s1 %= 65521u;
+		s2 %= 65521u;
+	}
+
+	return (s2 << 16u) | s1;
 }

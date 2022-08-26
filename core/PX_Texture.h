@@ -5,6 +5,7 @@
 #include "PX_Surface.h"
 #include "PX_Bitmap.h"
 #include "PX_TRaw.h"
+#include "PX_Png.h"
 
 typedef px_surface px_texture;
 

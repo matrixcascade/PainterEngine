@@ -43,4 +43,5 @@
 #include "PX_Piano.h"
 #include "PX_WebSocket.h"
 #include "PX_Wavelet.h"
+#include "PX_Png.h"
 #endif

@@ -14,34 +14,7 @@ px_void PX_StringTrim(px_string *str)
 {
 	if (str->buffer)
 	{
-		px_int loft=0;
-		px_int i;
-		while (str->buffer[loft]==' ')
-		{
-			loft++;
-		}
-		i=0;
-		while(PX_TRUE)
-		{
-			if (str->buffer[loft]=='\0'||loft>=str->bufferlen)
-			{
-				break;
-			}
-			str->buffer[i++]=str->buffer[loft++];
-		}
-		str->buffer[i]='\0';
-		i=PX_strlen(str->buffer);
-		if (i)
-		{
-			i--;
-		}
-		else
-			return;
-
-		while (i&&str->buffer[i]==' ')
-		{ 
-			str->buffer[i--]='\0';
-		}
+		PX_trim(str->buffer);
 	}
 	PX_StringUpdateExReg(str);
 }

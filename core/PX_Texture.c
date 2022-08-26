@@ -41,6 +41,20 @@ px_bool PX_TextureCreateFromMemory(px_memorypool *mp,px_void *data,px_int size,p
 		}
 	}
 
+	if (PX_PngVerify((px_byte *)data,size,&width,&height,0))
+	{
+		if (PX_TextureCreate(mp, tex, width, height))
+		{
+			if (!PX_PngToRenderBuffer(mp, (px_byte*)data, size, tex))
+				return PX_FALSE;
+			return PX_TRUE;
+		}
+		else
+		{
+			return PX_FALSE;
+		}
+	}
+
 	//image-format not supported
 	return PX_FALSE;
 }

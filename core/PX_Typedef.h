@@ -221,8 +221,9 @@ px_void PX_FileGetExt(const px_char filefullName[],px_char _out[],px_int outSize
 
 //////////////////////////////////////////////////////////////////////////
 //CRC
-px_uint32 PX_crc32( px_void *buffer, px_uint size);
-px_word PX_crc16(px_void *buffer,px_uint size);
+px_uint32 PX_crc32(const px_void *buffer, px_uint size);
+px_word PX_crc16(const px_void *buffer,px_uint size);
+px_dword PX_adler32(const px_byte* data, px_dword len);
 //////////////////////////////////////////////////////////////////////////
 //Sum
 px_uint32 PX_sum32(px_void *buffer, px_uint size);
@@ -402,7 +403,9 @@ px_int PX_sprintf1(px_char *str,px_int str_size,const px_char fmt[],\
 	px_stringformat _1\
 	);
 px_int PX_sprintf0(px_char *str,px_int str_size,const px_char fmt[]);
-/*px_int px_sprintf(px_char *str,px_int str_size,px_char fmt[],...);*/
+
+
+px_void PX_trim(px_char* str);
 //////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////
@@ -638,4 +641,9 @@ px_void PX_FIRFilterBuild(PX_FIRFILTER_TYPE bandtype,px_double fln,px_double fhn
 px_double PX_GroupDelay(px_double f, px_double* B, px_int sizeB, px_double* A, px_int sizeA, px_double FS);
 px_double PX_PhaseDelayDerive(px_double omega, px_double* B, px_int sizeB, px_double* A, px_int sizeA, px_double delta);
 px_double PX_PhaseDelay(px_double f, px_double* B, px_int sizeB, px_double* A, px_int sizeA, px_double FS);
+
+///////////////////////////////////////////////////////////////////////////////
+//memory
+px_byte PX_ReadBit(px_uint32* bitpointer, const px_byte* bitstream);
+px_uint32 PX_ReadBits(px_uint32* bitpointer, const px_byte* bitstream, px_int nbits);
 #endif

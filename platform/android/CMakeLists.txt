@@ -2,9 +2,9 @@ cmake_minimum_required(VERSION 3.6.0)
 
 #################################################################
 #PainterEngine Directory
-set(PAINTERENGINE_DIR D:/Git/PainterEngine)
+set(PAINTERENGINE_DIR D:/Working/PainterEngine)
 #Project Directory
-set(PAINTERENGINE_PROJECT_DIR D:/Git/project)
+set(PAINTERENGINE_PROJECT_DIR D:/Working/PainterEngine/project)
 #################################################################
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c11 -O3 ")
 
