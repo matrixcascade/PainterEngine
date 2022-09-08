@@ -3,18 +3,17 @@
 #include "PX_Object.h"
 typedef struct
 {
-	px_int x,y,width,height;
+	px_float x,y,width,height;
 	px_char u_key[8];
 	px_char d_key[8];
 	px_bool bCursor;
 	px_bool bDown;
 	px_bool bhold;
-
-}PX_Object_VirtualKey;
+}PX_Object_KeyBoardVirtualKey;
 
 typedef struct
 {
-	PX_Object_VirtualKey Keys[14+14+13+12+3];
+	PX_Object_KeyBoardVirtualKey Keys[14+14+13+12+3];
 	px_color backgroundColor;
 	px_color borderColor;
 	px_color cursorColor;
@@ -23,6 +22,8 @@ typedef struct
 	PX_Object *LinkerObject;
 	px_bool bTab,bUpper,bShift,bCtrl,bAlt;
 }PX_Object_VirtualKeyBoard;
+
+
 
 PX_Object* PX_Object_VirtualKeyBoardCreate(px_memorypool *mp, PX_Object *Parent,px_int x,px_int y,px_int width,px_int height);
 px_void PX_Object_VirtualKeyBoardSetBackgroundColor( PX_Object *pObject,px_color Color );
@@ -34,7 +35,7 @@ px_void PX_Object_VirtualKeyBoardSetLinkerObject(PX_Object *pObject,PX_Object *l
 
 typedef struct
 {
-	PX_Object_VirtualKey Keys[17];
+	PX_Object_KeyBoardVirtualKey Keys[17];
 	px_color backgroundColor;
 	px_color borderColor;
 	px_color cursorColor;

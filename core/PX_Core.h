@@ -44,4 +44,5 @@
 #include "PX_WebSocket.h"
 #include "PX_Wavelet.h"
 #include "PX_Png.h"
+#include "PX_Keyboard.h"
 #endif

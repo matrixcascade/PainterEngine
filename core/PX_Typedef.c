@@ -5192,3 +5192,5 @@ px_dword PX_adler32(const px_byte* data, px_dword len)
 
 	return (s2 << 16u) | s1;
 }
+
+

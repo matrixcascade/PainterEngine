@@ -83,6 +83,19 @@ static px_void PX_Object_MessageBoxRender(px_surface *pSurface,PX_Object *pObjec
 	pm->btn_Cancel->x=pSurface->width/2+300.0f;
 	pm->btn_Cancel->y=pSurface->height/2+150.0f;
 
+	if (pm->btn_Ok->x > pSurface->width - pm->btn_Ok->Width - 100)
+		pm->btn_Ok->x = pSurface->width - pm->btn_Ok->Width - 100;
+
+	if (pm->btn_Ok->y > pSurface->height - pm->btn_Ok->Height - 1)
+		pm->btn_Ok->y = pSurface->height - pm->btn_Ok->Height - 1;
+
+	if (pm->btn_Cancel->x > pSurface->width - pm->btn_Cancel->Width - 30)
+		pm->btn_Cancel->x = pSurface->width - pm->btn_Cancel->Width - 30;
+
+	if (pm->btn_Cancel->y > pSurface->height - pm->btn_Cancel->Height - 1)
+		pm->btn_Cancel->y = pSurface->height - pm->btn_Cancel->Height - 1;
+
+
 	pm->edit_inputbox->x=pSurface->width/2-100.0f;
 	pm->edit_inputbox->y=pSurface->height/2-12.0f;
 

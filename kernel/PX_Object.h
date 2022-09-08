@@ -88,6 +88,7 @@ enum PX_OBJECT_TYPE
   PX_OBJECT_TYPE_PRINTER		,
   PX_OBJECT_TYPE_EXECUTER		,
   PX_OBJECT_TYPE_ASMDEBUGGER	,
+  PX_OBJECT_TYPE_EXPLOSIONX  	,
 };
 
 
@@ -138,6 +139,9 @@ enum PX_OBJECT_TYPE
 #define  PX_OBJECT_FILTEREDITOR_DEFAULE_HORIZONTALPIXELDIVIDING 48
 #define  PX_OBJECT_FILTEREDITOR_DEFAULE_VERTICALPIXELDIVIDING   20
 #define	 PX_OBJECT_FILTEREDITOR_DEFAULT_FRAMELINE_WIDTH			   2
+
+
+#define PX_OBJECT_INHERIT_CODE(__pObject, objx, objy, objWidth,objHeight) do{px_float ix, iy;PX_ObjectGetInheritXY(__pObject, &ix, &iy);objx = (__pObject->x + ix);objy = (__pObject->y + iy);objWidth = __pObject->Width;objHeight = __pObject->Height;}while(0);
 
 
 ///////////////////////////////////////////////////////////////////////////
@@ -506,6 +510,10 @@ px_void PX_ObjectExecuteEvent(PX_Object *pPost,PX_Object_Event Event);
 //////////////////////////////////////////////////////////////////////////
 //execute
 #include "PX_Object_AsmDebugger.h"
+
+//////////////////////////////////////////////////////////////////////////
+//explosion
+#include "PX_Object_Explosion.h"
 #endif
 
 

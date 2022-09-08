@@ -20,7 +20,6 @@
 #define     PX_e2               (PX_e*PX_e)
 #define     PX_RAND_MAX         (0xffffff)
 
-
 #ifdef _DEBUG
 #define PX_DEBUG_MODE _DEBUG
 #endif
@@ -646,4 +645,6 @@ px_double PX_PhaseDelay(px_double f, px_double* B, px_int sizeB, px_double* A, p
 //memory
 px_byte PX_ReadBit(px_uint32* bitpointer, const px_byte* bitstream);
 px_uint32 PX_ReadBits(px_uint32* bitpointer, const px_byte* bitstream, px_int nbits);
+
+
 #endif

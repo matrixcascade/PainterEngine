@@ -10,6 +10,15 @@ typedef struct
 	WPARAM wparam;
 }WM_MESSAGE;
 
+typedef enum
+{
+	PX_WINODW_STYLE_NORMAL,
+	PX_WINODW_STYLE_DESKTOPSPRITE,
+	PX_WINODW_STYLE_SIMPLEWINDOW,
+	PX_WINODW_STYLE_FIXED,
+	PX_WINODW_STYLE_NOBOARD,
+}PX_WINODW_STYLE;
+
 extern "C" BOOL PX_CreateWindow( int windowWidth,int windowHeight, int surfaceWidth,int surfaceHeight,const char *name);
 extern "C" BOOL PX_WindowResize(int surfaceWidth,int surfaceHeight,int windowWidth,int windowHeight);
 
@@ -36,6 +45,7 @@ extern "C" char *PX_OpenFileDialog(const char Filter[]);
 extern "C" char *PX_MultFileDialog(const char Filter[]);
 extern "C" char *PX_SaveFileDialog(const char Filter[],const char ext[]);
 extern "C" double PX_GetWindowScale();
+extern "C" void PX_SetWindowStyle(PX_WINODW_STYLE style);
 #define         WIN_MAX_INPUT_STRING_LEN   64
 #define         WIN_MAX_INPUT_SPECKEY_LEN  0xff
 
@@ -50,6 +60,8 @@ extern "C" double PX_GetWindowScale();
 
 #define			WIN_MESSAGESTACK_SIZE 32
 
+
+
 HWND					Win_Hwnd;
 int						Win_Height;
 int						Win_Width;
@@ -57,8 +69,10 @@ double					Win_Scale;
 int						Surface_Height;
 int						Surface_Width;
 BOOL                    Win_Activated;
+PX_WINODW_STYLE			Win_Style;
+
 WM_MESSAGE				Win_messageStack[WIN_MESSAGESTACK_SIZE]={0};
-unsigned char		   DInput_KeyBoardState[256];
+
 char				   DInput_AccepyFile[MAX_PATH]={0};
 POINT				   DInput_MousePosition;
 POINT                  DInput_MouseWheelPosition;
@@ -113,6 +127,7 @@ BOOL PX_WindowResize(int surfaceWidth,int surfaceHeight,int windowWidth,int wind
 	Win_Width=windowWidth;
 	Win_Height=windowHeight;
 
+
 	GetClientRect(Win_Hwnd, &rc);
 
 	size.width=rc.right - rc.left;
@@ -160,12 +175,27 @@ BOOL PX_WindowResize(int surfaceWidth,int surfaceHeight,int windowWidth,int wind
 	return TRUE;
 
 }
+
+static BOOL CALLBACK EnumWindowsProc(_In_ HWND hwnd, _In_ LPARAM Lparam)
+{
+	HWND hDefView = FindWindowEx(hwnd, 0, TEXT("SHELLDLL_DefView"), 0);
+	if (hDefView != 0)
+	{
+		HWND hWorkerw = FindWindowEx(0, hwnd, TEXT("WorkerW"), 0);
+		ShowWindow(hWorkerw, SW_HIDE);
+
+		return FALSE;
+	}
+	return TRUE;
+}
+
 BOOL PX_CreateWindow( int surfaceWidth,int surfaceHeight,int windowWidth,int windowHeight,const char *name)
 {
 	HRESULT hr;
 	D2D1_SIZE_U size;
 	RECT rc;
-
+	DWORD style;
+	int window_x, window_y;
 	if (Win_Wcx.cbSize==0)
 	{
 		////////////////////////////////////////////////////////////////////////////
@@ -199,21 +229,54 @@ BOOL PX_CreateWindow( int surfaceWidth,int surfaceHeight,int windowWidth,int win
 	////////////////////////////////////////////////////////////////////////////
 	//Create window
 	////////////////////////////////////////////////////////////////////////////
+	switch (Win_Style)
+	{
+	case PX_WINODW_STYLE_NOBOARD:
+	case PX_WINODW_STYLE_DESKTOPSPRITE:
+	{
+		style = WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_POPUP;
+		window_x = 0;
+		window_y = 0;
+	}
+	break;
+	case PX_WINODW_STYLE_SIMPLEWINDOW :
+	{
+		style = WS_OVERLAPPED | WS_SYSMENU | WS_SIZEBOX;
+		window_x = CW_USEDEFAULT;
+		window_y = CW_USEDEFAULT;
+	}
+	break;
+	case PX_WINODW_STYLE_FIXED:
+	{
+		style = WS_OVERLAPPED | WS_SYSMENU ;
+		window_x = CW_USEDEFAULT;
+		window_y = CW_USEDEFAULT;
+	}
+	break;
+	default:
+		style = WS_OVERLAPPED | WS_SYSMENU | WS_MAXIMIZEBOX | WS_SIZEBOX;
+		window_x = CW_USEDEFAULT;
+		window_y = CW_USEDEFAULT;
+		break;
+	}
+	
+
+	
 #ifdef _UNICODE
 	do 
 	{
 		WCHAR wname[128]={0};
 		MultiByteToWideChar(CP_ACP, 0,name, (int)strlen(name), wname,128);
 		Win_Hwnd = CreateWindowA("WindowCls", (LPCSTR)wname,
-			WS_OVERLAPPED|WS_SYSMENU|WS_MAXIMIZEBOX|WS_SIZEBOX,
-			CW_USEDEFAULT, CW_USEDEFAULT,
+			style,
+			window_x, window_y,
 			Win_Width, Win_Height,
 			NULL, NULL, GetModuleHandle(NULL), NULL);
 	} while (0);
 #else
 	Win_Hwnd = CreateWindowA("WindowCls", name,
-		WS_OVERLAPPED|WS_SYSMENU|WS_MAXIMIZEBOX|WS_SIZEBOX,
-		CW_USEDEFAULT, CW_USEDEFAULT,
+		style,
+		window_x, window_y,
 		Win_Width, Win_Height,
 		NULL, NULL, GetModuleHandle(NULL), NULL);
 #endif
@@ -306,6 +369,23 @@ BOOL PX_CreateWindow( int surfaceWidth,int surfaceHeight,int windowWidth,int win
 	}
 
 	PX_GetWindowScale();
+
+	do 
+	{
+		if (Win_Style==PX_WINODW_STYLE_DESKTOPSPRITE)
+		{
+			STARTUPINFO si = { 0 };
+			PROCESS_INFORMATION pi = { 0 };
+			HWND hProgman = FindWindow(TEXT("Progman"), 0);
+			if (!hProgman)
+				break;
+			SendMessageTimeout(hProgman, 0x52C, 0, 0, 0, 100, 0);
+
+			SetParent(Win_Hwnd, hProgman);
+			EnumWindows(EnumWindowsProc, 0);
+		}
+	} while (0);
+	
 	return TRUE;
 }
 /////////////////////////////////////////////////////////////
@@ -470,7 +550,7 @@ BOOL PX_SystemisAvtivated()
 
 BOOL PX_KeyboardDown(unsigned char X)
 {
-	return (DInput_KeyBoardState[X]&0x80?TRUE:FALSE);
+	return (GetAsyncKeyState(X)&0x8000?TRUE:FALSE);
 }
 
 BOOL PX_MouseLButtonDown()
@@ -693,4 +773,11 @@ double PX_GetWindowScale()
 	
 	Win_Scale=horzScale;
 	return horzScale;
+}
+
+
+
+void PX_SetWindowStyle(PX_WINODW_STYLE style)
+{
+	Win_Style = style;
 }

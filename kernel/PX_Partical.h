@@ -38,6 +38,7 @@ typedef struct
 	px_void			*userptr;
 	px_texture		*tex;
 	px_point        position;
+	px_float		deviation_position_distanceRange;
 
 	px_point        direction;
 	px_float        deviation_rangAngle;
@@ -83,13 +84,14 @@ typedef struct
 typedef struct _PX_Partical_Launcher
 {
 	px_memorypool   *mp;
-	PX_ParticalLauncher_InitializeInfo LauncherInfo;
+	PX_ParticalLauncher_InitializeInfo InitInfo;
 
 	px_dword        elapsed;
 	px_int          genIndex;
 	px_int			lastgenIndex;
 	PX_Partical_Atom *ParticalPool;
 	px_float        lefttopX,leftTopY,rightBottomX,rightBottomY;
+	PX_ParticalLauncher_InitializeInfo LauncherInfo;
 }PX_ParticalLauncher;
 
 
@@ -97,7 +99,8 @@ px_void PX_ParticalLauncherInitializeDefaultInfo(PX_ParticalLauncher_InitializeI
 px_bool PX_ParticalLauncherInitialize(PX_ParticalLauncher *launcher,px_memorypool   *mp,PX_ParticalLauncher_InitializeInfo Info);
 px_void PX_ParticalLauncherSetPosition(PX_ParticalLauncher *launcher,px_float x,px_float y,px_float z);
 px_void PX_ParticalLauncherSetDirection(PX_ParticalLauncher *launcher,px_point direction);
-//px_void PX_ParticalLauncherUpdate(PX_ParticalLauncher *launcher,px_dword elapsed);
+
+px_void PX_ParticalLauncherReset(PX_ParticalLauncher* launcher);
 px_void PX_ParticalLauncherRender(px_surface *surface,PX_ParticalLauncher *launcher,px_dword elapsed);
 px_void PX_ParticalLauncherFree(PX_ParticalLauncher *launcher);
 #endif

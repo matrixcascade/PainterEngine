@@ -7,7 +7,6 @@
 #include <dxfile.h>
 #include <d3d9types.h>
 #include <dxfile.h>
-#include <d3d9types.h>
 #include <stdio.h>
 #include <dinput.h>
 #include <MMSystem.h>

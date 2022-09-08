@@ -217,7 +217,7 @@ px_bool PX_RFC1951DeflateBlock(px_byte* _in, px_uint input_size,px_bool isLastBl
 	return PX_TRUE;
 }
 
-#define PX_RFC1951_MAX_BLOCK 65535
+#define PX_RFC1951_MAX_BLOCK 32768
 
 px_bool PX_RFC1951Deflate(px_byte* _in, px_uint input_size, px_memory* _out)
 {
