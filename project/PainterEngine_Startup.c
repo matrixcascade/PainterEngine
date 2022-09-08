@@ -179,6 +179,23 @@ _ERROR:
 
 }
 
+px_bool PX_LoadLiveFromFile(px_memorypool *mp,PX_LiveFramework *pliveframework, const px_char path[])
+{
+	PX_IO_Data io = PX_LoadFileToIOData(path);
+	if (!io.size)
+	{
+		return PX_FALSE;
+	}
+	if (!PX_LiveFrameworkImport(mp, pliveframework,io.buffer,io.size))
+	{
+		PX_FreeIOData(&io);
+		return PX_FALSE;
+	}
+	PX_FreeIOData(&io);
+	return PX_TRUE;
+
+
+}
 
 px_bool PX_LoadScriptInstanceFromFile(px_memorypool *mp,PX_VM *ins,const px_char path[])
 {

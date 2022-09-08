@@ -27,6 +27,7 @@ px_bool PX_LoadSoundFromFile(px_memorypool *mp,PX_SoundData *sounddata,const px_
 px_bool PX_LoadAnimationLibraryFromFile(px_memorypool *mp,PX_AnimationLibrary *lib,const px_char path[]);
 px_bool PX_LoadScriptFromFile(px_memory *code,const px_char path[]);
 px_bool PX_LoadScriptInstanceFromFile(px_memorypool *mp,PX_VM *ins,const px_char path[]);
+px_bool PX_LoadLiveFromFile(px_memorypool* mp, PX_LiveFramework* pliveframework, const px_char path[]);
 
 px_bool PX_LoadTextureToResource(PX_ResourceLibrary *presourcelib,const px_char Path[],const px_char key[]);
 px_bool PX_LoadShapeToResource(PX_ResourceLibrary *presourcelib,const px_char Path[],const px_char key[]);
