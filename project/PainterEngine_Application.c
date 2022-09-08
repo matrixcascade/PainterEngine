@@ -1,5 +1,4 @@
 #include "PainterEngine_Application.h"
-#include "windows.h"
 PX_Application App;
 
 px_bool PX_ApplicationInitialize(PX_Application *pApp,px_int screen_width,px_int screen_height)
