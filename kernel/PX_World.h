@@ -46,6 +46,9 @@ typedef struct
 
 px_bool			PX_WorldInitialize(px_memorypool *mp,PX_World *World,px_int world_width,px_int world_height,px_int surface_width,px_int surface_height,px_dword calcsize);
 px_int			PX_WorldGetCount(PX_World *World);
+px_int			PX_WorldGetAliveCount(PX_World* World);
+PX_WorldObject* PX_WorldGetWorldObject(PX_World* World, px_int index);
+PX_Object*		PX_WorldGetObject(PX_World* World, px_int index);
 px_void         PX_WorldRemoveObject(PX_World *world,PX_Object *pObject);
 px_void			PX_WorldRemoveObjectByIndex(PX_World *world,px_int i_index);
 

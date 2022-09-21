@@ -142,6 +142,22 @@ px_bool PX_LoadSoundFromFile(px_memorypool *mp,PX_SoundData *sounddata,const px_
 	return PX_TRUE;
 }
 
+px_bool PX_LoadMidiFromFile( PX_Midi* midi, const px_char path[])
+{
+	PX_IO_Data io = PX_LoadFileToIOData(path);
+	if (!io.size)
+	{
+		return PX_FALSE;
+	}
+	if (!PX_MidiLoad(midi, io.buffer, io.size))
+	{
+		PX_FreeIOData(&io);
+		return PX_FALSE;
+	}
+	PX_FreeIOData(&io);
+	return PX_TRUE;
+}
+
 
 px_bool PX_LoadAnimationLibraryFromFile(px_memorypool *mp,PX_AnimationLibrary *lib,const px_char path[])
 {
@@ -194,8 +210,9 @@ px_bool PX_LoadLiveFromFile(px_memorypool *mp,PX_LiveFramework *pliveframework, 
 	PX_FreeIOData(&io);
 	return PX_TRUE;
 
-
 }
+
+
 
 px_bool PX_LoadScriptInstanceFromFile(px_memorypool *mp,PX_VM *ins,const px_char path[])
 {

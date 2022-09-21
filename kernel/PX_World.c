@@ -49,6 +49,52 @@ px_int PX_WorldGetCount(PX_World *World)
 	return World->pObjects.size;
 }
 
+px_int PX_WorldGetAliveCount(PX_World* World)
+{
+	px_int i;
+	px_int count=0;
+	for (i = 0; i < World->pObjects.size; i++)
+	{
+		if (PX_WorldGetWorldObject(World, i)->pObject && !PX_WorldGetWorldObject(World, i)->DeleteMark)
+			count++;
+	}
+	return count;
+}
+
+PX_WorldObject* PX_WorldGetWorldObject(PX_World* World, px_int index)
+{
+	PX_WorldObject* pwo;
+	if (index < 0)
+	{
+		PX_ASSERT();
+	}
+	if (index >= World->pObjects.size)
+	{
+		return PX_NULL;
+	}
+	pwo = PX_VECTORAT(PX_WorldObject, &World->pObjects, index);
+	return pwo;
+}
+
+PX_Object* PX_WorldGetObject(PX_World* World, px_int index)
+{
+	PX_WorldObject* pwo;
+	if (index<0)
+	{
+		PX_ASSERT();
+	}
+	if (index>= World->pObjects.size)
+	{
+		return PX_NULL;
+	}
+	pwo=PX_VECTORAT(PX_WorldObject, &World->pObjects, index);
+	if (pwo->DeleteMark)
+	{
+		return PX_NULL;
+	}
+	return pwo->pObject;
+}
+
 px_int PX_WorldAddObjectEx(PX_World *World,PX_Object *pObject)
 {
 	PX_WorldObject *pwo,wo;

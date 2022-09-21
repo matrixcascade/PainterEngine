@@ -4053,7 +4053,9 @@ px_void PX_srand(px_uint64 seed)
 
 px_uint32 PX_rand()
 {
-	return  ((px_uint32)(px_srand_seed = (px_srand_seed*314159269+453806245)%(1<<31)))&PX_RAND_MAX;
+	
+    px_srand_seed = (px_srand_seed*314159269+453806245)%(2147483648);
+	return (px_uint32)(px_srand_seed&PX_RAND_MAX);
 }
 
 
@@ -4064,7 +4066,7 @@ px_double PX_randRange(px_double min,px_double max)
 
 px_uint32 PX_randEx(px_uint64 seed)
 {
-	return  (px_uint32)(seed = (seed*764261123)%(0xefffffff));
+	return  (px_uint32)(seed = ((seed * 314159269 + 453806245) % (2147483648)));
 }
 
 
