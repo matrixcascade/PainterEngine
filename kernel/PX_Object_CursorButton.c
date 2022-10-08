@@ -110,7 +110,7 @@ PX_Object *PX_Object_CursorButtonCreate(px_memorypool *mp,PX_Object *Parent,px_i
 	pObject=PX_ObjectCreate(mp,Parent,(px_float)x,(px_float)y,0,(px_float)Width,(px_float)Height,0);
 	if (pObject==PX_NULL)
 	{
-		MP_Free(pObject->mp,pCb);
+		MP_Free(mp,pCb);
 		return PX_NULL;
 	}
 	pObject->pObject=pCb;

@@ -75,20 +75,22 @@ px_void PX_Object_ExplorerOnButtonGo(PX_Object *pObject,PX_Object_Event e,px_voi
 px_void PX_Object_ExplorerOnButtonOk(PX_Object *pObject,PX_Object_Event e,px_void *ptr)
 {
 	PX_Object_Explorer *pExp=PX_Object_GetExplorer((PX_Object *)ptr);
+	PX_ObjectExecuteEvent((PX_Object*)ptr, e);
+
 	PX_ObjectClearFocus((PX_Object *)ptr);
 	pExp->returnType=PX_OBJECT_EXPLORER_RETURN_CONFIRM;
 	((PX_Object*)ptr)->Visible = PX_FALSE;
-	PX_ObjectExecuteEvent((PX_Object *)ptr,e);
+	
 	
 
 }
 px_void PX_Object_ExplorerOnButtonCancel(PX_Object *pObject,PX_Object_Event e,px_void *ptr)
 {
 	PX_Object_Explorer *pExp=PX_Object_GetExplorer((PX_Object *)ptr);
+	PX_ObjectExecuteEvent((PX_Object*)ptr, PX_OBJECT_BUILD_EVENT(PX_OBJECT_EVENT_CANCEL));
 	PX_ObjectClearFocus((PX_Object *)ptr);
 	pExp->returnType=PX_OBJECT_EXPLORER_RETURN_CANCEL;
 	((PX_Object *)ptr)->Visible=PX_FALSE;
-	PX_ObjectExecuteEvent((PX_Object*)ptr, PX_OBJECT_BUILD_EVENT(PX_OBJECT_EVENT_CANCEL));
 }
 
 px_void PX_Object_ExplorerOnCursorDown(PX_Object *pObject,PX_Object_Event e,px_void *ptr)
