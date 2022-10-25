@@ -152,7 +152,7 @@ PX_Object * PX_Object_ImageCreate(px_memorypool *mp,PX_Object *Parent,px_int x,p
 	pObject->Enabled=PX_TRUE;
 	pObject->Visible=PX_TRUE;
 	pObject->Type=PX_OBJECT_TYPE_IMAGE;
-	pObject->ReceiveEvents=PX_FALSE;
+	pObject->ReceiveEvents=PX_TRUE;
 	pObject->Func_ObjectFree=PX_Object_ImageFree;
 	pObject->Func_ObjectRender=PX_Object_ImageRender;
 	pImage->pTexture=ptex;

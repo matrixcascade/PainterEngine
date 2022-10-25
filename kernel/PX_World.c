@@ -49,6 +49,52 @@ px_int PX_WorldGetCount(PX_World *World)
 	return World->pObjects.size;
 }
 
+px_int PX_WorldGetAliveCount(PX_World* World)
+{
+	px_int i;
+	px_int count=0;
+	for (i = 0; i < World->pObjects.size; i++)
+	{
+		if (PX_WorldGetWorldObject(World, i)->pObject && !PX_WorldGetWorldObject(World, i)->DeleteMark)
+			count++;
+	}
+	return count;
+}
+
+PX_WorldObject* PX_WorldGetWorldObject(PX_World* World, px_int index)
+{
+	PX_WorldObject* pwo;
+	if (index < 0)
+	{
+		PX_ASSERT();
+	}
+	if (index >= World->pObjects.size)
+	{
+		return PX_NULL;
+	}
+	pwo = PX_VECTORAT(PX_WorldObject, &World->pObjects, index);
+	return pwo;
+}
+
+PX_Object* PX_WorldGetObject(PX_World* World, px_int index)
+{
+	PX_WorldObject* pwo;
+	if (index<0)
+	{
+		PX_ASSERT();
+	}
+	if (index>= World->pObjects.size)
+	{
+		return PX_NULL;
+	}
+	pwo=PX_VECTORAT(PX_WorldObject, &World->pObjects, index);
+	if (pwo->DeleteMark)
+	{
+		return PX_NULL;
+	}
+	return pwo->pObject;
+}
+
 px_int PX_WorldAddObjectEx(PX_World *World,PX_Object *pObject)
 {
 	PX_WorldObject *pwo,wo;
@@ -269,7 +315,7 @@ px_void PX_WorldUpdate( PX_World *pworld,px_uint elapsed )
 							if (pimpactWo->DeleteMark != PX_TRUE)
 							{
 								e.Event = PX_OBJECT_EVENT_IMPACT;
-								e.Param_ptr[0] = pObj2;
+								PX_Object_Event_SetImpactTargetObject(&e, pObj2);
 								PX_ObjectPostEvent(pObj1, e);
 							}
 						}
@@ -509,6 +555,16 @@ px_void PX_WorldFree(PX_World *pw)
 			PX_ObjectDelete(pwo->pObject);
 		}
 	}
+	
+	for (i = 0; i < pw->pNewObjects.size; i++)
+	{
+		PX_Object *pObject = *PX_VECTORAT(PX_Object *, &pw->pObjects, i);
+		if (pObject)
+		{
+			PX_ObjectDelete(pObject);
+		}
+	}
+
 	PX_VectorFree(&pw->pObjects);
 	PX_VectorFree(&pw->pNewObjects);
 
@@ -531,7 +587,6 @@ px_void PX_WorldRemoveObject(PX_World *world,PX_Object *pObject)
 		if (pwo->pObject==pObject)
 		{
 			pwo->DeleteMark=PX_TRUE;
-
 			return;
 		}
 	}
@@ -601,4 +656,28 @@ _LIMIT px_int PX_WorldSearchRegion(PX_World *world,px_float x,px_float y,px_floa
 		}
 	}
 	return m;
+}
+
+_LIMIT px_int PX_WorldSearch(PX_World* pw, PX_Object* Object[], px_int MaxSearchCount, px_dword impact_object_type)
+{
+	px_int i;
+	px_int count = 0;
+	for (i = 0; i < pw->pObjects.size; i++)
+	{
+		PX_WorldObject *pwo = PX_VECTORAT(PX_WorldObject, &pw->pObjects, i);
+		if (pwo&&pwo->pObject&&!pwo->DeleteMark&&pwo->pObject->impact_object_type== impact_object_type)
+		{
+			if (MaxSearchCount)
+			{
+				Object[count] = pwo->pObject;
+				MaxSearchCount--;
+				count++;
+			}
+			else
+			{
+				break;
+			}
+		}
+	}
+	return count;
 }

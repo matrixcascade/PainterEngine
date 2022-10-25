@@ -5,24 +5,27 @@ static px_char *PX_Script_Keywords[]={"IF","ELSE","SWITCH","CASE","WHILE","FOR",
 
 px_void PX_ScriptTranslatorError(PX_ScriptInterpreter* analysis,px_char *info)
 {
-	px_lexer* lexer = &analysis->lexer;
-	PX_memset(analysis->PX_Script_InterpreterError, 0, sizeof(analysis->PX_Script_InterpreterError));
-	if (lexer->Sources)
+	if (analysis)
 	{
-		lexer->Sources[lexer->SourceOffset] = '\0';
-		analysis->PX_Script_InterpreterError[0] = '\0';
-		if (lexer->SourceOffset > 200)
+		px_lexer* lexer = &analysis->lexer;
+		PX_memset(analysis->PX_Script_InterpreterError, 0, sizeof(analysis->PX_Script_InterpreterError));
+		if (lexer->Sources)
 		{
-			PX_strcpy(analysis->PX_Script_InterpreterError, lexer->Sources + lexer->SourceOffset - 200, 200);
+			lexer->Sources[lexer->SourceOffset] = '\0';
+			analysis->PX_Script_InterpreterError[0] = '\0';
+			if (lexer->SourceOffset > 200)
+			{
+				PX_strcpy(analysis->PX_Script_InterpreterError, lexer->Sources + lexer->SourceOffset - 200, 200);
+			}
+			else
+			{
+				PX_strcpy(analysis->PX_Script_InterpreterError, lexer->Sources, 200);
+			}
 		}
-		else
-		{
-			PX_strcpy(analysis->PX_Script_InterpreterError, lexer->Sources, 200);
-		}
+		PX_strcat(analysis->PX_Script_InterpreterError, "\n");
+		PX_strcat(analysis->PX_Script_InterpreterError, info);
+		PX_strcat(analysis->PX_Script_InterpreterError, "\n");
 	}
-	PX_strcat(analysis->PX_Script_InterpreterError, "\n");
-	PX_strcat(analysis->PX_Script_InterpreterError, info);
-	PX_strcat(analysis->PX_Script_InterpreterError, "\n");
 }
 
 px_void PX_ScriptParserClearStack(PX_ScriptInterpreter *analysis)
@@ -3698,7 +3701,6 @@ static px_bool PX_ScriptParseLastInstr_ADR(PX_ScriptInterpreter *analysis,px_vec
 static px_bool PX_ScriptParseLastInstr_ADD(PX_ScriptInterpreter *analysis,px_vector *op,px_vector *tk,px_string *out)
 {
 	PX_SCRIPT_AST_OPERAND operand1,operand2,*pTop;
-	px_string fmrString;
 
 	if (tk->size<2)
 	{
@@ -3925,10 +3927,6 @@ static px_bool PX_ScriptParseLastInstr_ADD(PX_ScriptInterpreter *analysis,px_vec
 				{
 					if(!PX_ScriptParseAST_MapTokenToR2(analysis,operand2,out)) return PX_FALSE;
 					if(!PX_ScriptParseAST_MapTokenToR1(analysis,operand1,out)) return PX_FALSE;
-					PX_StringInitialize(analysis->mp,&fmrString);
-					PX_StringFormat1(&fmrString,"MUL R2,%1\n",PX_STRINGFORMAT_INT(operand1.pStruct->size));
-					PX_StringCat(out,fmrString.buffer);
-					PX_StringFree(&fmrString);
 					PX_StringCat(out,"ADD R1,R2\nPUSH R1\n");
 					pTop=PX_VECTORLAST(PX_SCRIPT_AST_OPERAND,tk);
 					pTop->operandType=PX_SCRIPT_AST_OPERAND_TYPE_INT_PTR_CONST;
@@ -9393,16 +9391,19 @@ px_bool PX_ScriptCompilerCompile(PX_SCRIPT_LIBRARY *lib,const px_char *name,px_s
 		}
 	}
 	
+	PX_memset(&analysis, 0, sizeof(analysis));
+
 	if (i==lib->codeLibraries.size)
 	{
 		PX_ScriptTranslatorError(&analysis,"Code of name was not existed");
 		return PX_FALSE;
 	}
 
+
 	if(!PX_ScriptParsePretreatment(&analysis, &codes,lib,name))
 		return PX_FALSE;
 
-	PX_memset(&analysis,0,sizeof(analysis));
+	
 
 	analysis.functionInside=PX_FALSE;
 	analysis.functionReturn=PX_FALSE;

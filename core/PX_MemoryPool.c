@@ -229,7 +229,7 @@ px_void * MP_Malloc(px_memorypool *MP, px_uint Size )
 			}
 			if(MP->DEBUG_allocdata[DEBUG_i].endAddr!=itNode->EndAddr) 
 			{
-					PX_ASSERT();
+					//PX_ASSERT();
 					return PX_NULL;
 			}
 			if(pAppend->append!=MP_APPENDDATA_MAGIC)
@@ -312,12 +312,10 @@ px_void * MP_Malloc(px_memorypool *MP, px_uint Size )
 	if (MP->ErrorCall_Ptr == PX_NULL)
 	{
 		PX_ERROR("MemoryPool Out Of Memory!");
-		PX_ASSERT();
 	}
 	else
 	{
-		MP->ErrorCall_Ptr(PX_MEMORYPOOL_ERROR_OUTOFMEMORY);
-		PX_ASSERT();
+		MP->ErrorCall_Ptr(MP->userptr,PX_MEMORYPOOL_ERROR_OUTOFMEMORY);
 	}
 	return PX_NULL;
 
@@ -373,12 +371,15 @@ px_void MP_Free(px_memorypool *MP, px_void *pAddress )
 	{
 		if(DEBUG_i==sizeof(MP->DEBUG_allocdata)/sizeof(MP->DEBUG_allocdata[0]))
 		{
-			if(MP->ErrorCall_Ptr==PX_NULL)
+			if (MP->ErrorCall_Ptr == PX_NULL)
+			{
 				PX_LOG("Invalid address free");
+				PX_ASSERT();
+			}
 			else
-				MP->ErrorCall_Ptr(PX_MEMORYPOOL_ERROR_INVALID_ADDRESS);
+				MP->ErrorCall_Ptr(MP->userptr,PX_MEMORYPOOL_ERROR_INVALID_ADDRESS);
 
-			PX_ASSERT();
+			
 			goto _END;
 		}
 	}
@@ -521,9 +522,10 @@ px_void MP_Release(px_memorypool *Node)
 	//free(G_MemoryPool.StartAddr);
 }
 
-px_void MP_ErrorCatch(px_memorypool *Pool,PX_MP_ErrorCall ErrorCall)
+px_void MP_ErrorCatch(px_memorypool *Pool,PX_MP_ErrorCall ErrorCall, px_void* ptr)
 {
 	Pool->ErrorCall_Ptr=ErrorCall;
+	Pool->userptr = ptr;
 }
 
 px_uint MP_Size(px_memorypool *Pool,px_void *pAddress)

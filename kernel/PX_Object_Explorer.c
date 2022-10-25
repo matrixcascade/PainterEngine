@@ -75,20 +75,22 @@ px_void PX_Object_ExplorerOnButtonGo(PX_Object *pObject,PX_Object_Event e,px_voi
 px_void PX_Object_ExplorerOnButtonOk(PX_Object *pObject,PX_Object_Event e,px_void *ptr)
 {
 	PX_Object_Explorer *pExp=PX_Object_GetExplorer((PX_Object *)ptr);
+	PX_ObjectExecuteEvent((PX_Object*)ptr, e);
+
 	PX_ObjectClearFocus((PX_Object *)ptr);
 	pExp->returnType=PX_OBJECT_EXPLORER_RETURN_CONFIRM;
 	((PX_Object*)ptr)->Visible = PX_FALSE;
-	PX_ObjectExecuteEvent((PX_Object *)ptr,e);
+	
 	
 
 }
 px_void PX_Object_ExplorerOnButtonCancel(PX_Object *pObject,PX_Object_Event e,px_void *ptr)
 {
 	PX_Object_Explorer *pExp=PX_Object_GetExplorer((PX_Object *)ptr);
+	PX_ObjectExecuteEvent((PX_Object*)ptr, PX_OBJECT_BUILD_EVENT(PX_OBJECT_EVENT_CANCEL));
 	PX_ObjectClearFocus((PX_Object *)ptr);
 	pExp->returnType=PX_OBJECT_EXPLORER_RETURN_CANCEL;
 	((PX_Object *)ptr)->Visible=PX_FALSE;
-	PX_ObjectExecuteEvent((PX_Object*)ptr, PX_OBJECT_BUILD_EVENT(PX_OBJECT_EVENT_CANCEL));
 }
 
 px_void PX_Object_ExplorerOnCursorDown(PX_Object *pObject,PX_Object_Event e,px_void *ptr)
@@ -379,7 +381,7 @@ px_void PX_Object_ExplorerRender(px_surface *psurface, PX_Object *pObject,px_uin
 	} while (0);
 
 
-	PX_GeoDrawLine(psurface,(px_int)objx,PX_OBJECT_EXPOLRER_MENU_HEIGHT,(px_int)(objx+objWidth),PX_OBJECT_EXPOLRER_MENU_HEIGHT,1,pExp->fontcolor);
+	PX_GeoDrawLine(psurface,(px_int)objx, (px_int)(objy + PX_OBJECT_EXPOLRER_MENU_HEIGHT),(px_int)(objx+objWidth), (px_int)(objy + PX_OBJECT_EXPOLRER_MENU_HEIGHT),1,pExp->fontcolor);
 	PX_GeoDrawLine(psurface,(px_int)objx,(px_int)(objy+objHeight-PX_OBJECT_EXPOLRER_MENU_HEIGHT),(px_int)(objx+objWidth),(px_int)(objy+objHeight-PX_OBJECT_EXPOLRER_MENU_HEIGHT),1,pExp->fontcolor);
 
 	pExp->btn_Ok->x=objWidth-8-PX_OBJECT_EXPOLRER_BUTTON_WIDTH-8-PX_OBJECT_EXPOLRER_BUTTON_WIDTH;
@@ -392,8 +394,8 @@ px_void PX_Object_ExplorerRender(px_surface *psurface, PX_Object *pObject,px_uin
 	PX_Object_PushButtonSetCursorColor(pExp->btn_Ok,pExp->cursorcolor);
 	PX_Object_PushButtonSetPushColor(pExp->btn_Ok,pExp->pushcolor);
 
-	pExp->btn_Cancel->x=objx+objWidth-8-PX_OBJECT_EXPOLRER_BUTTON_WIDTH;
-	pExp->btn_Cancel->y=objHeight-40;
+	pExp->btn_Cancel->x = pExp->btn_Ok->x + pExp->btn_Ok->Width + 5;
+	pExp->btn_Cancel->y= pExp->btn_Ok->y;
 	pExp->btn_Cancel->Width=PX_OBJECT_EXPOLRER_BUTTON_WIDTH;
 	pExp->btn_Cancel->Height=32;
 	PX_Object_PushButtonSetBackgroundColor(pExp->btn_Cancel,pExp->backgroundcolor);

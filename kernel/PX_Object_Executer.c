@@ -197,15 +197,15 @@ static px_bool PX_Object_ExecuterRunScript(PX_Object *pObject,const px_char *psh
 	PX_CompilerFree(&compiler);
 	PX_memset(&compiler, 0, sizeof(compiler));
 	
-	PX_VMRegistryHostFunction(&pExecute->vm,"print",PX_ExecuterVM_Print, pObject);//Print
-	PX_VMRegistryHostFunction(&pExecute->vm,"gets",PX_ExecuterVM_Gets, pObject);//Gets
-	PX_VMRegistryHostFunction(&pExecute->vm,"clear",PX_ExecuterVM_Clear, pObject);//Clear
-	PX_VMRegistryHostFunction(&pExecute->vm,"sleep",PX_ExecuterVM_Sleep, pObject);//Sleep
-	PX_VMRegistryHostFunction(&pExecute->vm,"rand",PX_ExecuterVM_Rand, pObject);//Rand
-	PX_VMRegistryHostFunction(&pExecute->vm,"sin",PX_ExecuterVM_Sin, pObject);//Sin
-	PX_VMRegistryHostFunction(&pExecute->vm,"cos",PX_ExecuterVM_Cos, pObject);//Cos
-	PX_VMRegistryHostFunction(&pExecute->vm,"lastprint",PX_ExecuterVM_LastPrint, pObject);//lastprint
-	PX_VMRegistryHostFunction(&pExecute->vm,"createthread",PX_ExecuterVM_CreateThread, pObject);//createthread
+	PX_VMRegistHostFunction(&pExecute->vm,"print",PX_ExecuterVM_Print, pObject);//Print
+	PX_VMRegistHostFunction(&pExecute->vm,"gets",PX_ExecuterVM_Gets, pObject);//Gets
+	PX_VMRegistHostFunction(&pExecute->vm,"clear",PX_ExecuterVM_Clear, pObject);//Clear
+	PX_VMRegistHostFunction(&pExecute->vm,"sleep",PX_ExecuterVM_Sleep, pObject);//Sleep
+	PX_VMRegistHostFunction(&pExecute->vm,"rand",PX_ExecuterVM_Rand, pObject);//Rand
+	PX_VMRegistHostFunction(&pExecute->vm,"sin",PX_ExecuterVM_Sin, pObject);//Sin
+	PX_VMRegistHostFunction(&pExecute->vm,"cos",PX_ExecuterVM_Cos, pObject);//Cos
+	PX_VMRegistHostFunction(&pExecute->vm,"lastprint",PX_ExecuterVM_LastPrint, pObject);//lastprint
+	PX_VMRegistHostFunction(&pExecute->vm,"createthread",PX_ExecuterVM_CreateThread, pObject);//createthread
 
 
 	if(!PX_VMRunFunction(&pExecute->vm,0,"_BOOT",PX_NULL,0))
@@ -268,7 +268,7 @@ px_bool PX_ExecuterRegistryHostFunction(PX_Object *pObject,const px_char Name[],
 	else
 	{
 		PX_Object_Executer* pExecuter=PX_ObjectGetDesc(PX_Object_Executer, pObject);
-		return PX_VMRegistryHostFunction(&pExecuter->vm, Name, function, userptr);
+		return PX_VMRegistHostFunction(&pExecuter->vm, Name, function, userptr);
 	}
 }
 

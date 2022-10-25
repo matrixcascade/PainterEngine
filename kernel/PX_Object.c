@@ -259,6 +259,16 @@ px_int PX_Object_Event_GetIndex(PX_Object_Event e)
 	return e.Param_int[0];
 }
 
+px_void PX_Object_Event_SetImpactTargetObject(PX_Object_Event* e, PX_Object* pObject)
+{
+	e->Param_ptr[0] = (px_void *)pObject;
+}
+
+PX_Object* PX_Object_Event_GetImpactTargetObject(PX_Object_Event e)
+{
+	return (PX_Object *)e.Param_ptr[0];
+}
+
 px_int PX_Object_Event_GetInt(PX_Object_Event e)
 {
 	return e.Param_int[0];

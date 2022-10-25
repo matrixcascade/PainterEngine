@@ -106,7 +106,7 @@ px_bool PX_VMIsRuning(PX_VM* Ins);
 px_bool PX_VMInitialize(PX_VM* Ins, px_memorypool* mp, px_byte* code, px_int size);
 px_bool PX_VMLocalAlloc(PX_VM *Ins,px_int size,PX_VM_MEMORY_PTR *mem_ptr);
 px_bool PX_VMLocalFree(PX_VM *Ins,PX_VM_MEMORY_PTR *mem_ptr);
-px_bool PX_VMRegistryHostFunction(PX_VM *Ins,const px_char *name,PX_VM_Function_Modules funcModules,px_void *userptr);
+px_bool PX_VMRegistHostFunction(PX_VM *Ins,const px_char *name,PX_VM_Function_Modules funcModules,px_void *userptr);
 px_bool PX_VMFree(PX_VM *Ins);
 
 
@@ -124,6 +124,8 @@ px_void  PX_VM_RET_int(PX_VM* Ins, px_int _int);
 px_void  PX_VM_RET_float(PX_VM* Ins, px_float _float);
 px_void  PX_VM_RET_memory(PX_VM* Ins, const px_byte* data, px_int size);
 px_void  PX_VM_PUSH(PX_VM* Ins, PX_VM_VARIABLE val);
+px_void  PX_VM_Sleep(PX_VM* Ins, px_uint sleep);
+px_void  PX_VM_ThreadSleep(PX_VM* Ins,px_int threadid, px_uint sleep);
 PX_VM_VARIABLE PX_VM_Variable_int(px_int _int);
 PX_VM_VARIABLE PX_VM_Variable_float(px_float _float);
 PX_VM_VARIABLE PX_VM_Variable_string(px_string _ref_string);

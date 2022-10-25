@@ -1248,10 +1248,16 @@ px_int PX_sprintf8(px_char *_out_str,px_int str_size,const px_char fmt[], px_str
 			switch (pstringfmt.type)
 			{
 			case PX_STRINGFORMAT_TYPE_INT:
-				length+=PX_strlen(PX_itos(pstringfmt._int,10).data);
+			{
+				PX_RETURN_STRING s = PX_itos(pstringfmt._int, 10);
+				length += PX_strlen(s.data);
+			}
 				break;
 			case PX_STRINGFORMAT_TYPE_FLOAT:
-				length+=PX_strlen(PX_ftos(pstringfmt._float,precision).data);
+			{
+				PX_RETURN_STRING s = PX_ftos(pstringfmt._float, precision);
+				length += PX_strlen(s.data);
+			}
 				break;
 			case PX_STRINGFORMAT_TYPE_STRING:
 				length+=PX_strlen(pstringfmt._pstring);
@@ -4053,7 +4059,9 @@ px_void PX_srand(px_uint64 seed)
 
 px_uint32 PX_rand()
 {
-	return  ((px_uint32)(px_srand_seed = (px_srand_seed*314159269+453806245)%(1<<31)))&PX_RAND_MAX;
+	
+    px_srand_seed = (px_srand_seed*314159269+453806245)%(2147483648);
+	return (px_uint32)(px_srand_seed&PX_RAND_MAX);
 }
 
 
@@ -4064,7 +4072,7 @@ px_double PX_randRange(px_double min,px_double max)
 
 px_uint32 PX_randEx(px_uint64 seed)
 {
-	return  (px_uint32)(seed = (seed*764261123)%(0xefffffff));
+	return  (px_uint32)(seed = ((seed * 314159269 + 453806245) % (2147483648)));
 }
 
 

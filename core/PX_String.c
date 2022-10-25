@@ -208,7 +208,9 @@ px_bool PX_StringCat(px_string *str,const px_char *str2)
 {
 	px_uchar shl=0;
 	px_char *old=str->buffer;
-	px_int length=PX_strlen(str->buffer)+PX_strlen(str2);
+	px_int length;
+
+	length = PX_strlen(str->buffer) + PX_strlen(str2);
 	if (length<str->bufferlen)
 	{
 		PX_strcat(str->buffer,str2);

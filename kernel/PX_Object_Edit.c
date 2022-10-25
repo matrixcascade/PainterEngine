@@ -221,6 +221,7 @@ PX_Object* PX_Object_EditCreate(px_memorypool *mp, PX_Object *Parent,px_int x,px
 {
 	PX_Object *pObject;
 	PX_Object_Edit *pEdit=(PX_Object_Edit *)MP_Malloc(mp,sizeof(PX_Object_Edit));
+	PX_memset(pEdit, 0, sizeof(PX_Object_Edit));
 	if (pEdit==PX_NULL)
 	{
 		return PX_NULL;

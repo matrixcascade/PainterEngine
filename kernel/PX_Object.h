@@ -257,6 +257,9 @@ px_float PX_Object_Event_GetWidth(PX_Object_Event e);
 px_float PX_Object_Event_GetHeight(PX_Object_Event e);
 px_int PX_Object_Event_GetIndex(PX_Object_Event e);
 
+px_void PX_Object_Event_SetImpactTargetObject(PX_Object_Event* e,PX_Object* pObject);
+PX_Object* PX_Object_Event_GetImpactTargetObject(PX_Object_Event e);
+
 px_int PX_Object_Event_GetInt(PX_Object_Event e);
 px_void PX_Object_Event_SetWidth(PX_Object_Event* e, px_float w);
 px_void PX_Object_Event_SetHeight(PX_Object_Event *e,px_float h);

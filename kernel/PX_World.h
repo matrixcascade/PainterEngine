@@ -46,11 +46,15 @@ typedef struct
 
 px_bool			PX_WorldInitialize(px_memorypool *mp,PX_World *World,px_int world_width,px_int world_height,px_int surface_width,px_int surface_height,px_dword calcsize);
 px_int			PX_WorldGetCount(PX_World *World);
+px_int			PX_WorldGetAliveCount(PX_World* World);
+PX_WorldObject* PX_WorldGetWorldObject(PX_World* World, px_int index);
+PX_Object*		PX_WorldGetObject(PX_World* World, px_int index);
 px_void         PX_WorldRemoveObject(PX_World *world,PX_Object *pObject);
 px_void			PX_WorldRemoveObjectByIndex(PX_World *world,px_int i_index);
 
 //LIMIT-Only used to ObjectUpdate Function 
 _LIMIT px_int	PX_WorldSearchRegion(PX_World *world,px_float centerX,px_float centerY,px_float raduis,PX_Object *Object[],px_int MaxSearchCount,px_dword impact_test_type);
+_LIMIT px_int	PX_WorldSearch(PX_World* world, PX_Object* Object[], px_int MaxSearchCount, px_dword impact_object_type);
 px_bool			PX_WorldAddObject(PX_World *World,PX_Object *pObject);
 px_void			PX_WorldUpdate(PX_World *World,px_uint elapsed );
 px_void			PX_WorldUpdateOffset(PX_World *pw);
