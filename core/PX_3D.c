@@ -199,7 +199,7 @@ px_void PX_3D_CameraBuildUVNMatrix(PX_3D_Camera *camera)
 	n=PX_Point4DUnit(n);
 	v=PX_POINT4D(0,1,0);
 	u=PX_Point4DCross(v,n);
-
+	v = PX_Point4DCross(n, u);
 	PX_MatrixZero(&mt_uvn);
 	mt_uvn._11=u.x;
 	mt_uvn._12=v.x;
