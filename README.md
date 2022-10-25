@@ -18,7 +18,7 @@
 </ul>
 </p>
 <br/><br/>
-更多内容请访问 PainterEngine.com
+更多内容请访问 PainterEngine.cn(.com域名备案中)
 <br/>
-社区交流请访问 faq.PainterEngine.com
+社区交流请访问 faq.PainterEngine.com(.com域名备案中,社区待备案完成后开放)
 <br/>
