@@ -26,9 +26,39 @@ const SDL_VideoInfo *info;
 px_dword lastupdatetime;
 px_int lastcursorx=-1,lastcursory=-1;
 px_bool mouseldown=PX_FALSE;
+px_byte cache_load_file[1024*1024*8];
+px_int  load_file_size=0;
 ///////////////////////////////////////////////
 
+EMSCRIPTEN_KEEPALIVE int load_file(uint8_t *buffer, size_t size) 
+{
+  if (size<=sizeof(cache_load_file))
+  {
+	PX_memcpy(cache_load_file,buffer,size);
+	load_file_size=size;
+  }
+  return 1;
+}
 
+px_void px_getfile()
+{
+EM_ASM(
+  var file_selector = document.createElement('input');
+  file_selector.setAttribute('type', 'file');
+  file_selector.setAttribute('onchange','open_file(event)');
+  file_selector.click();
+);
+}
+
+px_byte *px_getfiledata()
+{
+	return cache_load_file;
+}
+
+px_int px_getfilesize()
+{
+	return load_file_size;
+}
 
 
 void mainloop(void *ptr)
@@ -152,6 +182,16 @@ void mainloop(void *ptr)
 			PX_ApplicationPostEvent(&App,e);
 		}
 		if (event.type == SDL_QUIT) {};
+
+		if (load_file_size)
+		{
+			PX_Object_Event e={0};
+			e.Event=PX_OBJECT_EVENT_DRAGFILE;
+			PX_ApplicationPostEvent(&App,e);
+			load_file_size=0;
+		}
+		
+
 	}
 
 }

@@ -56,9 +56,9 @@ px_bool PX_JsonBuild_Value(PX_Json_Value *pValue,px_string *_out,px_bool bArrayV
 px_bool PX_JsonBuild(PX_Json *pjson,px_string *_out);
 px_void PX_JsonDelete(PX_Json *pjson,const px_char payload[]);
 px_void PX_JsonFree(PX_Json *pjson);
+px_void PX_JsonClear(PX_Json* pjson);
 
-
-px_bool PX_JsonCreateObjectValue(px_memorypool *mp,PX_Json_Value *pValue,const px_char name[]);
+px_bool PX_JsonCreateObjectValue(px_memorypool* mp, PX_Json_Value* pValue, const px_char name[]);
 px_bool PX_JsonCreateStringValue(px_memorypool *mp,PX_Json_Value *pValue,const px_char name[],const px_char text[]);
 px_bool PX_JsonCreateNumberValue(px_memorypool *mp,PX_Json_Value *pValue,const px_char name[],px_double value);
 px_bool PX_JsonCreateBooleanValue(px_memorypool *mp,PX_Json_Value *pValue,const px_char name[],px_bool b);

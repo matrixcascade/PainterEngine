@@ -63,7 +63,7 @@ px_void PX_Object_MessageBoxClose(PX_Object *pObject)
 
 static px_void PX_Object_MessageBoxRender(px_surface *pSurface,PX_Object *pObject,px_dword elapsed)
 {
-
+	px_float x, y, w, h;
 	px_color backGroundColor,frontColor;
 	PX_Object_MessageBox *pm=PX_Object_GetMessageBox(pObject);
 	if (elapsed>2000)
@@ -76,12 +76,15 @@ static px_void PX_Object_MessageBoxRender(px_surface *pSurface,PX_Object *pObjec
 		PX_SurfaceClear(pSurface,0,0,pSurface->width-1,pSurface->height-1,pm->fillbackgroundcolor);
 	}
 
+	PX_OBJECT_INHERIT_CODE(pm->btn_Ok, x, y, w, h);
 
-	pm->btn_Ok->x=pSurface->width/2+200.0f;
-	pm->btn_Ok->y=pSurface->height/2+150.0f;
+	pm->btn_Ok->x=pSurface->width/2+200.0f-(x- pm->btn_Ok->x);
+	pm->btn_Ok->y=pSurface->height/2+150.0f-(y - pm->btn_Ok->y);
 
-	pm->btn_Cancel->x=pSurface->width/2+300.0f;
-	pm->btn_Cancel->y=pSurface->height/2+150.0f;
+	PX_OBJECT_INHERIT_CODE(pm->btn_Ok, x, y, w, h);
+	pm->btn_Cancel->x=pSurface->width/2+300.0f - (x - pm->btn_Ok->x);
+	pm->btn_Cancel->y=pSurface->height/2+150.0f - (y - pm->btn_Ok->y);
+
 
 	if (pm->btn_Ok->x > pSurface->width - pm->btn_Ok->Width - 100)
 		pm->btn_Ok->x = pSurface->width - pm->btn_Ok->Width - 100;

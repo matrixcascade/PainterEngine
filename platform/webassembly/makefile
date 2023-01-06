@@ -1,7 +1,7 @@
 #emscripten makefile
 #####################################################
 target :=PainterEngine.html
-project_path := ../../../project
+project_path := ../../../PainterEngine_WebClient
 painterengine_path := ../..
 #####################################################
 
@@ -29,6 +29,10 @@ all:$(project_build_o)  $(painterengine_build_painterengine_o)
 	-o $(target) \
 	-I "$(painterengine_path)" \
 	-I "$(project_path)" \
+	-lwebsocket.js \
+	-s EXPORTED_RUNTIME_METHODS="['cwrap','ccall']" \
+	-s WEBSOCKET_SUBPROTOCOL='binary' \
+	-s SOCKET_DEBUG=1 \
 	-I "$(painterengine_path)/platform/webassembly" \
 	--preload-file assets
 	emrun --no_browser --port 8080 PainterEngine.html

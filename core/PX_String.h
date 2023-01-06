@@ -20,7 +20,9 @@ px_int PX_StringToInteger(px_string* str);
 px_float PX_StringToFloat(px_string *str);
 px_void PX_StringTrim(px_string *str);
 px_bool PX_StringCat(px_string *str,const px_char *str2);
-px_void PX_StringClear(px_string *str);
+px_char PX_StringLastChar(px_string* str);
+
+px_void PX_StringClear(px_string* str);
 px_bool PX_StringCatChar(px_string *str,px_char ch);
 px_int  PX_StringLen(px_string *str);
 px_void PX_StringFree(px_string *str);
@@ -30,6 +32,7 @@ px_bool PX_StringRemoveChar(px_string *str,px_int index);
 px_void PX_StringReplaceRange(px_string *str,px_int startindex,px_int endindex,px_char *replaceto);
 px_void PX_StringTrimLeft(px_string *str,px_int leftCount);
 px_void PX_StringTrimRight(px_string *str,px_int RightCount);
+px_int PX_StringFind(px_string* str, const px_char find[]);
 
 px_bool PX_StringIsNumeric(px_string *str);
 px_bool PX_StringIsFloat(px_string *str);

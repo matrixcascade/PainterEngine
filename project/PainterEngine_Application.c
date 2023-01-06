@@ -23,5 +23,7 @@ px_void PX_ApplicationRender(PX_Application *pApp,px_dword elapsed)
 px_void PX_ApplicationPostEvent(PX_Application *pApp,PX_Object_Event e)
 {
 	PX_ApplicationEventDefault(&pApp->runtime, e);
+
+	
 }
 

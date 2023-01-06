@@ -62,7 +62,11 @@ px_int PX_WebSocketRead(PX_WebSocket* pInstance, px_byte* data, px_int size)
 				px_char payload[128] = { 0 };
 				if (PX_HttpGetContent((const px_char*)pInstance->cache.buffer,"Sec-WebSocket-Key",payload,sizeof(payload)))
 				{
-					px_char response[280] = "HTTP/1.1 101 Switching Protocols\r\nConnection:Upgrade\r\nServer : PainterEngine websocket server\r\nUpgrade : WebSocket\r\nAccess - Control - Allow - Credentials : true\r\nAccess - Control - Allow - Headers : content - type\r\nSec-WebSocket-Accept:";
+					px_char response[280] = "HTTP/1.1 101 Switching Protocols\r\nConnection:Upgrade\r\n\
+Upgrade : websocket\r\n\
+Access - Control - Allow - Credentials : true\r\nAccess - Control - Allow - Headers : content - type\r\n\
+Sec-WebSocket-Protocol : binary\r\n\
+Sec-WebSocket-Accept:";
 					PX_SHA1_HASH hash;
 					PX_strcat_s(payload, sizeof(payload),"258EAFA5-E914-47DA-95CA-C5AB0DC85B11");
 					PX_Sha1Calculate(payload, PX_strlen(payload), &hash);
@@ -169,7 +173,10 @@ px_int PX_WebSocketRead(PX_WebSocket* pInstance, px_byte* data, px_int size)
 						break;
 					case 9:
 						pheader->opcode = 10;
-						PX_LinkerWrite(pInstance->plinker, pheader, sizeof(PX_WebSocketMessageHeader));
+						if (PX_LinkerWrite(pInstance->plinker, pheader, sizeof(PX_WebSocketMessageHeader))<=0)
+						{
+							pInstance->state = PX_WEBSOCKET_STATE_CLOSE;
+						}
 						break;
 					case 10:
 						break;
@@ -204,6 +211,10 @@ px_bool PX_WebSocketConnet(PX_WebSocket* pInstance)
 			pInstance->state = PX_WEBSOCKET_STATE_OPEN;
 			pInstance->isServer = PX_FALSE;
 			return PX_TRUE;
+		}
+		else
+		{
+			pInstance->state = PX_WEBSOCKET_STATE_CLOSE;
 		}
 	}
 	return PX_FALSE;
@@ -251,16 +262,28 @@ px_bool PX_WebSocketClientWrite(PX_WebSocket* pInstance,const px_byte* data, px_
 		header.mask = 1;
 		header.payloadTrueSize = PX_htonl(size);
 		
-		PX_LinkerWrite(pInstance->plinker, &header, sizeof(header));
+		if (PX_LinkerWrite(pInstance->plinker, &header, sizeof(header)) <= 0)
+		{
+			pInstance->state = PX_WEBSOCKET_STATE_CLOSE;
+			return PX_FALSE;
+		}
 		for (i = 0; i < size; i++)
 		{
 			buffer[i % sizeof(buffer)] = data[i] ^ 0;
 			if (i && (i % sizeof(buffer) == 0))
 			{
-				PX_LinkerWrite(pInstance->plinker, buffer, sizeof(buffer));
+				if (PX_LinkerWrite(pInstance->plinker, buffer, sizeof(buffer)) <= 0)
+				{
+					pInstance->state = PX_WEBSOCKET_STATE_CLOSE;
+					return PX_FALSE;
+				}
 			}
 		}
-		PX_LinkerWrite(pInstance->plinker, buffer, size % sizeof(buffer));
+		if (PX_LinkerWrite(pInstance->plinker, buffer, size % sizeof(buffer)) <= 0)
+		{
+			pInstance->state = PX_WEBSOCKET_STATE_CLOSE;
+			return PX_FALSE;
+		}
 
 	}
 	else if (size >126)
@@ -284,16 +307,28 @@ px_bool PX_WebSocketClientWrite(PX_WebSocket* pInstance,const px_byte* data, px_
 		header.payloadLength = 126;
 		header.payloadTrueSize = PX_htons(size);
 		header.mask = 1;
-		PX_LinkerWrite(pInstance->plinker, &header, sizeof(header));
+		if (PX_LinkerWrite(pInstance->plinker, &header, sizeof(header)) <= 0)
+		{
+			pInstance->state = PX_WEBSOCKET_STATE_CLOSE;
+			return PX_FALSE;
+		}
 		for (i=0;i<size;i++)
 		{
 			buffer[i % sizeof(buffer)] = data[i] ^ 0;
 			if (i&&(i% sizeof(buffer)==0))
 			{
-				PX_LinkerWrite(pInstance->plinker, buffer, sizeof(buffer));
+				if (PX_LinkerWrite(pInstance->plinker, buffer, sizeof(buffer)) <= 0)
+				{
+					pInstance->state = PX_WEBSOCKET_STATE_CLOSE;
+					return PX_FALSE;
+				}
 			}
 		}
-		PX_LinkerWrite(pInstance->plinker, buffer, size% sizeof(buffer));
+		if (PX_LinkerWrite(pInstance->plinker, buffer, size % sizeof(buffer)) <= 0)
+		{
+			pInstance->state = PX_WEBSOCKET_STATE_CLOSE;
+			return PX_FALSE;
+		}
 
 	}
 	else
@@ -316,16 +351,28 @@ px_bool PX_WebSocketClientWrite(PX_WebSocket* pInstance,const px_byte* data, px_
 		header.payloadLength = size;
 		header.mask = 1;
 
-		PX_LinkerWrite(pInstance->plinker, &header, sizeof(header));
+		if (PX_LinkerWrite(pInstance->plinker, &header, sizeof(header)) <= 0)
+		{
+			pInstance->state = PX_WEBSOCKET_STATE_CLOSE;
+			return PX_FALSE;
+		}
 		for (i = 0; i < size; i++)
 		{
 			buffer[i % sizeof(buffer)] = data[i] ^ 0;
 			if (i && (i % sizeof(buffer) == 0))
 			{
-				PX_LinkerWrite(pInstance->plinker, buffer, sizeof(buffer));
+				if (PX_LinkerWrite(pInstance->plinker, buffer, sizeof(buffer)) <= 0)
+				{
+					pInstance->state = PX_WEBSOCKET_STATE_CLOSE;
+					return PX_FALSE;
+				}
 			}
 		}
-		PX_LinkerWrite(pInstance->plinker, buffer, size % sizeof(buffer));
+		if (PX_LinkerWrite(pInstance->plinker, buffer, size % sizeof(buffer)) <= 0)
+		{
+			pInstance->state = PX_WEBSOCKET_STATE_CLOSE;
+			return PX_FALSE;
+		}
 
 	}
 	return PX_TRUE;
@@ -356,8 +403,16 @@ px_bool PX_WebSocketServerWrite(PX_WebSocket* pInstance, const px_byte* data, px
 		header.payloadLength = 127;
 		header.payloadTrueSize = PX_htonl(size);
 
-		PX_LinkerWrite(pInstance->plinker, &header, sizeof(header));
-		PX_LinkerWrite(pInstance->plinker, (px_void *)data, size);
+		if (PX_LinkerWrite(pInstance->plinker, &header, sizeof(header)) <= 0)
+		{
+			pInstance->state = PX_WEBSOCKET_STATE_CLOSE;
+			return PX_FALSE;
+		}
+		if (PX_LinkerWrite(pInstance->plinker, (px_void *)data, size) <= 0)
+		{
+			pInstance->state = PX_WEBSOCKET_STATE_CLOSE;
+			return PX_FALSE;
+		}
 
 	}
 	else if (size > 126)
@@ -378,8 +433,16 @@ px_bool PX_WebSocketServerWrite(PX_WebSocket* pInstance, const px_byte* data, px
 		header.opcode = 2;
 		header.payloadLength = 126;
 		header.payloadTrueSize = PX_htons(size);
-		PX_LinkerWrite(pInstance->plinker, &header, sizeof(header));
-		PX_LinkerWrite(pInstance->plinker, (px_void*)data, size);
+		if (PX_LinkerWrite(pInstance->plinker, &header, sizeof(header)) <= 0)
+		{
+			pInstance->state = PX_WEBSOCKET_STATE_CLOSE;
+			return PX_FALSE;
+		}
+		if (PX_LinkerWrite(pInstance->plinker, (px_void*)data, size) <= 0)
+		{
+			pInstance->state = PX_WEBSOCKET_STATE_CLOSE;
+			return PX_FALSE;
+		}
 
 	}
 	else
@@ -398,8 +461,16 @@ px_bool PX_WebSocketServerWrite(PX_WebSocket* pInstance, const px_byte* data, px
 		header.fin = 1;
 		header.opcode = 2;
 		header.payloadLength = size;
-		PX_LinkerWrite(pInstance->plinker, &header, sizeof(header));
-		PX_LinkerWrite(pInstance->plinker, (px_void*)data, size);
+		if (PX_LinkerWrite(pInstance->plinker, &header, sizeof(header)) <= 0)
+		{
+			pInstance->state = PX_WEBSOCKET_STATE_CLOSE;
+			return PX_FALSE;
+		}
+		if (PX_LinkerWrite(pInstance->plinker, (px_void*)data, size) <= 0)
+		{
+			pInstance->state = PX_WEBSOCKET_STATE_CLOSE;
+			return PX_FALSE;
+		}
 
 	}
 	return PX_TRUE;

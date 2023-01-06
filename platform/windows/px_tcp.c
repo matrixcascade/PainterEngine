@@ -19,23 +19,28 @@ int PX_TCPInitialize(PX_TCP *tcp,PX_TCP_IP_TYPE type)
 	int nRecvBuf=1024*1024*2;
 	int nSendBuf=1024*1024*2;
 	int optval=TRUE;
+	static int init = 0;
 
 	tcp->type=type;
 
-	wVersionRequested = MAKEWORD( 1, 1 );
-	err = WSAStartup( wVersionRequested, &wsaData );
-	if ( err != 0 ) {
+	if (init==0)
+	{
+		wVersionRequested = MAKEWORD(1, 1);
+		err = WSAStartup(wVersionRequested, &wsaData);
+		if (err != 0) {
 
-		return 0;
-	}
+			return 0;
+		}
 
-	if ( LOBYTE( wsaData.wVersion ) != 1 ||
-		HIBYTE( wsaData.wVersion ) != 1 ) {
+		if (LOBYTE(wsaData.wVersion) != 1 ||
+			HIBYTE(wsaData.wVersion) != 1) {
 			WSACleanup();
 			return 0;
+		}
+		init = 1;
 	}
+	
 	//Initialize socket
-
 	if ((tcp->socket=(unsigned int)socket(AF_INET,SOCK_STREAM,IPPROTO_TCP))==INVALID_SOCKET)
 	{
 		return 0;
@@ -112,14 +117,17 @@ int PX_TCPReceived(PX_TCP *tcp,void *buffer,int buffersize,int timeout)
 	case PX_TCP_IP_TYPE_IPV4:
 		{
 			int SockAddrSize=sizeof(SOCKADDR);
-			if((ReturnSize=recv(tcp->socket,(char *)buffer,buffersize,0))!=SOCKET_ERROR)
+			if((ReturnSize=recv(tcp->socket,(char *)buffer,buffersize,0))>0)
 			{
 				return (int)ReturnSize;
 			}
 			else
 			{
-				int error=WSAGetLastError();
-				return 0;
+				int error = WSAGetLastError();
+				if (error == 10060)
+					return 0;
+				else
+					return -1;
 			}
 		}
 		break;
@@ -148,11 +156,13 @@ int PX_TCPSocketReceived(unsigned int socket, void* buffer, int buffersize, int 
 
 	
 	ReturnSize= recv(socket, (char*)buffer, buffersize, 0);
-	if (ReturnSize==-1)
+	if (ReturnSize<=0)
 	{
 		int error = WSAGetLastError();
 		if (error == 10060)
 			return 0;
+		else
+			return -1;
 	}
 	return ReturnSize;
 }
@@ -182,6 +192,8 @@ int PX_TCPAccept(PX_TCP *tcp,unsigned int *socket,PX_TCP_ADDR *fromAddr)
 	int len=sizeof(SOCKADDR);
 	*socket=(unsigned int)accept((SOCKET)(tcp->socket),(LPSOCKADDR)&sockaddr_in,&len);
 	lasterror=WSAGetLastError();
+	fromAddr->ipv4 = sockaddr_in.sin_addr.S_un.S_addr;
+	fromAddr->port = sockaddr_in.sin_port;
 	return *socket!=INVALID_SOCKET;
 }
 

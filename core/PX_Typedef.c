@@ -1248,10 +1248,16 @@ px_int PX_sprintf8(px_char *_out_str,px_int str_size,const px_char fmt[], px_str
 			switch (pstringfmt.type)
 			{
 			case PX_STRINGFORMAT_TYPE_INT:
-				length+=PX_strlen(PX_itos(pstringfmt._int,10).data);
+			{
+				PX_RETURN_STRING s = PX_itos(pstringfmt._int, 10);
+				length += PX_strlen(s.data);
+			}
 				break;
 			case PX_STRINGFORMAT_TYPE_FLOAT:
-				length+=PX_strlen(PX_ftos(pstringfmt._float,precision).data);
+			{
+				PX_RETURN_STRING s = PX_ftos(pstringfmt._float, precision);
+				length += PX_strlen(s.data);
+			}
 				break;
 			case PX_STRINGFORMAT_TYPE_STRING:
 				length+=PX_strlen(pstringfmt._pstring);
@@ -1892,6 +1898,87 @@ px_color PX_ColorHSLToRGB(px_color_hsl color_hsl)
 
 	return PX_COLOR((px_uchar)(color_hsl.a*255),(px_uchar)(r*255),(px_uchar)(g*255),(px_uchar)(b*255));
 }
+
+px_color_hsv PX_ColorRGBToHSV( px_color rgb)
+{
+	px_color_hsv hsv;
+	px_float h, s, v;
+	px_float max = 0, min = 0;
+	px_float R, G, B;
+
+	R = rgb._argb.r / 255.f;
+	G = rgb._argb.g / 255.f;
+	B = rgb._argb.b / 255.f;
+
+	max = R;
+	max = max < G ? G : max;
+	max = max < B ? B : max;
+
+	min = R;
+	min = min > G ? B : min;
+	min = min > B ? B : min;
+
+
+	v = max;
+	if (max == 0)
+		s = 0;
+	else
+		s = 1 - (min / max);
+
+	if (max == min)
+		h = 0;
+	else if (max == R && G >= B)
+		h = 60 * ((G - B) / (max - min));
+	else if (max == R && G < B)
+		h = 60 * ((G - B) / (max - min)) + 360;
+	else if (max == G)
+		h = 60 * ((B - R) / (max - min)) + 120;
+	else if (max == B)
+		h = 60 * ((R - G) / (max - min)) + 240;
+
+	hsv.a = rgb._argb.a / 255.f;
+	hsv.H = h;
+	hsv.V = v;
+	hsv.S = s;
+	return hsv;
+}
+
+px_color PX_ColorHSVToRGB(px_color_hsv hsv)
+{
+	px_color rgb;
+	px_float R, G, B;
+	px_float C = 0, X = 0, Y = 0, Z = 0;
+	px_int i = 0;
+	px_float H = hsv.H;
+	px_float S = hsv.S;
+	px_float V = hsv.V;
+	if (S == 0)
+		R = G = B = V;
+	else
+	{
+		H = H / 60;
+		i = (px_int)H;
+		C = H - i;
+
+		X = V * (1 - S);
+		Y = V * (1 - S * C);
+		Z = V * (1 - S * (1 - C));
+		switch (i) {
+		case 0: R = V; G = Z; B = X; break;
+		case 1: R = Y; G = V; B = X; break;
+		case 2: R = X; G = V; B = Z; break;
+		case 3: R = X; G = Y; B = V; break;
+		case 4: R = Z; G = X; B = V; break;
+		case 5: R = V; G = X; B = Y; break;
+		}
+	}
+	rgb._argb.r = (px_byte)(R * 255);
+	rgb._argb.g = (px_byte)(G * 255);
+	rgb._argb.b = (px_byte)(B * 255);
+	rgb._argb.a= (px_byte)(hsv.a * 255);
+	return rgb;
+}
+
 
 px_color PX_ColorMul(px_color color1,px_double muls)
 {

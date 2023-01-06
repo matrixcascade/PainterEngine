@@ -118,6 +118,14 @@ typedef struct _px_color_hsl
 	px_float L;//Lightness 0--1
 }px_color_hsl;
 
+typedef struct _px_color_hsv
+{
+	px_float a;//Alpha 0--1
+	px_float H;//Hue 0-360
+	px_float S;//Saturation 0--100
+	px_float V;//Value 0--100
+}px_color_hsv;
+
 typedef struct _px_point
 {
 	px_float x;
@@ -439,6 +447,8 @@ px_color PX_ColorMul(px_color color1,px_double muls);
 px_bool  PX_ColorEqual(px_color color1,px_color color2);
 px_color_hsl PX_ColorRGBToHSL(px_color color_rgb);
 px_color PX_ColorHSLToRGB(px_color_hsl color_hsl);
+px_color_hsv PX_ColorRGBToHSV(px_color rgb);
+px_color PX_ColorHSVToRGB(px_color_hsv hsv);
 //////////////////////////////////////////////////////////////////////////
 
 

@@ -433,7 +433,6 @@ px_bool PX_JsonInterpret_Object(PX_Json *pjson,px_lexer *lexer,PX_Json_Object *j
 					}
 					else
 					{
-						PX_StringFree(&_value.name);
 						goto _ERROR;
 					}
 				}
@@ -725,6 +724,11 @@ px_void PX_JsonFreeValue(PX_Json *pjson,PX_Json_Value *json_Value)
 px_void PX_JsonFree(PX_Json *pjson)
 {
 	PX_JsonFreeValue(pjson,&pjson->rootValue);
+}
+
+px_void PX_JsonClear(PX_Json* pjson)
+{
+	PX_JsonFreeValue(pjson, &pjson->rootValue);
 }
 
 px_bool PX_JsonCreateObjectValue(px_memorypool *mp,PX_Json_Value *pValue,const px_char name[])

@@ -3,7 +3,7 @@
 
 static px_void PX_VM_Error(PX_VM *Ins,px_char *log)
 {
-	PX_ERROR(log);
+	PX_LOG(log);
 }
 
 static px_void PX_VM_LOG(px_char *log)
@@ -20,6 +20,8 @@ px_bool PX_VMInitialize(PX_VM *Ins,px_memorypool *mp,px_byte *code,px_int size)
 	PX_VM_EXPORT_FUNCTION *pfunc;
 	PX_ASM_HOST_NODE *phost;
 	px_int i,j;
+	PX_memset(Ins, 0, sizeof(PX_VM));
+
 	if (size<sizeof(PX_SCRIPT_ASM_HEADER))
 	{
 		return PX_FALSE;
@@ -54,13 +56,13 @@ px_bool PX_VMInitialize(PX_VM *Ins,px_memorypool *mp,px_byte *code,px_int size)
 
 	if ((Ins->_mem=(PX_VM_VARIABLE *)MP_Malloc(mp,sizeof(PX_VM_VARIABLE)*Ins->VM_memsize))==PX_NULL)
 	{
-		return PX_FALSE;
+		goto _ERROR;
 	}
 
 
 	if ((Ins->pThread=(PX_VM_Thread *)MP_Malloc(mp,sizeof(PX_VM_Thread)*Ins->maxThreadCount))==PX_NULL)
 	{
-		return PX_FALSE;
+		goto _ERROR;
 	}
 
 	for (i=0;i<Ins->maxThreadCount;i++)
@@ -92,7 +94,7 @@ px_bool PX_VMInitialize(PX_VM *Ins,px_memorypool *mp,px_byte *code,px_int size)
 	{
 		if ((Ins->_func=(PX_VM_EXPORT_FUNCTION *)MP_Malloc(mp,sizeof(PX_VM_EXPORT_FUNCTION)*Ins->funcCount))==PX_NULL)
 		{
-			return PX_FALSE;
+			goto _ERROR;
 		}
 		//read export functions
 		pfunc=(PX_VM_EXPORT_FUNCTION *)(code+header->oftfunc);
@@ -106,7 +108,7 @@ px_bool PX_VMInitialize(PX_VM *Ins,px_memorypool *mp,px_byte *code,px_int size)
 	{
 		if ((Ins->_host=(PX_ASM_HOST_NODE *)MP_Malloc(mp,sizeof(PX_ASM_HOST_NODE)*Ins->hostCount))==PX_NULL)
 		{
-			return PX_FALSE;
+			goto _ERROR;
 		}
 		PX_memset(Ins->_host,0,sizeof(PX_ASM_HOST_NODE)*Ins->hostCount);
 		phost=(PX_ASM_HOST_NODE *)(code+header->ofthost);
@@ -126,12 +128,24 @@ px_bool PX_VMInitialize(PX_VM *Ins,px_memorypool *mp,px_byte *code,px_int size)
 	
 
 	Ins->_string=(px_char *)MP_Malloc(mp,header->stringSize);
+	if (header->stringSize&&!Ins->_string)
+	{
+		goto _ERROR;
+	}
 	PX_memcpy(Ins->_string,code+header->oftString,header->stringSize);
 
 	Ins->_memory=(px_byte *)MP_Malloc(mp,header->memsize);
+	if (header->memsize&&!Ins->_memory)
+	{
+		goto _ERROR;
+	}
 	PX_memcpy(Ins->_memory,code+header->oftmem,header->memsize);
 
 	Ins->_bin=(px_byte *)MP_Malloc(mp,header->binsize);
+	if (header->binsize&&!Ins->_bin)
+	{
+		goto _ERROR;
+	}
 	PX_memcpy(Ins->_bin,code+header->oftbin,header->binsize);
 
 	
@@ -141,6 +155,31 @@ px_bool PX_VMInitialize(PX_VM *Ins,px_memorypool *mp,px_byte *code,px_int size)
 	}
 
 	return PX_TRUE;
+_ERROR:
+
+	if (Ins->_mem)
+		MP_Free(mp, Ins->_mem);
+
+	if (Ins->pThread)
+		MP_Free(mp, Ins->pThread);
+
+
+	if (Ins->_func)
+		MP_Free(mp, Ins->_func);
+
+	if (Ins->_host)
+		MP_Free(mp, Ins->_host);
+
+	if (Ins->_string)
+		MP_Free(mp, Ins->_string);
+
+	if (Ins->_memory)
+		MP_Free(mp, Ins->_memory);
+
+	if (Ins->_bin)
+		MP_Free(mp, Ins->_bin);
+
+	return PX_FALSE;
 }
 
 PX_VM_VARIABLE PX_VM_VaribaleCopy(PX_VM *Ins,PX_VM_VARIABLE var,px_bool *bOutOfMemory)
@@ -275,7 +314,7 @@ static PX_VM_VARIABLE  PX_VM_GetParamConst(PX_VM *Ins,px_char optype,px_int para
 		break;
 	case PX_SCRIPT_ASM_OPTYPE_LOCAL_CONST:
 		{
-			if(pT->BP-param>0&&pT->BP-param<Ins->VM_memsize)
+			if(pT->BP-param>=0&&pT->BP-param<Ins->VM_memsize)
 				return PX_VM_VaribaleCopy(Ins,Ins->_mem[pT->BP-param],bOutofMemory);
 			else
 				goto _ERROR;
@@ -288,7 +327,7 @@ static PX_VM_VARIABLE  PX_VM_GetParamConst(PX_VM *Ins,px_char optype,px_int para
 				rVar=pT->R[param];
 				if (rVar.type==PX_VM_VARIABLE_TYPE_INT)
 				{
-					if (pT->BP-rVar._int>0&&pT->BP-rVar._int<Ins->VM_memsize)
+					if (pT->BP-rVar._int>=0&&pT->BP-rVar._int<Ins->VM_memsize)
 					{
 						return PX_VM_VaribaleCopy(Ins,Ins->_mem[rVar._int-pT->BP],bOutofMemory);
 					}
@@ -311,12 +350,12 @@ static PX_VM_VARIABLE  PX_VM_GetParamConst(PX_VM *Ins,px_char optype,px_int para
 		break;
 	case PX_SCRIPT_ASM_OPTYPE_LOCAL_GLOBALREF:
 		{
-			if (param<Ins->VM_memsize)
+			if (param>=0&&param<Ins->VM_memsize)
 			{
 				rVar=Ins->_mem[param];
 				if (rVar.type==PX_VM_VARIABLE_TYPE_INT)
 				{
-					if (pT->BP-rVar._int>0&&pT->BP-rVar._int<Ins->VM_memsize)
+					if (pT->BP-rVar._int>=0&&pT->BP-rVar._int<Ins->VM_memsize)
 					{
 						return PX_VM_VaribaleCopy(Ins,Ins->_mem[pT->BP-rVar._int],bOutofMemory);
 					}
@@ -338,12 +377,12 @@ static PX_VM_VARIABLE  PX_VM_GetParamConst(PX_VM *Ins,px_char optype,px_int para
 		break;
 	case PX_SCRIPT_ASM_OPTYPE_LOCAL_LOCALREF:
 		{
-			if (pT->BP-param>0&&pT->BP-param<Ins->VM_memsize)
+			if (pT->BP-param>=0&&pT->BP-param<Ins->VM_memsize)
 			{
 				rVar=Ins->_mem[pT->BP-param];
 				if (rVar.type==PX_VM_VARIABLE_TYPE_INT)
 				{
-					if (pT->BP-rVar._int>0&&pT->BP-rVar._int<Ins->VM_memsize)
+					if (pT->BP-rVar._int>=0&&pT->BP-rVar._int<Ins->VM_memsize)
 					{
 						return PX_VM_VaribaleCopy(Ins,Ins->_mem[pT->BP-rVar._int],bOutofMemory);
 					}
@@ -365,7 +404,7 @@ static PX_VM_VARIABLE  PX_VM_GetParamConst(PX_VM *Ins,px_char optype,px_int para
 		break;
 	case PX_SCRIPT_ASM_OPTYPE_GLOBAL_CONST:
 		{
-			if(param<Ins->VM_memsize)
+			if(param>=0&&param<Ins->VM_memsize)
 				return PX_VM_VaribaleCopy(Ins,Ins->_mem[param],bOutofMemory);
 			else
 				goto _ERROR;
@@ -373,7 +412,7 @@ static PX_VM_VARIABLE  PX_VM_GetParamConst(PX_VM *Ins,px_char optype,px_int para
 		break;
 	case PX_SCRIPT_ASM_OPTYPE_GLOBAL_SPREF:
 		{
-			if(pT->SP+param<Ins->VM_memsize)
+			if(pT->SP + param>=0&&pT->SP+param<Ins->VM_memsize)
 				return PX_VM_VaribaleCopy(Ins,Ins->_mem[pT->SP+param],bOutofMemory);
 			else
 				goto _ERROR;
@@ -386,7 +425,7 @@ static PX_VM_VARIABLE  PX_VM_GetParamConst(PX_VM *Ins,px_char optype,px_int para
 				rVar=pT->R[param];
 				if (rVar.type==PX_VM_VARIABLE_TYPE_INT)
 				{
-					if (rVar._int<Ins->VM_memsize)
+					if (rVar._int>=0&&rVar._int<Ins->VM_memsize)
 					{
 						return PX_VM_VaribaleCopy(Ins,Ins->_mem[rVar._int],bOutofMemory);
 					}
@@ -408,12 +447,12 @@ static PX_VM_VARIABLE  PX_VM_GetParamConst(PX_VM *Ins,px_char optype,px_int para
 		break;
 	case PX_SCRIPT_ASM_OPTYPE_GLOBAL_GLOBALREF:
 		{
-			if (param<Ins->VM_memsize)
+			if (param>=0&&param<Ins->VM_memsize)
 			{
 				rVar=Ins->_mem[param];
 				if (rVar.type==PX_VM_VARIABLE_TYPE_INT)
 				{
-					if (rVar._int<Ins->VM_memsize)
+					if (rVar._int>=0&&rVar._int<Ins->VM_memsize)
 					{
 						return PX_VM_VaribaleCopy(Ins,Ins->_mem[rVar._int],bOutofMemory);
 					}
@@ -440,7 +479,7 @@ static PX_VM_VARIABLE  PX_VM_GetParamConst(PX_VM *Ins,px_char optype,px_int para
 				rVar=Ins->_mem[pT->BP-param];
 				if (rVar.type==PX_VM_VARIABLE_TYPE_INT)
 				{
-					if (rVar._int<Ins->VM_memsize)
+					if (rVar._int>=0&&rVar._int<Ins->VM_memsize)
 					{
 						return PX_VM_VaribaleCopy(Ins,Ins->_mem[rVar._int],bOutofMemory);
 					}
@@ -492,7 +531,7 @@ PX_VM_VARIABLE * PX_VMGetVariablePointer(PX_VM *Ins,px_char optype,px_int param)
 		break;
 	case PX_SCRIPT_ASM_OPTYPE_LOCAL_CONST:
 		{
-			if(pT->BP-param>0&&pT->BP-param<Ins->VM_memsize)
+			if(pT->BP-param>=0&&pT->BP-param<Ins->VM_memsize)
 			return &Ins->_mem[pT->BP-param];
 			else
 				goto _ERROR;
@@ -505,7 +544,7 @@ PX_VM_VARIABLE * PX_VMGetVariablePointer(PX_VM *Ins,px_char optype,px_int param)
 				rVar=pT->R[param];
 				if (rVar.type==PX_VM_VARIABLE_TYPE_INT)
 				{
-					if (pT->BP-rVar._int>0&&pT->BP-rVar._int<Ins->VM_memsize)
+					if (pT->BP-rVar._int>=0&&pT->BP-rVar._int<Ins->VM_memsize)
 					{
 						return &Ins->_mem[pT->BP-rVar._int];
 					}
@@ -528,12 +567,12 @@ PX_VM_VARIABLE * PX_VMGetVariablePointer(PX_VM *Ins,px_char optype,px_int param)
 		break;
 	case PX_SCRIPT_ASM_OPTYPE_LOCAL_GLOBALREF:
 		{
-			if (param<Ins->VM_memsize)
+			if (param>=0&&param<Ins->VM_memsize)
 			{
 				rVar=Ins->_mem[param];
 				if (rVar.type==PX_VM_VARIABLE_TYPE_INT)
 				{
-					if (pT->BP-rVar._int>0&&pT->BP-rVar._int<Ins->VM_memsize)
+					if (pT->BP-rVar._int>=0&&pT->BP-rVar._int<Ins->VM_memsize)
 					{
 						return &Ins->_mem[pT->BP-rVar._int];
 					}
@@ -555,12 +594,12 @@ PX_VM_VARIABLE * PX_VMGetVariablePointer(PX_VM *Ins,px_char optype,px_int param)
 		break;
 	case PX_SCRIPT_ASM_OPTYPE_LOCAL_LOCALREF:
 		{
-			if (pT->BP-param>0&&pT->BP-param<Ins->VM_memsize)
+			if (pT->BP-param>=0&&pT->BP-param<Ins->VM_memsize)
 			{
 				rVar=Ins->_mem[pT->BP-param];
 				if (rVar.type==PX_VM_VARIABLE_TYPE_INT)
 				{
-					if (pT->BP-rVar._int>0&&pT->BP-rVar._int<Ins->VM_memsize)
+					if (pT->BP-rVar._int>=0&&pT->BP-rVar._int<Ins->VM_memsize)
 					{
 						return &Ins->_mem[pT->BP-rVar._int];
 					}
@@ -582,7 +621,7 @@ PX_VM_VARIABLE * PX_VMGetVariablePointer(PX_VM *Ins,px_char optype,px_int param)
 		break;
 	case PX_SCRIPT_ASM_OPTYPE_GLOBAL_CONST:
 		{
-			if(param<Ins->VM_memsize)
+			if(param>=0&&param<Ins->VM_memsize)
 				return &Ins->_mem[param];
 			else
 				goto _ERROR;
@@ -591,7 +630,7 @@ PX_VM_VARIABLE * PX_VMGetVariablePointer(PX_VM *Ins,px_char optype,px_int param)
 
 	case PX_SCRIPT_ASM_OPTYPE_GLOBAL_SPREF:
 		{
-			if(pT->SP+param<Ins->VM_memsize)
+			if(pT->SP + param>=0&&pT->SP+param<Ins->VM_memsize)
 				return &Ins->_mem[pT->SP+param];
 			else
 				goto _ERROR;
@@ -605,7 +644,7 @@ PX_VM_VARIABLE * PX_VMGetVariablePointer(PX_VM *Ins,px_char optype,px_int param)
 				rVar=pT->R[param];
 				if (rVar.type==PX_VM_VARIABLE_TYPE_INT)
 				{
-					if (rVar._int<Ins->VM_memsize)
+					if (rVar._int>=0&&rVar._int<Ins->VM_memsize)
 					{
 						return &Ins->_mem[rVar._int];
 					}
@@ -627,12 +666,12 @@ PX_VM_VARIABLE * PX_VMGetVariablePointer(PX_VM *Ins,px_char optype,px_int param)
 		break;
 	case PX_SCRIPT_ASM_OPTYPE_GLOBAL_GLOBALREF:
 		{
-			if (param<Ins->VM_memsize)
+			if (param>=0&&param<Ins->VM_memsize)
 			{
 				rVar=Ins->_mem[param];
 				if (rVar.type==PX_VM_VARIABLE_TYPE_INT)
 				{
-					if (rVar._int<Ins->VM_memsize)
+					if (rVar._int>=0&&rVar._int<Ins->VM_memsize)
 					{
 						return &Ins->_mem[rVar._int];
 					}
@@ -654,12 +693,12 @@ PX_VM_VARIABLE * PX_VMGetVariablePointer(PX_VM *Ins,px_char optype,px_int param)
 		break;
 	case PX_SCRIPT_ASM_OPTYPE_GLOBAL_LOCALREF:
 		{
-			if (pT->BP-param>0&&pT->BP-param<Ins->VM_memsize)
+			if (pT->BP-param>=0&&pT->BP-param<Ins->VM_memsize)
 			{
 				rVar=Ins->_mem[pT->BP-param];
 				if (rVar.type==PX_VM_VARIABLE_TYPE_INT)
 				{
-					if (rVar._int<Ins->VM_memsize)
+					if (rVar._int>=0&&rVar._int<Ins->VM_memsize)
 					{
 						return &Ins->_mem[rVar._int];
 					}
@@ -1130,7 +1169,15 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 				PX_VM_Error(Ins,"MOD parameters error.");
 				goto _ERROR;
 			}
-			pVar->_int%=cVar._int;
+			if (cVar._int!=0)
+			{
+				pVar->_int %= cVar._int;
+			}
+			else
+			{
+				goto _ERROR;
+			}
+			
 			pT->IP+=(4+2*4);
 		}
 		break;
@@ -3097,6 +3144,9 @@ px_bool PX_VMRunFunction(PX_VM *Ins,px_int threadID,const px_char *functionName,
 {
 	return PX_VMCallFunctionEx(Ins, threadID, functionName, args, paramcount, -1);
 }
+
+
+
 px_bool PX_VMCallFunction(PX_VM* Ins, px_int threadID, const px_char* functionName, PX_VM_VARIABLE args[], px_int paramcount)
 {
 	return PX_VMCallFunctionEx(Ins, threadID, functionName, args, paramcount, Ins->pThread[threadID].IP);
@@ -3278,9 +3328,18 @@ px_int PX_VMGetFreeThreadId(PX_VM *Ins)
 	return -1;
 }
 
+px_void PX_VMSleep(PX_VM* Ins, px_int thread, px_uint sleepms)
+{
+	if (thread>=0&&thread<Ins->maxThreadCount)
+	{
+		Ins->pThread[thread].sleep = sleepms;
+	}
+}
+
 px_void PX_VMSuspend(PX_VM* Ins)
 {
 	Ins->Suspend = PX_TRUE;
+	
 }
 
 px_void PX_VMContinue(PX_VM* Ins)
@@ -3390,7 +3449,7 @@ px_bool PX_ScriptVM_InstanceInitialize(PX_VM* Ins, px_memorypool* mp, px_byte* c
 	return PX_VMInitialize(Ins, mp, code, size);
 }
 
-px_bool PX_VMRegistryHostFunction(PX_VM *Ins,const px_char *name,PX_VM_Function_Modules funcModules,px_void *userptr)
+px_bool PX_VMRegistHostFunction(PX_VM *Ins,const px_char *name,PX_VM_Function_Modules funcModules,px_void *userptr)
 {
 	px_int i;
 	px_char uprname[__PX_SCRIPT_ASM_MNEMONIC_NAME_LEN];
@@ -3518,6 +3577,19 @@ px_void PX_VM_PUSH(PX_VM *Ins,PX_VM_VARIABLE cVar)
 		*pVar=cVar;
 	}
 
+}
+
+px_void PX_VM_Sleep(PX_VM* Ins, px_uint sleep)
+{
+	Ins->pThread[Ins->T].sleep = sleep;
+}
+
+px_void PX_VM_ThreadSleep(PX_VM* Ins, px_int threadid, px_uint sleep)
+{
+	if (threadid>=0&&threadid<Ins->maxThreadCount)
+	{
+		Ins->pThread[threadid].sleep = sleep;
+	}
 }
 
 px_void PX_VM_POPN(PX_VM *Ins,px_int T,px_int n)

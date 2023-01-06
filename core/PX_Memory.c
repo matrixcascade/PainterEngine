@@ -290,7 +290,8 @@ px_int PX_FifoBufferPop(px_fifobuffer* pfifo, px_void* data, px_int size)
 		{
 			return 0;
 		}
-		PX_memcpy(data, pfifo->buffer + sizeof(px_int), rsize);
+		if(data)
+			PX_memcpy(data, pfifo->buffer + sizeof(px_int), rsize);
 		PX_MemoryRemove(pfifo, 0, rsize + sizeof(px_int) - 1);
 		return rsize;
 

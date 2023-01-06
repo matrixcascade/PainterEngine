@@ -1,7 +1,7 @@
 #include "PainterEngine_Runtime.h"
 
 
-px_void PX_Runtime_MP_ErrorCall(PX_MEMORYPOOL_ERROR err)
+px_void PX_Runtime_MP_ErrorCall(px_void *ptr,PX_MEMORYPOOL_ERROR err)
 {
 	switch(err)
 	{
@@ -33,9 +33,9 @@ px_bool PX_RuntimeInitialize(PX_Runtime *pe,px_int surface_width,px_int surface_
 	pe->mp_game=MP_Create(MP_Malloc(&pe->mp,game_size),game_size);
 
 
-	MP_ErrorCatch(&pe->mp_ui,PX_Runtime_MP_ErrorCall);
-	MP_ErrorCatch(&pe->mp_resources,PX_Runtime_MP_ErrorCall);
-	MP_ErrorCatch(&pe->mp_game,PX_Runtime_MP_ErrorCall);
+	MP_ErrorCatch(&pe->mp_ui,PX_Runtime_MP_ErrorCall,pe);
+	MP_ErrorCatch(&pe->mp_resources,PX_Runtime_MP_ErrorCall,pe);
+	MP_ErrorCatch(&pe->mp_game,PX_Runtime_MP_ErrorCall,pe);
 
 	//resources
 	if(!PX_ResourceLibraryInitialize(&pe->mp_resources,&pe->ResourceLibrary))return PX_FALSE;

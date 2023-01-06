@@ -58,6 +58,20 @@ px_void PX_StringTrimRight(px_string *str,px_int RightCount)
 	PX_StringUpdateExReg(str);
 }
 
+px_int PX_StringFind(px_string* str, const px_char find[])
+{
+	if (str->buffer)
+	{
+		px_char*p= PX_strstr(str->buffer, find);
+		if (p)
+		{
+			return (px_int)(p - str->buffer);
+		}
+	}
+	return -1;
+	
+}
+
 px_void PX_StringFree(px_string *str)
 {
 	if(str->buffer&&str->bufferlen)
@@ -208,7 +222,9 @@ px_bool PX_StringCat(px_string *str,const px_char *str2)
 {
 	px_uchar shl=0;
 	px_char *old=str->buffer;
-	px_int length=PX_strlen(str->buffer)+PX_strlen(str2);
+	px_int length;
+
+	length = PX_strlen(str->buffer) + PX_strlen(str2);
 	if (length<str->bufferlen)
 	{
 		PX_strcat(str->buffer,str2);
@@ -227,6 +243,17 @@ px_bool PX_StringCat(px_string *str,const px_char *str2)
 	MP_Free(str->mp,old);
 	PX_StringUpdateExReg(str);
 	return PX_TRUE;
+}
+
+
+
+px_char PX_StringLastChar(px_string* str)
+{
+	if (str->buffer&&str->buffer[0]!=0)
+	{
+		return str->buffer[PX_strlen(str->buffer)-1];
+	}
+	return 0;
 }
 
 px_void PX_StringClear(px_string *str)

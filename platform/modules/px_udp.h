@@ -30,4 +30,5 @@ int PX_UDPInitialize(PX_UDP *udp,PX_UDP_IP_TYPE type);
 int PX_UDPSend(PX_UDP *udp,PX_UDP_ADDR addr,void *buffer,int size);
 int PX_UDPReceived(PX_UDP *udp,PX_UDP_ADDR *from_addr,void *buffer,int buffersize,int *readsize);
 void PX_UDPFree(PX_UDP *udp);
+unsigned int PX_UDPGetHostByName(const char* host, unsigned int dns_addr);
 #endif

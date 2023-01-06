@@ -1,10 +1,7 @@
 #include "PX_MemoryPool.h"
 
 #if defined(PX_DEBUG_MODE) && defined(PX_MEMORYPOOL_DEBUG_CHECK)
-
 #include "stdio.h"
-static px_int DEBUG_i;
-static px_int DEBUG_assert;
 px_void MP_UnreleaseInfo(px_memorypool *mp)
 {
 	px_int i;
@@ -167,6 +164,9 @@ px_memorypool MP_Create( px_void *MemoryAddr,px_uint MemorySize )
 {
 	px_uint Index=0;
 	px_memorypool MP;
+#if defined(PX_DEBUG_MODE) && defined(PX_MEMORYPOOL_DEBUG_CHECK)
+	px_int DEBUG_i;
+#endif
 	PX_memset(&MP, 0, sizeof(MP));
 	if (MemorySize==0)
 	{
@@ -210,6 +210,7 @@ px_void * MP_Malloc(px_memorypool *MP, px_uint Size )
 #if defined(PX_DEBUG_MODE) && defined(PX_MEMORYPOOL_DEBUG_CHECK)
 	MP_Append_data *pAppend;
 	MemoryNode *itNode;
+	px_int DEBUG_i;
 	if (MP==PX_NULL)
 	{
 		PX_ASSERT();
@@ -229,7 +230,7 @@ px_void * MP_Malloc(px_memorypool *MP, px_uint Size )
 			}
 			if(MP->DEBUG_allocdata[DEBUG_i].endAddr!=itNode->EndAddr) 
 			{
-					PX_ASSERT();
+					//PX_ASSERT();
 					return PX_NULL;
 			}
 			if(pAppend->append!=MP_APPENDDATA_MAGIC)
@@ -312,12 +313,10 @@ px_void * MP_Malloc(px_memorypool *MP, px_uint Size )
 	if (MP->ErrorCall_Ptr == PX_NULL)
 	{
 		PX_ERROR("MemoryPool Out Of Memory!");
-		PX_ASSERT();
 	}
 	else
 	{
-		MP->ErrorCall_Ptr(PX_MEMORYPOOL_ERROR_OUTOFMEMORY);
-		PX_ASSERT();
+		MP->ErrorCall_Ptr(MP->userptr,PX_MEMORYPOOL_ERROR_OUTOFMEMORY);
 	}
 	return PX_NULL;
 
@@ -334,6 +333,9 @@ px_void MP_Free(px_memorypool *MP, px_void *pAddress )
 	px_uchar bExist;
 	px_void *TempPointer;
 	MemoryNode *TempNode;
+#if defined(PX_DEBUG_MODE) && defined(PX_MEMORYPOOL_DEBUG_CHECK)
+	px_int DEBUG_i;
+#endif
 	MP->nodeCount--;
 	bExist=0;
 	#if defined(PX_DEBUG_MODE)
@@ -373,12 +375,15 @@ px_void MP_Free(px_memorypool *MP, px_void *pAddress )
 	{
 		if(DEBUG_i==sizeof(MP->DEBUG_allocdata)/sizeof(MP->DEBUG_allocdata[0]))
 		{
-			if(MP->ErrorCall_Ptr==PX_NULL)
+			if (MP->ErrorCall_Ptr == PX_NULL)
+			{
 				PX_LOG("Invalid address free");
+				PX_ASSERT();
+			}
 			else
-				MP->ErrorCall_Ptr(PX_MEMORYPOOL_ERROR_INVALID_ADDRESS);
+				MP->ErrorCall_Ptr(MP->userptr,PX_MEMORYPOOL_ERROR_INVALID_ADDRESS);
 
-			PX_ASSERT();
+			
 			goto _END;
 		}
 	}
@@ -493,6 +498,7 @@ _END:
 	PX_UpdateMaxFreqSize(MP);
 
 #if defined(PX_DEBUG_MODE) && defined(PX_MEMORYPOOL_DEBUG_CHECK)
+
 	for (DEBUG_i=0;DEBUG_i<sizeof(MP->DEBUG_allocdata)/sizeof(MP->DEBUG_allocdata[0]);DEBUG_i++)
 	{
 		if(MP->DEBUG_allocdata[DEBUG_i].addr!=PX_NULL)
@@ -521,9 +527,10 @@ px_void MP_Release(px_memorypool *Node)
 	//free(G_MemoryPool.StartAddr);
 }
 
-px_void MP_ErrorCatch(px_memorypool *Pool,PX_MP_ErrorCall ErrorCall)
+px_void MP_ErrorCatch(px_memorypool *Pool,PX_MP_ErrorCall ErrorCall, px_void* ptr)
 {
 	Pool->ErrorCall_Ptr=ErrorCall;
+	Pool->userptr = ptr;
 }
 
 px_uint MP_Size(px_memorypool *Pool,px_void *pAddress)

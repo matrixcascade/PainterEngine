@@ -89,6 +89,7 @@ enum PX_OBJECT_TYPE
   PX_OBJECT_TYPE_EXECUTER		,
   PX_OBJECT_TYPE_ASMDEBUGGER	,
   PX_OBJECT_TYPE_EXPLOSIONX  	,
+  PX_OBJECT_TYPE_COLORPANEL		,
 };
 
 
@@ -174,7 +175,7 @@ struct _PX_Object
 	px_bool Visible;
 	px_bool ReceiveEvents;
 	px_int	Type;
-	px_int  designerTyoe;
+	px_int  designerType;
 	union
 	{
 	px_int  User_int;
@@ -256,6 +257,9 @@ px_int PX_Object_Event_GetCursorIndex(PX_Object_Event e);
 px_float PX_Object_Event_GetWidth(PX_Object_Event e);
 px_float PX_Object_Event_GetHeight(PX_Object_Event e);
 px_int PX_Object_Event_GetIndex(PX_Object_Event e);
+
+px_void PX_Object_Event_SetImpactTargetObject(PX_Object_Event* e,PX_Object* pObject);
+PX_Object* PX_Object_Event_GetImpactTargetObject(PX_Object_Event e);
 
 px_int PX_Object_Event_GetInt(PX_Object_Event e);
 px_void PX_Object_Event_SetWidth(PX_Object_Event* e, px_float w);
@@ -514,6 +518,11 @@ px_void PX_ObjectExecuteEvent(PX_Object *pPost,PX_Object_Event Event);
 //////////////////////////////////////////////////////////////////////////
 //explosion
 #include "PX_Object_Explosion.h"
+
+//////////////////////////////////////////////////////////////////////////
+//color panel
+#include "PX_Object_ColorPanel.h"
+
 #endif
 
 

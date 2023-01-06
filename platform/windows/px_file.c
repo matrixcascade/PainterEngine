@@ -117,6 +117,10 @@ int PX_FileGetDirectoryFileCount(const char path[],PX_FILEENUM_TYPE type,const c
 	int count=0;
     WIN32_FIND_DATAA FindFileData;
 	char _findpath[MAX_PATH];
+	if (!filter)
+	{
+		filter = "";
+	}
 	
 	if (path[0]==0||(path[0]=='\\'&&path[1]=='\0')||(path[0]=='/'&&path[1]=='\0'))
 	{
@@ -222,6 +226,7 @@ int PX_FileGetDirectoryFileCount(const char path[],PX_FILEENUM_TYPE type,const c
 		}
 	} while (FindNextFileA(hFind,&FindFileData));
 	FindClose(hFind);
+
 	return count;
 }
 
@@ -231,6 +236,11 @@ int PX_FileGetDirectoryFileName(const char path[],int count,char FileName[][260]
 	int index=0;
 	WIN32_FIND_DATAA FindFileData;
 	static char _findpath[MAX_PATH];
+
+	if (!filter)
+	{
+		filter = "";
+	}
 
 	if (path[0]==0||(path[0]=='\\'&&path[1]=='\0')||(path[0]=='/'&&path[1]=='\0'))
 	{

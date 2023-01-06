@@ -244,10 +244,20 @@ px_void PX_MenuPostEvent_OnCursorDown(PX_Object *pObject,PX_Object_Event e)
 			PX_Object_Menu_Item *pSubItem=PX_LIST_NODETDATA(PX_Object_Menu_Item,pNode);
 			if (PX_isXYInRegion(x,y,(px_float)pSubItem->x,(px_float)pSubItem->y,(px_float)pSubItem->width,(px_float)pSubItem->height)&&pSubItem->enable)
 			{
-				pMenu->activating=PX_TRUE;
-				PX_ObjectSetFocus(pObject);
-				pSubItem->Activated=PX_TRUE;
-				PX_MenuClearChild(pMenu,pSubItem);
+				if (pSubItem->Items.size)
+				{
+					pMenu->activating = PX_TRUE;
+					PX_ObjectSetFocus(pObject);
+					pSubItem->Activated = PX_TRUE;
+					PX_MenuClearChild(pMenu, pSubItem);
+				}
+				else
+				{
+					if (pSubItem->func_callback)
+					{
+						pSubItem->func_callback(pSubItem->user_ptr);
+					}
+				}
 				return;
 			}
 		}
