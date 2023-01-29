@@ -1436,6 +1436,92 @@ px_void PX_GeoDrawPenCircle(px_surface *psurface, px_float x,px_float y,px_float
 	PX_GeoDrawSolidCircle_Ex2(psurface,x,y,Radius,color);
 }
 
+px_void PX_GeoDrawSpray(px_surface* psurface, px_float x, px_float y, px_float Radius, px_color color)
+{
+	px_int left, top, right, bottom, mid, i, j;
+	px_float d;
+	px_color clr;
+	if (color._argb.a == 0)
+	{
+		return;
+	}
+
+	left = (px_int)(x - Radius);
+	top = (px_int)(y - Radius);
+	right = (px_int)(x + Radius);
+	bottom = (px_int)(y + Radius);
+
+
+	if (left < 0)
+	{
+		left = 0;
+	}
+	if (top < 0)
+	{
+		top = 0;
+	}
+
+	if (right > psurface->width - 1)
+	{
+		right = psurface->width - 1;
+	}
+
+	if (bottom > psurface->height - 1)
+	{
+		bottom = psurface->height - 1;
+	}
+
+	if (left > psurface->width - 1)
+	{
+		return;
+	}
+
+	if (bottom < 0)
+	{
+		return;
+	}
+
+	if (right < 0)
+	{
+		return;
+	}
+
+	if (top > psurface->height - 1)
+	{
+		return;
+	}
+
+
+	if (left > right)
+	{
+		mid = left;
+		left = right;
+		right = mid;
+	}
+	if (top > bottom)
+	{
+		mid = top;
+		top = bottom;
+		bottom = mid;
+	}
+
+	for (i = top; i <= bottom; i++)
+	{
+		for (j = left; j <= right; j++)
+		{
+			d = PX_sqrt((px_float)((i - y) * (i - y) + (j - x) * (j - x)));
+			if (d < Radius)
+			{
+				px_float a = 1-d / Radius;
+				clr = color;
+				clr._argb.a = (px_uchar)(clr._argb.a * a);
+				PX_SurfaceDrawPixel(psurface, j, i, clr);
+			}
+
+		}
+	}
+}
+
 px_void PX_GeoDrawPath(px_surface *psurface, px_point path[],px_int pathCount,px_float linewidth,px_color color)
 {
 	px_int i;

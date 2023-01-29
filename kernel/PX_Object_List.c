@@ -227,7 +227,7 @@ px_void PX_Object_ListMoveToBottom(PX_Object* pObject)
 	if (pList->ItemHeight*pList->pData.size>pObject->Height)
 	{
 		pList->offsety = (px_int)(pList->ItemHeight * pList->pData.size - pObject->Height);
-		PX_Object_SliderBarSetRange(pList->SliderBar, 0, (px_int)(pList->ItemHeight * pList->pData.size - pObject->Height));
+		PX_Object_SliderBarSetRange(pList->SliderBar, 0, (px_int)(pList->ItemHeight * (pList->pData.size) - pObject->Height));
 		PX_Object_SliderBarSetValue(pList->SliderBar, (px_int)(pList->ItemHeight * pList->pData.size - pObject->Height));
 	}
 	else
@@ -374,7 +374,7 @@ px_void PX_Object_ListRender(px_surface *psurface, PX_Object *pObject,px_uint el
 			}
 			if (index==pList->currentSelectedIndex)
 			{
-				PX_GeoDrawRect(&pList->renderSurface,(px_int)pItemObject->x,(px_int)pItemObject->y,(px_int)(pItemObject->x+pItemObject->Width-1),(px_int)(pItemObject->y+pItemObject->Height-1),pList->SelectCursor);
+				PX_GeoDrawRect(&pList->renderSurface,(px_int)pItemObject->x,(px_int)pItemObject->y,(px_int)(pItemObject->x+pItemObject->Width-1),(px_int)(pItemObject->y+pItemObject->Height-1),pList->SelectColor);
 			}
 			PX_ObjectRender(&pList->renderSurface,pItemObject,elapsed);
 		}
@@ -507,7 +507,7 @@ PX_Object * PX_Object_ListCreate(px_memorypool *mp, PX_Object *Parent,px_int x,p
 	List.BorderColor=PX_OBJECT_UI_DEFAULT_BORDERCOLOR;
 	List.BackgroundColor=PX_OBJECT_UI_DEFAULT_BACKGROUNDCOLOR;
 	List.CursorColor=PX_OBJECT_UI_DEFAULT_CURSORCOLOR;
-	List.SelectCursor=PX_OBJECT_UI_DEFAULT_PUSHCOLOR;
+	List.SelectColor=PX_OBJECT_UI_DEFAULT_PUSHCOLOR;
 
 	List.offsetx=0;
 	List.currentSelectedIndex=-1;
@@ -610,6 +610,26 @@ px_void PX_Object_ListSetBackgroundColor(PX_Object *pListObject,px_color color)
 		pList->BackgroundColor=color;
 	}
 }
+
+px_void PX_Object_ListSetCursorColor(PX_Object* pListObject, px_color color)
+{
+	PX_Object_List* pList = PX_Object_GetList(pListObject);
+	if (pList)
+	{
+		pList->CursorColor = color;
+	}
+}
+
+px_void PX_Object_ListSetSelectColor(PX_Object* pListObject, px_color color)
+{
+	PX_Object_List* pList = PX_Object_GetList(pListObject);
+	if (pList)
+	{
+		pList->SelectColor = color;
+	}
+}
+
+
 
 px_void PX_Object_ListSetBorderColor(PX_Object *pListObject,px_color color)
 {
@@ -830,7 +850,7 @@ px_void PX_Object_ListArrayRender(px_surface* psurface, PX_Object* pObject, px_u
 			}
 			if (index == pList->currentSelectedIndex)
 			{
-				PX_GeoDrawRect(&pList->renderSurface, (px_int)pItemObject->x, (px_int)pItemObject->y, (px_int)(pItemObject->x + pItemObject->Width - 1), (px_int)(pItemObject->y + pItemObject->Height - 1), pList->SelectCursor);
+				PX_GeoDrawRect(&pList->renderSurface, (px_int)pItemObject->x, (px_int)pItemObject->y, (px_int)(pItemObject->x + pItemObject->Width - 1), (px_int)(pItemObject->y + pItemObject->Height - 1), pList->SelectColor);
 			}
 			PX_ObjectRender(&pList->renderSurface, pItemObject, elapsed);
 		}

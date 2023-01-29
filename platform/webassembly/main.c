@@ -26,7 +26,7 @@ const SDL_VideoInfo *info;
 px_dword lastupdatetime;
 px_int lastcursorx=-1,lastcursory=-1;
 px_bool mouseldown=PX_FALSE;
-px_byte cache_load_file[1024*1024*8];
+px_byte cache_load_file[1024*1024*64];
 px_int  load_file_size=0;
 ///////////////////////////////////////////////
 

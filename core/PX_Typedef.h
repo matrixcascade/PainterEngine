@@ -555,7 +555,7 @@ px_double PX_ZeroCrossingRate(_IN px_double x[],px_int N);
 px_double PX_ZeroCrossingRateComplex(_IN px_complex x[],px_int N);
 //////////////////////////////////////////////////////////////////////////
 //PitchEstimation
-px_int PX_PitchEstimation(_IN px_complex x[],px_int N,px_int sampleRate,px_int low_Hz,px_int high_Hz);
+px_float PX_PitchEstimation(_IN px_complex x[],px_int N,px_int sampleRate,px_int low_Hz,px_int high_Hz);
 //////////////////////////////////////////////////////////////////////////
 //PreEmphasise
 px_void PX_PreEmphasise(const px_double *data, int len, px_double *out, px_double preF);//0.9<preF<1.0 suggest 0.9;
@@ -656,5 +656,9 @@ px_double PX_PhaseDelay(px_double f, px_double* B, px_int sizeB, px_double* A, p
 px_byte PX_ReadBit(px_uint32* bitpointer, const px_byte* bitstream);
 px_uint32 PX_ReadBits(px_uint32* bitpointer, const px_byte* bitstream, px_int nbits);
 
+//////////////////////////////////////////////////////////////////////////
+//mel
+px_double PX_MelToHz(px_double mel);
+px_double PX_HzToMel(px_double hz);
 
 #endif

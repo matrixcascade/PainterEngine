@@ -358,6 +358,74 @@ PX_SoundData PX_SoundDataCreate(PX_SOUND_CHANNEL channel, px_byte* data, px_int 
 	return sdata;
 }
 
+px_int PX_SoundDataReadSamples(PX_SoundData* sounddata, px_int byte_offset, px_int readcount, px_float unit_out[],px_int channel)
+{
+	if (sounddata->channel == PX_SOUND_CHANNEL_ONE)
+	{
+		if (byte_offset % 2)
+		{
+			return 0;
+		}
+	}
+
+	if (sounddata->channel==PX_SOUND_CHANNEL_DOUBLE)
+	{
+		if (byte_offset % 4)
+		{
+			return 0;
+		}
+	}
+
+	if (sounddata->channel == PX_SOUND_CHANNEL_ONE)
+	{
+		if (channel==1)
+		{
+			channel = 0;
+		}
+	}
+
+
+	if (sounddata->channel==PX_SOUND_CHANNEL_ONE)
+	{
+		px_int readbyte=0;
+		px_short* pPCM = (px_short*)sounddata->buffer;
+		px_int ssize = sounddata->size / 2;
+		px_int soffset = byte_offset/2;
+		while (soffset<ssize)
+		{
+			unit_out[readbyte / 2] = pPCM[soffset]/32768.f;
+			soffset++;
+			readbyte += 2;
+		}
+		return readbyte;
+	}
+	else if (sounddata->channel == PX_SOUND_CHANNEL_DOUBLE)
+	{
+		px_int readbyte = 0;
+		px_short* pPCM = (px_short*)sounddata->buffer;
+		px_int ssize = sounddata->size / 2;
+		px_int soffset = byte_offset / 2;
+		while (soffset < ssize)
+		{
+			if (readcount==0)
+			{
+				break;
+			}
+			unit_out[readbyte / 4] = pPCM[soffset+ channel] / 32768.f;
+			soffset+=2;
+			readbyte += 4;
+			readcount--;
+		}
+		return readbyte;
+	}
+	else
+	{
+		return 0;
+	}
+	return 0;
+}
+
+
 px_bool PX_SoundStaticDataCopy(px_memorypool *mp,PX_SoundData *resSounddata,PX_SoundData *targetSounddata)
 {
 	targetSounddata->buffer=(px_byte *)MP_Malloc(mp,resSounddata->size);

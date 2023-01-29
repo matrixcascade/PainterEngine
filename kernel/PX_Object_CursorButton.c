@@ -147,7 +147,7 @@ PX_Object_CursorButton * PX_Object_GetCursorButton( PX_Object *Object )
 		return PX_NULL;
 }
 
-PX_Object * PX_Object_GetCursorButtonPushButton(PX_Object *Object)
+PX_Object * PX_Object_CursorButtonGetPushButton(PX_Object *Object)
 {
 	PX_Object_CursorButton *pcb;
 	pcb=PX_Object_GetCursorButton(Object);

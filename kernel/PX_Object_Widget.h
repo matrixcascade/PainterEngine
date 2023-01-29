@@ -37,5 +37,6 @@ px_void PX_Object_WidgetSetBackgroundColor(PX_Object *pObject,px_color clr);
 px_void PX_Object_WidgetSetFocusColor(PX_Object *pObject,px_color clr);
 px_void PX_Object_WidgetSetFontColor(PX_Object *pObject,px_color clr);
 px_void PX_Object_WidgetSetTitle(PX_Object *pObject,const px_char title[]);
+px_void PX_Object_WidgetShowShader(PX_Object* pObject, px_bool show);
 #endif
 

@@ -24,5 +24,5 @@
 #include "PX_LiveFramework.h"
 #include "PX_UI.h"
 #include "PX_Compiler.h"
-
+#include "PX_CanvasVM.h"
 #endif

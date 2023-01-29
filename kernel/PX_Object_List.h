@@ -24,7 +24,7 @@ typedef struct
 	px_color BorderColor;
 	px_color BackgroundColor;
 	px_color CursorColor;
-	px_color SelectCursor;
+	px_color SelectColor;
 	px_surface renderSurface;
 	px_bool showCursor;
 	px_bool doubleCursorCancel;
@@ -57,7 +57,9 @@ px_int  PX_Object_ListGetItemCount(PX_Object* pListObject);
 px_void* PX_Object_ListItemGetData(PX_Object* pItemObject);
 px_void PX_Object_ListRemoveItem(PX_Object *pListObject,px_int index);
 px_void PX_Object_ListSetBackgroundColor(PX_Object *pListObject,px_color color);
-px_void PX_Object_ListSetBorderColor(PX_Object *pListObject,px_color color);
+px_void PX_Object_ListSetCursorColor(PX_Object* pListObject, px_color color);
+px_void PX_Object_ListSetSelectColor(PX_Object* pListObject, px_color color);
+px_void PX_Object_ListSetBorderColor(PX_Object* pListObject, px_color color);
 px_void PX_Object_ListSetDoubleClickCancel(PX_Object *pListObject,px_bool b);
 px_void PX_Object_ListViewFocus(PX_Object* pListObject, px_int index);
 

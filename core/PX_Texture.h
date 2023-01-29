@@ -30,7 +30,8 @@ typedef struct
 px_bool PX_TextureCreate(px_memorypool *mp,px_texture *tex,px_int width,px_int height);
 px_bool PX_TextureCreateFromMemory(px_memorypool *mp,px_void *data,px_int size,px_texture *tex);
 px_bool PX_TextureCopy(px_memorypool *mp,px_texture *restexture,px_texture *dest);
-px_bool PX_TextureCreateScale(px_memorypool *mp,px_texture *resTexture,px_int newWidth,px_int newHeight,px_texture *out);
+px_bool PX_TextureScaleToTexture(px_texture* resTexture, px_texture* out);
+px_bool PX_TextureCreateScale(px_memorypool* mp, px_texture* resTexture, px_int newWidth, px_int newHeight, px_texture* out);
 px_void PX_TextureRender(px_surface *psurface,px_texture *tex,px_int x,px_int y,PX_ALIGN refPoint,PX_TEXTURERENDER_BLEND *blend);
 px_void PX_TextureCover(px_surface *psurface,px_texture *tex,px_int x,px_int y,PX_ALIGN refPoint);
 px_void PX_TextureGetVisibleRange(px_texture *ptexture,px_int *pLeft,px_int *pRight,px_int *pTop,px_int *pBottom);

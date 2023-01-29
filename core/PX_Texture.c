@@ -961,91 +961,20 @@ px_void PX_TextureRenderMask(px_surface *psurface,px_texture *mask_tex,px_textur
 
 px_bool PX_TextureCreateScale(px_memorypool *mp,px_texture *resTexture,px_int newWidth,px_int newHeight,px_texture *out)
 {
-	px_double SampleWidth=(px_double)(resTexture->width)/(newWidth);
-	px_double SampleHeight=(px_double)(resTexture->height)/(newHeight);
-	px_double SampleX,SampleY,SampleArea,u,v,cellw,cellh,mixa,mixr,mixg,mixb;
-	px_color *Dst,*Src=(px_color *)resTexture->surfaceBuffer;
-	px_color SampleColor,MixColor;
-	px_int xoft,yoft,horz,vcl;
-
-	if (newWidth<0||newHeight<0)
+	if (newWidth<=0||newHeight<=0)
 	{
+		PX_ASSERT();
 		return PX_FALSE;
 	}
-	if (!(newHeight&&newWidth))
-	{
-		return PX_FALSE;
-	}
-
 	if (!PX_TextureCreate(mp,out,newWidth,newHeight))
 	{
 		return PX_FALSE;
 	}
 
-	Dst=(px_color *)out->surfaceBuffer;
-
-	SampleArea=SampleHeight*SampleWidth;
-
-	for (yoft=0;yoft<newHeight;yoft++)
+	if (!PX_TextureScaleToTexture(resTexture, out))
 	{
-		for (xoft=0;xoft<newWidth;xoft++)
-		{
-			//reset sample color
-			MixColor._argb.ucolor=0;
-
-			SampleX=xoft*SampleWidth;
-			SampleY=yoft*SampleHeight;
-			mixa=0;
-			mixr=0;
-			mixg=0;
-			mixb=0;
-
-			u=SampleX;
-			for (horz=PX_TRUNC(SampleX);horz<=PX_TRUNC(SampleX+SampleWidth);)
-			{
-				v=SampleY;
-				if (PX_TRUNC(u)==PX_TRUNC(SampleX+SampleWidth))
-				{
-					cellw=SampleX+SampleWidth-u;
-				}
-				else
-				{
-					cellw=horz+1-u;
-				}
-
-				for (vcl=PX_TRUNC(SampleY);vcl<=PX_TRUNC(SampleY+SampleHeight);)
-				{
-					if (PX_TRUNC(v)==PX_TRUNC(SampleY+SampleHeight))
-					{
-						cellh=SampleY+SampleHeight-v;
-					}
-					else
-					{
-						cellh=vcl+1-v;
-					}
-					if(horz<resTexture->width&&vcl<resTexture->height)
-					SampleColor=PX_SURFACECOLOR(resTexture,horz,vcl);
-					else
-					SampleColor._argb.ucolor=0;
-
-					mixa+=SampleColor._argb.a*cellh*cellw/SampleArea;
-					mixr+=SampleColor._argb.r*cellh*cellw/SampleArea;
-					mixg+=SampleColor._argb.g*cellh*cellw/SampleArea;
-					mixb+=SampleColor._argb.b*cellh*cellw/SampleArea;
-
-					
-					vcl++;
-					v=(px_double)vcl;
-				}
-				horz++;
-				u=(px_double)horz;
-			}
-			mixa>255?mixa=255:0;
-			mixr>255?mixr=255:0;
-			mixg>255?mixg=255:0;
-			mixb>255?mixb=255:0;
-			Dst[xoft+yoft*newWidth]=PX_COLOR((px_uchar)PX_APO(mixa),(px_uchar)mixr,(px_uchar)mixg,(px_uchar)mixb);;
-		}
+		PX_TextureFree(out);
+		return PX_FALSE;
 	}
 	return PX_TRUE;
 }
@@ -2908,3 +2837,90 @@ px_bool PX_TextureCopy(px_memorypool *mp,px_texture *restexture,px_texture *dest
 	return PX_TRUE;
 }
 
+px_bool PX_TextureScaleToTexture( px_texture* resTexture,  px_texture* out)
+{
+	px_int newWidth = out->width;
+	px_int newHeight= out->height;
+	px_double SampleWidth = (px_double)(resTexture->width) / (newWidth);
+	px_double SampleHeight = (px_double)(resTexture->height) / (newHeight);
+	px_double SampleX, SampleY, SampleArea, u, v, cellw, cellh, mixa, mixr, mixg, mixb;
+	px_color* Dst, * Src = (px_color*)resTexture->surfaceBuffer;
+	px_color SampleColor, MixColor;
+	px_int xoft, yoft, horz, vcl;
+
+	if (newWidth < 0 || newHeight < 0)
+	{
+		return PX_FALSE;
+	}
+	if (!(newHeight && newWidth))
+	{
+		return PX_FALSE;
+	}
+
+	Dst = (px_color*)out->surfaceBuffer;
+
+	SampleArea = SampleHeight * SampleWidth;
+
+	for (yoft = 0; yoft < newHeight; yoft++)
+	{
+		for (xoft = 0; xoft < newWidth; xoft++)
+		{
+			//reset sample color
+			MixColor._argb.ucolor = 0;
+
+			SampleX = xoft * SampleWidth;
+			SampleY = yoft * SampleHeight;
+			mixa = 0;
+			mixr = 0;
+			mixg = 0;
+			mixb = 0;
+
+			u = SampleX;
+			for (horz = PX_TRUNC(SampleX); horz <= PX_TRUNC(SampleX + SampleWidth);)
+			{
+				v = SampleY;
+				if (PX_TRUNC(u) == PX_TRUNC(SampleX + SampleWidth))
+				{
+					cellw = SampleX + SampleWidth - u;
+				}
+				else
+				{
+					cellw = horz + 1 - u;
+				}
+
+				for (vcl = PX_TRUNC(SampleY); vcl <= PX_TRUNC(SampleY + SampleHeight);)
+				{
+					if (PX_TRUNC(v) == PX_TRUNC(SampleY + SampleHeight))
+					{
+						cellh = SampleY + SampleHeight - v;
+					}
+					else
+					{
+						cellh = vcl + 1 - v;
+					}
+					if (horz < resTexture->width&& vcl < resTexture->height)
+						SampleColor = PX_SURFACECOLOR(resTexture, horz, vcl);
+					else
+						SampleColor._argb.ucolor = 0;
+
+					mixa += SampleColor._argb.a * cellh * cellw / SampleArea;
+					mixr += SampleColor._argb.r * cellh * cellw / SampleArea;
+					mixg += SampleColor._argb.g * cellh * cellw / SampleArea;
+					mixb += SampleColor._argb.b * cellh * cellw / SampleArea;
+
+
+					vcl++;
+					v = (px_double)vcl;
+				}
+				horz++;
+				u = (px_double)horz;
+			}
+			mixa > 255 ? mixa = 255 : 0;
+			mixr > 255 ? mixr = 255 : 0;
+			mixg > 255 ? mixg = 255 : 0;
+			mixb > 255 ? mixb = 255 : 0;
+			Dst[xoft + yoft * newWidth] = PX_COLOR((px_uchar)PX_APO(mixa), (px_uchar)mixr, (px_uchar)mixg, (px_uchar)mixb);;
+		}
+	}
+	return PX_TRUE;
+}

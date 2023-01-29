@@ -90,6 +90,9 @@ enum PX_OBJECT_TYPE
   PX_OBJECT_TYPE_ASMDEBUGGER	,
   PX_OBJECT_TYPE_EXPLOSIONX  	,
   PX_OBJECT_TYPE_COLORPANEL		,
+  PX_OBJECT_TYPE_PAINTERBOX		,
+  PX_OBJECT_TYPE_LAYERBOX		,
+  PX_OBJECT_TYPE_CANVAS			,
 };
 
 
@@ -135,7 +138,7 @@ enum PX_OBJECT_TYPE
 #define PX_COLOR_RED PX_COLOR(255,255,0,0)
 #define PX_COLOR_GREEN PX_COLOR(255,0,255,0)
 #define PX_COLOR_BLUE PX_COLOR(255,0,0,255)
-
+#define PX_COLOR_NONE PX_COLOR(0,0,0,0)
 
 #define  PX_OBJECT_FILTEREDITOR_DEFAULE_HORIZONTALPIXELDIVIDING 48
 #define  PX_OBJECT_FILTEREDITOR_DEFAULE_VERTICALPIXELDIVIDING   20
@@ -522,6 +525,18 @@ px_void PX_ObjectExecuteEvent(PX_Object *pPost,PX_Object_Event Event);
 //////////////////////////////////////////////////////////////////////////
 //color panel
 #include "PX_Object_ColorPanel.h"
+
+//////////////////////////////////////////////////////////////////////////
+//PainterBox
+#include "PX_Object_PainterBox.h"
+
+//////////////////////////////////////////////////////////////////////////
+//LayerBox
+#include "PX_Object_LayerBox.h"
+
+//////////////////////////////////////////////////////////////////////////
+//Canvas
+#include "PX_Object_Canvas.h"
 
 #endif
 

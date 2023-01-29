@@ -154,10 +154,11 @@ px_void PX_Object_ColorPanelOnCursorDown(PX_Object* pObject, PX_Object_Event e, 
 			pdesc->color_rgb = PX_ColorHSVToRGB(pdesc->color_hsv);
 			PX_Object_ColorPanelUpdatePanelTexture(pObject);
 			pdesc->state = PX_Object_ColorPanel_State_Ring;
+			PX_ObjectExecuteEvent(pObject, PX_OBJECT_BUILD_EVENT(PX_OBJECT_EVENT_VALUECHANGED));
 		}
 		
 		ed = d / 2 - (d / 2 - 18) / 1.41421f + 2;
-		edis = edis = d - ed - ed;
+		 edis = d - ed - ed;
 		cx -= ed;
 		cy -= ed;
 		if (cx>0&&cx<edis&&cy>0&&cy<edis)
@@ -167,6 +168,7 @@ px_void PX_Object_ColorPanelOnCursorDown(PX_Object* pObject, PX_Object_Event e, 
 			pdesc->color_hsv.V = 1 - cy/ edis;
 			pdesc->color_rgb = PX_ColorHSVToRGB(pdesc->color_hsv);
 			pdesc->state = PX_Object_ColorPanel_State_SV;
+			PX_ObjectExecuteEvent(pObject, PX_OBJECT_BUILD_EVENT(PX_OBJECT_EVENT_VALUECHANGED));
 		}
 
 	}
@@ -212,11 +214,12 @@ px_void PX_Object_ColorPanelOnCursorDrag(PX_Object* pObject, PX_Object_Event e, 
 		pdesc->color_hsv.H = H*1.f;
 		pdesc->color_rgb = PX_ColorHSVToRGB(pdesc->color_hsv);
 		PX_Object_ColorPanelUpdatePanelTexture(pObject);
+		PX_ObjectExecuteEvent(pObject, PX_OBJECT_BUILD_EVENT(PX_OBJECT_EVENT_VALUECHANGED));
 	}
 	else if (pdesc->state == PX_Object_ColorPanel_State_SV)
 	{
 		ed = d / 2 - (d / 2 - 18) / 1.41421f + 2;
-		edis = edis = d - ed - ed;
+		 edis = d - ed - ed;
 		cx -= ed;
 		cy -= ed;
 		
@@ -234,11 +237,17 @@ px_void PX_Object_ColorPanelOnCursorDrag(PX_Object* pObject, PX_Object_Event e, 
 			pdesc->color_hsv.V = 1;
 
 		pdesc->color_rgb = PX_ColorHSVToRGB(pdesc->color_hsv);
+		PX_ObjectExecuteEvent(pObject, PX_OBJECT_BUILD_EVENT(PX_OBJECT_EVENT_VALUECHANGED));
 	}
 
 }
 
-
+px_color PX_Object_ColorPanelGetColor(PX_Object* pObject)
+{
+	PX_Object_ColorPanel* pdesc;
+	pdesc = PX_ObjectGetDesc(PX_Object_ColorPanel, pObject);
+	return pdesc->color_rgb;
+}
 PX_Object_ColorPanel* PX_Object_GetColorPanel(PX_Object* pObject)
 {
 	PX_Object_ColorPanel* pdesc;
@@ -247,6 +256,13 @@ PX_Object_ColorPanel* PX_Object_GetColorPanel(PX_Object* pObject)
 		return pdesc;
 	return PX_NULL;
 }
+
+px_void PX_Object_ColorPanelFree(PX_Object* pObject)
+{
+	PX_Object_ColorPanel* pdesc = PX_ObjectGetDesc(PX_Object_ColorPanel, pObject);
+	PX_TextureFree(&pdesc->panel);
+}
+
 
 PX_Object* PX_Object_ColorPanelCreate(px_memorypool* mp, PX_Object* Parent, px_int x, px_int y, px_int width, px_int height)
 {
@@ -262,7 +278,7 @@ PX_Object* PX_Object_ColorPanelCreate(px_memorypool* mp, PX_Object* Parent, px_i
 		height = 64;
 	}
 	radius = width > height ? height : width;
-	pObject = PX_ObjectCreateEx(mp, Parent, x*1.f, y*1.f, 0, width*1.f, height*1.f, 0, PX_OBJECT_TYPE_COLORPANEL, 0, PX_Object_ColorPanelRender, 0, &desc, sizeof(desc));
+	pObject = PX_ObjectCreateEx(mp, Parent, x*1.f, y*1.f, 0, width*1.f, height*1.f, 0, PX_OBJECT_TYPE_COLORPANEL, 0, PX_Object_ColorPanelRender, PX_Object_ColorPanelFree, &desc, sizeof(desc));
 	pdesc = PX_ObjectGetDesc(PX_Object_ColorPanel, pObject);
 	pdesc->mp = mp;
 	pdesc->color_hsv.a = 1;

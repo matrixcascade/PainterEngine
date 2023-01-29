@@ -16,7 +16,7 @@ typedef struct
 //use pushbutton function to operate cursor-button
 PX_Object *PX_Object_CursorButtonCreate(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y,px_int Width,px_int Height,const px_char *Text,PX_FontModule *fontmodule,px_color Color);
 PX_Object_CursorButton * PX_Object_GetCursorButton( PX_Object *Object );
-PX_Object * PX_Object_GetCursorButtonPushButton(PX_Object *Object);
+PX_Object * PX_Object_CursorButtonGetPushButton(PX_Object *Object);
 
 #endif
 

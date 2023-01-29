@@ -177,8 +177,10 @@ px_void PX_Object_WidgetRender(px_surface *psurface, PX_Object *pObject,px_uint 
 		PX_SurfaceRender(psurface,&pwidget->renderTarget,(px_int)objx,(px_int)objy+PX_OBJECT_WIDGET_BAR_SIZE,PX_ALIGN_LEFTTOP,PX_NULL);
 		if (pwidget->showShader)
 		{
-			PX_GeoDrawRect(psurface, (px_int)(objx + objWidth), (px_int)objy + 6, (px_int)(objx + objWidth + 6), (px_int)(objy + objHeight + 6), PX_COLOR(128, 0, 0, 0));
-			PX_GeoDrawRect(psurface, (px_int)(objx + 6), (px_int)(objy + objHeight), (px_int)(objx + objWidth - 1), (px_int)(objy + objHeight + 6), PX_COLOR(128, 0, 0, 0));
+			px_color sd = pwidget->backgroundcolor;
+			sd._argb.a = sd._argb.a/3*2;
+			PX_GeoDrawRect(psurface, (px_int)(objx + objWidth), (px_int)objy + 6, (px_int)(objx + objWidth + 6), (px_int)(objy + objHeight + 6), sd);
+			PX_GeoDrawRect(psurface, (px_int)(objx + 6), (px_int)(objy + objHeight), (px_int)(objx + objWidth - 1), (px_int)(objy + objHeight + 6), sd);
 		}
 		
 	} while (0);
@@ -358,5 +360,14 @@ px_void PX_Object_WidgetSetTitle(PX_Object *pObject,const px_char title[])
 	if (pWidget)
 	{
 		PX_strcpy(pWidget->title,title,sizeof(pWidget->title));
+	}
+}
+
+px_void PX_Object_WidgetShowShader(PX_Object* pObject, px_bool show)
+{
+	PX_Object_Widget* pWidget = PX_Object_GetWidget(pObject);
+	if (pWidget)
+	{
+		pWidget->showShader = show;
 	}
 }

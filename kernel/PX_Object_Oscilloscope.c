@@ -1038,7 +1038,7 @@ static px_void PX_Object_OscilloscopeDrawDataInfo(px_surface *psurface,PX_Object
 
 					if (y>btm)
 					{
-						double tem;
+						px_double tem;
 						tem=btm;
 						btm=y;
 						y=tem;

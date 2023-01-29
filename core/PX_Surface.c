@@ -175,3 +175,8 @@ px_void PX_SurfaceClear(px_surface *psurface, px_int left, px_int top, px_int ri
 	}
 	
 }
+
+px_void PX_SurfaceClearAll(px_surface* psurface,px_color color)
+{
+	PX_SurfaceClear(psurface, 0, 0, psurface->width - 1, psurface->height - 1, color);
+}

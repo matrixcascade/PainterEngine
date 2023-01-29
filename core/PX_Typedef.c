@@ -3585,6 +3585,7 @@ px_void PX_Cepstrum(_IN px_complex x[],_OUT px_complex X[],px_int N,PX_CEPSTRUM_
 {
 	px_int i;
 	PX_FFT(x,X,N);
+	
 	if (type==PX_CEPSTRUM_TYPE_COMPLEX)
 	{
 		for (i=0;i<N;i++)
@@ -3638,7 +3639,7 @@ px_double PX_ZeroCrossingRateComplex(_IN px_complex x[],px_int N)
 	return zeroCross*1.0/N;
 }
 
-px_int PX_PitchEstimation(_IN px_complex x[],px_int N,px_int sampleRate,px_int low_Hz,px_int high_Hz)
+px_float PX_PitchEstimation(_IN px_complex x[],px_int N,px_int sampleRate,px_int low_Hz,px_int high_Hz)
 {
 	px_int low=0,high=0,i,idx=0;
 	px_double max=0;
@@ -3676,7 +3677,7 @@ px_int PX_PitchEstimation(_IN px_complex x[],px_int N,px_int sampleRate,px_int l
 	{
 		return 0;
 	}
-	return sampleRate/idx;
+	return sampleRate*1.0f/idx;
 }
 
 px_void PX_PreEmphasise(const px_double *data, px_int len, px_double *out, px_double preF)//0.9<preF<1.0 suggest 0.9
@@ -5283,3 +5284,11 @@ px_dword PX_adler32(const px_byte* data, px_dword len)
 }
 
 
+px_double PX_MelToHz(px_double mel)
+{
+	return 700 * (PX_pow(10, mel / 2595) - 1);
+}
+px_double PX_HzToMel(px_double hz)
+{
+	return 2595 * PX_log10(1 + hz / 700);
+}
