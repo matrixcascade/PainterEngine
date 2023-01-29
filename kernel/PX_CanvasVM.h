@@ -39,5 +39,6 @@ px_bool PX_CanvasVMInitialize(px_memorypool* mp, PX_CanvasVM *pCanvas);
 px_void PX_CanvasVMOnBegin(PX_CanvasVM* pCanvas, px_float x, px_float y, px_float z);
 px_void PX_CanvasVMOnMove(PX_CanvasVM* pCanvas, px_float x, px_float y, px_float z);
 px_void PX_CanvasVMOnEnd(PX_CanvasVM* pCanvas);
-px_void PX_CanvasVMSetPreviewTexture()
+px_void PX_CanvasVMSetResultTexture(PX_CanvasVM* pCanvas, px_texture* ptex);
+px_void PX_CanvasVMSetPreviewTexture(PX_CanvasVM* pCanvas,px_texture *ptex);
 #endif
