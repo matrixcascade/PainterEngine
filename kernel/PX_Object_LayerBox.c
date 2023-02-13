@@ -61,7 +61,7 @@ px_void PX_Object_LayerBoxListItemOnRender(px_surface* psurface, PX_Object* pObj
 		PX_GeoDrawRect(psurface, (px_int)x, (px_int)y, (px_int)x + 6, (px_int)(y + h),  PX_COLOR_BLUE);
 	}
 
-	PX_TextureRender(psurface, &pLayer->texmin, (px_int)x + 52, (px_int)y + 3, PX_ALIGN_LEFTTOP, 0);
+	PX_TextureRender(psurface, &pLayer->surface_preview_mini, (px_int)x + 52, (px_int)y + 3, PX_ALIGN_LEFTTOP, 0);
 	PX_FontModuleDrawText(psurface, pdesc->fm, (px_int)x + 100, (px_int)y + 3, PX_ALIGN_LEFTTOP, pLayer->name, PX_COLOR_BLACK);
 	PX_GeoDrawBorder(psurface, (px_int)x, (px_int)y, (px_int)(x + w), (px_int)(y + h), 1, PX_COLOR_BLACK);
 }
@@ -131,13 +131,13 @@ px_void PX_Object_LayerBoxCreateLayer(PX_Object* pObject, const px_char name[])
 	{
 		return;
 	}
-	if (!PX_TextureCreate(pdesc->data_mp, &pdesc->layers[i].layer,pdesc->width,pdesc->height))
+	if (!PX_TextureCreate(pdesc->data_mp, &pdesc->layers[i].surface_layer,pdesc->width,pdesc->height))
 	{
 		return;
 	}
-	if (!PX_TextureCreate(pdesc->data_mp, &pdesc->layers[i].texmin, 48, 48))
+	if (!PX_TextureCreate(pdesc->data_mp, &pdesc->layers[i].surface_preview_mini, 48, 48))
 	{
-		PX_TextureFree(&pdesc->layers[i].layer);
+		PX_TextureFree(&pdesc->layers[i].surface_layer);
 		return;
 	}
 	pdesc->layers[i].attribute = PX_OBJECT_LAYER_ATTRIBUTE_NORMAL;
@@ -165,8 +165,8 @@ px_void PX_Object_LayerBoxOnDeleteLayer(PX_Object* pObject, PX_Object_Event e, p
 	if (select_index!=-1)
 	{
 		px_int i;
-		PX_TextureFree(&pdesc->layers[select_index].texmin);
-		PX_TextureFree(&pdesc->layers[select_index].layer);
+		PX_TextureFree(&pdesc->layers[select_index].surface_preview_mini);
+		PX_TextureFree(&pdesc->layers[select_index].surface_layer);
 		if (select_index == PX_COUNTOF(pdesc->layers)-1)
 		{
 			PX_memset(&pdesc->layers[select_index], 0, sizeof(pdesc->layers[select_index]));
@@ -383,8 +383,42 @@ PX_Object* PX_Object_LayerBoxCreate(px_memorypool* ui_mp, px_memorypool* data_mp
 	return pObject;
 }
 
-px_texture* PX_Object_LayerBoxGetViewTex(PX_Object* pObject)
+px_texture* PX_Object_LayerBoxGetPreviewSurface(PX_Object* pObject)
 {
 	PX_Object_LayerBox* pdesc = PX_ObjectGetDesc(PX_Object_LayerBox, pObject);
 	return &pdesc->tex_view;
+}
+
+px_surface* PX_Object_LayerBoxGetEditingSurface(PX_Object* pObject)
+{
+	px_int i;
+	PX_Object_LayerBox* pdesc = PX_ObjectGetDesc(PX_Object_LayerBox, pObject);
+	i = PX_Object_ListGetCurrentSelectIndex(pdesc->list);
+	if (i==-1)
+	{
+		return PX_NULL;
+	}
+	return &pdesc->layers[i].surface_layer;
+}
+
+px_void PX_Object_LayerBoxUpdateLayer(PX_Object* pObject, px_int layerindex)
+{
+	PX_Object_LayerBox* pdesc = PX_ObjectGetDesc(PX_Object_LayerBox, pObject);
+	if (layerindex<0||layerindex>=PX_COUNTOF(pdesc->layers)||!pdesc->layers[layerindex].activating)
+	{
+		PX_ASSERT();
+		return;
+	}
+	PX_TextureScaleToTexture(&pdesc->layers[layerindex].surface_layer, &pdesc->layers[layerindex].surface_preview_mini);
+}
+px_void PX_Object_LayerBoxUpdateEditingLayer(PX_Object* pObject)
+{
+	px_int i;
+	PX_Object_LayerBox* pdesc = PX_ObjectGetDesc(PX_Object_LayerBox, pObject);
+	i = PX_Object_ListGetCurrentSelectIndex(pdesc->list);
+	if (i == -1)
+	{
+		return;
+	}
+	PX_Object_LayerBoxUpdateLayer(pObject, i);
 }

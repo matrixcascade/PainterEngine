@@ -22,6 +22,7 @@ px_void PX_Object_WidgetShow(PX_Object *pObject)
 	if (pWidget)
 	{
 		pObject->Visible=PX_TRUE;
+		if(pWidget->focusWidget)
 		PX_ObjectSetFocus(pObject);
 	}
 }
@@ -75,7 +76,8 @@ px_void PX_Object_Widget_EventDispatcher(PX_Object *pObject,PX_Object_Event e,px
 
 			if (PX_ObjectIsCursorInRegion(pObject,e))
 			{
-				PX_ObjectSetFocus(pObject);
+				if (pwidget->focusWidget)
+					PX_ObjectSetFocus(pObject);
 				x=PX_Object_Event_GetCursorX(e);
 				y=PX_Object_Event_GetCursorY(e);
 				if (!pwidget->bDraging)
@@ -98,6 +100,7 @@ px_void PX_Object_Widget_EventDispatcher(PX_Object *pObject,PX_Object_Event e,px
 			{
 				if (!pwidget->bmodel)
 				{
+					
 					PX_ObjectClearFocus(pObject);
 				}
 				
@@ -248,6 +251,7 @@ PX_Object * PX_Object_WidgetCreate(px_memorypool *mp,PX_Object *Parent,px_int x,
 	pWidget->bmoveable=PX_TRUE;
 	pWidget->fontcolor=PX_OBJECT_UI_DEFAULT_FONTCOLOR;
 	pWidget->showShader = PX_TRUE;
+	pWidget->focusWidget = PX_TRUE;
 	PX_ObjectRegisterEvent(pWidget->btn_close,PX_OBJECT_EVENT_EXECUTE,PX_Object_WidgetOnButtonClose,pObject);
 	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_ANY,PX_Object_Widget_EventDispatcher,PX_NULL);
 
@@ -369,5 +373,14 @@ px_void PX_Object_WidgetShowShader(PX_Object* pObject, px_bool show)
 	if (pWidget)
 	{
 		pWidget->showShader = show;
+	}
+}
+
+px_void PX_Object_WidgetSetFocusWidget(PX_Object* pObject, px_bool bf)
+{
+	PX_Object_Widget* pWidget = PX_Object_GetWidget(pObject);
+	if (pWidget)
+	{
+		pWidget->focusWidget = bf;
 	}
 }

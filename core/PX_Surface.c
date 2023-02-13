@@ -23,6 +23,14 @@ px_bool PX_SurfaceCreate(px_memorypool *mp,px_int width,px_int height,px_surface
 	return PX_FALSE;
 }
 
+px_void PX_SurfaceUnlimit(px_surface* psurface)
+{
+	psurface->limit_left = 0;
+	psurface->limit_top = 0;
+	psurface->limit_right = psurface->width - 1;
+	psurface->limit_bottom = psurface->height - 1;
+}
+
 px_void PX_SurfaceFree(px_surface *psurface)
 {
 	if (psurface->surfaceBuffer==PX_NULL|| psurface->MP==PX_NULL)

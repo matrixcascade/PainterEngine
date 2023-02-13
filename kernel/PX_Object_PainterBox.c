@@ -18,6 +18,12 @@ px_color PX_Object_PainterBoxGetToolColor(PX_Object* pObject)
 	return PX_Object_ColorPanelGetColor(pdesc->color_panel);
 }
 
+px_float PX_Object_PainterBoxGetToolSmooth(PX_Object* pObject)
+{
+	PX_Object_PainterBox* pdesc = PX_ObjectGetDesc(PX_Object_PainterBox, pObject);
+	return PX_Object_SliderBarGetValue(pdesc->sliderbar_smooth)*1.0f;
+}
+
 px_void PX_Object_PainterBoxOnResetToolsColor(PX_Object* pObject)
 {
 	PX_Object_PainterBox* pdesc = PX_ObjectGetDesc(PX_Object_PainterBox, pObject);
@@ -45,6 +51,8 @@ px_void PX_Object_PainterBoxOnRenderPresent(PX_Object* pObject)
 		h_tool_color._argb.a /= 4;
 		switch (pdesc->tool_type)
 		{
+		case PX_OBJECT_PAINTERBOX_TOOL_TYPE_NONE:
+			break;
 		case PX_OBJECT_PAINTERBOX_TOOL_TYPE_PEN:
 			{
 			PX_Object_PainterBoxOnResetToolsColor(pObject);
@@ -158,10 +166,11 @@ PX_Object* PX_Object_PainterBoxCreate(px_memorypool* mp, PX_Object* Parent, px_i
 	pObject = PX_ObjectCreateEx(mp, Parent, (px_float)x, (px_float)y, 0, (px_float)192, (px_float)572, 0, PX_OBJECT_TYPE_PAINTERBOX, PX_NULL, PX_NULL, PX_Object_PainterBoxFree, &desc, sizeof(desc));
 	pdesc = PX_ObjectGetDesc(PX_Object_PainterBox, pObject);
 
-	pdesc->widget = PX_Object_WidgetCreate(mp, pObject, 0, 0, 192, 572, "",0);
+	pdesc->widget = PX_Object_WidgetCreate(mp, pObject, 0, 0, 192, 610, "",0);
 	//PX_Object_WidgetShowHideCloseButton(pdesc->widget, PX_FALSE);
 	PX_Object_WidgetSetBorderColor(pdesc->widget, PX_COLOR_BLACK);
 	PX_Object_WidgetSetFocusColor(pdesc->widget, PX_COLOR_RED);
+	PX_Object_WidgetSetFocusWidget(pdesc->widget, PX_FALSE);
 	if (!PX_TextureCreateFromMemory(mp, PX_Object_PainterBox_ImageEraser, sizeof(PX_Object_PainterBox_ImageEraser), &pdesc->tex_Eraser))
 	{
 		PX_ObjectDelete(pObject);
@@ -263,12 +272,19 @@ PX_Object* PX_Object_PainterBoxCreate(px_memorypool* mp, PX_Object* Parent, px_i
 	PX_Object_SliderBarSetRange(pdesc->sliderbar_alpha, 0, 255);
 	PX_Object_SliderBarSetValue(pdesc->sliderbar_alpha, 255);
 
+	pdesc->sliderbar_smooth = PX_Object_SliderBarCreate(mp, pdesc->widget, 10, 356, 172, 28, PX_OBJECT_SLIDERBAR_TYPE_HORIZONTAL, PX_OBJECT_SLIDERBAR_STYLE_BOX);
+	PX_Object_SliderBarSetBackgroundColor(pdesc->sliderbar_smooth, PX_COLOR_WHITE);
+	PX_Object_SliderBarSetColor(pdesc->sliderbar_smooth, PX_COLOR_BLACK);
+	PX_Object_SliderBarSetRange(pdesc->sliderbar_smooth, 1, 100);
+	PX_Object_SliderBarSetValue(pdesc->sliderbar_smooth, 10);
+
 	PX_ObjectRegisterEvent(pdesc->sliderbar_alpha, PX_OBJECT_EVENT_VALUECHANGED, PX_Object_PainterBoxOnParamsChanged, pObject);
 	PX_ObjectRegisterEvent(pdesc->sliderbar_size, PX_OBJECT_EVENT_VALUECHANGED, PX_Object_PainterBoxOnParamsChanged, pObject);
 	PX_ObjectRegisterEvent(pdesc->color_panel, PX_OBJECT_EVENT_VALUECHANGED, PX_Object_PainterBoxOnParamsChanged, pObject);
-	pdesc->image_present = PX_Object_ImageCreate(mp, pdesc->widget, 10, 364, 172, 172, &pdesc->present);
+	pdesc->image_present = PX_Object_ImageCreate(mp, pdesc->widget, 10, 396, 172, 172, &pdesc->present);
 
 	PX_Object_PainterBoxOnRenderPresent(pObject);
+	
 	return pObject;
 }
 

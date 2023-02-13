@@ -132,14 +132,6 @@ enum PX_OBJECT_TYPE
 #endif
 
 #define PX_OBJECT_UI_DISABLE_FONTCOLOR PX_COLOR(255,128,128,128)
-
-#define PX_COLOR_WHITE PX_COLOR(255,255,255,255)
-#define PX_COLOR_BLACK PX_COLOR(255,0,0,0)
-#define PX_COLOR_RED PX_COLOR(255,255,0,0)
-#define PX_COLOR_GREEN PX_COLOR(255,0,255,0)
-#define PX_COLOR_BLUE PX_COLOR(255,0,0,255)
-#define PX_COLOR_NONE PX_COLOR(0,0,0,0)
-
 #define  PX_OBJECT_FILTEREDITOR_DEFAULE_HORIZONTALPIXELDIVIDING 48
 #define  PX_OBJECT_FILTEREDITOR_DEFAULE_VERTICALPIXELDIVIDING   20
 #define	 PX_OBJECT_FILTEREDITOR_DEFAULT_FRAMELINE_WIDTH			   2
@@ -255,6 +247,7 @@ PX_Object_Event PX_Object_Event_CursorOffset(PX_Object_Event e, px_point offset)
 px_float PX_Object_Event_GetCursorX(PX_Object_Event e);
 px_float PX_Object_Event_GetCursorY(PX_Object_Event e);
 px_float PX_Object_Event_GetCursorZ(PX_Object_Event e);
+px_float PX_Object_Event_GetCursorPressure(PX_Object_Event e);
 px_int PX_Object_Event_GetCursorIndex(PX_Object_Event e);
 
 px_float PX_Object_Event_GetWidth(PX_Object_Event e);

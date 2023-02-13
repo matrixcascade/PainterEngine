@@ -17,7 +17,7 @@ typedef struct
 {
 	px_bool activating;
 	px_char name[PX_OBJECT_LAYER_NAME_LENGTH];
-	px_texture texmin,layer;
+	px_texture surface_preview_mini,surface_layer;
 	px_bool editing;
 	px_bool visible;
 	PX_OBJECT_LAYER_ATTRIBUTE attribute;
@@ -39,6 +39,8 @@ typedef struct
 }PX_Object_LayerBox;
 
 PX_Object* PX_Object_LayerBoxCreate(px_memorypool* ui_mp, px_memorypool* data_mp, PX_Object* Parent, px_int x, px_int y, px_int surface_width, px_int surface_height, PX_FontModule* fm);
-px_texture* PX_Object_LayerBoxGetViewTex(PX_Object* pObject);
-
+px_texture* PX_Object_LayerBoxGetPreviewSurface(PX_Object* pObject);
+px_surface* PX_Object_LayerBoxGetEditingSurface(PX_Object* pObject);
+px_void PX_Object_LayerBoxUpdateLayer(PX_Object* pObject, px_int layerindex);
+px_void PX_Object_LayerBoxUpdateEditingLayer(PX_Object* pObject);
 #endif

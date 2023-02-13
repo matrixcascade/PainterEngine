@@ -20,6 +20,13 @@
 #define     PX_e2               (PX_e*PX_e)
 #define     PX_RAND_MAX         (0xffffff)
 
+#define PX_COLOR_WHITE PX_COLOR(255,255,255,255)
+#define PX_COLOR_BLACK PX_COLOR(255,0,0,0)
+#define PX_COLOR_RED PX_COLOR(255,255,0,0)
+#define PX_COLOR_GREEN PX_COLOR(255,0,255,0)
+#define PX_COLOR_BLUE PX_COLOR(255,0,0,255)
+#define PX_COLOR_NONE PX_COLOR(0,0,0,0)
+
 #ifdef _DEBUG
 #define PX_DEBUG_MODE _DEBUG
 #endif
@@ -536,7 +543,7 @@ px_void PX_FFT_2(_IN px_complex x[],_OUT px_complex X[],px_int N_N);
 px_void PX_IFFT_2(_IN px_complex X[],_OUT px_complex x[],px_int N_N);
 px_void PX_FFT_2_Shift(_IN px_complex _in[],_OUT px_complex _out[],px_int N_N);
 px_void PX_DCT_2_Shift(_IN px_double _in[], _OUT px_double _out[], px_int N_N);
-
+px_complex PX_FTResample(_IN px_complex X[], px_int N, px_float t_0_1);
 
 px_void PX_FT_Symmetry(_IN px_complex x[], _OUT px_complex X[], px_int N);
 

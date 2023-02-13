@@ -19,6 +19,7 @@ typedef struct
 	px_bool		event_optimization;
 	px_bool     bevent_update;
 	px_bool		showShader;
+	px_bool		focusWidget;
 }PX_Object_Widget;
 
 PX_Object_Widget * PX_Object_GetWidget( PX_Object *Object );
@@ -38,5 +39,6 @@ px_void PX_Object_WidgetSetFocusColor(PX_Object *pObject,px_color clr);
 px_void PX_Object_WidgetSetFontColor(PX_Object *pObject,px_color clr);
 px_void PX_Object_WidgetSetTitle(PX_Object *pObject,const px_char title[]);
 px_void PX_Object_WidgetShowShader(PX_Object* pObject, px_bool show);
+px_void PX_Object_WidgetSetFocusWidget(PX_Object* pObject, px_bool bf);
 #endif
 

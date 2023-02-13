@@ -2079,6 +2079,11 @@ px_point2D PX_Point2DDiv(px_point2D p1,px_float m)
 	return p1;
 }
 
+px_float PX_Point2DDistance(px_point p1, px_point p2)
+{
+	return PX_sqrt((p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y));
+}
+
 px_float PX_PointDot(px_point p1,px_point p2)
 {
 	return p1.x*p2.x+p1.y*p2.y+p1.z*p2.z;
@@ -2102,6 +2107,7 @@ px_point PX_PointCross(px_point p1,px_point p2)
 	pt.z=p1.x*p2.y-p2.x*p1.y;
 	return pt;
 }
+
 
 
 px_point4D PX_Point4DCross(px_point4D p1,px_point4D p2)
@@ -3365,6 +3371,36 @@ px_void FFT_Base2(_IN _OUT px_complex x[],px_int N)
 
 
 }
+
+px_complex PX_FTResample(_IN px_complex X[], px_int N, px_float t_0_1)
+{
+	px_complex x = {0};
+	px_int n;
+	px_float im = 0;
+	px_complex ejw;
+	px_float k;
+
+	if (N==0)
+	{
+		PX_ASSERT();
+		return x;
+	}
+	k = t_0_1 * (N - 1);
+	x.re = 0;
+	x.im = 0;
+	
+	for (n = 0; n < N; n++)
+	{
+		ejw.re = (px_float)PX_cosd((2 * PX_PI * k * n / N));
+		ejw.im = (px_float)PX_sind((2 * PX_PI * k * n / N));
+		x = PX_complexAdd(x, PX_complexMult(X[n], ejw));
+	}
+
+	x.re /= N; x.im /= N;
+	return x;
+}
+
+
 px_void PX_FFT(_IN px_complex x[],_OUT px_complex X[],px_int N)
 {
 	PX_memcpy(X,x,sizeof(px_complex)*N);

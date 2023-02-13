@@ -239,6 +239,11 @@ px_float PX_Object_Event_GetCursorZ(PX_Object_Event e)
 	return e.Param_float[2];
 }
 
+px_float PX_Object_Event_GetCursorPressure(PX_Object_Event e)
+{
+	return e.Param_float[3];
+}
+
 px_int PX_Object_Event_GetCursorIndex(PX_Object_Event e)
 {
 	return e.Param_int[2];

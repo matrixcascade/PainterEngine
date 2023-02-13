@@ -2841,9 +2841,9 @@ px_bool PX_TextureScaleToTexture( px_texture* resTexture,  px_texture* out)
 {
 	px_int newWidth = out->width;
 	px_int newHeight= out->height;
-	px_double SampleWidth = (px_double)(resTexture->width) / (newWidth);
-	px_double SampleHeight = (px_double)(resTexture->height) / (newHeight);
-	px_double SampleX, SampleY, SampleArea, u, v, cellw, cellh, mixa, mixr, mixg, mixb;
+	px_float SampleWidth = (px_float)(resTexture->width) / (newWidth);
+	px_float SampleHeight = (px_float)(resTexture->height) / (newHeight);
+	px_float SampleX, SampleY, SampleArea, u, v, cellw, cellh, mixa, mixr, mixg, mixb;
 	px_color* Dst, * Src = (px_color*)resTexture->surfaceBuffer;
 	px_color SampleColor, MixColor;
 	px_int xoft, yoft, horz, vcl;
@@ -2910,10 +2910,10 @@ px_bool PX_TextureScaleToTexture( px_texture* resTexture,  px_texture* out)
 
 
 					vcl++;
-					v = (px_double)vcl;
+					v = (px_float)vcl;
 				}
 				horz++;
-				u = (px_double)horz;
+				u = (px_float)horz;
 			}
 			mixa > 255 ? mixa = 255 : 0;
 			mixr > 255 ? mixr = 255 : 0;
