@@ -524,7 +524,7 @@ px_void PX_WorldSetAuxiliaryLineColor(PX_World *pw,px_color color)
 
 
 
-px_point PX_WolrdObjectXYtoScreenXY(PX_World *pw,px_float x,px_float y)
+px_point PX_WorldObjectXYtoScreenXY(PX_World *pw,px_float x,px_float y)
 {
 	return PX_POINT(x-pw->offsetx,y-pw->offsety,0);
 }
