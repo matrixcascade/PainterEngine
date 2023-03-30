@@ -35,6 +35,7 @@
 #define PX_OBJECT_EVENT_CLOSE				23
 #define PX_OBJECT_EVENT_CURSORMUP			24
 #define PX_OBJECT_EVENT_CURSORMDOWN			25
+#define PX_OBJECT_EVENT_REQUESTDATA			26
 //////////////////////////////////////////////////////////////////////////////
 //    Type of Controls
 /////////////////////////////////////////////////////////////////////////////
@@ -93,6 +94,7 @@ enum PX_OBJECT_TYPE
   PX_OBJECT_TYPE_PAINTERBOX		,
   PX_OBJECT_TYPE_LAYERBOX		,
   PX_OBJECT_TYPE_CANVAS			,
+  PX_OBJECT_TYPE_CURSORSLIDER   ,
 };
 
 
@@ -530,6 +532,10 @@ px_void PX_ObjectExecuteEvent(PX_Object *pPost,PX_Object_Event Event);
 //////////////////////////////////////////////////////////////////////////
 //Canvas
 #include "PX_Object_Canvas.h"
+
+//////////////////////////////////////////////////////////////////////////
+//SliderCursor
+#include "PX_Object_CursorSlider.h"
 
 #endif
 

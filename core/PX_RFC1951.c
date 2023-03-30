@@ -112,8 +112,8 @@ px_bool PX_RFC1951Inflate(px_byte* _in, px_uint input_size, px_memory* _out)
 			return PX_FALSE;
 		}
 
-		isLastBlock = PX_ReadBits(&bit_position, _in, 1);
-		type = PX_ReadBits(&bit_position, _in, 2);
+		isLastBlock = PX_ReadBitsLE(&bit_position, _in, 1);
+		type = PX_ReadBitsLE(&bit_position, _in, 2);
 		
 		if (!PX_RFC1951InflateBlock(_in, input_size, &bit_position, type, _out))
 			return PX_FALSE;

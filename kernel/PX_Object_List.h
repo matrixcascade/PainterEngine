@@ -35,6 +35,7 @@ typedef struct
 	PX_Object *SliderBar;
 	PX_FontModule* fm;
 	px_void* userptr;
+	px_dword click_elapsed;
 	PX_Object_ListItemOnCreate CreateFunctions;
 	Function_ObjectRender ArrayRender;
 }PX_Object_List;

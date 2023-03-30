@@ -134,7 +134,7 @@ px_void PX_Object_ListOnCursorDown(PX_Object *pObject,PX_Object_Event e,px_void 
 				pList->currentSelectedIndex = -1;
 			}
 		}
-		
+		pList->click_elapsed = 0;
 		ne.Event=PX_OBJECT_EVENT_VALUECHANGED;
 		PX_Object_Event_SetIndex(&ne,pList->currentSelectedIndex);
 		PX_ObjectExecuteEvent(pObject,ne);
@@ -149,6 +149,14 @@ px_void PX_Object_ListOnCursorDown(PX_Object *pObject,PX_Object_Event e,px_void 
 			PX_Object_Event_SetIndex(&ne,pList->currentSelectedIndex);
 			PX_ObjectExecuteEvent(pObject,ne);
 		}
+		else if(pList->currentSelectedIndex != -1&&pList->click_elapsed<260)
+		{
+			PX_memset(&e, 0, sizeof(ne));
+			ne.Event = PX_OBJECT_EVENT_EXECUTE;
+			PX_Object_Event_SetIndex(&ne, pList->currentSelectedIndex);
+			PX_ObjectExecuteEvent(pObject, ne);
+		}
+		pList->click_elapsed = 0;
 	}
 }
 
@@ -256,6 +264,8 @@ px_void PX_Object_ListRender(px_surface *psurface, PX_Object *pObject,px_uint el
 	objy=(pObject->y+inheritY);
 	objWidth=pObject->Width;
 	objHeight=pObject->Height;
+
+	pList->click_elapsed += elapsed;
 
 	if (pList->Items.size!=(px_int)(objHeight/(pList->ItemHeight) + 2))
 	{

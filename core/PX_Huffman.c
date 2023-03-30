@@ -59,7 +59,7 @@ static px_dword PX_HuffmanGetSymbol(px_uint32* bitpointer, const px_byte* bitstr
 		{
 			return tree[cursor].data;
 		}
-		bit = PX_ReadBit(bitpointer, bitstream);
+		bit = PX_ReadBitLE(bitpointer, bitstream);
 		if (bit)
 		{
 			cursor = tree[cursor].right;
@@ -362,9 +362,9 @@ static px_bool PX_HuffmanInflateDynamicTree(const px_byte* in, px_uint* bp, px_u
 	px_dword distance_index_bitlen[30] = {0};
 	
 
-	hlit = PX_ReadBits(bp, in, 5) + 257;	
-	hdist = PX_ReadBits(bp, in, 5) + 1;	
-	hclen = PX_ReadBits(bp, in, 4) + 4;	
+	hlit = PX_ReadBitsLE(bp, in, 5) + 257;	
+	hdist = PX_ReadBitsLE(bp, in, 5) + 1;	
+	hclen = PX_ReadBitsLE(bp, in, 4) + 4;	
 
 	do {
 		px_byte rfc1951_map[19] = { 16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15 };
@@ -378,7 +378,7 @@ static px_bool PX_HuffmanInflateDynamicTree(const px_byte* in, px_uint* bp, px_u
 		for (i = 0; i < 19; i++) 
 		{
 			if (i < hclen) 
-				raw_code_bl_code_bl[rfc1951_map[i]] = PX_ReadBits(bp, in, 3);
+				raw_code_bl_code_bl[rfc1951_map[i]] = PX_ReadBitsLE(bp, in, 3);
 			else 
 				raw_code_bl_code_bl[rfc1951_map[i]] = 0;
 		}
@@ -413,7 +413,7 @@ static px_bool PX_HuffmanInflateDynamicTree(const px_byte* in, px_uint* bp, px_u
 
 			if ((*bp)/8 >= in_size) return PX_FALSE;
 			
-			replength += PX_ReadBits(bp, in, 2);
+			replength += PX_ReadBitsLE(bp, in, 2);
 
 			if ((i - 1) < hlit) 
 				value = symbol_bitlen[i - 1];
@@ -441,7 +441,7 @@ static px_bool PX_HuffmanInflateDynamicTree(const px_byte* in, px_uint* bp, px_u
 
 			if ((*bp) /8  >= in_size) break;
 		
-			replength += PX_ReadBits(bp, in, 3);
+			replength += PX_ReadBitsLE(bp, in, 3);
 
 
 			for (n = 0; n < replength; n++) 
@@ -462,7 +462,7 @@ static px_bool PX_HuffmanInflateDynamicTree(const px_byte* in, px_uint* bp, px_u
 			px_uint replength = 11;
 
 			if ((*bp) / 8 >= in_size) break;
-			replength += PX_ReadBits(bp, in, 7);
+			replength += PX_ReadBitsLE(bp, in, 7);
 
 
 			for (n = 0; n < replength; n++) 
@@ -560,7 +560,7 @@ px_bool PX_HuffmanInflateCodeData(const px_byte _in[], px_uint *pbit_position, p
 			if ((*pbit_position/8) >= in_size) 
 				return PX_FALSE;
 			
-			length += PX_ReadBits(pbit_position, _in, extra_bits);
+			length += PX_ReadBitsLE(pbit_position, _in, extra_bits);
 
 			distance_code = PX_HuffmanGetSymbol(pbit_position, _in, distance_tree,60);
 
@@ -575,7 +575,7 @@ px_bool PX_HuffmanInflateCodeData(const px_byte _in[], px_uint *pbit_position, p
 			if (((*pbit_position)/8) >= in_size) 
 				return PX_FALSE;
 
-			distance += PX_ReadBits(pbit_position, _in, extra_bits);
+			distance += PX_ReadBitsLE(pbit_position, _in, extra_bits);
 
 			if(!PX_MemoryCat(out, &code, 2))
 				return PX_FALSE;

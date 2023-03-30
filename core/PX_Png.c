@@ -280,6 +280,51 @@ static px_dword PX_PngChunkGetCRC(const px_byte* pchunk)
 	return crc;
 }
 
+px_int PX_PngGetSize(px_byte* ppngbuffer,px_int in_size)
+{
+	px_int width, height;
+	PX_PNG_FORMAT format;
+	px_byte* pchunk;
+	px_byte* compressed = 0;
+
+	px_int compressed_size = 0;
+
+
+	if (!PX_PngVerify(ppngbuffer, 29, &width, &height, &format))return PX_FALSE;
+
+	do
+	{
+		px_int chunk_length;
+		px_byte* pdata;
+		pchunk = ppngbuffer + 33;
+		while (pchunk < ppngbuffer + in_size)
+		{
+			if ((px_int)(pchunk - ppngbuffer + 12) > in_size)return PX_FALSE;
+			if (!PX_PngChunkCRCVerify(pchunk)) return PX_FALSE;
+			chunk_length = PX_PNG_MAKE_DWORD_PTR(pchunk);
+			if ((px_int)(pchunk - ppngbuffer + 12 + chunk_length) > in_size) return PX_FALSE;
+			pdata = pchunk + 8;
+
+			switch (PX_PNG_MAKE_DWORD_PTR(pchunk + 4))
+			{
+			case PX_PNG_CHUNK_IDAT:
+			{
+				compressed_size += chunk_length;
+			}
+			break;
+			case PX_PNG_CHUNK_IEND:
+				break;
+			default:
+				if ((pchunk[4] & 32) != 0)
+					break;
+				return PX_FALSE;
+			}
+			pchunk += (chunk_length + 12);
+		}
+		return (px_int)(pchunk - ppngbuffer);
+	} while (0);
+}
+
 px_bool PX_PngToRenderBuffer(px_memorypool * mp,px_byte* ppngbuffer, px_int size,px_surface *prendersurface)
 {
 	px_int width, height;
@@ -407,7 +452,7 @@ px_bool PX_PngToRenderBuffer(px_memorypool * mp,px_byte* ppngbuffer, px_int size
 		{
 			for (i = 0; i < width; i++)
 			{
-				px_byte a = PX_ReadBits(&bp, imagedata, 1)?255:0;
+				px_byte a = PX_ReadBitsLE(&bp, imagedata, 1)?255:0;
 				PX_SurfaceSetPixel(prendersurface, i, j, PX_COLOR(255, a, a, a));
 			}
 		}
@@ -421,7 +466,7 @@ px_bool PX_PngToRenderBuffer(px_memorypool * mp,px_byte* ppngbuffer, px_int size
 		{
 			for (i = 0; i < width; i++)
 			{
-				px_byte a = (px_byte)(PX_ReadBits(&bp, imagedata, 2) *(255/3));
+				px_byte a = (px_byte)(PX_ReadBitsLE(&bp, imagedata, 2) *(255/3));
 				PX_SurfaceSetPixel(prendersurface, i, j, PX_COLOR(255, a, a, a));
 			}
 		}
@@ -435,7 +480,7 @@ px_bool PX_PngToRenderBuffer(px_memorypool * mp,px_byte* ppngbuffer, px_int size
 		{
 			for (i = 0; i < width; i++)
 			{
-				px_byte a = (px_byte)(PX_ReadBits(&bp, imagedata, 4) * (255 / 15));
+				px_byte a = (px_byte)(PX_ReadBitsLE(&bp, imagedata, 4) * (255 / 15));
 				PX_SurfaceSetPixel(prendersurface, i, j, PX_COLOR(255, a, a, a));
 			}
 		}
@@ -463,7 +508,7 @@ px_bool PX_PngToRenderBuffer(px_memorypool * mp,px_byte* ppngbuffer, px_int size
 		{
 			for (i = 0; i < width; i++)
 			{
-				px_byte a = PX_ReadBits(&bp, imagedata, 1) ? 255 : 0;
+				px_byte a = PX_ReadBitsLE(&bp, imagedata, 1) ? 255 : 0;
 				PX_SurfaceSetPixel(prendersurface, i, j, PX_COLOR(a, 255, 255, 255));
 			}
 		}
@@ -477,7 +522,7 @@ px_bool PX_PngToRenderBuffer(px_memorypool * mp,px_byte* ppngbuffer, px_int size
 		{
 			for (i = 0; i < width; i++)
 			{
-				px_byte a = (px_byte)(PX_ReadBits(&bp, imagedata, 2) * (255 / 3));
+				px_byte a = (px_byte)(PX_ReadBitsLE(&bp, imagedata, 2) * (255 / 3));
 				PX_SurfaceSetPixel(prendersurface, i, j, PX_COLOR(a, 255, 255, 255));
 			}
 		}
@@ -492,7 +537,7 @@ px_bool PX_PngToRenderBuffer(px_memorypool * mp,px_byte* ppngbuffer, px_int size
 		{
 			for (i = 0; i < width; i++)
 			{
-				px_byte a = (px_byte)(PX_ReadBits(&bp, imagedata, 2) * (255 / 15));
+				px_byte a = (px_byte)(PX_ReadBitsLE(&bp, imagedata, 2) * (255 / 15));
 				PX_SurfaceSetPixel(prendersurface, i, j, PX_COLOR(a, 255, 255, 255));
 			}
 		}

@@ -119,6 +119,17 @@ PX_Object * PX_Object_ScrollAreaGetIncludedObjects(PX_Object *pObj)
 	return PX_NULL;
 }
 
+PX_Object* PX_Object_ScrollAreaSetBackgroundColor(PX_Object* pObj, px_color color)
+{
+	PX_Object_ScrollArea *pSA;
+	pSA=PX_Object_GetScrollArea(pObj);
+	if (pSA)
+	{
+		pSA->BackgroundColor=color;
+	}
+	return pObj;
+}
+
 px_void PX_Object_ScrollAreaMoveToBottom(PX_Object *pObject)
 {
 	px_float left=0,top=0,right=0,bottom=0;
@@ -320,6 +331,17 @@ px_void PX_Object_ScrollAreaFree(PX_Object *pObj)
 	{
 		PX_ObjectDelete(pSA->root);
 		PX_SurfaceFree(&pSA->surface);
+	}
+}
+
+px_void PX_Object_ScrollAreaClear(PX_Object* pObj)
+{
+	PX_Object_ScrollArea *pSA;
+	pSA=PX_Object_GetScrollArea(pObj);
+	if (pSA)
+	{
+		PX_ObjectDelete(pSA->root);
+		pSA->root=PX_ObjectCreate(pObj->mp,PX_NULL,0,0,0,0,0,0);
 	}
 }
 

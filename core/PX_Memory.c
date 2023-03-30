@@ -85,7 +85,7 @@ px_bool PX_MemoryCatBits(px_memory* memory, px_byte data[], px_int bit_count)
 	px_uint bp=0;
 	for (i = 0; i < bit_count; i++)
 	{
-		if (!PX_MemoryCatBit(memory, PX_ReadBit(&bp, data)))
+		if (!PX_MemoryCatBit(memory, PX_ReadBitLE(&bp, data)))
 			return PX_FALSE;
 	}
 	return PX_TRUE;

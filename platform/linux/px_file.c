@@ -309,3 +309,18 @@ int PX_GetDirectoryFileName(const char path[], int count, char *FileName[260], P
     closedir(pDir);
     return  index;
 }
+
+void PX_RequestData(const char url[], void* buffer, int size, void* ptr, void (*func_callback)(void* buffer, int size, void* ptr))
+{
+    PX_IO_Data io= PX_LoadFileToIOData(url);
+    if (io.size>0&&io.buffer&&io.size<=(unsigned int)size)
+    {
+        memcpy(buffer,io.buffer,io.size);
+        func_callback(buffer,io.size,ptr);
+    }
+    else
+    {
+        func_callback(buffer,0,ptr);
+    }
+    PX_FreeIOData(&io);
+}

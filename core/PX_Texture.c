@@ -55,6 +55,21 @@ px_bool PX_TextureCreateFromMemory(px_memorypool *mp,px_void *data,px_int size,p
 		}
 	}
 
+	if (PX_JpgVerify(data, size))
+	{
+		PX_JpgDecoder decoder;
+		if (PX_JpgDecoderInitialize(mp, &decoder, data, size))
+		{
+			if (PX_TextureCreate(mp, tex, decoder.width, decoder.height))
+			{
+				PX_JpgDecoderRenderToSurface(&decoder, tex);
+				PX_JpgDecoderFree(&decoder);
+				return PX_TRUE;
+			}
+			PX_JpgDecoderFree(&decoder);
+		}
+	}
+
 	//image-format not supported
 	return PX_FALSE;
 }
@@ -245,6 +260,57 @@ px_void PX_TextureRender(px_surface *psurface,px_texture *tex,px_int x,px_int y,
 			}
 		}
 	
+}
+
+px_void PX_TextureRenderClip(px_surface* psurface, px_texture* tex, px_int x, px_int y, px_int clipx, px_int clipy, px_int clipw, px_int cliph, PX_ALIGN refPoint, PX_TEXTURERENDER_BLEND* blend)
+{
+	px_texture temp;
+	if (clipx<0)
+	{
+		clipx = 0;
+	}
+	if (clipx>tex->width-1)
+	{
+		return;
+	}
+	if (clipy < 0)
+	{
+		clipy = 0;
+	}
+	if (clipy > tex->height - 1)
+	{
+		return;
+	}
+
+	if (clipx+clipw> tex->width )
+	{
+		clipw = tex->width - clipx;
+	}
+	if (clipy + cliph > tex->height)
+	{
+		cliph = tex->height - clipy;
+	}
+
+	if (clipw<=0)
+	{
+		return;
+	}
+
+	if (cliph<=0)
+	{
+		return;
+	}
+	temp.MP = 0;
+	temp.height=cliph;
+	temp.width=clipw;
+	temp.limit_bottom=cliph;
+	temp.limit_left=0;
+	temp.limit_right=clipw;
+	temp.limit_top=0;
+	temp.surfaceBuffer=tex->surfaceBuffer+clipy*tex->width+clipx;
+	PX_TextureRender(psurface,&temp,x,y,refPoint,blend);
+
+	return;
 }
 
 

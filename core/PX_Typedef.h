@@ -469,7 +469,8 @@ px_point2D PX_Point2DRotate(px_point2D p,px_float angle);
 px_float PX_PointDistance(px_point p1,px_point p2);
 
 
-px_point PX_PointAdd(px_point p1,px_point p2);
+px_float PX_Point2DDistance(px_point2D p1, px_point2D p2);
+px_point PX_PointAdd(px_point p1, px_point p2);
 px_point2D PX_Point2DAdd(px_point2D p1,px_point2D p2);
 px_point PX_PointSub(px_point p1,px_point p2);
 px_point2D PX_Point2DSub(px_point2D p1,px_point2D p2);
@@ -660,9 +661,26 @@ px_double PX_PhaseDelay(px_double f, px_double* B, px_int sizeB, px_double* A, p
 
 ///////////////////////////////////////////////////////////////////////////////
 //memory
-px_byte PX_ReadBit(px_uint32* bitpointer, const px_byte* bitstream);
-px_uint32 PX_ReadBits(px_uint32* bitpointer, const px_byte* bitstream, px_int nbits);
 
+px_byte PX_ReadBitLE(px_uint32* bitpointer, const px_byte* bitstream);
+px_uint32 PX_ReadBitsLE(px_uint32* bitpointer, const px_byte* bitstream, px_int nbits);
+
+typedef struct
+{
+	px_int32 bitpointer;
+	const px_byte* bitstream;
+	px_int size;
+}PX_MemoryStream;
+
+px_void PX_MemoryStreamInitialize(PX_MemoryStream* pStream, px_byte* bitstream,px_int size);
+px_byte PX_MemoryStreamReadBitLE(PX_MemoryStream* pStream);
+px_byte PX_MemoryStreamReadBitBE(PX_MemoryStream* pStream);
+px_byte PX_MemoryStreamReadByte(PX_MemoryStream* pStream);
+px_word PX_MemoryStreamReadWord(PX_MemoryStream* pStream);
+px_void PX_MemoryStreamAlign(PX_MemoryStream* pStream);
+px_uint32 PX_MemoryStreamReadBitsLE(PX_MemoryStream* pStream, px_int nbits);
+px_uint32 PX_MemoryStreamReadBitsBE(PX_MemoryStream* pStream, px_int nbits);
+px_bool PX_MemoryStreamIsEnd(PX_MemoryStream* pStream);
 //////////////////////////////////////////////////////////////////////////
 //mel
 px_double PX_MelToHz(px_double mel);

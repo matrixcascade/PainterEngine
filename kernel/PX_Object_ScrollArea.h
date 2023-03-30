@@ -26,6 +26,7 @@ px_void PX_Object_ScrollAreaSetBkColor(PX_Object *pObj,px_color bkColor);
 px_void PX_Object_ScrollAreaSetBorder( PX_Object *pObj,px_bool Border );
 px_void PX_Object_ScrollAreaSetBorderColor(PX_Object *pObj,px_color borderColor);
 px_void PX_Object_ScrollAreaFree(PX_Object *pObj);
-
+px_void PX_Object_ScrollAreaClear(PX_Object* pObj);
+PX_Object* PX_Object_ScrollAreaSetBackgroundColor(PX_Object* pObj, px_color color);
 #endif
 

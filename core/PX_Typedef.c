@@ -2079,10 +2079,6 @@ px_point2D PX_Point2DDiv(px_point2D p1,px_float m)
 	return p1;
 }
 
-px_float PX_Point2DDistance(px_point p1, px_point p2)
-{
-	return PX_sqrt((p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y));
-}
 
 px_float PX_PointDot(px_point p1,px_point p2)
 {
@@ -4708,6 +4704,10 @@ px_float PX_PointDistance(px_point p1,px_point p2)
 	return PX_sqrt((p1.x-p2.x)*(p1.x-p2.x)+(p1.y-p2.y)*(p1.y-p2.y));
 }
 
+px_float PX_Point2DDistance(px_point2D p1, px_point2D p2)
+{
+	return PX_sqrt((p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y));
+}
 
 px_void  PX_WindowFunction_triangular(px_double data[],px_int N)
 {
@@ -5282,20 +5282,130 @@ px_double PX_PhaseDelay(px_double f, px_double* B, px_int sizeB, px_double* A, p
 	return grpdel - omega * PX_PhaseDelayDerive(omega, B, sizeB, A, sizeA, 0.0005f);
 }
 
-px_byte PX_ReadBit(px_uint32* bitpointer, const px_byte* bitstream)
+px_byte PX_ReadBitLE(px_uint32* bitpointer, const px_byte* bitstream)
 {
 	px_byte result = (px_byte)((bitstream[(*bitpointer) >> 3] >> ((*bitpointer) & 0x7)) & 1);
 	(*bitpointer)++;
 	return result;
 }
 
-px_uint32 PX_ReadBits(px_uint32* bitpointer, const px_byte* bitstream, px_int nbits)
+px_uint32 PX_ReadBitsLE(px_uint32* bitpointer, const px_byte* bitstream, px_int nbits)
 {
 	px_uint32 result = 0;
 	px_int i;
 	for (i = 0; i < nbits; i++)
-		result |= ((px_uint32)PX_ReadBit(bitpointer, bitstream)) << i;
+		result |= ((px_uint32)PX_ReadBitLE(bitpointer, bitstream)) << i;
 	return result;
+}
+
+px_byte PX_ReadBitBE(px_uint32* bitpointer, const px_byte* bitstream)
+{
+	px_byte result = (px_byte)((bitstream[(*bitpointer) >> 3] >> (7-((*bitpointer) & 0x7))) & 1);
+	(*bitpointer)++;
+	return result;
+}
+
+px_uint32 PX_ReadBitsBE(px_uint32* bitpointer, const px_byte* bitstream, px_int nbits)
+{
+	px_uint32 result = 0;
+	px_int i;
+	for (i = 0; i < nbits; i++)
+		result = (result<<1)|PX_ReadBitBE(bitpointer, bitstream);
+	return result;
+}
+
+
+
+px_void PX_MemoryStreamInitialize(PX_MemoryStream* pStream, px_byte* bitstream,px_int size)
+{
+	pStream->bitpointer = 0;
+	pStream->bitstream = bitstream;
+	pStream->size = size;
+}
+px_byte PX_MemoryStreamReadBitLE(PX_MemoryStream* pStream)
+{
+	if (pStream->bitpointer/8<=pStream->size*8)
+	{
+		return PX_ReadBitLE(&pStream->bitpointer, pStream->bitstream);
+	}
+	else
+	{
+		return 0;
+	}
+}
+px_byte PX_MemoryStreamReadBitBE(PX_MemoryStream* pStream)
+{
+	if (pStream->bitpointer / 8 <= pStream->size * 8)
+	{
+		return PX_ReadBitBE(&pStream->bitpointer, pStream->bitstream);
+	}
+	else
+	{
+		return 0;
+	}
+}
+px_void PX_MemoryStreamAlign(PX_MemoryStream* pStream)
+{
+	pStream->bitpointer = (pStream->bitpointer + 7u) & ~7u;
+}
+
+px_byte PX_MemoryStreamReadByte(PX_MemoryStream* pStream)
+{
+	PX_MemoryStreamAlign(pStream);
+	if (pStream->bitpointer / 8+8 <= pStream->size * 8)
+	{
+		px_byte result = (px_byte)PX_ReadBitsLE(&pStream->bitpointer, pStream->bitstream, 8);
+		return result;
+	}
+	else
+	{
+		return 0;
+	}
+}
+px_uint32 PX_MemoryStreamReadBitsLE(PX_MemoryStream* pStream, px_int nbits)
+{
+	if (pStream->bitpointer / 8 + nbits <= pStream->size * 8)
+	{
+		px_uint32 result = PX_ReadBitsLE(&pStream->bitpointer, pStream->bitstream, nbits);
+		return result;
+	}
+	else
+	{
+		return 0;
+	}
+}
+px_uint32 PX_MemoryStreamReadBitsBE(PX_MemoryStream* pStream, px_int nbits)
+{
+	if (pStream->bitpointer / 8 + nbits <= pStream->size * 8)
+	{
+		px_uint32 result = PX_ReadBitsBE(&pStream->bitpointer, pStream->bitstream, nbits);
+		return result;
+	}
+	else
+	{
+		return 0;
+	}
+}
+
+px_word PX_MemoryStreamReadWord(PX_MemoryStream* pStream)
+{
+	px_byte b1, b2;
+	PX_MemoryStreamAlign(pStream);
+	b1=PX_MemoryStreamReadByte(pStream);
+	b2=PX_MemoryStreamReadByte(pStream);
+	return (b1<<8)+b2;
+}
+
+px_bool PX_MemoryStreamIsEnd(PX_MemoryStream* pStream)
+{
+	if (pStream->bitpointer  >= pStream->size * 8)
+	{
+		return PX_TRUE;
+	}
+	else
+	{
+		return PX_FALSE;
+	}
 }
 
 px_dword PX_adler32(const px_byte* data, px_dword len) 

@@ -524,7 +524,8 @@ px_bool PX_JsonBuild_Value(PX_Json_Value *pValue,px_string *_out,px_bool bArrayV
 		break;
 	case PX_JSON_VALUE_TYPE_NUMBER:
 		{
-			if(!PX_StringCatEx(_out,PX_ftos((px_float)pValue->_number,6).data))return PX_FALSE;
+		PX_RETURN_STRING ret = PX_ftos((px_float)pValue->_number, 6);
+		if(!PX_StringCatEx(_out, ret.data))return PX_FALSE;
 		}
 		break;
 	case PX_JSON_VALUE_TYPE_STRING:

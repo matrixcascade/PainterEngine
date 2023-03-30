@@ -1,0 +1,56 @@
+#ifndef PX_LIVEFRAMEWORKMODULES_ANIMATIONCONTROLLER_H
+#define PX_LIVEFRAMEWORKMODULES_ANIMATIONCONTROLLER_H
+
+#include "PainterEngine_Startup.h"
+
+#define PX_LIVEFRAMEWORKMODULES_ANIMATIONCONTROLLER_EVENT_EXIT    0x00010000
+#define PX_LIVEFRAMEWORKMODULES_ANIMATIONCONTROLLER_EVENT_PLAY    0x00010001
+#define PX_LIVEFRAMEWORKMODULES_ANIMATIONCONTROLLER_EVENT_STOP    0x00010002
+#define PX_LIVEFRAMEWORKMODULES_ANIMATIONCONTROLLER_EVENT_CLOCK    0x00010003
+#define PX_LIVEFRAMEWORKMODULES_ANIMATIONCONTROLLER_EVENT_SMARTTRANSFORM    0x00010004
+#define PX_LIVEFRAMEWORKMODULES_ANIMATIONCONTROLLER_EVENT_VERTEXTRANSFORM    0x00010005
+#define PX_LIVEFRAMEWORKMODULES_ANIMATIONCONTROLLER_EVENT_STRETCH    0x00010006
+#define PX_LIVEFRAMEWORKMODULES_ANIMATIONCONTROLLER_EVENT_ROTATION    0x00010007
+#define PX_LIVEFRAMEWORKMODULES_ANIMATIONCONTROLLER_EVENT_SWITCHTEXTURE    0x00010008
+#define PX_LIVEFRAMEWORKMODULES_ANIMATIONCONTROLLER_EVENT_GLOBALROTATION    0x00010009
+#define PX_LIVEFRAMEWORKMODULES_ANIMATIONCONTROLLER_EVENT_IMPULSE		0x0001000a
+#define PX_LIVEFRAMEWORKMODULES_ANIMATIONCONTROLLER_EVENT_PANC		0x0001000b
+
+typedef enum
+{
+	PX_LIVEEDITORMODULE_ANIMATIONCONTROLLER_FOCUS_NONE=0,
+	PX_LIVEEDITORMODULE_ANIMATIONCONTROLLER_FOCUS_TIMESTAMP,
+	PX_LIVEEDITORMODULE_ANIMATIONCONTROLLER_FOCUS_SMART,
+	PX_LIVEEDITORMODULE_ANIMATIONCONTROLLER_FOCUS_GLOBALROTATION,
+	PX_LIVEEDITORMODULE_ANIMATIONCONTROLLER_FOCUS_STRETCH,
+	PX_LIVEEDITORMODULE_ANIMATIONCONTROLLER_FOCUS_ROTATION,
+	PX_LIVEEDITORMODULE_ANIMATIONCONTROLLER_FOCUS_SWITCHTEXTURE,
+	PX_LIVEEDITORMODULE_ANIMATIONCONTROLLER_FOCUS_IMPULSE,
+	PX_LIVEEDITORMODULE_ANIMATIONCONTROLLER_FOCUS_VERTICES,
+	PX_LIVEEDITORMODULE_ANIMATIONCONTROLLER_FOCUS_PANC,
+}PX_LIVEEDITORMODULE_ANIMATIONCONTROLLER_FOCUS;
+
+typedef struct
+{
+	PX_LiveFramework *pLiveFramework;
+	PX_Runtime *pruntime;
+	PX_Object *messagebox;
+	PX_Object *button_play,*button_stop,*button_smarttranslation,*button_verticeseditor,*button_stretch,*button_rotation,*button_clock,*button_switchtexture,*button_impulse,*button_globalrotation,*button_pan;
+	px_shape shape_play,shape_stop,shape_smarttranslation,shape_pointtranslation,shape_stretch,shape_rotation,shape_clock,shape_switchtexture,shape_impulse,shape_globalrotation,shape_pan;
+	PX_FontModule *fontmodule;
+	PX_Json *pLanguageJson;
+	PX_LIVEEDITORMODULE_ANIMATIONCONTROLLER_FOCUS focus;
+}PX_LiveEditorModule_AnimationController;
+
+//////////////////////////////////////////////////////////////////////////
+//standard
+PX_Object * PX_LiveEditorModule_AnimationControllerInstall(PX_Object *pparent,PX_Runtime *pruntime,PX_FontModule *fm,PX_LiveFramework *pLiveFramework,PX_Json *pLanguageJson);
+px_void PX_LiveEditorModule_AnimationControllerUninstall(PX_Object *pObject);
+
+
+px_void PX_LiveEditorModule_AnimationControllerFocusButton(PX_Object *pObject,PX_LIVEEDITORMODULE_ANIMATIONCONTROLLER_FOCUS focus);
+//////////////////////////////////////////////////////////////////////////
+//
+px_void PX_LiveEditorModule_AnimationControllerEnable(PX_Object *pObject);
+px_void PX_LiveEditorModule_AnimationControllerDisable(PX_Object *pObject);
+#endif   

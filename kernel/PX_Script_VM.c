@@ -14,7 +14,7 @@ static px_void PX_VM_LOG(px_char *log)
 #define PX_SCRIPT_VM_LOG
 
 
-px_bool PX_VMInitialize(PX_VM *Ins,px_memorypool *mp,px_byte *code,px_int size)
+px_bool PX_VMInitialize(PX_VM *Ins,px_memorypool *mp,const px_byte *code,px_int size)
 {
 	PX_SCRIPT_ASM_HEADER *header;
 	PX_VM_EXPORT_FUNCTION *pfunc;
@@ -3886,37 +3886,49 @@ px_void PX_VMRun(PX_VM* Ins, px_int tick, px_dword elapsed)
 				}
 
 				PX_VMThreadSwitch(Ins, i);
-				if (tick< PX_VM_ATOM_INSTRUCTMENTS)
+				if (tick>=0)
 				{
-					PX_VM_RUNRETURN ret = PX_VMRunThread(Ins, tick);
-					if (ret == PX_VM_RUNRETURN_WAIT || ret == PX_VM_RUNRETURN_SUSPEND)
+					if (tick < PX_VM_ATOM_INSTRUCTMENTS)
 					{
-						continue;
+						PX_VM_RUNRETURN ret = PX_VMRunThread(Ins, tick);
+						if (ret == PX_VM_RUNRETURN_WAIT || ret == PX_VM_RUNRETURN_SUSPEND)
+						{
+							continue;
+						}
+						else
+						{
+							ActivatingThreadCount++;
+							tick = 0;
+						}
 					}
 					else
 					{
-						ActivatingThreadCount++;
-						tick = 0;
+						PX_VM_RUNRETURN ret = PX_VMRunThread(Ins, PX_VM_ATOM_INSTRUCTMENTS);
+						if (ret == PX_VM_RUNRETURN_WAIT || ret == PX_VM_RUNRETURN_SUSPEND)
+						{
+							continue;
+						}
+						else
+						{
+							ActivatingThreadCount++;
+							tick -= PX_VM_ATOM_INSTRUCTMENTS;
+						}
+
+					}
+
+					if (tick <= 0)
+					{
+						return;
 					}
 				}
 				else
 				{
-					PX_VM_RUNRETURN ret=PX_VMRunThread(Ins, PX_VM_ATOM_INSTRUCTMENTS);
+					PX_VM_RUNRETURN ret = PX_VMRunThread(Ins, PX_VM_ATOM_INSTRUCTMENTS);
 					if (ret == PX_VM_RUNRETURN_WAIT || ret == PX_VM_RUNRETURN_SUSPEND)
 					{
 						continue;
 					}
-					else
-					{
-						ActivatingThreadCount++;
-						tick -= PX_VM_ATOM_INSTRUCTMENTS;
-					}
-					
-				}
-				
-				if (tick <= 0)
-				{
-					return;
+					ActivatingThreadCount++;
 				}
 			}
 		}

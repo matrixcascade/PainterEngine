@@ -32,5 +32,6 @@ typedef enum
 
 px_bool PX_PngVerify(px_byte* ppngbuffer, px_int size, px_int* width, px_int* height, PX_PNG_FORMAT* format);
 px_bool PX_PngToRenderBuffer(px_memorypool* calcBuffer, px_byte* ppngbuffer, px_int size, px_surface* prenderbuffer);
+px_int  PX_PngGetSize(px_byte* ppngbuffer, px_int in_size);
 px_bool PX_PngSurfaceToBuffer(px_surface* prenderbuffer,px_memory *out);
 #endif

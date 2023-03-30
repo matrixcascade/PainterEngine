@@ -1349,7 +1349,6 @@ static px_void PX_GeoDrawSolidCircle_Ex2(px_surface *psurface, px_float x,px_flo
 }
 
 
-
 px_void PX_GeoDrawSolidCircle(px_surface *psurface, px_int x,px_int y,px_int Radius,px_color color )
 {
 	px_int Sc,Sr;
@@ -1429,7 +1428,6 @@ px_void PX_GeoDrawSolidCircle(px_surface *psurface, px_int x,px_int y,px_int Rad
 		PX_GeoDrawSolidCircle_Ex1(psurface,x,y,Radius,color);
 	}
 }
-
 
 px_void PX_GeoDrawPenCircle(px_surface *psurface, px_float x,px_float y,px_float Radius,px_color color)
 {
@@ -1522,6 +1520,115 @@ px_void PX_GeoDrawSpray(px_surface* psurface, px_float x, px_float y, px_float R
 	}
 }
 
+px_void PX_GeoDrawBall(px_surface* psurface, px_float x, px_float y, px_float Radius, px_color color)
+{
+	px_int left, top, right, bottom, mid, i, j;
+	px_float d;
+	px_color clr;
+	if (color._argb.a == 0)
+	{
+		return;
+	}
+
+	left = (px_int)(x - Radius);
+	top = (px_int)(y - Radius);
+	right = (px_int)(x + Radius);
+	bottom = (px_int)(y + Radius);
+
+
+	if (left < 0)
+	{
+		left = 0;
+	}
+	if (top < 0)
+	{
+		top = 0;
+	}
+
+	if (right > psurface->width - 1)
+	{
+		right = psurface->width - 1;
+	}
+
+	if (bottom > psurface->height - 1)
+	{
+		bottom = psurface->height - 1;
+	}
+
+	if (left > psurface->width - 1)
+	{
+		return;
+	}
+
+	if (bottom < 0)
+	{
+		return;
+	}
+
+	if (right < 0)
+	{
+		return;
+	}
+
+	if (top > psurface->height - 1)
+	{
+		return;
+	}
+
+
+	if (left > right)
+	{
+		mid = left;
+		left = right;
+		right = mid;
+	}
+	if (top > bottom)
+	{
+		mid = top;
+		top = bottom;
+		bottom = mid;
+	}
+
+	for (i = top; i <= bottom; i++)
+	{
+		for (j = left; j <= right; j++)
+		{
+			d = PX_sqrt((px_float)((i - y) * (i - y) + (j - x) * (j - x)));
+
+			if (d < Radius)
+			{
+				if (d > Radius -2)
+				{
+					if ((px_float)Radius - d < 1.414f)
+					{
+						clr = color;
+						clr._argb.a = (px_uchar)(clr._argb.a * ((px_float)Radius - d) / 1.414f);
+						PX_SurfaceDrawPixel(psurface, j, i, clr);
+					}
+					else
+						PX_SurfaceDrawPixel(psurface, j, i, color);
+				}
+				else if (Radius*0.6f<d&&d < Radius -2)
+				{
+					px_float a =  0.2f+0.8f*(d- Radius*0.6f) / (Radius-2- Radius * 0.6f);
+					clr = color;
+					clr._argb.a = (px_uchar)(clr._argb.a * a);
+					PX_SurfaceDrawPixel(psurface, j, i, clr);
+				}
+				else
+				{
+					clr = color;
+					clr._argb.a /=5;
+					PX_SurfaceDrawPixel(psurface, j, i, clr);
+				}
+				
+			}
+
+		}
+	}
+}
+
+
 px_void PX_GeoDrawPath(px_surface *psurface, px_point path[],px_int pathCount,px_float linewidth,px_color color)
 {
 	px_int i;
@@ -1580,6 +1687,30 @@ px_void PX_GeoDrawPenLine(px_surface* psurface, px_float x0, px_float y0, px_flo
 	p[1].x = x1;
 	p[1].y = y1;
 	PX_GeoDrawPath(psurface, p, 2, lineWidth, color);
+}
+
+px_void PX_GeoDrawDashLine(px_surface* psurface, px_int x0, px_int y0, px_int x1, px_int y1, px_int lineWidth, px_float dash_width, px_color color)
+{
+	px_point2D v = PX_Point2DSub(PX_POINT2D((px_float)x1, (px_float)y1), PX_POINT2D((px_float)x0, (px_float)y0));
+	px_float d = PX_Point2DMod(v);
+	px_int count = (px_int)(d / dash_width);
+	px_int i;
+	px_float dx0, dy0,dx1,dy1;
+	v = PX_Point2DNormalization(v);
+	v = PX_Point2DMul(v, d/count);
+	for (i=0;i<count;i++)
+	{
+		if ((i&1)==0)
+		{
+			dx0 = x0 + v.x * i;
+			dy0 = y0 + v.y * i;
+
+			dx1 = x0 + v.x * (i+1);
+			dy1 = y0 + v.y * (i+1);
+
+			PX_GeoDrawLine(psurface, (px_int)dx0, (px_int)dy0, (px_int)dx1, (px_int)dy1, lineWidth, color);
+		}
+	}
 }
 
 px_void PX_GeoDrawPenDots(px_surface* psurface, px_point _samples[], px_int samplescount, px_float radius, px_color color)
@@ -2633,7 +2764,6 @@ px_void PX_GeoDrawRoundRect(px_surface *psurface, px_int left, px_int top, px_in
 	}
 }
 
-
 px_void PX_GeoDrawBezierCurvePoint(px_surface *rendersurface,px_point pt[],px_int pt_count,px_float t,px_float radius,px_color clr)
 {
 	px_int i;
@@ -2687,7 +2817,6 @@ px_point PX_GeoGetBezierCurvePoint(px_point pt[], px_int pt_count, px_float t)
 
 	return PX_GeoGetBezierCurvePoint( pt, pt_count - 1, t);
 }
-
 
 
 px_void PX_GeoDrawBresenhamLine(px_surface *psurface,px_int x0, px_int y0, px_int x1, px_int y1,px_color color)
@@ -3452,24 +3581,4 @@ px_void PX_GeoDrawPenSamplesLine(px_surface* psurface, px_point _samples[], px_i
 
 	}
 }
-px_void PX_GeoDrawFTLine(px_surface* psurface, px_point _samples[], px_int samplescount, px_float radius, px_color color)
-{
-	px_complex in_complexs[2048];
-	px_complex out_complexs[2048];
-	px_int i;
-	for (i = 0; i < samplescount; i++)
-	{
-		in_complexs[i].re = _samples[i].x;
-		in_complexs[i].im = _samples[i].y;
-	}
 
-	PX_DFT(in_complexs, out_complexs, samplescount);
-
-	for (i=1;i< 256;i++)
-	{
-		px_complex c1=PX_FTResample(out_complexs, samplescount, i*1.0f /255);
-		px_complex c2 = PX_FTResample(out_complexs, samplescount, (i-1) * 1.0f / 255);
-		PX_GeoDrawLine(psurface, (px_int)c1.re, (px_int)c1.im, (px_int)c2.re, (px_int)c2.im, radius, PX_COLOR_BLACK);
-	}
-
-}

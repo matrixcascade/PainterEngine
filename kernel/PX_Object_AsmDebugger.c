@@ -455,7 +455,7 @@ px_bool PX_Object_AsmDebuggerAttach(PX_Object *pObject,PX_VM_DebuggerMap* map,PX
 	}
 
 	PX_VMSuspend(vm);
-	pObject->Visible = PX_TRUE;
+
 	return PX_TRUE;
 
 }

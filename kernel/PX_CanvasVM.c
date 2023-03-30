@@ -104,22 +104,6 @@ px_void PX_CanvasVMOn_PenPaint(PX_CanvasVM* pCanvas, px_void* ptr)
 		}
 	}
 	break;
-	case PX_CanvasVM_FilterMode_FT:
-	{
-		px_int count = pCanvas->currentPathCount;
-		if (count > PX_CANVASVM_MAX_DETAIL_SIZE)
-		{
-			count = PX_CANVASVM_MAX_DETAIL_SIZE;
-		}
-		for (i = 0; i < count; i++)
-		{
-			samples[i].x = pCanvas->currentPath[i].x;
-			samples[i].y = pCanvas->currentPath[i].y;
-			samples[i].z = pCanvas->currentPath[i].z;
-		}
-		PX_GeoDrawFTLine(ptarget_surface, samples, count, pCanvas->reg_size, pCanvas->reg_color);
-	}
-	break;
 	default:
 		if (pCanvas->currentPathCount > 1)
 		{

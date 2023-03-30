@@ -6,7 +6,7 @@
 #include "PX_Bitmap.h"
 #include "PX_TRaw.h"
 #include "PX_Png.h"
-
+#include "PX_Jpg.h"
 typedef px_surface px_texture;
 
 
@@ -33,6 +33,7 @@ px_bool PX_TextureCopy(px_memorypool *mp,px_texture *restexture,px_texture *dest
 px_bool PX_TextureScaleToTexture(px_texture* resTexture, px_texture* out);
 px_bool PX_TextureCreateScale(px_memorypool* mp, px_texture* resTexture, px_int newWidth, px_int newHeight, px_texture* out);
 px_void PX_TextureRender(px_surface *psurface,px_texture *tex,px_int x,px_int y,PX_ALIGN refPoint,PX_TEXTURERENDER_BLEND *blend);
+px_void PX_TextureRenderClip(px_surface* psurface, px_texture* tex, px_int x, px_int y,px_int clipx,px_int clipy,px_int clipw,px_int cliph, PX_ALIGN refPoint, PX_TEXTURERENDER_BLEND* blend);
 px_void PX_TextureCover(px_surface *psurface,px_texture *tex,px_int x,px_int y,PX_ALIGN refPoint);
 px_void PX_TextureGetVisibleRange(px_texture *ptexture,px_int *pLeft,px_int *pRight,px_int *pTop,px_int *pBottom);
 typedef px_void (*PX_TexturePixelShader)(px_surface *psurface,px_int x,px_int y,px_color clr,px_void *ptr);

@@ -79,7 +79,7 @@ PX_Object* PX_Object_PrinterLastPrintText(PX_Object* pObject, const px_char* tex
 		PX_Object_Printer* pDesc = PX_ObjectGetDesc(PX_Object_Printer, pObject);
 		if (pDesc->pObjects.size == 0)
 		{
-			return PX_NULL;
+			return PX_Object_PrinterPrintText(pObject,text);
 		}
 		pobjColumn = PX_VECTORLAST(PX_Object_PrinterLine, &pDesc->pObjects);
 		pObject = pobjColumn->Object;
@@ -263,7 +263,11 @@ px_void PX_Object_PrinterFree(PX_Object* pObject)
 	PX_VectorFree(&pDesc->pObjects);
 }
 
-
+px_void PX_Object_PrinterSetBackgroundColor(PX_Object* pObject,px_color color)
+{
+	PX_Object_Printer* pDesc = PX_ObjectGetDesc(PX_Object_Printer, pObject);
+	PX_Object_ScrollAreaSetBackgroundColor(pDesc->Area, color);
+}
 
 PX_Object* PX_Object_PrinterCreate(px_memorypool* mp, PX_Object* Parent, px_int x, px_int y, px_int width, px_int height, PX_FontModule* fm)
 {

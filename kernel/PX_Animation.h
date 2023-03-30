@@ -1,6 +1,7 @@
 #ifndef PX_ANIMATION_H
 #define PX_ANIMATION_H
 #include "PX_2dxCommon.h"
+#include "PX_Lexer.h"
 typedef struct
 {
 	px_vector frames; //vector frames
@@ -16,6 +17,11 @@ typedef struct
 	px_uint   reg_reservedTime;
 	px_int    reg_currentFrameIndex;
 	px_dword  reg_currentAnimation;
+	px_int	  reg_clipx;
+	px_int	  reg_clipy;
+	px_int	  reg_clipw;
+	px_int	  reg_cliph;
+	px_int	  reg_clipi;
 	PX_AnimationLibrary *linker;
 }PX_Animation;
 
@@ -24,6 +30,18 @@ typedef struct
 	px_dword ip;
 	px_string name; //image file path
 }PX_Animationlibrary_tagInfo;
+
+typedef struct
+{
+	px_char path[64]; //image file path
+	px_char map[64];
+}PX_2dxMake_textureInfo;
+
+typedef struct
+{
+	px_char tag[64]; //animation tag
+	px_dword addr;
+}PX_2dxMake_tagInfo;
 
 px_bool PX_AnimationCreate(PX_Animation *animation,PX_AnimationLibrary *linker);
 px_bool PX_AnimationSetLibrary(PX_Animation *animation,PX_AnimationLibrary *linker);
@@ -52,5 +70,9 @@ px_int PX_AnimationLibraryGetFrameWidth(PX_AnimationLibrary *panimationLib,px_in
 px_int PX_AnimationLibraryGetFrameHeight(PX_AnimationLibrary *panimationLib,px_int frameIndex);
 px_bool PX_AnimationLibraryCreateFromMemory(px_memorypool *mp,PX_AnimationLibrary *panimationLib,px_byte *_2dxBuffer,px_uint size);
 px_bool PX_AnimationLibrary_CreateEffect_JumpVertical(px_memorypool *mp,PX_AnimationLibrary *panimation,px_texture *effectTexture);
+
+//compiler
+px_bool PX_AnimationShellCompile(px_memorypool* mp, const px_char script[], px_vector* taginfos, px_vector* texinfos, px_memory* out);
+
 #endif
 

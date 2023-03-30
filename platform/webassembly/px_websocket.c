@@ -11,6 +11,7 @@ static EM_BOOL onopen(int eventType, const EmscriptenWebSocketOpenEvent *websock
 static EM_BOOL onerror(int eventType, const EmscriptenWebSocketErrorEvent *websocketEvent, void *userData) 
 {
     PX_WebsocketEm *em=(PX_WebsocketEm *)userData;
+	em->status=PX_WEBSOCKETEM_STATUS_CLOSED;
     return EM_TRUE;
 }
 
@@ -48,12 +49,15 @@ px_bool PX_WebsocketEmInitialize(PX_WebsocketEm *em)
     if (!emscripten_websocket_is_supported()) {
         return 0;
     }
+	em->status=PX_WEBSOCKETEM_STATUS_CLOSED;
+	printf("Websocket Initialized\n");
     return 1;
 }
 
 px_bool PX_WebsocketEmConnect(PX_WebsocketEm *em,const px_char host[])
 {
     EmscriptenWebSocketCreateAttributes ws_attrs;
+	printf("Websocket Connect to %s\n",host);
     PX_memset(em,0,sizeof(PX_WebsocketEm));
     ws_attrs.url=host;
     ws_attrs.protocols="binary";
@@ -114,6 +118,6 @@ px_bool PX_WebsocketEmWrite(PX_WebsocketEm *em,px_byte *data,px_int data_size)
 
 px_void PX_WebsocketEmFree(PX_WebsocketEm *em)
 {
-    emscripten_websocket_close(em->socket,0,"user close");
+    emscripten_websocket_close(em->socket,1000,"user close");
 }
 

@@ -566,3 +566,16 @@ px_void MP_Reset(px_memorypool *Pool)
 #endif
 }
 
+px_void MP_ResetZero(px_memorypool* Pool)
+{
+	Pool->AllocAddr = Pool->StartAddr;
+	Pool->EndAddr = ((px_uchar*)Pool->StartAddr) + Pool->Size - 1;
+	Pool->FreeSize = Pool->Size;
+	Pool->FreeTableCount = 0;
+	Pool->MaxMemoryfragSize = 0;
+	Pool->nodeCount = 0;
+	PX_memset(Pool->StartAddr,0,Pool->Size);
+#if defined(PX_DEBUG_MODE) && defined(PX_MEMORYPOOL_DEBUG_CHECK)
+	PX_memset(Pool->DEBUG_allocdata, 0, sizeof(Pool->DEBUG_allocdata));
+#endif
+}

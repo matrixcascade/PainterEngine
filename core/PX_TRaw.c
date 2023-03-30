@@ -97,7 +97,11 @@ px_bool PX_TRawBuild(px_surface *psurface,px_byte *TRawBuffer,px_int *size)
 		return PX_FALSE;
 }
 
-px_uint PX_TRawGetSize(PX_TRaw_Header *header)
+px_uint PX_TRawGetSize(PX_TRaw_Header * pHeader)
 {
-	return header->Height*header->Width*sizeof(px_color)+sizeof(PX_TRaw_Header);
+	if (pHeader->Magic[0] != 'T' || pHeader->Magic[1] != 'R' || pHeader->Magic[2] != 'A' || pHeader->Magic[3] != 'W')
+	{
+		return PX_FALSE;
+	}
+	return pHeader->Height* pHeader->Width*sizeof(px_color)+sizeof(PX_TRaw_Header);
 }

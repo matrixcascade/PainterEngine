@@ -113,22 +113,25 @@ px_void PX_SurfaceDrawPixel(px_surface *psurface,px_int X,px_int Y,px_color COLO
 	{
 		return;
 	}
-	if(X<=psurface->limit_right&&X>=psurface->limit_left&&Y<=psurface->limit_bottom&&Y>=psurface->limit_top)
+	if (X > psurface->limit_right || X < psurface->limit_left || Y > psurface->limit_bottom || Y < psurface->limit_top)
 	{
-		if(COLOR._argb.a==0xff)
-		{
-		psurface->surfaceBuffer[X+psurface->width*Y]=COLOR;
-		}
-		else
-		{
+		return;
+	}
+
+	if(COLOR._argb.a==0xff)
+	{
+	psurface->surfaceBuffer[X+psurface->width*Y]=COLOR;
+	}
+	else
+	{
 		c=psurface->surfaceBuffer[X+psurface->width*Y];
 		c._argb.r=(px_uchar)(((255-COLOR._argb.a)*c._argb.r+COLOR._argb.r*COLOR._argb.a)/255);
 		c._argb.g=(px_uchar)(((255-COLOR._argb.a)*c._argb.g+COLOR._argb.g*COLOR._argb.a)/255);
 		c._argb.b=(px_uchar)(((255-COLOR._argb.a)*c._argb.b+COLOR._argb.b*COLOR._argb.a)/255);
 		c._argb.a=255-(255-c._argb.a)*(255-COLOR._argb.a)/255;
 		psurface->surfaceBuffer[X+psurface->width*Y]=c;
-		}
 	}
+
 }
 
 px_void PX_SurfaceClear(px_surface *psurface, px_int left, px_int top, px_int right, px_int bottom,px_color color)

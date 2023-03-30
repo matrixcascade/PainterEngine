@@ -1804,19 +1804,21 @@ px_bool PX_DesignerExport(PX_Object *pObject, px_string* pText)
 			}
 			else if (pobjectdesc->properties[j].getfloat)
 			{
+				PX_RETURN_STRING ret;
 				if(!PX_StringCatEx(pText,"\""))goto _ERROR;
 				if(!PX_StringCatEx(pText,pobjectdesc->properties[j].Name))goto _ERROR;
 				if(!PX_StringCatEx(pText,"\":"))goto _ERROR;
-				
-				if(!PX_StringCatEx(pText,PX_ftos(pobjectdesc->properties[j].getfloat(pdobject->pObject),2).data))goto _ERROR;
+				ret = PX_ftos(pobjectdesc->properties[j].getfloat(pdobject->pObject), 2);
+				if(!PX_StringCatEx(pText,ret.data))goto _ERROR;
 			}
 			else if (pobjectdesc->properties[j].getint)
 			{
+				PX_RETURN_STRING ret;
 				if(!PX_StringCatEx(pText,"\""))goto _ERROR;
 				if(!PX_StringCatEx(pText,pobjectdesc->properties[j].Name))goto _ERROR;
 				if(!PX_StringCatEx(pText,"\":"))goto _ERROR;
-
-				if(!PX_StringCatEx(pText,PX_itos(pobjectdesc->properties[j].getint(pdobject->pObject),10).data))goto _ERROR;
+				ret = PX_itos(pobjectdesc->properties[j].getint(pdobject->pObject), 10);
+				if(!PX_StringCatEx(pText,ret.data))goto _ERROR;
 			}
 			else if (pobjectdesc->properties[j].getstring)
 			{

@@ -1,7 +1,5 @@
-// Copyright 2011 The Emscripten Authors.  All rights reserved.
-// Emscripten is available under two separate licenses, the MIT license and the
-// University of Illinois/NCSA Open Source License.  Both these licenses can be
-// found in the LICENSE file.
+// Code by DBinary.  All rights reserved.
+// The codes is available under MIT licenses
 
 #ifdef _MSC_VER
 #pragma comment(lib,"SDL.lib")
@@ -12,6 +10,7 @@
 
 #include <stdio.h>
 #include <SDL.h>
+
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
@@ -26,40 +25,119 @@ const SDL_VideoInfo *info;
 px_dword lastupdatetime;
 px_int lastcursorx=-1,lastcursory=-1;
 px_bool mouseldown=PX_FALSE;
-px_byte cache_load_file[1024*1024*64];
-px_int  load_file_size=0;
 ///////////////////////////////////////////////
 
+extern void PX_Sleep(unsigned int ms);
+///////////////////////////////////////////////
+
+EM_JS(char*, PX_GetInputTextUTF8, (const char *_prompt_text), {
+  var jsString = prompt(_prompt_text,"");
+var lengthBytes = lengthBytesUTF8(jsString) + 1;
+var stringOnWasmHeap = _malloc(lengthBytes);
+stringToUTF8(jsString, stringOnWasmHeap, lengthBytes);
+return stringOnWasmHeap;
+	});
+
+EM_JS(char*, PX_GetInputTextGBK, (const char* _prompt_text), {
+  var jsString = prompt(_prompt_text,"");
+var lengthBytes = lengthBytesGBK(jsString) + 1;
+var stringOnWasmHeap = _malloc(lengthBytes);
+stringToGBK(jsString, stringOnWasmHeap, lengthBytes);
+return stringOnWasmHeap;
+	});
+
+const px_char* PX_InputText(const px_char prompt[], const px_char charset[])
+{
+	if (PX_strequ2(charset,"UTF8")|| PX_strequ2(charset, "UTF-8"))
+	{
+		return PX_GetInputTextUTF8(prompt);
+	}
+	return PX_GetInputTextGBK(prompt);
+}
+
+typedef struct
+{
+	void* buffer;
+	int size;
+	void* ptr;
+	void (*func_callback)(void* buffer, int size, void* ptr);
+}PX_RequestData_Info;
+
+void px_em_async_wget_onload_func(void* arg, void*buffer, int size)
+{
+	PX_RequestData_Info *info = (PX_RequestData_Info *)arg;
+	if (size<info->size)
+	{
+		memcpy(info->buffer, buffer, size);
+		info->func_callback(info->buffer, size, info->ptr);
+	}
+	else
+	{
+		info->func_callback(info->buffer, 0, info->ptr);
+	}
+	free(info);
+}
+
+void px_em_arg_callback_func(void*ptr)
+{
+	PX_RequestData_Info *info = (PX_RequestData_Info *)ptr;
+	info->func_callback(info->buffer, 0, info->ptr);
+	free(info);
+}
+
+PX_RequestData_Info *load_file_info;
 EMSCRIPTEN_KEEPALIVE int load_file(uint8_t *buffer, size_t size) 
 {
-  if (size<=sizeof(cache_load_file))
+  if (load_file_info)
   {
-	PX_memcpy(cache_load_file,buffer,size);
-	load_file_size=size;
+	  if (size<load_file_info->size)
+	  {
+		  memcpy(load_file_info->buffer, buffer, size);
+		  load_file_info->func_callback(load_file_info->buffer, size, load_file_info->ptr);
+	  }
+	  else
+	  {
+		  load_file_info->func_callback(load_file_info->buffer, 0, load_file_info->ptr);
+	  }
+	  free(load_file_info);
+	  load_file_info=PX_NULL;
   }
   return 1;
 }
 
-px_void px_getfile()
+
+void PX_RequestData(const char url[], void* buffer, int size, void* ptr, void (*func_callback)(void* buffer, int size, void* ptr))
 {
+	PX_RequestData_Info *info = (PX_RequestData_Info *)malloc(sizeof(PX_RequestData_Info));
+	if (!info)
+	{
+		func_callback(buffer, 0, ptr);
+		return;
+	}
+	
+	info->buffer = buffer;
+	info->size = size;
+	info->ptr = ptr;
+	info->func_callback = func_callback;
+	if (PX_strequ2(url,"open"))
+	{
 EM_ASM(
   var file_selector = document.createElement('input');
   file_selector.setAttribute('type', 'file');
   file_selector.setAttribute('onchange','open_file(event)');
   file_selector.click();
 );
+load_file_info=info;
+	}
+	else if (PX_strequ2(url,"save"))
+	{
+		func_callback(buffer, 0, ptr);
+	}
+	else
+	{
+		emscripten_async_wget_data(url,info, px_em_async_wget_onload_func, px_em_arg_callback_func);
+	}
 }
-
-px_byte *px_getfiledata()
-{
-	return cache_load_file;
-}
-
-px_int px_getfilesize()
-{
-	return load_file_size;
-}
-
 
 void mainloop(void *ptr)
 {
@@ -183,19 +261,9 @@ void mainloop(void *ptr)
 		}
 		if (event.type == SDL_QUIT) {};
 
-		if (load_file_size)
-		{
-			PX_Object_Event e={0};
-			e.Event=PX_OBJECT_EVENT_DRAGFILE;
-			PX_ApplicationPostEvent(&App,e);
-			load_file_size=0;
-		}
-		
-
 	}
 
 }
-
 
 #ifdef __cplusplus
 extern "C"
@@ -204,6 +272,7 @@ int main(int argc, char *argv[])
 {
 	
 	printf("PainterEngine Webassembly initializating...\n");
+
 	SDL_Init(SDL_INIT_VIDEO);
 	info=SDL_GetVideoInfo();
 	if(!PX_ApplicationInitialize(&App,info->current_w,info->current_h))
@@ -211,7 +280,7 @@ int main(int argc, char *argv[])
 		printf("PainterEngine startup failed.\n");
 			return PX_FALSE;
 	}
-
+	printf("SDL Create surface %d %d\n",App.runtime.surface_width,App.runtime.surface_height);
 	screen = SDL_SetVideoMode(App.runtime.surface_width, App.runtime.surface_height, 32, SDL_SWSURFACE);
 	lastupdatetime=SDL_GetTicks();
 

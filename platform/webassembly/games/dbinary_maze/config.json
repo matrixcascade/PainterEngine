@@ -1,0 +1,11 @@
+{
+"name":"走迷宫",
+"author":"作者:DBinary",
+"description":"吃到食物,走出迷宫",
+"rank":{
+    "rank1":{},
+    "rank2":{},
+    "rank3":{}
+},
+"gametime":7.000000
+}

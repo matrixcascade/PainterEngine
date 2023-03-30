@@ -853,7 +853,6 @@ static px_void PX_3D_RenderListRasterization(px_surface *psurface,PX_3D_RenderLi
 			toverz += toverz_step;
 		}
 	}
-
 }
 
 
