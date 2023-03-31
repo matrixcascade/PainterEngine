@@ -225,12 +225,13 @@ px_void PX_Object_CanvasUpdateSliderBar(PX_Object* pObject)
 
 px_void PX_Object_CanvasRenderToLayerPreview(PX_Object* pObject)
 {
-	PX_Object_Canvas* pdesc = PX_ObjectGetDesc(PX_Object_Canvas, pObject);
-	px_texture* ptexture = PX_Object_LayerBoxGetPreviewSurface(pdesc->pLayerBoxObject);
 	px_float scale;
 	px_int neww, newh,ltoftx,ltofty;
-	px_float vcx, vcy, vcw, vch;;
+	px_float vcx, vcy, vcw, vch;
 	px_texture mintex;
+	PX_Object_Canvas* pdesc = PX_ObjectGetDesc(PX_Object_Canvas, pObject);
+	px_texture* ptexture = PX_Object_LayerBoxGetPreviewSurface(pdesc->pLayerBoxObject);
+
 	if (pdesc->cache_editing_surface.width>pdesc->cache_editing_surface.height)
 	{
 		scale = 120.f / pdesc->cache_editing_surface.width;

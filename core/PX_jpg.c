@@ -183,6 +183,7 @@ px_bool PX_JpgReadStartOfFrame(PX_JpgDecoder* pJpgdecoder)
     for (i = 0; i < pJpgdecoder->numComponents; ++i) 
     {
         PX_JpgColorComponent* component;
+		px_byte samplingFactor;
         px_byte componentID = PX_MemoryStreamReadByte(pstream);
         // component IDs are usually 1, 2, 3 but rarely can be seen as 0, 1, 2
         // always force them into 1, 2, 3 for consistency
@@ -203,7 +204,7 @@ px_bool PX_JpgReadStartOfFrame(PX_JpgDecoder* pJpgdecoder)
         }
         component->usedInFrame = PX_TRUE;
 
-        px_byte samplingFactor = PX_MemoryStreamReadByte(pstream);
+        samplingFactor = PX_MemoryStreamReadByte(pstream);
         component->horizontalSamplingFactor = samplingFactor >> 4;
         component->verticalSamplingFactor = samplingFactor & 0x0F;
         if (componentID == 1) {
@@ -255,8 +256,9 @@ px_bool PX_JpgReadQuantizationTable(PX_JpgDecoder* pJpgdecoder) {
 
     while (length > 0) {
         px_byte tableInfo = PX_MemoryStreamReadByte(pstream);
+		px_byte tableID;
         length -= 1;
-        px_byte tableID = tableInfo & 0x0F;
+        tableID = tableInfo & 0x0F;
 
         if (tableID > 3) {
             // "Error - Invalid quantization table ID: " << (px_uint)tableID << '\n';
