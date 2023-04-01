@@ -319,6 +319,15 @@ px_int PX_PngGetSize(px_byte* ppngbuffer,px_int in_size)
 					break;
 				return PX_FALSE;
 			}
+			
+
+			if (PX_PNG_MAKE_DWORD_PTR(pchunk + 4) == PX_PNG_CHUNK_IEND)
+			{
+
+				pchunk += (chunk_length + 12);
+				break;
+			}
+
 			pchunk += (chunk_length + 12);
 		}
 		return (px_int)(pchunk - ppngbuffer);
@@ -365,6 +374,10 @@ px_bool PX_PngToRenderBuffer(px_memorypool * mp,px_byte* ppngbuffer, px_int size
 				return PX_FALSE;
 			}
 			pchunk += (chunk_length + 12);
+			if (PX_PNG_MAKE_DWORD_PTR(pchunk + 4) == PX_PNG_CHUNK_IEND)
+			{
+				break;
+			}
 		}
 	} while (0);
 

@@ -6,8 +6,8 @@
 #ifndef PX_JPG_H
 #define PX_JPG_H
 
-#include "px_memory.h"
-#include "px_surface.h"
+#include "PX_Memory.h"
+#include "PX_Surface.h"
 
 // Start of Frame markers, non-differential, Huffman coding
 typedef enum

@@ -7,7 +7,7 @@ px_bool PX_AnimationLibraryCreateFromMemory(px_memorypool *mp,PX_AnimationLibrar
 	px_byte *pbuffer;
 	px_texture texture;
 	PX_2DX_CODE_Header _codeheader;
-
+	panimation->mp = mp;
 	_header=*(PX_2DX_Header *)_2dxBuffer;
 	if (!PX_memequ(&_header.magic,"2DX",sizeof(_header.magic)))
 	{
@@ -192,6 +192,14 @@ px_void PX_AnimationUpdate(PX_Animation *panimation,px_uint elapsed)
 				panimation->ip+=sizeof(PX_2DX_INSTR);
 			}
 			break;
+		case PX_2DX_OPCODE_CLIPX:
+			panimation->reg_clipx = pInstr->param;
+			panimation->ip += sizeof(PX_2DX_INSTR);
+			break;
+		case PX_2DX_OPCODE_CLIPY:
+			panimation->reg_clipy = pInstr->param;
+			panimation->ip += sizeof(PX_2DX_INSTR);
+			break;
 		case PX_2DX_OPCODE_CLIPW:
 			panimation->reg_clipw=pInstr->param;
 			panimation->ip+=sizeof(PX_2DX_INSTR);
@@ -203,6 +211,15 @@ px_void PX_AnimationUpdate(PX_Animation *panimation,px_uint elapsed)
 		case PX_2DX_OPCODE_CLIPI:
 			panimation->reg_clipi=pInstr->param;
 			panimation->ip+=sizeof(PX_2DX_INSTR);
+			break;
+		case PX_2DX_OPCODE_CLIPINC:
+			panimation->reg_clipi += pInstr->param;
+			panimation->ip += sizeof(PX_2DX_INSTR);
+			
+			break;
+		case PX_2DX_OPCODE_CLIPDEC:
+			panimation->reg_clipi -= pInstr->param;
+			panimation->ip += sizeof(PX_2DX_INSTR);
 			break;
 		}
 	}
@@ -223,7 +240,6 @@ px_void PX_AnimationRender(px_surface *psurface,PX_Animation *animation,px_int x
 		cxc = pTexture->width / animation->reg_clipw;
 		clx = (animation->reg_clipi%cxc)*animation->reg_clipw+animation->reg_clipx;
 		cly = (animation->reg_clipi/cxc)*animation->reg_cliph+animation->reg_clipy;
-
 		PX_TextureRenderClip(psurface, pTexture, x, y, clx,cly,animation->reg_clipw,animation->reg_cliph, refPoint, blend);
 	}
 }
@@ -394,6 +410,8 @@ px_bool PX_AnimationLibrary_CreateEffect_JumpVertical(px_memorypool *mp,PX_Anima
 #define PX_2DX_MNEMONIC_CLIPW "CLIPW"
 #define PX_2DX_MNEMONIC_CLIPH "CLIPH"
 #define PX_2DX_MNEMONIC_CLIPI "CLIPI"
+#define PX_2DX_MNEMONIC_CLIPINC "CLIPINC"
+#define PX_2DX_MNEMONIC_CLIPDEC "CLIPDEC"
 
 PX_LEXER_LEXEME_TYPE PX_2dx_NextLexer(px_lexer* lexer)
 {
@@ -622,7 +640,9 @@ px_bool PX_AnimationShellCompile(px_memorypool* mp, const px_char script[], px_v
 			PX_strequ(lexer.CurLexeme.buffer, PX_2DX_MNEMONIC_CLIPY) ||\
 			PX_strequ(lexer.CurLexeme.buffer, PX_2DX_MNEMONIC_CLIPW) ||\
 			PX_strequ(lexer.CurLexeme.buffer, PX_2DX_MNEMONIC_CLIPH) ||\
-			PX_strequ(lexer.CurLexeme.buffer, PX_2DX_MNEMONIC_CLIPI)\
+			PX_strequ(lexer.CurLexeme.buffer, PX_2DX_MNEMONIC_CLIPI) || \
+			PX_strequ(lexer.CurLexeme.buffer, PX_2DX_MNEMONIC_CLIPINC)||\
+			PX_strequ(lexer.CurLexeme.buffer, PX_2DX_MNEMONIC_CLIPDEC) \
 			)
 		{
 			type = PX_2dx_NextLexer(&lexer);
@@ -735,7 +755,9 @@ px_bool PX_AnimationShellCompile(px_memorypool* mp, const px_char script[], px_v
 			PX_strequ(lexer.CurLexeme.buffer, PX_2DX_MNEMONIC_CLIPY) || \
 			PX_strequ(lexer.CurLexeme.buffer, PX_2DX_MNEMONIC_CLIPW) || \
 			PX_strequ(lexer.CurLexeme.buffer, PX_2DX_MNEMONIC_CLIPH) || \
-			PX_strequ(lexer.CurLexeme.buffer, PX_2DX_MNEMONIC_CLIPI)\
+			PX_strequ(lexer.CurLexeme.buffer, PX_2DX_MNEMONIC_CLIPI) || \
+			PX_strequ(lexer.CurLexeme.buffer, PX_2DX_MNEMONIC_CLIPINC) || \
+			PX_strequ(lexer.CurLexeme.buffer, PX_2DX_MNEMONIC_CLIPDEC) \
 			)
 		{
 			if (PX_strequ(lexer.CurLexeme.buffer, PX_2DX_MNEMONIC_LOOP))
@@ -750,6 +772,10 @@ px_bool PX_AnimationShellCompile(px_memorypool* mp, const px_char script[], px_v
 				instr.opcode = PX_2DX_OPCODE_CLIPH;
 			else if (PX_strequ(lexer.CurLexeme.buffer, PX_2DX_MNEMONIC_CLIPI))
 				instr.opcode = PX_2DX_OPCODE_CLIPI;
+			else if (PX_strequ(lexer.CurLexeme.buffer, PX_2DX_MNEMONIC_CLIPINC))
+				instr.opcode = PX_2DX_OPCODE_CLIPINC;
+			else if (PX_strequ(lexer.CurLexeme.buffer, PX_2DX_MNEMONIC_CLIPDEC))
+				instr.opcode = PX_2DX_OPCODE_CLIPDEC;
 
 			type = PX_2dx_NextLexer(&lexer);
 			if (type != PX_LEXER_LEXEME_TYPE_TOKEN)
@@ -763,7 +789,7 @@ px_bool PX_AnimationShellCompile(px_memorypool* mp, const px_char script[], px_v
 
 			
 
-			if (PX_atoi(lexer.CurLexeme.buffer) > 0 && PX_atoi(lexer.CurLexeme.buffer) < 65535)
+			if (PX_atoi(lexer.CurLexeme.buffer) >= 0 && PX_atoi(lexer.CurLexeme.buffer) <= 65535)
 			{
 				instr.param = PX_atoi(lexer.CurLexeme.buffer);
 			}
@@ -988,6 +1014,11 @@ px_bool PX_AnimationSetCurrentPlayAnimation(PX_Animation *animation,px_int i)
 		return PX_TRUE;
 	}
 	return PX_FALSE;
+}
+
+px_bool PX_AnimationPlay(PX_Animation* animation, const px_char* name)
+{
+	return PX_AnimationSetCurrentPlayAnimationByName(animation,name);
 }
 
 px_bool PX_AnimationSetCurrentPlayAnimationByName(PX_Animation *animation,const px_char *name)

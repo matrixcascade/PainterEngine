@@ -6,16 +6,16 @@
 #include "PX_Bitmap.h"
 #include "PX_TRaw.h"
 #include "PX_Png.h"
-#include "PX_Jpg.h"
+#include "PX_jpg.h"
 typedef px_surface px_texture;
 
 
 typedef struct
 {
-	float hdr_R;
-	float hdr_G;
-	float hdr_B;
-	float alpha;
+	px_float hdr_R;
+	px_float hdr_G;
+	px_float hdr_B;
+	px_float alpha;
 }PX_TEXTURERENDER_BLEND;
 
 typedef struct

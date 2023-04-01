@@ -4,6 +4,7 @@
 #include "PX_Lexer.h"
 typedef struct
 {
+	px_memorypool* mp;
 	px_vector frames; //vector frames
 	px_vector animation;
 	px_memory code;
@@ -43,14 +44,21 @@ typedef struct
 	px_dword addr;
 }PX_2dxMake_tagInfo;
 
-px_bool PX_AnimationCreate(PX_Animation *animation,PX_AnimationLibrary *linker);
-px_bool PX_AnimationSetLibrary(PX_Animation *animation,PX_AnimationLibrary *linker);
+//Create Animation from 2dx data
+px_int PX_AnimationLibraryGetFrameWidth(PX_AnimationLibrary* panimationLib, px_int frameIndex);
+px_int PX_AnimationLibraryGetFrameHeight(PX_AnimationLibrary* panimationLib, px_int frameIndex);
+px_bool PX_AnimationLibraryCreateFromMemory(px_memorypool* mp, PX_AnimationLibrary* panimationLib, px_byte* _2dxBuffer, px_uint size);
+px_bool PX_AnimationLibrary_CreateEffect_JumpVertical(px_memorypool* mp, PX_AnimationLibrary* panimation, px_texture* effectTexture);
 px_int PX_AnimationLibraryGetPlayAnimationIndexByName(PX_AnimationLibrary* pLib, const px_char* name);
 px_void PX_AnimationLibraryAddInstr(PX_AnimationLibrary *panimationLib,PX_2DX_OPCODE opcode,px_word param);
 px_void PX_AnimationLibraryFree(PX_AnimationLibrary *panimationLib);
+
+px_bool PX_AnimationCreate(PX_Animation* animation, PX_AnimationLibrary* linker);
+px_bool PX_AnimationSetLibrary(PX_Animation* animation, PX_AnimationLibrary* linker);
 px_int PX_AnimationGetAnimationsCount(PX_Animation *animation);
 px_dword PX_AnimationGetCurrentPlayAnimation(PX_Animation *animation);
 px_bool PX_AnimationSetCurrentPlayAnimation(PX_Animation *animation,px_int i);
+px_bool PX_AnimationPlay(PX_Animation* animation, const px_char* name);
 px_bool PX_AnimationSetCurrentPlayAnimationByName(PX_Animation *animation,const px_char *name);
 px_int PX_AnimationGetPlayAnimationIndexByName(PX_Animation* animation, const px_char* name);
 px_void PX_AnimationFree(PX_Animation *animation);
@@ -65,11 +73,7 @@ px_void PX_AnimationRenderEx(px_surface *psurface,PX_Animation *animation,px_int
 px_void PX_AnimationRender_scale(px_surface *psurface,PX_Animation *animation,px_int x,px_int y,px_float scale,PX_ALIGN refPoint,PX_TEXTURERENDER_BLEND *blend);
 px_void PX_AnimationRender_vector(px_surface *psurface,PX_Animation *animation,px_int x,px_int y,px_point direction,PX_ALIGN refPoint,PX_TEXTURERENDER_BLEND *blend);
 
-//Create Animation from 2dx data
-px_int PX_AnimationLibraryGetFrameWidth(PX_AnimationLibrary *panimationLib,px_int frameIndex);
-px_int PX_AnimationLibraryGetFrameHeight(PX_AnimationLibrary *panimationLib,px_int frameIndex);
-px_bool PX_AnimationLibraryCreateFromMemory(px_memorypool *mp,PX_AnimationLibrary *panimationLib,px_byte *_2dxBuffer,px_uint size);
-px_bool PX_AnimationLibrary_CreateEffect_JumpVertical(px_memorypool *mp,PX_AnimationLibrary *panimation,px_texture *effectTexture);
+
 
 //compiler
 px_bool PX_AnimationShellCompile(px_memorypool* mp, const px_char script[], px_vector* taginfos, px_vector* texinfos, px_memory* out);

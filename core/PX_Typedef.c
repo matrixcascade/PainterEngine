@@ -5326,7 +5326,7 @@ px_byte PX_MemoryStreamReadBitLE(PX_MemoryStream* pStream)
 {
 	if (pStream->bitpointer/8<=pStream->size*8)
 	{
-		return PX_ReadBitLE(&pStream->bitpointer, pStream->bitstream);
+		return PX_ReadBitLE((px_uint32 *)&pStream->bitpointer, pStream->bitstream);
 	}
 	else
 	{
@@ -5337,7 +5337,7 @@ px_byte PX_MemoryStreamReadBitBE(PX_MemoryStream* pStream)
 {
 	if (pStream->bitpointer / 8 <= pStream->size * 8)
 	{
-		return PX_ReadBitBE(&pStream->bitpointer, pStream->bitstream);
+		return PX_ReadBitBE((px_uint32*)&pStream->bitpointer, pStream->bitstream);
 	}
 	else
 	{
@@ -5354,7 +5354,7 @@ px_byte PX_MemoryStreamReadByte(PX_MemoryStream* pStream)
 	PX_MemoryStreamAlign(pStream);
 	if (pStream->bitpointer / 8+8 <= pStream->size * 8)
 	{
-		px_byte result = (px_byte)PX_ReadBitsLE(&pStream->bitpointer, pStream->bitstream, 8);
+		px_byte result = (px_byte)PX_ReadBitsLE((px_uint32*)&pStream->bitpointer, pStream->bitstream, 8);
 		return result;
 	}
 	else
@@ -5366,7 +5366,7 @@ px_uint32 PX_MemoryStreamReadBitsLE(PX_MemoryStream* pStream, px_int nbits)
 {
 	if (pStream->bitpointer / 8 + nbits <= pStream->size * 8)
 	{
-		px_uint32 result = PX_ReadBitsLE(&pStream->bitpointer, pStream->bitstream, nbits);
+		px_uint32 result = PX_ReadBitsLE((px_uint32*)&pStream->bitpointer, pStream->bitstream, nbits);
 		return result;
 	}
 	else
@@ -5378,7 +5378,7 @@ px_uint32 PX_MemoryStreamReadBitsBE(PX_MemoryStream* pStream, px_int nbits)
 {
 	if (pStream->bitpointer / 8 + nbits <= pStream->size * 8)
 	{
-		px_uint32 result = PX_ReadBitsBE(&pStream->bitpointer, pStream->bitstream, nbits);
+		px_uint32 result = PX_ReadBitsBE((px_uint32*)&pStream->bitpointer, pStream->bitstream, nbits);
 		return result;
 	}
 	else

@@ -1,0 +1,1 @@
+Put your resource file in the current directory and access it with 'assets/YourFileName'.

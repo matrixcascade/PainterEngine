@@ -359,18 +359,41 @@ int PX_FileGetDirectoryFileName(const char path[],int count,char FileName[][260]
 	FindClose(hFind);
 	return index;
 }
-
+extern char* PX_OpenFileDialog(const char Filter[]);
 void PX_RequestData(const char url[], void* buffer, int size, void* ptr, void (*func_callback)(void* buffer, int size, void* ptr))
 {
-    PX_IO_Data io= PX_LoadFileToIOData(url);
-    if (io.size>0&&io.buffer&&io.size<=(unsigned int)size)
-    {
-        memcpy(buffer,io.buffer,io.size);
-        func_callback(buffer,io.size,ptr);
-    }
-    else
-    {
-        func_callback(buffer,0,ptr);
-    }
-    PX_FreeIOData(&io);
+	if (strstr(url,"open"))
+	{
+		char* ppath = PX_OpenFileDialog("");
+		if (ppath&&ppath[0])
+		{
+			PX_IO_Data io = PX_LoadFileToIOData(ppath);
+			if (io.size > 0 && io.buffer && io.size <= (unsigned int)size)
+			{
+				memcpy(buffer, io.buffer, io.size);
+				func_callback(buffer, io.size, ptr);
+			}
+			else
+			{
+				func_callback(buffer, 0, ptr);
+			}
+			PX_FreeIOData(&io);
+		}
+		
+	}
+	else
+	{
+		PX_IO_Data io = PX_LoadFileToIOData(url);
+		if (io.size > 0 && io.buffer && io.size <= (unsigned int)size)
+		{
+			memcpy(buffer, io.buffer, io.size);
+			func_callback(buffer, io.size, ptr);
+		}
+		else
+		{
+			func_callback(buffer, 0, ptr);
+		}
+		PX_FreeIOData(&io);
+	}
+    
 }

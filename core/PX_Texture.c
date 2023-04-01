@@ -264,7 +264,8 @@ px_void PX_TextureRender(px_surface *psurface,px_texture *tex,px_int x,px_int y,
 
 px_void PX_TextureRenderClip(px_surface* psurface, px_texture* tex, px_int x, px_int y, px_int clipx, px_int clipy, px_int clipw, px_int cliph, PX_ALIGN refPoint, PX_TEXTURERENDER_BLEND* blend)
 {
-	px_texture temp;
+	px_int ry;
+	px_int rx;
 	if (clipx<0)
 	{
 		clipx = 0;
@@ -300,17 +301,49 @@ px_void PX_TextureRenderClip(px_surface* psurface, px_texture* tex, px_int x, px
 	{
 		return;
 	}
-	temp.MP = 0;
-	temp.height=cliph;
-	temp.width=clipw;
-	temp.limit_bottom=cliph;
-	temp.limit_left=0;
-	temp.limit_right=clipw;
-	temp.limit_top=0;
-	temp.surfaceBuffer=tex->surfaceBuffer+clipy*tex->width+clipx;
-	PX_TextureRender(psurface,&temp,x,y,refPoint,blend);
+	
+	switch (refPoint)
+	{
+	case PX_ALIGN_LEFTTOP:
+		break;
+	case PX_ALIGN_MIDTOP:
+		x -= clipw / 2;
+		break;
+	case PX_ALIGN_RIGHTTOP:
+		x -= clipw;
+		break;
+	case PX_ALIGN_LEFTMID:
+		y -= cliph / 2;
+		break;
+	case PX_ALIGN_CENTER:
+		y -= cliph / 2;
+		x -= clipw / 2;
+		break;
+	case PX_ALIGN_RIGHTMID:
+		y -= cliph / 2;
+		x -= clipw;
+		break;
+	case PX_ALIGN_LEFTBOTTOM:
+		y -= cliph;
+		break;
+	case PX_ALIGN_MIDBOTTOM:
+		y -= cliph;
+		x -= clipw / 2;
+		break;
+	case PX_ALIGN_RIGHTBOTTOM:
+		y -= cliph;
+		x -= clipw;
+		break;
+	}
 
-	return;
+	for (ry = 0; ry < cliph; ry++)
+	{
+		for (rx = 0; rx < clipw; rx++)
+		{
+			PX_SurfaceDrawPixel(psurface,x+rx,y+ry, *(tex->surfaceBuffer + (clipy + ry) * tex->width + clipx+rx));
+		}
+		
+	}
 }
 
 

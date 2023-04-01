@@ -681,9 +681,9 @@ px_void PX_Object_SliderBarRender(px_surface *psurface, PX_Object *pObject,px_ui
 		pSliderBar->Value=pSliderBar->Max;
 	}
 
-	if (pSliderBar->Value<0)
+	if (pSliderBar->Value< pSliderBar->Min)
 	{
-		pSliderBar->Value=0;
+		pSliderBar->Value= pSliderBar->Min;
 	}
 
 }

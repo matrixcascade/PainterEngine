@@ -969,7 +969,7 @@ px_bool PX_JpgDecodeBlockComponent(
     return PX_FALSE;
 }
 // decode all the Huffman data and fill all MCUs
-#include "stdio.h"
+
 px_bool PX_JpgDecodeHuffmanData(PX_JpgDecoder* pJpgdecoder)
 {
     PX_MemoryStream* pstream = &pJpgdecoder->stream;
