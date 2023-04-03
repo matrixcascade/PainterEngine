@@ -64,7 +64,7 @@ px_void			PX_WorldSetImpact(PX_Object *pObj,px_dword type,px_dword impact);
 px_void			PX_WorldSetAuxiliaryXYSpacer(PX_World *pw,px_int x,px_int y);
 px_void			PX_WorldEnableAuxiliaryLine(PX_World *pw,px_bool bline);
 px_void			PX_WorldSetAuxiliaryLineColor(PX_World *pw,px_color color);
-px_point        PX_WolrdObjectXYtoScreenXY(PX_World *pw,px_float x,px_float y);
+px_point        PX_WorldObjectXYtoScreenXY(PX_World *pw,px_float x,px_float y);
 px_void			PX_WorldPostEvent(PX_World* pw, PX_Object_Event e);
 px_void         PX_WorldFree(PX_World *pw);
 #endif
