@@ -93,9 +93,6 @@ _ERROR:
 	return PX_FALSE;
 }
 
-
-
-
 px_void PX_AnimationLibraryFree(PX_AnimationLibrary *panimation)
 {
 	px_int i;
@@ -149,9 +146,9 @@ px_void PX_AnimationUpdate(PX_Animation *panimation,px_uint elapsed)
 				panimation->reg_currentFrameIndex = pInstr->param;
 				panimation->reg_clipx = 0;
 				panimation->reg_clipy = 0;
-				panimation->reg_clipw = 0;
-				panimation->reg_cliph = 0;
 				panimation->reg_clipi = 0;
+				panimation->reg_clipw = PX_AnimationLibraryGetFrameWidth(panimation->linker, panimation->reg_currentFrameIndex);
+				panimation->reg_cliph = PX_AnimationLibraryGetFrameHeight(panimation->linker, panimation->reg_currentFrameIndex);
 			}
 			else
 			{
@@ -232,6 +229,7 @@ px_void PX_AnimationRender(px_surface *psurface,PX_Animation *animation,px_int x
 	{
 		return;
 	}
+	if(animation->reg_clipw&&animation->reg_cliph)
 	if(animation->reg_currentFrameIndex>=0&&animation->reg_currentFrameIndex<animation->linker->frames.size)
 	{
 		px_int cxc;
@@ -295,18 +293,38 @@ px_void PX_AnimationRender_vector(px_surface *psurface,PX_Animation *animation,p
 	}
 }
 
+px_int PX_AnimationGetFrameWidth(PX_Animation* animation)
+{
+	return animation->reg_clipw;
+}
+
+px_int PX_AnimationGetFrameHeight(PX_Animation* animation)
+{
+	return animation->reg_cliph;
+}
 
 px_int PX_AnimationLibraryGetFrameWidth(PX_AnimationLibrary *panimationLib,px_int frameIndex)
 {
-	return PX_VECTORAT(px_texture,&panimationLib->frames,frameIndex)->width;
+	if (frameIndex>=0&&frameIndex< panimationLib->frames.size)
+	{
+		return PX_VECTORAT(px_texture, &panimationLib->frames, frameIndex)->width;
+	}
+	return 0;
 }
 
-
-px_int PX_AnimationLibraryGetFrameHeight(PX_AnimationLibrary *panimationLib,px_int frameIndex)
+px_int PX_AnimationLibraryGetFrameHeight(PX_AnimationLibrary* panimationLib, px_int frameIndex)
 {
-	return PX_VECTORAT(px_texture,&panimationLib->frames,frameIndex)->height;
+	if (frameIndex >= 0 && frameIndex < panimationLib->frames.size)
+	{
+		return PX_VECTORAT(px_texture, &panimationLib->frames ,frameIndex)->height;
+	}
+	return 0;
 }
 
+px_bool PX_AnimationIsActivity(PX_Animation* animation)
+{
+	return animation->linker!=PX_NULL;
+}
 px_bool PX_AnimationCreate(PX_Animation *animation,PX_AnimationLibrary *linker)
 {
 	animation->elapsed=0;

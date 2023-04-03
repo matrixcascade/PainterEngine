@@ -1429,6 +1429,87 @@ px_void PX_GeoDrawSolidCircle(px_surface *psurface, px_int x,px_int y,px_int Rad
 	}
 }
 
+px_void PX_GeoDrawSolidCircleFast(px_surface* psurface, px_int x, px_int y, px_int Radius, px_color color)
+{
+	px_int _x,_y;
+	px_int left, top, right, bottom, mid;
+	if (color._argb.a == 0)
+	{
+		return;
+	}
+
+	left = x - Radius;
+	top = y - Radius;
+	right = x + Radius;
+	bottom = y + Radius;
+
+
+	if (left < 0)
+	{
+		left = 0;
+	}
+	if (top < 0)
+	{
+		top = 0;
+	}
+
+	if (right > psurface->width - 1)
+	{
+		right = psurface->width - 1;
+	}
+
+	if (bottom > psurface->height - 1)
+	{
+		bottom = psurface->height - 1;
+	}
+
+	if (left > psurface->width - 1)
+	{
+		return;
+	}
+
+	if (bottom < 0)
+	{
+		return;
+	}
+
+	if (right < 0)
+	{
+		return;
+	}
+
+	if (top > psurface->height - 1)
+	{
+		return;
+	}
+
+
+	if (left > right)
+	{
+		mid = left;
+		left = right;
+		right = mid;
+	}
+	if (top > bottom)
+	{
+		mid = top;
+		top = bottom;
+		bottom = mid;
+	}
+	for ( _y = top; _y <= bottom; _y++)
+	{
+		for (_x = left; _x <= right; _x++)
+		{
+			if ((_x - x) * (_x - x) + (_y - y) * (_y - y) <= Radius * Radius)
+			{
+				PX_SurfaceSetPixel(psurface,_x,_y,color);
+			}
+		}
+	}
+	
+}
+
+
 px_void PX_GeoDrawPenCircle(px_surface *psurface, px_float x,px_float y,px_float Radius,px_color color)
 {
 	PX_GeoDrawSolidCircle_Ex2(psurface,x,y,Radius,color);

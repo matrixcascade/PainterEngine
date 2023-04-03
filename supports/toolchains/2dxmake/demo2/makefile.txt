@@ -9,7 +9,6 @@ clipx 0
 clipy 0
 clipw 233
 cliph 257
-
 loop 17
 clipi 0
 tag $run_begin
@@ -26,7 +25,6 @@ clipx 0
 clipy 0
 clipw 178
 cliph 249
-
 loop 23
 clipi 0
 tag $walk_begin

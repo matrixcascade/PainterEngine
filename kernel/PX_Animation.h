@@ -53,6 +53,7 @@ px_int PX_AnimationLibraryGetPlayAnimationIndexByName(PX_AnimationLibrary* pLib,
 px_void PX_AnimationLibraryAddInstr(PX_AnimationLibrary *panimationLib,PX_2DX_OPCODE opcode,px_word param);
 px_void PX_AnimationLibraryFree(PX_AnimationLibrary *panimationLib);
 
+px_bool PX_AnimationIsActivity(PX_Animation* animation);
 px_bool PX_AnimationCreate(PX_Animation* animation, PX_AnimationLibrary* linker);
 px_bool PX_AnimationSetLibrary(PX_Animation* animation, PX_AnimationLibrary* linker);
 px_int PX_AnimationGetAnimationsCount(PX_Animation *animation);
@@ -72,7 +73,8 @@ px_void PX_AnimationRender(px_surface *psurface,PX_Animation *animation,px_int x
 px_void PX_AnimationRenderEx(px_surface *psurface,PX_Animation *animation,px_int x,px_int y,px_float scale,px_point direction,PX_ALIGN refPoint,PX_TEXTURERENDER_BLEND *blend);
 px_void PX_AnimationRender_scale(px_surface *psurface,PX_Animation *animation,px_int x,px_int y,px_float scale,PX_ALIGN refPoint,PX_TEXTURERENDER_BLEND *blend);
 px_void PX_AnimationRender_vector(px_surface *psurface,PX_Animation *animation,px_int x,px_int y,px_point direction,PX_ALIGN refPoint,PX_TEXTURERENDER_BLEND *blend);
-
+px_int PX_AnimationGetFrameWidth(PX_Animation *animation);
+px_int PX_AnimationGetFrameHeight(PX_Animation *animation);
 
 
 //compiler

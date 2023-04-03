@@ -12,6 +12,7 @@ px_void PX_GeoDrawPenDots(px_surface* psurface, px_point _samples[], px_int samp
 px_void PX_GeoDrawBorder(px_surface *psurface, px_int left, px_int top, px_int right, px_int bottom ,px_int lineWidth,px_color color);
 px_void PX_GeoDrawRect(px_surface *psurface, px_int left, px_int top, px_int right, px_int bottom,px_color color);
 px_void PX_GeoDrawSolidCircle(px_surface *psurface, px_int x,px_int y,px_int Radius,px_color color );
+px_void PX_GeoDrawSolidCircleFast(px_surface* psurface, px_int x, px_int y, px_int Radius, px_color color);
 px_void PX_GeoDrawPenCircle(px_surface *psurface, px_float x,px_float y,px_float Radius,px_color color );
 px_void PX_GeoDrawSpray(px_surface* psurface, px_float x, px_float y, px_float Radius, px_color color);
 px_void PX_GeoDrawBall(px_surface* psurface, px_float x, px_float y, px_float Radius, px_color color);

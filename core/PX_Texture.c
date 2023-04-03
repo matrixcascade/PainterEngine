@@ -230,34 +230,73 @@ px_void PX_TextureRender(px_surface *psurface,px_texture *tex,px_int x,px_int y,
 			px_int Gb=(px_int)(blend->hdr_G*1000);
 			px_int Bb=(px_int)(blend->hdr_B*1000);
 
-			for (j=top;j<=bottom;j++)
+			if (psurface->limit_left==0&& psurface->limit_right == psurface->width-1&& psurface->limit_top == 0 && psurface->limit_bottom == psurface->height - 1)
 			{
-				for (i=left;i<=right;i++)
+				for (j = top; j <= bottom; j++)
 				{
-					clr=pdata[j*tex->width+i];
-					bA=(px_int)(clr._argb.a*Ab/1000);
-					bR=(px_int)(clr._argb.r*Rb/1000);
-					bG=(px_int)(clr._argb.g*Gb/1000);
-					bB=(px_int)(clr._argb.b*Bb/1000);
+					for (i = left; i <= right; i++)
+					{
+						clr = pdata[j * tex->width + i];
+						bA = (px_int)(clr._argb.a * Ab / 1000);
+						bR = (px_int)(clr._argb.r * Rb / 1000);
+						bG = (px_int)(clr._argb.g * Gb / 1000);
+						bB = (px_int)(clr._argb.b * Bb / 1000);
 
-					clr._argb.a=bA>255?255:(px_uchar)bA;
-					clr._argb.r=bR>255?255:(px_uchar)bR;
-					clr._argb.g=bG>255?255:(px_uchar)bG;
-					clr._argb.b=bB>255?255:(px_uchar)bB;
-					PX_SurfaceDrawPixel(psurface,x+i,y+j,clr);
+						clr._argb.a = bA > 255 ? 255 : (px_uchar)bA;
+						clr._argb.r = bR > 255 ? 255 : (px_uchar)bR;
+						clr._argb.g = bG > 255 ? 255 : (px_uchar)bG;
+						clr._argb.b = bB > 255 ? 255 : (px_uchar)bB;
+						PX_SurfaceDrawPixelWithoutLimit(psurface, x + i, y + j, clr);
+					}
 				}
 			}
+			else
+			{
+				for (j = top; j <= bottom; j++)
+				{
+					for (i = left; i <= right; i++)
+					{
+						clr = pdata[j * tex->width + i];
+						bA = (px_int)(clr._argb.a * Ab / 1000);
+						bR = (px_int)(clr._argb.r * Rb / 1000);
+						bG = (px_int)(clr._argb.g * Gb / 1000);
+						bB = (px_int)(clr._argb.b * Bb / 1000);
+
+						clr._argb.a = bA > 255 ? 255 : (px_uchar)bA;
+						clr._argb.r = bR > 255 ? 255 : (px_uchar)bR;
+						clr._argb.g = bG > 255 ? 255 : (px_uchar)bG;
+						clr._argb.b = bB > 255 ? 255 : (px_uchar)bB;
+						PX_SurfaceDrawPixel(psurface, x + i, y + j, clr);
+					}
+				}
+			}
+			
 		}
 		else
 		{
-			for (j=top;j<=bottom;j++)
+			if (psurface->limit_left == 0 && psurface->limit_right == psurface->width - 1 && psurface->limit_top == 0 && psurface->limit_bottom == psurface->height - 1)
 			{
-				for (i=left;i<=right;i++)
+				for (j = top; j <= bottom; j++)
 				{
-					clr=pdata[j*tex->width+i];
-					PX_SurfaceDrawPixel(psurface,x+i,y+j,clr);
+					for (i = left; i <= right; i++)
+					{
+						clr = pdata[j * tex->width + i];
+						PX_SurfaceDrawPixelWithoutLimit(psurface, x + i, y + j, clr);
+					}
 				}
 			}
+			else
+			{
+				for (j = top; j <= bottom; j++)
+				{
+					for (i = left; i <= right; i++)
+					{
+						clr = pdata[j * tex->width + i];
+						PX_SurfaceDrawPixel(psurface, x + i, y + j, clr);
+					}
+				}
+			}
+			
 		}
 	
 }
@@ -335,15 +374,29 @@ px_void PX_TextureRenderClip(px_surface* psurface, px_texture* tex, px_int x, px
 		x -= clipw;
 		break;
 	}
-
-	for (ry = 0; ry < cliph; ry++)
+	if (psurface->limit_left == 0 && psurface->limit_right == psurface->width - 1 && psurface->limit_top == 0 && psurface->limit_bottom == psurface->height - 1)
 	{
-		for (rx = 0; rx < clipw; rx++)
+		for (ry = 0; ry < cliph; ry++)
 		{
-			PX_SurfaceDrawPixel(psurface,x+rx,y+ry, *(tex->surfaceBuffer + (clipy + ry) * tex->width + clipx+rx));
+			for (rx = 0; rx < clipw; rx++)
+			{
+				PX_SurfaceDrawPixelWithoutLimit(psurface, x + rx, y + ry, *(tex->surfaceBuffer + (clipy + ry) * tex->width + clipx + rx));
+			}
+
 		}
-		
 	}
+	else
+	{
+		for (ry = 0; ry < cliph; ry++)
+		{
+			for (rx = 0; rx < clipw; rx++)
+			{
+				PX_SurfaceDrawPixel(psurface, x + rx, y + ry, *(tex->surfaceBuffer + (clipy + ry) * tex->width + clipx + rx));
+			}
+
+		}
+	}
+	
 }
 
 
@@ -585,7 +638,7 @@ px_void PX_TextureRenderPixelShader(px_surface *psurface,px_texture *tex,px_int 
 		for (i=left;i<=right;i++)
 		{
 			clr=pdata[j*tex->width+i];
-			shader(psurface,x+i,y+j,clr,ptr);
+			shader(psurface, tex,x+i,y+j,i,j,ptr);
 		}
 	}
 }
