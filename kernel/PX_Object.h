@@ -311,6 +311,7 @@ px_void	   PX_ObjectInitialize(px_memorypool *mp,PX_Object *Object,PX_Object *Pa
 px_void    PX_ObjectSetId(PX_Object *pObject,const px_char id[]);
 px_void    PX_ObjectSetUserCode(PX_Object *pObject,px_int user_int);
 px_void    PX_ObjectSetUserPointer(PX_Object *pObject,px_void *user_ptr);
+px_void	   PX_ObjectSetParent(PX_Object *Object,PX_Object *Parent);
 px_void    PX_ObjectDelete(PX_Object *pObject);
 px_void    PX_ObjectDelayDelete(PX_Object* pObject);
 px_void	   PX_ObjectDeleteChilds( PX_Object *pObject );

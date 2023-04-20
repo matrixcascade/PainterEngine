@@ -486,6 +486,56 @@ static px_void PX_Object_DeleteLinkerObject( PX_Object **ppObject )
 	(*ppObject)=PX_NULL;
 }
 
+px_void PX_ObjectSetParent(PX_Object *pObject, PX_Object *pParent)
+{
+	if (pObject==PX_NULL) return;
+	if (pObject->pParent==pParent) return;
+	if (pObject->OnFocus) PX_ObjectClearFocus(pObject);
+
+	// detach from parent
+	if (pObject->pParent!=PX_NULL)
+	{
+		if (pObject->pParent->pChilds==pObject)
+		{
+		   pObject->pParent->pChilds=pObject->pNextBrother;
+		   if(pObject->pNextBrother)
+		   {
+		   pObject->pNextBrother->pParent=pObject->pParent;
+		   pObject->pNextBrother->pPreBrother=PX_NULL;
+		   }
+		}
+		else
+		{
+			if (pObject->pPreBrother!=PX_NULL)
+			{
+				pObject->pPreBrother->pNextBrother=pObject->pNextBrother;
+				if(pObject->pNextBrother)
+				pObject->pNextBrother->pPreBrother=pObject->pPreBrother;
+			}
+			else
+			{
+				PX_ERROR("Invalid Object struct");
+			}
+		}
+	}
+	else
+	{
+		if (pObject->pPreBrother!=PX_NULL)
+		{
+			pObject->pPreBrother=pObject->pNextBrother;
+		}
+	}
+
+	// if the parent is null, then the object is a root object
+	if(pParent==PX_NULL){
+		pObject->pParent=PX_NULL;
+		pObject->pNextBrother=PX_NULL;
+		pObject->pPreBrother=PX_NULL;
+	}else{
+		PX_ObjectAddClild(pParent, pObject);
+	}
+}
+
 px_void PX_ObjectDelete( PX_Object *pObject )
 {
 	if (pObject==PX_NULL) 
