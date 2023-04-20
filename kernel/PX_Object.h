@@ -331,7 +331,7 @@ px_bool		PX_ObjectIsCursorInRegion(PX_Object *Object,PX_Object_Event e);
 px_float	PX_ObjectGetHeight(PX_Object *Object);
 px_float	PX_ObjectGetWidth(PX_Object *Object);
 
-px_void PX_ObjectAddClild(PX_Object *Parent,PX_Object *child);
+px_void PX_ObjectAddChild(PX_Object *Parent,PX_Object *child);
 px_void PX_ObjectUpdate(PX_Object *Object,px_uint elapsed );
 px_void PX_ObjectRender(px_surface *pSurface,PX_Object *Object,px_uint elapsed);
 

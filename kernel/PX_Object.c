@@ -794,7 +794,7 @@ px_float PX_ObjectGetWidth(PX_Object *Object)
 	return Object->Width;
 }
 
-px_void PX_ObjectAddClild(PX_Object *Parent,PX_Object *child)
+px_void PX_ObjectAddChild(PX_Object *Parent,PX_Object *child)
 {
 	PX_Object *pLinker;
 	child->pParent=Parent;
@@ -857,7 +857,7 @@ px_void PX_ObjectInitialize(px_memorypool *mp,PX_Object *pObject,PX_Object *Pare
 		}
 		else
 		{
-			PX_ObjectAddClild(Parent,pObject);
+			PX_ObjectAddChild(Parent,pObject);
 		}
 		
 	}
