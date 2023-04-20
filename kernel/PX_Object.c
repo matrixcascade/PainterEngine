@@ -532,7 +532,7 @@ px_void PX_ObjectSetParent(PX_Object *pObject, PX_Object *pParent)
 		pObject->pNextBrother=PX_NULL;
 		pObject->pPreBrother=PX_NULL;
 	}else{
-		PX_ObjectAddClild(pParent, pObject);
+		PX_ObjectAddChild(pParent, pObject);
 	}
 }
 
