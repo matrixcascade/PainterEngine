@@ -158,7 +158,7 @@ PX_UDP_ADDR PX_UDP_ADDR_IPV4(unsigned int ipv4,unsigned short port)
 	return addr;
 }
 
-unsigned int PX_UDPGetHostByName(const char *host)
+unsigned int PX_UDPGetHostByName(const char *host, unsigned int dns_addr)
 {
 	PX_UDP udp;
 	if (PX_UDPInitialize(&udp, PX_UDP_IP_TYPE_IPV4))
