@@ -311,6 +311,7 @@ px_void	   PX_ObjectInitialize(px_memorypool *mp,PX_Object *Object,PX_Object *Pa
 px_void    PX_ObjectSetId(PX_Object *pObject,const px_char id[]);
 px_void    PX_ObjectSetUserCode(PX_Object *pObject,px_int user_int);
 px_void    PX_ObjectSetUserPointer(PX_Object *pObject,px_void *user_ptr);
+px_void	   PX_ObjectSetParent(PX_Object *Object,PX_Object *Parent);
 px_void    PX_ObjectDelete(PX_Object *pObject);
 px_void    PX_ObjectDelayDelete(PX_Object* pObject);
 px_void	   PX_ObjectDeleteChilds( PX_Object *pObject );
@@ -331,7 +332,7 @@ px_bool		PX_ObjectIsCursorInRegion(PX_Object *Object,PX_Object_Event e);
 px_float	PX_ObjectGetHeight(PX_Object *Object);
 px_float	PX_ObjectGetWidth(PX_Object *Object);
 
-px_void PX_ObjectAddClild(PX_Object *Parent,PX_Object *child);
+px_void PX_ObjectAddChild(PX_Object *Parent,PX_Object *child);
 px_void PX_ObjectUpdate(PX_Object *Object,px_uint elapsed );
 px_void PX_ObjectRender(px_surface *pSurface,PX_Object *Object,px_uint elapsed);
 

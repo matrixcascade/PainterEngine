@@ -13,7 +13,7 @@ px_void PX_Object_WidgetFree(PX_Object *pObject)
 
 px_void  PX_Object_WidgetLinkChild(PX_Object *parent,PX_Object *child)
 {
-	PX_ObjectAddClild(PX_Object_WidgetGetRoot(parent),child);
+	PX_ObjectAddChild(PX_Object_WidgetGetRoot(parent),child);
 }
 
 px_void PX_Object_WidgetShow(PX_Object *pObject)
