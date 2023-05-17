@@ -78,7 +78,7 @@ px_int PX_FontModuleGetCharacterDesc(PX_FontModule *module,const px_char *Text,p
 px_void PX_FontModuleTextGetRenderWidthHeight(PX_FontModule *module,const px_char *Text,px_int *advance,px_int *height);
 px_int PX_FontModuleDrawCharacter(px_surface *psurface,PX_FontModule *mod,px_int x,px_int y,const px_dword code,px_color Color);
 px_int PX_FontModuleDrawText(px_surface *psurface,PX_FontModule *mod,px_int x,px_int y,PX_ALIGN align,const px_char *Text,px_color Color);
-
+void PX_FontModuleDrawTextEx(px_memorypool* mp,px_surface *psurface,PX_FontModule *mod,px_int x,px_int y,PX_ALIGN align,const px_char *Text,px_color Color, float sx, float sy);
 
 #endif
  

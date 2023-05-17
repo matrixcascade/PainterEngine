@@ -748,3 +748,63 @@ px_int PX_FontModuleDrawText(px_surface *psurface,PX_FontModule *mod,px_int x,px
 	return dx-x+1;
 }
 
+void PX_FontModuleDrawTextEx(px_memorypool* mp,px_surface *psurface,PX_FontModule *mod,px_int x,px_int y,PX_ALIGN align,const px_char *Text,px_color Color, float sx, float sy){
+	px_int frWidth, frHeight;
+	PX_FontModuleTextGetRenderWidthHeight(mod, Text, &frWidth, &frHeight);
+	px_surface tmp, out;
+	px_bool ok;
+	// 创建临时surface
+	ok = PX_SurfaceCreate(mp, frWidth, frHeight, &tmp);
+	if(!ok) PX_ASSERT();
+	// 绘制在临时surface上
+	PX_FontModuleDrawText(&tmp, mod, 0, 0, PX_ALIGN_LEFTTOP, Text, Color);
+	// 对临时surface进行缩放
+	frWidth = (px_int)(frWidth * sx);
+	frHeight = (px_int)(frHeight * sy);
+	ok = PX_TextureCreateScale(mp, &tmp, frWidth, frHeight, &out);
+	if(!ok) PX_ASSERT();
+	PX_SurfaceFree(&tmp);
+	// 处理对齐方式
+	switch (align)
+	{
+	case PX_ALIGN_LEFTTOP:
+		break;
+	case PX_ALIGN_MIDTOP:
+		x-=frWidth/2;
+		break;
+	case PX_ALIGN_RIGHTTOP:
+		x-=frWidth;
+		break;
+	case PX_ALIGN_LEFTMID:
+		y-=frHeight/2;
+		break;
+	case PX_ALIGN_CENTER:
+		y-=frHeight/2;
+		x-=frWidth/2;
+		break;
+	case PX_ALIGN_RIGHTMID:
+		y-=frHeight/2;
+		x-=frWidth;
+		break;
+	case PX_ALIGN_LEFTBOTTOM:
+		y-=frHeight;
+		break;
+	case PX_ALIGN_MIDBOTTOM:
+		y-=frHeight;
+		x-=frWidth/2;
+		break;
+	case PX_ALIGN_RIGHTBOTTOM:
+		y-=frHeight;
+		x-=frWidth;
+		break;
+	}
+	// 将缩放后的surface绘制到目标surface上
+	for(int i=0; i<out.width; ++i){
+		for(int j=0; j<out.height; ++j){
+			px_color clr = PX_SURFACECOLOR(&out, i, j);
+			PX_SurfaceDrawPixel(psurface, x+i, y+j, clr);
+		}
+	}
+	PX_SurfaceFree(&out);
+}
+
