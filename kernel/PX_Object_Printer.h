@@ -34,4 +34,5 @@ px_void	   PX_Object_PrinterGets(PX_Object* pObject);
 px_void    PX_Object_PrinterClear(PX_Object* pObject);
 px_int	   PX_Object_PrinterGetLastCreateId(PX_Object* pObject);
 px_void		PX_Object_PrinterSetBackgroundColor(PX_Object* pObject, px_color color);
+PX_Designer_ObjectDesc PX_Object_PrinterDesignerInstall();
 #endif

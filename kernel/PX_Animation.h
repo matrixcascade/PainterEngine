@@ -23,6 +23,7 @@ typedef struct
 	px_int	  reg_clipw;
 	px_int	  reg_cliph;
 	px_int	  reg_clipi;
+	px_int	  reg_priority;
 	PX_AnimationLibrary *linker;
 }PX_Animation;
 
@@ -53,13 +54,17 @@ px_int PX_AnimationLibraryGetPlayAnimationIndexByName(PX_AnimationLibrary* pLib,
 px_void PX_AnimationLibraryAddInstr(PX_AnimationLibrary *panimationLib,PX_2DX_OPCODE opcode,px_word param);
 px_void PX_AnimationLibraryFree(PX_AnimationLibrary *panimationLib);
 
+
 px_bool PX_AnimationIsActivity(PX_Animation* animation);
 px_bool PX_AnimationCreate(PX_Animation* animation, PX_AnimationLibrary* linker);
 px_bool PX_AnimationSetLibrary(PX_Animation* animation, PX_AnimationLibrary* linker);
 px_int PX_AnimationGetAnimationsCount(PX_Animation *animation);
+px_bool PX_AnimationGetRenderRange(PX_Animation* animation,px_recti *range);
 px_dword PX_AnimationGetCurrentPlayAnimation(PX_Animation *animation);
+const px_char* PX_AnimationGetCurrentPlayAnimationName(PX_Animation* animation);
 px_bool PX_AnimationSetCurrentPlayAnimation(PX_Animation *animation,px_int i);
 px_bool PX_AnimationPlay(PX_Animation* animation, const px_char* name);
+px_bool PX_AnimationPlayWithPriority(PX_Animation* animation, const px_char* name, px_int Priority);
 px_bool PX_AnimationSetCurrentPlayAnimationByName(PX_Animation *animation,const px_char *name);
 px_int PX_AnimationGetPlayAnimationIndexByName(PX_Animation* animation, const px_char* name);
 px_void PX_AnimationFree(PX_Animation *animation);
@@ -70,9 +75,10 @@ px_rect PX_AnimationGetSize(PX_Animation *panimation);
 px_texture *PX_AnimationGetCurrentTexture(PX_Animation *panimation);
 px_void PX_AnimationRenderRotation(px_surface *psurface,PX_Animation *animation,px_point position,px_int angle,PX_ALIGN refPoint,PX_TEXTURERENDER_BLEND *blend);
 px_void PX_AnimationRender(px_surface *psurface,PX_Animation *animation,px_int x,px_int y,PX_ALIGN refPoint,PX_TEXTURERENDER_BLEND *blend);
-px_void PX_AnimationRenderEx(px_surface *psurface,PX_Animation *animation,px_int x,px_int y,px_float scale,px_point direction,PX_ALIGN refPoint,PX_TEXTURERENDER_BLEND *blend);
+px_void PX_AnimationRenderMirror(px_surface* psurface, PX_Animation* animation, px_int x, px_int y, PX_ALIGN refPoint, PX_TEXTURERENDER_BLEND* blend, PX_TEXTURERENDER_MIRRROR_MODE mirror);
+px_void PX_AnimationRenderEx(px_surface *psurface,PX_Animation *animation,px_int x,px_int y,px_float scale,px_point2D direction,PX_ALIGN refPoint,PX_TEXTURERENDER_BLEND *blend);
 px_void PX_AnimationRender_scale(px_surface *psurface,PX_Animation *animation,px_int x,px_int y,px_float scale,PX_ALIGN refPoint,PX_TEXTURERENDER_BLEND *blend);
-px_void PX_AnimationRender_vector(px_surface *psurface,PX_Animation *animation,px_int x,px_int y,px_point direction,PX_ALIGN refPoint,PX_TEXTURERENDER_BLEND *blend);
+px_void PX_AnimationRender_vector(px_surface *psurface,PX_Animation *animation,px_int x,px_int y,px_point2D direction,PX_ALIGN refPoint,PX_TEXTURERENDER_BLEND *blend);
 px_int PX_AnimationGetFrameWidth(PX_Animation *animation);
 px_int PX_AnimationGetFrameHeight(PX_Animation *animation);
 

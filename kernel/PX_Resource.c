@@ -30,6 +30,15 @@ px_bool PX_ResourceLibraryLoad(PX_ResourceLibrary *lib,PX_RESOURCE_TYPE type,px_
 		if(!PX_ShapeCreateFromMemory(lib->mp,data,datasize,&res.shape))
 			return PX_FALSE;
 		break;
+	case PX_RESOURCE_TYPE_STRING:
+		if (!PX_StringInitialize(lib->mp, &res.stringdata))
+			return PX_FALSE;
+		if (!PX_StringCat(&res.stringdata, (const px_char *)data))
+		{
+			PX_StringFree(&res.stringdata);
+			return PX_FALSE;
+		}
+		break;
 	case PX_RESOURCE_TYPE_SCRIPT:
 		if(!PX_VMInitialize(&res.Script,lib->mp,data,datasize))
 			return PX_FALSE;
@@ -100,6 +109,17 @@ px_bool PX_ResourceLibraryLoad(PX_ResourceLibrary *lib,PX_RESOURCE_TYPE type,px_
 	return PX_TRUE;
 }
 
+px_bool PX_ResourceLibraryAdd(PX_ResourceLibrary* lib, PX_Resource res,const px_char key[])
+{
+	if (PX_MapGet(&lib->map, key)==PX_NULL)
+	{
+		if (PX_MapPut(&lib->map, key, PX_ListPush(&lib->resources, &res, sizeof(res))) == PX_HASHMAP_RETURN_OK)
+			return PX_TRUE;
+	}
+	
+	return PX_FALSE;
+}
+
 px_void PX_ResourceLibraryFree(PX_ResourceLibrary *lib)
 {
 	PX_Resource *pres;
@@ -110,6 +130,9 @@ px_void PX_ResourceLibraryFree(PX_ResourceLibrary *lib)
 		switch(pres->Type)
 		{
 		case PX_RESOURCE_TYPE_NULL:
+			break;
+		case PX_RESOURCE_TYPE_STRING:
+			PX_StringFree(&pres->stringdata);
 			break;
 		case PX_RESOURCE_TYPE_TEXTURE:
 			PX_TextureFree(&pres->texture);
@@ -151,6 +174,9 @@ px_bool PX_ResourceLibraryAddTexture(PX_ResourceLibrary *lib,const px_char key[]
 	return PX_TRUE;
 }
 
+
+
+
 px_void PX_ResourceLibraryDelete(PX_ResourceLibrary *lib,const px_char key[])
 {
 	PX_Resource * pres,*pnodeRes;
@@ -167,6 +193,9 @@ px_void PX_ResourceLibraryDelete(PX_ResourceLibrary *lib,const px_char key[])
 				switch(pres->Type)
 				{
 				case PX_RESOURCE_TYPE_NULL:
+					break;
+				case PX_RESOURCE_TYPE_STRING:
+					PX_StringFree(&pres->stringdata);
 					break;
 				case PX_RESOURCE_TYPE_TEXTURE:
 					PX_TextureFree(&pres->texture);
@@ -212,6 +241,16 @@ px_shape * PX_ResourceLibraryGetShape(PX_ResourceLibrary *lib,const px_char key[
 	if (pres&&pres->Type==PX_RESOURCE_TYPE_SHAPE)
 	{
 		return &pres->shape;
+	}
+	return PX_NULL;
+}
+
+px_string* PX_ResourceLibraryGetString(PX_ResourceLibrary* lib, const px_char key[])
+{
+	PX_Resource* pres = PX_ResourceLibraryGet(lib, key);
+	if (pres && pres->Type == PX_RESOURCE_TYPE_STRING)
+	{
+		return &pres->stringdata;
 	}
 	return PX_NULL;
 }

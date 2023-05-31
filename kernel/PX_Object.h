@@ -36,6 +36,8 @@
 #define PX_OBJECT_EVENT_CURSORMUP			24
 #define PX_OBJECT_EVENT_CURSORMDOWN			25
 #define PX_OBJECT_EVENT_REQUESTDATA			26
+#define PX_OBJECT_EVENT_OPEN				27
+#define PX_OBJECT_EVENT_SAVE				28
 //////////////////////////////////////////////////////////////////////////////
 //    Type of Controls
 /////////////////////////////////////////////////////////////////////////////
@@ -311,7 +313,7 @@ px_void	   PX_ObjectInitialize(px_memorypool *mp,PX_Object *Object,PX_Object *Pa
 px_void    PX_ObjectSetId(PX_Object *pObject,const px_char id[]);
 px_void    PX_ObjectSetUserCode(PX_Object *pObject,px_int user_int);
 px_void    PX_ObjectSetUserPointer(PX_Object *pObject,px_void *user_ptr);
-px_void	   PX_ObjectSetParent(PX_Object *Object,PX_Object *Parent);
+px_void	   PX_ObjectSetParent(PX_Object* Object, PX_Object* Parent);
 px_void    PX_ObjectDelete(PX_Object *pObject);
 px_void    PX_ObjectDelayDelete(PX_Object* pObject);
 px_void	   PX_ObjectDeleteChilds( PX_Object *pObject );
@@ -339,6 +341,76 @@ px_void PX_ObjectRender(px_surface *pSurface,PX_Object *Object,px_uint elapsed);
 px_int PX_ObjectRegisterEvent(PX_Object *Object,px_uint Event,px_void (*ProcessFunc)(PX_Object *,PX_Object_Event e,px_void *user_ptr),px_void *ptr);
 px_void PX_ObjectPostEvent(PX_Object *pPost,PX_Object_Event Event);
 px_void PX_ObjectExecuteEvent(PX_Object *pPost,PX_Object_Event Event);
+
+
+//////////////////////////////////////////////////////////////////////////
+//designer
+/////////////////////////////////////////////////////////////////////////
+#define PX_DESIGNER_NAME_LENGTH 48
+#define PX_DESIGNER_MAX_PROPERTYS 32
+#define PX_DESIGNER_CONTROLLER_ITEM_HEIGHT 22
+typedef enum
+{
+	PX_DESIGNER_OBJECT_TYPE_UI,
+	PX_DESIGNER_OBJECT_TYPE_GAME,
+	PX_DESIGNER_OBJECT_TYPE_FUNCTION,
+}PX_DESIGNER_OBJECT_TYPE;
+
+
+typedef PX_Object* (*px_designer_createfunc)(px_memorypool* mp, PX_Object* pparent, px_float x, px_float y, px_float width, px_float height, px_void* userptr);
+
+typedef px_float(*px_designer_getproperty_float)(PX_Object* pObject);
+typedef px_int(*px_designer_getproperty_int)(PX_Object* pObject);
+typedef px_bool(*px_designer_getproperty_string)(PX_Object* pObject, px_string* str);
+typedef px_bool(*px_designer_getproperty_bool)(PX_Object* pObject);
+
+typedef px_void(*px_designer_setproperty_float)(PX_Object* pObject, px_float v);
+typedef px_void(*px_designer_setproperty_int)(PX_Object* pObject, px_int v);
+typedef px_void(*px_designer_setproperty_string)(PX_Object* pObject, const px_char v[]);
+typedef px_void(*px_designer_setproperty_bool)(PX_Object* pObject, px_bool v);
+
+typedef struct
+{
+	px_char Name[PX_DESIGNER_NAME_LENGTH];
+	//get
+	px_designer_getproperty_float getfloat;
+	px_designer_getproperty_int getint;
+	px_designer_getproperty_string getstring;
+	px_designer_getproperty_bool getbool;
+
+	//set
+	px_designer_setproperty_float setfloat;
+	px_designer_setproperty_int setint;
+	px_designer_setproperty_string setstring;
+	px_designer_setproperty_bool setbool;
+
+}PX_Designer_Object_property;
+
+
+
+typedef struct
+{
+	px_char Name[PX_DESIGNER_NAME_LENGTH];
+	px_designer_createfunc createfunc;
+	PX_DESIGNER_OBJECT_TYPE type;
+	PX_Designer_Object_property properties[PX_DESIGNER_MAX_PROPERTYS];
+}PX_Designer_ObjectDesc;
+
+//common
+px_bool PX_Designer_GetID(PX_Object* pObject, px_string* str);
+px_float PX_Designer_GetX(PX_Object* pObject);
+px_float PX_Designer_GetY(PX_Object* pObject);
+px_float PX_Designer_GetWidth(PX_Object* pObject);
+px_float PX_Designer_GetHeight(PX_Object* pObject);
+px_bool PX_Designer_GetEnable(PX_Object* pObject);
+
+px_void PX_Designer_SetID(PX_Object* pObject, const px_char id[]);
+px_void PX_Designer_SetX(PX_Object* pObject, px_float v);
+px_void PX_Designer_SetY(PX_Object* pObject, px_float v);
+px_void PX_Designer_SetHeight(PX_Object* pObject, px_float v);
+px_void PX_Designer_SetWidth(PX_Object* pObject, px_float v);
+px_void PX_Designer_SetEnable(PX_Object* pObject, px_bool v);
+
 
 //////////////////////////////////////////////////////////////////////////
 //Label

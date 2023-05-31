@@ -272,3 +272,80 @@ px_void PX_Object_RadioBoxSetCheck(PX_Object *Object,px_bool check)
 {
 	PX_Object_GetRadioBox(Object)->bCheck=check;
 }
+
+
+//////////////////////////////////////////////////////////////////////////
+//radiobox
+//////////////////////////////////////////////////////////////////////////
+PX_Object* PX_Designer_RadioBoxCreate(px_memorypool* mp, PX_Object* pparent, px_float x, px_float y, px_float width, px_float height, PX_FontModule* fm)
+{
+	return PX_Object_RadioBoxCreate(mp, pparent, (px_int)x, (px_int)y, 108, 28, "RadioButton", fm);
+}
+
+px_void PX_Designer_RadioBoxSetText(PX_Object* pobject, const px_char text[])
+{
+	PX_Object_RadioBoxSetText(pobject, text);
+}
+
+px_bool PX_Designer_RadioBoxGetText(PX_Object* pobject, px_string* str)
+{
+	return PX_StringSet(str, PX_Object_RadioBoxGetText(pobject));
+}
+
+px_void PX_Designer_RadioBoxSetCheck(PX_Object* pobject, px_bool b)
+{
+	PX_Object_RadioBoxSetCheck(pobject, b);
+}
+
+px_bool PX_Designer_RadioBoxGetCheck(PX_Object* pobject)
+{
+	return PX_Object_RadioBoxGetCheck(pobject);
+}
+
+PX_Designer_ObjectDesc PX_Object_RadioBoxDesignerInstall()
+{
+	PX_Designer_ObjectDesc sradiobutton;
+	px_int i = 0;
+	PX_memset(&sradiobutton, 0, sizeof(sradiobutton));
+	PX_strcat(sradiobutton.Name, "radiobutton");
+
+	sradiobutton.createfunc = PX_Designer_RadioBoxCreate;
+	sradiobutton.type = PX_DESIGNER_OBJECT_TYPE_UI;
+
+	PX_strcat(sradiobutton.properties[i].Name, "id");
+	sradiobutton.properties[i].getstring = PX_Designer_GetID;
+	sradiobutton.properties[i].setstring = PX_Designer_SetID;
+	i++;
+
+	PX_strcat(sradiobutton.properties[i].Name, "x");
+	sradiobutton.properties[i].getfloat = PX_Designer_GetX;
+	sradiobutton.properties[i].setfloat = PX_Designer_SetX;
+	i++;
+
+	PX_strcat(sradiobutton.properties[i].Name, "y");
+	sradiobutton.properties[i].getfloat = PX_Designer_GetY;
+	sradiobutton.properties[i].setfloat = PX_Designer_SetY;
+	i++;
+
+	PX_strcat(sradiobutton.properties[i].Name, "width");
+	sradiobutton.properties[i].getfloat = PX_Designer_GetWidth;
+	sradiobutton.properties[i].setfloat = PX_Designer_SetWidth;
+	i++;
+
+	PX_strcat(sradiobutton.properties[i].Name, "height");
+	sradiobutton.properties[i].getfloat = PX_Designer_GetHeight;
+	sradiobutton.properties[i].setfloat = PX_Designer_SetHeight;
+	i++;
+
+	PX_strcat(sradiobutton.properties[i].Name, "text");
+	sradiobutton.properties[i].setstring = PX_Designer_RadioBoxSetText;
+	sradiobutton.properties[i].getstring = PX_Designer_RadioBoxGetText;
+	i++;
+
+	PX_strcat(sradiobutton.properties[i].Name, "check");
+	sradiobutton.properties[i].setbool = PX_Designer_RadioBoxSetCheck;
+	sradiobutton.properties[i].getbool = PX_Designer_RadioBoxGetCheck;
+	i++;
+	return sradiobutton;
+}
+

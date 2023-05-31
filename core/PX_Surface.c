@@ -109,6 +109,16 @@ px_void PX_SurfaceSetPixel(px_surface *psurface,px_int X,px_int Y,px_color color
 px_void PX_SurfaceDrawPixelWithoutLimit(px_surface* psurface, px_int X, px_int Y, px_color COLOR)
 {
 	px_color c;
+#ifdef PX_DEBUG_MODE
+	if (X > psurface->limit_right || X < psurface->limit_left || Y > psurface->limit_bottom || Y < psurface->limit_top)
+	{
+		PX_ASSERT();
+	}
+
+#endif // PX_DEBUG
+
+	
+
 	if (COLOR._argb.a == 0)
 	{
 		return;

@@ -126,280 +126,243 @@ static px_int PX_TextureRenderParallel(px_void *parallel_data)
 	return 0;
 }
 
-px_void PX_TextureRender(px_surface *psurface,px_texture *tex,px_int x,px_int y,PX_ALIGN refPoint,PX_TEXTURERENDER_BLEND *blend)
+
+px_void PX_TextureRenderClipMirror(px_surface* psurface, px_texture* tex, px_int x, px_int y, px_int clipx, px_int clipy, px_int clipw, px_int cliph, PX_ALIGN refPoint, PX_TEXTURERENDER_BLEND* blend, PX_TEXTURERENDER_MIRRROR_MODE mirrorMode)
 {
-	px_int left,right,top,bottom,i,j;
-	px_int bR,bG,bB,bA;
-	px_color *pdata;
+	px_int i, j;
+	px_int bR, bG, bB, bA;
+	px_int hmul, vmul, hinc, vinc;
+	px_int offsetw = clipw, offseth = cliph;
+	px_color* pdata;
 	px_color clr;
 
-	pdata=(px_color *)tex->surfaceBuffer;
-	switch (refPoint)
-	{
-	case PX_ALIGN_LEFTTOP:
-		break;
-	case PX_ALIGN_MIDTOP:
-		x-=tex->width/2;
-		break;
-	case PX_ALIGN_RIGHTTOP:
-		x-=tex->width;
-		break;
-	case PX_ALIGN_LEFTMID:
-		y-=tex->height/2;
-		break;
-	case PX_ALIGN_CENTER:
-		y-=tex->height/2;
-		x-=tex->width/2;
-		break;
-	case PX_ALIGN_RIGHTMID:
-		y-=tex->height/2;
-		x-=tex->width;
-		break;
-	case PX_ALIGN_LEFTBOTTOM:
-		y-=tex->height;
-		break;
-	case PX_ALIGN_MIDBOTTOM:
-		y-=tex->height;
-		x-=tex->width/2;
-		break;
-	case PX_ALIGN_RIGHTBOTTOM:
-		y-=tex->height;
-		x-=tex->width;
-		break;
-	}
-
-
-	if (x<-tex->width)
-	{
-		return;
-	}
-	if (x>psurface->width-1)
-	{
-		return;
-	}
-	if (y<-tex->height)
-	{
-		return;
-	}
-	if (y>psurface->height-1)
-	{
-		return;
-	}
-
-	if (x<0)
-	{
-		left=-x;
-	}
-	else
-	{
-		left=0;
-	}
-
-	if (x+tex->width>psurface->width)
-	{
-		right=psurface->width-x-1;
-	}
-	else
-	{
-		right=tex->width-1;
-	}
-
-	if (y<0)
-	{
-		top=-y;
-	}
-	else
-	{
-		top=0;
-	}
-
-	if (y+tex->height>psurface->height)
-	{
-		bottom=psurface->height-y-1;
-	}
-	else
-	{
-		bottom=tex->height-1;
-	}
-	
-	
-		if (blend)
-		{	
-			px_int Ab=(px_int)(blend->alpha*1000);
-			px_int Rb=(px_int)(blend->hdr_R*1000);
-			px_int Gb=(px_int)(blend->hdr_G*1000);
-			px_int Bb=(px_int)(blend->hdr_B*1000);
-
-			if (psurface->limit_left==0&& psurface->limit_right == psurface->width-1&& psurface->limit_top == 0 && psurface->limit_bottom == psurface->height - 1)
-			{
-				for (j = top; j <= bottom; j++)
-				{
-					for (i = left; i <= right; i++)
-					{
-						clr = pdata[j * tex->width + i];
-						bA = (px_int)(clr._argb.a * Ab / 1000);
-						bR = (px_int)(clr._argb.r * Rb / 1000);
-						bG = (px_int)(clr._argb.g * Gb / 1000);
-						bB = (px_int)(clr._argb.b * Bb / 1000);
-
-						clr._argb.a = bA > 255 ? 255 : (px_uchar)bA;
-						clr._argb.r = bR > 255 ? 255 : (px_uchar)bR;
-						clr._argb.g = bG > 255 ? 255 : (px_uchar)bG;
-						clr._argb.b = bB > 255 ? 255 : (px_uchar)bB;
-						PX_SurfaceDrawPixelWithoutLimit(psurface, x + i, y + j, clr);
-					}
-				}
-			}
-			else
-			{
-				for (j = top; j <= bottom; j++)
-				{
-					for (i = left; i <= right; i++)
-					{
-						clr = pdata[j * tex->width + i];
-						bA = (px_int)(clr._argb.a * Ab / 1000);
-						bR = (px_int)(clr._argb.r * Rb / 1000);
-						bG = (px_int)(clr._argb.g * Gb / 1000);
-						bB = (px_int)(clr._argb.b * Bb / 1000);
-
-						clr._argb.a = bA > 255 ? 255 : (px_uchar)bA;
-						clr._argb.r = bR > 255 ? 255 : (px_uchar)bR;
-						clr._argb.g = bG > 255 ? 255 : (px_uchar)bG;
-						clr._argb.b = bB > 255 ? 255 : (px_uchar)bB;
-						PX_SurfaceDrawPixel(psurface, x + i, y + j, clr);
-					}
-				}
-			}
-			
-		}
-		else
-		{
-			if (psurface->limit_left == 0 && psurface->limit_right == psurface->width - 1 && psurface->limit_top == 0 && psurface->limit_bottom == psurface->height - 1)
-			{
-				for (j = top; j <= bottom; j++)
-				{
-					for (i = left; i <= right; i++)
-					{
-						clr = pdata[j * tex->width + i];
-						PX_SurfaceDrawPixelWithoutLimit(psurface, x + i, y + j, clr);
-					}
-				}
-			}
-			else
-			{
-				for (j = top; j <= bottom; j++)
-				{
-					for (i = left; i <= right; i++)
-					{
-						clr = pdata[j * tex->width + i];
-						PX_SurfaceDrawPixel(psurface, x + i, y + j, clr);
-					}
-				}
-			}
-			
-		}
-	
-}
-
-px_void PX_TextureRenderClip(px_surface* psurface, px_texture* tex, px_int x, px_int y, px_int clipx, px_int clipy, px_int clipw, px_int cliph, PX_ALIGN refPoint, PX_TEXTURERENDER_BLEND* blend)
-{
-	px_int ry;
-	px_int rx;
-	if (clipx<0)
+	if (clipx < 0)
 	{
 		clipx = 0;
 	}
-	if (clipx>tex->width-1)
+	else if (clipx >= tex->width)
 	{
 		return;
 	}
+
+	if (clipw <= 0)
+	{
+		return;
+	}
+	else if (clipx + clipw > tex->width)
+	{
+		clipw = tex->width - clipx;
+	}
+
 	if (clipy < 0)
 	{
 		clipy = 0;
 	}
-	if (clipy > tex->height - 1)
+	else if (clipy >= tex->height)
 	{
 		return;
 	}
 
-	if (clipx+clipw> tex->width )
+	if (cliph <= 0)
 	{
-		clipw = tex->width - clipx;
+		return;
 	}
-	if (clipy + cliph > tex->height)
+	else if (clipy + cliph > tex->height)
 	{
 		cliph = tex->height - clipy;
 	}
 
-	if (clipw<=0)
-	{
-		return;
-	}
 
-	if (cliph<=0)
-	{
-		return;
-	}
-	
+	pdata = (px_color*)tex->surfaceBuffer;
 	switch (refPoint)
 	{
 	case PX_ALIGN_LEFTTOP:
 		break;
 	case PX_ALIGN_MIDTOP:
-		x -= clipw / 2;
+		x -= offsetw / 2;
 		break;
 	case PX_ALIGN_RIGHTTOP:
-		x -= clipw;
+		x -= offsetw;
 		break;
 	case PX_ALIGN_LEFTMID:
-		y -= cliph / 2;
+		y -= offseth / 2;
 		break;
 	case PX_ALIGN_CENTER:
-		y -= cliph / 2;
-		x -= clipw / 2;
+		y -= offseth / 2;
+		x -= offsetw / 2;
 		break;
 	case PX_ALIGN_RIGHTMID:
-		y -= cliph / 2;
-		x -= clipw;
+		y -= offseth / 2;
+		x -= offsetw;
 		break;
 	case PX_ALIGN_LEFTBOTTOM:
-		y -= cliph;
+		y -= offseth;
 		break;
 	case PX_ALIGN_MIDBOTTOM:
-		y -= cliph;
-		x -= clipw / 2;
+		y -= offseth;
+		x -= offsetw / 2;
 		break;
 	case PX_ALIGN_RIGHTBOTTOM:
-		y -= cliph;
-		x -= clipw;
+		y -= offseth;
+		x -= offsetw;
 		break;
 	}
-	if (psurface->limit_left == 0 && psurface->limit_right == psurface->width - 1 && psurface->limit_top == 0 && psurface->limit_bottom == psurface->height - 1)
-	{
-		for (ry = 0; ry < cliph; ry++)
-		{
-			for (rx = 0; rx < clipw; rx++)
-			{
-				PX_SurfaceDrawPixelWithoutLimit(psurface, x + rx, y + ry, *(tex->surfaceBuffer + (clipy + ry) * tex->width + clipx + rx));
-			}
 
+	if (x < psurface->limit_left)
+	{
+		if (x + clipw < psurface->limit_left)
+		{
+			return;
 		}
+		else
+		{
+			if (x + clipw <= psurface->limit_right + 1)
+			{
+				clipw = x + clipw - psurface->limit_left;
+				clipx += psurface->limit_left - x;
+				x = psurface->limit_left;
+			}
+			else
+			{
+				clipw = psurface->limit_right - psurface->limit_left + 1;
+				clipx += psurface->limit_left - x;
+				x = psurface->limit_left;
+			}
+		}
+
+	}
+	else if (x >= psurface->limit_left)
+	{
+		if (x + clipw > psurface->limit_right + 1)
+			clipw = psurface->limit_right + 1-x;
 	}
 	else
 	{
-		for (ry = 0; ry < cliph; ry++)
-		{
-			for (rx = 0; rx < clipw; rx++)
-			{
-				PX_SurfaceDrawPixel(psurface, x + rx, y + ry, *(tex->surfaceBuffer + (clipy + ry) * tex->width + clipx + rx));
-			}
+		return;
+	}
 
+	if (y < psurface->limit_top)
+	{
+		if (y + cliph < psurface->limit_top)
+		{
+			return;
+		}
+		else
+		{
+			if (y + cliph <= psurface->limit_bottom + 1)
+			{
+				cliph = y + cliph - psurface->limit_top;
+				clipy += psurface->limit_top - y;
+				y = psurface->limit_top;
+			}
+			else
+			{
+				cliph = psurface->limit_bottom - psurface->limit_top + 1;
+				clipy += psurface->limit_top - y;
+				y = psurface->limit_top;
+			}
+		}
+
+	}
+	else if (y >= psurface->limit_top)
+	{
+		if (y + cliph > psurface->limit_bottom + 1)
+			cliph = psurface->limit_bottom + 1 - y;
+	}
+	else
+	{
+		return;
+	}
+
+
+	switch (mirrorMode)
+	{
+	case PX_TEXTURERENDER_MIRRROR_MODE_NONE:
+		hmul = 1;
+		hinc = clipx;
+		vmul = 1;
+		vinc = clipy;
+		break;
+	case PX_TEXTURERENDER_MIRRROR_MODE_H:
+		hmul = -1;
+		hinc = clipx+ offsetw -1;
+		vmul = 1;
+		vinc = clipy;
+		break;
+	case PX_TEXTURERENDER_MIRRROR_MODE_V:
+		hmul = 1;
+		hinc = clipx;
+		vmul = -1;
+		vinc = clipy+ offseth - 1;
+		break;
+	case PX_TEXTURERENDER_MIRRROR_MODE_HV:
+		hmul = -1;
+		hinc = clipx+ offsetw - 1;
+		vmul = -1;
+		vinc = clipy+ offseth - 1;
+		break;
+	}
+
+	if (blend)
+	{
+		px_int Ab = (px_int)(blend->alpha * 1000);
+		px_int Rb = (px_int)(blend->hdr_R * 1000);
+		px_int Gb = (px_int)(blend->hdr_G * 1000);
+		px_int Bb = (px_int)(blend->hdr_B * 1000);
+
+		for (j = 0; j < cliph; j++)
+		{
+			for (i = 0; i < clipw; i++)
+			{
+				clr = pdata[(j * vmul + vinc) * tex->width + (i * hmul + hinc)];
+				bA = (px_int)(clr._argb.a * Ab / 1000);
+				bR = (px_int)(clr._argb.r * Rb / 1000);
+				bG = (px_int)(clr._argb.g * Gb / 1000);
+				bB = (px_int)(clr._argb.b * Bb / 1000);
+
+				clr._argb.a = (px_uchar)bA;
+				clr._argb.r = (px_uchar)bR;
+				clr._argb.g = (px_uchar)bG;
+				clr._argb.b = (px_uchar)bB;
+
+				if (x+i<psurface->limit_left||x+i>psurface->limit_right|| y + j<psurface->limit_top|| y + j>psurface->limit_bottom)
+				{
+					PX_ASSERT();
+				}
+
+				PX_SurfaceDrawPixelWithoutLimit(psurface, x + i, y + j, clr);
+			}
+		}
+
+	}
+	else
+	{
+
+		for (j = 0; j < cliph; j++)
+		{
+			for (i = 0; i < clipw; i++)
+			{
+				clr = pdata[(j * vmul + vinc) * tex->width + (i * hmul + hinc)];
+				PX_SurfaceDrawPixelWithoutLimit(psurface, x + i, y + j, clr);
+			}
 		}
 	}
-	
+
 }
 
+px_void PX_TextureRenderClip(px_surface* psurface, px_texture* tex, px_int x, px_int y, px_int clipx, px_int clipy, px_int clipw, px_int cliph, PX_ALIGN refPoint, PX_TEXTURERENDER_BLEND* blend)
+{
+	PX_TextureRenderClipMirror(psurface, tex, x, y, clipx, clipy, clipw, cliph, refPoint, blend, PX_TEXTURERENDER_MIRRROR_MODE_NONE);
+}
 
+px_void PX_TextureRenderMirror(px_surface* psurface, px_texture* tex, px_int x, px_int y, PX_ALIGN refPoint, PX_TEXTURERENDER_BLEND* blend, PX_TEXTURERENDER_MIRRROR_MODE mirrorMode)
+{
+	PX_TextureRenderClipMirror(psurface, tex, x, y, 0, 0, tex->width, tex->height, refPoint, blend, mirrorMode);
+}
+px_void PX_TextureRender(px_surface* psurface, px_texture* tex, px_int x, px_int y, PX_ALIGN refPoint, PX_TEXTURERENDER_BLEND* blend)
+{
+	PX_TextureRenderMirror(psurface, tex, x, y, refPoint, blend, PX_TEXTURERENDER_MIRRROR_MODE_NONE);
+}
 
 px_void PX_TextureCover(px_surface *psurface,px_texture *tex,px_int x,px_int y,PX_ALIGN refPoint)
 {
@@ -648,9 +611,13 @@ px_void PX_TextureRenderRotation(px_surface *psurface,px_texture *tex,px_int x,p
 	PX_TextureRenderRotation_sincos(psurface,tex,x,y,refPoint,blend,PX_sin_angle((px_float)Angle),PX_cos_angle((px_float)Angle));
 }
 
-px_void PX_TextureRenderRotation_vector(px_surface *psurface,px_texture *tex,px_int x,px_int y,PX_ALIGN refPoint,PX_TEXTURERENDER_BLEND *blend,px_point p_vector)
+px_void PX_TextureRenderRotation_vector(px_surface *psurface,px_texture *tex,px_int x,px_int y,PX_ALIGN refPoint,PX_TEXTURERENDER_BLEND *blend,px_point2D p_vector)
 {
-	PX_TextureRenderRotation_sincos(psurface,tex,x,y,refPoint,blend,PX_Point_sin(p_vector),PX_Point_cos(p_vector));
+	if (p_vector.x|| p_vector.y)
+	{
+		PX_TextureRenderRotation_sincos(psurface, tex, x, y, refPoint, blend, PX_Point2D_sin(p_vector), PX_Point2D_cos(p_vector));
+	}
+	
 }
 
 px_void PX_TextureRenderRotation_sincos(px_surface *psurface,px_texture *tex,px_int x,px_int y,PX_ALIGN refPoint,PX_TEXTURERENDER_BLEND *blend,px_float sinx,px_float cosx)
@@ -1131,6 +1098,8 @@ px_bool PX_TextureCreateScale(px_memorypool *mp,px_texture *resTexture,px_int ne
 	return PX_TRUE;
 }
 
+
+
 px_bool PX_TextureCreateRotationRadian(px_memorypool *mp,px_texture *resTexture,px_float radian,px_texture *out)
 {
     return PX_TextureCreateRotationAngle(mp,resTexture,(px_float)(radian*180/PX_PI),out);
@@ -1390,6 +1359,77 @@ px_bool PX_TextureRotationAngleToTexture(px_texture *resTexture,px_float Angle,p
 px_void PX_TextureFree(px_texture *tex)
 {
 	PX_SurfaceFree(tex);
+}
+
+px_int PX_TextureGetRenderRange(px_texture* tex, px_int x, px_int y, px_int clipw, px_int cliph, px_recti* render_range)
+{
+	px_int i, j;
+	px_int left=tex->width, right=0, top=tex->height, bottom=0;
+	PX_memset(render_range, 0, sizeof(px_recti));
+	
+	if (x<0)
+	{
+		x = 0;
+	}
+	if (x>=tex->width)
+	{
+		return 0;
+	}
+	if (y < 0)
+	{
+		y=0;
+	}
+	if (y >= tex->height)
+	{
+		return 0;
+	}
+	if (x+clipw>tex->width)
+	{
+		clipw = tex->width - x;
+	}
+
+	if (y + cliph > tex->height)
+	{
+		cliph  =tex->height-y;
+	}
+
+	for (j = y; j < cliph; j++)
+	{
+		for (i = x; i < clipw; i++)
+		{
+			if (PX_SurfaceGetPixel(tex, x, y)._argb.a)
+			{
+				if (i < left)
+				{
+					left = i;
+				}
+				if (i > right)
+				{
+					right = i;
+				}
+				if (j < top)
+				{
+					top = j;
+				}
+				if (j > bottom)
+				{
+					bottom = j;
+				}
+			}
+		}
+	}
+	if (right < left)
+	{
+		return 0;
+	}
+	else
+	{
+		render_range->x = left;
+		render_range->y = top;
+		render_range->width = right-left+1;
+		render_range->height = bottom-top+1;
+		return render_range->width * render_range->height;
+	}
 }
 
 
@@ -2332,6 +2372,27 @@ px_void PX_ShapeFree(px_shape *shape)
 	MP_Free(shape->MP,shape->alpha);
 }
 
+px_void PX_ShapeSetPixel(px_shape* shape, px_int x, px_int y, px_uchar value)
+{
+	px_uchar* pdata;
+	pdata = (px_uchar*)shape->alpha;
+	if (x>=0&&y>=0&&x<shape->width&&y<shape->height)
+	{
+		pdata[y * shape->width + x] = value;
+	}
+}
+
+px_uchar PX_ShapeGetPixel(px_shape* shape, px_int x, px_int y)
+{
+ 	px_uchar *pdata;
+	pdata  =(px_uchar *)shape->alpha;
+	if (x >= 0 && y >= 0 && x < shape->width && y < shape->height)
+	{
+		return pdata[y  *shape->width+x];
+	}
+	return 0;
+}
+
 px_void PX_ShapeRender(px_surface *psurface,px_shape *shape,px_int x,px_int y,PX_ALIGN refPoint,px_color blendColor)
 {
 	px_int left,right,top,bottom,i,j;
@@ -2626,7 +2687,23 @@ px_bool PX_ShapeCreateFromMemory(px_memorypool *mp,px_void *data,px_int size,px_
 		}
 	}
 
-	return PX_TRUE;
+
+	if (PX_PngVerify((px_byte*)data, size, &width, &height, 0))
+	{
+		if (PX_ShapeCreate(mp, shape, width, height))
+		{
+			if (!PX_PngToShapeBuffer(mp, (px_byte*)data, size, shape))
+				return PX_FALSE;
+			return PX_TRUE;
+		}
+		else
+		{
+			return PX_FALSE;
+		}
+	}
+
+
+	return PX_FALSE;
 }
 
 px_void PX_ShapeRenderEx_sincos(px_surface *psurface,px_shape *shape,px_int x,px_int y,PX_ALIGN refPoint,px_color blendColor,px_float scale,px_float sinx,px_float cosx)
@@ -2776,9 +2853,9 @@ px_void PX_ShapeRenderEx_sincos(px_surface *psurface,px_shape *shape,px_int x,px
 	}
 }
 
-px_void PX_ShapeRenderEx_vector(px_surface *psurface,px_shape *shape,px_int x,px_int y,PX_ALIGN refPoint,px_color blendColor,px_float scale,px_point p_vector)
+px_void PX_ShapeRenderEx_vector(px_surface *psurface,px_shape *shape,px_int x,px_int y,PX_ALIGN refPoint,px_color blendColor,px_float scale,px_point2D p_vector)
 {
-	PX_ShapeRenderEx_sincos(psurface,shape,x,y,refPoint,blendColor,scale,PX_Point_sin(p_vector),PX_Point_cos(p_vector));
+	PX_ShapeRenderEx_sincos(psurface,shape,x,y,refPoint,blendColor,scale,PX_Point2D_sin(p_vector),PX_Point2D_cos(p_vector));
 }
 
 px_void PX_TextureRenderEx_sincos(px_surface *psurface,px_texture *resTexture,px_int x,px_int y,PX_ALIGN refPoint,PX_TEXTURERENDER_BLEND *blend,px_float scale,px_float sinx,px_float cosx)
@@ -2975,9 +3052,9 @@ px_void PX_TextureRenderEx_sincos(px_surface *psurface,px_texture *resTexture,px
 }
 
 
-px_void PX_TextureRenderEx_vector(px_surface *psurface,px_texture *resTexture,px_int x,px_int y,PX_ALIGN refPoint,PX_TEXTURERENDER_BLEND *blend,px_float scale,px_point p_vector)
+px_void PX_TextureRenderEx_vector(px_surface *psurface,px_texture *resTexture,px_int x,px_int y,PX_ALIGN refPoint,PX_TEXTURERENDER_BLEND *blend,px_float scale,px_point2D p_vector)
 {
-	PX_TextureRenderEx_sincos(psurface,resTexture,x,y,refPoint,blend,scale,PX_Point_sin(p_vector),PX_Point_cos(p_vector));
+	PX_TextureRenderEx_sincos(psurface,resTexture,x,y,refPoint,blend,scale,PX_Point2D_sin(p_vector),PX_Point2D_cos(p_vector));
 }
 
 

@@ -3,7 +3,7 @@
 
 #include "PX_MemoryPool.h"
 
-typedef struct __PX_memroy
+typedef struct __PX_memory
 {
 	px_byte *buffer;
 	px_memorypool *mp;

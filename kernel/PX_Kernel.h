@@ -18,6 +18,7 @@
 #include "PX_Sync.h"
 #include "PX_MQTT.h"
 #include "PX_Object.h"
+#include "PX_Object_Designer.h"
 #include "PX_Json.h"
 #include "PX_3D_ObjData.h"
 #include "PX_Modbus.h"
@@ -25,4 +26,5 @@
 #include "PX_UI.h"
 #include "PX_Compiler.h"
 #include "PX_CanvasVM.h"
+
 #endif

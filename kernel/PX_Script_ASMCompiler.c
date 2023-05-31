@@ -2025,6 +2025,7 @@ px_bool PX_ScriptAsmOptimization(px_string *asmcode)
 	opt=opt|PX_StringTrimer_Solve(asmcode,"RET\nRET\n","RET\n");
 	opt=opt|PX_StringTrimer_Solve(asmcode,"PUSH %1\nPOP %2\n","MOV %2,%1\n");
 	opt=opt|PX_StringTrimer_Solve(asmcode,"MOV R%1,%2\nMOV %3,R%1\n","MOV %3,%2\n");
+	opt=opt|PX_StringTrimer_Solve(asmcode,"MOV R%1,%2\n;%3\nMOV R%1,%4\n;",";%3\nMOV R%1,%4\n");
 	opt=opt|PX_StringTrimer_Solve(asmcode,"MOV R2,0\nFLT R2\n","MOV R2,0.0\n");
 	opt=opt|PX_StringTrimer_Solve(asmcode,"PUSH R1\nMOV R2,%1\nPOP R1\n","MOV R2,%1\n");
 	}while(opt);

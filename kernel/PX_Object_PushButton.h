@@ -16,6 +16,7 @@ typedef enum
 {
 	PX_OBJECT_PUSHBUTTON_STYLE_RECT,
 	PX_OBJECT_PUSHBUTTON_STYLE_ROUNDRECT,
+	PX_OBJECT_PUSHBUTTON_STYLE_CIRCLE,
 }PX_OBJECT_PUSHBUTTON_STYLE;
 
 typedef struct 
@@ -36,6 +37,7 @@ typedef struct
 }PX_Object_PushButton;
 
 PX_Object *PX_Object_PushButtonCreate(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y,px_int Width,px_int Height,const px_char *Text,PX_FontModule *fontmodule);
+PX_Object* PX_Object_CircleButtonCreate(px_memorypool* mp, PX_Object* Parent, px_int x, px_int y, px_int Radius, const px_char* Text, PX_FontModule* fontmodule);
 PX_Object_PushButton * PX_Object_GetPushButton( PX_Object *Object );
 px_char * PX_Object_PushButtonGetText( PX_Object *PushButton );
 px_void PX_Object_PushButtonSetText( PX_Object *pObject,const px_char *Text );
@@ -51,7 +53,7 @@ px_void PX_Object_PushButtonSetTexture(PX_Object *pObject,px_texture *texture);
 px_void PX_Object_PushButtonSetShape(PX_Object *pObject,px_shape *pshape);
 px_void PX_Object_PushButtonFree( PX_Object *Obj );
 
-
+PX_Designer_ObjectDesc PX_Object_PushButtonDesignerInstall();
 
 #endif
 

@@ -24,14 +24,15 @@ px_double PX_Object_JoystickGetDistance(PX_Object* pObject) {
 px_point2D PX_Object_JoystickGetVector(PX_Object* pObject) {
     px_point2D p;
     if (pObject->Type != PX_OBJECT_TYPE_JOYSTICK) {
-        p.x = 0.0;
-        p.y = 0.0;
+        PX_ASSERT();
     } else {
         p.x = ((PX_Object_Joystick*)(pObject->pObject))->Distance *
             (px_float)PX_cosd(((PX_Object_Joystick*)(pObject->pObject))->Angle);
         p.y = ((PX_Object_Joystick*)(pObject->pObject))->Distance *
             (px_float)PX_sind(((PX_Object_Joystick*)(pObject->pObject))->Angle);
     }
+    p .x/= ((PX_Object_Joystick*)pObject->pObject)->DeferentRadius;
+    p. y/= ((PX_Object_Joystick*)pObject->pObject)->DeferentRadius;
     return p;
 }
 
@@ -93,11 +94,11 @@ px_void Func_JoystickRender(px_surface* pSurface, PX_Object* pObject, px_uint el
         (px_int)objx,
         (px_int)objy,
         (px_int)pJoystick->DeferentRadius, pJoystick->DeferentColor);
-    PX_GeoDrawSolidCircle(
+    PX_GeoDrawBall(
         pSurface,
-        (px_int)(objx + pJoystick->Distance * PX_cosd(pJoystick->Angle)),
-       (px_int)(objy + pJoystick->Distance * PX_sind(pJoystick->Angle)),
-        (px_int)(pJoystick->EpicycleRadius), pJoystick->EpicycleColor);
+       (px_float)(objx + pJoystick->Distance * PX_cosd(pJoystick->Angle)),
+        (px_float)(objy + pJoystick->Distance * PX_sind(pJoystick->Angle)),
+       (pJoystick->EpicycleRadius), pJoystick->EpicycleColor);
 }
 
 px_void Func_JoystickOnCursorDown(PX_Object* pObject, PX_Object_Event e, px_void* ptr) {
@@ -121,6 +122,10 @@ px_void Func_JoystickOnCursorDown(PX_Object* pObject, PX_Object_Event e, px_void
 
     if (r < pJoystick->SenseRadius) {
         pJoystick->IsAciton = PX_TRUE;
+        if (r>pJoystick->DeferentRadius)
+        {
+            r = pJoystick->DeferentRadius;
+        }
         pJoystick->Distance = r;
         pJoystick->Angle = (px_float)PX_atan2(y, x);
     } else {
@@ -153,8 +158,6 @@ px_void Func_JoystickOnCursorDrag(PX_Object* pObject, PX_Object_Event e, px_void
     } else if (r <= pJoystick->SenseRadius) {
         pJoystick->Distance = pJoystick->DeferentRadius;
     } else {
-        pJoystick->Distance = 0.0f;
-        pJoystick->IsAciton = PX_FALSE;
         return;
     }
 

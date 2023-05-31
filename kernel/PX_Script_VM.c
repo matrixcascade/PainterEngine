@@ -153,7 +153,7 @@ px_bool PX_VMInitialize(PX_VM *Ins,px_memorypool *mp,const px_byte *code,px_int 
 	{
 		Ins->breakpoints[i] = -1;
 	}
-
+	PX_VMRunFunction(Ins, 0, "_BOOT", 0, 0);
 	return PX_TRUE;
 _ERROR:
 
@@ -3198,6 +3198,18 @@ px_bool PX_VMRunFunctionIndex(PX_VM *Ins,px_int threadID,px_int funcIndex,PX_VM_
 	return PX_TRUE;
 }
 
+px_int PX_VMGetFreeThread(PX_VM* Ins,px_int reservedThread)
+{
+	px_int i;
+	for (i = reservedThread+1; i < Ins->maxThreadCount; i++)
+	{
+		if (!Ins->pThread[i].Activated)
+			return i;
+	}
+	return -1;
+}
+
+
 
 px_bool PX_VMBeginThreadFunction(PX_VM *Ins,px_int threadID,const px_char *func,PX_VM_VARIABLE args[],px_int paramcount)
 {
@@ -3382,6 +3394,7 @@ px_void PX_VMReset(PX_VM* Ins)
 		}
 	}
 	Ins->Suspend = PX_FALSE;
+	PX_VMRunFunction(Ins, 0, "_BOOT", 0, 0);
 }
 
 px_bool PX_VMFree(PX_VM *Ins)

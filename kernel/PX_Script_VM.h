@@ -83,6 +83,7 @@ px_bool             PX_VMThreadSwitch(PX_VM *Ins,px_int T);
 px_bool				PX_VMRunFunction(PX_VM *Ins,px_int threadID,const px_char *functionName,PX_VM_VARIABLE args[],px_int paramcount);
 px_bool				PX_VMCallFunction(PX_VM* Ins, px_int threadID, const px_char* functionName, PX_VM_VARIABLE args[], px_int paramcount);
 px_bool				PX_VMRunFunctionIndex(PX_VM* Ins, px_int threadID, px_int funcIndex, PX_VM_VARIABLE args[], px_int paramcount);
+px_int				PX_VMGetFreeThread(PX_VM* Ins, px_int reservedThread);
 px_bool				PX_VMBeginThreadFunction(PX_VM *Ins,px_int threadID,const px_char *functionName,PX_VM_VARIABLE args[],px_int paramcount);
 px_bool				PX_VMBeginThreadFunctionIndex(PX_VM *Ins,px_int threadID,px_int funcIndex,PX_VM_VARIABLE args[],px_int paramcount);
 px_int				PX_VMGetFreeThreadId(PX_VM *Ins);

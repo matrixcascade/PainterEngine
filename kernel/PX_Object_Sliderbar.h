@@ -51,6 +51,6 @@ px_void    PX_Object_SliderBarSetColor(PX_Object *pSliderBar,px_color color);
 px_void	   PX_Object_SliderBarSetSliderButtonLength(PX_Object *pSliderBar,px_int length);
 
 
-
+PX_Designer_ObjectDesc PX_Object_SliderBarDesignerInstall();
 #endif
 

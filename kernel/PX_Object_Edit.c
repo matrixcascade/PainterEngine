@@ -996,3 +996,64 @@ px_void PX_Object_EditSetInputMode(PX_Object* pObject, PX_OBJECT_EDIT_INPUT_MODE
 		pEdit->inputmode = mode;
 	}
 }
+
+//////////////////////////////////////////////////////////////////////////
+//edit
+//////////////////////////////////////////////////////////////////////////
+PX_Object* PX_Designer_EditCreate(px_memorypool* mp, PX_Object* pparent, px_float x, px_float y, px_float width, px_float height, PX_FontModule* fm)
+{
+	return PX_Object_EditCreate(mp, pparent, (px_int)x, (px_int)y, 128, 28, fm);
+}
+
+px_void PX_Designer_EditSetText(PX_Object* pobject, const px_char text[])
+{
+	PX_Object_EditSetText(pobject, text);
+}
+
+px_bool PX_Designer_EditGetText(PX_Object* pobject, px_string* str)
+{
+	return PX_StringSet(str, PX_Object_EditGetText(pobject));
+}
+
+PX_Designer_ObjectDesc PX_Object_EditDesignerInstall()
+{
+	PX_Designer_ObjectDesc edit;
+	px_int i = 0;
+	PX_memset(&edit, 0, sizeof(edit));
+	PX_strcat(edit.Name, "edit");
+
+	edit.createfunc = PX_Designer_EditCreate;
+	edit.type = PX_DESIGNER_OBJECT_TYPE_UI;
+
+	PX_strcat(edit.properties[i].Name, "id");
+	edit.properties[i].getstring = PX_Designer_GetID;
+	edit.properties[i].setstring = PX_Designer_SetID;
+	i++;
+
+	PX_strcat(edit.properties[i].Name, "x");
+	edit.properties[i].getfloat = PX_Designer_GetX;
+	edit.properties[i].setfloat = PX_Designer_SetX;
+	i++;
+
+	PX_strcat(edit.properties[i].Name, "y");
+	edit.properties[i].getfloat = PX_Designer_GetY;
+	edit.properties[i].setfloat = PX_Designer_SetY;
+	i++;
+
+	PX_strcat(edit.properties[i].Name, "width");
+	edit.properties[i].getfloat = PX_Designer_GetWidth;
+	edit.properties[i].setfloat = PX_Designer_SetWidth;
+	i++;
+
+	PX_strcat(edit.properties[i].Name, "height");
+	edit.properties[i].getfloat = PX_Designer_GetHeight;
+	edit.properties[i].setfloat = PX_Designer_SetHeight;
+	i++;
+
+	PX_strcat(edit.properties[i].Name, "text");
+	edit.properties[i].setstring = PX_Designer_EditSetText;
+	edit.properties[i].getstring = PX_Designer_EditGetText;
+	i++;
+	return edit;
+
+}

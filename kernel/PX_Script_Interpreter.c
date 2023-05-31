@@ -25,6 +25,7 @@ px_void PX_ScriptTranslatorError(PX_ScriptInterpreter* analysis,px_char *info)
 		PX_strcat(analysis->PX_Script_InterpreterError, "\n");
 		PX_strcat(analysis->PX_Script_InterpreterError, info);
 		PX_strcat(analysis->PX_Script_InterpreterError, "\n");
+		PX_LOG(analysis->PX_Script_InterpreterError);
 	}
 }
 
@@ -93,15 +94,18 @@ px_bool PX_ScriptCompilerLoad(PX_SCRIPT_LIBRARY *lib,const px_char *code)
 	if(!PX_LexerLoadSourceFromMemory(&lexer,code))
 	{
 		PX_LexerFree(&lexer);
+		PX_LOG("Failed to load source from memory\n");
 		return PX_FALSE;
 	}
 	if(PX_LexerGetNextLexeme(&lexer)!=PX_LEXER_LEXEME_TYPE_TOKEN)
 	{
 		PX_LexerFree(&lexer);
+		PX_LOG("Unexpected token\n");
 		return PX_FALSE;
 	}
 	if (!PX_strequ(lexer.CurLexeme.buffer,"#NAME"))
 	{
+		PX_LOG("#Name Missing\n");
 		PX_LexerFree(&lexer);
 		return PX_FALSE;
 	}
@@ -109,11 +113,13 @@ px_bool PX_ScriptCompilerLoad(PX_SCRIPT_LIBRARY *lib,const px_char *code)
 	if(PX_LexerGetNextLexeme(&lexer)!=PX_LEXER_LEXEME_TYPE_SPACER)
 	{
 		PX_LexerFree(&lexer);
+		PX_LOG("Unexpected token\n");
 		return PX_FALSE;
 	}
 	if(PX_LexerGetNextLexeme(&lexer)!=PX_LEXER_LEXEME_TYPE_CONATINER)
 	{
 		PX_LexerFree(&lexer);
+		PX_LOG("Unexpected token\n");
 		return PX_FALSE;
 	}
 	PX_StringInitialize(lib->mp,&scode.code);
@@ -128,6 +134,7 @@ px_bool PX_ScriptCompilerLoad(PX_SCRIPT_LIBRARY *lib,const px_char *code)
 		PX_StringFree(&scode.name);
 		 PX_StringFree(&scode.code);
 		PX_LexerFree(&lexer);
+		PX_LOG("Unexpected token\n");
 		return PX_FALSE;
 	}
 
@@ -141,6 +148,7 @@ px_bool PX_ScriptCompilerLoad(PX_SCRIPT_LIBRARY *lib,const px_char *code)
 		{
 			 PX_StringFree(&scode.name);
 			 PX_StringFree(&scode.code);
+			 PX_LOG("repeat source name\n");
 			 return PX_FALSE;
 		}
 	}
@@ -7854,6 +7862,25 @@ static px_bool PX_ScriptParseVar(PX_ScriptInterpreter *analysis)
 			}
 			else
 			{
+				if (variable.type == PX_SCRIPT_PARSER_VAR_TYPE_FLOAT)
+				{
+					px_string code;
+					px_string exprgen;
+					PX_SCRIPT_AST_OPERAND retOperand;
+					PX_StringInitialize(analysis->mp, &code);
+					PX_StringInitialize(analysis->mp, &exprgen);
+					PX_StringFormat1(&code, "%1=0", PX_STRINGFORMAT_STRING(variable.Mnemonic.buffer));
+					if (!PX_ScriptParseExpression(analysis, code.buffer, &exprgen, &retOperand))
+					{
+						PX_StringFree(&code);
+						PX_StringFree(&exprgen);
+						return PX_FALSE;
+					}
+					PX_StringCat(&analysis->code, exprgen.buffer);
+					PX_StringFree(&exprgen);
+					PX_StringFree(&code);
+				}
+
 				if (variable.type==PX_SCRIPT_PARSER_VAR_TYPE_STRING)
 				{
 					px_string code;
@@ -8696,20 +8723,24 @@ px_bool PX_ScriptParseFunctionDefined(PX_ScriptInterpreter *analysis,PX_SCRIPT_T
 	}
 	if (type!=PX_LEXER_LEXEME_TYPE_TOKEN)
 	{
+		PX_ScriptTranslatorError(analysis, "Unexpected Lexeme.");
 		return PX_FALSE;
 	}
 	if (!PX_ScriptParseIsValidToken(analysis->lexer.CurLexeme.buffer))
 	{
+		PX_ScriptTranslatorError(analysis, "Invalid Token.");
 		return PX_FALSE;
 	}
 
 	if (PX_StringLen(&analysis->lexer.CurLexeme)>PX_SCRIPT_FUNCTION_NAME_MAX_LEN)
 	{
+		PX_ScriptTranslatorError(analysis, "Token too long");
 		return PX_FALSE;
 	}
 	PX_strcpy(func.name,analysis->lexer.CurLexeme.buffer,PX_SCRIPT_FUNCTION_NAME_MAX_LEN);
 	if ((PX_ScriptTranslatorNextToken(&analysis->lexer))!=PX_LEXER_LEXEME_TYPE_DELIMITER||analysis->lexer.Symbol!='(')
 	{
+		PX_ScriptTranslatorError(analysis, "Unexpected Lexeme.");
 		goto _ERROR;
 	}
 
@@ -8723,6 +8754,7 @@ px_bool PX_ScriptParseFunctionDefined(PX_ScriptInterpreter *analysis,PX_SCRIPT_T
 		}
 		if (type!=PX_LEXER_LEXEME_TYPE_TOKEN)
 		{
+			PX_ScriptTranslatorError(analysis, "Unexpected Lexeme.");
 			goto _ERROR;
 		}
 		fvar.layer=analysis->v_astStructure.size;
@@ -8750,6 +8782,7 @@ px_bool PX_ScriptParseFunctionDefined(PX_ScriptInterpreter *analysis,PX_SCRIPT_T
 
 			if ((fvar.setIndex=PX_ScriptParseGetSetIndex(analysis,analysis->lexer.CurLexeme.buffer))==-1)
 			{
+				PX_ScriptTranslatorError(analysis, "Index error.");
 				goto _ERROR;
 			}
 		}
@@ -9144,6 +9177,7 @@ px_bool PX_ScriptParseLastCodeblockEnd(PX_ScriptInterpreter *analysis)
 
 				if (!PX_ScriptParseLastBlockEnd(analysis))
 				{
+					PX_ScriptTranslatorError(analysis, "unexpected lexeme.");
 					return PX_FALSE;
 				}
 				
@@ -9161,6 +9195,7 @@ px_bool PX_ScriptParseLastCodeblockEnd(PX_ScriptInterpreter *analysis)
 
 			if (!PX_ScriptParseLastBlockEnd(analysis))
 			{
+				PX_ScriptTranslatorError(analysis, "unexpected lexeme.");
 				return PX_FALSE;
 			}
 		}
@@ -9176,6 +9211,7 @@ px_bool PX_ScriptParseLastCodeblockEnd(PX_ScriptInterpreter *analysis)
 
 			if (!PX_ScriptParseLastBlockEnd(analysis))
 			{
+				PX_ScriptTranslatorError(analysis, "unexpected lexeme.");
 				return PX_FALSE;
 			}
 		}
@@ -9192,6 +9228,7 @@ px_bool PX_ScriptParseLastCodeblockEnd(PX_ScriptInterpreter *analysis)
 
 			if (!PX_ScriptParseLastBlockEnd(analysis))
 			{
+				PX_ScriptTranslatorError(analysis, "unexpected lexeme.");
 				return PX_FALSE;
 			}
 		}
@@ -9211,6 +9248,7 @@ px_bool PX_ScriptParseLastCodeblockEnd(PX_ScriptInterpreter *analysis)
 
 			if (!PX_ScriptParseLastBlockEnd(analysis))
 			{
+				PX_ScriptTranslatorError(analysis, "unexpected lexeme.");
 				return PX_FALSE;
 			}
 		}
@@ -9227,6 +9265,7 @@ px_bool PX_ScriptParseLastCodeblockEnd(PX_ScriptInterpreter *analysis)
 
 			if (!PX_ScriptParseLastBlockEnd(analysis))
 			{
+				PX_ScriptTranslatorError(analysis, "unexpected lexeme.");
 				return PX_FALSE;
 			}
 		}
@@ -9509,6 +9548,7 @@ px_bool PX_ScriptCompilerCompile(PX_SCRIPT_LIBRARY *lib,const px_char *name,px_s
 			type=PX_ScriptTranslatorNextToken(&analysis.lexer);
 			if (type!=PX_LEXER_LEXEME_TYPE_TOKEN)
 			{
+				PX_ScriptTranslatorError(&analysis, "unexpected lexeme.");
 				goto _ERROR;
 			}
 			if (PX_strequ(analysis.lexer.CurLexeme.buffer,PX_SCRIPT_TRANSLATOR_KEYWORD_STACK))
@@ -9516,16 +9556,19 @@ px_bool PX_ScriptCompilerCompile(PX_SCRIPT_LIBRARY *lib,const px_char *name,px_s
 				type=PX_ScriptTranslatorNextToken(&analysis.lexer);
 				if (type!=PX_LEXER_LEXEME_TYPE_TOKEN)
 				{
+					PX_ScriptTranslatorError(&analysis, "unexpected lexeme.");
 					goto _ERROR;
 				}
 				if (!PX_strIsInt(analysis.lexer.CurLexeme.buffer))
 				{
+					PX_ScriptTranslatorError(&analysis, "unexpected lexeme.");
 					goto _ERROR;
 				}
 				LocalStackSize=PX_atoi(analysis.lexer.CurLexeme.buffer);
 				type=PX_ScriptTranslatorNextToken(&analysis.lexer);
 				if (type!=PX_LEXER_LEXEME_TYPE_NEWLINE)
 				{
+					PX_ScriptTranslatorError(&analysis, "unexpected lexeme.");
 					goto _ERROR;
 				}
 			}
@@ -9534,16 +9577,19 @@ px_bool PX_ScriptCompilerCompile(PX_SCRIPT_LIBRARY *lib,const px_char *name,px_s
 				type=PX_ScriptTranslatorNextToken(&analysis.lexer);
 				if (type!=PX_LEXER_LEXEME_TYPE_TOKEN)
 				{
+					PX_ScriptTranslatorError(&analysis, "unexpected lexeme.");
 					goto _ERROR;
 				}
 				if (!PX_strIsInt(analysis.lexer.CurLexeme.buffer))
 				{
+					PX_ScriptTranslatorError(&analysis, "unexpected lexeme.");
 					goto _ERROR;
 				}
 				thread=PX_atoi(analysis.lexer.CurLexeme.buffer);
 				type=PX_ScriptTranslatorNextToken(&analysis.lexer);
 				if (type!=PX_LEXER_LEXEME_TYPE_NEWLINE)
 				{
+					PX_ScriptTranslatorError(&analysis, "unexpected lexeme.");
 					goto _ERROR;
 				}
 			}
@@ -9572,10 +9618,12 @@ px_bool PX_ScriptCompilerCompile(PX_SCRIPT_LIBRARY *lib,const px_char *name,px_s
 
 			if (type!=PX_LEXER_LEXEME_TYPE_TOKEN)
 			{
+				PX_ScriptTranslatorError(&analysis, "unexpected lexeme.");
 				goto _ERROR;
 			}
 			if (!PX_ScriptParseIsValidToken(analysis.lexer.CurLexeme.buffer))
 			{
+				PX_ScriptTranslatorError(&analysis, "invalid lexeme.");
 				goto _ERROR;
 			}
 			type=PX_ScriptTranslatorNextToken(&analysis.lexer);
@@ -9586,12 +9634,15 @@ px_bool PX_ScriptCompilerCompile(PX_SCRIPT_LIBRARY *lib,const px_char *name,px_s
 				//////////////////////////////////////////////////////////////////////////
 				if (analysis.functionInside)
 				{
+					PX_ScriptTranslatorError(&analysis, "must be funtion inside");
 					goto _ERROR;
 				}
 
-				if(!PX_ScriptParseFunctionDefined(&analysis,PX_SCRIPT_TRANSLATOR_FUNCTION_TYPE_CUSTOM))
+				if (!PX_ScriptParseFunctionDefined(&analysis, PX_SCRIPT_TRANSLATOR_FUNCTION_TYPE_CUSTOM))
+				{
+					PX_ScriptTranslatorError(&analysis, "function define error");
 					goto _ERROR;
-
+				}
 				type=PX_ScriptTranslatorNextTokenSN(&analysis.lexer);
 
 				if (type==PX_LEXER_LEXEME_TYPE_DELIMITER&&analysis.lexer.Symbol=='{')
@@ -9609,6 +9660,7 @@ px_bool PX_ScriptCompilerCompile(PX_SCRIPT_LIBRARY *lib,const px_char *name,px_s
 				}
 				else
 				{
+					PX_ScriptTranslatorError(&analysis, "unexpected lexeme.");
 					goto _ERROR;
 				}
 				//////////////////////////////////////////////////////////////////////////
@@ -9617,7 +9669,7 @@ px_bool PX_ScriptCompilerCompile(PX_SCRIPT_LIBRARY *lib,const px_char *name,px_s
 			{
 				
 				if (pset)
-				{	
+				{
 					//////////////////////////////////////////////////////////////////////////
 					//STRUCT VARIALBE
 					//////////////////////////////////////////////////////////////////////////
@@ -9627,7 +9679,11 @@ px_bool PX_ScriptCompilerCompile(PX_SCRIPT_LIBRARY *lib,const px_char *name,px_s
 					//}
 
 					PX_LexerSetState(state);
-					if(!PX_ScriptParseStruct(&analysis)) goto _ERROR;
+					if (!PX_ScriptParseStruct(&analysis))
+					{
+						PX_ScriptTranslatorError(&analysis, "Invalid struct defined");
+						goto _ERROR;
+					}
 				}
 				else
 				{
@@ -9639,7 +9695,11 @@ px_bool PX_ScriptCompilerCompile(PX_SCRIPT_LIBRARY *lib,const px_char *name,px_s
 // 						PX_ScriptTranslatorError(&analysis,"Define variable before expression");
 // 						goto _ERROR;
 // 					}
-					if(!PX_ScriptParseVar(&analysis)) goto _ERROR;
+					if (!PX_ScriptParseVar(&analysis))
+					{
+						PX_ScriptTranslatorError(&analysis, "Invalid variable defined");
+						goto _ERROR;
+					}
 				}
 				continue;
 			}
@@ -9655,12 +9715,14 @@ px_bool PX_ScriptCompilerCompile(PX_SCRIPT_LIBRARY *lib,const px_char *name,px_s
 		{	
 			if (analysis.functionInside)
 			{
+				PX_ScriptTranslatorError(&analysis, "must be funtion inside");
 				goto _ERROR;
 			}
 
 			state=PX_LexerGetState(&analysis.lexer);
 			if (PX_ScriptTranslatorNextToken(&analysis.lexer)!=PX_LEXER_LEXEME_TYPE_TOKEN)
 			{
+				PX_ScriptTranslatorError(&analysis, "unexpected lexeme.");
 				goto _ERROR;
 			}
 
@@ -9671,6 +9733,7 @@ px_bool PX_ScriptCompilerCompile(PX_SCRIPT_LIBRARY *lib,const px_char *name,px_s
 			}
 			else
 			{
+				PX_ScriptTranslatorError(&analysis, "unexpected lexeme.");
 				goto _ERROR;
 			}
 			continue;
@@ -9684,11 +9747,13 @@ px_bool PX_ScriptCompilerCompile(PX_SCRIPT_LIBRARY *lib,const px_char *name,px_s
 		{
 			if (analysis.functionInside)
 			{
+				PX_ScriptTranslatorError(&analysis, "must be funtion inside");
 				goto _ERROR;
 			}
 			state=PX_LexerGetState(&analysis.lexer);
 			if ((type=PX_ScriptTranslatorNextToken(&analysis.lexer))!=PX_LEXER_LEXEME_TYPE_TOKEN)
 			{
+				PX_ScriptTranslatorError(&analysis, "unexpected lexeme.");
 				goto _ERROR;
 			}
 			if (PX_strequ(analysis.lexer.CurLexeme.buffer,PX_SCRIPT_TRANSLATOR_KEYWORD_VAR_INT)||\
@@ -9700,11 +9765,15 @@ px_bool PX_ScriptCompilerCompile(PX_SCRIPT_LIBRARY *lib,const px_char *name,px_s
 				)
 			{
 				PX_LexerSetState(state);
-				if(!PX_ScriptParseFunctionDefined(&analysis,PX_SCRIPT_TRANSLATOR_FUNCTION_TYPE_HOST))
+				if (!PX_ScriptParseFunctionDefined(&analysis, PX_SCRIPT_TRANSLATOR_FUNCTION_TYPE_HOST))
+				{
+					PX_ScriptTranslatorError(&analysis, "Invalid function defined");
 					goto _ERROR;
+				}
 			}
 			else
 			{
+				PX_ScriptTranslatorError(&analysis, "unexpected lexeme.");
 				goto _ERROR;
 			}
 			
@@ -9721,6 +9790,7 @@ px_bool PX_ScriptCompilerCompile(PX_SCRIPT_LIBRARY *lib,const px_char *name,px_s
 			}
 			else
 			{
+				PX_ScriptTranslatorError(&analysis, "unexpected lexeme.");
 				goto _ERROR;
 			}
 
@@ -9735,10 +9805,12 @@ px_bool PX_ScriptCompilerCompile(PX_SCRIPT_LIBRARY *lib,const px_char *name,px_s
 
 			if (analysis.functionInside)
 			{
+				PX_ScriptTranslatorError(&analysis, "must be funtion inside");
 				goto _ERROR;
 			}
 			if ((type=PX_ScriptTranslatorNextToken(&analysis.lexer))!=PX_LEXER_LEXEME_TYPE_TOKEN)
 			{
+				PX_ScriptTranslatorError(&analysis, "unexpected lexeme.");
 				goto _ERROR;
 			}
 
@@ -9751,12 +9823,15 @@ px_bool PX_ScriptCompilerCompile(PX_SCRIPT_LIBRARY *lib,const px_char *name,px_s
 				)
 			{
 				PX_LexerSetState(state);
-				if(!PX_ScriptParseFunctionDefined(&analysis,PX_SCRIPT_TRANSLATOR_FUNCTION_TYPE_EXPORT))
+				if (!PX_ScriptParseFunctionDefined(&analysis, PX_SCRIPT_TRANSLATOR_FUNCTION_TYPE_EXPORT))
+				{
+					PX_ScriptTranslatorError(&analysis, "Invalid function defined");
 					goto _ERROR;
+				}
 			}
 			else
 			{
-
+				PX_ScriptTranslatorError(&analysis, "unexpected lexeme.");
 				goto _ERROR;
 			}
 
@@ -9777,6 +9852,7 @@ px_bool PX_ScriptCompilerCompile(PX_SCRIPT_LIBRARY *lib,const px_char *name,px_s
 			}
 			else
 			{
+				PX_ScriptTranslatorError(&analysis, "unexpected lexeme.");
 				goto _ERROR;
 			}
 		}
@@ -9791,12 +9867,14 @@ px_bool PX_ScriptCompilerCompile(PX_SCRIPT_LIBRARY *lib,const px_char *name,px_s
 		{
 			if (!analysis.functionInside)
 			{
+				PX_ScriptTranslatorError(&analysis, "must be funtion inside");
 				goto _ERROR;
 			}
 			type=PX_ScriptTranslatorNextTokenSN(&analysis.lexer);
 
 			if (type!=PX_LEXER_LEXEME_TYPE_DELIMITER||analysis.lexer.Symbol!='(')
 			{
+				PX_ScriptTranslatorError(&analysis, "unexpected lexeme.");
 				goto _ERROR;
 			}
 
@@ -9815,6 +9893,7 @@ px_bool PX_ScriptCompilerCompile(PX_SCRIPT_LIBRARY *lib,const px_char *name,px_s
 			{
 				PX_StringFree(&expression);
 				PX_StringFree(&expCode);
+				PX_ScriptTranslatorError(&analysis, "unexpected lexeme.");
 				goto _ERROR;
 			}
 			PX_StringCat(&analysis.code,expCode.buffer);
@@ -9824,6 +9903,7 @@ px_bool PX_ScriptCompilerCompile(PX_SCRIPT_LIBRARY *lib,const px_char *name,px_s
 
 			if (!PX_ScriptParseIsOperandNumericType(retOperand))
 			{
+				PX_ScriptTranslatorError(&analysis, "unexpected lexeme.");
 				goto _ERROR;
 			}
 
@@ -9860,12 +9940,14 @@ px_bool PX_ScriptCompilerCompile(PX_SCRIPT_LIBRARY *lib,const px_char *name,px_s
 		{
 			if (!analysis.functionInside)
 			{
+				PX_ScriptTranslatorError(&analysis, "must be funtion inside");
 				goto _ERROR;
 			}
 			type=PX_ScriptTranslatorNextTokenSN(&analysis.lexer);
 
 			if (type!=PX_LEXER_LEXEME_TYPE_DELIMITER||analysis.lexer.Symbol!='(')
 			{
+				PX_ScriptTranslatorError(&analysis, "unexpected lexeme.");
 				goto _ERROR;
 			}
 
@@ -9877,6 +9959,7 @@ px_bool PX_ScriptCompilerCompile(PX_SCRIPT_LIBRARY *lib,const px_char *name,px_s
 			{
 				PX_StringFree(&expression);
 				PX_StringFree(&expCode);
+				PX_ScriptTranslatorError(&analysis, "unexpected lexeme.");
 				goto _ERROR;
 			}
 			PX_StringCat(&analysis.code,";WHILE (CONDITION) \n");
@@ -9893,6 +9976,7 @@ px_bool PX_ScriptCompilerCompile(PX_SCRIPT_LIBRARY *lib,const px_char *name,px_s
 			{
 				PX_StringFree(&expression);
 				PX_StringFree(&expCode);
+				PX_ScriptTranslatorError(&analysis, "expression error.");
 				goto _ERROR;
 			}
 			PX_StringCat(&analysis.code,expCode.buffer);
@@ -9902,6 +9986,7 @@ px_bool PX_ScriptCompilerCompile(PX_SCRIPT_LIBRARY *lib,const px_char *name,px_s
 
 			if (!PX_ScriptParseIsOperandNumericType(retOperand))
 			{
+				PX_ScriptTranslatorError(&analysis, "unexpected lexeme.");
 				goto _ERROR;
 			}
 
@@ -9935,12 +10020,14 @@ px_bool PX_ScriptCompilerCompile(PX_SCRIPT_LIBRARY *lib,const px_char *name,px_s
 		{
 			if (!analysis.functionInside)
 			{
+				PX_ScriptTranslatorError(&analysis, "must be funtion inside");
 				goto _ERROR;
 			}
 
 			type=PX_ScriptTranslatorNextTokenSN(&analysis.lexer);
 			if (type!=PX_LEXER_LEXEME_TYPE_DELIMITER||analysis.lexer.Symbol!='{')
 			{
+				PX_ScriptTranslatorError(&analysis, "unexpected lexeme.");
 				goto _ERROR;
 			}
 
@@ -9998,12 +10085,14 @@ _CONTINUE:
 		{
 			if (!analysis.functionInside)
 			{
+				PX_ScriptTranslatorError(&analysis, "must be funtion inside");
 				goto _ERROR;
 			}
 			type=PX_ScriptTranslatorNextTokenSN(&analysis.lexer);
 
 			if (type!=PX_LEXER_LEXEME_TYPE_DELIMITER||analysis.lexer.Symbol!='(')
 			{
+				PX_ScriptTranslatorError(&analysis, "unexpected lexeme.");
 				goto _ERROR;
 			}
 
@@ -10026,6 +10115,7 @@ _CONTINUE:
 				PX_StringFree(&expCode);
 				PX_StringFree(&fmrString);
 				PX_StringFree(&condCodes);
+				PX_ScriptTranslatorError(&analysis, "unexpected lexeme.");
 				goto _ERROR;
 			}
 
@@ -10035,6 +10125,7 @@ _CONTINUE:
 				PX_StringFree(&expCode);
 				PX_StringFree(&fmrString);
 				PX_StringFree(&condCodes);
+				PX_ScriptTranslatorError(&analysis, "unexpected lexeme.");
 				goto _ERROR;
 			}
 			PX_StringCat(&analysis.code,expCode.buffer);
@@ -10052,6 +10143,7 @@ _CONTINUE:
 				PX_StringFree(&expCode);
 				PX_StringFree(&fmrString);
 				PX_StringFree(&condCodes);
+				PX_ScriptTranslatorError(&analysis, "unexpected lexeme.");
 				goto _ERROR;
 			}
 
@@ -10061,6 +10153,7 @@ _CONTINUE:
 				PX_StringFree(&expCode);
 				PX_StringFree(&fmrString);
 				PX_StringFree(&condCodes);
+				PX_ScriptTranslatorError(&analysis, "unexpected lexeme.");
 				goto _ERROR;
 			}
 			PX_StringCat(&condCodes,expCode.buffer);
@@ -10077,6 +10170,7 @@ _CONTINUE:
 				PX_StringFree(&expCode);
 				PX_StringFree(&fmrString);
 				PX_StringFree(&condCodes);
+				PX_ScriptTranslatorError(&analysis, "unexpected lexeme.");
 				goto _ERROR;
 			}
 
@@ -10086,6 +10180,7 @@ _CONTINUE:
 				PX_StringFree(&expCode);
 				PX_StringFree(&fmrString);
 				PX_StringFree(&condCodes);
+				PX_ScriptTranslatorError(&analysis, "unexpected lexeme.");
 				goto _ERROR;
 			}
 			PX_StringCat(&analysis.code,expCode.buffer);
@@ -10110,6 +10205,7 @@ _CONTINUE:
 
 			if (!PX_ScriptParseIsOperandNumericType(retOperand))
 			{
+				PX_ScriptTranslatorError(&analysis, "unexpected lexeme.");
 				goto _ERROR;
 			}
 
@@ -10137,6 +10233,7 @@ _CONTINUE:
 		{
 			if (!analysis.functionInside)
 			{
+				PX_ScriptTranslatorError(&analysis, "must be funtion inside");
 				goto _ERROR;
 			}
 
@@ -10147,6 +10244,7 @@ _CONTINUE:
 
 			if (type!=PX_LEXER_LEXEME_TYPE_DELIMITER||analysis.lexer.Symbol!='(')
 			{
+				PX_ScriptTranslatorError(&analysis, "unexpected lexeme.");
 				goto _ERROR;
 			}
 
@@ -10160,6 +10258,7 @@ _CONTINUE:
 			{
 				PX_StringFree(&expression);
 				PX_StringFree(&expCode);
+				PX_ScriptTranslatorError(&analysis, "unexpected lexeme.");
 				goto _ERROR;
 			}
 			
@@ -10167,6 +10266,7 @@ _CONTINUE:
 			{
 				PX_StringFree(&expression);
 				PX_StringFree(&expCode);
+				PX_ScriptTranslatorError(&analysis, "unexpected lexeme.");
 				goto _ERROR;
 			}
 			
@@ -10203,6 +10303,7 @@ _CONTINUE:
 		{
 			if (!analysis.functionInside)
 			{
+				PX_ScriptTranslatorError(&analysis, "must be funtion inside");
 				goto _ERROR;
 			}
 			caseEnd=PX_FALSE;
@@ -10216,6 +10317,7 @@ _CONTINUE:
 			}
 			if (i<=0) //0 is function AST structure
 			{
+				PX_ScriptTranslatorError(&analysis, "unknow ast error");
 				goto _ERROR;
 			}
 
@@ -10224,6 +10326,7 @@ _CONTINUE:
 
 			if (type!=PX_LEXER_LEXEME_TYPE_DELIMITER||analysis.lexer.Symbol!='(')
 			{
+				PX_ScriptTranslatorError(&analysis, "unexpected lexeme.");
 				goto _ERROR;
 			}
 
@@ -10286,8 +10389,11 @@ _CONTINUE:
 					if (analysis.lexer.Symbol==')')
 					{
 						lBracket--;
-						if(lBracket<0)
+						if (lBracket < 0)
+						{
+							PX_ScriptTranslatorError(&analysis, "Non closed-bracket");
 							return PX_FALSE;
+						}
 					}
 					if (analysis.lexer.Symbol=='[')
 					{
@@ -10296,8 +10402,11 @@ _CONTINUE:
 					if (analysis.lexer.Symbol==']')
 					{
 						mBracket--;
-						if(mBracket<0)
+						if (mBracket < 0)
+						{
+							PX_ScriptTranslatorError(&analysis, "Non closed-bracket");
 							return PX_FALSE;
+						}
 					}
 
 					if (type==PX_LEXER_LEXEME_TYPE_SPACER)
@@ -10474,6 +10583,7 @@ _CONTINUEOUT:
 		{
 			if (!analysis.functionInside)
 			{
+				PX_ScriptTranslatorError(&analysis, "must be funtion inside");
 				goto _ERROR;
 			}
 			//custom expression
@@ -10484,6 +10594,7 @@ _CONTINUEOUT:
 			{
 				PX_StringFree(&expression);
 				PX_StringFree(&expCode);
+				PX_ScriptTranslatorError(&analysis, "invalid expression");
 				goto _ERROR;
 			}
 			PX_StringCat(&analysis.code,";RETURN (EXPRESSION)\n");
@@ -10491,6 +10602,7 @@ _CONTINUEOUT:
 			{
 				PX_StringFree(&expression);
 				PX_StringFree(&expCode);
+				PX_ScriptTranslatorError(&analysis, "invalid expression");
 				goto _ERROR;
 			}
 			
@@ -10598,7 +10710,11 @@ _CONTINUEOUT:
 			PX_StringFree(&fmrString);
 
 
-			if(!PX_ScriptParseIfLastAST(&analysis)) goto _ERROR;
+			if (!PX_ScriptParseIfLastAST(&analysis))
+			{
+				PX_ScriptTranslatorError(&analysis, "IF Last AST error.");
+				goto _ERROR;
+			}
 			continue;
 		}
 
@@ -10610,7 +10726,11 @@ _CONTINUEOUT:
 
 			if (type==PX_LEXER_LEXEME_TYPE_DELIMITER&&analysis.lexer.Symbol=='}')
 			{
-				if(!PX_ScriptParseLastCodeblockEnd(&analysis)) goto _ERROR;
+				if (!PX_ScriptParseLastCodeblockEnd(&analysis))
+				{
+					PX_ScriptTranslatorError(&analysis, "unexpected token.");
+					goto _ERROR;
+				}
 			}
 			else
 			{
@@ -10624,6 +10744,7 @@ _CONTINUEOUT:
 				{
 					PX_StringFree(&expression);
 					PX_StringFree(&expCode);
+					PX_ScriptTranslatorError(&analysis, "Invalid expression.");
 					goto _ERROR;
 				}
 
@@ -10631,6 +10752,7 @@ _CONTINUEOUT:
 				{
 					PX_StringFree(&expression);
 					PX_StringFree(&expCode);
+					PX_ScriptTranslatorError(&analysis, "Invalid expression.");
 					goto _ERROR;
 				}
 				
@@ -10639,7 +10761,11 @@ _CONTINUEOUT:
 				PX_StringFree(&expression);
 				PX_StringFree(&expCode);
 
-				if(!PX_ScriptParseIfLastAST(&analysis)) goto _ERROR;
+				if (!PX_ScriptParseIfLastAST(&analysis))
+				{
+					PX_ScriptTranslatorError(&analysis, "Invalid IF Last ast.");
+					goto _ERROR;
+				}
 			}
 			continue;
 		}
@@ -10655,6 +10781,7 @@ _CONTINUEOUT:
 	//Output
 	if (!PX_ScriptParseBootCode(&analysis))
 	{
+		PX_ScriptTranslatorError(&analysis, "BootCode Error.");
 		goto _ERROR;
 	}
 	//.Global .Local
@@ -10699,6 +10826,7 @@ _CONTINUEOUT:
 		{
 			PX_ScriptParsePopAstStructure(&analysis);
 		}
+		PX_ScriptTranslatorError(&analysis, "Invalid astStructure.");
 		goto _ERROR;
 	}
 

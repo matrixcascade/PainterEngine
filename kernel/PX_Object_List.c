@@ -460,6 +460,7 @@ px_void PX_Object_ListFree(PX_Object *pListObj)
 		PX_ObjectDelete(pItemObject);
 	}
 	PX_VectorFree(&pList->Items);
+	PX_VectorFree(&pList->pData);
 }
 
 px_void PX_Object_ListOnSliderValueChanged(PX_Object  *Object,PX_Object_Event e,px_void *ptr)
@@ -909,5 +910,52 @@ px_void *PX_Object_ListArrayItemGetData(PX_Object* pListItemObject)
 		return pItem->pdata;
 	}
 	return PX_NULL;
+}
+
+//////////////////////////////////////////////////////////////////////////
+//list
+//////////////////////////////////////////////////////////////////////////
+
+PX_Object* PX_Designer_ListCreate(px_memorypool* mp, PX_Object* pparent, px_float x, px_float y, px_float width, px_float height, PX_FontModule* fm)
+{
+	return PX_Object_ListContentCreate(mp, pparent, (px_int)x, (px_int)y, 256, 128, fm);
+}
+
+PX_Designer_ObjectDesc PX_Object_ListDesignerInstall()
+{
+	PX_Designer_ObjectDesc list;
+	px_int i = 0;
+	PX_memset(&list, 0, sizeof(list));
+	PX_strcat(list.Name, "list");
+
+	list.createfunc = PX_Designer_ListCreate;
+	list.type = PX_DESIGNER_OBJECT_TYPE_UI;
+
+	PX_strcat(list.properties[i].Name, "id");
+	list.properties[i].getstring = PX_Designer_GetID;
+	list.properties[i].setstring = PX_Designer_SetID;
+	i++;
+
+	PX_strcat(list.properties[i].Name, "x");
+	list.properties[i].getfloat = PX_Designer_GetX;
+	list.properties[i].setfloat = PX_Designer_SetX;
+	i++;
+
+	PX_strcat(list.properties[i].Name, "y");
+	list.properties[i].getfloat = PX_Designer_GetY;
+	list.properties[i].setfloat = PX_Designer_SetY;
+	i++;
+
+	PX_strcat(list.properties[i].Name, "width");
+	list.properties[i].getfloat = PX_Designer_GetWidth;
+	list.properties[i].setfloat = PX_Designer_SetWidth;
+	i++;
+
+	PX_strcat(list.properties[i].Name, "height");
+	list.properties[i].getfloat = PX_Designer_GetHeight;
+	list.properties[i].setfloat = PX_Designer_SetHeight;
+	i++;
+
+	return list;
 }
 

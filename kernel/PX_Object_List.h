@@ -67,5 +67,8 @@ px_void PX_Object_ListViewFocus(PX_Object* pListObject, px_int index);
 PX_Object* PX_Object_ListArrayCreate(px_memorypool* mp, PX_Object* Parent, px_int x, px_int y, px_int Width, px_int Height, px_int ItemHeight, Function_ObjectRender render, px_void* userptr);
 px_void  PX_Object_ListArraySetData(PX_Object* pListObject, px_void *ArrayData,px_int ArrayDataCount);
 px_void* PX_Object_ListArrayItemGetData(PX_Object* pListItemObject);
+
+
+PX_Designer_ObjectDesc PX_Object_ListDesignerInstall();
 #endif
 

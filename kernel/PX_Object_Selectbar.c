@@ -565,3 +565,97 @@ px_void PX_Object_SelectBarSetMaxDisplayCount(PX_Object* pObject, px_int i)
 	}
 }
 
+//////////////////////////////////////////////////////////////////////////
+//SelectBar
+//////////////////////////////////////////////////////////////////////////
+
+PX_Object* PX_Designer_SelectBarCreate(px_memorypool* mp, PX_Object* pparent, px_float x, px_float y, px_float width, px_float height, PX_FontModule* fm)
+{
+	return PX_Object_SelectBarCreate(mp, pparent, (px_int)x, (px_int)y, 96, 24, fm);
+}
+
+px_void PX_Designer_SelectBarSetText(PX_Object* pobject, const px_char text[])
+{
+	px_char content[64];
+	px_int _strlen;
+	px_int i, j;
+	PX_Object_SelectBarClear(pobject);
+	i = 0;
+	_strlen = PX_strlen(text);
+	while (i < _strlen)
+	{
+		j = 0;
+		while (text[i] != '\n' && text[i] != '\0')
+		{
+			if (j >= PX_COUNTOF(content) - 1)
+			{
+				return;
+			}
+			content[j++] = text[i++];
+		}
+		content[j] = '\0';
+		if (text[i] == '\n')
+		{
+			i++;
+		}
+		PX_Object_SelectBarAddItem(pobject, content);
+	}
+}
+
+
+px_bool PX_Designer_SelectBarGetText(PX_Object* pobject, px_string* str)
+{
+	px_int i;
+	PX_Object_SelectBar* pdesc = PX_ObjectGetDesc(PX_Object_SelectBar, pobject);
+	for (i = 0; i < pdesc->Items.size; i++)
+	{
+		PX_StringCat(str, PX_Object_SelectBarGetItemText(pobject, i));
+		PX_StringCat(str, "\n");
+	}
+	PX_StringBackspace(str);
+	return PX_TRUE;
+}
+
+PX_Designer_ObjectDesc PX_Object_SelectBarDesignerInstall()
+{
+	PX_Designer_ObjectDesc selectbar;
+	px_int i = 0;
+	PX_memset(&selectbar, 0, sizeof(selectbar));
+	PX_strcat(selectbar.Name, "selectbar");
+
+	selectbar.createfunc = PX_Designer_SelectBarCreate;
+	selectbar.type = PX_DESIGNER_OBJECT_TYPE_UI;
+
+	PX_strcat(selectbar.properties[i].Name, "id");
+	selectbar.properties[i].getstring = PX_Designer_GetID;
+	selectbar.properties[i].setstring = PX_Designer_SetID;
+	i++;
+
+	PX_strcat(selectbar.properties[i].Name, "x");
+	selectbar.properties[i].getfloat = PX_Designer_GetX;
+	selectbar.properties[i].setfloat = PX_Designer_SetX;
+	i++;
+
+	PX_strcat(selectbar.properties[i].Name, "y");
+	selectbar.properties[i].getfloat = PX_Designer_GetY;
+	selectbar.properties[i].setfloat = PX_Designer_SetY;
+	i++;
+
+	PX_strcat(selectbar.properties[i].Name, "width");
+	selectbar.properties[i].getfloat = PX_Designer_GetWidth;
+	selectbar.properties[i].setfloat = PX_Designer_SetWidth;
+	i++;
+
+	PX_strcat(selectbar.properties[i].Name, "height");
+	selectbar.properties[i].getfloat = PX_Designer_GetHeight;
+	selectbar.properties[i].setfloat = PX_Designer_SetHeight;
+	i++;
+
+	PX_strcat(selectbar.properties[i].Name, "list");
+	selectbar.properties[i].setstring = PX_Designer_SelectBarSetText;
+	selectbar.properties[i].getstring = PX_Designer_SelectBarGetText;
+	i++;
+	return selectbar;
+}
+
+

@@ -74,7 +74,11 @@ PX_HASHMAP_RETURN PX_MapPut(px_map * m,const px_char stringkey[], px_void * valu
 		return PX_HASHMAP_RETURN_OK;
 	}
 	else
+	{
+		MP_Free(m->mp, newnode);
 		return PX_HASHMAP_RETURN_NULL;
+	}
+		
 }
 
 PX_HASHMAP_RETURN PX_MapPutInt(px_map * m,const px_char stringkey[], px_int value)
@@ -88,7 +92,10 @@ PX_HASHMAP_RETURN PX_MapPutInt(px_map * m,const px_char stringkey[], px_int valu
 		return PX_HASHMAP_RETURN_OK;
 	}
 	else
+	{
+		MP_Free(m->mp, newnode);
 		return PX_HASHMAP_RETURN_NULL;
+	}
 }
 
 PX_HASHMAP_RETURN PX_MapPutFloat(px_map * m,const px_char stringkey[], px_float value)
@@ -102,7 +109,10 @@ PX_HASHMAP_RETURN PX_MapPutFloat(px_map * m,const px_char stringkey[], px_float 
 		return PX_HASHMAP_RETURN_OK;
 	}
 	else
+	{
+		MP_Free(m->mp, newnode);
 		return PX_HASHMAP_RETURN_NULL;
+	}
 }
 
 px_void * PX_MapGet(px_map * m, const px_char stringkey[])

@@ -149,6 +149,18 @@ PX_Object * PX_Object_PushButtonCreate(px_memorypool *mp,PX_Object *Parent,px_in
 	return pObject;
 }
 
+PX_Object* PX_Object_CircleButtonCreate(px_memorypool* mp, PX_Object* Parent, px_int x, px_int y, px_int Radius, const px_char* Text, PX_FontModule* fontmodule)
+{
+	PX_Object *pObject= PX_Object_PushButtonCreate(mp, Parent, x, y, Radius*2, Radius*2, Text, fontmodule);
+	if (pObject)
+	{
+		PX_Object_PushButton *pPushButton = (PX_Object_PushButton *)pObject->pObject;
+		pPushButton->style = PX_OBJECT_PUSHBUTTON_STYLE_CIRCLE;
+		pObject->diameter=Radius*2.f;
+	}
+	return pObject;
+}
+
 PX_Object_PushButton  * PX_Object_GetPushButton( PX_Object *Object )
 {
 	if(Object->Type==PX_OBJECT_TYPE_PUSHBUTTON)
@@ -345,6 +357,23 @@ px_void PX_Object_PushButtonRender(px_surface *psurface, PX_Object *pObject,px_u
 			break;
 		}
 		break;
+	case PX_OBJECT_PUSHBUTTON_STYLE_CIRCLE:
+		{
+		PX_GeoDrawSolidCircle(psurface, (px_int)objx, (px_int)objy,(px_int)(pObject->diameter/2), pPushButton->BackgroundColor);
+		switch (pPushButton->state)
+		{
+		case PX_OBJECT_BUTTON_STATE_NORMAL:
+			PX_GeoDrawBall(psurface, objx, objy, (pObject->diameter / 2), pPushButton->BackgroundColor);
+			break;
+		case PX_OBJECT_BUTTON_STATE_ONPUSH:
+			PX_GeoDrawBall(psurface, objx, objy, (pObject->diameter / 2), pPushButton->PushColor);
+			break;
+		case PX_OBJECT_BUTTON_STATE_ONCURSOR:
+			PX_GeoDrawBall(psurface, objx, objy, (pObject->diameter / 2), pPushButton->CursorColor);
+			break;
+		}
+		}
+		break;
 	}
 
 
@@ -369,6 +398,9 @@ px_void PX_Object_PushButtonRender(px_surface *psurface, PX_Object *pObject,px_u
 		case PX_OBJECT_PUSHBUTTON_STYLE_ROUNDRECT:
 			PX_GeoDrawRoundRect(psurface,(px_int)objx,(px_int)objy,(px_int)objx+(px_int)objWidth-1,(px_int)objy+(px_int)objHeight-1,pPushButton->roundradius,0.6f,pPushButton->BorderColor);
 			break;
+		case PX_OBJECT_PUSHBUTTON_STYLE_CIRCLE:
+			PX_GeoDrawCircle(psurface,(px_int)objx,(px_int)objy,(px_int)(pObject->diameter/2),1,pPushButton->BorderColor);
+			break;
 		}
 	}
 
@@ -390,3 +422,62 @@ px_void PX_Object_PushButtonFree( PX_Object *Obj )
 	}
 }
 
+//////////////////////////////////////////////////////////////////////////
+//Push button
+//////////////////////////////////////////////////////////////////////////
+PX_Object* PX_Designer_PushButtonCreate(px_memorypool* mp, PX_Object* pparent, px_float x, px_float y, px_float width, px_float height, PX_FontModule* fm)
+{
+	return PX_Object_PushButtonCreate(mp, pparent, (px_int)x, (px_int)y, 128, 64, "PushButton", fm);
+}
+
+px_void PX_Designer_PushButtonSetText(PX_Object* pobject, const px_char text[])
+{
+	PX_Object_PushButtonSetText(pobject, text);
+}
+
+px_bool PX_Designer_PushButtonGetText(PX_Object* pobject, px_string* str)
+{
+	return PX_StringSet(str, PX_Object_PushButtonGetText(pobject));
+}
+
+PX_Designer_ObjectDesc PX_Object_PushButtonDesignerInstall()
+{
+	PX_Designer_ObjectDesc spushbutton;
+	px_int i = 0;
+	PX_memset(&spushbutton, 0, sizeof(spushbutton));
+	PX_strcat(spushbutton.Name, "pushbutton");
+	spushbutton.createfunc = PX_Designer_PushButtonCreate;
+	spushbutton.type = PX_DESIGNER_OBJECT_TYPE_UI;
+
+	PX_strcat(spushbutton.properties[i].Name, "id");
+	spushbutton.properties[i].getstring = PX_Designer_GetID;
+	spushbutton.properties[i].setstring = PX_Designer_SetID;
+	i++;
+
+	PX_strcat(spushbutton.properties[i].Name, "x");
+	spushbutton.properties[i].getfloat = PX_Designer_GetX;
+	spushbutton.properties[i].setfloat = PX_Designer_SetX;
+	i++;
+
+	PX_strcat(spushbutton.properties[i].Name, "y");
+	spushbutton.properties[i].getfloat = PX_Designer_GetY;
+	spushbutton.properties[i].setfloat = PX_Designer_SetY;
+	i++;
+
+	PX_strcat(spushbutton.properties[i].Name, "width");
+	spushbutton.properties[i].getfloat = PX_Designer_GetWidth;
+	spushbutton.properties[i].setfloat = PX_Designer_SetWidth;
+	i++;
+
+	PX_strcat(spushbutton.properties[i].Name, "height");
+	spushbutton.properties[i].getfloat = PX_Designer_GetHeight;
+	spushbutton.properties[i].setfloat = PX_Designer_SetHeight;
+	i++;
+
+	PX_strcat(spushbutton.properties[i].Name, "text");
+	spushbutton.properties[i].setstring = PX_Designer_PushButtonSetText;
+	spushbutton.properties[i].getstring = PX_Designer_PushButtonGetText;
+	i++;
+
+	return spushbutton;
+}

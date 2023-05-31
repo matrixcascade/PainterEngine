@@ -6,23 +6,9 @@
 static px_byte PX_ApplicationRuntime[PX_APPLICATION_MEMORYPOOL_UI_SIZE+PX_APPLICATION_MEMORYPOOL_RESOURCES_SIZE+PX_APPLICATION_MEMORYPOOL_GAME_SIZE+PX_APPLICATION_MEMORYPOOL_SPACE_SIZE];
 px_bool PX_ApplicationInitializeDefault(PX_Runtime *runtime, px_int screen_width, px_int screen_height)
 {
-	px_int surface_width=0,surface_height=0;
-	px_int window_width=0,window_height=0;
-	px_double wdh;
-	if (screen_width==0|| screen_height==0)
-	{
-		window_width = 0;
-		window_height = 0;
-	}
-	else
-	{
-		wdh = screen_width * 1.0 / screen_height;
-		surface_height = (px_int)(PX_sqrtd(PX_APPLICATION_SURFACE_SIZE * PX_APPLICATION_SURFACE_SIZE / wdh));
-		surface_width = (px_int)(surface_height * wdh);
-		window_width = screen_width / 2;
-		window_height = screen_height / 2;
-	}
-	
+	px_int surface_width=900,surface_height=506;
+	px_int window_width=900,window_height=506;
+
 	if(!PX_RuntimeInitialize(runtime,surface_width,surface_height,window_width,window_height,PX_ApplicationRuntime,sizeof(PX_ApplicationRuntime),PX_APPLICATION_MEMORYPOOL_UI_SIZE,PX_APPLICATION_MEMORYPOOL_RESOURCES_SIZE,PX_APPLICATION_MEMORYPOOL_GAME_SIZE))
 		return PX_FALSE;
 	return PX_TRUE;
@@ -31,14 +17,7 @@ px_void PX_ApplicationEventDefault(PX_Runtime *runtime,PX_Object_Event e)
 {
 	if (e.Event==PX_OBJECT_EVENT_WINDOWRESIZE)
 	{
-		px_int surface_width=0,surface_height=0;
-		px_double wdh;
-
-		wdh=PX_Object_Event_GetWidth(e)*1.0/PX_Object_Event_GetHeight(e);
-		surface_height=(px_int)(PX_sqrtd(PX_APPLICATION_SURFACE_SIZE*PX_APPLICATION_SURFACE_SIZE/wdh));
-		surface_width=(px_int)(surface_height*wdh);
-
-		PX_RuntimeResize(runtime,surface_width,surface_height,(px_int)PX_Object_Event_GetWidth(e),(px_int)PX_Object_Event_GetHeight(e));
+		PX_RuntimeResize(runtime, runtime->surface_width, runtime->surface_height,(px_int)PX_Object_Event_GetWidth(e),(px_int)PX_Object_Event_GetHeight(e));
 		return;
 	}
 }
@@ -62,6 +41,26 @@ px_bool PX_LoadTextureFromFile(px_memorypool *mp,px_texture *tex,const px_char p
 	PX_FreeIOData(&io);
 	return PX_FALSE;
 }
+
+px_bool PX_LoadStringFromFile(px_memorypool* mp, px_string* _string, const px_char path[])
+{
+	PX_IO_Data io;
+
+	io = PX_LoadFileToIOData(path);
+	if (!io.size)
+	{
+		return PX_FALSE;
+	}
+	PX_StringInitialize(mp, _string);
+	if(PX_StringCat(_string, (const px_char *)io.buffer))
+	{
+		PX_FreeIOData(&io);
+		return PX_TRUE;
+	}
+	PX_FreeIOData(&io);
+	return PX_FALSE;
+}
+
 
 px_bool PX_LoadShapeFromFile(px_memorypool *mp,px_shape *shape,const px_char path[])
 {
@@ -243,6 +242,20 @@ _ERROR:
 	PX_FreeIOData(&io);
 	return PX_FALSE;
 }
+
+px_bool PX_LoadStringToResource(PX_ResourceLibrary* ResourceLibrary, const px_char Path[], const px_char key[])
+{
+	PX_IO_Data io;
+	io = PX_LoadFileToIOData(Path);
+	if (!io.size)goto _ERROR;
+	if (!PX_ResourceLibraryLoad(ResourceLibrary, PX_RESOURCE_TYPE_STRING, io.buffer, io.size, key)) goto _ERROR;
+	PX_FreeIOData(&io);
+	return PX_TRUE;
+_ERROR:
+	PX_FreeIOData(&io);
+	return PX_FALSE;
+}
+
 
 px_bool PX_LoadShapeToResource(PX_ResourceLibrary *ResourceLibrary,const px_char Path[],const px_char key[])
 {
