@@ -313,8 +313,9 @@ PX_Object* PX_Object_PrinterCreate(px_memorypool* mp, PX_Object* Parent, px_int 
 /////////////////////////////////////////////////////////
 //Printer
 /////////////////////////////////////////////////////////
-PX_Object* PX_Designer_PrinterCreate(px_memorypool* mp, PX_Object* pparent, px_float x, px_float y, px_float width, px_float height, PX_FontModule* fm)
+PX_Object* PX_Designer_PrinterCreate(px_memorypool* mp, PX_Object* pparent, px_float x, px_float y, px_float width, px_float height, px_void* ptr)
 {
+	PX_FontModule* fm = (PX_FontModule*)ptr;
 	return PX_Object_PrinterCreate(mp, pparent, (px_int)x, (px_int)y, (px_int)width, (px_int)height, fm);
 }
 

@@ -723,8 +723,9 @@ px_void PX_Object_SliderBarSetSliderButtonLength(PX_Object *pSliderBar,px_int le
 //////////////////////////////////////////////////////////////////////////
 //SliderBar
 //////////////////////////////////////////////////////////////////////////
-PX_Object* PX_Designer_SliderBarCreate(px_memorypool* mp, PX_Object* pparent, px_float x, px_float y, px_float width, px_float height, PX_FontModule* fm)
+PX_Object* PX_Designer_SliderBarCreate(px_memorypool* mp, PX_Object* pparent, px_float x, px_float y, px_float width, px_float height, px_void* ptr)
 {
+	PX_FontModule* fm = (PX_FontModule*)ptr;
 	return PX_Object_SliderBarCreate(mp, pparent, (px_int)x, (px_int)y, 192, 32, PX_OBJECT_SLIDERBAR_TYPE_HORIZONTAL, PX_OBJECT_SLIDERBAR_STYLE_LINER);
 }
 

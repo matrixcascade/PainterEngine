@@ -277,8 +277,9 @@ px_void PX_Object_RadioBoxSetCheck(PX_Object *Object,px_bool check)
 //////////////////////////////////////////////////////////////////////////
 //radiobox
 //////////////////////////////////////////////////////////////////////////
-PX_Object* PX_Designer_RadioBoxCreate(px_memorypool* mp, PX_Object* pparent, px_float x, px_float y, px_float width, px_float height, PX_FontModule* fm)
+PX_Object* PX_Designer_RadioBoxCreate(px_memorypool* mp, PX_Object* pparent, px_float x, px_float y, px_float width, px_float height, px_void* ptr)
 {
+	PX_FontModule* fm = (PX_FontModule*)ptr;
 	return PX_Object_RadioBoxCreate(mp, pparent, (px_int)x, (px_int)y, 108, 28, "RadioButton", fm);
 }
 

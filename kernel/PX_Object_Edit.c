@@ -1000,8 +1000,9 @@ px_void PX_Object_EditSetInputMode(PX_Object* pObject, PX_OBJECT_EDIT_INPUT_MODE
 //////////////////////////////////////////////////////////////////////////
 //edit
 //////////////////////////////////////////////////////////////////////////
-PX_Object* PX_Designer_EditCreate(px_memorypool* mp, PX_Object* pparent, px_float x, px_float y, px_float width, px_float height, PX_FontModule* fm)
+PX_Object* PX_Designer_EditCreate(px_memorypool* mp, PX_Object* pparent, px_float x, px_float y, px_float width, px_float height, px_void* ptr)
 {
+	PX_FontModule* fm = (PX_FontModule*)ptr;
 	return PX_Object_EditCreate(mp, pparent, (px_int)x, (px_int)y, 128, 28, fm);
 }
 

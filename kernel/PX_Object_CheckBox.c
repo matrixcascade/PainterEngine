@@ -246,8 +246,9 @@ px_void PX_Object_CheckBoxSetCheck(PX_Object *Object,px_bool check)
 //////////////////////////////////////////////////////////////////////////
 //checkbox
 //////////////////////////////////////////////////////////////////////////
-PX_Object* PX_Designer_CheckBoxCreate(px_memorypool* mp, PX_Object* pparent, px_float x, px_float y, px_float width, px_float height, PX_FontModule* fm)
+PX_Object* PX_Designer_CheckBoxCreate(px_memorypool* mp, PX_Object* pparent, px_float x, px_float y, px_float width, px_float height, px_void* ptr)
 {
+	PX_FontModule* fm = (PX_FontModule*)ptr;
 	return PX_Object_CheckBoxCreate(mp, pparent, (px_int)x, (px_int)y, 96, 28, "CheckBox", fm);
 }
 
