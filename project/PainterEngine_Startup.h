@@ -29,6 +29,7 @@ px_bool PX_LoadAnimationLibraryFromFile(px_memorypool *mp,PX_AnimationLibrary *l
 px_bool PX_LoadScriptFromFile(px_memory *code,const px_char path[]);
 px_bool PX_LoadScriptInstanceFromFile(px_memorypool *mp,PX_VM *ins,const px_char path[]);
 px_bool PX_LoadLiveFromFile(px_memorypool* mp, PX_LiveFramework* pliveframework, const px_char path[]);
+px_bool PX_LoadUIFormFile(px_memorypool* mp, PX_Object* proot, PX_FontModule* fm, const px_char path[]);
 
 px_bool PX_LoadTextureToResource(PX_ResourceLibrary *presourcelib,const px_char Path[],const px_char key[]);
 px_bool PX_LoadShapeToResource(PX_ResourceLibrary *presourcelib,const px_char Path[],const px_char key[]);
