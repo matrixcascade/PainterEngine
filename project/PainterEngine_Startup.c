@@ -3,21 +3,37 @@
 
 //////////////////////////////////////////////////////////////////////////
 //Functions
-static px_byte PX_ApplicationRuntime[PX_APPLICATION_MEMORYPOOL_UI_SIZE+PX_APPLICATION_MEMORYPOOL_RESOURCES_SIZE+PX_APPLICATION_MEMORYPOOL_GAME_SIZE+PX_APPLICATION_MEMORYPOOL_SPACE_SIZE];
-px_bool PX_ApplicationInitializeDefault(PX_Runtime *runtime, px_int screen_width, px_int screen_height)
+static px_byte PX_ApplicationRuntime[PX_APPLICATION_MEMORYPOOL_UI_SIZE + PX_APPLICATION_MEMORYPOOL_RESOURCES_SIZE + PX_APPLICATION_MEMORYPOOL_GAME_SIZE + PX_APPLICATION_MEMORYPOOL_SPACE_SIZE];
+px_bool PX_ApplicationInitializeDefault(PX_Runtime* runtime, px_int screen_width, px_int screen_height)
 {
-	px_int surface_width=900,surface_height=506;
-	px_int window_width=900,window_height=506;
+	px_int surface_width = 0, surface_height = 0;
+	px_int window_width = 0, window_height = 0;
+	px_double wdh;
+	wdh = screen_width * 1.0 / screen_height;
+	surface_height = (px_int)(PX_sqrtd(PX_APPLICATION_SURFACE_SIZE * PX_APPLICATION_SURFACE_SIZE / wdh));
+	surface_width = (px_int)(surface_height * wdh);
 
-	if(!PX_RuntimeInitialize(runtime,surface_width,surface_height,window_width,window_height,PX_ApplicationRuntime,sizeof(PX_ApplicationRuntime),PX_APPLICATION_MEMORYPOOL_UI_SIZE,PX_APPLICATION_MEMORYPOOL_RESOURCES_SIZE,PX_APPLICATION_MEMORYPOOL_GAME_SIZE))
+
+	window_width = screen_width * 2 / 3;
+	window_height = screen_height * 2 / 3;
+
+
+	if (!PX_RuntimeInitialize(runtime, surface_width, surface_height, window_width, window_height, PX_ApplicationRuntime, sizeof(PX_ApplicationRuntime), PX_APPLICATION_MEMORYPOOL_UI_SIZE, PX_APPLICATION_MEMORYPOOL_RESOURCES_SIZE, PX_APPLICATION_MEMORYPOOL_GAME_SIZE))
 		return PX_FALSE;
 	return PX_TRUE;
 }
-px_void PX_ApplicationEventDefault(PX_Runtime *runtime,PX_Object_Event e)
+px_void PX_ApplicationEventDefault(PX_Runtime* runtime, PX_Object_Event e)
 {
-	if (e.Event==PX_OBJECT_EVENT_WINDOWRESIZE)
+	if (e.Event == PX_OBJECT_EVENT_WINDOWRESIZE)
 	{
-		PX_RuntimeResize(runtime, runtime->surface_width, runtime->surface_height,(px_int)PX_Object_Event_GetWidth(e),(px_int)PX_Object_Event_GetHeight(e));
+		px_int surface_width = 0, surface_height = 0;
+		px_double wdh;
+
+		wdh = PX_Object_Event_GetWidth(e) * 1.0 / PX_Object_Event_GetHeight(e);
+		surface_height = (px_int)(PX_sqrtd(PX_APPLICATION_SURFACE_SIZE * PX_APPLICATION_SURFACE_SIZE / wdh));
+		surface_width = (px_int)(surface_height * wdh);
+
+		PX_RuntimeResize(runtime, surface_width, surface_height, (px_int)PX_Object_Event_GetWidth(e), (px_int)PX_Object_Event_GetHeight(e));
 		return;
 	}
 }
@@ -209,6 +225,20 @@ px_bool PX_LoadLiveFromFile(px_memorypool *mp,PX_LiveFramework *pliveframework, 
 	PX_FreeIOData(&io);
 	return PX_TRUE;
 
+}
+
+px_bool PX_LoadUIFormFile(px_memorypool* mp, PX_Object* proot,PX_FontModule *fm, const px_char path[])
+{
+	px_bool ret = PX_FALSE;
+	PX_IO_Data io = PX_LoadFileToIOData(path);
+	if (!io.size)
+	{
+		return PX_FALSE;
+	}
+	if (PX_Object_DesignerImportToUIObject(mp,proot, (const px_char *)io.buffer,fm))
+		ret = PX_TRUE;
+	PX_FreeIOData(&io);
+	return PX_TRUE;
 }
 
 
