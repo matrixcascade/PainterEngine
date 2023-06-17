@@ -72,5 +72,7 @@ px_void PX_Object_EditAutoNewLine(PX_Object *pObject,px_bool b,px_int AutoNewLin
 px_void PX_Object_EditSetOffset(PX_Object *pObject,px_int TopOffset,px_int LeftOffset);
 px_void PX_Object_EditSetXYOffset(PX_Object* pObject, px_int XOffset, px_int YOffset);
 px_void PX_Object_EditSetInputMode(PX_Object* pObject, PX_OBJECT_EDIT_INPUT_MODE mode);
+
+PX_Designer_ObjectDesc PX_Object_EditDesignerInstall();
 #endif
 

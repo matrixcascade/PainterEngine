@@ -766,7 +766,7 @@ px_void PX_ObjectRender(px_surface *pSurface, PX_Object *pObject,px_uint elapsed
 
 px_bool PX_ObjectIsPointInRegion( PX_Object *pObject,px_float x,px_float y )
 {
-	px_float objx,objy,objw,objh;
+	px_float objx,objy,objw,objh,r;
 	px_float inheritX,inheritY;
 
 	PX_ObjectGetInheritXY(pObject,&inheritX,&inheritY);
@@ -775,8 +775,11 @@ px_bool PX_ObjectIsPointInRegion( PX_Object *pObject,px_float x,px_float y )
 	objy=(pObject->y+inheritY);
 	objw=pObject->Width;
 	objh=pObject->Height;
-
-	return PX_isXYInRegion(x,y,objx,objy,objw,objh);
+	r = pObject->diameter/2;
+	if (r)
+		return PX_isPoint2DInCircle(PX_POINT2D(x,y),PX_POINT2D(objx,objy),r);
+	else
+		return PX_isXYInRegion(x,y,objx,objy,objw,objh);
 }
 
 px_bool PX_ObjectIsCursorInRegion(PX_Object *Object,PX_Object_Event e)
@@ -794,7 +797,7 @@ px_float PX_ObjectGetWidth(PX_Object *Object)
 	return Object->Width;
 }
 
-px_void PX_ObjectAddClild(PX_Object *Parent,PX_Object *child)
+px_void PX_ObjectAddChild(PX_Object *Parent,PX_Object *child)
 {
 	PX_Object *pLinker;
 	child->pParent=Parent;
@@ -857,7 +860,7 @@ px_void PX_ObjectInitialize(px_memorypool *mp,PX_Object *pObject,PX_Object *Pare
 		}
 		else
 		{
-			PX_ObjectAddClild(Parent,pObject);
+			PX_ObjectAddChild(Parent,pObject);
 		}
 		
 	}
@@ -1073,6 +1076,115 @@ px_void PX_ObjectSetUserPointer(PX_Object *pObject,px_void *user_ptr)
 	pObject->User_ptr=user_ptr;
 }
 
+px_void PX_ObjectSetParent(PX_Object* pObject, PX_Object* pParent)
+{
+	if (pObject == PX_NULL) return;
+	if (pObject->pParent == pParent) return;
+	if (pObject->OnFocus) PX_ObjectClearFocus(pObject);
 
+	// detach from parent
+	if (pObject->pParent != PX_NULL)
+	{
+		if (pObject->pParent->pChilds == pObject)
+		{
+			pObject->pParent->pChilds = pObject->pNextBrother;
+			if (pObject->pNextBrother)
+			{
+				pObject->pNextBrother->pParent = pObject->pParent;
+				pObject->pNextBrother->pPreBrother = PX_NULL;
+			}
+		}
+		else
+		{
+			if (pObject->pPreBrother != PX_NULL)
+			{
+				pObject->pPreBrother->pNextBrother = pObject->pNextBrother;
+				if (pObject->pNextBrother)
+					pObject->pNextBrother->pPreBrother = pObject->pPreBrother;
+			}
+			else
+			{
+				PX_ERROR("Invalid Object struct");
+			}
+		}
+	}
+	else
+	{
+		if (pObject->pPreBrother != PX_NULL)
+		{
+			pObject->pPreBrother = pObject->pNextBrother;
+		}
+	}
 
+	// if the parent is null, then the object is a root object
+	if (pParent == PX_NULL) {
+		pObject->pParent = PX_NULL;
+		pObject->pNextBrother = PX_NULL;
+		pObject->pPreBrother = PX_NULL;
+	}
+	else {
+		PX_ObjectAddChild(pParent, pObject);
+	}
+}
 
+//////////////////////////////////////////////////////////////////////////
+px_bool PX_Designer_GetID(PX_Object* pObject, px_string* str)
+{
+	PX_StringSet(str, pObject->id);
+	return PX_TRUE;
+}
+
+px_void PX_Designer_SetID(PX_Object* pObject, const px_char id[])
+{
+	PX_ObjectSetId(pObject, id);
+}
+
+px_float PX_Designer_GetX(PX_Object* pObject)
+{
+	return pObject->x;
+}
+
+px_float PX_Designer_GetY(PX_Object* pObject)
+{
+	return pObject->y;
+}
+
+px_float PX_Designer_GetWidth(PX_Object* pObject)
+{
+	return pObject->Width;
+}
+
+px_float PX_Designer_GetHeight(PX_Object* pObject)
+{
+	return pObject->Height;
+}
+
+px_bool PX_Designer_GetEnable(PX_Object* pObject)
+{
+	return pObject->Enabled;
+}
+
+px_void PX_Designer_SetX(PX_Object* pObject, px_float v)
+{
+	pObject->x = v;
+}
+
+px_void PX_Designer_SetY(PX_Object* pObject, px_float v)
+{
+	pObject->y = v;
+}
+
+px_void PX_Designer_SetWidth(PX_Object* pObject, px_float v)
+{
+	pObject->Width = v;
+}
+
+px_void PX_Designer_SetEnable(PX_Object* pObject, px_bool v)
+{
+	pObject->Enabled = v;
+}
+
+px_void PX_Designer_SetHeight(PX_Object* pObject, px_float v)
+{
+	pObject->Height = v;
+}

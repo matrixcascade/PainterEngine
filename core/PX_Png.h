@@ -5,6 +5,10 @@
 #include "PX_RFC1951.h"
 #include "PX_Surface.h"
 
+typedef struct _px_shape px_shape;
+extern px_void PX_ShapeSetPixel(px_shape* shape, px_int x, px_int y, px_uchar value);
+
+
 typedef enum
 {
 	PX_PNG_COLOR_TYPE_LUM = 0,
@@ -32,6 +36,7 @@ typedef enum
 
 px_bool PX_PngVerify(px_byte* ppngbuffer, px_int size, px_int* width, px_int* height, PX_PNG_FORMAT* format);
 px_bool PX_PngToRenderBuffer(px_memorypool* calcBuffer, px_byte* ppngbuffer, px_int size, px_surface* prenderbuffer);
+px_bool PX_PngToShapeBuffer(px_memorypool* calcBuffer, px_byte* ppngbuffer, px_int size, px_shape* pshapebuffer);
 px_int  PX_PngGetSize(px_byte* ppngbuffer, px_int in_size);
 px_bool PX_PngSurfaceToBuffer(px_surface* prenderbuffer,px_memory *out);
 #endif

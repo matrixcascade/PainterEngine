@@ -1234,3 +1234,50 @@ px_void PX_Object_PianoTuneSetParameters(PX_Object* pObject, PX_Piano*pPiano,px_
 {
 	PX_Object_PianoTuneSetParametersEx(pObject, pPiano->keys[keyIndex].param,pPiano->soundboard.param);
 }
+
+/////////////////////////////////////////////////////////
+//Piano
+/////////////////////////////////////////////////////////
+PX_Object* PX_Designer_PianoCreate(px_memorypool* mp, PX_Object* pparent, px_float x, px_float y, px_float width, px_float height, px_void* ptr)
+{
+	PX_FontModule* fm = (PX_FontModule*)ptr;
+	return PX_Object_PianoCreate(mp, pparent, x, y, 88 * 6, 48);
+}
+
+PX_Designer_ObjectDesc PX_Object_PianoDesignerInstall()
+{
+	PX_Designer_ObjectDesc piano;
+	px_int i = 0;
+	PX_memset(&piano, 0, sizeof(piano));
+	PX_strcat(piano.Name, "piano");
+
+	piano.createfunc = PX_Designer_PianoCreate;
+	piano.type = PX_DESIGNER_OBJECT_TYPE_UI;
+
+	PX_strcat(piano.properties[i].Name, "id");
+	piano.properties[i].getstring = PX_Designer_GetID;
+	piano.properties[i].setstring = PX_Designer_SetID;
+	i++;
+
+	PX_strcat(piano.properties[i].Name, "x");
+	piano.properties[i].getfloat = PX_Designer_GetX;
+	piano.properties[i].setfloat = PX_Designer_SetX;
+	i++;
+
+	PX_strcat(piano.properties[i].Name, "y");
+	piano.properties[i].getfloat = PX_Designer_GetY;
+	piano.properties[i].setfloat = PX_Designer_SetY;
+	i++;
+
+	PX_strcat(piano.properties[i].Name, "width");
+	piano.properties[i].getfloat = PX_Designer_GetWidth;
+	piano.properties[i].setfloat = PX_Designer_SetWidth;
+	i++;
+
+	PX_strcat(piano.properties[i].Name, "height");
+	piano.properties[i].getfloat = PX_Designer_GetHeight;
+	piano.properties[i].setfloat = PX_Designer_SetHeight;
+	i++;
+	return piano;
+}
+

@@ -391,7 +391,6 @@ px_void PX_Object_AsmDebuggerOnButtonReset(PX_Object* pObject, PX_Object_Event e
 	if (pAsm->vm&&pAsm->map)
 	{
 		PX_VMReset(pAsm->vm);
-		PX_VMRunFunction(pAsm->vm, 0, "_BOOT", 0, 0);
 		PX_VMBeginThreadFunction(pAsm->vm, 0, "main", 0, 0);
 		PX_VMSuspend(pAsm->vm);
 	}

@@ -18,9 +18,9 @@ typedef px_void (*PX_MP_ErrorCall)(px_void *ptr,PX_MEMORYPOOL_ERROR);
 #if defined(PX_DEBUG_MODE) && defined(PX_MEMORYPOOL_DEBUG_CHECK)
 typedef struct 
 {
-	px_void *addr;
 	px_void *startAddr;
 	px_void *endAddr;
+	px_dword offset;
 }MP_alloc_debug;
 
 
@@ -44,7 +44,7 @@ typedef struct _memoryPool
 	PX_MP_ErrorCall ErrorCall_Ptr;
 	px_void* userptr;
 #if defined(PX_DEBUG_MODE) && defined(PX_MEMORYPOOL_DEBUG_CHECK)
-	MP_alloc_debug DEBUG_allocdata[128];
+	MP_alloc_debug DEBUG_allocdata[8192];
 	px_bool enable_allocdata_tracert;
 #endif
 }px_memorypool;

@@ -101,6 +101,7 @@ px_int main(px_int argc,px_char **argv)
 	px_char prename[256]={0};
 	px_char numbercontent[8];
 	px_char loadname[256] = { 0 };
+	px_char outname[256] = { 0 };
 	px_memory outbin;
 	px_texture tex_clip,tex_scale,tex_out;
 	printf("scale factor(1.0):");
@@ -188,7 +189,7 @@ px_int main(px_int argc,px_char **argv)
 		printf("no texture found!\n");
 		return 0;
 	}
-	printf("ClipFrame w:%d h:%d count:%d\n", minwidth, minheight, texturedatas.size);
+	printf("ClipFrame w:%d h:%d count:%d\n", (px_int)(minwidth * scalefactor), (px_int)(minheight * scalefactor), texturedatas.size);
 	printf("packing....\n");
 	
 	PX_TextureCreate(&mp, &tex_clip, minwidth, minheight);
@@ -209,7 +210,8 @@ px_int main(px_int argc,px_char **argv)
 	}
 	printf("encoding...\n");
 	PX_PngSurfaceToBuffer(&tex_out, &outbin);
-	PX_SaveDataToFile( outbin.buffer, outbin.usedsize, "out.png");
+	PX_sprintf3(outname, sizeof(outname), "release %1x%2x%3.png", PX_STRINGFORMAT_INT(tex_scale.width), PX_STRINGFORMAT_INT(tex_scale.height), PX_STRINGFORMAT_INT(texturedatas.size));
+	PX_SaveDataToFile( outbin.buffer, outbin.usedsize, outname);
 	printf("done\n");
 
 }

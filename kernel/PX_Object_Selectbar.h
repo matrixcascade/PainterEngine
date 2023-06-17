@@ -52,5 +52,8 @@ px_void PX_Object_SelectBarSetCursorColor(PX_Object *pObject,px_color color);
 px_void PX_Object_SelectBarSetBorderColor(PX_Object *pObject,px_color color);
 px_void PX_Object_SelectBarSetBackgroundColor(PX_Object *pObject,px_color color);
 px_void PX_Object_SelectBarSetMaxDisplayCount(PX_Object* pObject, px_int color);
+
+
+PX_Designer_ObjectDesc PX_Object_SelectBarDesignerInstall();
 #endif
 

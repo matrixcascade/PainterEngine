@@ -1,7 +1,7 @@
 #emscripten makefile
 #####################################################
 target :=PainterEngine.html
-project_path := ../../supports/toolchains/2dxviewer
+project_path := ../../../PainterEngineDesigner
 painterengine_path := ../..
 #####################################################
 

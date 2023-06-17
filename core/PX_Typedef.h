@@ -77,15 +77,15 @@ typedef struct
 
 typedef enum
 {
-	PX_ALIGN_LEFTTOP,
-	PX_ALIGN_MIDTOP,
-	PX_ALIGN_RIGHTTOP,
-	PX_ALIGN_LEFTMID,
-	PX_ALIGN_CENTER,
-	PX_ALIGN_RIGHTMID,
-	PX_ALIGN_LEFTBOTTOM,
-	PX_ALIGN_MIDBOTTOM,
-	PX_ALIGN_RIGHTBOTTOM,
+	PX_ALIGN_LEFTTOP = 7,
+	PX_ALIGN_MIDTOP = 8,
+	PX_ALIGN_RIGHTTOP = 9,
+	PX_ALIGN_LEFTMID = 4,
+	PX_ALIGN_CENTER = 5,
+	PX_ALIGN_RIGHTMID = 6,
+	PX_ALIGN_LEFTBOTTOM = 1,
+	PX_ALIGN_MIDBOTTOM = 2,
+	PX_ALIGN_RIGHTBOTTOM = 3,
 }PX_ALIGN;
 
 
@@ -133,6 +133,14 @@ typedef struct _px_color_hsv
 	px_float V;//Value 0--100
 }px_color_hsv;
 
+typedef struct _px_color_ycbcr
+{
+	px_uchar a;//-128-127
+	px_char Y;//-128-127
+	px_char Cb;//-128-127
+	px_char Cr;//-128-127
+}px_color_YCbCr;
+
 typedef struct _px_point
 {
 	px_float x;
@@ -178,6 +186,13 @@ typedef struct _px_rect
 {
 	px_float x,y,width,height;
 }px_rect;
+
+typedef struct _px_recti
+{
+	px_int x, y, width, height;
+}px_recti;
+typedef px_rect px_rectf;
+
 
 typedef struct __px_complex
 {
@@ -232,7 +247,7 @@ px_double PX_Ceil(px_double v);
 px_void PX_FileGetName(const px_char filefullName[],px_char _out[],px_int outSize);
 px_void PX_FileGetPath(const px_char filefullName[],px_char _out[],px_int outSize);
 px_void PX_FileGetExt(const px_char filefullName[],px_char _out[],px_int outSize);
-
+px_void PX_FileGetFullName(const px_char filefullName[], px_char _out[], px_int outSize);
 //////////////////////////////////////////////////////////////////////////
 //CRC
 px_uint32 PX_crc32(const px_void *buffer, px_uint size);
@@ -273,8 +288,8 @@ px_double PX_atan2(px_double y, px_double x);
 
 px_double PX_asin(px_double x);
 px_double PX_acos(px_double x);
-px_float PX_Point_sin(px_point v);
-px_float PX_Point_cos(px_point v);
+px_float PX_Point2D_sin(px_point2D v);
+px_float PX_Point2D_cos(px_point2D v);
 
 #define  PX_APO(x) ((px_int)((x)+0.5f))
 #define  PX_ABS(x) ((x)>0?(x):-(x))
@@ -456,6 +471,8 @@ px_color_hsl PX_ColorRGBToHSL(px_color color_rgb);
 px_color PX_ColorHSLToRGB(px_color_hsl color_hsl);
 px_color_hsv PX_ColorRGBToHSV(px_color rgb);
 px_color PX_ColorHSVToRGB(px_color_hsv hsv);
+px_color_YCbCr PX_ColorRGBToYCbCr(px_color rgb);
+px_color PX_ColorYCbCrToRGB(px_color_YCbCr YCbCr);
 //////////////////////////////////////////////////////////////////////////
 
 
@@ -538,6 +555,8 @@ px_void PX_IDFT(_IN px_complex X[],_OUT px_complex x[],px_int N);
 px_void PX_IDCT(_IN px_double x[],_OUT px_double X[],px_int N);
 px_void PX_FDCT(_IN _OUT px_complex x[], _OUT px_complex X[], px_int N);
 px_void PX_FIDCT(_IN _OUT px_complex x[], _OUT px_complex X[], px_int N);
+px_void PX_FDCT_2(_IN px_complex x[], _OUT px_complex X[], px_int N);
+px_void PX_IFDCT_2(_IN px_complex X[], _OUT px_complex x[], px_int N);
 px_void PX_FFT(_IN px_complex x[], _OUT px_complex X[], px_int N);
 px_void PX_IFFT(_IN px_complex X[],_OUT px_complex x[],px_int N);
 px_void PX_FFT_2(_IN px_complex x[],_OUT px_complex X[],px_int N_N);

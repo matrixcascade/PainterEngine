@@ -19,5 +19,6 @@ px_void		PX_Object_ProcessBarSetMax(PX_Object *pProcessBar,px_int Max);
 px_int		PX_Object_ProcessBarGetMax(PX_Object* pProcessBar);
 px_int		PX_Object_ProcessBarGetValue(PX_Object* pProcessBar);
 
+PX_Designer_ObjectDesc PX_Object_ProcessBarDesignerInstall();
 #endif
 

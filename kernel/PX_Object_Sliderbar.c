@@ -720,3 +720,142 @@ px_void PX_Object_SliderBarSetSliderButtonLength(PX_Object *pSliderBar,px_int le
 	}
 }
 
+//////////////////////////////////////////////////////////////////////////
+//SliderBar
+//////////////////////////////////////////////////////////////////////////
+PX_Object* PX_Designer_SliderBarCreate(px_memorypool* mp, PX_Object* pparent, px_float x, px_float y, px_float width, px_float height, px_void* ptr)
+{
+	PX_FontModule* fm = (PX_FontModule*)ptr;
+	return PX_Object_SliderBarCreate(mp, pparent, (px_int)x, (px_int)y, 192, 32, PX_OBJECT_SLIDERBAR_TYPE_HORIZONTAL, PX_OBJECT_SLIDERBAR_STYLE_LINER);
+}
+
+px_void PX_Designer_SliderBarSetMax(PX_Object* pobject, px_int max)
+{
+	PX_Object_SliderBarSetRange(pobject, PX_ObjectGetDesc(PX_Object_SliderBar, pobject)->Min, max);
+}
+
+px_int PX_Designer_SliderBarGetMax(PX_Object* pobject)
+{
+	return PX_ObjectGetDesc(PX_Object_SliderBar, pobject)->Max;
+}
+
+px_void PX_Designer_SliderBarSetMin(PX_Object* pobject, px_int min)
+{
+	PX_Object_SliderBarSetRange(pobject, min, PX_ObjectGetDesc(PX_Object_SliderBar, pobject)->Max);
+}
+
+px_int PX_Designer_SliderBarGetMin(PX_Object* pobject)
+{
+	return PX_ObjectGetDesc(PX_Object_SliderBar, pobject)->Min;
+}
+
+px_void PX_Designer_SliderBarSetType(PX_Object* pobject, px_int type)
+{
+	switch (type)
+	{
+	case PX_OBJECT_SLIDERBAR_TYPE_HORIZONTAL:
+	case PX_OBJECT_SLIDERBAR_TYPE_VERTICAL:
+		PX_ObjectGetDesc(PX_Object_SliderBar, pobject)->Type = (PX_OBJECT_SLIDERBAR_TYPE)type;
+	default:
+		break;
+	}
+
+}
+px_int PX_Designer_SliderBarGetType(PX_Object* pobject)
+{
+	return (px_int)PX_ObjectGetDesc(PX_Object_SliderBar, pobject)->Type;
+}
+
+
+px_void PX_Designer_SliderBarSetStyle(PX_Object* pobject, px_int style)
+{
+	switch (style)
+	{
+	case PX_OBJECT_SLIDERBAR_STYLE_BOX:
+	case PX_OBJECT_SLIDERBAR_STYLE_LINER:
+		PX_ObjectGetDesc(PX_Object_SliderBar, pobject)->style = (PX_OBJECT_SLIDERBAR_STYLE)style;
+	default:
+		break;
+	}
+
+}
+px_int PX_Designer_SliderBarGetStyle(PX_Object* pobject)
+{
+	return (px_int)PX_ObjectGetDesc(PX_Object_SliderBar, pobject)->style;
+}
+
+px_void PX_Designer_SliderBarSetValue(PX_Object* pobject, px_int value)
+{
+	PX_Object_SliderBarSetValue(pobject, value);
+}
+
+px_int PX_Designer_SliderBarGetValue(PX_Object* pobject)
+{
+	return PX_Object_SliderBarGetValue(pobject);
+}
+
+
+PX_Designer_ObjectDesc PX_Object_SliderBarDesignerInstall()
+{
+	PX_Designer_ObjectDesc sliderbar;
+	px_int i = 0;
+	PX_memset(&sliderbar, 0, sizeof(sliderbar));
+	PX_strcat(sliderbar.Name, "sliderbar");
+
+	sliderbar.createfunc = PX_Designer_SliderBarCreate;
+	sliderbar.type = PX_DESIGNER_OBJECT_TYPE_UI;
+
+	PX_strcat(sliderbar.properties[i].Name, "id");
+	sliderbar.properties[i].getstring = PX_Designer_GetID;
+	sliderbar.properties[i].setstring = PX_Designer_SetID;
+	i++;
+
+	PX_strcat(sliderbar.properties[i].Name, "x");
+	sliderbar.properties[i].getfloat = PX_Designer_GetX;
+	sliderbar.properties[i].setfloat = PX_Designer_SetX;
+	i++;
+
+	PX_strcat(sliderbar.properties[i].Name, "y");
+	sliderbar.properties[i].getfloat = PX_Designer_GetY;
+	sliderbar.properties[i].setfloat = PX_Designer_SetY;
+	i++;
+
+	PX_strcat(sliderbar.properties[i].Name, "width");
+	sliderbar.properties[i].getfloat = PX_Designer_GetWidth;
+	sliderbar.properties[i].setfloat = PX_Designer_SetWidth;
+	i++;
+
+	PX_strcat(sliderbar.properties[i].Name, "height");
+	sliderbar.properties[i].getfloat = PX_Designer_GetHeight;
+	sliderbar.properties[i].setfloat = PX_Designer_SetHeight;
+	i++;
+
+	PX_strcat(sliderbar.properties[i].Name, "min");
+	sliderbar.properties[i].setint = PX_Designer_SliderBarSetMin;
+	sliderbar.properties[i].getint = PX_Designer_SliderBarGetMin;
+	i++;
+
+	PX_strcat(sliderbar.properties[i].Name, "max");
+	sliderbar.properties[i].setint = PX_Designer_SliderBarSetMax;
+	sliderbar.properties[i].getint = PX_Designer_SliderBarGetMax;
+	i++;
+
+
+	PX_strcat(sliderbar.properties[i].Name, "type");
+	sliderbar.properties[i].setint = PX_Designer_SliderBarSetType;
+	sliderbar.properties[i].getint = PX_Designer_SliderBarGetType;
+	i++;
+
+	PX_strcat(sliderbar.properties[i].Name, "style");
+	sliderbar.properties[i].setint = PX_Designer_SliderBarSetStyle;
+	sliderbar.properties[i].getint = PX_Designer_SliderBarGetStyle;
+	i++;
+
+	PX_strcat(sliderbar.properties[i].Name, "value");
+	sliderbar.properties[i].setint = PX_Designer_SliderBarSetValue;
+	sliderbar.properties[i].getint = PX_Designer_SliderBarGetValue;
+	i++;
+
+	return sliderbar;
+}
+

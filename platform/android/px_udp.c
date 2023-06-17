@@ -158,7 +158,7 @@ PX_UDP_ADDR PX_UDP_ADDR_IPV4(unsigned int ipv4,unsigned short port)
 	return addr;
 }
 
-unsigned int PX_UDPGetHostByName(const char *host)
+unsigned int PX_UDPGetHostByName(const char *host, unsigned int dns_addr)
 {
 	PX_UDP udp;
 	if (PX_UDPInitialize(&udp, PX_UDP_IP_TYPE_IPV4))
@@ -167,7 +167,7 @@ unsigned int PX_UDPGetHostByName(const char *host)
 		int try = 8;
 		PX_UDP_ADDR target;
 		unsigned char content[1024] = { 0x01,0xEC,0x01,0,0,1,0,0,0,0,0,0,0,0 };
-		while (host[ptrindex])
+		while (host[srcindex])
 		{
 			unsigned char* plen = &content[ptrindex];
 			*plen = 0;
@@ -196,12 +196,12 @@ unsigned int PX_UDPGetHostByName(const char *host)
 				break;
 			}
 		}
-		strl =(int)strlen(host);
+		strl = (int)strlen(host);
 		content[13 + strl + 1] = 0;
 		content[13 + strl + 2] = 1;
 		content[13 + strl + 3] = 0;
 		content[13 + strl + 4] = 1;
-		target.ipv4 = 0x08080808;
+		target.ipv4 = dns_addr;
 		target.port = 53<<8;
 
 		while (try--)
@@ -210,7 +210,7 @@ unsigned int PX_UDPGetHostByName(const char *host)
 			usleep(200000);
 			if (PX_UDPReceived(&udp, &target, content, sizeof(content), &size))
 			{
-				return (content[size - 4] << 24) + (content[size - 3] << 16) + (content[size - 2] << 8) + (content[size - 1]);
+				return (content[size - 1] << 24) + (content[size - 2] << 16) + (content[size - 3] << 8) + (content[size - 4]);
 			}
 		}
 		

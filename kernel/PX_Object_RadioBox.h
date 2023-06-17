@@ -36,6 +36,6 @@ px_void PX_Object_RadioBoxSetTextColor(PX_Object *Object,px_color clr);
 px_void PX_Object_RadioBoxSetCheck(PX_Object *Object,px_bool check);
 
 
-
+PX_Designer_ObjectDesc PX_Object_RadioBoxDesignerInstall();
 #endif
 

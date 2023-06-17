@@ -360,6 +360,7 @@ int PX_FileGetDirectoryFileName(const char path[],int count,char FileName[][260]
 	return index;
 }
 extern char* PX_OpenFileDialog(const char Filter[]);
+extern char* PX_SaveFileDialog(const char Filter[], const char ext[]);
 void PX_RequestData(const char url[], void* buffer, int size, void* ptr, void (*func_callback)(void* buffer, int size, void* ptr))
 {
 	if (strstr(url,"open"))
@@ -380,6 +381,18 @@ void PX_RequestData(const char url[], void* buffer, int size, void* ptr, void (*
 			PX_FreeIOData(&io);
 		}
 		
+	}
+	else if (memcmp(url, "save:", 5) == 0)
+	{
+		char* ppath = PX_SaveFileDialog("", url+5);
+		if (ppath && ppath[0])
+		{
+			PX_SaveDataToFile(buffer, size, ppath);
+		}
+	}
+	else if (memcmp(url, "download:", 9)==0)
+	{
+		PX_SaveDataToFile(buffer,size, (char*)url + 9);
 	}
 	else
 	{

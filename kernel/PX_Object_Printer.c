@@ -310,3 +310,49 @@ PX_Object* PX_Object_PrinterCreate(px_memorypool* mp, PX_Object* Parent, px_int 
 
 
 
+/////////////////////////////////////////////////////////
+//Printer
+/////////////////////////////////////////////////////////
+PX_Object* PX_Designer_PrinterCreate(px_memorypool* mp, PX_Object* pparent, px_float x, px_float y, px_float width, px_float height, px_void* ptr)
+{
+	PX_FontModule* fm = (PX_FontModule*)ptr;
+	return PX_Object_PrinterCreate(mp, pparent, (px_int)x, (px_int)y, (px_int)width, (px_int)height, fm);
+}
+
+PX_Designer_ObjectDesc PX_Object_PrinterDesignerInstall()
+{
+	PX_Designer_ObjectDesc printer;
+	px_int i = 0;
+	PX_memset(&printer, 0, sizeof(printer));
+	PX_strcat(printer.Name, "printer");
+
+	printer.createfunc = PX_Designer_PrinterCreate;
+	printer.type = PX_DESIGNER_OBJECT_TYPE_UI;
+
+	PX_strcat(printer.properties[i].Name, "id");
+	printer.properties[i].getstring = PX_Designer_GetID;
+	printer.properties[i].setstring = PX_Designer_SetID;
+	i++;
+
+	PX_strcat(printer.properties[i].Name, "x");
+	printer.properties[i].getfloat = PX_Designer_GetX;
+	printer.properties[i].setfloat = PX_Designer_SetX;
+	i++;
+
+	PX_strcat(printer.properties[i].Name, "y");
+	printer.properties[i].getfloat = PX_Designer_GetY;
+	printer.properties[i].setfloat = PX_Designer_SetY;
+	i++;
+
+	PX_strcat(printer.properties[i].Name, "width");
+	printer.properties[i].getfloat = PX_Designer_GetWidth;
+	printer.properties[i].setfloat = PX_Designer_SetWidth;
+	i++;
+
+	PX_strcat(printer.properties[i].Name, "height");
+	printer.properties[i].getfloat = PX_Designer_GetHeight;
+	printer.properties[i].setfloat = PX_Designer_SetHeight;
+	i++;
+
+	return printer;
+}

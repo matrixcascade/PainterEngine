@@ -207,12 +207,6 @@ static px_bool PX_Object_ExecuterRunScript(PX_Object *pObject,const px_char *psh
 	PX_VMRegistHostFunction(&pExecute->vm,"lastprint",PX_ExecuterVM_LastPrint, pObject);//lastprint
 	PX_VMRegistHostFunction(&pExecute->vm,"createthread",PX_ExecuterVM_CreateThread, pObject);//createthread
 
-
-	if(!PX_VMRunFunction(&pExecute->vm,0,"_BOOT",PX_NULL,0))
-	{
-		goto _ERROR;
-	}
-
 	if(!PX_VMBeginThreadFunction(&pExecute->vm,0,"main",PX_NULL,0))
 	{
 		goto _ERROR;

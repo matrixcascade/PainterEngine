@@ -139,6 +139,7 @@ px_void PX_AnimationUpdate(PX_Animation *panimation,px_uint elapsed)
 		switch(pInstr->opcode)
 		{
 		case PX_2DX_OPCODE_END:
+			panimation->reg_priority = 0;
 			return;
 		case PX_2DX_OPCODE_FRAME:
 			if (pInstr->param < panimation->linker->frames.size)
@@ -222,7 +223,7 @@ px_void PX_AnimationUpdate(PX_Animation *panimation,px_uint elapsed)
 	}
 }
 
-px_void PX_AnimationRender(px_surface *psurface,PX_Animation *animation,px_int x,px_int y,PX_ALIGN refPoint,PX_TEXTURERENDER_BLEND *blend)
+px_void PX_AnimationRenderMirror(px_surface *psurface,PX_Animation *animation,px_int x,px_int y,PX_ALIGN refPoint,PX_TEXTURERENDER_BLEND *blend,PX_TEXTURERENDER_MIRRROR_MODE mirror)
 {
 	px_texture *pTexture;
 	if (!animation->linker)
@@ -238,11 +239,16 @@ px_void PX_AnimationRender(px_surface *psurface,PX_Animation *animation,px_int x
 		cxc = pTexture->width / animation->reg_clipw;
 		clx = (animation->reg_clipi%cxc)*animation->reg_clipw+animation->reg_clipx;
 		cly = (animation->reg_clipi/cxc)*animation->reg_cliph+animation->reg_clipy;
-		PX_TextureRenderClip(psurface, pTexture, x, y, clx,cly,animation->reg_clipw,animation->reg_cliph, refPoint, blend);
+		PX_TextureRenderClipMirror(psurface, pTexture, x, y, clx,cly,animation->reg_clipw,animation->reg_cliph, refPoint, blend,mirror);
 	}
 }
 
-px_void PX_AnimationRenderEx(px_surface *psurface,PX_Animation *animation,px_int x,px_int y,px_float scale,px_point direction,PX_ALIGN refPoint,PX_TEXTURERENDER_BLEND *blend)
+px_void PX_AnimationRender(px_surface* psurface, PX_Animation* animation, px_int x, px_int y, PX_ALIGN refPoint, PX_TEXTURERENDER_BLEND* blend)
+{
+	PX_AnimationRenderMirror(psurface, animation , x, y, refPoint, blend, PX_TEXTURERENDER_MIRRROR_MODE_NONE);
+}
+
+px_void PX_AnimationRenderEx(px_surface *psurface,PX_Animation *animation,px_int x,px_int y,px_float scale,px_point2D direction,PX_ALIGN refPoint,PX_TEXTURERENDER_BLEND *blend)
 {
 	px_texture *pTexture;
 	if (!animation->linker)
@@ -279,7 +285,7 @@ px_void PX_AnimationRender_scale(px_surface *psurface,PX_Animation *animation,px
 }
 
 
-px_void PX_AnimationRender_vector(px_surface *psurface,PX_Animation *animation,px_int x,px_int y,px_point direction,PX_ALIGN refPoint,PX_TEXTURERENDER_BLEND *blend)
+px_void PX_AnimationRender_vector(px_surface *psurface,PX_Animation *animation,px_int x,px_int y,px_point2D direction,PX_ALIGN refPoint,PX_TEXTURERENDER_BLEND *blend)
 {
 	px_texture *pTexture;
 	if (!animation->linker)
@@ -327,14 +333,12 @@ px_bool PX_AnimationIsActivity(PX_Animation* animation)
 }
 px_bool PX_AnimationCreate(PX_Animation *animation,PX_AnimationLibrary *linker)
 {
-	animation->elapsed=0;
+	PX_memset(animation,0,sizeof(PX_Animation));
+
 	animation->linker=linker;
 	animation->reg_currentFrameIndex=-1;
-	animation->reg_loopTimes=0;
-	animation->reg_reservedTime=0;
 	animation->reg_currentAnimation = -1;
-	animation->ip=0;
-
+	
 	return PX_TRUE;
 }
 
@@ -1016,9 +1020,36 @@ px_int PX_AnimationGetAnimationsCount(PX_Animation *animation)
 		return 0;
 }
 
+px_bool PX_AnimationGetRenderRange(PX_Animation* animation, px_recti *range)
+{
+	 px_texture * pTexture =PX_AnimationGetCurrentTexture(animation);
+	 if (pTexture)
+	 {
+		 px_int cxc;
+		 px_int clx, cly;
+		 cxc = pTexture->width / animation->reg_clipw;
+		 clx = (animation->reg_clipi % cxc) * animation->reg_clipw + animation->reg_clipx;
+		 cly = (animation->reg_clipi / cxc) * animation->reg_cliph + animation->reg_clipy;
+
+		return PX_TextureGetRenderRange(pTexture, clx, cly,animation->reg_clipw,animation->reg_cliph, range);
+	 }
+	 return PX_FALSE;
+}
+
 px_dword PX_AnimationGetCurrentPlayAnimation(PX_Animation *animation)
 {
 	return animation->reg_currentAnimation;
+}
+
+const px_char* PX_AnimationGetCurrentPlayAnimationName(PX_Animation* animation)
+{
+	if (animation->linker&& animation->reg_currentAnimation>=0&& animation->reg_currentAnimation< (px_dword)animation->linker->animation.size)
+	{
+		PX_Animationlibrary_tagInfo* tag = PX_VECTORAT(PX_Animationlibrary_tagInfo, &animation->linker->animation, animation->reg_currentAnimation);
+		return tag->name.buffer;
+	}
+		
+	return PX_NULL;
 }
 
 px_bool PX_AnimationSetCurrentPlayAnimation(PX_Animation *animation,px_int i)
@@ -1034,10 +1065,8 @@ px_bool PX_AnimationSetCurrentPlayAnimation(PX_Animation *animation,px_int i)
 	return PX_FALSE;
 }
 
-px_bool PX_AnimationPlay(PX_Animation* animation, const px_char* name)
-{
-	return PX_AnimationSetCurrentPlayAnimationByName(animation,name);
-}
+
+
 
 px_bool PX_AnimationSetCurrentPlayAnimationByName(PX_Animation *animation,const px_char *name)
 {
@@ -1055,6 +1084,29 @@ px_bool PX_AnimationSetCurrentPlayAnimationByName(PX_Animation *animation,const 
 			}
 		}
 		return PX_FALSE;
+}
+
+px_bool PX_AnimationPlay(PX_Animation* animation, const px_char* name)
+{
+	if (PX_AnimationSetCurrentPlayAnimationByName(animation, name))
+	{
+		animation->reg_priority = 0;
+		return PX_TRUE;
+	}
+	return PX_FALSE;
+}
+
+px_bool PX_AnimationPlayWithPriority(PX_Animation* animation, const px_char* name,px_int Priority)
+{
+	if (Priority>=animation->reg_priority)
+	{
+		if (PX_AnimationSetCurrentPlayAnimationByName(animation, name))
+		{
+			animation->reg_priority = Priority;
+			return PX_TRUE;
+		}
+	}
+	return PX_FALSE;
 }
 
 px_int PX_AnimationLibraryGetPlayAnimationIndexByName(PX_AnimationLibrary* pLib, const px_char* name)

@@ -91,30 +91,40 @@ px_byte PX_JpgReadBit(PX_MemoryStream* pstream)
     if (pstream->bitpointer%8==0&&pstream->bitpointer)
     {
         px_int byteindex = pstream->bitpointer / 8;
-        while (pstream->bitstream[byteindex-1]==0xff)
+
+        while (PX_TRUE)
         {
-            if (pstream->bitstream[byteindex] == 0xFF)
+            if (pstream->bitstream[byteindex] == 0x00 && pstream->bitstream[byteindex - 1] == 0xFF)
             {
                 pstream->bitpointer += 8;
                 byteindex++;
                 continue;
             }
-
-            if (pstream->bitstream[byteindex] == 0x00)
+            else if (pstream->bitstream[byteindex] == 0xFF)
             {
-                pstream->bitpointer += 8;
-                break;
-            }
+                if(pstream->bitstream[byteindex + 1] == 0xFF)
+                {
+                    pstream->bitpointer += 8;
+                    byteindex++;
+                    continue;
+                }
 
-            if (pstream->bitstream[byteindex] >= PX_JPG_MARKER_RST0 && pstream->bitstream[byteindex] <= PX_JPG_MARKER_RST7)
-            {
-                pstream->bitpointer += 8;
-                break;
+                if (pstream->bitstream[byteindex + 1] >= PX_JPG_MARKER_RST0 && pstream->bitstream[byteindex + 1] <= PX_JPG_MARKER_RST7)
+                {
+                    pstream->bitpointer += 16;
+                }
+                else
+                {
+                    if (pstream->bitstream[byteindex + 1] != 0x00)
+                    {
+                        return -1;
+                    }
+                }
             }
+            break;
+        }
 
-            //error
-            return -1;
-        }       
+            
     }
     return PX_MemoryStreamReadBitBE(pstream);
 }
@@ -684,6 +694,7 @@ px_bool PX_JpgDecodeBlockComponent(
         // get the DC value for this block component
         px_int coeff, numZeroes, coeffLength;
         px_byte length = PX_JpgGetNextSymbol(pJpgdecoder, dcTable);
+
         if (length == (px_byte)-1) {
             // "Error - Invalid DC value\n";
             return PX_FALSE;
@@ -1058,6 +1069,19 @@ px_bool PX_JpgReadScans(PX_JpgDecoder* pJpgdecoder)
     if (!PX_JpgDecodeHuffmanData(pJpgdecoder))
         return PX_FALSE;
 
+    PX_MemoryStreamAlign(&pJpgdecoder->stream);
+    while (pstream->bitpointer%8==0&& pstream->bitpointer)
+    {
+        if (pstream->bitstream[pstream->bitpointer / 8 - 1] == 0xff)
+        {
+            pstream->bitpointer += 8;
+        }
+        else
+        {
+			break;
+		}
+    }
+
     last = PX_MemoryStreamReadByte(pstream);
     current = PX_MemoryStreamReadByte(pstream);
 
@@ -1359,7 +1383,7 @@ px_bool PX_JpgDecoderInitialize(px_memorypool* mp, PX_JpgDecoder* decoder, px_by
     if (decoder->blocks == 0) {
         return PX_FALSE;
     }
-
+    PX_memset(decoder->blocks, 0, sizeof(PX_JpgBlock) * decoder->blockHeightReal * decoder->blockWidthReal);
     if (!PX_JpgReadScans(decoder))
     {
         goto _ERROR;

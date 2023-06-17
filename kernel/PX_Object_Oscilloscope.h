@@ -161,7 +161,7 @@ px_void PX_Object_OscilloscopeSetMinHorizontalPixelDividing(PX_Object *pObject,p
 px_void PX_Object_OscilloscopeSetHorizontalDividing(PX_Object *pObject,px_int Count);
 px_void PX_Object_OscilloscopeSetLeftVerticalDividing(PX_Object *pObject,px_int Count);
 px_void PX_Object_OscilloscopeSetRightVerticalDividing(PX_Object *pObject,px_int Count);
-px_void PX_Object_OscilloscopeSetStyle(PX_Object *pObject,PX_OBJECT_OSCILLOSCOPE_LINEMODE mode);
+px_void PX_Object_OscilloscopeSetLineMode(PX_Object *pObject,PX_OBJECT_OSCILLOSCOPE_LINEMODE mode,px_float width);
 px_void PX_Object_OscilloscopeSetScaleEnabled(PX_Object *pObject,px_bool Enabled);
 px_void PX_Object_OscilloscopeSetGuidesVisible(PX_Object *pObject,px_bool Visible); 
 px_void PX_Object_OscilloscopeSetGuidesShowMode(PX_Object *pObject,PX_OBJECT_OSCILLOSCOPE_GUIDESSHOWMODE mode);

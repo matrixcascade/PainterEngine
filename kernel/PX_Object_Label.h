@@ -32,6 +32,6 @@ px_void		PX_Object_LabelSetBorderColor(PX_Object *pLabel,px_color color);
 px_void		PX_Object_LabelSetStyle(PX_Object *pLabel,PX_OBJECT_LABEL_STYLE style);
 px_int		PX_Object_LabelGetTextRenderWidth(PX_Object* pLabel);
 
-
+PX_Designer_ObjectDesc PX_Object_LabelDesignerInstall();
 #endif
 

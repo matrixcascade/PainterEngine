@@ -119,7 +119,7 @@ px_void PX_Object_OscilloscopeSetRightVerticalDividing(PX_Object *pObj,px_int Co
 
 
 
-px_void PX_Object_OscilloscopeSetStyle(PX_Object *pObj,PX_OBJECT_OSCILLOSCOPE_LINEMODE mode)
+px_void PX_Object_OscilloscopeSetLineMode(PX_Object *pObj,PX_OBJECT_OSCILLOSCOPE_LINEMODE mode,px_float width)
 {
 	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObj);
 	if (!pcd)
@@ -128,6 +128,17 @@ px_void PX_Object_OscilloscopeSetStyle(PX_Object *pObj,PX_OBJECT_OSCILLOSCOPE_LI
 		return;
 	}
 	pcd->LineMode=mode;
+	switch (pcd->LineMode)
+	{
+		case PX_OBJECT_OSCILLOSCOPE_LINEMODE_LINES:
+			pcd->DataLineWidth=width;
+			break;
+		case PX_OBJECT_OSCILLOSCOPE_LINEMODE_PILLAR:
+			pcd->DataPillarWidth = width;
+			break;
+	default:
+		break;
+	}
 }
 
 

@@ -31,7 +31,11 @@ extern void PX_Sleep(unsigned int ms);
 ///////////////////////////////////////////////
 
 EM_JS(char*, PX_GetInputTextUTF8, (const char *_prompt_text), {
-  var jsString = prompt(_prompt_text,"");
+  var jsString = prompt(UTF8ToString(_prompt_text),"");
+  if(jsString==null)
+  {
+	return 0;
+  }
 var lengthBytes = lengthBytesUTF8(jsString) + 1;
 var stringOnWasmHeap = _malloc(lengthBytes);
 stringToUTF8(jsString, stringOnWasmHeap, lengthBytes);
@@ -39,7 +43,11 @@ return stringOnWasmHeap;
 	});
 
 EM_JS(char*, PX_GetInputTextGBK, (const char* _prompt_text), {
-  var jsString = prompt(_prompt_text,"");
+  var jsString = prompt(GBKToString(_prompt_text),"");
+  if(jsString==null)
+  {
+	return 0;
+  }
 var lengthBytes = lengthBytesGBK(jsString) + 1;
 var stringOnWasmHeap = _malloc(lengthBytes);
 stringToGBK(jsString, stringOnWasmHeap, lengthBytes);
@@ -106,6 +114,30 @@ EMSCRIPTEN_KEEPALIVE int load_file(uint8_t *buffer, size_t size)
 }
 
 
+EM_JS(void, downloadFile, (const char* filename, const void* data, size_t size), {
+  const array = new Uint8Array(Module.HEAPU8.buffer, data, size);
+  const blob = new Blob([array], { type: 'arraybuffer' });
+  const url = URL.createObjectURL(blob);
+
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  link.click();
+  URL.revokeObjectURL(url);
+});
+
+
+void PX_RequestDownloadFile(const char* filename, const void* data, size_t size) {
+  EM_ASM({
+    const filename = UTF8ToString($0);
+    const dataPtr = $1;
+    const dataSize = $2;
+
+    downloadFile(filename, dataPtr, dataSize);
+  }, filename, data, size);
+}
+
+
 void PX_RequestData(const char url[], void* buffer, int size, void* ptr, void (*func_callback)(void* buffer, int size, void* ptr))
 {
 	PX_RequestData_Info *info = (PX_RequestData_Info *)malloc(sizeof(PX_RequestData_Info));
@@ -131,7 +163,14 @@ load_file_info=info;
 	}
 	else if (PX_strequ2(url,"save"))
 	{
-		func_callback(buffer, 0, ptr);
+		if(func_callback)
+			func_callback(buffer, 0, ptr);
+	}
+	else if(PX_memequ(url,"download:",9))
+	{
+		PX_RequestDownloadFile(url+9, buffer, size);
+		if(func_callback)
+			func_callback(buffer, size, ptr);
 	}
 	else
 	{

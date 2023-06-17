@@ -243,3 +243,79 @@ px_void PX_Object_CheckBoxSetCheck(PX_Object *Object,px_bool check)
 	PX_Object_GetCheckBox(Object)->bCheck=check;
 }
 
+//////////////////////////////////////////////////////////////////////////
+//checkbox
+//////////////////////////////////////////////////////////////////////////
+PX_Object* PX_Designer_CheckBoxCreate(px_memorypool* mp, PX_Object* pparent, px_float x, px_float y, px_float width, px_float height, px_void* ptr)
+{
+	PX_FontModule* fm = (PX_FontModule*)ptr;
+	return PX_Object_CheckBoxCreate(mp, pparent, (px_int)x, (px_int)y, 96, 28, "CheckBox", fm);
+}
+
+px_void PX_Designer_CheckBoxSetText(PX_Object* pobject, const px_char text[])
+{
+	PX_Object_CheckBoxSetText(pobject, text);
+}
+
+px_bool PX_Designer_CheckBoxGetText(PX_Object* pobject, px_string* str)
+{
+	return PX_StringSet(str, PX_Object_CheckBoxGetText(pobject));
+}
+
+px_void PX_Designer_CheckBoxSetCheck(PX_Object* pobject, px_bool b)
+{
+	PX_Object_CheckBoxSetCheck(pobject, b);
+}
+
+px_bool PX_Designer_CheckBoxGetCheck(PX_Object* pobject)
+{
+	return PX_Object_CheckBoxGetCheck(pobject);
+}
+
+PX_Designer_ObjectDesc PX_Object_CheckBoxDesignerInstall()
+{
+	PX_Designer_ObjectDesc scheckbox;
+	px_int i = 0;
+	PX_memset(&scheckbox, 0, sizeof(scheckbox));
+	PX_strcat(scheckbox.Name, "checkbox");
+
+	scheckbox.createfunc = PX_Designer_CheckBoxCreate;
+	scheckbox.type = PX_DESIGNER_OBJECT_TYPE_UI;
+
+	PX_strcat(scheckbox.properties[i].Name, "id");
+	scheckbox.properties[i].getstring = PX_Designer_GetID;
+	scheckbox.properties[i].setstring = PX_Designer_SetID;
+	i++;
+
+	PX_strcat(scheckbox.properties[i].Name, "x");
+	scheckbox.properties[i].getfloat = PX_Designer_GetX;
+	scheckbox.properties[i].setfloat = PX_Designer_SetX;
+	i++;
+
+	PX_strcat(scheckbox.properties[i].Name, "y");
+	scheckbox.properties[i].getfloat = PX_Designer_GetY;
+	scheckbox.properties[i].setfloat = PX_Designer_SetY;
+	i++;
+
+	PX_strcat(scheckbox.properties[i].Name, "width");
+	scheckbox.properties[i].getfloat = PX_Designer_GetWidth;
+	scheckbox.properties[i].setfloat = PX_Designer_SetWidth;
+	i++;
+
+	PX_strcat(scheckbox.properties[i].Name, "height");
+	scheckbox.properties[i].getfloat = PX_Designer_GetHeight;
+	scheckbox.properties[i].setfloat = PX_Designer_SetHeight;
+	i++;
+
+	PX_strcat(scheckbox.properties[i].Name, "text");
+	scheckbox.properties[i].setstring = PX_Designer_CheckBoxSetText;
+	scheckbox.properties[i].getstring = PX_Designer_CheckBoxGetText;
+	i++;
+
+	PX_strcat(scheckbox.properties[i].Name, "check");
+	scheckbox.properties[i].setbool = PX_Designer_CheckBoxSetCheck;
+	scheckbox.properties[i].getbool = PX_Designer_CheckBoxGetCheck;
+	i++;
+
+	return scheckbox;
+}

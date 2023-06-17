@@ -33,7 +33,7 @@ px_void PX_Object_ScrollArea_EventDispatcher(PX_Object *Object,PX_Object_Event e
 
 px_void  PX_Object_ScrollAreaLinkChild(PX_Object *parent,PX_Object *child)
 {
-	PX_ObjectAddClild(PX_Object_ScrollAreaGetIncludedObjects(parent),child);
+	PX_ObjectAddChild(PX_Object_ScrollAreaGetIncludedObjects(parent),child);
 	PX_Object_ScrollAreaUpdateRange(parent);
 }
 

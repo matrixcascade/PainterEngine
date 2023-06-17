@@ -32,6 +32,16 @@ px_bool PX_WorldInitialize(px_memorypool *mp,PX_World *World,px_int world_width,
 	return PX_TRUE;
 }
 
+px_void PX_WorldSetBackwardTexture(PX_World* pWorld, px_texture* ptexture)
+{
+	pWorld->pbackgroundtexture = ptexture;
+}
+
+px_void PX_WorldSetFrontwardTexture(PX_World* pWorld, px_texture* ptexture)
+{
+	pWorld->pfrontwardtexture = ptexture;
+}
+
 px_void PX_WorldSetAuxiliaryXYSpacer(PX_World *pw,px_int x,px_int y)
 {
 	pw->auxiliaryXSpacer=x;
@@ -136,6 +146,16 @@ px_void PX_WorldRemoveObjectEx(PX_World *world,px_int i_index)
 	}
 }
 
+px_void PX_WorldClear(PX_World* world)
+{
+	px_int i;
+	for (i = 0; i < world->pObjects.size; i++)
+	{
+		PX_WorldRemoveObjectEx(world,i);
+	}
+	PX_VectorClear(&world->pObjects);
+}
+
 static px_void PX_WorldUpdateNewObjectList(PX_World* pworld)
 {
 	px_int k = 0,i,j;
@@ -188,6 +208,8 @@ px_void PX_WorldUpdate( PX_World *pworld,px_uint elapsed )
 	}
 
 	MP_Reset(calcmp);
+	//search map
+	
 
 	//Add NewObjects
 	PX_WorldUpdateNewObjectList(pworld);
@@ -195,6 +217,21 @@ px_void PX_WorldUpdate( PX_World *pworld,px_uint elapsed )
 	//Object Counts
 	updateCount=pworld->pObjects.size;
 
+	PX_MapInitialize(calcmp, &pworld->idSearchmap);
+	for (i = 0; i < updateCount; i++)
+	{
+		pwo = PX_VECTORAT(PX_WorldObject, &pworld->pObjects, i);
+		if (!pwo->pObject)
+		{
+			continue;
+		}
+		if (!pwo->pObject->id[0])
+		{
+			continue;
+		}
+		PX_MapPut(&pworld->idSearchmap, pwo->pObject->id, pwo->pObject);
+
+	}
 	//////////////////////////////////////////////////////////////////////////
 	//impact test
 	//////////////////////////////////////////////////////////////////////////
@@ -454,6 +491,34 @@ px_void PX_WorldRender(px_surface *psurface,PX_World *pw,px_dword elapsed)
 	surface_width=pw->surface_width;
 	surface_height=pw->surface_height;
 
+	if (pw->pbackgroundtexture)
+	{
+		px_float xfactor;
+		px_float yfactor;
+		px_int x;
+		px_int y;
+		if (pw->world_width != pw->surface_width)
+		{
+			xfactor = pw->offsetx * 1.0f / (pw->world_width - pw->surface_width);
+		}
+		else
+		{
+			xfactor = 0;
+		}
+
+		if (pw->world_height != pw->surface_height)
+		{
+			yfactor = pw->offsety * 1.0f / (pw->world_height - pw->surface_height);
+		}
+		else
+		{
+			yfactor = 0;
+		}
+
+		x = (px_int)((pw->pbackgroundtexture->width - pw->surface_width) * xfactor);
+		y = (px_int)((pw->pbackgroundtexture->height - pw->surface_height) * yfactor);
+		PX_TextureRender(psurface, pw->pbackgroundtexture, -x, -y, PX_ALIGN_LEFTTOP, 0);
+	}
 
 	if (pw->auxiliaryline&& pw->auxiliaryline_color._argb.a)
 	{
@@ -497,8 +562,37 @@ px_void PX_WorldRender(px_surface *psurface,PX_World *pw,px_dword elapsed)
 			PX_WorldClildRender(pw, psurface, (PX_Object*)ArrayIndex[i].pData, elapsed, pw->offsetx, pw->offsety);
 		}
 	}
-	
 	MP_Reset(calcmp);
+
+	if (pw->pfrontwardtexture)
+	{
+		px_float xfactor;
+		px_float yfactor;
+		px_int x;
+		px_int y;
+		if (pw->world_width != pw->surface_width)
+		{
+			xfactor = pw->offsetx * 1.0f / (pw->world_width - pw->surface_width);
+		}
+		else
+		{
+			xfactor = 0;
+		}
+
+		if (pw->world_height != pw->surface_height)
+		{
+			yfactor = pw->offsety * 1.0f / (pw->world_height - pw->surface_height);
+		}
+		else
+		{
+			yfactor = 0;
+		}
+
+		x = (px_int)((pw->pfrontwardtexture->width - pw->surface_width) * xfactor);
+		y = (px_int)((pw->pfrontwardtexture->height - pw->surface_height) * yfactor);
+		PX_TextureRender(psurface, pw->pfrontwardtexture, -x, -y, PX_ALIGN_LEFTTOP, 0);
+	}
+
 }
 
 px_void PX_WorldSetImpact(PX_Object *pObj,px_dword type,px_dword Intersect)
@@ -680,4 +774,15 @@ _LIMIT px_int PX_WorldSearch(PX_World* pw, PX_Object* Object[], px_int MaxSearch
 		}
 	}
 	return count;
+}
+
+_LIMIT PX_Object* PX_WorldSearchObject(PX_World* pWorld, const px_char id[])
+{
+	return PX_MapGet(&pWorld->idSearchmap, id);
+}
+
+px_void PX_WorldSetSize(PX_World* pWorld, px_int world_width, px_int world_height)
+{
+	pWorld->world_width = world_width;
+	pWorld->world_height = world_height;
 }

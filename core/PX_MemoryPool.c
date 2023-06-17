@@ -7,8 +7,8 @@ px_void MP_UnreleaseInfo(px_memorypool *mp)
 	px_int i;
 	for (i=0;i<sizeof(mp->DEBUG_allocdata)/sizeof(mp->DEBUG_allocdata[0]);i++)
 	{
-		if(mp->DEBUG_allocdata[i].addr) 
-			printf("Warning:Unreleased memory in MID %p\n",mp->DEBUG_allocdata[i].addr);
+		if(mp->DEBUG_allocdata[i].offset) 
+			printf("Warning:Unreleased memory in MID %d\n",mp->DEBUG_allocdata[i].offset);
 
 	}
 }
@@ -186,13 +186,11 @@ px_memorypool MP_Create( px_void *MemoryAddr,px_uint MemorySize )
 	MP.MaxMemoryfragSize=0;
 	MP.nodeCount=0;
 	MP.ErrorCall_Ptr=PX_NULL;
-	PX_memset(MemoryAddr,0,MemorySize);
-
 #if defined(PX_DEBUG_MODE) && defined(PX_MEMORYPOOL_DEBUG_CHECK)
-
+	PX_memset(MemoryAddr, 0, MemorySize);
 	for (DEBUG_i=0;DEBUG_i<sizeof(MP.DEBUG_allocdata)/sizeof(MP.DEBUG_allocdata[0]);DEBUG_i++)
 	{
-		MP.DEBUG_allocdata[DEBUG_i].addr=PX_NULL;
+		MP.DEBUG_allocdata[DEBUG_i].offset=0;
 		MP.DEBUG_allocdata[DEBUG_i].startAddr=PX_NULL;
 		MP.DEBUG_allocdata[DEBUG_i].endAddr=PX_NULL;
 	}
@@ -218,11 +216,11 @@ px_void * MP_Malloc(px_memorypool *MP, px_uint Size )
 	}
 	for (DEBUG_i=0;DEBUG_i<sizeof(MP->DEBUG_allocdata)/sizeof(MP->DEBUG_allocdata[0]);DEBUG_i++)
 	{
-		if (MP->DEBUG_allocdata[DEBUG_i].addr!=PX_NULL)
+		if (MP->DEBUG_allocdata[DEBUG_i].startAddr!=PX_NULL)
 		{
 			MP_Append_data *pAppend;
 			pAppend=(MP_Append_data *)((px_uchar *)MP->DEBUG_allocdata[DEBUG_i].endAddr-sizeof(MP_Append_data)+1);
-			itNode=(MemoryNode *)((px_uchar *)MP->DEBUG_allocdata[DEBUG_i].addr-sizeof(MemoryNode));
+			itNode=(MemoryNode *)((px_uchar *)MP->DEBUG_allocdata[DEBUG_i].startAddr -sizeof(MemoryNode));
 			if(MP->DEBUG_allocdata[DEBUG_i].startAddr!=itNode->StartAddr) 
 			{
 					PX_ASSERT();
@@ -262,11 +260,12 @@ px_void * MP_Malloc(px_memorypool *MP, px_uint Size )
 #if defined(PX_DEBUG_MODE) && defined(PX_MEMORYPOOL_DEBUG_CHECK)
 		for (DEBUG_i=0;DEBUG_i<sizeof(MP->DEBUG_allocdata)/sizeof(MP->DEBUG_allocdata[0]);DEBUG_i++)
 		{
-			if(MP->DEBUG_allocdata[DEBUG_i].addr==0)
+			if(MP->DEBUG_allocdata[DEBUG_i].startAddr ==0)
 			{
-				MP->DEBUG_allocdata[DEBUG_i].addr=MemNode->StartAddr;
+				MP->DEBUG_allocdata[DEBUG_i].offset=(px_byte *)MemNode->StartAddr- (px_byte*)MP->StartAddr;
 				MP->DEBUG_allocdata[DEBUG_i].startAddr=MemNode->StartAddr;
 				MP->DEBUG_allocdata[DEBUG_i].endAddr=MemNode->EndAddr;
+
 				break;
 			}
 		}
@@ -278,7 +277,8 @@ px_void * MP_Malloc(px_memorypool *MP, px_uint Size )
 		pAppend=(MP_Append_data *)((px_uchar *)MemNode->EndAddr-sizeof(MP_Append_data)+1);
 		pAppend->append=MP_APPENDDATA_MAGIC;
 	#endif
-		MP->nodeCount++;
+		MP->nodeCount++; 
+	
 		return MemNode->StartAddr;
 	}
 
@@ -290,11 +290,12 @@ px_void * MP_Malloc(px_memorypool *MP, px_uint Size )
 #if defined(PX_DEBUG_MODE) && defined(PX_MEMORYPOOL_DEBUG_CHECK)
 		for (DEBUG_i=0;DEBUG_i<sizeof(MP->DEBUG_allocdata)/sizeof(MP->DEBUG_allocdata[0]);DEBUG_i++)
 		{
-			if(MP->DEBUG_allocdata[DEBUG_i].addr==0)
+			if(MP->DEBUG_allocdata[DEBUG_i].startAddr ==0)
 			{
-				MP->DEBUG_allocdata[DEBUG_i].addr=MemNode->StartAddr;
+				MP->DEBUG_allocdata[DEBUG_i].offset = (px_byte*)MemNode->StartAddr - (px_byte*)MP->StartAddr;
 				MP->DEBUG_allocdata[DEBUG_i].startAddr=MemNode->StartAddr;
 				MP->DEBUG_allocdata[DEBUG_i].endAddr=MemNode->EndAddr;
+
 				break;
 			}
 		}
@@ -357,14 +358,14 @@ px_void MP_Free(px_memorypool *MP, px_void *pAddress )
 	
 	for (DEBUG_i=0;DEBUG_i<sizeof(MP->DEBUG_allocdata)/sizeof(MP->DEBUG_allocdata[0]);DEBUG_i++)
 	{
-		if(MP->DEBUG_allocdata[DEBUG_i].addr==pAddress)
+		if(MP->DEBUG_allocdata[DEBUG_i].startAddr==pAddress)
 		{
 			MP_Append_data *pAppend;
 			pAppend=(MP_Append_data *)((px_uchar *)MP->DEBUG_allocdata[DEBUG_i].endAddr-sizeof(MP_Append_data)+1);
 			if(MP->DEBUG_allocdata[DEBUG_i].startAddr!=FreeNode.StartAddr) PX_ASSERT();
 			if(MP->DEBUG_allocdata[DEBUG_i].endAddr!=FreeNode.EndAddr) PX_ASSERT();
 			if(pAppend->append!=MP_APPENDDATA_MAGIC)PX_ASSERT();
-			MP->DEBUG_allocdata[DEBUG_i].addr=PX_NULL;
+			MP->DEBUG_allocdata[DEBUG_i].offset=0;
 			MP->DEBUG_allocdata[DEBUG_i].startAddr=PX_NULL;
 			MP->DEBUG_allocdata[DEBUG_i].endAddr=PX_NULL;
 			break;
@@ -501,7 +502,7 @@ _END:
 
 	for (DEBUG_i=0;DEBUG_i<sizeof(MP->DEBUG_allocdata)/sizeof(MP->DEBUG_allocdata[0]);DEBUG_i++)
 	{
-		if(MP->DEBUG_allocdata[DEBUG_i].addr!=PX_NULL)
+		if(MP->DEBUG_allocdata[DEBUG_i].startAddr!=PX_NULL)
 		{
 			for(i=0;i<MP->FreeTableCount;i++)
 			{

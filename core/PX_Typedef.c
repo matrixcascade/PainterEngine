@@ -774,13 +774,13 @@ px_float PX_tan_angle(px_float angle)
 	return PX_sin_angle(angle)/PX_cos_angle(angle);
 }
 
-px_float PX_Point_sin(px_point v)
+px_float PX_Point2D_sin(px_point2D v)
 {
 	return v.y/PX_sqrt(v.x*v.x+v.y*v.y);
 }
 
 
-px_float PX_Point_cos(px_point v)
+px_float PX_Point2D_cos(px_point2D v)
 {
 	return v.x/PX_sqrt(v.x*v.x+v.y*v.y);
 }
@@ -1976,6 +1976,55 @@ px_color PX_ColorHSVToRGB(px_color_hsv hsv)
 	rgb._argb.g = (px_byte)(G * 255);
 	rgb._argb.b = (px_byte)(B * 255);
 	rgb._argb.a= (px_byte)(hsv.a * 255);
+	return rgb;
+}
+
+px_color_YCbCr PX_ColorRGBToYCbCr(px_color rgb)
+{
+	//rgb to YCbCr
+	px_color_YCbCr YCbCr;
+	px_int Y, Cb, Cr;
+	px_int r = rgb._argb.r;
+	px_int g  =rgb._argb.g;
+	px_int b  =rgb._argb.b;
+	YCbCr.a=rgb._argb.a;
+
+	Y = (299 * r + 587 * g + 114 * b)/1000-128;
+	Cb = (169 *r-331*g+500*b)/1000;
+	Cr = (500*r-419*g-81*b)/1000;
+
+	if (Y < -128) Y = -128;
+	if (Y > 127) Y = 127;
+	if (Cb < -128) Cb = -128;
+	if (Cb > 127) Cb = 127;
+	if (Cr < -128) Cr = -128;
+	if (Cr > 127) Cr = 127;
+	YCbCr.Y = (px_char)Y;
+	YCbCr.Cb = (px_char)Cb;
+	YCbCr.Cr = (px_char)Cr;
+	return YCbCr;
+}
+
+px_color PX_ColorYCbCrToRGB(px_color_YCbCr YCbCr)
+{
+	//YCbCr to rgb
+	px_color rgb;
+	px_int r,g, b;
+	rgb._argb.a=YCbCr.a;
+	r = (1000*YCbCr.Y + 1402*YCbCr.Cr)/1000+128;
+	g = (1000*YCbCr.Y -344*YCbCr.Cb - 714*YCbCr.Cr)/1000+128;
+	b = (1000*YCbCr.Y + 1772 *YCbCr.Cb)/1000+128;
+
+	if (r < 0) r = 0;
+	if (r > 255) r = 255;
+	if (g < 0) g = 0;
+	if (g > 255) g = 255;
+	if (b < 0) b = 0;
+	if (b > 255) b = 255;
+	rgb._argb.r = (px_byte)r;
+	rgb._argb.g = (px_byte)g;
+	rgb._argb.b = (px_byte)b;
+
 	return rgb;
 }
 
@@ -3309,7 +3358,7 @@ px_void PX_FIDCT(_IN _OUT px_complex x[], _OUT px_complex X[], px_int N) {
 		PX_FDCT_SortArray(X, N, sLen);
 		sLen /= 2;
 	}
-	for (i = 1; i < N; i++)
+	for (i = 0; i < N; i++)
 	{
 		X[i].im = 0;
 	}
@@ -3507,6 +3556,44 @@ px_void PX_FFT_2(_IN px_complex x[],_OUT px_complex X[],px_int N)
 		}
 	}
 }
+
+px_void PX_FDCT_2(_IN px_complex x[], _OUT px_complex X[], px_int N)
+{
+	px_int i, cx, cy;
+	px_complex _t;
+	for (i = 0; i < N; i++)
+	{
+		PX_FDCT(&x[i * N], &X[i * N], N);
+	}
+	//Matrix transpose
+	for (cy = 0; cy < N; cy++)
+	{
+		for (cx = cy + 1; cx < N; cx++)
+		{
+			_t = X[cy * N + cx];
+			X[cy * N + cx] = X[cx * N + cy];
+			X[cx * N + cy] = _t;
+		}
+	}
+
+	for (i = 0; i < N; i++)
+	{
+		PX_FDCT(&X[i * N], &X[i * N], N);
+	}
+
+	//Matrix transpose again
+
+	for (cy = 0; cy < N; cy++)
+	{
+		for (cx = cy + 1; cx < N; cx++)
+		{
+			_t = X[cy * N + cx];
+			X[cy * N + cx] = X[cx * N + cy];
+			X[cx * N + cy] = _t;
+		}
+	}
+}
+
 px_void PX_IFFT_2(_IN px_complex X[],_OUT px_complex x[],px_int N)
 {
 	px_int cx,cy,i;
@@ -3541,6 +3628,43 @@ px_void PX_IFFT_2(_IN px_complex X[],_OUT px_complex x[],px_int N)
 	for (i=0;i<N;i++)
 	{
 		PX_IFFT(&X[i*N],&X[i*N],N);
+	}
+}
+
+px_void PX_IFDCT_2(_IN px_complex X[], _OUT px_complex x[], px_int N)
+{
+	px_int cx, cy, i;
+	px_complex _t;
+	//Matrix transpose
+	for (cy = 0; cy < N; cy++)
+	{
+		for (cx = cy + 1; cx < N; cx++)
+		{
+			_t = X[cy * N + cx];
+			X[cy * N + cx] = X[cx * N + cy];
+			X[cx * N + cy] = _t;
+		}
+	}
+
+	for (i = 0; i < N; i++)
+	{
+		PX_FIDCT(&x[i * N], &X[i * N], N);
+	}
+
+	//Matrix transpose again
+	for (cy = 0; cy < N; cy++)
+	{
+		for (cx = cy + 1; cx < N; cx++)
+		{
+			_t = X[cy * N + cx];
+			X[cy * N + cx] = X[cx * N + cy];
+			X[cx * N + cy] = _t;
+		}
+	}
+
+	for (i = 0; i < N; i++)
+	{
+		PX_FIDCT(&X[i * N], &X[i * N], N);
 	}
 }
 
@@ -4244,6 +4368,39 @@ px_void PX_FileGetName(const px_char filefullName[],px_char _out[],px_int outSiz
 		_out++;
 	}
 
+}
+
+px_void PX_FileGetFullName(const px_char filefullName[], px_char _out[], px_int outSize)
+{
+	px_int s;
+	if (outSize == 0)
+	{
+		return;
+	}
+	_out[0] = 0;
+	s = PX_strlen(filefullName);
+	if (s == 0)
+	{
+		return;
+	}
+	s--;
+	while (s)
+	{
+		if (filefullName[s] == '/' || filefullName[s] == '\\')
+		{
+			s++;
+			break;
+		}
+		s--;
+	}
+
+	while (outSize > 1 && filefullName[s] && filefullName[s] != '\0')
+	{
+		outSize--;
+		*_out = filefullName[s++];
+		_out[1] = '\0';
+		_out++;
+	}
 }
 px_void PX_FileGetPath(const px_char filefullName[],px_char _out[],px_int outSize)
 {
