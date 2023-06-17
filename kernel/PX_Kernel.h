@@ -2,7 +2,7 @@
 /*
   PainterEngine Kernel
   (C)2019 DBinary <matrixcascade@gmail.com tel-18959060883>
-  
+
   This program is free software; you can redistribute it and/or modify
   it under the terms of the BSD3 General Public License
 */
@@ -25,4 +25,5 @@
 #include "PX_UI.h"
 #include "PX_Compiler.h"
 #include "PX_CanvasVM.h"
+#include "PX_Timer.h"
 #endif
