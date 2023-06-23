@@ -26,5 +26,4 @@
 #include "PX_UI.h"
 #include "PX_Compiler.h"
 #include "PX_CanvasVM.h"
-#include "PX_Timer.h"
 #endif
