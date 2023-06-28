@@ -13,7 +13,7 @@ px_double PX_Object_JoystickGetAngle(PX_Object *pObject)
 {
     if (pObject->Type != PX_OBJECT_TYPE_JOYSTICK)
     {
-        return 0.0;
+        PX_ASSERT();
     }
     return ((PX_Object_Joystick *)(pObject->pObject))->Angle;
 }
@@ -22,7 +22,7 @@ px_double PX_Object_JoystickGetDistance(PX_Object *pObject)
 {
     if (pObject->Type != PX_OBJECT_TYPE_JOYSTICK)
     {
-        return 0.0;
+        PX_ASSERT();
     }
     return ((PX_Object_Joystick *)(pObject->pObject))->Distance;
 }
@@ -32,8 +32,7 @@ px_point2D PX_Object_JoystickGetVector(PX_Object *pObject)
     px_point2D p;
     if (pObject->Type != PX_OBJECT_TYPE_JOYSTICK)
     {
-        p.x = 0.0;
-        p.y = 0.0;
+        PX_ASSERT();
     }
     else
     {
@@ -105,11 +104,11 @@ px_void Func_JoystickRender(px_surface *pSurface, PX_Object *pObject, px_uint el
         (px_int)objy,
         (px_int)pJoystick->ActionAreaRadius,
         pJoystick->ActionAreaColor);
-    PX_GeoDrawSolidCircle(
+    PX_GeoDrawBall(
         pSurface,
-        (px_int)(objx + pJoystick->Distance * PX_cosd(pJoystick->Angle)),
-        (px_int)(objy + pJoystick->Distance * PX_sind(pJoystick->Angle)),
-        (px_int)(pJoystick->JoystickRadius),
+        (px_float)(objx + pJoystick->Distance * PX_cosd(pJoystick->Angle)),
+        (px_float)(objy + pJoystick->Distance * PX_sind(pJoystick->Angle)),
+        (px_float)(pJoystick->JoystickRadius),
         pJoystick->JoystickColor);
 }
 
