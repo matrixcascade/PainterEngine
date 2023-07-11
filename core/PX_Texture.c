@@ -1920,15 +1920,50 @@ px_void PX_TextureRenderMaskEx(px_surface *psurface,px_texture *mask_tex,px_text
 
 }
 
+px_bool PX_TextureFillTestColor(px_color c1, px_color c2, px_float range)
+{
+	px_float  r, g, b;
 
+	if (c1._argb.ucolor == c2._argb.ucolor)
+	{
+		return PX_TRUE;
+	}
 
-px_void PX_TextureFill(px_memorypool *mp,px_texture *ptexture,px_int x,px_int y,px_color test_color,px_color fill_color)
+	if (range==0)
+	{
+		return c1._argb.ucolor == c2._argb.ucolor;
+	}
+	else
+	{
+		r = (c1._argb.r - c2._argb.r) * (c1._argb.r - c2._argb.r) / 65535.f;
+		g = (c1._argb.g - c2._argb.g) * (c1._argb.g - c2._argb.g) / 65535.f;
+		b = (c1._argb.b - c2._argb.b) * (c1._argb.b - c2._argb.b) / 65535.f;
+
+		if (r<=range&& g <= range && b <= range && c1._argb.a <= range * 255)
+		{
+			return PX_TRUE;
+		}
+		else
+		{
+			return PX_FALSE;
+		}
+	}
+	
+}
+
+px_void PX_TextureFill(px_memorypool *mp,px_texture *ptexture,px_int x,px_int y,px_color test_color,px_float testRange0_1,px_color fill_color)
 {
 	typedef struct
 	{
 		px_int x,y;
 	}__PX_POINT;
 	px_vector pstack;
+
+	if (fill_color._argb.ucolor==test_color._argb.ucolor)
+	{
+		return;
+	}
+
 	PX_VectorInitialize(mp,&pstack,sizeof(__PX_POINT),8);
 	
 	do 
@@ -1941,6 +1976,7 @@ px_void PX_TextureFill(px_memorypool *mp,px_texture *ptexture,px_int x,px_int y,
 
 	while (pstack.size)
 	{
+		px_bool up_newnode,down_newnode;
 		__PX_POINT retPt=*PX_VECTORLAST(__PX_POINT,&pstack);
 		PX_VectorPop(&pstack);
 
@@ -1948,106 +1984,72 @@ px_void PX_TextureFill(px_memorypool *mp,px_texture *ptexture,px_int x,px_int y,
 		y=retPt.y;
 
 		//xo mark
-		while (x>0&&(PX_SurfaceGetPixel(ptexture,x-1,y)._argb.ucolor==test_color._argb.ucolor))
+		while (x>0&&PX_TextureFillTestColor(PX_SurfaceGetPixel(ptexture,x-1,y),test_color, testRange0_1)&& (PX_SurfaceGetPixel(ptexture, x + 1, y)._argb.ucolor != fill_color._argb.ucolor))
 		{
 			x--;
 		}
 
-		//up
-		if (y>0)
+		up_newnode = PX_TRUE;
+		down_newnode = PX_TRUE;
+		for (; x< ptexture->width; x++)
 		{
-			if (PX_SurfaceGetPixel(ptexture,x,y-1)._argb.ucolor==test_color._argb.ucolor)
+			PX_SurfaceSetPixel(ptexture, x, y, fill_color);
+			//up
+			if (y > 0)
 			{
-				__PX_POINT pt;
-				pt.x=x;
-				pt.y=y-1;
-				PX_VectorPushback(&pstack,&pt);
-			}
-		}
+				px_color targettestcolor = PX_SurfaceGetPixel(ptexture, x, y - 1);
 
-		//down
-		if (y<ptexture->height-1)
-		{
-			if (PX_SurfaceGetPixel(ptexture,x,y+1)._argb.ucolor==test_color._argb.ucolor)
+				if (PX_TextureFillTestColor(targettestcolor, test_color, testRange0_1)&& targettestcolor._argb.ucolor!= fill_color._argb.ucolor)
+				{
+					if (up_newnode)
+					{
+						__PX_POINT pt;
+						pt.x = x;
+						pt.y = y - 1;
+						PX_VectorPushback(&pstack, &pt);
+						up_newnode = PX_FALSE;
+					}
+					
+				}
+				else
+				{
+					up_newnode = PX_TRUE;
+				}
+			}
+
+			//down
+			if (y < ptexture->height - 1)
 			{
-				__PX_POINT pt;
-				pt.x=x;
-				pt.y=y+1;
-				PX_VectorPushback(&pstack,&pt);
+				px_color targettestcolor = PX_SurfaceGetPixel(ptexture, x, y + 1);
+
+				if (PX_TextureFillTestColor(PX_SurfaceGetPixel(ptexture, x, y + 1), test_color, testRange0_1) && targettestcolor._argb.ucolor != fill_color._argb.ucolor)
+				{
+					if (down_newnode)
+					{
+						__PX_POINT pt;
+						pt.x = x;
+						pt.y = y + 1;
+						PX_VectorPushback(&pstack, &pt);
+						down_newnode = PX_FALSE;
+					}
+
+				}
+				else
+				{
+					down_newnode = PX_TRUE;
+				}
 			}
-		}
+			//right
 
-		PX_SurfaceSetPixel(ptexture,x,y,fill_color);
-		x++;
 
-		//left top
-		while (x<ptexture->width)
-		{
-			if (PX_SurfaceGetPixel(ptexture,x,y)._argb.ucolor!=test_color._argb.ucolor)
+			if (!PX_TextureFillTestColor(PX_SurfaceGetPixel(ptexture, x+1, y ), test_color, testRange0_1)||\
+				(PX_SurfaceGetPixel(ptexture, x+1, y)._argb.ucolor == fill_color._argb.ucolor))
 			{
 				break;
 			}
-
-			PX_SurfaceSetPixel(ptexture,x,y,fill_color);
-
-			if (x>0)
-			{
-				//up
-				if (y>0)
-				{
-					if (PX_SurfaceGetPixel(ptexture,x-1,y-1)._argb.ucolor!=test_color._argb.ucolor&&PX_SurfaceGetPixel(ptexture,x,y-1)._argb.ucolor==test_color._argb.ucolor)
-					{
-						__PX_POINT pt;
-						pt.x=x;
-						pt.y=y-1;
-						PX_VectorPushback(&pstack,&pt);
-					}
-				}
-					
-				//down
-				if (y<ptexture->height-1)
-				{
-					if (PX_SurfaceGetPixel(ptexture,x-1,y+1)._argb.ucolor!=test_color._argb.ucolor&&PX_SurfaceGetPixel(ptexture,x,y+1)._argb.ucolor==test_color._argb.ucolor)
-					{
-						__PX_POINT pt;
-						pt.x=x;
-						pt.y=y+1;
-						PX_VectorPushback(&pstack,&pt);
-					}
-				}
-					
-			}
-			else
-			{
-				//up
-				if (y>0)
-				{
-					if (PX_SurfaceGetPixel(ptexture,x,y-1)._argb.ucolor==test_color._argb.ucolor)
-					{
-						__PX_POINT pt;
-						pt.x=x;
-						pt.y=y-1;
-						PX_VectorPushback(&pstack,&pt);
-					}
-				}
-				
-				//down
-				if (y<ptexture->height-1)
-				{
-					if (PX_SurfaceGetPixel(ptexture,x,y+1)._argb.ucolor==test_color._argb.ucolor)
-					{
-						__PX_POINT pt;
-						pt.x=x;
-						pt.y=y+1;
-						PX_VectorPushback(&pstack,&pt);
-					}
-				}
-					
-			}
-			x++;
 		}
 	}
-
+	PX_VectorFree(&pstack);
 }
 
 px_void PX_TextureRegionRender(px_surface *psurface,px_texture *resTexture,px_int x,px_int y,px_int oft_left,px_int oft_top,px_int oft_right,px_int oft_bottom,PX_ALIGN refPoint,PX_TEXTURERENDER_BLEND *blend)

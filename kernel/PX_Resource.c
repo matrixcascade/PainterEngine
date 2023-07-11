@@ -105,15 +105,15 @@ px_bool PX_ResourceLibraryLoad(PX_ResourceLibrary *lib,PX_RESOURCE_TYPE type,px_
 		break;
 	}
 	
-	PX_MapPut(&lib->map,key,PX_ListPush(&lib->resources,&res,sizeof(res)));
+	PX_MapPut(&lib->map,key,PX_strlen(key), PX_ListPush(&lib->resources, &res, sizeof(res)));
 	return PX_TRUE;
 }
 
 px_bool PX_ResourceLibraryAdd(PX_ResourceLibrary* lib, PX_Resource res,const px_char key[])
 {
-	if (PX_MapGet(&lib->map, key)==PX_NULL)
+	if (PX_MapGet(&lib->map, key, PX_strlen(key))==PX_NULL)
 	{
-		if (PX_MapPut(&lib->map, key, PX_ListPush(&lib->resources, &res, sizeof(res))) == PX_HASHMAP_RETURN_OK)
+		if (PX_MapPut(&lib->map, key, PX_strlen(key), PX_ListPush(&lib->resources, &res, sizeof(res))) == PX_HASHMAP_RETURN_OK)
 			return PX_TRUE;
 	}
 	
@@ -162,7 +162,7 @@ px_void PX_ResourceLibraryFree(PX_ResourceLibrary *lib)
 
 PX_Resource *  PX_ResourceLibraryGet(PX_ResourceLibrary *lib,const px_char key[])
 {
-	return (PX_Resource *)PX_MapGet(&lib->map,key);
+	return (PX_Resource *)PX_MapGet(&lib->map,key, PX_strlen(key));
 }
 
 px_bool PX_ResourceLibraryAddTexture(PX_ResourceLibrary *lib,const px_char key[],px_texture *pTexture)
@@ -170,7 +170,7 @@ px_bool PX_ResourceLibraryAddTexture(PX_ResourceLibrary *lib,const px_char key[]
 	PX_Resource res;
 	res.Type=PX_RESOURCE_TYPE_TEXTURE;
 	if(!PX_TextureCopy(lib->mp,pTexture,&res.texture))return PX_FALSE;
-	PX_MapPut(&lib->map,key,PX_ListPush(&lib->resources,&res,sizeof(res)));
+	PX_MapPut(&lib->map,key, PX_strlen(key),PX_ListPush(&lib->resources,&res,sizeof(res)));
 	return PX_TRUE;
 }
 
@@ -181,7 +181,7 @@ px_void PX_ResourceLibraryDelete(PX_ResourceLibrary *lib,const px_char key[])
 {
 	PX_Resource * pres,*pnodeRes;
 
-	pres=(PX_Resource *)PX_MapGet(&lib->map,key);
+	pres=(PX_Resource *)PX_MapGet(&lib->map,key, PX_strlen(key));
 	if (pres)
 	{
 		px_list_node *pNode=lib->resources.head;
@@ -217,7 +217,7 @@ px_void PX_ResourceLibraryDelete(PX_ResourceLibrary *lib,const px_char key[])
                         break;
 				}
 				PX_ListPop(&lib->resources,pNode);
-				PX_MapErase(&lib->map,key);
+				PX_MapErase(&lib->map,key, PX_strlen(key));
 				return;
 			}
 			pNode=pNode->pnext;

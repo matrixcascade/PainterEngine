@@ -1,5 +1,4 @@
 #include "PX_Object_Designer.h"
-#include "stdio.h"
 
 static px_void PX_Designer_RefreshProperties(PX_Object *pObject)
 {

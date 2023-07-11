@@ -229,7 +229,7 @@ px_void PX_WorldUpdate( PX_World *pworld,px_uint elapsed )
 		{
 			continue;
 		}
-		PX_MapPut(&pworld->idSearchmap, pwo->pObject->id, pwo->pObject);
+		PX_MapPut(&pworld->idSearchmap, pwo->pObject->id,PX_strlen(pwo->pObject->id), pwo->pObject);
 
 	}
 	//////////////////////////////////////////////////////////////////////////
@@ -778,7 +778,7 @@ _LIMIT px_int PX_WorldSearch(PX_World* pw, PX_Object* Object[], px_int MaxSearch
 
 _LIMIT PX_Object* PX_WorldSearchObject(PX_World* pWorld, const px_char id[])
 {
-	return PX_MapGet(&pWorld->idSearchmap, id);
+	return PX_MapGet(&pWorld->idSearchmap, id,PX_strlen(id));
 }
 
 px_void PX_WorldSetSize(PX_World* pWorld, px_int world_width, px_int world_height)

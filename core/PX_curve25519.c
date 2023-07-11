@@ -75,7 +75,7 @@ typedef px_int64 limb;
  * i.e. the limbs are 26, 25, 26, 25, ... bits wide. */
 
 /* Sum two numbers: output += in */
-static void fsum(limb *output, const limb *in) {
+static px_void fsum(limb *output, const limb *in) {
   unsigned i;
   for (i = 0; i < 10; i += 2) {
     output[0+i] = output[0+i] + in[0+i];
@@ -85,7 +85,7 @@ static void fsum(limb *output, const limb *in) {
 
 /* Find the difference of two numbers: output = in - output
  * (note the order of the arguments!). */
-static void fdifference(limb *output, const limb *in) {
+static px_void fdifference(limb *output, const limb *in) {
   unsigned i;
   for (i = 0; i < 10; ++i) {
     output[i] = in[i] - output[i];
@@ -93,7 +93,7 @@ static void fdifference(limb *output, const limb *in) {
 }
 
 /* Multiply a number by a scalar: output = in * scalar */
-static void fscalar_product(limb *output, const limb *in, const limb scalar) {
+static px_void fscalar_product(limb *output, const limb *in, const limb scalar) {
   unsigned i;
   for (i = 0; i < 10; ++i) {
     output[i] = in[i] * scalar;
@@ -106,7 +106,7 @@ static void fscalar_product(limb *output, const limb *in, const limb scalar) {
  * form, the output is not.
  *
  * output[x] <= 14 * the largest product of the input limbs. */
-static void fproduct(limb *output, const limb *in2, const limb *in) {
+static px_void fproduct(limb *output, const limb *in2, const limb *in) {
   output[0] =       ((limb) ((px_int32) in2[0])) * ((px_int32) in[0]);
   output[1] =       ((limb) ((px_int32) in2[0])) * ((px_int32) in[1]) +
                     ((limb) ((px_int32) in2[1])) * ((px_int32) in[0]);
@@ -213,7 +213,7 @@ static void fproduct(limb *output, const limb *in2, const limb *in) {
  *
  * On entry: |output[i]| < 14*2^54
  * On exit: |output[0..8]| < 280*2^54 */
-static void freduce_degree(limb *output) {
+static px_void freduce_degree(limb *output) {
   /* Each of these shifts and adds ends up multiplying the value by 19.
    *
    * For output[0..8], the absolute entry value is < 14*2^54 and we add, at
@@ -284,7 +284,7 @@ static limb div_by_2_25(const limb v)
 /* Reduce all coefficients of the short form input so that |x| < 2^26.
  *
  * On entry: |output[i]| < 280*2^54 */
-static void freduce_coefficients(limb *output) {
+static px_void freduce_coefficients(limb *output) {
   unsigned i;
 
   output[10] = 0;
@@ -333,7 +333,7 @@ static void freduce_coefficients(limb *output) {
  *
  * output must be distinct to both inputs. The output is reduced degree
  * (indeed, one need only provide storage for 10 limbs) and |output[i]| < 2^26. */
-static void
+static px_void
 fmul(limb *output, const limb *in, const limb *in2) {
   limb t[19];
   fproduct(t, in, in2);
@@ -350,7 +350,7 @@ fmul(limb *output, const limb *in, const limb *in2) {
  * form, the output is not.
  *
  * output[x] <= 14 * the largest product of the input limbs. */
-static void fsquare_inner(limb *output, const limb *in) {
+static px_void fsquare_inner(limb *output, const limb *in) {
   output[0] =       ((limb) ((px_int32) in[0])) * ((px_int32) in[0]);
   output[1] =  2 *  ((limb) ((px_int32) in[0])) * ((px_int32) in[1]);
   output[2] =  2 * (((limb) ((px_int32) in[1])) * ((px_int32) in[1]) +
@@ -415,7 +415,7 @@ static void fsquare_inner(limb *output, const limb *in) {
  *
  * On exit: The |output| argument is in reduced coefficients form (indeed, one
  * need only provide storage for 10 limbs) and |out[i]| < 2^26. */
-static void
+static px_void
 fsquare(limb *output, const limb *in) {
   limb t[19];
   fsquare_inner(t, in);
@@ -429,7 +429,7 @@ fsquare(limb *output, const limb *in) {
 }
 
 /* Take a little-endian, 32-byte number and expand it into polynomial form */
-static void
+static px_void
 fexpand(limb *output, const px_byte *input) {
 #define F(n,start,shift,mask) \
   output[n] = ((((limb) input[start + 0]) | \
@@ -476,7 +476,7 @@ static px_int32 s32_gte(px_int32 a, px_int32 b) {
  * little-endian, 32-byte array.
  *
  * On entry: |input_limbs[i]| < 2^26 */
-static void
+static px_void
 fcontract(px_byte *output, limb *input_limbs) {
   px_int i;
   px_int j;
@@ -630,7 +630,7 @@ fcontract(px_byte *output, limb *input_limbs) {
  *
  * On entry and exit, the absolute value of the limbs of all inputs and outputs
  * are < 2^26. */
-static void fmonty(limb *x2, limb *z2,  /* output 2Q */
+static px_void fmonty(limb *x2, limb *z2,  /* output 2Q */
                    limb *x3, limb *z3,  /* output Q + Q' */
                    limb *x, limb *z,    /* input Q */
                    limb *xprime, limb *zprime,  /* input Q' */
@@ -714,7 +714,7 @@ static void fmonty(limb *x2, limb *z2,  /* output 2Q */
  * reduced-degree form: the values in a[10..19] or b[10..19] aren't swapped,
  * and all all values in a[0..9],b[0..9] must have magnitude less than
  * INT32_MAX. */
-static void
+static px_void
 swap_conditional(limb a[19], limb b[19], limb iswap) {
   unsigned i;
   const px_int32 swap = (px_int32) -iswap;
@@ -731,7 +731,7 @@ swap_conditional(limb a[19], limb b[19], limb iswap) {
  *   resultx/resultz: the x coordinate of the resulting curve point (short form)
  *   n: a little endian, 32-byte number
  *   q: a point of the curve (short form) */
-static void
+static px_void
 cmult(limb *resultx, limb *resultz, const px_byte *n, const limb *q) {
   limb a[19] = {0}, b[19] = {1}, c[19] = {1}, d[19] = {0};
   limb *nqpqx = a, *nqpqz = b, *nqx = c, *nqz = d, *t;
@@ -781,7 +781,7 @@ cmult(limb *resultx, limb *resultz, const px_byte *n, const limb *q) {
 // -----------------------------------------------------------------------------
 // Shamelessly copied from djb's code
 // -----------------------------------------------------------------------------
-static void
+static px_void
 crecip(limb *out, const limb *z) {
   limb z2[10];
   limb z9[10];

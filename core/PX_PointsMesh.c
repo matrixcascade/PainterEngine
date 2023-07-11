@@ -56,7 +56,7 @@ px_bool PX_PointsMeshBuild(px_memorypool *mp,px_point2D limit_line_pt[],px_int l
 	{
 		PX_GeoDrawBresenhamLine(&testTexture,(px_int)(limit_line_pt[i-1].x+offsetx),(px_int)(limit_line_pt[i-1].y+offsety),(px_int)(limit_line_pt[i].x+offsetx),(px_int)(limit_line_pt[i].y+offsety),PX_COLOR(255,0,0,0));
 	}
-	PX_TextureFill(mp,&testTexture,0,0,PX_COLOR(0,0,0,0),PX_COLOR(0,255,255,255));
+	PX_TextureFill(mp,&testTexture,0,0,PX_COLOR(0,0,0,0),0,PX_COLOR(0,255,255,255));
 
 	if(!PX_DelaunaryPointsBuild(mp,pt,pt_count,out_triangles,type))
 	{

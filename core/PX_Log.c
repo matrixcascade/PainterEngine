@@ -24,3 +24,8 @@ px_void PX_LOG(const px_char fmt[])
 	int errcode;
 	errcode = 0;
 }
+
+px_void PX_NOP()
+{
+
+}

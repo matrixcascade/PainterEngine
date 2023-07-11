@@ -24,7 +24,7 @@ px_void PX_MemoryFree(px_memory *memory);
 px_byte *PX_MemoryData(px_memory *memory);
 px_bool PX_MemoryCatBit(px_memory* memory, px_bool b);
 px_bool PX_MemoryCatBits(px_memory* memory, px_byte data[],px_int bit_count);
-
+px_void PX_MemoryLeft(px_memory* memory, px_int trimsize);
 typedef struct  
 {
 	px_memorypool* mp;

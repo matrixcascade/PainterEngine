@@ -163,6 +163,17 @@ px_void PX_MemoryClear(px_memory *memory)
 	memory->bit_pointer = 0;
 }
 
+px_void PX_MemoryLeft(px_memory* memory,px_int trimsize)
+{
+	if (trimsize>=memory->usedsize)
+	{
+		return;
+	}
+	memory->usedsize = trimsize;
+	memory->bit_pointer = 0;
+}
+
+
 px_bool PX_MemoryCopy(px_memory *memory,const px_void *buffer,px_int startoffset,px_int size)
 {
 	px_byte *old;

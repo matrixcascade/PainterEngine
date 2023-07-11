@@ -1,8 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
-//Painter Engine Interpreter
-//code by DBinary, matrixcascade@gmail.com
-//QQ:477608346,tel-18959060883
-//include script compiler & parser & AST
+//Painter Engine Script Interpreter by DBinary
+
 
 #ifndef _PX_SCRIPT_TRANSLATOR_H
 #define _PX_SCRIPT_TRANSLATOR_H

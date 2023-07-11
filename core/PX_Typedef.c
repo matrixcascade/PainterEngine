@@ -2873,6 +2873,19 @@ px_void PX_memcpy(px_void *dst,const px_void *src,px_int size)
 	}
 }
 
+px_int PX_memcmp(px_void* dst, const px_void* src, px_int size)
+{
+	px_int i;
+	px_char *psrc=(px_char *)src;
+	px_char *pdst=(px_char *)dst;
+	for (i = 0; i < size; i++)
+	{
+		if(psrc[i]-pdst[i])
+			return psrc[i] - pdst[i];
+	}
+	return 0;
+}
+
 
 
 px_void PX_strcpy(px_char *dst,const px_char *src,px_int size)
@@ -4287,7 +4300,7 @@ px_double PX_tand(px_double radian)
 	return PX_tan_radian((px_float)radian);
 }
 
-static px_uint64 px_srand_seed=0x31415926;
+px_uint64 px_srand_seed=0x31415926;
 
 px_void PX_srand(px_uint64 seed)
 {

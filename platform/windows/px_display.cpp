@@ -58,7 +58,7 @@ extern "C" void PX_SetWindowStyle(PX_WINODW_STYLE style);
 #define         WIN_KEYDOWN_DOWN         6
 
 
-#define			WIN_MESSAGESTACK_SIZE 32
+#define			WIN_MESSAGESTACK_SIZE 64
 
 
 
@@ -72,6 +72,8 @@ BOOL                    Win_Activated;
 PX_WINODW_STYLE			Win_Style;
 
 WM_MESSAGE				Win_messageStack[WIN_MESSAGESTACK_SIZE]={0};
+int						Win_messageStackWIndex=0;
+int						Win_messageStackRIndex=0;
 
 char				   DInput_AccepyFile[MAX_PATH]={0};
 POINT				   DInput_MousePosition;
@@ -399,7 +401,7 @@ LRESULT CALLBACK AppWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 // 	if(uMsg==0x246)
 // 	printf("%x\n",uMsg);
 	WM_MESSAGE message;
-	int i;
+
 
 	switch(uMsg) 
 	{
@@ -476,14 +478,17 @@ LRESULT CALLBACK AppWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 	message.uMsg=uMsg;
 	message.wparam=wParam;
 	message.lparam=lParam;
-	for (i=0;i<WIN_MESSAGESTACK_SIZE;i++)
+	
+	if (Win_messageStack[Win_messageStackWIndex].uMsg==0)
 	{
-		if (Win_messageStack[i].uMsg==0)
+		Win_messageStack[Win_messageStackWIndex% WIN_MESSAGESTACK_SIZE]=message;
+		Win_messageStackWIndex++;
+		if (Win_messageStackWIndex>= WIN_MESSAGESTACK_SIZE)
 		{
-			Win_messageStack[i]=message;
-			break;
+			Win_messageStackWIndex = 0;
 		}
 	}
+	
 
 	return TRUE;
 }
@@ -626,16 +631,19 @@ BOOL PX_MouseWheel(int *x,int *y,int *delta)
 
 BOOL PX_GetWinMessage(WM_MESSAGE *Msg)
 {
-	int i;
-	for (i=0;i<WIN_MESSAGESTACK_SIZE;i++)
+
+	if (Win_messageStack[Win_messageStackRIndex].uMsg!=0)
 	{
-		if (Win_messageStack[i].uMsg!=0)
+		*Msg = Win_messageStack[Win_messageStackRIndex];
+		memset(&Win_messageStack[Win_messageStackRIndex], 0, sizeof(WM_MESSAGE));
+		Win_messageStackRIndex++;
+		if (Win_messageStackRIndex >= WIN_MESSAGESTACK_SIZE)
 		{
-			*Msg=Win_messageStack[i];
-			memset(&Win_messageStack[i],0,sizeof(WM_MESSAGE));
-			return TRUE;
+			Win_messageStackRIndex = 0;
 		}
+		return TRUE;
 	}
+
 	return FALSE;
 }
 

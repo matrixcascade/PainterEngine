@@ -36,6 +36,8 @@ typedef struct
 	px_int SliderButtonLength;
 	px_color color;
 	px_color BackgroundColor;
+	px_bool showvalue;
+	px_color showvalue_color;
 }PX_Object_SliderBar;
 
 PX_Object *PX_Object_SliderBarCreate(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y,px_int Width,px_int Height,PX_OBJECT_SLIDERBAR_TYPE Type,PX_OBJECT_SLIDERBAR_STYLE style);
@@ -49,7 +51,7 @@ px_void    PX_Object_SliderBarSetBackgroundColor(PX_Object *pSliderBar,px_color 
 px_void	   PX_Object_SliderBarFree(PX_Object *pSliderBar);
 px_void    PX_Object_SliderBarSetColor(PX_Object *pSliderBar,px_color color);
 px_void	   PX_Object_SliderBarSetSliderButtonLength(PX_Object *pSliderBar,px_int length);
-
+px_void	   PX_Object_SliderBarSetShowValue(PX_Object *pSliderBar,px_bool b,px_color color);
 
 PX_Designer_ObjectDesc PX_Object_SliderBarDesignerInstall();
 #endif

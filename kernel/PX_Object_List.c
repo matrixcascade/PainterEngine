@@ -495,6 +495,8 @@ px_void PX_Object_ListOnEvent(PX_Object  *Object,PX_Object_Event e,px_void *ptr)
 		PX_Object_Event_SetCursorX(&e,PX_Object_Event_GetCursorX(e)-Object->x);
 		PX_Object_Event_SetCursorY(&e,PX_Object_Event_GetCursorY(e)-Object->y);
 		break;
+	case PX_OBJECT_EVENT_EXECUTE:
+		return;
 	}
 
 	for (i=0;i<pList->Items.size;i++)

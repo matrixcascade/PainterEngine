@@ -262,7 +262,7 @@ px_void * MP_Malloc(px_memorypool *MP, px_uint Size )
 		{
 			if(MP->DEBUG_allocdata[DEBUG_i].startAddr ==0)
 			{
-				MP->DEBUG_allocdata[DEBUG_i].offset=(px_byte *)MemNode->StartAddr- (px_byte*)MP->StartAddr;
+				MP->DEBUG_allocdata[DEBUG_i].offset=(px_dword)((px_byte *)MemNode->StartAddr- (px_byte*)MP->StartAddr);
 				MP->DEBUG_allocdata[DEBUG_i].startAddr=MemNode->StartAddr;
 				MP->DEBUG_allocdata[DEBUG_i].endAddr=MemNode->EndAddr;
 
@@ -292,7 +292,7 @@ px_void * MP_Malloc(px_memorypool *MP, px_uint Size )
 		{
 			if(MP->DEBUG_allocdata[DEBUG_i].startAddr ==0)
 			{
-				MP->DEBUG_allocdata[DEBUG_i].offset = (px_byte*)MemNode->StartAddr - (px_byte*)MP->StartAddr;
+				MP->DEBUG_allocdata[DEBUG_i].offset = (px_dword)((px_byte*)MemNode->StartAddr - (px_byte*)MP->StartAddr);
 				MP->DEBUG_allocdata[DEBUG_i].startAddr=MemNode->StartAddr;
 				MP->DEBUG_allocdata[DEBUG_i].endAddr=MemNode->EndAddr;
 

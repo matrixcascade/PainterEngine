@@ -445,7 +445,6 @@ px_bool PX_FontModuleLoad(PX_FontModule *module,px_byte *buffer,px_int size)
 	
 	while (offset<size)
 	{
-		px_char hex[16]={0};
 		px_byte *pData;
 		
 		PX_FontModule_Charactor_Header *pcHeader=(PX_FontModule_Charactor_Header *)(buffer+offset);
@@ -474,12 +473,7 @@ px_bool PX_FontModuleLoad(PX_FontModule *module,px_byte *buffer,px_int size)
 		}
 		
 
-		PX_Base64Encode((px_byte *)&pcHeader->charactor_code,sizeof(pcHeader->charactor_code),hex);
-
-		//PX_itoa(pcHeader->charactor_code,hex,sizeof(hex),16);
-		
-
-		if (PX_MapGet(&module->characters_map,hex))
+		if (PX_MapGet(&module->characters_map, (px_byte*)&pcHeader->charactor_code, sizeof(pcHeader->charactor_code)))
 		{
 			offset+=pcHeader->Font_Width*pcHeader->Font_Height;
 			continue;
@@ -513,7 +507,7 @@ px_bool PX_FontModuleLoad(PX_FontModule *module,px_byte *buffer,px_int size)
 		}
 		PX_memcpy(cpy->shape.alpha,pData,cpy->header.Font_Width*cpy->header.Font_Height);
 		offset+=cpy->header.Font_Width*cpy->header.Font_Height;
-		PX_MapPut(&module->characters_map,hex,cpy);
+		PX_MapPut(&module->characters_map,(px_byte *)&pcHeader->charactor_code,sizeof(pcHeader->charactor_code),cpy);
 	}
 	return PX_TRUE;
 _ERROR:
@@ -523,14 +517,15 @@ _ERROR:
 
 px_void PX_FontModuleFree(PX_FontModule *module)
 {
-	px_map_element *pme;
-	pme=PX_MapFirst(&module->characters_map);
+	PX_RBNode* pme;
+	pme = PX_MapFirst(&module->characters_map);
 	while (pme)
 	{
-		PX_FontModule_Charactor *pmc=(PX_FontModule_Charactor *)pme->Ptr;
+		PX_FontModule_Charactor* pmc = (PX_FontModule_Charactor*)pme->_ptr;
 		PX_ShapeFree(&pmc->shape);
-		MP_Free(module->mp,pmc);
-		pme=PX_MapNext(&module->characters_map,pme);
+		MP_Free(module->mp, pmc);
+		pme->_ptr =PX_NULL;
+		pme = PX_MapNext(pme);
 	}
 	PX_MapFree(&module->characters_map);
 }
@@ -540,7 +535,6 @@ px_void PX_FontModuleFree(PX_FontModule *module)
 
 px_int PX_FontModuleGetCharacterDesc(PX_FontModule *module,const px_char *Text,px_dword *code,px_int *advance,px_int *height)
 {
-	px_char hex[16];
 	px_int f_size;
 	PX_FontModule_Charactor *pChar=PX_NULL;
 
@@ -556,9 +550,8 @@ px_int PX_FontModuleGetCharacterDesc(PX_FontModule *module,const px_char *Text,p
 		return f_size;
 	}
 
-	PX_Base64Encode((px_byte *)code,sizeof(px_dword),hex);
 
-	pChar=(PX_FontModule_Charactor *)PX_MapGet(&module->characters_map,hex);
+	pChar=(PX_FontModule_Charactor *)PX_MapGet(&module->characters_map, (px_byte*)code, sizeof(px_dword));
 	if (pChar)
 	{
 		*advance=(px_int)pChar->header.Advance;
@@ -590,7 +583,6 @@ px_void PX_FontModuleTextGetRenderWidthHeight(PX_FontModule *module,const px_cha
 	while (PX_TRUE)
 	{
 		px_dword code=0;
-		px_char hex[16];
 		px_int f_size;
 		PX_FontModule_Charactor *pChar=PX_NULL;
 
@@ -611,9 +603,8 @@ px_void PX_FontModuleTextGetRenderWidthHeight(PX_FontModule *module,const px_cha
 		}
 		else
 		{
-			PX_Base64Encode((px_byte *)&code,sizeof(code),hex);
 
-			pChar=(PX_FontModule_Charactor *)PX_MapGet(&module->characters_map,hex);
+			pChar=(PX_FontModule_Charactor *)PX_MapGet(&module->characters_map, (px_byte*)&code, sizeof(code));
 			if (pChar)
 			{
 				//
@@ -640,10 +631,8 @@ px_void PX_FontModuleTextGetRenderWidthHeight(PX_FontModule *module,const px_cha
 
 px_int PX_FontModuleDrawCharacter(px_surface *psurface,PX_FontModule *mod,px_int x,px_int y,const px_dword code,px_color Color)
 {
-	px_char hex[16];
 	PX_FontModule_Charactor *pChar;
-	PX_Base64Encode((px_byte *)&code,sizeof(code),hex);
-	pChar=(PX_FontModule_Charactor *)PX_MapGet(&mod->characters_map,hex);
+	pChar=(PX_FontModule_Charactor *)PX_MapGet(&mod->characters_map, (px_byte*)&code, sizeof(code));
 	if (pChar)
 	{
 		PX_ShapeRender(psurface,&pChar->shape,x+pChar->header.BearingX,y+mod->max_BearingY-pChar->header.BearingY,PX_ALIGN_LEFTTOP,Color);
@@ -714,7 +703,6 @@ px_int PX_FontModuleDrawText(px_surface *psurface,PX_FontModule *mod,px_int x,px
 	while (PX_TRUE)
 	{
 		px_dword code=0;
-		px_char hex[16];
 		px_int f_size;
 		PX_FontModule_Charactor *pChar;
 
@@ -735,9 +723,8 @@ px_int PX_FontModuleDrawText(px_surface *psurface,PX_FontModule *mod,px_int x,px
 		}
 		else
 		{
-			PX_Base64Encode((px_byte *)&code,sizeof(code),hex);
 			//PX_itoa(code,hex,sizeof(hex),16);
-			pChar=(PX_FontModule_Charactor *)PX_MapGet(&mod->characters_map,hex);
+			pChar=(PX_FontModule_Charactor *)PX_MapGet(&mod->characters_map, (px_byte*)&code, sizeof(code));
 			if (pChar)
 			{
 				PX_ShapeRender(psurface,&pChar->shape,dx+pChar->header.BearingX,dy+mod->max_BearingY-pChar->header.BearingY,PX_ALIGN_LEFTTOP,Color);

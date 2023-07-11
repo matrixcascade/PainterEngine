@@ -471,6 +471,14 @@ px_void PX_Object_SliderBarRender(px_surface *psurface, PX_Object *pObject,px_ui
 							);
 						//Draw Slider button
 						PX_GeoDrawRect(psurface,(px_int)Sx,(px_int)Sy,(px_int)(Sx+SliderBtnLen-1),(px_int)(Sy+objHeight-1),pSliderBar->color);
+
+						if (pSliderBar->showvalue )
+						{
+							px_char text[16] = { 0 };
+							PX_itoa(pSliderBar->Value, text,sizeof(text), 10);
+							PX_FontModuleDrawText(psurface, 0, (px_int)Sx+ SliderBtnLen/2, (px_int)Sy-1, PX_ALIGN_MIDBOTTOM, text, pSliderBar->showvalue_color);
+						}
+
 					}
 					break;
 				case PX_OBJECT_SLIDERBAR_STYLE_BOX:
@@ -482,6 +490,14 @@ px_void PX_Object_SliderBarRender(px_surface *psurface, PX_Object *pObject,px_ui
 						Sx+=SliderBtnLen/2;
 						//draw slider bar
 						PX_GeoDrawRect(psurface,(px_int)(objx+Sx-SliderBtnLen/2+2),(px_int)(objy+2),(px_int)(objx+Sx-SliderBtnLen/2+SliderBtnLen-3),(px_int)(objy+objHeight-3),pSliderBar->color);
+
+						if (pSliderBar->showvalue&&pSliderBar->status )
+						{
+							px_char text[16] = { 0 };
+							PX_itoa(pSliderBar->Value,text,sizeof(text),10);
+							PX_FontModuleDrawText(psurface, 0, (px_int)(objx + objWidth / 2), (px_int)(objy + objHeight / 2), PX_ALIGN_CENTER, text, pSliderBar->showvalue_color);
+						}
+
 					}
 					break;
 				}
@@ -568,6 +584,13 @@ px_void PX_Object_SliderBarRender(px_surface *psurface, PX_Object *pObject,px_ui
 							);
 						//Draw Slider button
 						PX_GeoDrawRect(psurface,(px_int)(objx+Sx),(px_int)Sy,(px_int)(objx+Sx+SliderBtnLen-1),(px_int)(Sy+objHeight-1),pSliderBar->color);
+
+						if (pSliderBar->showvalue)
+						{
+							px_char text[16] = { 0 };
+							PX_itoa(pSliderBar->Value, text, sizeof(text), 10);
+							PX_FontModuleDrawText(psurface, 0, (px_int)Sx + SliderBtnLen / 2, (px_int)Sy - 1, PX_ALIGN_MIDBOTTOM, text, pSliderBar->showvalue_color);
+						}
 					}
 					break;
 				case PX_OBJECT_SLIDERBAR_STYLE_BOX:
@@ -594,6 +617,13 @@ px_void PX_Object_SliderBarRender(px_surface *psurface, PX_Object *pObject,px_ui
 						Sx+=SliderBtnLen/2;
 						//draw slider bar
 						PX_GeoDrawRect(psurface,(px_int)(objx+Sx-SliderBtnLen/2+2),(px_int)objy+2,(px_int)(objx+Sx+SliderBtnLen/2-3),(px_int)(objy+objHeight-3),pSliderBar->color);
+
+						if (pSliderBar->showvalue)
+						{
+							px_char text[16] = { 0 };
+							PX_itoa(pSliderBar->Value, text, sizeof(text), 10);
+							PX_FontModuleDrawText(psurface, 0, (px_int)(objx + objWidth / 2), (px_int)(objy + objHeight / 2), PX_ALIGN_CENTER, text, pSliderBar->showvalue_color);
+						}
 					}
 					break;
 				}
@@ -717,6 +747,16 @@ px_void PX_Object_SliderBarSetSliderButtonLength(PX_Object *pSliderBar,px_int le
 	if (SliderBar!=PX_NULL)
 	{
 		SliderBar->SliderButtonLength=length;
+	}
+}
+
+px_void PX_Object_SliderBarSetShowValue(PX_Object* pSliderBar, px_bool b, px_color color)
+{
+	PX_Object_SliderBar* SliderBar = PX_Object_GetSliderBar(pSliderBar);
+	if (SliderBar != PX_NULL)
+	{
+		SliderBar->showvalue = b;
+		SliderBar->showvalue_color = color;
 	}
 }
 

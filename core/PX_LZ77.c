@@ -90,10 +90,6 @@ px_bool PX_LZ77Inflate(px_word* pbuffer, px_int size, px_memory* out)
 		if (pbuffer[i]<256)
 		{
 			px_byte symbol = (px_byte)pbuffer[i];
-			if (out->usedsize==183606)
-			{
-				while (0);
-			}
 			if (!PX_MemoryCat(out, &symbol, 1))
 				return PX_FALSE;
 		}

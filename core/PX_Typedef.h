@@ -483,6 +483,7 @@ px_void PX_memdwordset(px_void *dst,px_dword dw,px_int count);
 #define PX_zeromemory(dst,size) PX_memset(dst,0,size)
 px_bool PX_memequ(const px_void *dst,const px_void *src,px_int size);
 px_void PX_memcpy(px_void *dst,const px_void *src,px_int size);
+px_int PX_memcmp(px_void* dst, const px_void* src, px_int size);
 px_void PX_strcpy(px_char *dst,const px_char *src,px_int size);
 px_void PX_wstrcpy(px_word *dst,const px_word *src,px_int size);
 px_void PX_strcat(px_char *src,const px_char *cat);

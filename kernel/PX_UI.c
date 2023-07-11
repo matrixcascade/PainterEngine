@@ -967,13 +967,13 @@ PX_Object * PX_UICreate(PX_UI *ui,PX_Object *parent,PX_Json_Value *json_value,px
 	pSubValue=PX_JsonGetObjectValue(json_value,"id");
 	if (pSubValue&&pSubValue->type==PX_JSON_VALUE_TYPE_STRING&&pSubValue->_string.buffer[0])
 	{
-		if(PX_MapGet(&ui->ObjectMap,pSubValue->_string.buffer))
+		if(PX_MapGet(&ui->ObjectMap,pSubValue->_string.buffer, PX_strlen(pSubValue->_string.buffer)))
 		{
 			//"Repeat controller"
 			PX_ASSERT();
 			goto _ERROR;
 		}
-		if(PX_MapPut(&ui->ObjectMap,pSubValue->_string.buffer,pNewObject)!=PX_HASHMAP_RETURN_OK)
+		if(PX_MapPut(&ui->ObjectMap,pSubValue->_string.buffer, PX_strlen(pSubValue->_string.buffer),pNewObject)!=PX_HASHMAP_RETURN_OK)
 			goto _ERROR;
 	}
 
@@ -1038,7 +1038,7 @@ px_void PX_UIUpdateObjectsPostions(PX_UI *ui,PX_Object *pObject,PX_Json_Value *j
 
 PX_Object * PX_UIGetObjectByID(PX_UI *ui,const px_char id[])
 {
-	return (PX_Object *)PX_MapGet(&ui->ObjectMap,id);
+	return (PX_Object *)PX_MapGet(&ui->ObjectMap,id,PX_strlen(id));
 }
 
 px_void PX_UIFree(PX_UI *ui)

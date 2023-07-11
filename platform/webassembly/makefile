@@ -1,7 +1,7 @@
 #emscripten makefile
 #####################################################
 target :=PainterEngine.html
-project_path := ../../../PainterEngineDesigner
+project_path := ../../../project
 painterengine_path := ../..
 #####################################################
 

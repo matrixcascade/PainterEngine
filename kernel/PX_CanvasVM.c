@@ -1,597 +1,1364 @@
 #include "PX_CanvasVM.h"
 
-px_void PX_CanvasVM_PenDrawSamples(PX_CanvasVM* pCanvas, px_surface* psurface, px_point samples[], px_int detail)
+px_void PX_CanvasVM_PenPaint(px_surface* psurface, px_float x, px_float y, px_float size,px_color color, px_void* ptr)
 {
-	px_int i;
-	px_float size = pCanvas->reg_size * pCanvas->currentPath[0].z;
-	px_color clr = pCanvas->reg_color;
-	if (pCanvas->currentPath[0].z <= 1)
-		clr._argb.a = (px_byte)(clr._argb.a / (pCanvas->reg_step/6) * pCanvas->currentPath[0].z);
-	for (i = 0; i < detail; i++)
-	{
-		PX_GeoDrawPenCircle(psurface, samples[i].x, samples[i].y, size, clr);
-	}
+	PX_GeoDrawPenCircle(psurface, x, y, size, color);
 }
 
-px_void PX_CanvasVMOn_PenPaint(PX_CanvasVM* pCanvas, px_void* ptr)
+px_void PX_CanvasVM_PaintPaint(px_surface* psurface, px_float x, px_float y, px_float size, px_color color, px_void* ptr)
 {
-	px_int i;
-	px_int detail;
-	px_point samples[PX_CANVASVM_MAX_DETAIL_SIZE] ;
-	px_surface* ptarget_surface = pCanvas->ptarget_surface;
-
-	if (ptarget_surface==PX_NULL||pCanvas->currentPathCount==0)
+	PX_CanvasVM* pCanvasVM = (PX_CanvasVM*)ptr;
+	px_color clr;
+	if (x<0||x>psurface->width-1||y<0||y>psurface->height-1)
 	{
 		return;
 	}
-	switch (pCanvas->reg_filtermode)
-	{
-	case PX_CanvasVM_FilterMode_None:
-		break;
-	case PX_CanvasVM_FilterMode_PainterEngineFilter:
-	{
-		px_int count = pCanvas->currentPathCount;
-		if (count > PX_CANVASVM_MAX_DETAIL_SIZE)
-		{
-			count = PX_CANVASVM_MAX_DETAIL_SIZE;
-		}
-		for (i = 0; i < count; i++)
-		{
-			samples[i].x = pCanvas->currentPath[i].x;
-			samples[i].y = pCanvas->currentPath[i].y;
-			samples[i].z = pCanvas->currentPath[i].z;
-		}
-		PX_GeoDrawPenSamplesLine(ptarget_surface, samples, count, pCanvas->reg_size, pCanvas->reg_color, pCanvas->reg_step, pCanvas->reg_filterfactor);
-	}
-	break;
-	case PX_CanvasVM_FilterMode_Bezier:
-	{
-		px_int count = pCanvas->currentPathCount;
-		px_float lenght = 0;
-		if (count > PX_CANVASVM_MAX_DETAIL_SIZE)
-		{
-			count = PX_CANVASVM_MAX_DETAIL_SIZE;
-		}
-		for (i = 0; i < count; i++)
-		{
-			samples[i].x = pCanvas->currentPath[i].x;
-			samples[i].y = pCanvas->currentPath[i].y;
-			samples[i].z = pCanvas->currentPath[i].z;
-			PX_GeoDrawPenCircle(ptarget_surface, pCanvas->currentPath[i].x, pCanvas->currentPath[i].y, pCanvas->reg_size, pCanvas->reg_color);
-		}
-		for (i = 1; i < count; i++)
-		{
-			lenght += PX_PointDistance(samples[i], samples[i - 1]);
-			
-		}
-		lenght *= 2;
-
-		for (i = 1; i < lenght; i++)
-		{
-			px_int j;
-			px_point p1, p2;
-			for (j = 0; j < count; j++)
-			{
-				samples[j].x = pCanvas->currentPath[j].x;
-				samples[j].y = pCanvas->currentPath[j].y;
-				samples[j].z = pCanvas->currentPath[j].z;
-			}
-			p1=PX_GeoGetBezierCurvePoint( samples, count, (i-1) * 1.0f / (lenght - 1));
-			for (j = 0; j < count; j++)
-			{
-				samples[j].x = pCanvas->currentPath[j].x;
-				samples[j].y = pCanvas->currentPath[j].y;
-				samples[j].z = pCanvas->currentPath[j].z;
-			}
-			p2 = PX_GeoGetBezierCurvePoint( samples, count, i * 1.0f / (lenght - 1));
-			PX_GeoDrawPenLine(ptarget_surface, p1.x, p1.y, p2.x, p2.y, pCanvas->reg_size, pCanvas->reg_color);
-		}
-
-		
-
-	}
-	break;
-	case PX_CanvasVM_FilterMode_Breseham:
-	{
-		px_int count = pCanvas->currentPathCount;
-		if (count > PX_CANVASVM_MAX_DETAIL_SIZE)
-		{
-			count = PX_CANVASVM_MAX_DETAIL_SIZE;
-		}
-		for (i = 1; i < count; i++)
-		{
-			PX_GeoDrawBresenhamLine(ptarget_surface, (px_int)pCanvas->currentPath[i - 1].x, (px_int)pCanvas->currentPath[i - 1].y, (px_int)pCanvas->currentPath[i].x, (px_int)pCanvas->currentPath[i].y, pCanvas->reg_color);
-		}
-	}
-	break;
-	default:
-		if (pCanvas->currentPathCount > 1)
-		{
-			px_float dx, dy;
-			dx = (pCanvas->currentPath[1].x - pCanvas->currentPath[0].x);
-			dy = (pCanvas->currentPath[1].y - pCanvas->currentPath[0].y);
-			detail = (px_int)PX_sqrt(dx * dx + dy * dy);
-			detail = (detail == 0 ? 1 : detail);
-			detail = (detail > PX_CANVASVM_MAX_DETAIL_SIZE ? PX_CANVASVM_MAX_DETAIL_SIZE : detail);
-
-			PX_CanvasVMFilter(pCanvas, PX_CanvasVM_FilterMode_Liner, 1, samples, detail);
-			PX_CanvasVM_PenDrawSamples(pCanvas, ptarget_surface, samples, detail);
-		}
-
-		for (i = 2; i < pCanvas->currentPathCount - 1; i++)
-		{
-			px_float dx, dy;
-			dx = (pCanvas->currentPath[i].x - pCanvas->currentPath[i - 1].x);
-			dy = (pCanvas->currentPath[i].y - pCanvas->currentPath[i - 1].y);
-			detail = (px_int)PX_sqrt(dx * dx + dy * dy);
-			detail = (detail == 0 ? 1 : detail);
-			detail = (detail > PX_CANVASVM_MAX_DETAIL_SIZE ? PX_CANVASVM_MAX_DETAIL_SIZE : detail);
-
-			PX_CanvasVMFilter(pCanvas, pCanvas->reg_filtermode, i, samples, detail);
-			PX_CanvasVM_PenDrawSamples(pCanvas, ptarget_surface, samples, detail);
-		}
-
-		if (pCanvas->currentPathCount > 1)
-		{
-			px_float dx, dy;
-			dx = (pCanvas->currentPath[pCanvas->currentPathCount - 1].x - pCanvas->currentPath[pCanvas->currentPathCount - 2].x);
-			dy = (pCanvas->currentPath[pCanvas->currentPathCount - 1].y - pCanvas->currentPath[pCanvas->currentPathCount - 2].y);
-
-			detail = (px_int)PX_sqrt(dx * dx + dy * dy);
-			detail = (detail == 0 ? 1 : detail);
-			detail = (detail > PX_CANVASVM_MAX_DETAIL_SIZE ? PX_CANVASVM_MAX_DETAIL_SIZE : detail);
-
-			PX_CanvasVMFilter(pCanvas, PX_CanvasVM_FilterMode_Liner, pCanvas->currentPathCount - 1, samples, detail);
-			PX_CanvasVM_PenDrawSamples(pCanvas, ptarget_surface, samples, detail);
-		}
-		break;
-	}
-
-	if (pCanvas->reg_showdot)
-	{
-		for (i = 0; i < pCanvas->currentPathCount; i++)
-		{
-			PX_GeoDrawPenCircle(ptarget_surface, pCanvas->currentPath[i].x, pCanvas->currentPath[i].y, 3, pCanvas->reg_dotcolor);
-		}
-	}
-	
+	clr=PX_SURFACECOLOR(psurface, (px_int)x, (px_int)y);
+	PX_TextureFill(pCanvasVM->mp, psurface, (px_int)x, (px_int)y, clr,0.25f, color);
 }
 
-
-px_bool PX_CanvasVMInitialize(px_memorypool* mp, PX_CanvasVM* pCanvas)
+px_void PX_CanvasVM_SparyPaint(px_surface* psurface, px_float x, px_float y, px_float size, px_color color, px_void* ptr)
 {
-	PX_memset(pCanvas, 0, sizeof(PX_CanvasVM));
-	pCanvas->mp = mp;
-	if (!PX_VectorInitialize(mp,&pCanvas->payload_offsets,sizeof(px_int),256))
-	{
-		return PX_FALSE;
-	}
-	PX_MemoryInitialize(mp,&pCanvas->payload);
-
-	//Pen
-	PX_CanvasVMRegisterTool(pCanvas, "pen", 1, PX_CanvasVMOn_PenPaint, 0);
-
-	pCanvas->reg_showdot = PX_FALSE;
-	pCanvas->reg_dotcolor = PX_COLOR_RED;
-	return PX_TRUE;
+	PX_GeoDrawSpray(psurface, x, y, size, color);
 }
 
-
-
-px_void PX_CanvasVMOnBegin(PX_CanvasVM* pCanvas, PX_CANVASVM_OPCODE opcode, px_float size, px_color color, px_float step,  px_float reg_factor)
+px_void PX_CanvasVM_EraserPaint(px_surface* psurface, px_float x, px_float y, px_float size, px_color color, px_void* ptr)
 {
-	if (pCanvas->reg_state==PX_CanvasVM_State_Painting)
-	{
-		PX_CanvasVMOnEnd(pCanvas);
-	}
-
-	if (pCanvas->reg_state == PX_CanvasVM_State_Standby)
-	{
-		px_int i;
-		for (i=0;i<PX_COUNTOF(pCanvas->tools);i++)
-		{
-			if (pCanvas->tools[i].opcode==opcode)
-			{
-				break;
-			}
-		}
-		if (i== PX_COUNTOF(pCanvas->tools))
-		{
-			//not found
-			return;
-		}
-		pCanvas->reg_size=size;
-		pCanvas->reg_color = color;
-		pCanvas->reg_step = step;
-		pCanvas->reg_filterfactor = reg_factor;
-		pCanvas->reg_state = PX_CanvasVM_State_Painting;
-		pCanvas->currentPathCount = 0;
-		return;
-	}
-	PX_ASSERT();
+	PX_GeoDrawPenCircleEraser(psurface, x, y, size,PX_TRUE);
 }
 
+px_void PX_CanvasVM_HandPaint(px_surface* psurface, px_float x, px_float y, px_float size, px_color color, px_void* ptr)
+{}
 
-px_void PX_CanvasVMFilter(PX_CanvasVM* pCanvas,PX_CanvasVM_FilterMode mode,px_int index, px_point samples[PX_CANVASVM_MAX_DETAIL_SIZE],px_int detail)
+px_void PX_CanvasVMPushNode(PX_CanvasVM* pCanvasVM, PX_CanvasNode* pnode)
 {
-	if (detail<=0)
+	if (pCanvasVM->currentPathCount < PX_CANVASVM_MAX_COUNT)
 	{
-		PX_ASSERT();
-		return;
+		pCanvasVM->currentPath[pCanvasVM->currentPathCount] = *pnode;
+		pCanvasVM->currentPathCount++;
 	}
 
-	if (index<0||index>=pCanvas->currentPathCount)
+}
+
+px_bool PX_CanvasVM_AddNode(PX_CanvasVM* pCanvasVM, px_float x, px_float y, px_float z)
+{
+	PX_CanvasNode node;
+	if (pCanvasVM->currentPathCount==0)
 	{
-		PX_ASSERT();
-		return;
+		node.x = x;
+		node.y = y;
+		node.z = z;
+		PX_CanvasVMPushNode(pCanvasVM, &node);
+		return PX_TRUE;
 	}
 	else
 	{
-		switch(mode)
+		PX_CanvasNode lastNode = pCanvasVM->currentPath[pCanvasVM->currentPathCount - 1];
+		px_point2D v=PX_POINT2D(x-lastNode.x,y-lastNode.y);
+		px_float distance = PX_Point2DMod(v);
+		v=PX_Point2DNormalization(v);
+		if (distance > pCanvasVM->reg_size / PX_CANVASVM_STEP_DIV)
 		{
-		case PX_CanvasVM_FilterMode_None:
-		{
-			px_float x, y,z;
-			x = pCanvas->currentPath[index].x;
-			y = pCanvas->currentPath[index].y;
-			z = pCanvas->currentPath[index].z;
-			
-			samples[0].x = x;
-			samples[0].y = y;
-			samples[0].z = z;
+			px_float fstep= (pCanvasVM->reg_size / PX_CANVASVM_STEP_DIV);
+			px_int iStep;
+			fstep=fstep < 1 ? 1 : fstep;
+			iStep=(px_int)(distance/ fstep);
 
-		}
-		break;
-		case PX_CanvasVM_FilterMode_Liner:
-		{
-			px_int i;
-			px_point v;
-			px_float x0, y0, z0;
-			px_float x1, y1, z1;
-			px_float step;
-			if (index ==0)
-			{
-				px_float x, y, z;
-				x = pCanvas->currentPath[index].x;
-				y = pCanvas->currentPath[index].y;
-				z = pCanvas->currentPath[index].z;
-
-				samples[0].x = x;
-				samples[0].y = y;
-				samples[0].z = z;
-				return;
-			}
-
-			x0 = pCanvas->currentPath[index-1].x;
-			y0 = pCanvas->currentPath[index-1].y;
-			z0 = pCanvas->currentPath[index-1].z;
-			x1 = pCanvas->currentPath[index].x;
-			y1 = pCanvas->currentPath[index].y;
-			z1 = pCanvas->currentPath[index].z;
-			v = PX_POINT(x1 - x0, y1 - y0, z1 - z0);
-			v = PX_PointNormalization(v);
-			step = PX_sqrt((x1 - x0) * (x1 - x0)+ (y1 - y0) *( y1 - y0))/detail;
-			for (i=0;i<detail;i++)
-			{
-				samples[i] = PX_PointAdd(PX_POINT(x0, y0, z0), PX_PointMul(v, step * i));
-			}
-		}
-		break;
-		case PX_CanvasVM_FilterMode_BSpline:
-		{
-			if (index == 0)
-			{
-				px_float x, y, z;
-				x = pCanvas->currentPath[index].x;
-				y = pCanvas->currentPath[index].y;
-				z = pCanvas->currentPath[index].z;
-
-				samples[0].x = x;
-				samples[0].y = y;
-				samples[0].z = z;
-				return;
-			}
-			else if (index==1)
-			{
-				px_int i;
-				px_point v;
-				px_float x0, y0, z0;
-				px_float x1, y1, z1;
-				px_float step;
-				x0 = pCanvas->currentPath[index - 1].x;
-				y0 = pCanvas->currentPath[index - 1].y;
-				z0 = pCanvas->currentPath[index - 1].z;
-				x1 = pCanvas->currentPath[index].x;
-				y1 = pCanvas->currentPath[index].y;
-				z1 = pCanvas->currentPath[index].z;
-				v = PX_POINT(x1 - x0, y1 - y0, z1 - z0);
-				v = PX_PointNormalization(v);
-				step = PX_sqrt((x1 - x0) * (x1 - x0) + (y1 - y0) * (y1 - y0)) / detail;
-				for (i = 0; i < detail; i++)
-				{
-					samples[i] = PX_PointAdd(PX_POINT(x0, y0, z0), PX_PointMul(v, step * i));
-				}
-			}
-			else
-			{
-				if (index<pCanvas->currentPathCount-1)
-				{
-					px_point2D samples2D[PX_CANVASVM_MAX_DETAIL_SIZE];
-					px_point2D bspline_order3[4],v,v1,v2,v3;
-					px_float x0, y0, z0,x1, y1, z1, x2, y2, z2, x3, y3, z3,d1,d2,d3;
-					px_int i;
-					x0 = pCanvas->currentPath[index - 2].x;
-					y0 = pCanvas->currentPath[index - 2].y;
-					z0 = pCanvas->currentPath[index - 2].z;
-					
-					x1 = pCanvas->currentPath[index-1].x;
-					y1 = pCanvas->currentPath[index-1].y;
-					z1 = pCanvas->currentPath[index-1].z;
-					
-					x2 = pCanvas->currentPath[index].x;
-					y2 = pCanvas->currentPath[index].y;
-					z2 = pCanvas->currentPath[index].z;
-
-					x3 = pCanvas->currentPath[index + 1].x;
-					y3 = pCanvas->currentPath[index + 1].y;
-					z3 = pCanvas->currentPath[index + 1].z;
-					
-					bspline_order3[0].x = x1;
-					bspline_order3[0].y = y1;
-
-					v1 = (PX_POINT2D((x1 - x0), (y1 - y0)));
-					v2= (PX_POINT2D((x2 - x1), (y2 - y1)));
-					v3 = (PX_POINT2D((x3 - x2), (y3 - y2)));
-					d1 = PX_Point2DMod(v1);
-					d2 = PX_Point2DMod(v2);
-					d3 = PX_Point2DMod(v3);
-					v1 = PX_Point2DMul(v1, d2/d1);
-					v = PX_Point2DAdd(v1,v2);
-					v = PX_Point2DMul(v, 0.25f * pCanvas->reg_filterfactor);
-
-					bspline_order3[1].x =x1+ v.x;
-					bspline_order3[1].y =y1+ v.y;
-
-					v3 = PX_Point2DMul(v3, d2 / d3);
-					v = PX_Point2DAdd(v2, v3);
-					v = PX_Point2DMul(v, -0.25f * pCanvas->reg_filterfactor);
-
-					bspline_order3[2].x = x2 + v.x;
-					bspline_order3[2].y = y2 + v.y;
-
-					bspline_order3[3].x = x2;
-					bspline_order3[3].y = y2;
-
-					PX_GeoBSpline3(bspline_order3, samples2D, detail);
-
-					for (i=0;i<detail;i++)
-					{
-						samples[i].x = samples2D[i].x;
-						samples[i].y = samples2D[i].y;
-						samples[i].z = z1 + (z2 - z1) * i / detail;
-					}
-				}
-				else
-				{
-					PX_ASSERT();
-				}
-			}
-		}
-		break;
-		case PX_CanvasVM_FilterMode_PainterEngineFilter:
-		{
-			PX_ASSERT();
-			return;
-		}
-		break;
-		default:
-			return;
-		}
-	}
-	
-}
-
-px_void PX_CanvasVMOnMove(PX_CanvasVM* pCanvas, px_float x, px_float y, px_float z)
-{
-	if (pCanvas->reg_state != PX_CanvasVM_State_Painting)
-	{
-		return;
-	}
-	pCanvas->reg_lastpoint.x = x;
-	pCanvas->reg_lastpoint.y = y;
-	pCanvas->reg_lastpoint.z = z;
-
-	if (pCanvas->reg_current_tool_index >= 0 && pCanvas->reg_current_tool_index < pCanvas->reg_tools_count)
-	{
-		PX_CanvasNode node = { 0 };
-		px_float distance,px,py,dx,dy;
-
-			if (pCanvas->currentPathCount==0)
-			{
-				node.x = x;
-				node.y = y;
-				node.z = z;
-				PX_CanvasVMPushNode(pCanvas, &node);
-				PX_CanvasVMPushNode(pCanvas, &node);
-			}
-			else
-			{
-
-				if (pCanvas->currentPathCount>2)
-				{
-					px_float m1, m2;
-					px_point2D v1, v2;
-					v1 = PX_POINT2D(\
-						pCanvas->currentPath[pCanvas->currentPathCount - 1].x - pCanvas->currentPath[pCanvas->currentPathCount - 2].x,
-						pCanvas->currentPath[pCanvas->currentPathCount - 1].y - pCanvas->currentPath[pCanvas->currentPathCount - 2].y);
-
-					v2 = PX_POINT2D(\
-						x - pCanvas->currentPath[pCanvas->currentPathCount - 1].x,
-						y - pCanvas->currentPath[pCanvas->currentPathCount - 1].y);
-
-					m1 = PX_Point2DMod(v1);
-					m2 = PX_Point2DMod(v2);
-					if (m1*m2!=0)
-					{
-						if (PX_Point2DDot(v1,v2)/m1/m2<0.7f)
-						{
-							node.x = x;
-							node.y = y;
-							node.z = z;
-							PX_CanvasVMPushNode(pCanvas, &node);
-						}
-					}
-				}
-				px = pCanvas->currentPath[pCanvas->currentPathCount - 1].x;
-				py = pCanvas->currentPath[pCanvas->currentPathCount - 1].y;
-
-				dx= px - pCanvas->currentPath[pCanvas->currentPathCount - 2].x;
-				dy = py - pCanvas->currentPath[pCanvas->currentPathCount - 2].y;
-				distance = PX_sqrt(dx* dx + dy * dy);
-				if (distance< pCanvas->reg_step)
-				{
-					pCanvas->currentPath[pCanvas->currentPathCount - 1].x = x;
-					pCanvas->currentPath[pCanvas->currentPathCount - 1].y = y;
-				}
-				else
-				{
-					node.x = x;
-					node.y = y;
-					node.z = z;
-					PX_CanvasVMPushNode(pCanvas, &node);
-				}
-		}
-		return;
-	}
-	PX_ASSERT();
-	return;
-}
-
-
-
-
-px_void PX_CanvasVMPaint(PX_CanvasVM* pCanvas, px_surface* prender, px_surface* pmask)
-{
-	if (pCanvas->reg_current_tool_index >= 0 && pCanvas->reg_current_tool_index < pCanvas->reg_tools_count)
-	{
-		pCanvas->ptarget_surface = prender;
-		pCanvas->pmask_surface = pmask;
-		pCanvas->tools[pCanvas->reg_current_tool_index].paint(pCanvas, pCanvas->tools[pCanvas->reg_current_tool_index].ptr);
-		return;
-	}
-	PX_ASSERT();
-
-}
-
-px_void PX_CanvasVMOnEnd(PX_CanvasVM* pCanvas)
-{
-	if (pCanvas->reg_current_tool_index >= 0 && pCanvas->reg_current_tool_index < pCanvas->reg_tools_count)
-	{
-		PX_CanvasNode node = { 0 };
-		px_float  lx, ly;
-		lx = pCanvas->currentPath[pCanvas->currentPathCount - 1].x;
-		ly = pCanvas->currentPath[pCanvas->currentPathCount - 1].y;
-		if (lx!=pCanvas->reg_lastpoint.x|| ly != pCanvas->reg_lastpoint.y)
-		{
-			node.x = pCanvas->reg_lastpoint.x;
-			node.y = pCanvas->reg_lastpoint.y;
-			node.z = pCanvas->reg_lastpoint.z;
-			PX_CanvasVMPushNode(pCanvas, &node);
-		}
-		
-		pCanvas->reg_state = PX_CanvasVM_State_Standby;
-		return;
-	}
-	PX_ASSERT();
-}
-
-px_bool PX_CanvasVMSelectToolByIndex(PX_CanvasVM* pCanvas, px_int index)
-{
-	if (index >= 0 && index < pCanvas->reg_tools_count)
-	{
-		pCanvas->reg_current_tool_index = index;
-		return PX_TRUE;
-	}
-	return PX_FALSE;
-}
-
-px_bool PX_CanvasVMSelectToolByName(PX_CanvasVM* pCanvas, const px_char name[])
-{
-	px_int i;
-	for (i=0;i<PX_COUNTOF(pCanvas->tools);i++)
-	{
-		if(!pCanvas->tools[i].name[0])
-			break;
-		if (PX_strequ2(pCanvas->tools[i].name,name))
-		{
-			pCanvas->reg_current_tool_index = i;
+			node.x = lastNode.x + iStep*  v.x;
+			node.y = lastNode.y + iStep * v.y;
+			node.z = z;
+			PX_CanvasVMPushNode(pCanvasVM, &node);
 			return PX_TRUE;
 		}
 	}
 	return PX_FALSE;
+	
 }
 
-px_void PX_CanvasVMSetTargetTexture(PX_CanvasVM* pCanvas, px_texture* ptex)
+px_void PX_CanvasVM_PaintDot(PX_CanvasVM* pCanvasVM,px_float x, px_float y,px_float z)
 {
-	pCanvas->ptarget_surface = ptex;
-}
-
-px_void PX_CanvasVMSetMaskTexture(PX_CanvasVM* pCanvas, px_texture* ptex)
-{
-	pCanvas->pmask_surface = ptex;
-}
-
-px_void PX_CanvasVMSetSize(PX_CanvasVM* pCanvas, px_float size)
-{
-	pCanvas->reg_size = size;
-}
-
-px_void PX_CanvasVMPushNode(PX_CanvasVM* pCanvas, PX_CanvasNode* pnode)
-{
-	if (pCanvas->currentPathCount< PX_CANVASVM_MAX_COUNT)
+	if (pCanvasVM->reg_tool >= 0 && pCanvasVM->reg_tool < pCanvasVM->reg_tools_count)
 	{
-		pCanvas->currentPath[pCanvas->currentPathCount] = *pnode;
-		pCanvas->currentPathCount++;
+		PX_CanvasVMTool* pTool = &pCanvasVM->tools[pCanvasVM->reg_tool];
+
+		if (z<0)
+		{
+			z = 0;
+		}
+		if (z>1)
+		{
+			z = 1;
+		}
+		if (pTool->paint&&pCanvasVM->pcache_editing_surface)
+		{
+			pTool->paint(pCanvasVM->pcache_editing_surface, x, y, pCanvasVM->reg_size*z,pCanvasVM->reg_color ,pTool->ptr);
+		}
+	}
+}
+
+px_bool PX_CanvasVMInitialize(px_memorypool* mp, PX_CanvasVM* pCanvasVM, px_int width, px_int height,px_int zoom_width,px_int zoom_height)
+{
+	PX_memset(pCanvasVM, 0, sizeof(PX_CanvasVM));
+	pCanvasVM->mp = mp;
+	pCanvasVM->reg_showdot = PX_FALSE;
+	pCanvasVM->reg_dotcolor = PX_COLOR_RED;
+	pCanvasVM->width = width;
+	pCanvasVM->height = height;
+	pCanvasVM->scale = 1;
+	pCanvasVM->max_scale = 10;
+	pCanvasVM->reg_state=PX_CanvasVM_State_Standby;
+	pCanvasVM->reg_state_id = 314159;
+	PX_MemoryInitialize(mp,&pCanvasVM->shell);
+
+
+	//hand--must be zero
+	PX_CanvasVMRegisterTool(pCanvasVM, "hand", PX_CanvasVM_HandPaint, PX_FALSE, pCanvasVM);
+	//Pen
+	PX_CanvasVMRegisterTool(pCanvasVM, "pen",  PX_CanvasVM_PenPaint,PX_TRUE, pCanvasVM);
+	//Paint
+	PX_CanvasVMRegisterTool(pCanvasVM, "paint",  PX_CanvasVM_PaintPaint, PX_TRUE, pCanvasVM);
+	//Spary
+	PX_CanvasVMRegisterTool(pCanvasVM, "spary",  PX_CanvasVM_SparyPaint, PX_TRUE, pCanvasVM);
+	//Eraser
+	PX_CanvasVMRegisterTool(pCanvasVM, "eraser",  PX_CanvasVM_EraserPaint, PX_TRUE, pCanvasVM);
+	
+
+
+	if (!PX_TextureCreate(mp, &pCanvasVM->cache_backward_surface, pCanvasVM->width, pCanvasVM->height))
+	{
+		PX_ASSERT();
+		return PX_NULL;
+	}
+	if (!PX_TextureCreate(mp, &pCanvasVM->cache_frontward_surface, pCanvasVM->width, pCanvasVM->height))
+	{
+		PX_ASSERT();
+		return PX_NULL;
+	}
+
+
+	if (!PX_TextureCreate(mp, &pCanvasVM->cache_surface, pCanvasVM->width, pCanvasVM->height))
+	{
+		PX_ASSERT();
+		return PX_NULL;
+	}
+
+	if (!PX_TextureCreate(mp, &pCanvasVM->view_surface, zoom_width, zoom_height))
+	{
+		PX_ASSERT();
+		return PX_NULL;
+	}
+
+
+	if (pCanvasVM->cache_surface.width * 1.25f > pCanvasVM->view_surface.width)
+	{
+		pCanvasVM->min_scale = pCanvasVM->view_surface.width * 1.0f / (pCanvasVM->cache_surface.width * 1.25f);
+
+		if (pCanvasVM->min_scale > pCanvasVM->view_surface.height * 1.0f / (pCanvasVM->cache_surface.height * 1.25f))
+		{
+			pCanvasVM->min_scale = pCanvasVM->view_surface.height * 1.0f / (pCanvasVM->cache_surface.height * 1.25f);
+		}
+	}
+	pCanvasVM->scale = 1;
+
+	pCanvasVM->view_x = pCanvasVM->cache_surface.width / 2.f;
+	pCanvasVM->view_y = pCanvasVM->cache_surface.height / 2.f;
+	return PX_TRUE;
+}
+
+px_void PX_CanvasVMSetZoom(PX_CanvasVM* pCanvasVM, px_int zoom_width, px_int zoom_height)
+{
+	PX_TextureFree(&pCanvasVM->view_surface);
+	if (!PX_TextureCreate(pCanvasVM->mp, &pCanvasVM->view_surface, zoom_width, zoom_height))
+	{
+		//out of memory
+		PX_ASSERT();
+		return;
+	}
+}
+
+px_void PX_CanvasVMOnBegin(PX_CanvasVM* pCanvasVM)
+{
+	if (PX_CanvasVMGetEditingLayerIndex(pCanvasVM) != -1)
+	{
+		if (pCanvasVM->reg_state == PX_CanvasVM_State_Standby)
+		{
+			PX_CanvasVMUpdateMaskEditingCache(pCanvasVM);
+			pCanvasVM->reg_state = PX_CanvasVM_State_Painting;
+			pCanvasVM->currentPathCount = 0;
+			PX_memset(pCanvasVM->currentPath, 0, sizeof(pCanvasVM->currentPath));
+		}
+	}
+}
+
+px_void PX_CanvasVMOnDrawLastInterpolate(PX_CanvasVM* pCanvasVM)
+{
+	
+	if (pCanvasVM->currentPathCount > 1)
+	{
+		px_point3D v1 = PX_POINT(pCanvasVM->currentPath[pCanvasVM->currentPathCount - 1].x, pCanvasVM->currentPath[pCanvasVM->currentPathCount - 1].y, pCanvasVM->currentPath[pCanvasVM->currentPathCount - 1].z);
+		px_point3D v2 = PX_POINT(pCanvasVM->currentPath[pCanvasVM->currentPathCount - 2].x, pCanvasVM->currentPath[pCanvasVM->currentPathCount - 2].y, pCanvasVM->currentPath[pCanvasVM->currentPathCount - 2].z);
+		px_point3D dir=PX_PointSub(v1,v2);
+		px_float d=PX_sqrt(dir.x*dir.x+dir.y*dir.y);
+		px_float step=pCanvasVM->reg_size/PX_CANVASVM_STEP_DIV;
+		px_int i,dots;
+
+		PX_ASSERTIF(pCanvasVM->reg_size == 0)
+
+
+		dir = PX_PointNormalization(dir);
+		
+		dots = PX_APO(d / step);
+
+		for (i = 1; i <= dots; i++)
+		{
+			PX_CanvasVM_PaintDot(pCanvasVM, v2.x+dir.x*i*step, v2.y+dir.y*i * step,v2.z+ dir.z*i * step);
+		}
+
+		if (pCanvasVM->reg_showdot&& pCanvasVM->pcache_editing_surface)
+		{
+			PX_GeoDrawSolidCircle(pCanvasVM->pcache_editing_surface, (px_int)pCanvasVM->currentPath[pCanvasVM->currentPathCount - 1].x, (px_int)pCanvasVM->currentPath[pCanvasVM->currentPathCount - 1].y, 2, PX_COLOR_RED);
+		}
+	}
+	else if(pCanvasVM->currentPathCount ==1)
+	{
+		PX_CanvasVM_PaintDot(pCanvasVM, pCanvasVM->currentPath[0].x, pCanvasVM->currentPath[0].y, pCanvasVM->currentPath[0].z);
+		if (pCanvasVM->reg_showdot&& pCanvasVM->pcache_editing_surface)
+		{
+			PX_GeoDrawSolidCircle(pCanvasVM->pcache_editing_surface, (px_int)pCanvasVM->currentPath[0].x, (px_int)pCanvasVM->currentPath[0].y, 2, PX_COLOR_RED);
+		}
 	}
 	
 }
 
-px_void PX_CanvasVMStorePayload(PX_CanvasVM* pCanvas)
+px_void PX_CanvasVMOnMove(PX_CanvasVM* pCanvasVM, px_float x, px_float y, px_float z)
 {
-	PX_CanvasNode_Header header = { 0 };
-	header.opcode = pCanvas->tools[pCanvas->reg_current_tool_index].opcode;
-	header.size = pCanvas->currentPathCount;
-	if (!PX_MemoryCat(&pCanvas->payload, &header, sizeof(header)))return;
-	if (!PX_MemoryCat(&pCanvas->payload, pCanvas->currentPath, sizeof(PX_CanvasNode) * pCanvas->currentPathCount))return;
-	pCanvas->currentPathCount = 0;
+	px_float step = pCanvasVM->reg_size / PX_CANVASVM_STEP_DIV;
+	if (pCanvasVM->reg_state != PX_CanvasVM_State_Painting)
+	{
+		return;
+	}
+
+	if (step<1)
+	{
+		step = 1;
+	}
+	if (pCanvasVM->currentPathCount==0)
+	{
+		if (pCanvasVM->reg_tool >= 0 && pCanvasVM->reg_tool < pCanvasVM->reg_tools_count)
+		{
+			if (pCanvasVM->tools[pCanvasVM->reg_tool].store)
+			{
+				if(PX_CanvasVM_AddNode(pCanvasVM, x, y, z))
+					PX_CanvasVMOnDrawLastInterpolate(pCanvasVM);
+			}
+			else
+			{
+				PX_CanvasVM_PaintDot(pCanvasVM, x, y, z);
+			}
+		}
+		else
+		{
+			PX_ASSERT();
+		}
+		pCanvasVM->reg_lastCursorPos = PX_POINT(x, y, z);
+	}
+	else
+	{
+		px_float d;
+		px_point lastPoint;
+
+		if (pCanvasVM->reg_tool <  0 || pCanvasVM->reg_tool >= pCanvasVM->reg_tools_count)
+		{
+			return;
+		}
+		
+		lastPoint.x = pCanvasVM->currentPath[pCanvasVM->currentPathCount - 1].x;
+		lastPoint.y = pCanvasVM->currentPath[pCanvasVM->currentPathCount - 1].y;
+		lastPoint.z = pCanvasVM->currentPath[pCanvasVM->currentPathCount - 1].z;
+
+		do
+		{
+			px_float m1, m2;
+			px_point2D v1, v2;
+			v1 = PX_POINT2D(lastPoint.x - pCanvasVM->reg_lastCursorPos.x, lastPoint.y - pCanvasVM->reg_lastCursorPos.y);
+			v2 = PX_POINT2D(x - pCanvasVM->reg_lastCursorPos.x, y - pCanvasVM->reg_lastCursorPos.y);
+
+			m1 = PX_Point2DMod(v1);
+			m2 = PX_Point2DMod(v2);
+
+			if (m1 * m2 > 1)
+			{
+				px_float _cosv = PX_Point2DDot(v1, v2) / m1 / m2;
+				if (_cosv > 0.5f)
+				{
+					if (PX_CanvasVM_AddNode(pCanvasVM, pCanvasVM->reg_lastCursorPos.x, pCanvasVM->reg_lastCursorPos.y, pCanvasVM->reg_lastCursorPos.z))
+						PX_CanvasVMOnDrawLastInterpolate(pCanvasVM);
+
+					lastPoint.x = pCanvasVM->currentPath[pCanvasVM->currentPathCount - 1].x;
+					lastPoint.y = pCanvasVM->currentPath[pCanvasVM->currentPathCount - 1].y;
+					lastPoint.z = pCanvasVM->currentPath[pCanvasVM->currentPathCount - 1].z;
+				}
+			}
+
+		} while (0);
+
+		pCanvasVM->reg_lastCursorPos = PX_POINT(x, y, z);
+
+		d = PX_sqrt((x - lastPoint.x) * (x - lastPoint.x) + (y - lastPoint.y) * (y - lastPoint.y));
+		if (d > pCanvasVM->reg_filter_radius)
+		{
+			if (PX_CanvasVM_AddNode(pCanvasVM, pCanvasVM->reg_lastCursorPos.x, pCanvasVM->reg_lastCursorPos.y, pCanvasVM->reg_lastCursorPos.z))
+				PX_CanvasVMOnDrawLastInterpolate(pCanvasVM);
+		}
+		else
+		{
+			return;
+		}
+	}
+
 }
 
-px_void PX_CanvasVMRegisterTool(PX_CanvasVM* pCanvas, px_char name[PX_CANVASVM_MAX_TOOL_NAME], px_dword opcode, pfun_PX_CanvasVMOnPaint paint, px_void* ptr)
+px_void PX_CanvasVMOnEndEx(PX_CanvasVM* pCanvasVM,px_bool store)
+{
+	PX_ASSERTIF(pCanvasVM->reg_tool == -1);
+
+	if (pCanvasVM->reg_state != PX_CanvasVM_State_Painting)
+	{
+		return;
+	}
+
+	if (pCanvasVM->reg_lastCursorPos.x != pCanvasVM->currentPath[pCanvasVM->currentPathCount - 1].x)
+	{
+		if (pCanvasVM->reg_lastCursorPos.y != pCanvasVM->currentPath[pCanvasVM->currentPathCount - 1].y)
+		{
+			if (pCanvasVM->reg_tool >= 0 && pCanvasVM->reg_tool < pCanvasVM->reg_tools_count)
+			{
+				if (PX_CanvasVM_AddNode(pCanvasVM, pCanvasVM->reg_lastCursorPos.x, pCanvasVM->reg_lastCursorPos.y, pCanvasVM->reg_lastCursorPos.z))
+					PX_CanvasVMOnDrawLastInterpolate(pCanvasVM);
+
+			}
+			else
+			{
+				PX_ASSERT();
+			}
+
+		}
+	}
+	if (store)
+	{
+		if (pCanvasVM->reg_tool >= 0 && pCanvasVM->reg_tool < pCanvasVM->reg_tools_count)
+		{
+			if (pCanvasVM->tools[pCanvasVM->reg_tool].store)
+				PX_CanvasVMStorePaintShell(pCanvasVM);
+		}
+		PX_CanvasVMRepaintEditingLayerMiniPreview(pCanvasVM);
+	}
+
+	PX_memset(pCanvasVM->currentPath, 0, sizeof(pCanvasVM->currentPath));
+	pCanvasVM->currentPathCount = 0;
+	pCanvasVM->reg_state = PX_CanvasVM_State_Standby;
+	pCanvasVM->reg_state_id++;
+	return;
+}
+px_void PX_CanvasVMOnEnd(PX_CanvasVM* pCanvasVM)
+{
+	PX_CanvasVMOnEndEx(pCanvasVM, PX_TRUE);
+}
+
+
+px_bool PX_CanvasVMSelectToolByName(PX_CanvasVM* pCanvasVM, const px_char name[])
 {
 	px_int i;
-	for (i=0;i<PX_COUNTOF(pCanvas->tools);i++)
+	for (i=0;i<PX_COUNTOF(pCanvasVM->tools);i++)
 	{
-		if (pCanvas->tools[i].name[0]==0)
+		if(!pCanvasVM->tools[i].name[0])
+			break;
+		if (PX_strequ2(pCanvasVM->tools[i].name,name))
 		{
-			PX_strset(pCanvas->tools[i].name, name);
-			pCanvas->tools[i].opcode = opcode;
-			pCanvas->tools[i].paint = paint;
-			pCanvas->tools[i].ptr = ptr;
-			pCanvas->reg_tools_count++;
+			pCanvasVM->reg_tool = i;
+			return PX_TRUE;
+		}
+	}
+	pCanvasVM->reg_tool = -1;
+	return PX_FALSE;
+}
+
+
+px_void PX_CanvasVMSetSize(PX_CanvasVM* pCanvasVM, px_float size)
+{
+	pCanvasVM->reg_size = size;
+}
+
+
+px_void PX_CanvasVMSetFilter(PX_CanvasVM* pCanvasVM, px_float filter)
+{
+	pCanvasVM->reg_filter_radius = filter;
+}
+
+px_void PX_CanvasVMSetViewPosition(PX_CanvasVM* pCanvasVM, px_float x, px_float y)
+{
+	pCanvasVM->view_x = x;
+	pCanvasVM->view_y = y;
+
+	if (pCanvasVM->view_x < 0)
+	{
+		pCanvasVM->view_x = 0;
+	};
+
+	if (pCanvasVM->view_x > pCanvasVM->cache_surface.width)
+	{
+		pCanvasVM->view_x = pCanvasVM->cache_surface.width * 1.f;
+	};
+
+	if (pCanvasVM->view_y < 0)
+	{
+		pCanvasVM->view_y = 0;
+	};
+	if (pCanvasVM->view_y > pCanvasVM->cache_surface.height)
+	{
+		pCanvasVM->view_y =pCanvasVM->cache_surface.height * 1.f;
+	};
+
+	PX_CanvasVMRepaintCacheToView(pCanvasVM);
+	pCanvasVM->reg_state_id++;
+}
+
+px_void PX_CanvasVMSetViewScale(PX_CanvasVM* pCanvasVM, px_float scale)
+{
+	pCanvasVM->scale = scale;
+	pCanvasVM->reg_state_id++;
+	if (pCanvasVM->scale < pCanvasVM->min_scale)
+	{
+		pCanvasVM->scale = pCanvasVM->min_scale;
+	}
+	if (pCanvasVM->scale > pCanvasVM->max_scale)
+	{
+		pCanvasVM->scale = pCanvasVM->max_scale;
+	}
+	PX_CanvasVMRepaintCacheToView(pCanvasVM);
+	pCanvasVM->reg_state_id++;
+	
+}
+
+px_void PX_CanvasVMResetView(PX_CanvasVM* pCanvasVM)
+{
+	pCanvasVM->scale = 1;
+	pCanvasVM->view_x=pCanvasVM->cache_surface.width/2.f;
+	pCanvasVM->view_y=pCanvasVM->cache_surface.height/2.f;
+	pCanvasVM->reg_state_id++;
+	PX_CanvasVMRepaintCacheToView(pCanvasVM);
+}
+
+px_void PX_CanvasVMSetColor(PX_CanvasVM* pCanvasVM, px_color color)
+{
+	pCanvasVM->reg_color = color;
+}
+
+px_void PX_CanvasVMLayerSetEditing(PX_CanvasVM* pCanvasVM, px_int index)
+{
+	
+	px_int lastip;
+	PX_CanvasVMShell_Header* pHeader;
+	lastip= PX_CanvasVMGetLastShellIP(pCanvasVM);
+	PX_ASSERTIF(lastip == -1);
+	pHeader=(PX_CanvasVMShell_Header*)(pCanvasVM->shell.buffer+lastip);
+	if (pHeader->opcode==PX_CANVASVM_OPCODE_LAYEREDIT)
+	{
+		pCanvasVM->reg_ip = lastip;
+		pHeader->payload=(px_dword)index;
+	}
+	else
+	{
+		PX_CanvasVMShell_Header header = { 0 };
+		header.opcode = PX_CANVASVM_OPCODE_LAYEREDIT;
+		header.color = PX_COLOR_NONE;
+		header.psize = 0;
+		header.payload = (px_dword)index;
+		PX_MemoryLeft(&pCanvasVM->shell, pCanvasVM->reg_ip);
+		if (!PX_MemoryCat(&pCanvasVM->shell, &header, sizeof(header)))return;
+		
+	}
+
+	PX_CanvasVMExecuteShell(pCanvasVM);
+	PX_CanvasVMRepaintAllCache(pCanvasVM);
+}
+
+px_int PX_CanvasVMGetEditingLayerIndex(PX_CanvasVM* pCanvasVM)
+{
+	px_int i;
+	for (i = 0; i < PX_COUNTOF(pCanvasVM->layers); i++)
+	{
+		if (pCanvasVM->layers[i].editing)
+		{
+			return i;
+		}
+	}
+	return -1;
+}
+
+px_void PX_CanvasVMStorePaintShell(PX_CanvasVM* pCanvasVM)
+{
+	PX_CanvasVMShell_Header header = { 0 };
+	header.opcode= PX_CANVASVM_OPCODE_PAINT;
+	header.payload = pCanvasVM->reg_tool;
+	header.color = pCanvasVM->reg_color;
+	header.psize=pCanvasVM->reg_size;
+	header.filter = pCanvasVM->reg_filter_radius;
+	header.size = pCanvasVM->currentPathCount* sizeof(PX_CanvasNode);
+	PX_MemoryLeft(&pCanvasVM->shell, pCanvasVM->reg_ip);
+	if (!PX_MemoryCat(&pCanvasVM->shell, &header, sizeof(header)))return;
+	if (!PX_MemoryCat(&pCanvasVM->shell, pCanvasVM->currentPath, sizeof(PX_CanvasNode) * pCanvasVM->currentPathCount))return;
+
+	pCanvasVM->reg_ip = pCanvasVM->shell.usedsize;
+
+}
+
+px_void PX_CanvasVMRegisterTool(PX_CanvasVM* pCanvasVM, px_char name[PX_CANVASVM_MAX_TOOL_NAME], pfun_PX_CanvasVMOnPaint paint,px_bool store, px_void* ptr)
+{
+	px_int i;
+	for (i=0;i<PX_COUNTOF(pCanvasVM->tools);i++)
+	{
+		if (pCanvasVM->tools[i].name[0]==0)
+		{
+			PX_strset(pCanvasVM->tools[i].name, name);
+			pCanvasVM->tools[i].paint = paint;
+			pCanvasVM->tools[i].ptr = ptr;
+			pCanvasVM->tools[i].store = store;
+			pCanvasVM->reg_tools_count++;
+
 			return;
 		}
 	}
 }
 
-px_void PX_CanvasVMFree(PX_CanvasVM* pCanvas)
+px_void PX_CanvasVMFree(PX_CanvasVM* pCanvasVM)
 {
-	PX_VectorFree( &pCanvas->payload_offsets);
-	PX_MemoryFree(&pCanvas->payload);
+	px_int i;
+	PX_MemoryFree(&pCanvasVM->shell);
+
+
+	for (i = 0; i < PX_COUNTOF(pCanvasVM->layers); i++)
+	{
+		if (pCanvasVM->layers[i].activating)
+		{
+			PX_TextureFree(&pCanvasVM->layers[i].surface_layer);
+			PX_TextureFree(&pCanvasVM->layers[i].surface_preview_mini);
+		}
+		if (pCanvasVM->snapshot_layers[i].activating)
+		{
+			PX_TextureFree(&pCanvasVM->snapshot_layers[i].surface_layer);
+			PX_TextureFree(&pCanvasVM->snapshot_layers[i].surface_preview_mini);
+		}
+	}
+
+	PX_TextureFree(&pCanvasVM->cache_backward_surface);
+	PX_TextureFree(&pCanvasVM->cache_frontward_surface);
+
+	PX_TextureFree(&pCanvasVM->cache_surface);
+	PX_TextureFree(&pCanvasVM->view_surface);
+}
+
+px_void PX_CanvasVMReset(PX_CanvasVM* pCanvasVM)
+{
+	px_int i;
+	PX_MemoryClear(&pCanvasVM->shell);
+	for (i = 0; i < PX_COUNTOF(pCanvasVM->layers); i++)
+	{
+		if (pCanvasVM->layers[i].activating)
+		{
+			PX_TextureFree(&pCanvasVM->layers[i].surface_layer);
+			PX_TextureFree(&pCanvasVM->layers[i].surface_preview_mini);
+		}
+		if (pCanvasVM->snapshot_layers[i].activating)
+		{
+			PX_TextureFree(&pCanvasVM->snapshot_layers[i].surface_layer);
+			PX_TextureFree(&pCanvasVM->snapshot_layers[i].surface_preview_mini);
+		}
+	}
+	PX_memset(pCanvasVM->layers, 0, sizeof(pCanvasVM->layers));
+	PX_memset(pCanvasVM->snapshot_layers, 0, sizeof(pCanvasVM->snapshot_layers));
+	pCanvasVM->reg_ip = 0;
+	pCanvasVM->reg_snapshot_ip = 0;
+
+	PX_CanvasVMRepaintAllCache(pCanvasVM);
+	PX_CanvasVMRepaintAllLayersPreview(pCanvasVM);
+}
+
+px_bool PX_CanvasVMExport(PX_CanvasVM* pCanvasVM, px_memory* bin)
+{
+	typedef struct
+	{
+		px_dword pi2;
+		px_dword size;
+	}header;
+	header hd;
+	hd.pi2 = 0x6282;
+	hd.size = pCanvasVM->shell.usedsize;
+
+	if (!PX_MemoryCat(bin, &hd, sizeof(hd)))return PX_FALSE;
+	if (!PX_MemoryCat(bin, pCanvasVM->shell.buffer, pCanvasVM->shell.usedsize))return PX_FALSE;
+	return PX_TRUE;
+}
+
+px_bool PX_CanvasVMExportAsPng(PX_CanvasVM* pCanvasVM, px_memory* bin)
+{
+	PX_PngSurfaceToBuffer(&pCanvasVM->cache_surface, bin);
+	return PX_TRUE;
+}
+
+px_bool PX_CanvasVMImport(PX_CanvasVM* pCanvasVM, const px_byte data[], px_int size)
+{
+	typedef struct
+	{
+		px_dword pi2;
+		px_dword size;
+	}header;
+	PX_CanvasVMReset(pCanvasVM);
+	//check header and size
+	if (size < sizeof(header))return PX_FALSE;
+	header* hd = (header*)data;
+	if (hd->pi2 != 0x6282)return PX_FALSE;
+	if (size < hd->size + sizeof(header))return PX_FALSE;
+	//import
+	if (!PX_MemoryCat(&pCanvasVM->shell, data + sizeof(header), hd->size))return PX_FALSE;
+	pCanvasVM->reg_ip = 0;
+	PX_CanvasVMPushad(pCanvasVM);
+	while (pCanvasVM->reg_ip<pCanvasVM->shell.usedsize)
+	{
+		PX_CanvasVMExecuteShell(pCanvasVM);
+	}
+	PX_CanvasVMRepaintAllCache(pCanvasVM);
+	PX_CanvasVMRepaintAllLayersPreview(pCanvasVM);
+	PX_CanvasVMPopad(pCanvasVM);
+	return PX_TRUE;
+}
+
+px_void PX_CanvasVMPushad(PX_CanvasVM* pCanvasVM)
+{
+	pCanvasVM->reg_tool2= pCanvasVM->reg_tool;
+	pCanvasVM->reg_size2 = pCanvasVM->reg_size;
+	pCanvasVM->reg_color2 = pCanvasVM->reg_color;
+	pCanvasVM->reg_filter_radius2 = pCanvasVM->reg_filter_radius;
 
 }
 
-px_void PX_CanvasVMSetMode(PX_CanvasVM* pCanvas, PX_CanvasVM_FilterMode fmode)
+px_void PX_CanvasVMPopad(PX_CanvasVM* pCanvasVM)
 {
-	pCanvas->reg_filtermode = fmode;
+	pCanvasVM->reg_tool = pCanvasVM->reg_tool2;
+	pCanvasVM->reg_size = pCanvasVM->reg_size2;
+	pCanvasVM->reg_color = pCanvasVM->reg_color2;
+	pCanvasVM->reg_filter_radius = pCanvasVM->reg_filter_radius2;
 }
 
+
+px_void PX_CanvasVMRepaintLayerMiniPreview(PX_CanvasVM* pCanvasVM, px_int layerindex)
+{
+	if (layerindex < 0 || layerindex >= PX_COUNTOF(pCanvasVM->layers) || !pCanvasVM->layers[layerindex].activating)
+	{
+		PX_ASSERT();
+		return;
+	}
+	PX_TextureScaleToTexture(&pCanvasVM->layers[layerindex].surface_layer, &pCanvasVM->layers[layerindex].surface_preview_mini);
+}
+
+px_void PX_CanvasVMRepaintEditingLayerMiniPreview(PX_CanvasVM* pCanvasVM)
+{
+	px_int i = 0;
+	for (i = 0; i < PX_COUNTOF(pCanvasVM->layers); i++)
+	{
+		if (!pCanvasVM->layers[i].activating)
+		{
+			break;
+		}
+		if (pCanvasVM->layers[i].editing)
+		{
+			PX_CanvasVMRepaintLayerMiniPreview(pCanvasVM, i);
+			return;
+		}
+	}
+}
+
+px_void PX_CanvasVMLayerCreate(PX_CanvasVM* pCanvasVM, const px_char name[])
+{
+	
+   PX_CanvasVMShell_Header header = { 0 };
+	//add shell
+	header.opcode = PX_CANVASVM_OPCODE_LAYERCREATE;
+	header.color = PX_COLOR_NONE;
+	header.psize = 0;
+	header.size = PX_strlen(name)+1;
+	PX_MemoryLeft(&pCanvasVM->shell, pCanvasVM->reg_ip);
+	if (!PX_MemoryCat(&pCanvasVM->shell, &header, sizeof(header)))return;
+	if (!PX_MemoryCat(&pCanvasVM->shell, name, PX_strlen(name) + 1))return;
+
+	PX_CanvasVMExecuteShell(pCanvasVM);
+	PX_CanvasVMRepaintAllCache(pCanvasVM);
+	return;
+}
+
+px_void PX_CanvasVMLayerDelete(PX_CanvasVM* pCanvasVM)
+{
+	PX_CanvasVMShell_Header header = { 0 };
+	if (PX_CanvasVMGetEditingLayerIndex(pCanvasVM)==-1)
+	{
+		return;
+	}
+	//add shell
+	header.opcode = PX_CANVASVM_OPCODE_LAYERDELETE;
+	header.color = PX_COLOR_NONE;
+	header.psize = 0;
+	header.size = 0;
+	PX_MemoryLeft(&pCanvasVM->shell, pCanvasVM->reg_ip);
+	if (!PX_MemoryCat(&pCanvasVM->shell, &header, sizeof(header)))return;
+	PX_CanvasVMExecuteShell(pCanvasVM);
+	PX_CanvasVMRepaintAllCache(pCanvasVM);
+
+}
+
+px_void PX_CanvasVMLayerMoveUp(PX_CanvasVM* pCanvasVM)
+{
+	PX_CanvasVMShell_Header header = { 0 };
+
+	if (PX_CanvasVMGetEditingLayerIndex(pCanvasVM) == -1)
+	{
+		return;
+	}
+
+	//add shell
+	header.opcode = PX_CANVASVM_OPCODE_LAYERMOVEUP;
+	header.color = PX_COLOR_NONE;
+	header.psize = 0;
+	header.size = 0;
+	PX_MemoryLeft(&pCanvasVM->shell, pCanvasVM->reg_ip);
+	if (!PX_MemoryCat(&pCanvasVM->shell, &header, sizeof(header)))return;
+
+	PX_CanvasVMExecuteShell(pCanvasVM);
+
+	PX_CanvasVMRepaintAllCache(pCanvasVM);
+}
+
+px_void PX_CanvasVMLayerMoveDown(PX_CanvasVM* pCanvasVM)
+{
+	PX_CanvasVMShell_Header header = { 0 };
+
+	if (PX_CanvasVMGetEditingLayerIndex(pCanvasVM) == -1)
+	{
+		return;
+	}
+	//add shell
+	header.opcode = PX_CANVASVM_OPCODE_LAYERMOVEDOWN;
+	header.color = PX_COLOR_NONE;
+	header.psize = 0;
+	header.size = 0;
+	PX_MemoryLeft(&pCanvasVM->shell, pCanvasVM->reg_ip);
+	if (!PX_MemoryCat(&pCanvasVM->shell, &header, sizeof(header)))return;
+
+	PX_CanvasVMExecuteShell(pCanvasVM);
+
+	PX_CanvasVMRepaintAllCache(pCanvasVM);
+}
+
+px_void PX_CanvasVMLayerVisible(PX_CanvasVM* pCanvasVM)
+{
+	PX_CanvasVMShell_Header header = { 0 };
+
+	if (PX_CanvasVMGetEditingLayerIndex(pCanvasVM) == -1)
+	{
+		return;
+	}
+	//add shell
+	header.opcode = PX_CANVASVM_OPCODE_LAYERVISIBLE;
+	header.color = PX_COLOR_NONE;
+	header.psize = 0;
+	header.size = 0;
+	PX_MemoryLeft(&pCanvasVM->shell, pCanvasVM->reg_ip);
+	if (!PX_MemoryCat(&pCanvasVM->shell, &header, sizeof(header)))return;
+
+	PX_CanvasVMExecuteShell(pCanvasVM);
+
+	PX_CanvasVMRepaintAllCache(pCanvasVM);
+
+
+}
+
+px_void PX_CanvasVMLayerClip(PX_CanvasVM* pCanvasVM)
+{
+	
+	PX_CanvasVMShell_Header header = { 0 };
+
+	if (PX_CanvasVMGetEditingLayerIndex(pCanvasVM) == -1)
+	{
+		return;
+	}
+
+	//add shell
+	header.opcode = PX_CANVASVM_OPCODE_LAYERCLIP;
+	header.color = PX_COLOR_NONE;
+	header.psize = 0;
+	header.size = 0;
+	PX_MemoryLeft(&pCanvasVM->shell, pCanvasVM->reg_ip);
+	if (!PX_MemoryCat(&pCanvasVM->shell, &header, sizeof(header)))return;
+
+	PX_CanvasVMExecuteShell(pCanvasVM);
+
+	PX_CanvasVMRepaintAllCache(pCanvasVM);
+}
+
+static px_void PX_CanvasVMRenderLayerToSurface(PX_CanvasVM* pCanvasVM, px_int index, px_texture* prendertarget)
+{
+	if (pCanvasVM->layers[index].activating == PX_FALSE)
+	{
+		return;
+	}
+
+	if (pCanvasVM->layers[index].attribute == PX_OBJECT_LAYER_ATTRIBUTE_CLIP)
+	{
+		//find normal
+		px_int j;
+		for (j = index + 1; j < PX_COUNTOF(pCanvasVM->layers); j++)
+		{
+			if (pCanvasVM->layers[j].activating == PX_FALSE)
+			{
+				break;
+			}
+			//find mask
+			if (pCanvasVM->layers[j].attribute == PX_OBJECT_LAYER_ATTRIBUTE_NORMAL)
+			{
+				if (pCanvasVM->layers[j].visible)
+				{
+					PX_TextureRenderMask(prendertarget, &pCanvasVM->layers[j].surface_layer, &pCanvasVM->layers[index].surface_layer, 0, 0, PX_ALIGN_LEFTTOP, 0);
+					return;
+				}
+			}
+		}
+	}
+
+	if (pCanvasVM->layers[index].visible)
+		PX_TextureRender(prendertarget, &pCanvasVM->layers[index].surface_layer, 0, 0, PX_ALIGN_LEFTTOP, 0);
+
+}
+
+px_void PX_CanvasVMRepaintAllLayersPreview(PX_CanvasVM* pCanvasVM)
+{
+	px_int i;
+	for (i = 0; i < PX_COUNTOF(pCanvasVM->layers); i++)
+	{
+		if (pCanvasVM->layers[i].activating)
+		{
+			PX_CanvasVMRepaintLayerMiniPreview(pCanvasVM, i);
+		}
+	}
+}
+
+px_void PX_CanvasVMRepaintBackFrontCache(PX_CanvasVM* pdesc)
+{
+	px_texture* prender;
+	px_int index = 0;
+
+	if (pdesc->layers[0].activating==PX_FALSE)
+	{
+		return;
+	}
+
+	pdesc->reg_r_drawback = PX_FALSE;
+	pdesc->reg_r_drawfront = PX_FALSE;
+
+	PX_SurfaceClearAll(&pdesc->cache_frontward_surface, PX_COLOR(0, 255, 255, 255));
+	PX_SurfaceClearAll(&pdesc->cache_backward_surface, PX_COLOR(0, 255, 255, 255));
+
+	while (pdesc->layers[index].activating)
+	{
+		index++;
+	}
+	if (!index)
+	{
+		return;
+	}
+	index--;
+	prender = &pdesc->cache_backward_surface;
+	while (index >= 0)
+	{
+
+		if (pdesc->layers[index].editing)
+		{
+			prender = &pdesc->cache_frontward_surface;
+		}
+		else
+		{
+			if (prender == &pdesc->cache_backward_surface)
+			{
+				if (pdesc->layers[index].visible)
+				{
+					pdesc->reg_r_drawback = PX_TRUE;
+				}
+			}
+			else
+			{
+				if (pdesc->layers[index].visible)
+				{
+					pdesc->reg_r_drawfront = PX_TRUE;
+				}
+			}
+			PX_CanvasVMRenderLayerToSurface(pdesc, index, prender);
+		}
+
+		index--;
+	}
+
+}
+
+px_void PX_CanvasVMUpdateMaskEditingCache(PX_CanvasVM* pdesc)
+{
+	px_int index = 0;
+	px_int activatingIndex = 0;
+	
+	if (pdesc->layers[0].activating == PX_FALSE)
+	{
+		return;
+	}
+
+	pdesc->pcache_editing_surface = PX_NULL;
+	pdesc->pcache_mask_surface = PX_NULL;
+
+	for (activatingIndex = 0; activatingIndex < PX_COUNTOF(pdesc->layers); activatingIndex++)
+	{
+		if (pdesc->layers[activatingIndex].activating == PX_FALSE)
+		{
+			break;
+		}
+		if (pdesc->layers[activatingIndex].editing == PX_TRUE)
+		{
+			if (pdesc->layers[activatingIndex].visible)
+			{
+				pdesc->pcache_editing_surface = &pdesc->layers[activatingIndex].surface_layer;
+			}
+
+			if (pdesc->layers[activatingIndex].attribute == PX_OBJECT_LAYER_ATTRIBUTE_CLIP)
+			{
+				index = activatingIndex + 1;
+
+				while (index < PX_COUNTOF(pdesc->layers))
+				{
+					if (!pdesc->layers[index].activating)
+					{
+						break;
+					}
+					if (pdesc->layers[index].attribute == PX_OBJECT_LAYER_ATTRIBUTE_NORMAL)
+					{
+						pdesc->pcache_mask_surface = &pdesc->layers[index].surface_layer;
+						break;
+					}
+					index++;
+				}
+			}
+			break;
+		}
+	}
+}
+
+px_void PX_CanvasVMRepaintCache(PX_CanvasVM* pdesc)
+{
+
+	if (pdesc->layers[0].activating == PX_FALSE)
+	{
+		PX_SurfaceClearAll(&pdesc->cache_surface, PX_COLOR(0, 255, 255, 255));
+		return;
+	}
+
+	PX_SurfaceClearAll(&pdesc->cache_surface, PX_COLOR(255, 255, 255, 255));
+
+	if (pdesc->reg_r_drawback)
+	{
+		PX_TextureRender(&pdesc->cache_surface, &pdesc->cache_backward_surface, 0, 0, PX_ALIGN_LEFTTOP, 0);
+	}
+
+	if (pdesc->pcache_editing_surface)
+	{
+		if (pdesc->pcache_mask_surface)
+			PX_TextureRenderMask(&pdesc->cache_surface, pdesc->pcache_mask_surface, pdesc->pcache_editing_surface, 0, 0, PX_ALIGN_LEFTTOP, 0);
+		else
+			PX_TextureRender(&pdesc->cache_surface, pdesc->pcache_editing_surface, 0, 0, PX_ALIGN_LEFTTOP, 0);
+	}
+
+	if (pdesc->reg_r_drawfront)
+	{
+		PX_TextureRender(&pdesc->cache_surface, &pdesc->cache_frontward_surface, 0, 0, PX_ALIGN_LEFTTOP, 0);
+	}
+
+}
+
+px_void PX_CanvasVMRepaintCacheToView(PX_CanvasVM* pdesc)
+{
+	px_int ltx, lty, rbx, rby;
+	px_int v_width = pdesc->view_surface.width;
+	px_int v_height = pdesc->view_surface.height;
+	px_int clipw, cliph;
+	px_texture clip_tex;
+
+
+	if (pdesc->layers[0].activating == PX_FALSE)
+	{
+		PX_SurfaceClearAll(&pdesc->view_surface, PX_COLOR(0, 255, 255, 255));
+		return;
+	}
+
+	clipw = (px_int)(v_width / pdesc->scale);
+	cliph = (px_int)(v_height / pdesc->scale);
+
+	ltx = (px_int)(pdesc->view_x - clipw / 2);
+	rbx = (px_int)(pdesc->view_x + clipw / 2);
+	lty = (px_int)(pdesc->view_y - cliph / 2);
+	rby = (px_int)(pdesc->view_y + cliph / 2);
+
+	if (pdesc->scale == 1)
+	{
+		PX_SurfaceClearAll(&pdesc->view_surface, PX_COLOR(0, 255, 255, 255));
+		PX_TextureCover(&pdesc->view_surface, &pdesc->cache_surface, -ltx, -lty, PX_ALIGN_LEFTTOP);
+	}
+	else
+	{
+		if (!PX_TextureCreate(pdesc->mp, &clip_tex, clipw, cliph))
+		{
+			return;
+		}
+
+		PX_SurfaceClearAll(&clip_tex, PX_COLOR(0, 255, 255, 255));
+
+		PX_TextureRender(&clip_tex, &pdesc->cache_surface, -ltx, -lty, PX_ALIGN_LEFTTOP, 0);
+
+		if (!PX_TextureScaleToTexture(&clip_tex, &pdesc->view_surface))
+		{
+			PX_TextureFree(&clip_tex);
+			return;
+		}
+		PX_TextureFree(&clip_tex);
+	}
+
+
+}
+
+px_void PX_CanvasVMRepaintAllCache(PX_CanvasVM* pCanvasVM)
+{
+	PX_CanvasVMRepaintBackFrontCache(pCanvasVM);
+	PX_CanvasVMUpdateMaskEditingCache(pCanvasVM);
+	PX_CanvasVMRepaintCache(pCanvasVM);
+	PX_CanvasVMRepaintCacheToView(pCanvasVM);
+}
+
+px_point2D PX_CanvasVMCanvasPostionToViewPosition(PX_CanvasVM* pdesc, px_point2D canvasPos)
+{
+	px_float sw, sh;
+	px_point2D p;
+	//distance
+	sw = pdesc->view_surface.width * 1.0f / pdesc->scale;
+	sh = pdesc->view_surface.height * 1.0f / pdesc->scale;
+	p = PX_Point2DSub(canvasPos, PX_POINT2D(pdesc->view_x, pdesc->view_y));
+	p.x = (p.x / sw * 2) * pdesc->view_surface.width / 2 + pdesc->view_surface.width / 2;
+	p.y = (p.y / sh * 2) * pdesc->view_surface.height / 2 + pdesc->view_surface.height / 2;
+	return p;
+}
+
+px_point2D PX_CanvasVMViewPositionToCanvasPostion(PX_CanvasVM* pdesc, px_point2D ViewPos)
+{
+	px_float left, right, top, bottom;
+	px_float canvas_x_rate, canvas_y_rate;
+	px_point2D p;
+	//left
+	left = pdesc->view_x - pdesc->view_surface.width / 2 / pdesc->scale;
+	right = pdesc->view_x + pdesc->view_surface.width / 2 / pdesc->scale;
+	top = pdesc->view_y - pdesc->view_surface.height / 2 / pdesc->scale;
+	bottom = pdesc->view_y + pdesc->view_surface.height / 2 / pdesc->scale;
+
+	canvas_x_rate = ViewPos.x / pdesc->view_surface.width;
+	canvas_y_rate = ViewPos.y / pdesc->view_surface.height;
+
+	p.x = canvas_x_rate * (right - left) + left;
+	p.y = canvas_y_rate * (bottom - top) + top;
+	return p;
+}
+
+px_bool PX_CanvasVMExecuteShell(PX_CanvasVM* pCanvasVM)
+{
+	PX_CanvasVMShell_Header* pHeader;
+	if (pCanvasVM->reg_ip>pCanvasVM->shell.usedsize-sizeof(PX_CanvasVMShell_Header))
+	{
+		return PX_FALSE;
+	}
+	
+	pHeader= (PX_CanvasVMShell_Header *)(pCanvasVM->shell.buffer+pCanvasVM->reg_ip);
+
+	if (pCanvasVM->reg_ip + pHeader->size+ sizeof(PX_CanvasVMShell_Header)>pCanvasVM->shell.usedsize)
+	{
+		return PX_FALSE;
+	}
+
+	switch (pHeader->opcode)
+	{
+	case PX_CANVASVM_OPCODE_NONE:
+		pCanvasVM->reg_ip+=sizeof(PX_CanvasVMShell_Header);
+		break;
+	case PX_CANVASVM_OPCODE_LAYEREDIT:
+		{
+			px_int index;
+			index = pHeader->payload;
+
+			PX_ASSERTIF(index < 0 || index >= PX_COUNTOF(pCanvasVM->layers));
+			if (pCanvasVM->layers[index].activating)
+			{
+				px_int i;
+				for (i = 0; i < PX_COUNTOF(pCanvasVM->layers); i++)
+				{
+					pCanvasVM->layers[i].editing = PX_FALSE;
+				}
+				pCanvasVM->layers[index].editing = PX_TRUE;
+			}
+
+			pCanvasVM->reg_ip += sizeof(PX_CanvasVMShell_Header);
+		}
+		break;
+	case PX_CANVASVM_OPCODE_LAYERCREATE:
+	{
+		px_int i;
+
+		if (pCanvasVM->shell.buffer[pCanvasVM->reg_ip+sizeof(PX_CanvasVMShell_Header)+pHeader->size-1]!='\0')
+		{
+			PX_ASSERT();
+			return PX_FALSE;
+		}
+
+		for (i = 0; i < PX_COUNTOF(pCanvasVM->layers); i++)
+		{
+			if (pCanvasVM->layers[i].activating == PX_FALSE)
+			{
+				break;
+			}
+		}
+		if (i == PX_COUNTOF(pCanvasVM->layers))
+		{
+			return PX_FALSE;
+		}
+
+		for (i = PX_COUNTOF(pCanvasVM->layers) - 1; i > 0; i--)
+		{
+			pCanvasVM->layers[i] = pCanvasVM->layers[i - 1];
+			pCanvasVM->layers[i].editing = PX_FALSE;
+		}
+
+		if (!PX_TextureCreate(pCanvasVM->mp, &pCanvasVM->layers[i].surface_layer, pCanvasVM->width, pCanvasVM->height))
+		{
+			//out of memory
+			PX_ASSERTIF(1);
+			return PX_FALSE;
+		}
+
+		if (!PX_TextureCreate(pCanvasVM->mp, &pCanvasVM->layers[i].surface_preview_mini, 48, 48))
+		{
+			//out of memory
+			PX_TextureFree(&pCanvasVM->layers[i].surface_layer);
+			PX_ASSERTIF(1);
+			return PX_FALSE;
+		}
+
+		PX_TextureClearAll(&pCanvasVM->layers[i].surface_layer, PX_COLOR(0, 255, 255, 255));
+
+		pCanvasVM->layers[i].attribute = PX_OBJECT_LAYER_ATTRIBUTE_NORMAL;
+		pCanvasVM->layers[i].activating = PX_TRUE;
+		pCanvasVM->layers[i].editing = PX_TRUE;
+		PX_strcpy(pCanvasVM->layers[i].name, (const px_char *)pCanvasVM->shell.buffer+pCanvasVM->reg_ip + sizeof(PX_CanvasVMShell_Header), sizeof(pCanvasVM->layers[i].name));
+		pCanvasVM->layers[i].visible = PX_TRUE;
+
+		pCanvasVM->reg_ip += sizeof(PX_CanvasVMShell_Header);
+		pCanvasVM->reg_ip += pHeader->size;
+	}
+	break;
+	case PX_CANVASVM_OPCODE_PAINT:
+		{
+			px_int i;
+			px_int ptcount=pHeader->size/sizeof(PX_CanvasNode);
+			PX_CanvasNode* pNode;
+			PX_ASSERTIF(pCanvasVM->shell.usedsize - pCanvasVM->reg_ip < sizeof(PX_CanvasVMShell_Header) + pHeader->size);
+			
+			pCanvasVM->reg_color = pHeader->color;
+			pCanvasVM->reg_filter_radius = pHeader->filter;
+			pCanvasVM->reg_tool= pHeader->payload;
+			pCanvasVM->reg_size= pHeader->psize;
+			PX_CanvasVMOnBegin(pCanvasVM);
+			pNode=(PX_CanvasNode *)(pCanvasVM->shell.buffer+pCanvasVM->reg_ip+ sizeof(PX_CanvasVMShell_Header));
+			for ( i = 0; i < ptcount; i++)
+			{
+				PX_CanvasVMOnMove(pCanvasVM, pNode[i].x, pNode[i].y, pNode[i].z);
+			}
+			PX_CanvasVMOnEndEx(pCanvasVM,PX_FALSE);
+			pCanvasVM->reg_ip += sizeof(PX_CanvasVMShell_Header);
+			pCanvasVM->reg_ip += pHeader->size;
+		}
+		break;
+	case PX_CANVASVM_OPCODE_LAYERDELETE:
+	{
+		px_int select_index = PX_CanvasVMGetEditingLayerIndex(pCanvasVM);
+		if (select_index != -1)
+		{
+			px_int i;
+			PX_TextureFree(&pCanvasVM->layers[select_index].surface_preview_mini);
+			PX_TextureFree(&pCanvasVM->layers[select_index].surface_layer);
+			for (i = select_index; i < PX_COUNTOF(pCanvasVM->layers) - 1; i++)
+			{
+				pCanvasVM->layers[i] = pCanvasVM->layers[i + 1];
+				if (!pCanvasVM->layers[i].activating)
+				{
+					break;
+				}
+			}
+			PX_memset(&pCanvasVM->layers[i], 0, sizeof(pCanvasVM->layers[i]));
+		}
+
+		pCanvasVM->reg_ip += sizeof(PX_CanvasVMShell_Header);
+	}
+	break;
+	case PX_CANVASVM_OPCODE_LAYERMOVEUP:
+	{
+		px_int select_index = PX_CanvasVMGetEditingLayerIndex(pCanvasVM);
+		if (select_index > 0)
+		{
+			PX_Object_Layer layer = pCanvasVM->layers[select_index];
+			pCanvasVM->layers[select_index] = pCanvasVM->layers[select_index - 1];
+			pCanvasVM->layers[select_index - 1] = layer;
+		}
+
+		pCanvasVM->reg_ip += sizeof(PX_CanvasVMShell_Header);
+	}
+	break;
+	case PX_CANVASVM_OPCODE_LAYERMOVEDOWN:
+	{
+		px_int select_index = PX_CanvasVMGetEditingLayerIndex(pCanvasVM);
+
+		if (pCanvasVM->layers[select_index + 1].activating)
+		{
+			PX_Object_Layer layer = pCanvasVM->layers[select_index];
+			pCanvasVM->layers[select_index] = pCanvasVM->layers[select_index + 1];
+			pCanvasVM->layers[select_index + 1] = layer;
+		}
+
+		pCanvasVM->reg_ip += sizeof(PX_CanvasVMShell_Header);
+	}
+	break;
+	case PX_CANVASVM_OPCODE_LAYERVISIBLE:
+	{
+		px_int select_index = PX_CanvasVMGetEditingLayerIndex(pCanvasVM);
+		PX_ASSERTIF(select_index == -1);
+		
+		pCanvasVM->layers[select_index].visible = !pCanvasVM->layers[select_index].visible;
+
+		pCanvasVM->reg_ip += sizeof(PX_CanvasVMShell_Header);
+	}
+	break;
+	case PX_CANVASVM_OPCODE_LAYERCLIP:
+	{
+		px_int select_index = PX_CanvasVMGetEditingLayerIndex(pCanvasVM);
+		PX_ASSERTIF(select_index ==-1)
+		if (pCanvasVM->layers[select_index].attribute == PX_OBJECT_LAYER_ATTRIBUTE_CLIP)
+		{
+			pCanvasVM->layers[select_index].attribute = PX_OBJECT_LAYER_ATTRIBUTE_NORMAL;
+		}
+		else
+		{
+			pCanvasVM->layers[select_index].attribute = PX_OBJECT_LAYER_ATTRIBUTE_CLIP;
+		}
+
+		pCanvasVM->reg_ip += sizeof(PX_CanvasVMShell_Header);
+	}
+	break;
+	default:
+		break;
+	}
+	PX_CanvasVMUpdateMaskEditingCache(pCanvasVM);
+	pCanvasVM->reg_state_id++;
+	return PX_TRUE;
+}
+
+px_int PX_CanvasVMGetLastShellIP(PX_CanvasVM* pCanvasVM)
+{
+	px_int ip;
+	if (pCanvasVM->shell.usedsize == 0)
+	{
+		return -1;
+	}
+	ip = 0;
+	PX_CanvasVMShell_Header* pheader;
+	while (PX_TRUE)
+	{
+		pheader = (PX_CanvasVMShell_Header*)(pCanvasVM->shell.buffer + ip);
+		ip += sizeof(PX_CanvasVMShell_Header);
+		ip += pheader->size;
+
+		if (ip >= pCanvasVM->shell.usedsize)
+		{
+			return ip - sizeof(PX_CanvasVMShell_Header) - pheader->size;
+		}
+	}
+
+}
+
+static px_void PX_CanvasVMTakeSnapshot(PX_CanvasVM* pCanvasVM)
+{
+	px_int i;
+
+	for (i = 0; i < PX_COUNTOF(pCanvasVM->layers); i++)
+	{
+		if (pCanvasVM->layers[i].activating)
+		{
+			PX_TextureFree(&pCanvasVM->layers[i].surface_layer);
+			PX_TextureFree(&pCanvasVM->layers[i].surface_preview_mini);
+		}
+	}
+
+	for (i = 0; i < PX_COUNTOF(pCanvasVM->snapshot_layers); i++)
+	{
+		pCanvasVM->layers[i] = pCanvasVM->snapshot_layers[i];
+		if (pCanvasVM->snapshot_layers[i].activating)
+		{
+			PX_TextureCopy(pCanvasVM->mp, &pCanvasVM->snapshot_layers[i].surface_layer, &pCanvasVM->layers[i].surface_layer);
+			PX_TextureCopy(pCanvasVM->mp, &pCanvasVM->snapshot_layers[i].surface_preview_mini, &pCanvasVM->layers[i].surface_preview_mini);
+		}
+	}
+
+	pCanvasVM->reg_ip = pCanvasVM->reg_snapshot_ip;
+}
+
+px_void PX_CanvasVMMoveBack(PX_CanvasVM* pCanvasVM)
+{
+	PX_CanvasVMShell_Header* pHeader;
+	px_int lastip = pCanvasVM->reg_ip;
+	if (pCanvasVM->shell.usedsize==0)
+	{
+		return;
+	}
+	PX_CanvasVMPushad(pCanvasVM);
+	PX_CanvasVMTakeSnapshot(pCanvasVM);
+
+	while(PX_TRUE)
+	{
+		pHeader=(PX_CanvasVMShell_Header*)(pCanvasVM->shell.buffer+pCanvasVM->reg_ip);
+		if (pCanvasVM->reg_ip+sizeof(PX_CanvasVMShell_Header)+pHeader->size>=lastip)
+		{
+			break;
+		}
+		PX_CanvasVMExecuteShell(pCanvasVM);
+	}
+	pCanvasVM->reg_state_id++;
+	PX_CanvasVMRepaintAllCache(pCanvasVM);
+	PX_CanvasVMRepaintAllLayersPreview(pCanvasVM);
+	PX_CanvasVMPopad(pCanvasVM);
+}
+
+px_void PX_CanvasVMMoveForward(PX_CanvasVM* pCanvasVM)
+{
+	if (pCanvasVM->reg_ip< pCanvasVM->shell.usedsize)
+	{
+		PX_CanvasVMPushad(pCanvasVM);
+		PX_CanvasVMExecuteShell(pCanvasVM);
+		PX_CanvasVMRepaintAllCache(pCanvasVM);
+		PX_CanvasVMRepaintAllLayersPreview(pCanvasVM);
+		PX_CanvasVMPopad(pCanvasVM);
+	}
+}
