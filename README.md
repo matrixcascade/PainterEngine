@@ -21,7 +21,7 @@ PainterEngine 是一个由 C 语言编写的**跨平台图形应用框架**，�
 
 社区交流请访问 [faq.PainterEngine.com](https://faq.painterengine.com) 
 
-============================================================================
+==========================================================================
 
 PainterEngine is a complete open-source, cross-platform graphic application framework written in C language that can be ported to Windows, Linux, Android, iOS, WebAssembly-enabled web, and embedded MCU. 
 - PainterEngine is written in C99 standard and some extensions, without relying on any C standard library or third-party library. 
