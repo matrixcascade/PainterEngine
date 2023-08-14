@@ -15,6 +15,9 @@ elseif(ANDROID)
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
     set(PLATFORM "webassembly")
     message("Web platform detected")
+elseif(APPLE)
+    set(PLATFORM "macos")
+    message("MacOS platform detected")
 elseif(UNIX)
     set(PLATFORM "linux")
     message("Linux platform detected")
@@ -99,16 +102,14 @@ else()
         target_link_libraries(${TARGET_NAME}
             Threads::Threads
         )
-    elseif(PLATFORM STREQUAL "linux")
+    elseif(PLATFORM STREQUAL "linux" OR PLATFORM STREQUAL "macos")
         find_package(OpenGL REQUIRED)
         find_package(GLUT REQUIRED)
-        find_package(X11 REQUIRED)
 
         target_link_libraries(${TARGET_NAME}
             OpenGL::GL
             GLUT::GLUT
             Threads::Threads
-            ${X11_LIBRARIES}
         )
     endif()
 endif()
