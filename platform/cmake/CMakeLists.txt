@@ -3,8 +3,8 @@ cmake_minimum_required(VERSION 3.19)
 project(PainterEngine LANGUAGES C CXX)
 
 set(TARGET_NAME "PainterEngine")
-set(PROJECT_PATH "project")
-set(PAINTERENGINE_PATH ".")
+set(PROJECT_PATH "../../project")
+set(PAINTERENGINE_PATH "../..")
 
 if(WIN32)
     set(PLATFORM "windows")
