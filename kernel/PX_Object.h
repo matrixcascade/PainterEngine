@@ -38,6 +38,7 @@
 #define PX_OBJECT_EVENT_REQUESTDATA			26
 #define PX_OBJECT_EVENT_OPEN				27
 #define PX_OBJECT_EVENT_SAVE				28
+#define PX_OBJECT_EVENT_TIMEOUT             29
 //////////////////////////////////////////////////////////////////////////////
 //    Type of Controls
 /////////////////////////////////////////////////////////////////////////////
@@ -97,6 +98,7 @@ enum PX_OBJECT_TYPE
   PX_OBJECT_TYPE_LAYERBOX		,
   PX_OBJECT_TYPE_CANVAS			,
   PX_OBJECT_TYPE_CURSORSLIDER   ,
+  PX_OBJECT_TYPE_TIMER          ,
 };
 
 
@@ -609,6 +611,10 @@ px_void PX_Designer_SetEnable(PX_Object* pObject, px_bool v);
 //////////////////////////////////////////////////////////////////////////
 //SliderCursor
 #include "PX_Object_CursorSlider.h"
+
+//////////////////////////////////////////////////////////////////////////
+//Timer
+#include "PX_Object_Timer.h"
 
 #endif
 
