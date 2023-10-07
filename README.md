@@ -4,7 +4,7 @@
 
 ## 30-Second Quick Start Guide to PainterEngine
 
-将PainterEngine引入到您的项目中,仅仅需要"#include "PainterEngine.h""
+将PainterEngine引入到您的项目中,仅仅需要"#include "PainterEngine.h"
 
 To incorporate PainterEngine into your project, all you need is 
 ```c
@@ -38,13 +38,14 @@ Use "PainterEngine make" to quickly compile and deploy your project to various p
 | 数据结构               | vector/list/map/stack/fifo/circular-buffer...                | 平台无关的数据结构算法实现                          |
 | 图片支持               | PNG/JPG/GIF/BMP                                              | 支持PNG/JPG/GIF/BMP解码及PNG编码.           |
 | 几何绘制               | Line/Triangle/Rectangle/Circle/Ring/Sector/Rounded.....      | 常用几何光栅化实现                                                                 |
-| 写入安全               | 2D/3D                                                        | 2D 3D渲染器实现及一个高质量制图引擎                                                 |
+| 渲染器                | 2D/3D                                                        | 2D 3D渲染器实现及一个高质量制图引擎                                                 |
 | 动画                  | 2dx/live2D                                                   | 2D 动画和一个类Live2D 骨骼动画系统                                                  |
 | 脚本引擎               | Compiler/VM/Debugger                                         | A一个完整的脚本引擎,包含编译器虚拟机调试器                                           |
 | UI框架                 | button/radio/image/edit/label/list....                       | UI框架实现                                                                        |
 | 协议                   | MQTT/MODBUS/Game-network-synchronization                     | 常用的通讯协议                                                                    |
 | 游戏引擎               |                                                              | 集成一个游戏世界框架                                                               |
 
+还有更多探索...
 
 ///////////////////////////////////////////////////////////////////////////////
 
