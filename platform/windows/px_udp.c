@@ -182,7 +182,7 @@ unsigned int PX_UDPGetHostByName(const char *host, unsigned int dns_addr)
 	if (PX_UDPInitialize(&udp, PX_UDP_IP_TYPE_IPV4))
 	{
 		int strl,size,srcindex=0,ptrindex=12;
-		int try = 8;
+		int _tryt = 8;
 		PX_UDP_ADDR target;
 		unsigned char content[1024] = { 0x01,0xEC,0x01,0,0,1,0,0,0,0,0,0,0,0 };
 		while (host[srcindex])
@@ -222,7 +222,7 @@ unsigned int PX_UDPGetHostByName(const char *host, unsigned int dns_addr)
 		target.ipv4 = dns_addr;
 		target.port = 53<<8;
 
-		while (try--)
+		while (_tryt--)
 		{
 			PX_UDPSend(&udp, target, content, 12 + 1 + strl + 1 + 4);
 			Sleep(200);

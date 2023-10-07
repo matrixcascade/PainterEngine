@@ -161,8 +161,8 @@ static px_void PX_Designer_UpdateObjectsList(PX_Object* pObject)
 }
 px_void PX_DesignerOnDesignerBoxValueChanged(PX_Object *pObject,PX_Object_Event e,px_void *ptr)
 {
-	PX_Object_DesignerBox *pDesignerBox=(PX_Object_DesignerBox *)pObject->pObject;
-	PX_Object_Designer *pDesc=(PX_Object_Designer *)((PX_Object *)ptr)->pObject;
+	PX_Object_DesignerBox *pDesignerBox=(PX_Object_DesignerBox *)pObject->pObjectDesc;
+	PX_Object_Designer *pDesc=(PX_Object_Designer *)((PX_Object *)ptr)->pObjectDesc;
 
 	if (pDesc->selectObjectIndex>=0&&pDesc->selectObjectIndex<pDesc->Objects.size)
 	{
@@ -207,7 +207,7 @@ px_void PX_DesignerOnDesignerBoxValueChanged(PX_Object *pObject,PX_Object_Event 
 px_void PX_DesignerUpdate(PX_Object *pObject,px_dword elapsed)
 {
 	px_int i,count;
-	PX_Object_Designer *pDesc=(PX_Object_Designer *)pObject->pObject;
+	PX_Object_Designer *pDesc=(PX_Object_Designer *)pObject->pObjectDesc;
 
 	//////////////////////////////////////////////////////////////////////////
 	//designer box
@@ -564,7 +564,7 @@ px_void PX_Designer_OnCursorDown(PX_Object *pObject,PX_Object_Event e,px_void *p
 						{
 						if (pDesignerDesc->pLinkObject)
 						{
-							PX_Object* pNewObject = pObjectDesc->createfunc(pDesignerDesc->mp_ui, pDesignerDesc->pLinkObject, x, y, 100, 100, pDesignerDesc->userptr);
+							PX_Object* pNewObject = pObjectDesc->createfunc(pDesignerDesc->mp, pDesignerDesc->pLinkObject, x, y, 100, 100, pDesignerDesc->userptr);
 							PX_sprintf2(pNewObject->id, sizeof(pNewObject->id), "%1%2", PX_STRINGFORMAT_STRING(pObjectDesc->Name), PX_STRINGFORMAT_INT(pDesignerDesc->allocID++));
 
 							dobject.pObject = pNewObject;
@@ -579,7 +579,7 @@ px_void PX_Designer_OnCursorDown(PX_Object *pObject,PX_Object_Event e,px_void *p
 						{
 						if (pDesignerDesc->pLinkWorld)
 						{
-							PX_Object* pNewObject = pObjectDesc->createfunc(pDesignerDesc->mp_game, PX_NULL, x + pDesignerDesc->pLinkWorld->offsetx, y + pDesignerDesc->pLinkWorld->offsety, 100, 100, pDesignerDesc->userptr);
+							PX_Object* pNewObject = pObjectDesc->createfunc(pDesignerDesc->mp, PX_NULL, x + pDesignerDesc->pLinkWorld->offsetx, y + pDesignerDesc->pLinkWorld->offsety, 100, 100, pDesignerDesc->userptr);
 							PX_sprintf2(pNewObject->id, sizeof(pNewObject->id), "%1%2", PX_STRINGFORMAT_STRING(pObjectDesc->Name), PX_STRINGFORMAT_INT(pDesignerDesc->allocID++));
 
 							PX_WorldAddObject(pDesignerDesc->pLinkWorld, pNewObject);
@@ -866,7 +866,7 @@ px_void PX_Object_DesignerFree(PX_Object* pObject)
 	PX_VectorFree(&pDesc->Objects);
 }
 
-PX_Object * PX_Object_DesignerCreate(px_memorypool *mp,px_memorypool *mp_ui,px_memorypool *mp_world,PX_Object *pparent,PX_Object *pLinkObject,PX_World *pLinkWorld,PX_FontModule *fm,px_void *userptr)
+PX_Object * PX_Object_DesignerCreate(px_memorypool *mp,PX_Object *pparent,PX_Object *pLinkObject,PX_World *pLinkWorld,PX_FontModule *fm,px_void *userptr)
 {
 	px_int i;
 	PX_Object *pObject;
@@ -874,7 +874,7 @@ PX_Object * PX_Object_DesignerCreate(px_memorypool *mp,px_memorypool *mp_ui,px_m
 	PX_memset(&desc,0,sizeof(desc));
 
 	pObject=PX_ObjectCreateEx(mp,pparent,0,0,0,0,0,0,0x21080210,PX_DesignerUpdate,PX_DesignerRender, PX_Object_DesignerFree,&desc,sizeof(desc));
-	pdesc=(PX_Object_Designer *)pObject->pObject;
+	pdesc=(PX_Object_Designer *)pObject->pObjectDesc;
 	pdesc->pLinkWorld=pLinkWorld;
 	pdesc->pLinkObject=pLinkObject;
 	pdesc->showsliderbar = PX_TRUE;
@@ -934,8 +934,6 @@ PX_Object * PX_Object_DesignerCreate(px_memorypool *mp,px_memorypool *mp_ui,px_m
 	if (!PX_VectorInitialize(mp, &pdesc->ObjectDesc, sizeof(PX_Designer_ObjectDesc), 16))return PX_FALSE;
 	if (!PX_VectorInitialize(mp, &pdesc->Objects, sizeof(PX_Designer_Object), 16))return PX_FALSE;
 	pdesc->mp=mp;
-	pdesc->mp_ui=mp_ui;
-	pdesc->mp_game=mp_world;
 	pdesc->fm=fm;
 	pdesc->selectObjectIndex=-1;
 	pdesc->menu=PX_Object_MenuCreate(mp,pObject,0,0,64,fm);
@@ -1052,6 +1050,38 @@ px_void PX_Object_DesignerEnable(PX_Object* pObject)
 	}
 }
 
+px_void PX_Object_DesignerBindWorld(PX_Object* pObject, PX_World* pLinkWorld)
+{
+	PX_Object_Designer* pdesc = PX_ObjectGetDesc(PX_Object_Designer, pObject);
+	if (pObject->Type== 0x21080210)
+	{
+		pdesc->pLinkWorld = pLinkWorld;
+		if (pdesc->pLinkWorld)
+			pdesc->widget_property->x = pdesc->pLinkWorld->surface_width - pdesc->widget_property->Width - 25;
+		if (pdesc->pLinkWorld)
+			pdesc->widget_controllers->x = pdesc->pLinkWorld->surface_width - pdesc->widget_controllers->Width - 25;
+		if (pdesc->pLinkWorld && pdesc->pLinkWorld->world_width > pdesc->pLinkWorld->surface_width)
+		{
+			PX_Object_SliderBarSetRange(pdesc->world_hscroll, (px_int)(pdesc->pLinkWorld->surface_width / 2) - 1, (px_int)(pdesc->pLinkWorld->world_width - pdesc->pLinkWorld->surface_width / 2) + 1);
+		}
+		else
+		{
+			pdesc->world_hscroll->Visible = PX_FALSE;
+		}
+
+	}
+	return;
+}
+
+px_void PX_Object_DesignerBindRoot(PX_Object* pObject, PX_Object* root)
+{
+	PX_Object_Designer* pdesc = PX_ObjectGetDesc(PX_Object_Designer, pObject);
+	if (pObject->Type == 0x21080210)
+	{
+		pdesc->pLinkObject = root;
+	}
+}
+
 px_void PX_Object_DesignerDisable(PX_Object* pObject)
 {
 	if (pObject->Type == 0x21080210)
@@ -1091,12 +1121,12 @@ px_bool PX_Object_DesignerExport(PX_Object *pObject, px_string* pText)
 			PX_ASSERT();
 			goto _ERROR;;
 		}
-		//Object Name
+		//pObject Name
 		if(!PX_StringCatEx(pText,"\""))goto _ERROR;
 		if(!PX_StringCatEx(pText,pobjectdesc->Name))goto _ERROR;
 		if(!PX_StringCatEx(pText,"\":{\n"))goto _ERROR;
 
-		//Object Type
+		//pObject Type
 		switch (pdobject->type)
 		{
 		case PX_DESIGNER_OBJECT_TYPE_UI:
@@ -1186,18 +1216,15 @@ _ERROR:
 	return PX_FALSE;
 
 }
-px_bool PX_Object_DesignerImportToUIObject(px_memorypool *mp, PX_Object* pRootObject, const px_char* pText,PX_FontModule *fm)
+px_bool PX_Object_DesignerImportToUIObject(px_memorypool *mp,PX_Object *DesignerObject, PX_Object* pRootObject, const px_char* pText,PX_FontModule *fm)
 {
 	PX_Json Json;
 	px_int i;
-	px_vector descvec;
-	PX_VectorInitialize(mp, &descvec, sizeof(PX_Designer_ObjectDesc), 16);
+	
+	PX_Object_Designer* pDesignerDesc = PX_ObjectGetDesc(PX_Object_Designer, DesignerObject);
+	px_vector* pdescvec = &pDesignerDesc->ObjectDesc;
 	if (!PX_JsonInitialize(mp, &Json))return PX_FALSE;
 	if (!PX_JsonParse(&Json, pText))
-	{
-		goto _ERROR;
-	}
-	if (!PX_Object_DesignerDefaultInstall(&descvec))
 	{
 		goto _ERROR;
 	}
@@ -1206,15 +1233,16 @@ px_bool PX_Object_DesignerImportToUIObject(px_memorypool *mp, PX_Object* pRootOb
 	{
 		PX_Json_Value* pJsonValue = PX_JsonGetObjectValueByIndex(&Json.rootValue, i);
 		PX_Designer_ObjectDesc* pObjectDesc;
+		
 		px_int j, descindex = -1;
 		if (!pJsonValue || pJsonValue->type != PX_JSON_VALUE_TYPE_OBJECT)
 		{
 			continue;
 		}
 		pObjectDesc = PX_NULL;
-		for (j = 0; j < descvec.size; j++)
+		for (j = 0; j < pdescvec->size; j++)
 		{
-			PX_Designer_ObjectDesc* pEnumObjectDesc = PX_VECTORAT(PX_Designer_ObjectDesc, &descvec, j);
+			PX_Designer_ObjectDesc* pEnumObjectDesc = PX_VECTORAT(PX_Designer_ObjectDesc, pdescvec, j);
 			if (PX_strequ(pJsonValue->name.buffer, pEnumObjectDesc->Name))
 			{
 				pObjectDesc = pEnumObjectDesc;
@@ -1227,6 +1255,7 @@ px_bool PX_Object_DesignerImportToUIObject(px_memorypool *mp, PX_Object* pRootOb
 			PX_Json_Value* TypeValue = PX_JsonGetObjectValue(pJsonValue, "type");
 			PX_DESIGNER_OBJECT_TYPE type;
 			PX_Object* pNewObject = PX_NULL;
+			PX_Designer_Object dobject;
 			if (TypeValue && TypeValue->type == PX_JSON_VALUE_TYPE_STRING)
 			{
 				if (PX_strequ(TypeValue->_string.buffer, "ui"))
@@ -1242,11 +1271,42 @@ px_bool PX_Object_DesignerImportToUIObject(px_memorypool *mp, PX_Object* pRootOb
 					type = PX_DESIGNER_OBJECT_TYPE_FUNCTION;
 				}
 
-				switch (type)
+				switch (pObjectDesc->type)
 				{
 				case PX_DESIGNER_OBJECT_TYPE_UI:
 				{
-					pNewObject = pObjectDesc->createfunc(mp, pRootObject, 0, 0, 100, 100, fm);
+					if (pDesignerDesc->pLinkObject)
+					{
+						pNewObject = pObjectDesc->createfunc(pDesignerDesc->mp, pDesignerDesc->pLinkObject, 0, 0, 100, 100, pDesignerDesc->userptr);
+						dobject.pObject = pNewObject;
+						dobject.type = PX_DESIGNER_OBJECT_TYPE_UI;
+						dobject.descIndex = descindex;
+						PX_VectorPushback(&pDesignerDesc->Objects, &dobject);
+						PX_Designer_UpdateObjectsList(DesignerObject);
+					}
+				}
+				break;
+				case PX_DESIGNER_OBJECT_TYPE_GAME:
+				{
+					if (pDesignerDesc->pLinkWorld)
+					{
+						pNewObject = pObjectDesc->createfunc(pDesignerDesc->mp, PX_NULL, 0 + pDesignerDesc->pLinkWorld->offsetx, 0 + pDesignerDesc->pLinkWorld->offsety, 100, 100, pDesignerDesc->userptr);
+						PX_WorldAddObject(pDesignerDesc->pLinkWorld, pNewObject);
+						dobject.pObject = pNewObject;
+						dobject.type = PX_DESIGNER_OBJECT_TYPE_GAME;
+						dobject.descIndex = descindex;
+						PX_VectorPushback(&pDesignerDesc->Objects, &dobject);
+						PX_Designer_UpdateObjectsList(DesignerObject);
+					}
+				}
+				break;
+				case PX_DESIGNER_OBJECT_TYPE_FUNCTION:
+				{
+					pNewObject = pObjectDesc->createfunc(pDesignerDesc->mp, PX_NULL, 0, 0, 100, 100, pDesignerDesc->userptr);
+					if (pNewObject != PX_NULL)
+					{
+						PX_ASSERT();
+					}
 				}
 				break;
 				default:
@@ -1300,11 +1360,9 @@ px_bool PX_Object_DesignerImportToUIObject(px_memorypool *mp, PX_Object* pRootOb
 		}
 	}
 	PX_JsonFree(&Json);
-	PX_VectorFree(&descvec);
 	return PX_TRUE;
 _ERROR:
 	PX_JsonFree(&Json);
-	PX_VectorFree(&descvec);
 	return PX_FALSE;
 }
 
@@ -1363,7 +1421,7 @@ px_bool PX_Object_DesignerImport(PX_Object* pObject, const px_char* pText)
 				case PX_DESIGNER_OBJECT_TYPE_UI:
 				{
 					PX_Designer_Object dobject;
-					pNewObject = pObjectDesc->createfunc(pdesigner->mp_ui, pdesigner->pLinkObject, 0, 0, 100, 100, pdesigner->userptr);
+					pNewObject = pObjectDesc->createfunc(pdesigner->mp, pdesigner->pLinkObject, 0, 0, 100, 100, pdesigner->userptr);
 					dobject.pObject = pNewObject;
 					dobject.type = PX_DESIGNER_OBJECT_TYPE_UI;
 					dobject.descIndex = descindex;
@@ -1373,7 +1431,7 @@ px_bool PX_Object_DesignerImport(PX_Object* pObject, const px_char* pText)
 				case PX_DESIGNER_OBJECT_TYPE_GAME:
 				{
 					PX_Designer_Object dobject;
-					pNewObject = pObjectDesc->createfunc(pdesigner->mp_game, PX_NULL, 0, 0, 100, 100, pdesigner->userptr);
+					pNewObject = pObjectDesc->createfunc(pdesigner->mp, PX_NULL, 0, 0, 100, 100, pdesigner->userptr);
 					PX_WorldAddObject(pdesigner->pLinkWorld, pNewObject);
 					dobject.pObject = pNewObject;
 					dobject.type = PX_DESIGNER_OBJECT_TYPE_GAME;

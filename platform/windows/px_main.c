@@ -1,6 +1,6 @@
 
 //Platform supports
-#include "PainterEngine_Application.h"
+#include "runtime/PainterEngine_Application.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -65,12 +65,8 @@ DWORD WINAPI DEMO_RenderThreadFunc(LPVOID p)
 					{
 						PX_ApplicationPostEvent(&App,e);
 						PX_WindowResize(App.runtime.surface_width,App.runtime.surface_height,(px_int)width, (px_int)height);
+						PX_RuntimeResize(&App.runtime,App.runtime.surface_width,App.runtime.surface_height,(px_int)width, (px_int)height);
 					}
-					else
-					{
-						
-					}
-					
 					continue;
 					
 				}

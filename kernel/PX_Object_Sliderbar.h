@@ -41,7 +41,7 @@ typedef struct
 }PX_Object_SliderBar;
 
 PX_Object *PX_Object_SliderBarCreate(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y,px_int Width,px_int Height,PX_OBJECT_SLIDERBAR_TYPE Type,PX_OBJECT_SLIDERBAR_STYLE style);
-PX_Object_SliderBar *PX_Object_GetSliderBar(PX_Object *Object);
+PX_Object_SliderBar *PX_Object_GetSliderBar(PX_Object *pObject);
 px_void	   PX_Object_SliderBarSetValue(PX_Object *pSliderBar,px_int Value);
 px_void	   PX_Object_SliderBarSetRange(PX_Object *pSliderBar,px_int Min,px_int Max);
 px_int	   PX_Object_SliderBarGetMax( PX_Object *pSliderBar );

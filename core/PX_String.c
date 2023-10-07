@@ -71,6 +71,35 @@ px_int PX_StringFind(px_string* str, const px_char find[])
 	return -1;
 	
 }
+px_bool PX_StringRead(const px_char content[],  px_int readsize, px_char out[])
+{
+	if (readsize > PX_strlen(content))
+	{
+		return PX_FALSE;
+	}
+	PX_memcpy(out, content, readsize);
+	out[readsize] = '\0';
+	return PX_TRUE;
+}
+
+px_int PX_StringReadUntil(const px_char content[], px_char until,  px_char out[], px_int max_out_size)
+{
+	px_int i;
+	for (i = 0; i < max_out_size -1; i++)
+	{
+		if (content[i]=='\0')
+		{
+			return 0;
+		}
+		if (content[i] == until)
+		{
+			out[i] = '\0';
+			return i+1;
+		}
+		out[i] = content[i];
+	}
+	return 0;
+}
 
 px_void PX_StringFree(px_string *str)
 {

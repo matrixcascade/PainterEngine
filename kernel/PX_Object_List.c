@@ -1,16 +1,16 @@
 #include "PX_Object_List.h"
-PX_Object_List  * PX_Object_GetList( PX_Object *Object )
+PX_Object_List  * PX_Object_GetList( PX_Object *pObject )
 {
-	if(Object->Type==PX_OBJECT_TYPE_LIST)
-		return (PX_Object_List *)Object->pObject;
+	if(pObject->Type==PX_OBJECT_TYPE_LIST)
+		return (PX_Object_List *)pObject->pObjectDesc;
 	else
 		return PX_NULL;
 }
 
-PX_Object_ListItem  * PX_Object_GetListItem( PX_Object *Object )
+PX_Object_ListItem  * PX_Object_GetListItem( PX_Object *pObject )
 {
-	if(Object->Type==PX_OBJECT_TYPE_LISTITEM)
-		return (PX_Object_ListItem *)Object->pObject;
+	if(pObject->Type==PX_OBJECT_TYPE_LISTITEM)
+		return (PX_Object_ListItem *)pObject->pObjectDesc;
 	else
 		return PX_NULL;
 }
@@ -463,22 +463,22 @@ px_void PX_Object_ListFree(PX_Object *pListObj)
 	PX_VectorFree(&pList->pData);
 }
 
-px_void PX_Object_ListOnSliderValueChanged(PX_Object  *Object,PX_Object_Event e,px_void *ptr)
+px_void PX_Object_ListOnSliderValueChanged(PX_Object  *pObject,PX_Object_Event e,px_void *ptr)
 {
-	px_int value=PX_Object_SliderBarGetValue(Object);
+	px_int value=PX_Object_SliderBarGetValue(pObject);
 	PX_Object_List *pList=PX_Object_GetList((PX_Object *)ptr);
 	pList->offsety=value;
 }
 
-px_void PX_Object_ListOnEvent(PX_Object  *Object,PX_Object_Event e,px_void *ptr)
+px_void PX_Object_ListOnEvent(PX_Object  *pObject,PX_Object_Event e,px_void *ptr)
 {
 	px_int i;
-	PX_Object_List  *pList=PX_Object_GetList(Object);
+	PX_Object_List  *pList=PX_Object_GetList(pObject);
 
 	switch (e.Event)
 	{
 	case PX_OBJECT_EVENT_CURSORWHEEL:
-		if (!PX_ObjectIsPointInRegion(Object,PX_Object_Event_GetCursorX(e),PX_Object_Event_GetCursorY(e)))
+		if (!PX_ObjectIsPointInRegion(pObject,PX_Object_Event_GetCursorX(e),PX_Object_Event_GetCursorY(e)))
 		{
 			return;
 		}
@@ -488,12 +488,12 @@ px_void PX_Object_ListOnEvent(PX_Object  *Object,PX_Object_Event e,px_void *ptr)
 	case PX_OBJECT_EVENT_CURSORUP:
 	case PX_OBJECT_EVENT_CURSORRUP:
 	case PX_OBJECT_EVENT_CURSORMOVE:
-		if (!PX_ObjectIsPointInRegion(Object,PX_Object_Event_GetCursorX(e),PX_Object_Event_GetCursorY(e)))
+		if (!PX_ObjectIsPointInRegion(pObject,PX_Object_Event_GetCursorX(e),PX_Object_Event_GetCursorY(e)))
 		{
 			return;
 		}
-		PX_Object_Event_SetCursorX(&e,PX_Object_Event_GetCursorX(e)-Object->x);
-		PX_Object_Event_SetCursorY(&e,PX_Object_Event_GetCursorY(e)-Object->y);
+		PX_Object_Event_SetCursorX(&e,PX_Object_Event_GetCursorX(e)-pObject->x);
+		PX_Object_Event_SetCursorY(&e,PX_Object_Event_GetCursorY(e)-pObject->y);
 		break;
 	case PX_OBJECT_EVENT_EXECUTE:
 		return;
@@ -712,7 +712,7 @@ px_int PX_Object_ListGetItemCount(PX_Object* pListObject)
 
 px_void* PX_Object_ListItemGetData(PX_Object* pItemObject)
 {
-	PX_Object_ListItem* pItem=(PX_Object_ListItem *)pItemObject->pObject;
+	PX_Object_ListItem* pItem=(PX_Object_ListItem *)pItemObject->pObjectDesc;
 	return pItem->pdata;
 }
 
@@ -875,7 +875,7 @@ px_void PX_Object_ListArrayRender(px_surface* psurface, PX_Object* pObject, px_u
 
 px_bool PX_Designer_ListArrayItemOnCreate(px_memorypool* mp, PX_Object* ItemObject, px_void* userptr)
 {
-	PX_Object_List* pList = (PX_Object_List*)PX_ObjectGetDesc(PX_Object_ListItem, ItemObject)->pList->pObject;
+	PX_Object_List* pList = (PX_Object_List*)PX_ObjectGetDesc(PX_Object_ListItem, ItemObject)->pList->pObjectDesc;
 	ItemObject->Func_ObjectRender = pList->ArrayRender;
 	return PX_TRUE;
 }

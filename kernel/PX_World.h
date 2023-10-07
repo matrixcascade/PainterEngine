@@ -58,8 +58,8 @@ px_void			PX_WorldRemoveObjectByIndex(PX_World *pWorld,px_int i_index);
 px_void			PX_WorldClear(PX_World* world);
 
 //LIMIT-Only used to ObjectUpdate Function 
-_LIMIT px_int	PX_WorldSearchRegion(PX_World *pWorld,px_float centerX,px_float centerY,px_float raduis,PX_Object *Object[],px_int MaxSearchCount,px_dword impact_test_type);
-_LIMIT px_int	PX_WorldSearch(PX_World* world, PX_Object* Object[], px_int MaxSearchCount, px_dword impact_object_type);
+_LIMIT px_int	PX_WorldSearchRegion(PX_World *pWorld,px_float centerX,px_float centerY,px_float raduis,PX_Object *pObject[],px_int MaxSearchCount,px_dword impact_test_type);
+_LIMIT px_int	PX_WorldSearch(PX_World* world, PX_Object* pObject[], px_int MaxSearchCount, px_dword impact_object_type);
 _LIMIT PX_Object* PX_WorldSearchObject(PX_World *pWorld,const px_char id[]);
 px_void			PX_WorldSetSize(PX_World* pWorld, px_int world_width, px_int world_height);
 px_bool			PX_WorldAddObject(PX_World *pWorld,PX_Object *pObject);

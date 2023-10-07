@@ -15,7 +15,7 @@ typedef struct
 
 typedef struct  
 {
-	px_memorypool *mp,*mp_ui,*mp_game;
+	px_memorypool *mp;
 	PX_Object *pLinkObject;
 	PX_World  *pLinkWorld;
 	px_void*	userptr;
@@ -38,14 +38,16 @@ typedef struct
 	px_vector Objects;
 }PX_Object_Designer;
 
-PX_Object * PX_Object_DesignerCreate(px_memorypool *mp,px_memorypool *mp_ui,px_memorypool*mp_world,PX_Object *pparent,PX_Object *pLinkObject,PX_World *pLinkWorld,PX_FontModule *fm,px_void *userptr);
+PX_Object * PX_Object_DesignerCreate(px_memorypool *mp,PX_Object *pparent,PX_Object *pLinkObject,PX_World *pLinkWorld,PX_FontModule *fm,px_void *userptr);
 px_bool PX_Object_DesignerAddObjectDescription(PX_Object* pObject, PX_Designer_ObjectDesc* desc);
 px_void PX_Object_DesignerEnable(PX_Object* pObject);
+px_void PX_Object_DesignerBindWorld(PX_Object* pObject, PX_World* world);
+px_void PX_Object_DesignerBindRoot(PX_Object* pObject,PX_Object *root);
 px_void PX_Object_DesignerDisable(PX_Object* pObject);
 px_bool PX_Object_DesignerExport(PX_Object* pObject, px_string* pText);
 px_bool PX_Object_DesignerImport(PX_Object* pObject, const px_char* pText);
-px_bool PX_Object_DesignerImportToUIObject(px_memorypool* mp, PX_Object* pRootObject, const px_char* pText, PX_FontModule* fm);
-px_bool PX_Object_DesignerDefaultInstall(px_vector* pObject);
+px_bool PX_Object_DesignerImportToUIObject(px_memorypool* mp, PX_Object* DesignerObject, PX_Object* pRootObject, const px_char* pText, PX_FontModule* fm);
+px_bool PX_Object_DesignerDefaultInstall(px_vector* pvector);
 px_void PX_Object_DesignerClear(PX_Object* pObject);
 
 #endif

@@ -46,7 +46,7 @@ px_void PX_TextureRenderClipMirror(px_surface* psurface, px_texture* tex, px_int
 px_void PX_TextureRenderClip(px_surface* psurface, px_texture* tex, px_int x, px_int y,px_int clipx,px_int clipy,px_int clipw,px_int cliph, PX_ALIGN refPoint, PX_TEXTURERENDER_BLEND* blend);
 px_void PX_TextureCover(px_surface *psurface,px_texture *tex,px_int x,px_int y,PX_ALIGN refPoint);
 px_void PX_TextureGetVisibleRange(px_texture *ptexture,px_int *pLeft,px_int *pRight,px_int *pTop,px_int *pBottom);
-typedef px_void (*PX_TexturePixelShader)(px_surface *psurface,px_texture *ptexture,px_int renderx,px_int rendery,px_int x,px_int y,px_void *ptr);
+typedef px_void (*PX_TexturePixelShader)(px_surface *psurface,px_texture *ptexture,px_int renderx,px_int rendery,px_int samplex,px_int sampley,px_void *ptr);
 px_void PX_TextureRenderPixelShader(px_surface *psurface,px_texture *tex,px_int x,px_int y,PX_ALIGN refPoint,PX_TexturePixelShader shader,px_void *ptr);
 px_void PX_TextureRenderRotation(px_surface *psurface,px_texture *tex,px_int x,px_int y,PX_ALIGN refPoint,PX_TEXTURERENDER_BLEND *blend,px_int Angle);
 px_void PX_TextureRenderRotation_vector(px_surface *psurface,px_texture *tex,px_int x,px_int y,PX_ALIGN refPoint,PX_TEXTURERENDER_BLEND *blend,px_point2D p_vector);

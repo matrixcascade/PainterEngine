@@ -23,17 +23,17 @@ typedef struct
 	PX_Object_RADIOBOX_STATE state;
 }PX_Object_RadioBox;
 
-PX_Object_RadioBox *PX_Object_GetRadioBox(PX_Object *Object);
+PX_Object_RadioBox *PX_Object_GetRadioBox(PX_Object *pObject);
 PX_Object * PX_Object_RadioBoxCreate(px_memorypool *mp, PX_Object *Parent,px_int x,px_int y,px_int Width,px_int Height,const char text[],PX_FontModule *fm);
-px_bool PX_Object_RadioBoxGetCheck(PX_Object *Object);
-px_void PX_Object_RadioBoxSetBackgroundColor(PX_Object *Object,px_color clr);
-px_void PX_Object_RadioBoxSetBorderColor(PX_Object *Object,px_color clr);
-px_void PX_Object_RadioBoxSetPushColor(PX_Object *Object,px_color clr);
-px_void PX_Object_RadioBoxSetCursorColor(PX_Object *Object,px_color clr);
-px_void PX_Object_RadioBoxSetText(PX_Object *Object,const px_char text[]);
-const px_char *PX_Object_RadioBoxGetText(PX_Object *Object);
-px_void PX_Object_RadioBoxSetTextColor(PX_Object *Object,px_color clr);
-px_void PX_Object_RadioBoxSetCheck(PX_Object *Object,px_bool check);
+px_bool PX_Object_RadioBoxGetCheck(PX_Object *pObject);
+px_void PX_Object_RadioBoxSetBackgroundColor(PX_Object *pObject,px_color clr);
+px_void PX_Object_RadioBoxSetBorderColor(PX_Object *pObject,px_color clr);
+px_void PX_Object_RadioBoxSetPushColor(PX_Object *pObject,px_color clr);
+px_void PX_Object_RadioBoxSetCursorColor(PX_Object *pObject,px_color clr);
+px_void PX_Object_RadioBoxSetText(PX_Object *pObject,const px_char text[]);
+const px_char *PX_Object_RadioBoxGetText(PX_Object *pObject);
+px_void PX_Object_RadioBoxSetTextColor(PX_Object *pObject,px_color clr);
+px_void PX_Object_RadioBoxSetCheck(PX_Object *pObject,px_bool check);
 
 
 PX_Designer_ObjectDesc PX_Object_RadioBoxDesignerInstall();

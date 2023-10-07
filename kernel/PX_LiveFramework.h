@@ -255,6 +255,7 @@ px_bool PX_LiveCreate(px_memorypool *mp,PX_LiveFramework *pLiveFramework,PX_Live
 px_void PX_LiveFree(PX_Live *pLive);
 
 px_void PX_LivePlay(PX_Live*plive);
+px_int PX_LiveGetAnimationCount(PX_Live *plive);
 px_bool PX_LivePlayAnimation(PX_Live *plive,px_int index);
 px_bool PX_LivePlayAnimationByName(PX_Live *plive,const px_char name[]);
 px_void PX_LivePause(PX_Live *plive);

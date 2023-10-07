@@ -4,7 +4,7 @@ PX_Object_MessageBox *PX_Object_GetMessageBox(PX_Object *pObject)
 {
 	if (pObject->Type==PX_OBJECT_TYPE_MESSAGEBOX)
 	{
-		return (PX_Object_MessageBox *)pObject->pObject;
+		return (PX_Object_MessageBox *)pObject->pObjectDesc;
 	}
 	return PX_NULL;
 }
@@ -59,6 +59,26 @@ px_void PX_Object_MessageBoxClose(PX_Object *pObject)
 		pMessageBox->edit_inputbox->Visible=PX_FALSE;
 	}
 	
+}
+
+//set mode
+px_void PX_Object_MessageBoxSetMode(PX_Object *pObject, PX_MESSAGEBOX_COLORMOD mode)
+{
+	PX_Object_MessageBox *pMessageBox=PX_Object_GetMessageBox(pObject);
+	if (pMessageBox)
+	{
+		pMessageBox->colormod=mode;
+	}
+}
+
+//set fillcolor
+px_void PX_Object_MessageBoxSetFillColor(PX_Object *pObject, px_color color)
+{
+	PX_Object_MessageBox *pMessageBox=PX_Object_GetMessageBox(pObject);
+	if (pMessageBox)
+	{
+		pMessageBox->fillbackgroundcolor=color;
+	}
 }
 
 static px_void PX_Object_MessageBoxRender(px_surface *pSurface,PX_Object *pObject,px_dword elapsed)

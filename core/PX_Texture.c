@@ -2705,7 +2705,7 @@ px_bool PX_ShapeCreateFromMemory(px_memorypool *mp,px_void *data,px_int size,px_
 	}
 
 
-	return PX_FALSE;
+	return PX_TRUE;
 }
 
 px_void PX_ShapeRenderEx_sincos(px_surface *psurface,px_shape *shape,px_int x,px_int y,PX_ALIGN refPoint,px_color blendColor,px_float scale,px_float sinx,px_float cosx)

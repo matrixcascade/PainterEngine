@@ -613,12 +613,13 @@ px_bool PX_CanvasVMImport(PX_CanvasVM* pCanvasVM, const px_byte data[], px_int s
 		px_dword pi2;
 		px_dword size;
 	}header;
+	header* hd;
 	PX_CanvasVMReset(pCanvasVM);
 	//check header and size
-	if (size < sizeof(header))return PX_FALSE;
-	header* hd = (header*)data;
+	if ((px_uint)size < sizeof(header))return PX_FALSE;
+	hd = (header*)data;
 	if (hd->pi2 != 0x6282)return PX_FALSE;
-	if (size < hd->size + sizeof(header))return PX_FALSE;
+	if ((px_uint)size < hd->size + sizeof(header))return PX_FALSE;
 	//import
 	if (!PX_MemoryCat(&pCanvasVM->shell, data + sizeof(header), hd->size))return PX_FALSE;
 	pCanvasVM->reg_ip = 0;
@@ -1080,14 +1081,14 @@ px_point2D PX_CanvasVMViewPositionToCanvasPostion(PX_CanvasVM* pdesc, px_point2D
 px_bool PX_CanvasVMExecuteShell(PX_CanvasVM* pCanvasVM)
 {
 	PX_CanvasVMShell_Header* pHeader;
-	if (pCanvasVM->reg_ip>pCanvasVM->shell.usedsize-sizeof(PX_CanvasVMShell_Header))
+	if ((px_uint)pCanvasVM->reg_ip>pCanvasVM->shell.usedsize-sizeof(PX_CanvasVMShell_Header))
 	{
 		return PX_FALSE;
 	}
 	
 	pHeader= (PX_CanvasVMShell_Header *)(pCanvasVM->shell.buffer+pCanvasVM->reg_ip);
 
-	if (pCanvasVM->reg_ip + pHeader->size+ sizeof(PX_CanvasVMShell_Header)>pCanvasVM->shell.usedsize)
+	if ((px_uint)pCanvasVM->reg_ip + pHeader->size+ sizeof(PX_CanvasVMShell_Header)> (px_uint)pCanvasVM->shell.usedsize)
 	{
 		return PX_FALSE;
 	}
@@ -1176,7 +1177,7 @@ px_bool PX_CanvasVMExecuteShell(PX_CanvasVM* pCanvasVM)
 			px_int i;
 			px_int ptcount=pHeader->size/sizeof(PX_CanvasNode);
 			PX_CanvasNode* pNode;
-			PX_ASSERTIF(pCanvasVM->shell.usedsize - pCanvasVM->reg_ip < sizeof(PX_CanvasVMShell_Header) + pHeader->size);
+			PX_ASSERTIF((px_uint)pCanvasVM->shell.usedsize - (px_uint)pCanvasVM->reg_ip < sizeof(PX_CanvasVMShell_Header) + pHeader->size);
 			
 			pCanvasVM->reg_color = pHeader->color;
 			pCanvasVM->reg_filter_radius = pHeader->filter;
@@ -1339,7 +1340,7 @@ px_void PX_CanvasVMMoveBack(PX_CanvasVM* pCanvasVM)
 	while(PX_TRUE)
 	{
 		pHeader=(PX_CanvasVMShell_Header*)(pCanvasVM->shell.buffer+pCanvasVM->reg_ip);
-		if (pCanvasVM->reg_ip+sizeof(PX_CanvasVMShell_Header)+pHeader->size>=lastip)
+		if ((px_uint)pCanvasVM->reg_ip+sizeof(PX_CanvasVMShell_Header)+ (px_uint)pHeader->size>= (px_uint)lastip)
 		{
 			break;
 		}

@@ -2,14 +2,16 @@ cmake_minimum_required(VERSION 3.6.0)
 
 #################################################################
 #PainterEngine Directory
-set(PAINTERENGINE_DIR D:/Working/PainterEngine)
+#set(PAINTERENGINE_DIR ../PainterEngine)
 #Project Directory
-set(PAINTERENGINE_PROJECT_DIR D:/Working/PainterEngine/project)
+#set(PAINTERENGINE_PROJECT_DIR ../Project)
 #################################################################
+
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c11 -O3 ")
 
 include_directories(${ANDROID_NDK}/sources/android/native_app_glue/)
 include_directories(${PAINTERENGINE_DIR})
+include_directories(${PAINTERENGINE_DIR}/runtime)
 include_directories(${PAINTERENGINE_DIR}/platform/android)
 include_directories(${PAINTERENGINE_PROJECT_DIR})
 
@@ -24,7 +26,7 @@ set(ANDROID_NATIVE_APP_GLUE ${ANDROID_NDK}/sources/android/native_app_glue/andro
 aux_source_directory(${PAINTERENGINE_DIR}/platform/android PAINTERENGINE_PLATFORM_ANDROID_SOURCES)
 aux_source_directory(${PAINTERENGINE_DIR}/core PAINTERENGINE_CORE_SOURCES)
 aux_source_directory(${PAINTERENGINE_DIR}/kernel PAINTERENGINE_KERNEL_SOURCES)
-aux_source_directory(${PAINTERENGINE_DIR}/architecture PAINTERENGINE_ARCH_SOURCES)
+aux_source_directory(${PAINTERENGINE_DIR}/runtime PAINTERENGINE_ARCH_SOURCES)
 
 add_library(PAINTERENGINELIB
         STATIC

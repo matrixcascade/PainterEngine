@@ -20,8 +20,8 @@ typedef struct
 	PX_OBJECT_PROTRACTOR_STATE state;
 }PX_Object_Protractor;
 
-PX_Object_Protractor *PX_Object_GetProtractor(PX_Object *Object);
+PX_Object_Protractor *PX_Object_GetProtractor(PX_Object *pObject);
 PX_Object * PX_Object_ProtractorCreate(px_memorypool *mp, PX_Object *Parent,px_int x,px_int y,px_int radius);
-px_float PX_Object_ProtractorGetAngle(PX_Object *Object);
+px_float PX_Object_ProtractorGetAngle(PX_Object *pObject);
 
 #endif

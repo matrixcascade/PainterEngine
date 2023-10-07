@@ -38,7 +38,7 @@
 #define PX_OBJECT_EVENT_REQUESTDATA			26
 #define PX_OBJECT_EVENT_OPEN				27
 #define PX_OBJECT_EVENT_SAVE				28
-#define PX_OBJECT_EVENT_TIMEOUT             29
+#define PX_OBJECT_EVENT_TIMEOUT				29
 //////////////////////////////////////////////////////////////////////////////
 //    Type of Controls
 /////////////////////////////////////////////////////////////////////////////
@@ -98,7 +98,13 @@ enum PX_OBJECT_TYPE
   PX_OBJECT_TYPE_LAYERBOX		,
   PX_OBJECT_TYPE_CANVAS			,
   PX_OBJECT_TYPE_CURSORSLIDER   ,
-  PX_OBJECT_TYPE_TIMER          ,
+  PX_OBJECT_TYPE_TYPER			,
+  PX_OBJECT_TYPE_TIMER			,
+  PX_OBJECT_TYPE_PANEL			,
+  PX_OBJECT_TYPE_3DMODEL		,
+  PX_OBJECT_TYPE_SOUNDVIEW		,
+  PX_OBJECT_TYPE_LIVE2D			,
+  PX_OBJECT_TYPE_FIREWORK		,
 };
 
 
@@ -117,25 +123,12 @@ enum PX_OBJECT_TYPE
 #define  PX_OBJECT_IMAGE_LISTBOX_STYLE_ITEMBORDER	1
 #define  PX_OBJECT_IMAGE_LISTBOX_STYLE_SELECT		2
 
-#ifndef PX_OBJECT_UI_DEFAULT_BACKGROUNDCOLOR
-#define PX_OBJECT_UI_DEFAULT_BACKGROUNDCOLOR PX_COLOR(255,48,48,48)
-#endif
+#define PX_OBJECT_UI_DEFAULT_BACKGROUNDCOLOR PX_COLOR_BACKGROUNDCOLOR
+#define PX_OBJECT_UI_DEFAULT_CURSORCOLOR PX_COLOR_CURSORCOLOR
+#define PX_OBJECT_UI_DEFAULT_FONTCOLOR PX_COLOR_FONTCOLOR
+#define PX_OBJECT_UI_DEFAULT_BORDERCOLOR PX_COLOR_BORDERCOLOR
+#define PX_OBJECT_UI_DEFAULT_PUSHCOLOR PX_COLOR_PUSHCOLOR
 
-#ifndef PX_OBJECT_UI_DEFAULT_CURSORCOLOR
-#define PX_OBJECT_UI_DEFAULT_CURSORCOLOR PX_COLOR(255,32,32,32)
-#endif
-
-#ifndef PX_OBJECT_UI_DEFAULT_FONTCOLOR
-#define PX_OBJECT_UI_DEFAULT_FONTCOLOR PX_COLOR(255,192,192,192)
-#endif
-
-#ifndef PX_OBJECT_UI_DEFAULT_BORDERCOLOR
-#define PX_OBJECT_UI_DEFAULT_BORDERCOLOR PX_COLOR(255,192,192,192)
-#endif
-
-#ifndef PX_OBJECT_UI_DEFAULT_PUSHCOLOR
-#define PX_OBJECT_UI_DEFAULT_PUSHCOLOR PX_COLOR(255,64,64,64)
-#endif
 
 #define PX_OBJECT_UI_DISABLE_FONTCOLOR PX_COLOR(255,128,128,128)
 #define  PX_OBJECT_FILTEREDITOR_DEFAULE_HORIZONTALPIXELDIVIDING 48
@@ -147,7 +140,7 @@ enum PX_OBJECT_TYPE
 
 
 ///////////////////////////////////////////////////////////////////////////
-////  PainterEngine Object
+////  PainterEngine pObject
 //////////////////////////////////////////////////////////////////////////
 struct _PX_Object;
 typedef struct _PX_Object PX_Object;
@@ -159,6 +152,16 @@ typedef px_void  (*Function_ObjectEndRender)(px_surface *,PX_Object *,px_dword);
 typedef px_void  (*Function_ObjectFree)(PX_Object *);
 typedef px_void  (*Function_ObjectLinkChild)(PX_Object *parent,PX_Object *child);
 
+#define PX_OBJECT_EVENT_FUNCTION(name) px_void name(PX_Object *pObject,PX_Object_Event e,px_void * ptr)
+#define PX_OBJECT_RENDER_FUNCTION(name) px_void name(px_surface *psurface,PX_Object *pObject,px_uint elapsed)
+#define PX_OBJECT_UPDATE_FUNCTION(name) px_void name(PX_Object *pObject,px_uint elapsed)
+#define PX_OBJECT_FREE_FUNCTION(name) px_void name(PX_Object *pObject)
+
+#define PX_OBJECT_EVENTFUNCTION(name) PX_OBJECT_EVENT_FUNCTION(name)
+#define PX_OBJECT_RENDERFUNCTION(name) PX_OBJECT_RENDER_FUNCTION(name)
+#define PX_OBJECT_UPDATEFUNCTION(name) PX_OBJECT_UPDATE_FUNCTION(name)
+#define PX_OBJECT_FREEFUNCTION(name) PX_OBJECT_FREE_FUNCTION(name)
+
 struct _PX_Object
 {
 	px_char id[PX_OBJECT_ID_MAXLEN];
@@ -168,7 +171,7 @@ struct _PX_Object
 	px_float Width;
 	px_float Height;
 	px_float Length;
-	px_float diameter;//if the member is not zero,The Object is round shape
+	px_float diameter;//if the member is not zero,The pObject is round shape
 	px_bool OnFocus;
 	px_bool OnFocusNode;
 	px_bool OnLostFocusReleaseEvent;
@@ -187,7 +190,7 @@ struct _PX_Object
 	px_bool  delay_delete;
 	px_dword impact_object_type;
 	px_dword impact_target_type;
-	px_void *pObject;
+	px_void *pObjectDesc;
 	px_memorypool *mp;
 	struct _PX_Object *pChilds;
 	struct _PX_Object *pParent;
@@ -207,18 +210,6 @@ struct _PX_Object
 //////////////////////////////////////////////////////////////////////////
 ///   Controllers
 //////////////////////////////////////////////////////////////////////////
-
-
-
-
-typedef struct 
-{
-	PX_ALIGN Align;
-	PX_Animation animation;
-}PX_Object_Animation;
-
-
-
 
 typedef struct
 {
@@ -309,38 +300,40 @@ PX_Object *PX_ObjectCreateEx(px_memorypool *mp,PX_Object *Parent,\
 	px_void *desc,\
 	px_int size
 	);
-#define    PX_ObjectGetDesc(type,pobject) ((type *)((pobject)->pObject))
-px_void    PX_ObjectGetInheritXY(PX_Object *Object,px_float *x,px_float *y);
-px_void	   PX_ObjectInitialize(px_memorypool *mp,PX_Object *Object,PX_Object *Parent,px_float x,px_float y,px_float z,px_float Width,px_float Height,px_float Length);
+PX_Object* PX_ObjectCreateFunction(px_memorypool* mp, PX_Object* Parent, Function_ObjectUpdate Func_ObjectUpdate, Function_ObjectRender Func_ObjectRender, Function_ObjectFree Func_ObjectFree);
+PX_Object* PX_ObjectCreateRoot(px_memorypool* mp);
+#define    PX_ObjectGetDesc(type,pobject) ((type *)((pobject)->pObjectDesc))
+px_void    PX_ObjectGetInheritXY(PX_Object *pObject,px_float *x,px_float *y);
+px_void	   PX_ObjectInitialize(px_memorypool *mp,PX_Object *pObject,PX_Object *Parent,px_float x,px_float y,px_float z,px_float Width,px_float Height,px_float Length);
 px_void    PX_ObjectSetId(PX_Object *pObject,const px_char id[]);
 px_void    PX_ObjectSetUserCode(PX_Object *pObject,px_int user_int);
 px_void    PX_ObjectSetUserPointer(PX_Object *pObject,px_void *user_ptr);
-px_void	   PX_ObjectSetParent(PX_Object* Object, PX_Object* Parent);
+px_void	   PX_ObjectSetParent(PX_Object* pObject, PX_Object* Parent);
 px_void    PX_ObjectDelete(PX_Object *pObject);
 px_void    PX_ObjectDelayDelete(PX_Object* pObject);
 px_void	   PX_ObjectDeleteChilds( PX_Object *pObject );
-px_void	   PX_ObjectSetPosition(PX_Object *Object,px_float x,px_float y,px_float z);
-px_void    PX_ObjectSetSize(PX_Object *Object,px_float Width,px_float Height,px_float length);
-px_void	   PX_ObjectSetVisible(PX_Object *Object,px_bool visible);
-px_void    PX_ObjectSetEnabled(PX_Object *Object,px_bool enabled);
-px_void    PX_ObjectEnable(PX_Object *Object);
-px_void    PX_ObjectDisable(PX_Object *Object);
-PX_Object  *PX_ObjectGetChild(PX_Object *Object,px_int Index);
+px_void	   PX_ObjectSetPosition(PX_Object *pObject,px_float x,px_float y,px_float z);
+px_void    PX_ObjectSetSize(PX_Object *pObject,px_float Width,px_float Height,px_float length);
+px_void	   PX_ObjectSetVisible(PX_Object *pObject,px_bool visible);
+px_void    PX_ObjectSetEnabled(PX_Object *pObject,px_bool enabled);
+px_void    PX_ObjectEnable(PX_Object *pObject);
+px_void    PX_ObjectDisable(PX_Object *pObject);
+PX_Object  *PX_ObjectGetChild(PX_Object *pObject,px_int Index);
 PX_Object  *PX_ObjectGetObject(PX_Object *pObject,const px_char payload[]);
-px_void     PX_ObjectSetFocus(PX_Object *Object);
-px_void     PX_ObjectClearFocus(PX_Object *Object);
+px_void     PX_ObjectSetFocus(PX_Object *pObject);
+px_void     PX_ObjectClearFocus(PX_Object *pObject);
 #define		PX_ObjectReleaseFocus PX_ObjectClearFocus
 
-px_bool		PX_ObjectIsPointInRegion(PX_Object *Object,px_float x,px_float y);
-px_bool		PX_ObjectIsCursorInRegion(PX_Object *Object,PX_Object_Event e);
-px_float	PX_ObjectGetHeight(PX_Object *Object);
-px_float	PX_ObjectGetWidth(PX_Object *Object);
+px_bool		PX_ObjectIsPointInRegion(PX_Object *pObject,px_float x,px_float y);
+px_bool		PX_ObjectIsCursorInRegion(PX_Object *pObject,PX_Object_Event e);
+px_float	PX_ObjectGetHeight(PX_Object *pObject);
+px_float	PX_ObjectGetWidth(PX_Object *pObject);
 
 px_void PX_ObjectAddChild(PX_Object *Parent,PX_Object *child);
-px_void PX_ObjectUpdate(PX_Object *Object,px_uint elapsed );
-px_void PX_ObjectRender(px_surface *pSurface,PX_Object *Object,px_uint elapsed);
+px_void PX_ObjectUpdate(PX_Object *pObject,px_uint elapsed );
+px_void PX_ObjectRender(px_surface *pSurface,PX_Object *pObject,px_uint elapsed);
 
-px_int PX_ObjectRegisterEvent(PX_Object *Object,px_uint Event,px_void (*ProcessFunc)(PX_Object *,PX_Object_Event e,px_void *user_ptr),px_void *ptr);
+px_int PX_ObjectRegisterEvent(PX_Object *pObject,px_uint Event,px_void (*ProcessFunc)(PX_Object *,PX_Object_Event e,px_void *user_ptr),px_void *ptr);
 px_void PX_ObjectPostEvent(PX_Object *pPost,PX_Object_Event Event);
 px_void PX_ObjectExecuteEvent(PX_Object *pPost,PX_Object_Event Event);
 
@@ -613,8 +606,36 @@ px_void PX_Designer_SetEnable(PX_Object* pObject, px_bool v);
 #include "PX_Object_CursorSlider.h"
 
 //////////////////////////////////////////////////////////////////////////
+//Typer
+#include "PX_Object_Typer.h"
+
+//////////////////////////////////////////////////////////////////////////
 //Timer
 #include "PX_Object_Timer.h"
+
+//////////////////////////////////////////////////////////////////////////
+//Panel
+#include "PX_Object_Panel.h"
+
+//////////////////////////////////////////////////////////////////////////
+//3D
+#include "PX_Object_3D.h"
+
+//////////////////////////////////////////////////////////////////////////
+//SoundView
+#include "PX_Object_SoundView.h"
+
+//////////////////////////////////////////////////////////////////////////
+//Partical
+#include "PX_Object_Partical.h"
+
+//////////////////////////////////////////////////////////////////////////
+//Live2D
+#include "PX_Object_Live2D.h"
+
+/////////////////////////////////////////////////////////////////////////
+//Firework
+#include "PX_Object_Firework.h"
 
 #endif
 

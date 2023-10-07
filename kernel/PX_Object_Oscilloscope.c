@@ -57,7 +57,7 @@ PX_Object_Oscilloscope *PX_Object_GetOscilloscope(PX_Object *pObject)
 {
 	if (pObject->Type==PX_OBJECT_TYPE_OSCILLOSCOPE)
 	{
-		return (PX_Object_Oscilloscope *)pObject->pObject;
+		return (PX_Object_Oscilloscope *)pObject->pObjectDesc;
 	}
 	return PX_NULL;
 }
@@ -1873,11 +1873,55 @@ PX_Object *PX_Object_OscilloscopeCreate(px_memorypool *mp, PX_Object *Parent,px_
 	return pObject;
 }
 
-PX_Object_FilterEditor * PX_Object_GetFilterEditor(PX_Object *Object)
+
+PX_Object* PX_Designer_OscilloscopeCreate(px_memorypool* mp, PX_Object* pparent, px_float x, px_float y, px_float width, px_float height, px_void* ptr)
 {
-	if (Object->Type==PX_OBJECT_TYPE_FILTEREDITOR)
+	PX_FontModule* fm = (PX_FontModule*)ptr;
+	return PX_Object_OscilloscopeCreate(mp, pparent, (px_int)x, (px_int)y, 256, 256, fm);
+}
+
+PX_Designer_ObjectDesc PX_Object_OscilloscopeDesignerInstall()
+{
+	PX_Designer_ObjectDesc desc;
+	px_int i = 0;
+	PX_memset(&desc, 0, sizeof(desc));
+	PX_strcat(desc.Name, "oscilloscope");
+	desc.createfunc = PX_Designer_OscilloscopeCreate;
+	desc.type = PX_DESIGNER_OBJECT_TYPE_UI;
+
+	PX_strcat(desc.properties[i].Name, "id");
+	desc.properties[i].getstring = PX_Designer_GetID;
+	desc.properties[i].setstring = PX_Designer_SetID;
+	i++;
+
+	PX_strcat(desc.properties[i].Name, "x");
+	desc.properties[i].getfloat = PX_Designer_GetX;
+	desc.properties[i].setfloat = PX_Designer_SetX;
+	i++;
+
+	PX_strcat(desc.properties[i].Name, "y");
+	desc.properties[i].getfloat = PX_Designer_GetY;
+	desc.properties[i].setfloat = PX_Designer_SetY;
+	i++;
+
+	PX_strcat(desc.properties[i].Name, "width");
+	desc.properties[i].getfloat = PX_Designer_GetWidth;
+	desc.properties[i].setfloat = PX_Designer_SetWidth;
+	i++;
+
+	PX_strcat(desc.properties[i].Name, "height");
+	desc.properties[i].getfloat = PX_Designer_GetHeight;
+	desc.properties[i].setfloat = PX_Designer_SetHeight;
+	i++;
+
+	return desc;
+}
+
+PX_Object_FilterEditor * PX_Object_GetFilterEditor(PX_Object *pObject)
+{
+	if (pObject->Type==PX_OBJECT_TYPE_FILTEREDITOR)
 	{
-		return (PX_Object_FilterEditor *)Object->pObject;
+		return (PX_Object_FilterEditor *)pObject->pObjectDesc;
 	}
 	return PX_NULL;
 }
@@ -2270,105 +2314,105 @@ px_void PX_Object_FilterEditorSetOperateCount(PX_Object *pObject,px_int count)
 	pfe->opCount=count;
 }
 
-px_void PX_Object_FilterEditorSetType(PX_Object *Object,PX_OBJECT_FILTER_TYPE type)
+px_void PX_Object_FilterEditorSetType(PX_Object *pObject,PX_OBJECT_FILTER_TYPE type)
 {
-	PX_Object_FilterEditor *pfe=PX_Object_GetFilterEditor(Object);
+	PX_Object_FilterEditor *pfe=PX_Object_GetFilterEditor(pObject);
 	if (pfe)
 	{
 		pfe->FilterType=type;
 	}
 }
 
-px_void PX_Object_FilterEditorSetHorizontalShow(PX_Object *Object,px_bool HorizontalShow)
+px_void PX_Object_FilterEditorSetHorizontalShow(PX_Object *pObject,px_bool HorizontalShow)
 {
-	PX_Object_FilterEditor *pfe=PX_Object_GetFilterEditor(Object);
+	PX_Object_FilterEditor *pfe=PX_Object_GetFilterEditor(pObject);
 	if (pfe)
 	{
 		pfe->showHorizontal=HorizontalShow;
 	}
 }
 
-px_void PX_Object_FilterEditorReset(PX_Object *Object)
+px_void PX_Object_FilterEditorReset(PX_Object *pObject)
 {
 	px_int i,y;
-	PX_Object_FilterEditor *pfe=PX_Object_GetFilterEditor(Object);
-	y=(px_int)(Object->Height/2);
+	PX_Object_FilterEditor *pfe=PX_Object_GetFilterEditor(pObject);
+	y=(px_int)(pObject->Height/2);
 	for (i=0;i<pfe->opCount;i++)
 	{
 		pfe->pt[i].y=y;
 	}
 }
 
-px_void PX_Object_FilterEditorSetRange(PX_Object *Object,px_double range)
+px_void PX_Object_FilterEditorSetRange(PX_Object *pObject,px_double range)
 {
 
-	PX_Object_FilterEditor *pfe=PX_Object_GetFilterEditor(Object);
+	PX_Object_FilterEditor *pfe=PX_Object_GetFilterEditor(pObject);
 	if (pfe)
 	{
 		pfe->rangedb=range;
 	}
 }
 
-px_void PX_Object_FilterEditorSetFontColor(PX_Object *Object,px_color clr)
+px_void PX_Object_FilterEditorSetFontColor(PX_Object *pObject,px_color clr)
 {
-	PX_Object_FilterEditor *pfe=PX_Object_GetFilterEditor(Object);
+	PX_Object_FilterEditor *pfe=PX_Object_GetFilterEditor(pObject);
 	if (pfe)
 	{
 		pfe->FontColor=clr;
 	}
 }
 
-px_void PX_Object_FilterEditorSetBorderColor(PX_Object *Object,px_color clr)
+px_void PX_Object_FilterEditorSetBorderColor(PX_Object *pObject,px_color clr)
 {
-	PX_Object_FilterEditor *pfe=PX_Object_GetFilterEditor(Object);
+	PX_Object_FilterEditor *pfe=PX_Object_GetFilterEditor(pObject);
 	if (pfe)
 	{
 		pfe->borderColor=clr;
 	}
 }
 
-px_void PX_Object_FilterEditorSethelpLineColor(PX_Object *Object,px_color clr)
+px_void PX_Object_FilterEditorSethelpLineColor(PX_Object *pObject,px_color clr)
 {
-	PX_Object_FilterEditor *pfe=PX_Object_GetFilterEditor(Object);
+	PX_Object_FilterEditor *pfe=PX_Object_GetFilterEditor(pObject);
 	if (pfe)
 	{
 		pfe->helpLineColor=clr;
 	}
 }
 
-px_void PX_Object_FilterEditorSetFontSize(PX_Object *Object,px_int size)
+px_void PX_Object_FilterEditorSetFontSize(PX_Object *pObject,px_int size)
 {
-	PX_Object_FilterEditor *pfe=PX_Object_GetFilterEditor(Object);
+	PX_Object_FilterEditor *pfe=PX_Object_GetFilterEditor(pObject);
 	if (pfe)
 	{
 		pfe->FontSize=size;
 	}
 }
 
-px_void PX_Object_FilterEditorSetHorizontalDividing(PX_Object *Object,px_int div)
+px_void PX_Object_FilterEditorSetHorizontalDividing(PX_Object *pObject,px_int div)
 {
-	PX_Object_FilterEditor *pfe=PX_Object_GetFilterEditor(Object);
+	PX_Object_FilterEditor *pfe=PX_Object_GetFilterEditor(pObject);
 	if (pfe)
 	{
 		pfe->HorizontalDividing=div;
 	}
 }
 
-px_void PX_Object_FilterEditorSetVerticalDividing(PX_Object *Object,px_int div)
+px_void PX_Object_FilterEditorSetVerticalDividing(PX_Object *pObject,px_int div)
 {
-	PX_Object_FilterEditor *pfe=PX_Object_GetFilterEditor(Object);
+	PX_Object_FilterEditor *pfe=PX_Object_GetFilterEditor(pObject);
 	if (pfe)
 	{
 		pfe->VerticalDividing=div;
 	}
 }
 
-px_void PX_Object_FilterEditorMapData(PX_Object *Object,px_double data[],px_int size)
+px_void PX_Object_FilterEditorMapData(PX_Object *pObject,px_double data[],px_int size)
 {
 	px_int i,mapIndex;
 	px_double ptValue[PX_OBJECT_FILTER_EDITOR_MAX_PT];
 	px_double step,frac,d2,d1,dm;
-	PX_Object_FilterEditor *pfe=PX_Object_GetFilterEditor(Object);
+	PX_Object_FilterEditor *pfe=PX_Object_GetFilterEditor(pObject);
 	if (!pfe)
 	{
 		return;
@@ -2376,13 +2420,13 @@ px_void PX_Object_FilterEditorMapData(PX_Object *Object,px_double data[],px_int 
 	//pt to value
 	for (i=0;i<pfe->opCount;i++)
 	{
-		if (pfe->pt[i].y>Object->Height-10)
+		if (pfe->pt[i].y>pObject->Height-10)
 		{
 			ptValue[i]=-1000;
 		}
 		else
 		{
-			ptValue[i]=((Object->Height/2)-pfe->pt[i].y)/(Object->Height/2)*pfe->rangedb;
+			ptValue[i]=((pObject->Height/2)-pfe->pt[i].y)/(pObject->Height/2)*pfe->rangedb;
 		}
 	}
 
@@ -2470,17 +2514,17 @@ PX_Object * PX_Object_FilterEditorCreate(px_memorypool *mp, PX_Object *Parent,px
 	return pObject;
 }
 
-px_void PX_Object_FilterEditorSetborderColor(PX_Object *Object,px_color clr)
+px_void PX_Object_FilterEditorSetborderColor(PX_Object *pObject,px_color clr)
 {
-	PX_Object_FilterEditor *pfe=PX_Object_GetFilterEditor(Object);
+	PX_Object_FilterEditor *pfe=PX_Object_GetFilterEditor(pObject);
 	pfe->borderColor=clr;
 }
 
 
 
-px_void PX_Object_FilterEditorSetptColor(PX_Object *Object,px_color clr)
+px_void PX_Object_FilterEditorSetptColor(PX_Object *pObject,px_color clr)
 {
-	PX_Object_FilterEditor *pfe=PX_Object_GetFilterEditor(Object);
+	PX_Object_FilterEditor *pfe=PX_Object_GetFilterEditor(pObject);
 	pfe->ptColor=clr;
 }
 

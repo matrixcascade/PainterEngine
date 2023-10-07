@@ -7,7 +7,7 @@ px_void PX_Object_ProcessBarRender(px_surface *psurface, PX_Object *pObject,px_u
 	px_int x,y,w,h;
 	px_float inheritX,inheritY;
 
-	PX_Object_ProcessBar *pProcessBar=(PX_Object_ProcessBar *)pObject->pObject;
+	PX_Object_ProcessBar *pProcessBar=(PX_Object_ProcessBar *)pObject->pObjectDesc;
 	PX_ObjectGetInheritXY(pObject,&inheritX,&inheritY);
 
 	x=(px_int)(pObject->x+inheritX);
@@ -59,6 +59,14 @@ px_void PX_Object_ProcessBarRender(px_surface *psurface, PX_Object *pObject,px_u
 
 	PX_GeoDrawRect(psurface,px,py,px+pl-2-1,py+(px_int)h-4-1,pProcessBar->Color);
 
+	//Draw text
+	if (pProcessBar->ProgressTextColor._argb.a)
+	{
+		px_char text[32];
+		PX_sprintf1(text,sizeof(text),"%1%",PX_STRINGFORMAT_INT((px_int)((pProcessBar->Value*1.0/pProcessBar->MAX)*100)));
+		PX_FontModuleDrawText(psurface, 0,x+w/2,y+h/2,PX_ALIGN_CENTER, text,pProcessBar->ProgressTextColor);
+	}
+
 }
 
 PX_Object * PX_Object_ProcessBarCreate(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y,px_int Width,px_int Height )
@@ -76,7 +84,7 @@ PX_Object * PX_Object_ProcessBarCreate(px_memorypool *mp,PX_Object *Parent,px_in
 		return PX_NULL;
 	}
 
-	pObject->pObject=ProcessBar;
+	pObject->pObjectDesc=ProcessBar;
 	pObject->Enabled=PX_TRUE;
 	pObject->Visible=PX_TRUE;
 	pObject->Type=PX_OBJECT_TYPE_PROCESSBAR;
@@ -98,6 +106,15 @@ px_void PX_Object_ProcessBarSetColor( PX_Object *pProcessBar,px_color Color)
 	{
 
 		pProcess->Color=Color;
+	}
+}
+
+px_void PX_Object_ProcessBarSetTextColor(PX_Object* pProcessBar, px_color Color)
+{
+	PX_Object_ProcessBar* pProcess = PX_Object_GetProcessBar(pProcessBar);
+	if (pProcess != PX_NULL)
+	{
+		pProcess->ProgressTextColor = Color;
 	}
 }
 
@@ -142,10 +159,10 @@ px_int PX_Object_ProcessBarGetMax(PX_Object* pProcessBar)
 	return 0;
 }
 
-PX_Object_ProcessBar * PX_Object_GetProcessBar( PX_Object *Object )
+PX_Object_ProcessBar * PX_Object_GetProcessBar( PX_Object *pObject )
 {
-	if(Object->Type==PX_OBJECT_TYPE_PROCESSBAR)
-		return (PX_Object_ProcessBar *)Object->pObject;
+	if(pObject->Type==PX_OBJECT_TYPE_PROCESSBAR)
+		return (PX_Object_ProcessBar *)pObject->pObjectDesc;
 	else
 		return PX_NULL;
 }

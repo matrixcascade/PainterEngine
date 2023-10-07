@@ -33,6 +33,8 @@ px_void PX_StringReplaceRange(px_string *str,px_int startindex,px_int endindex,p
 px_void PX_StringTrimLeft(px_string *str,px_int leftCount);
 px_void PX_StringTrimRight(px_string *str,px_int RightCount);
 px_int PX_StringFind(px_string* str, const px_char find[]);
+px_bool PX_StringRead(const px_char content[],px_int readsize,px_char out[]);
+px_int PX_StringReadUntil(const px_char content[], px_char until, px_char out[], px_int max_out_size);
 
 px_bool PX_StringIsNumeric(px_string *str);
 px_bool PX_StringIsFloat(px_string *str);

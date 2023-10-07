@@ -14,8 +14,8 @@ painterengine_build_painterengine_o := $(patsubst %.c,%.o,$(painterengine_build_
 painterengine_build_kernel := $(wildcard $(painterengine_path)/kernel/*.c)
 painterengine_build_painterengine_o += $(patsubst %.c,%.o,$(painterengine_build_kernel))
 
-painterengine_build_architecture := $(wildcard $(painterengine_path)/architecture/*.c)
-painterengine_build_painterengine_o += $(patsubst %.c,%.o,$(painterengine_build_architecture))
+painterengine_build_runtime := $(wildcard $(painterengine_path)/runtime/*.c)
+painterengine_build_painterengine_o += $(patsubst %.c,%.o,$(painterengine_build_runtime))
 
 painterengine_build_platform := $(wildcard $(painterengine_path)/platform/linux/*.c)
 painterengine_build_painterengine_o += $(patsubst %.c,%.o,$(painterengine_build_platform))
@@ -35,7 +35,7 @@ all:$(project_build_o)  $(painterengine_build_painterengine_o)
 $(project_path)/%.o:$(project_path)/%.c
 	gcc -c $^ -o $@ -I "$(painterengine_path)" -I "$(painterengine_path)/platform/linux"
 
-$(painterengine_path)/architecture/%.o:$(painterengine_path)/architecture/%.c 
+$(painterengine_path)/runtime/%.o:$(painterengine_path)/runtime/%.c 
 	gcc -c $^ -o $@ -I "$(painterengine_path)"
 
 $(painterengine_path)/kernel/%.o:$(painterengine_path)/kernel/%.c

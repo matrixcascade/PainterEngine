@@ -3,6 +3,8 @@
 #include "PX_Object.h"
 #define PX_OBJECT_LIST_SLIDERBAR_WIDTH 18
 
+#define PX_OBJECT_LIST_ITEM_CREATE_FUNCTION(name) px_bool name(px_memorypool *mp,PX_Object *ItemObject,px_void *userptr)
+
 typedef px_bool (*PX_Object_ListItemOnCreate)(px_memorypool *mp,PX_Object *ItemObject,px_void *userptr);
 typedef px_void (*PX_Object_ListArrayItemOnRender)(px_surface* psurface, PX_Object* ItemObject,px_dword elapsed,px_byte *pdata,px_int index,px_void* userptr);
 
@@ -40,8 +42,8 @@ typedef struct
 	Function_ObjectRender ArrayRender;
 }PX_Object_List;
 
-PX_Object_List * PX_Object_GetList( PX_Object *Object );
-PX_Object_ListItem * PX_Object_GetListItem( PX_Object *Object );
+PX_Object_List * PX_Object_GetList( PX_Object *pObject );
+PX_Object_ListItem * PX_Object_GetListItem( PX_Object *pObject );
 PX_Object * PX_Object_ListCreate(px_memorypool *mp, PX_Object *Parent,px_int x,px_int y,px_int Width,px_int Height,px_int ItemHeight,PX_Object_ListItemOnCreate _CreateFunc,px_void *userptr);
 PX_Object* PX_Object_ListContentCreate(px_memorypool* mp, PX_Object* Parent, px_int x, px_int y, px_int Width, px_int Height, PX_FontModule* fm);
 

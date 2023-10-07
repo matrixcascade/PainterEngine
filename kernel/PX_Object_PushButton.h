@@ -28,6 +28,9 @@ typedef struct
 	px_color CursorColor;
 	px_color PushColor;
 	px_char *Text;
+	px_char* Tips;
+	px_float tips_x,tips_y;
+	px_dword bCursorShowTipsElapsed;
 	PX_FontModule *fontModule;
 	px_texture *Texture;
 	px_shape *shape;
@@ -38,21 +41,23 @@ typedef struct
 
 PX_Object *PX_Object_PushButtonCreate(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y,px_int Width,px_int Height,const px_char *Text,PX_FontModule *fontmodule);
 PX_Object* PX_Object_CircleButtonCreate(px_memorypool* mp, PX_Object* Parent, px_int x, px_int y, px_int Radius, const px_char* Text, PX_FontModule* fontmodule);
-PX_Object_PushButton * PX_Object_GetPushButton( PX_Object *Object );
+PX_Object_PushButton * PX_Object_GetPushButton( PX_Object *pObject );
 px_char * PX_Object_PushButtonGetText( PX_Object *PushButton );
 px_void PX_Object_PushButtonSetText( PX_Object *pObject,const px_char *Text );
+px_void PX_Object_PushButtonSetTips(PX_Object* pObject, const px_char* tips);
 px_void PX_Object_PushButtonSetBackgroundColor( PX_Object *pObject,px_color Color );
 px_void PX_Object_PushButtonSetCursorColor( PX_Object *pObject,px_color Color );
 px_void PX_Object_PushButtonSetStyle(PX_Object *pObject,PX_OBJECT_PUSHBUTTON_STYLE style);
 px_void PX_Object_PushButtonSetPushColor( PX_Object *pObject,px_color Color );
 px_void PX_Object_PushButtonSetBorderColor( PX_Object *pObject,px_color Color );
-px_void PX_Object_PushButtonSetBorder( PX_Object *Object,px_bool Border );
+px_void PX_Object_PushButtonSetBorder( PX_Object *pObject,px_bool Border );
 px_void PX_Object_PushButtonRender(px_surface *psurface, PX_Object *pObject,px_uint elapsed);
 px_void PX_Object_PushButtonSetTextColor( PX_Object *pObject,px_color Color );
 px_void PX_Object_PushButtonSetTexture(PX_Object *pObject,px_texture *texture);
 px_void PX_Object_PushButtonSetShape(PX_Object *pObject,px_shape *pshape);
-px_void PX_Object_PushButtonFree( PX_Object *Obj );
+px_void PX_Object_PushButtonFree( PX_Object *pObject );
 
+px_void PX_Object_PushButtonSetRoundRadius(PX_Object* pObject, px_float RoundRadius);
 PX_Designer_ObjectDesc PX_Object_PushButtonDesignerInstall();
 
 #endif

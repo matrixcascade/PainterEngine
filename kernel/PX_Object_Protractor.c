@@ -1,10 +1,10 @@
 #include "PX_Object_Protractor.h"
 
-PX_Object_Protractor * PX_Object_GetProtractor(PX_Object *Object)
+PX_Object_Protractor * PX_Object_GetProtractor(PX_Object *pObject)
 {
-	if (Object->Type==PX_OBJECT_TYPE_PROTRACTOR)
+	if (pObject->Type==PX_OBJECT_TYPE_PROTRACTOR)
 	{
-		return (PX_Object_Protractor *)Object->pObject;
+		return (PX_Object_Protractor *)pObject->pObjectDesc;
 	}
 	return PX_NULL;
 }
@@ -166,8 +166,8 @@ PX_Object * PX_Object_ProtractorCreate(px_memorypool *mp, PX_Object *Parent,px_i
 	return pObject;
 }
 
-px_float PX_Object_ProtractorGetAngle(PX_Object *Object)
+px_float PX_Object_ProtractorGetAngle(PX_Object *pObject)
 {
-	return PX_Object_GetProtractor(Object)->endAngle-PX_Object_GetProtractor(Object)->startAngle;
+	return PX_Object_GetProtractor(pObject)->endAngle-PX_Object_GetProtractor(pObject)->startAngle;
 }
 

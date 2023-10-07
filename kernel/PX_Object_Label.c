@@ -5,7 +5,7 @@ px_void PX_Object_LabelRender(px_surface *psurface, PX_Object *pObject,px_uint e
 	px_int x,y,w,h;
 	px_float inheritX,inheritY;
 	PX_SurfaceLimitInfo limitInfo;
-	PX_Object_Label *pLabel=(PX_Object_Label *)pObject->pObject;
+	PX_Object_Label *pLabel=(PX_Object_Label *)pObject->pObjectDesc;
 	if (pLabel==PX_NULL)
 	{
 		return;
@@ -101,7 +101,7 @@ PX_Object* PX_Object_LabelCreate(px_memorypool *mp,PX_Object *Parent,px_int x,px
 		MP_Free(mp,pLable);
 		return PX_NULL;
 	}
-	pObject->pObject=pLable;
+	pObject->pObjectDesc=pLable;
 	pObject->Type=PX_OBJECT_TYPE_LABEL;
 	pObject->ReceiveEvents=PX_FALSE;
 	pObject->Func_ObjectFree=PX_Object_LabelFree;
@@ -130,10 +130,10 @@ PX_Object* PX_Object_LabelCreate(px_memorypool *mp,PX_Object *Parent,px_int x,px
 }
 
 
-PX_Object_Label  * PX_Object_GetLabel( PX_Object *Object )
+PX_Object_Label  * PX_Object_GetLabel( PX_Object *pObject )
 {
-	if(Object->Type==PX_OBJECT_TYPE_LABEL)
-		return (PX_Object_Label *)Object->pObject;
+	if(pObject->Type==PX_OBJECT_TYPE_LABEL)
+		return (PX_Object_Label *)pObject->pObjectDesc;
 	else
 		return PX_NULL;
 }
@@ -162,7 +162,7 @@ px_void PX_Object_LabelSetText( PX_Object *pObject,const px_char *Text )
 	}
 
 	TextLen=PX_strlen(Text);
-	pLabel=(PX_Object_Label *)pObject->pObject;
+	pLabel=(PX_Object_Label *)pObject->pObjectDesc;
 	if(TextLen>PX_strlen(pLabel->Text))
 	{
 		MP_Free(pObject->mp,pLabel->Text);

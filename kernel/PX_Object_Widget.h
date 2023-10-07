@@ -22,12 +22,12 @@ typedef struct
 	px_bool		focusWidget;
 }PX_Object_Widget;
 
-PX_Object_Widget * PX_Object_GetWidget( PX_Object *Object );
+PX_Object_Widget * PX_Object_GetWidget( PX_Object *pObject );
 PX_Object * PX_Object_WidgetCreate(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y,px_int width,px_int height,const px_char title[],PX_FontModule *fontmodule);
 px_void PX_Object_WidgetShow(PX_Object *pObject);
 px_void PX_Object_WidgetHide(PX_Object *pObject);
 px_void PX_Object_WidgetShowHideCloseButton(PX_Object *pObject,px_bool show);
-px_void PX_Object_WidgetSetModel(PX_Object *Object,px_bool model);
+px_void PX_Object_WidgetSetModel(PX_Object *pObject,px_bool model);
 PX_Object * PX_Object_WidgetGetRoot(PX_Object *pObject);
 px_int PX_Object_WidgetGetRenderTargetHeight(PX_Object *pObject);
 px_int PX_Object_WidgetGetRenderTargetWidth(PX_Object *pObject);

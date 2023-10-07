@@ -14,6 +14,7 @@ px_void PX_Object_CounterDownUpdate(PX_Object* pObject, px_dword elapsed)
 		{
 			pdesc->ms_down = 0;
 			PX_ObjectExecuteEvent(pObject, PX_OBJECT_BUILD_EVENT(PX_OBJECT_EVENT_EXECUTE));
+			pObject->Visible = PX_FALSE;
 		}
 	}
 }
@@ -71,6 +72,7 @@ PX_Object* PX_Object_CounterDownCreate(px_memorypool* mp, PX_Object* Parent, px_
 	Desc.ringcolor = PX_OBJECT_UI_DEFAULT_FONTCOLOR;
 	pObject= PX_ObjectCreateEx(mp, Parent, x, y, 0, radius * 2, radius * 2,0, PX_OBJECT_TYPE_COUNTERDOWN, PX_Object_CounterDownUpdate, PX_Object_CounterDownRender, 0, &Desc, sizeof(Desc));
 	pObject->diameter = radius * 2;
+	pObject->Visible = PX_FALSE;
 	return pObject;
 }
 
@@ -89,6 +91,7 @@ px_void PX_Object_CounterDownSetValue(PX_Object* pObject, px_int value)
 	if (pdesc)
 	{
 		pdesc->ms_down = value;
+		pObject->Visible = PX_TRUE;
 	}
 }
 

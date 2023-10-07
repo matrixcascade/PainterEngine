@@ -3,11 +3,11 @@
 //////////////////////////////////////////////////////////////////////////
 //explorer
 
-PX_Object_Explorer * PX_Object_GetExplorer(PX_Object *Object)
+PX_Object_Explorer * PX_Object_GetExplorer(PX_Object *pObject)
 {
-	if(Object->Type==PX_OBJECT_TYPE_EXPLORER)
+	if(pObject->Type==PX_OBJECT_TYPE_EXPLORER)
 	{
-		return (PX_Object_Explorer *)Object->pObject;
+		return (PX_Object_Explorer *)pObject->pObjectDesc;
 	}
 	return PX_NULL;
 }
@@ -501,45 +501,45 @@ PX_Object * PX_Object_ExplorerCreate(px_memorypool *mp, PX_Object *Parent,px_int
 	return pObject;
 }
 
-px_void PX_Object_ExplorerSetBorderColor(PX_Object *Object,px_color clr)
+px_void PX_Object_ExplorerSetBorderColor(PX_Object *pObject,px_color clr)
 {
-	PX_Object_Explorer *pExp=PX_Object_GetExplorer(Object);
+	PX_Object_Explorer *pExp=PX_Object_GetExplorer(pObject);
 	if (pExp)
 	{
 		pExp->bordercolor=clr;
 	}
 }
 
-px_void PX_Object_ExplorerSetPushColor(PX_Object *Object,px_color clr)
+px_void PX_Object_ExplorerSetPushColor(PX_Object *pObject,px_color clr)
 {
-	PX_Object_Explorer *pExp=PX_Object_GetExplorer(Object);
+	PX_Object_Explorer *pExp=PX_Object_GetExplorer(pObject);
 	if (pExp)
 	{
 		pExp->pushcolor=clr;
 	}
 }
 
-px_void PX_Object_ExplorerSetCursorColor(PX_Object *Object,px_color clr)
+px_void PX_Object_ExplorerSetCursorColor(PX_Object *pObject,px_color clr)
 {
-	PX_Object_Explorer *pExp=PX_Object_GetExplorer(Object);
+	PX_Object_Explorer *pExp=PX_Object_GetExplorer(pObject);
 	if (pExp)
 	{
 		pExp->cursorcolor=clr;
 	}
 }
 
-px_void PX_Object_ExplorerSetTextColor(PX_Object *Object,px_color clr)
+px_void PX_Object_ExplorerSetTextColor(PX_Object *pObject,px_color clr)
 {
-	PX_Object_Explorer *pExp=PX_Object_GetExplorer(Object);
+	PX_Object_Explorer *pExp=PX_Object_GetExplorer(pObject);
 	if (pExp)
 	{
 		pExp->fontcolor=clr;
 	}
 }
 
-px_void PX_Object_ExplorerRefresh(PX_Object *Object)
+px_void PX_Object_ExplorerRefresh(PX_Object *pObject)
 {
-	PX_Object_Explorer *pExp=PX_Object_GetExplorer(Object);
+	PX_Object_Explorer *pExp=PX_Object_GetExplorer(pObject);
 	px_char FileNames[PX_EXPLORER_MAX_ITEMS][260];
 
 	if (pExp)
@@ -594,9 +594,9 @@ px_void PX_Object_ExplorerRefresh(PX_Object *Object)
 		}
 	}
 }
-px_int PX_Object_ExplorerGetSelectedCount(PX_Object *Object)
+px_int PX_Object_ExplorerGetSelectedCount(PX_Object *pObject)
 {
-	PX_Object_Explorer *pExp=PX_Object_GetExplorer(Object);
+	PX_Object_Explorer *pExp=PX_Object_GetExplorer(pObject);
 	px_int selectCount=0;
 	px_int i;
 	for (i=0;i<pExp->ItemCount;i++)
@@ -608,9 +608,9 @@ px_int PX_Object_ExplorerGetSelectedCount(PX_Object *Object)
 	}
 	return selectCount;
 }
-px_void PX_Object_ExplorerGetPath(PX_Object *Object,px_char path[PX_EXPLORER_MAX_PATH_LEN],px_int index)
+px_void PX_Object_ExplorerGetPath(PX_Object *pObject,px_char path[PX_EXPLORER_MAX_PATH_LEN],px_int index)
 {
-	PX_Object_Explorer *pExp=PX_Object_GetExplorer(Object);
+	PX_Object_Explorer *pExp=PX_Object_GetExplorer(pObject);
 	px_int selectCount=0,selectIndex=0;
 	px_int i;
 	for (i=0;i<pExp->ItemCount;i++)
@@ -655,42 +655,42 @@ px_void PX_Object_ExplorerGetPath(PX_Object *Object,px_char path[PX_EXPLORER_MAX
 	}
 }
 
-px_void PX_Object_ExplorerOpen(PX_Object *Object)
+px_void PX_Object_ExplorerOpen(PX_Object *pObject)
 {
-	if (Object->Type!=PX_OBJECT_TYPE_EXPLORER)
+	if (pObject->Type!=PX_OBJECT_TYPE_EXPLORER)
 	{
 		PX_ASSERT();
 		return;
 	}
-	PX_ObjectSetFocus(Object);
-	PX_Object_ExplorerRefresh(Object);
-	Object->Visible=PX_TRUE;
-	PX_ObjectGetDesc(PX_Object_Explorer, Object)->savemode = PX_FALSE;
+	PX_ObjectSetFocus(pObject);
+	PX_Object_ExplorerRefresh(pObject);
+	pObject->Visible=PX_TRUE;
+	PX_ObjectGetDesc(PX_Object_Explorer, pObject)->savemode = PX_FALSE;
 }
 
-px_void PX_Object_ExplorerSave(PX_Object* Object)
+px_void PX_Object_ExplorerSave(PX_Object* pObject)
 {
-	PX_Object_Explorer* pExp = PX_ObjectGetDesc(PX_Object_Explorer, Object);
-	if (Object->Type != PX_OBJECT_TYPE_EXPLORER)
+	PX_Object_Explorer* pExp = PX_ObjectGetDesc(PX_Object_Explorer, pObject);
+	if (pObject->Type != PX_OBJECT_TYPE_EXPLORER)
 	{
 		PX_ASSERT();
 		return;
 	}
-	PX_ObjectSetFocus(Object);
-	PX_Object_ExplorerRefresh(Object);
-	Object->Visible = PX_TRUE;
+	PX_ObjectSetFocus(pObject);
+	PX_Object_ExplorerRefresh(pObject);
+	pObject->Visible = PX_TRUE;
 	pExp->savemode = PX_TRUE;
 }
 
-px_void PX_Object_ExplorerClose(PX_Object *Object)
+px_void PX_Object_ExplorerClose(PX_Object *pObject)
 {
-	PX_ObjectClearFocus(Object);
-	Object->Visible=PX_FALSE;
+	PX_ObjectClearFocus(pObject);
+	pObject->Visible=PX_FALSE;
 }
 
-px_void PX_Object_ExplorerSetFilter(PX_Object *Object,const px_char *filter)
+px_void PX_Object_ExplorerSetFilter(PX_Object *pObject,const px_char *filter)
 {
-	PX_Object_Explorer *pExp=PX_Object_GetExplorer(Object);
+	PX_Object_Explorer *pExp=PX_Object_GetExplorer(pObject);
 	if (pExp)
 	{
 		PX_memset(pExp->filter,0,sizeof(pExp->filter));
@@ -698,9 +698,9 @@ px_void PX_Object_ExplorerSetFilter(PX_Object *Object,const px_char *filter)
 	}
 
 }
-px_void PX_Object_ExplorerSetMaxSelectCount(PX_Object *Object,px_int selectCount)
+px_void PX_Object_ExplorerSetMaxSelectCount(PX_Object *pObject,px_int selectCount)
 {
-	PX_Object_Explorer *pExp=PX_Object_GetExplorer(Object);
+	PX_Object_Explorer *pExp=PX_Object_GetExplorer(pObject);
 	if (pExp)
 	{
 		pExp->MaxSelectedCount=selectCount;

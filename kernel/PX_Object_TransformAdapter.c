@@ -1,10 +1,10 @@
 #include "PX_Object_TransformAdapter.h"
 
-PX_Object_TransformAdapter * PX_Object_GetTransformAdapter(PX_Object *Object)
+PX_Object_TransformAdapter * PX_Object_GetTransformAdapter(PX_Object *pObject)
 {
-	if (Object->Type==PX_OBJECT_TYPE_TRANSFORMADAPTER)
+	if (pObject->Type==PX_OBJECT_TYPE_TRANSFORMADAPTER)
 	{
-		return (PX_Object_TransformAdapter *)Object->pObject;
+		return (PX_Object_TransformAdapter *)pObject->pObjectDesc;
 	}
 	return PX_NULL;
 }
@@ -172,19 +172,19 @@ PX_Object * PX_Object_TransformAdapterCreate(px_memorypool *mp, PX_Object *Paren
 	return pObject;
 }
 
-px_void PX_Object_TransformAdapterSetMode(PX_Object *Object,PX_OBJECT_TRANSFORMADAPTER_MODE mode)
+px_void PX_Object_TransformAdapterSetMode(PX_Object *pObject,PX_OBJECT_TRANSFORMADAPTER_MODE mode)
 {
-	PX_Object_GetTransformAdapter(Object)->mode=mode;
+	PX_Object_GetTransformAdapter(pObject)->mode=mode;
 }
 
-px_float PX_Object_TransformAdapterGetRotation(PX_Object *Object)
+px_float PX_Object_TransformAdapterGetRotation(PX_Object *pObject)
 {
-	return PX_Object_GetTransformAdapter(Object)->endAngle-PX_Object_GetTransformAdapter(Object)->startAngle;
+	return PX_Object_GetTransformAdapter(pObject)->endAngle-PX_Object_GetTransformAdapter(pObject)->startAngle;
 }
 
-px_float PX_Object_TransformAdapterGetStretch(PX_Object *Object)
+px_float PX_Object_TransformAdapterGetStretch(PX_Object *pObject)
 {
-	return PX_Object_GetTransformAdapter(Object)->stretch;
+	return PX_Object_GetTransformAdapter(pObject)->stretch;
 }
 
 px_void PX_Object_TransformAdapterResetState(PX_Object *pObject,px_float x,px_float y,px_point2D sourceAdaptPoint,px_float rotation,px_float stretch)

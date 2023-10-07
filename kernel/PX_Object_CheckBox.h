@@ -28,17 +28,17 @@ typedef struct
 	PX_Object_CHECKBOX_STATE state;
 }PX_Object_CheckBox;
 
-PX_Object_CheckBox *PX_Object_GetCheckBox(PX_Object *Object);
+PX_Object_CheckBox *PX_Object_GetCheckBox(PX_Object *pObject);
 PX_Object * PX_Object_CheckBoxCreate(px_memorypool *mp, PX_Object *Parent,px_int x,px_int y,px_int Width,px_int Height,const char text[],PX_FontModule *fm);
-px_bool PX_Object_CheckBoxGetCheck(PX_Object *Object);
-px_void PX_Object_CheckBoxSetBackgroundColor(PX_Object *Object,px_color clr);
-px_void PX_Object_CheckBoxSetBorderColor(PX_Object *Object,px_color clr);
-px_void PX_Object_CheckBoxSetPushColor(PX_Object *Object,px_color clr);
-px_void PX_Object_CheckBoxSetCursorColor(PX_Object *Object,px_color clr);
-px_void PX_Object_CheckBoxSetText(PX_Object *Object,const px_char text[]);
-px_char *PX_Object_CheckBoxGetText(PX_Object *Object);
-px_void PX_Object_CheckBoxSetTextColor(PX_Object *Object,px_color clr);
-px_void PX_Object_CheckBoxSetCheck(PX_Object *Object,px_bool check);
+px_bool PX_Object_CheckBoxGetCheck(PX_Object *pObject);
+px_void PX_Object_CheckBoxSetBackgroundColor(PX_Object *pObject,px_color clr);
+px_void PX_Object_CheckBoxSetBorderColor(PX_Object *pObject,px_color clr);
+px_void PX_Object_CheckBoxSetPushColor(PX_Object *pObject,px_color clr);
+px_void PX_Object_CheckBoxSetCursorColor(PX_Object *pObject,px_color clr);
+px_void PX_Object_CheckBoxSetText(PX_Object *pObject,const px_char text[]);
+px_char *PX_Object_CheckBoxGetText(PX_Object *pObject);
+px_void PX_Object_CheckBoxSetTextColor(PX_Object *pObject,px_color clr);
+px_void PX_Object_CheckBoxSetCheck(PX_Object *pObject,px_bool check);
 
 PX_Designer_ObjectDesc PX_Object_CheckBoxDesignerInstall();
 

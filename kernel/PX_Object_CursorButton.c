@@ -69,19 +69,19 @@ px_void PX_Object_CursorButtonRender(px_surface *psurface, PX_Object *pObject,px
 	PX_GeoDrawRect(psurface,(px_int)_x,(px_int)_y-pcb->c_width-1,(px_int)_x-pcb->c_width,(px_int)(_y-h),pcb->c_color);
 }
 
-px_void PX_Object_CursorButtonFree( PX_Object *Obj )
+px_void PX_Object_CursorButtonFree( PX_Object *pObject )
 {
 
 }
-px_void PX_Object_CursorButtonOnMouseMove(PX_Object *Object,PX_Object_Event e,px_void *user_ptr)
+px_void PX_Object_CursorButtonOnMouseMove(PX_Object *pObject,PX_Object_Event e,px_void *user_ptr)
 {
 
-	PX_Object_CursorButton *pCB=PX_Object_GetCursorButton(Object);
+	PX_Object_CursorButton *pCB=PX_Object_GetCursorButton(pObject);
 	px_float x,y;
 	x=PX_Object_Event_GetCursorX(e);
 	y=PX_Object_Event_GetCursorY(e);
 
-	if(PX_ObjectIsPointInRegion(Object,(px_float)x,(px_float)y))
+	if(PX_ObjectIsPointInRegion(pObject,(px_float)x,(px_float)y))
 	{
 		if (!pCB->enter)
 		{
@@ -113,7 +113,7 @@ PX_Object *PX_Object_CursorButtonCreate(px_memorypool *mp,PX_Object *Parent,px_i
 		MP_Free(mp,pCb);
 		return PX_NULL;
 	}
-	pObject->pObject=pCb;
+	pObject->pObjectDesc=pCb;
 	pObject->Enabled=PX_TRUE;
 	pObject->Visible=PX_TRUE;
 	pObject->Type=PX_OBJECT_TYPE_CURSORBUTTON;
@@ -139,18 +139,18 @@ PX_Object *PX_Object_CursorButtonCreate(px_memorypool *mp,PX_Object *Parent,px_i
 	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_CURSORMOVE,PX_Object_CursorButtonOnMouseMove,PX_NULL);
 	return pObject;
 }
-PX_Object_CursorButton * PX_Object_GetCursorButton( PX_Object *Object )
+PX_Object_CursorButton * PX_Object_GetCursorButton( PX_Object *pObject )
 {
-	if(Object->Type==PX_OBJECT_TYPE_CURSORBUTTON)
-		return (PX_Object_CursorButton *)Object->pObject;
+	if(pObject->Type==PX_OBJECT_TYPE_CURSORBUTTON)
+		return (PX_Object_CursorButton *)pObject->pObjectDesc;
 	else
 		return PX_NULL;
 }
 
-PX_Object * PX_Object_CursorButtonGetPushButton(PX_Object *Object)
+PX_Object * PX_Object_CursorButtonGetPushButton(PX_Object *pObject)
 {
 	PX_Object_CursorButton *pcb;
-	pcb=PX_Object_GetCursorButton(Object);
+	pcb=PX_Object_GetCursorButton(pObject);
 	if (!pcb)
 	{
 		return PX_NULL;

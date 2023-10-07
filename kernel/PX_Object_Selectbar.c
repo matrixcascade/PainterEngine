@@ -12,7 +12,7 @@ PX_Object_SelectBar *PX_Object_GetSelectBar(PX_Object *pSelecrBar)
 {
 	if (pSelecrBar->Type==PX_OBJECT_TYPE_SELECTBAR)
 	{
-		return (PX_Object_SelectBar *)pSelecrBar->pObject;
+		return (PX_Object_SelectBar *)pSelecrBar->pObjectDesc;
 	}
 	return PX_NULL;
 }
@@ -389,7 +389,7 @@ PX_Object * PX_Object_SelectBarCreate(px_memorypool *mp,PX_Object *Parent,px_int
 	}
 
 
-	pObject->pObject=pSelectbar;
+	pObject->pObjectDesc=pSelectbar;
 	pObject->Enabled=PX_TRUE;
 	pObject->Visible=PX_TRUE;
 	pObject->Type=PX_OBJECT_TYPE_SELECTBAR;

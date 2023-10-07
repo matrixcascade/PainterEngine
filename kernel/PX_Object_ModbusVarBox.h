@@ -16,7 +16,7 @@ typedef struct
 	px_bool   EditMode;
 }PX_Object_ModbusVarBox;
 
-PX_Object_ModbusVarBox* PX_Object_GetModbusVarBox( PX_Object *Object );
+PX_Object_ModbusVarBox* PX_Object_GetModbusVarBox( PX_Object *pObject );
 PX_Object * PX_Object_ModbusVarBoxCreate(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y,px_int width,px_int height,const px_char title[],PX_FontModule *fontmodule);
 px_void PX_Object_ModbusVarBoxShow(PX_Object *pObject);
 px_void PX_Object_ModbusVarBoxShowEdit(PX_Object* pObject, const px_char name[], px_dword address, px_int type, px_word value);

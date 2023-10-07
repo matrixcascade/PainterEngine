@@ -364,18 +364,18 @@ PX_Object * PX_Object_ScaleBoxCreate(px_memorypool *mp,PX_Object *Parent)
 	return pObject;
 }
 
-PX_Object_ScaleBox * PX_Object_GetScaleBox(PX_Object *Object)
+PX_Object_ScaleBox * PX_Object_GetScaleBox(PX_Object *pObject)
 {
-	if (Object->Type==PX_OBJECT_TYPE_SCALEBOX)
+	if (pObject->Type==PX_OBJECT_TYPE_SCALEBOX)
 	{
-		return (PX_Object_ScaleBox *)Object->pObject;
+		return (PX_Object_ScaleBox *)pObject->pObjectDesc;
 	}
 	return PX_NULL;
 }
 
-px_point2D * PX_Object_ScaleBoxGetPoints(PX_Object *Object)
+px_point2D * PX_Object_ScaleBoxGetPoints(PX_Object *pObject)
 {
-	PX_Object_ScaleBox *pscalebox=PX_Object_GetScaleBox(Object);
+	PX_Object_ScaleBox *pscalebox=PX_Object_GetScaleBox(pObject);
 	if (pscalebox)
 	{
 		return pscalebox->edit_pt;

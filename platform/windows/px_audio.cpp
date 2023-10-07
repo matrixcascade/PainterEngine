@@ -44,13 +44,10 @@ DWORD  _stdcall DEMO_DSoundProc(LPVOID p)
 	{
 		wsize=PX_AudioGetStandbyBufferSize();
 
+
 		if (PX_SoundPlayGetDataCount(DSound_soundplay))
 		{
 			
-			if (wsize>DSOUND_BUFFER_SIZE)
-			{
-				wsize=DSOUND_BUFFER_SIZE;
-			}
 			PX_SoundPlayRead(DSound_soundplay,DSound_data,wsize);
 			PX_AudioWriteBuffer(DSound_data,wsize);
 		}

@@ -214,7 +214,7 @@ px_void PX_WorldUpdate( PX_World *pworld,px_uint elapsed )
 	//Add NewObjects
 	PX_WorldUpdateNewObjectList(pworld);
 
-	//Object Counts
+	//pObject Counts
 	updateCount=pworld->pObjects.size;
 
 	PX_MapInitialize(calcmp, &pworld->idSearchmap);
@@ -229,7 +229,7 @@ px_void PX_WorldUpdate( PX_World *pworld,px_uint elapsed )
 		{
 			continue;
 		}
-		PX_MapPut(&pworld->idSearchmap, pwo->pObject->id,PX_strlen(pwo->pObject->id), pwo->pObject);
+		PX_MapPut(&pworld->idSearchmap, (const px_byte *)pwo->pObject->id,PX_strlen(pwo->pObject->id), pwo->pObject);
 
 	}
 	//////////////////////////////////////////////////////////////////////////
@@ -422,47 +422,47 @@ px_void PX_WorldUpdateOffset(PX_World *pw)
 	pw->offsety=(px_float)LeftTopY;
 }
 
-static px_void PX_WorldClildRender(PX_World *pworld,px_surface *pSurface, PX_Object *Object,px_uint elapsed,px_float oftX,px_float oftY)
+static px_void PX_WorldClildRender(PX_World *pworld,px_surface *pSurface, PX_Object *pObject,px_uint elapsed,px_float oftX,px_float oftY)
 {
-	if (Object==PX_NULL)
+	if (pObject==PX_NULL)
 	{
 		return;
 	}
-	if (Object->Visible==PX_FALSE)
+	if (pObject->Visible==PX_FALSE)
 	{
 		return;
 	}
-	if (Object->Func_ObjectRender!=0)
+	if (pObject->Func_ObjectRender!=0)
 	{
-		px_float x=Object->x;
-		px_float y=Object->y;
-		Object->x-=oftX;
-		Object->y-=oftY;
-		Object->Func_ObjectRender(pSurface,Object,elapsed);
+		px_float x=pObject->x;
+		px_float y=pObject->y;
+		pObject->x-=oftX;
+		pObject->y-=oftY;
+		pObject->Func_ObjectRender(pSurface,pObject,elapsed);
 
 		if (pworld->showImpactRegion)
 		{
-			if (Object->diameter)
+			if (pObject->diameter)
 			{
-				PX_GeoDrawSolidCircle(pSurface, (px_int)Object->x, (px_int)Object->y, (px_int)Object->diameter / 2, PX_COLOR(32, 255, 0, 0));
+				PX_GeoDrawSolidCircle(pSurface, (px_int)pObject->x, (px_int)pObject->y, (px_int)pObject->diameter / 2, PX_COLOR(32, 255, 0, 0));
 			}
 			else
 			{
-				PX_GeoDrawRect(pSurface, (px_int)(Object->x- Object->Width/2), (px_int)(Object->y- Object->Height/2), (px_int)(Object->x + Object->Width/2), (px_int)(Object->y + Object->Height/2), PX_COLOR(32, 255, 0, 0));
+				PX_GeoDrawRect(pSurface, (px_int)(pObject->x- pObject->Width/2), (px_int)(pObject->y- pObject->Height/2), (px_int)(pObject->x + pObject->Width/2), (px_int)(pObject->y + pObject->Height/2), PX_COLOR(32, 255, 0, 0));
 			}
 		}
 
 
-		Object->x=x;
-		Object->y=y;
+		pObject->x=x;
+		pObject->y=y;
 	}
-	if (Object->pNextBrother!=PX_NULL)
+	if (pObject->pNextBrother!=PX_NULL)
 	{
-		PX_WorldClildRender(pworld,pSurface,Object->pNextBrother,elapsed,oftX,oftY);
+		PX_WorldClildRender(pworld,pSurface,pObject->pNextBrother,elapsed,oftX,oftY);
 	}
-	if (Object->pChilds!=PX_NULL)
+	if (pObject->pChilds!=PX_NULL)
 	{
-		PX_WorldClildRender(pworld,pSurface,Object->pChilds,elapsed,oftX,oftY);
+		PX_WorldClildRender(pworld,pSurface,pObject->pChilds,elapsed,oftX,oftY);
 	}
 }
 
@@ -703,7 +703,7 @@ px_void PX_WorldRemoveObjectByIndex(PX_World *world,px_int i_index)
 	}
 }
 
-_LIMIT px_int PX_WorldSearchRegion(PX_World *world,px_float x,px_float y,px_float raduis,PX_Object *Object[],px_int MaxSearchCount,px_dword impact_test_type)
+_LIMIT px_int PX_WorldSearchRegion(PX_World *world,px_float x,px_float y,px_float raduis,PX_Object *pObject[],px_int MaxSearchCount,px_dword impact_test_type)
 {
 	px_int b;
 	px_int m=0;
@@ -740,7 +740,7 @@ _LIMIT px_int PX_WorldSearchRegion(PX_World *world,px_float x,px_float y,px_floa
 				{
 					if (m<MaxSearchCount)
 					{
-						Object[m]=pObj2;
+						pObject[m]=pObj2;
 						m++;
 					}
 					
@@ -752,7 +752,7 @@ _LIMIT px_int PX_WorldSearchRegion(PX_World *world,px_float x,px_float y,px_floa
 	return m;
 }
 
-_LIMIT px_int PX_WorldSearch(PX_World* pw, PX_Object* Object[], px_int MaxSearchCount, px_dword impact_object_type)
+_LIMIT px_int PX_WorldSearch(PX_World* pw, PX_Object* pObject[], px_int MaxSearchCount, px_dword impact_object_type)
 {
 	px_int i;
 	px_int count = 0;
@@ -763,7 +763,7 @@ _LIMIT px_int PX_WorldSearch(PX_World* pw, PX_Object* Object[], px_int MaxSearch
 		{
 			if (MaxSearchCount)
 			{
-				Object[count] = pwo->pObject;
+				pObject[count] = pwo->pObject;
 				MaxSearchCount--;
 				count++;
 			}
@@ -778,7 +778,7 @@ _LIMIT px_int PX_WorldSearch(PX_World* pw, PX_Object* Object[], px_int MaxSearch
 
 _LIMIT PX_Object* PX_WorldSearchObject(PX_World* pWorld, const px_char id[])
 {
-	return PX_MapGet(&pWorld->idSearchmap, id,PX_strlen(id));
+	return PX_MapGet(&pWorld->idSearchmap, (const px_byte *)id,PX_strlen(id));
 }
 
 px_void PX_WorldSetSize(PX_World* pWorld, px_int world_width, px_int world_height)

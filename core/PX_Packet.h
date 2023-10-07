@@ -12,7 +12,7 @@ typedef struct
 {
 	px_char		magic[4];//PACK
 	px_dword	algorithm;
-	px_dword    CRC;
+	px_dword    _crc;
 }PX_Packet_Header;
 
 px_bool PX_PacketCompress(px_byte *_in,px_uint input_size,px_byte *_out,px_uint *out_size,px_dword algotithm);

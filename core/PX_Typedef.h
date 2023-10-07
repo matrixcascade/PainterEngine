@@ -3,6 +3,8 @@
 
 #include	"PX_MathTable.h"
 
+#define PX_COLOR_FORMAT_RGBA
+
 #define PX_DBL_POSITIVE_MAX 1.7976931348623158e+308
 #define PX_DBL_POSITIVE_MIN 4.94065645841246544e-324
 
@@ -26,6 +28,14 @@
 #define PX_COLOR_GREEN PX_COLOR(255,0,255,0)
 #define PX_COLOR_BLUE PX_COLOR(255,0,0,255)
 #define PX_COLOR_NONE PX_COLOR(0,0,0,0)
+
+
+#define PX_COLOR_BACKGROUNDCOLOR PX_COLOR(255,48,48,48)
+#define PX_COLOR_CURSORCOLOR PX_COLOR(255,32,32,32)
+#define PX_COLOR_FONTCOLOR PX_COLOR(255,192,192,192)
+#define PX_COLOR_BORDERCOLOR PX_COLOR(255,192,192,192)
+#define PX_COLOR_PUSHCOLOR PX_COLOR(255,64,64,64)
+
 
 #define PX_CSS_COLOR_AliceBlue PX_COLOR(0xFF, 0xF0, 0xF8, 0xFF)
 #define PX_CSS_COLOR_AntiqueWhite PX_COLOR(0xFF, 0xFA, 0xEB, 0xD7)
@@ -179,7 +189,6 @@
 #define PX_COUNTOF(x) (sizeof(x)/sizeof(x[0]))
 
 
-
 typedef		void				px_void;
 typedef		int					px_bool;
 typedef		unsigned int		px_dword;//typedef     uint32_t		       px_dword;
@@ -233,6 +242,78 @@ typedef enum
 }PX_ALIGN;
 
 
+#ifdef PX_COLOR_FORMAT_RGBA
+typedef struct _px_color
+{
+	union
+	{
+		struct
+		{
+			px_uchar r;
+			px_uchar g;
+			px_uchar b;
+			px_uchar a;
+		};
+		px_dword ucolor;
+	}_argb;
+}px_color;
+#endif 
+
+#ifdef PX_COLOR_FORMAT_BGRA
+typedef struct _px_color
+{
+	union
+	{
+		struct
+		{
+			px_uchar b;
+			px_uchar g;
+			px_uchar r;
+			px_uchar a;
+		};
+		px_dword ucolor;
+	}_argb;
+}px_color;
+#endif 
+
+#ifdef PX_COLOR_FORMAT_ARGB
+typedef struct _px_color
+{
+	union
+	{
+		struct
+		{
+			px_uchar a;
+			px_uchar r;
+			px_uchar g;
+			px_uchar b;
+		};
+		px_dword ucolor;
+	}_argb;
+}px_color;
+#endif 
+
+#ifdef PX_COLOR_FORMAT_ABGR
+typedef struct _px_color
+{
+	union
+	{
+		struct
+		{
+			px_uchar a;
+			px_uchar b;
+			px_uchar g;
+			px_uchar r;
+		};
+		px_dword ucolor;
+	}_argb;
+}px_color;
+#endif 
+
+
+
+
+
 typedef struct _px_matrix 
 {
 	union {
@@ -246,20 +327,7 @@ typedef struct _px_matrix
 	};
 }px_matrix;
 
-typedef struct _px_color
-{
-	union 
-	{
-		struct
-		{
-			px_uchar r;
-			px_uchar g;
-			px_uchar b;
-			px_uchar a;
-		};
-		px_dword ucolor;
-	}_argb;
-}px_color;
+
 
 typedef struct _px_color_hsl
 {
@@ -841,6 +909,7 @@ px_byte PX_MemoryStreamReadBitLE(PX_MemoryStream* pStream);
 px_byte PX_MemoryStreamReadBitBE(PX_MemoryStream* pStream);
 px_byte PX_MemoryStreamReadByte(PX_MemoryStream* pStream);
 px_word PX_MemoryStreamReadWord(PX_MemoryStream* pStream);
+px_dword PX_MemoryStreamReadDWord(PX_MemoryStream* pStream);
 px_void PX_MemoryStreamAlign(PX_MemoryStream* pStream);
 px_uint32 PX_MemoryStreamReadBitsLE(PX_MemoryStream* pStream, px_int nbits);
 px_uint32 PX_MemoryStreamReadBitsBE(PX_MemoryStream* pStream, px_int nbits);

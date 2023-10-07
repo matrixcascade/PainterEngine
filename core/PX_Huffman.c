@@ -623,7 +623,7 @@ px_bool PX_HuffmanDeflateCodeData(px_word* _in, px_uint in_size, px_memory* _out
 			}
 			PX_HuffmanBuildDymanicTable(counter, 288, raw_code, raw_code_bl);//code_bit_length [1-19] 5bit
 
-			for (i = 0; i < in_size; i++)
+			for (i = 0; i < 288; i++)
 			{
 				if (raw_code_bl[i] >= 16)
 				{

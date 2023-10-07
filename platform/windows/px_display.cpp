@@ -41,11 +41,9 @@ extern "C" POINT PX_MousePosition();
 extern "C" BOOL PX_KeyDown(unsigned char key);
 extern "C" BOOL PX_MouseWheel(int *x,int *y,int *delta);
 extern "C" BOOL PX_GetWinMessage(WM_MESSAGE *Msg);
-extern "C" char *PX_OpenFileDialog(const char Filter[]);
-extern "C" char *PX_MultFileDialog(const char Filter[]);
-extern "C" char *PX_SaveFileDialog(const char Filter[],const char ext[]);
 extern "C" double PX_GetWindowScale();
 extern "C" void PX_SetWindowStyle(PX_WINODW_STYLE style);
+extern "C" void PX_SetWindowPosition(int x, int y);
 #define         WIN_MAX_INPUT_STRING_LEN   64
 #define         WIN_MAX_INPUT_SPECKEY_LEN  0xff
 
@@ -243,7 +241,7 @@ BOOL PX_CreateWindow( int surfaceWidth,int surfaceHeight,int windowWidth,int win
 	break;
 	case PX_WINODW_STYLE_SIMPLEWINDOW :
 	{
-		style = WS_OVERLAPPED | WS_SYSMENU | WS_SIZEBOX;
+		style = WS_OVERLAPPED | WS_SYSMENU ;
 		window_x = CW_USEDEFAULT;
 		window_y = CW_USEDEFAULT;
 	}
@@ -256,7 +254,7 @@ BOOL PX_CreateWindow( int surfaceWidth,int surfaceHeight,int windowWidth,int win
 	}
 	break;
 	default:
-		style = WS_OVERLAPPED | WS_SYSMENU | WS_MAXIMIZEBOX | WS_SIZEBOX;
+		style = WS_OVERLAPPED | WS_SYSMENU | WS_MAXIMIZEBOX ;
 		window_x = CW_USEDEFAULT;
 		window_y = CW_USEDEFAULT;
 		break;
@@ -648,105 +646,6 @@ BOOL PX_GetWinMessage(WM_MESSAGE *Msg)
 }
 
 
-char *PX_OpenFileDialog(const char Filter[])
-{
-	OPENFILENAMEA ofn;
-	static char szFile[MAX_PATH];
-	ZeroMemory(&ofn,sizeof(ofn));
-	ofn.lStructSize = sizeof(ofn);
-	ofn.lpstrFile = szFile;
-	ofn.lpstrFile[0] = TEXT('\0');
-	ofn.nMaxFile = sizeof(szFile);
-	ofn.lpstrFilter = Filter;//TEXT("Mirror(.mirror)\0*.mirror");
-	ofn.nFilterIndex = 1;
-	ofn.lpstrFileTitle = NULL;
-	ofn.nMaxFileTitle = 0;
-	ofn.lpstrInitialDir = NULL;
-	ofn.hwndOwner = Win_Hwnd;
-	ofn.Flags = OFN_EXPLORER |OFN_PATHMUSTEXIST|OFN_NOCHANGEDIR;
-
-	if (GetOpenFileNameA(&ofn))
-	{
-		return szFile;
-	}
-	return NULL;
-}
-
-char *PX_MultFileDialog(const char Filter[])
-{
-	OPENFILENAMEA ofn;
-	static char szFile[MAX_PATH*64];
-	ZeroMemory(&ofn,sizeof(ofn));
-	ofn.lStructSize = sizeof(ofn);
-	ofn.lpstrFile = szFile;
-	ofn.lpstrFile[0] = TEXT('\0');
-	ofn.nMaxFile = sizeof(szFile);
-	ofn.lpstrFilter = Filter;//TEXT("MirrorÎÄ¼þ(.mirror)\0*.mirror");
-	ofn.nFilterIndex = 1;
-	ofn.lpstrFileTitle = NULL;
-	ofn.nMaxFileTitle = 0;
-	ofn.lpstrInitialDir = NULL;
-	ofn.hwndOwner = Win_Hwnd;
-	ofn.Flags = OFN_EXPLORER |OFN_PATHMUSTEXIST|OFN_ALLOWMULTISELECT|OFN_NOCHANGEDIR;
-
-	if (GetOpenFileNameA(&ofn))
-	{
-		if (szFile[strlen(szFile)+1]=='\0')
-		{
-			int oft=(int)strlen(szFile)-1;
-			while (oft>=0)
-			{
-				if (szFile[oft]=='\\'||szFile[oft]=='/')
-				{
-					szFile[oft]=0;
-					break;
-				}
-				oft--;
-			}
-		}
-		return szFile;
-	}
-	return NULL;
-}
-
-char *PX_SaveFileDialog(const char Filter[],const char ext[])
-{
-	OPENFILENAMEA ofn;
-	static char szFile[MAX_PATH];
-	ZeroMemory(&ofn,sizeof(ofn));
-	ofn.lStructSize = sizeof(ofn);
-	ofn.lpstrFile = szFile;
-	ofn.lpstrFile[0] = TEXT('\0');
-	ofn.nMaxFile = sizeof(szFile);
-	ofn.lpstrFilter = Filter;//TEXT("MirrorÎÄ¼þ(.mirror)\0*.mirror");
-	ofn.nFilterIndex = 1;
-	ofn.lpstrFileTitle = NULL;
-	ofn.nMaxFileTitle = 0;
-	ofn.lpstrInitialDir = NULL;
-	ofn.hwndOwner = Win_Hwnd;
-	ofn.Flags = OFN_EXPLORER |OFN_PATHMUSTEXIST |OFN_NOCHANGEDIR;
-
-	if (GetSaveFileNameA(&ofn))
-	{
-		if (ext)
-		{
-			char uprFile[MAX_PATH]={0};
-			char uprExt[MAX_PATH]={0};
-			strcpy_s(uprExt,ext);
-			_strupr_s(uprExt,MAX_PATH);
-			strcpy_s(uprFile,szFile);
-			_strupr_s(uprFile,MAX_PATH);
-			if (!strstr(uprFile,uprExt))
-			{
-				strcat_s(szFile,sizeof(szFile),ext);
-			}
-		}
-		return szFile;
-	}
-	return NULL;
-}
-
-
 
 
 int PX_SetWindowResizeable()
@@ -788,4 +687,9 @@ double PX_GetWindowScale()
 void PX_SetWindowStyle(PX_WINODW_STYLE style)
 {
 	Win_Style = style;
+}
+
+void PX_SetWindowPosition(int x,int y)
+{
+	SetWindowPos(Win_Hwnd,HWND_TOPMOST,x,y,0,0,SWP_NOSIZE);
 }

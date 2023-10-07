@@ -6,9 +6,21 @@ px_void PX_Object_ImageRender(px_surface *psurface, PX_Object *pObject,px_uint e
 	px_int x,y,w,h;
 	PX_SurfaceLimitInfo limitInfo;
 	px_float inheritX,inheritY;
-	if (!pImage->pTexture)
+	px_texture *prenderTexture=PX_NULL;
+	if (!pImage->pTexture&&!pImage->pgif)
 	{
 		return;
+	}
+
+	if (pImage->pgif)
+	{
+		PX_GifUpdate(pImage->pgif, elapsed);
+		prenderTexture=PX_GifGetTexture(pImage->pgif);
+	}
+
+	if (pImage->pTexture)
+	{
+		prenderTexture = pImage->pTexture;
 	}
 
 	PX_ObjectGetInheritXY(pObject,&inheritX,&inheritY);
@@ -28,9 +40,9 @@ px_void PX_Object_ImageRender(px_surface *psurface, PX_Object *pObject,px_uint e
 			if (pImage!=PX_NULL)
 			{
 				if(pImage->pmask)
-					PX_TextureRenderMask(psurface,pImage->pmask,pImage->pTexture,x,y,PX_ALIGN_LEFTTOP,PX_NULL);
+					PX_TextureRenderMask(psurface,pImage->pmask,prenderTexture,x,y,PX_ALIGN_LEFTTOP,PX_NULL);
 				else
-					PX_TextureRender(psurface,pImage->pTexture,x,y,PX_ALIGN_LEFTTOP,PX_NULL);
+					PX_TextureRender(psurface,prenderTexture,x,y,PX_ALIGN_LEFTTOP,PX_NULL);
 			}
 		}
 		break;
@@ -39,9 +51,9 @@ px_void PX_Object_ImageRender(px_surface *psurface, PX_Object *pObject,px_uint e
 			if (pImage!=PX_NULL)
 			{
 				if(pImage->pmask)
-					PX_TextureRenderMask(psurface,pImage->pmask,pImage->pTexture,x,y+h/2,PX_ALIGN_LEFTMID,PX_NULL);
+					PX_TextureRenderMask(psurface,pImage->pmask,prenderTexture,x,y+h/2,PX_ALIGN_LEFTMID,PX_NULL);
 				else
-					PX_TextureRender(psurface,pImage->pTexture,x,y+h/2,PX_ALIGN_LEFTMID,PX_NULL);
+					PX_TextureRender(psurface,prenderTexture,x,y+h/2,PX_ALIGN_LEFTMID,PX_NULL);
 			}
 		}
 		break;
@@ -50,9 +62,9 @@ px_void PX_Object_ImageRender(px_surface *psurface, PX_Object *pObject,px_uint e
 			if (pImage!=PX_NULL)
 			{
 				if(pImage->pmask)
-					PX_TextureRenderMask(psurface,pImage->pmask,pImage->pTexture,x,y+h,PX_ALIGN_LEFTBOTTOM,PX_NULL);
+					PX_TextureRenderMask(psurface,pImage->pmask,prenderTexture,x,y+h,PX_ALIGN_LEFTBOTTOM,PX_NULL);
 				else
-					PX_TextureRender(psurface,pImage->pTexture,x,y+h,PX_ALIGN_LEFTBOTTOM,PX_NULL);
+					PX_TextureRender(psurface,prenderTexture,x,y+h,PX_ALIGN_LEFTBOTTOM,PX_NULL);
 			}
 		}
 		break;
@@ -61,9 +73,9 @@ px_void PX_Object_ImageRender(px_surface *psurface, PX_Object *pObject,px_uint e
 			if (pImage!=PX_NULL)
 			{
 				if(pImage->pmask)
-					PX_TextureRenderMask(psurface,pImage->pmask,pImage->pTexture,x+w/2,y,PX_ALIGN_MIDTOP,PX_NULL);
+					PX_TextureRenderMask(psurface,pImage->pmask,prenderTexture,x+w/2,y,PX_ALIGN_MIDTOP,PX_NULL);
 				else
-					PX_TextureRender(psurface,pImage->pTexture,x+w/2,y,PX_ALIGN_MIDTOP,PX_NULL);
+					PX_TextureRender(psurface,prenderTexture,x+w/2,y,PX_ALIGN_MIDTOP,PX_NULL);
 			}
 		}
 		break;
@@ -72,9 +84,9 @@ px_void PX_Object_ImageRender(px_surface *psurface, PX_Object *pObject,px_uint e
 			if (pImage!=PX_NULL)
 			{
 				if(pImage->pmask)
-					PX_TextureRenderMask(psurface,pImage->pmask,pImage->pTexture,x+w/2,y+h/2,PX_ALIGN_CENTER,PX_NULL);
+					PX_TextureRenderMask(psurface,pImage->pmask,prenderTexture,x+w/2,y+h/2,PX_ALIGN_CENTER,PX_NULL);
 				else
-					PX_TextureRender(psurface,pImage->pTexture,x+w/2,y+h/2,PX_ALIGN_CENTER,PX_NULL);
+					PX_TextureRender(psurface,prenderTexture,x+w/2,y+h/2,PX_ALIGN_CENTER,PX_NULL);
 			}
 		}
 		break;
@@ -83,9 +95,9 @@ px_void PX_Object_ImageRender(px_surface *psurface, PX_Object *pObject,px_uint e
 			if (pImage!=PX_NULL)
 			{
 				if(pImage->pmask)
-					PX_TextureRenderMask(psurface,pImage->pmask,pImage->pTexture,x+w/2,y+h,PX_ALIGN_MIDBOTTOM,PX_NULL);
+					PX_TextureRenderMask(psurface,pImage->pmask,prenderTexture,x+w/2,y+h,PX_ALIGN_MIDBOTTOM,PX_NULL);
 				else
-					PX_TextureRender(psurface,pImage->pTexture,x+w/2,y+h,PX_ALIGN_MIDBOTTOM,PX_NULL);
+					PX_TextureRender(psurface,prenderTexture,x+w/2,y+h,PX_ALIGN_MIDBOTTOM,PX_NULL);
 			}
 		}
 		break;
@@ -94,9 +106,9 @@ px_void PX_Object_ImageRender(px_surface *psurface, PX_Object *pObject,px_uint e
 			if (pImage!=PX_NULL)
 			{
 				if(pImage->pmask)
-					PX_TextureRenderMask(psurface,pImage->pmask,pImage->pTexture,x+w,y,PX_ALIGN_RIGHTTOP,PX_NULL);
+					PX_TextureRenderMask(psurface,pImage->pmask,prenderTexture,x+w,y,PX_ALIGN_RIGHTTOP,PX_NULL);
 				else
-					PX_TextureRender(psurface,pImage->pTexture,x+w,y,PX_ALIGN_RIGHTTOP,PX_NULL);
+					PX_TextureRender(psurface,prenderTexture,x+w,y,PX_ALIGN_RIGHTTOP,PX_NULL);
 			}
 		}
 		break;
@@ -105,9 +117,9 @@ px_void PX_Object_ImageRender(px_surface *psurface, PX_Object *pObject,px_uint e
 			if (pImage!=PX_NULL)
 			{
 				if(pImage->pmask)
-					PX_TextureRenderMask(psurface,pImage->pmask,pImage->pTexture,x+w,y+h/2,PX_ALIGN_RIGHTMID,PX_NULL);
+					PX_TextureRenderMask(psurface,pImage->pmask,prenderTexture,x+w,y+h/2,PX_ALIGN_RIGHTMID,PX_NULL);
 				else
-					PX_TextureRender(psurface,pImage->pTexture,x+w,y+h/2,PX_ALIGN_RIGHTMID,PX_NULL);
+					PX_TextureRender(psurface,prenderTexture,x+w,y+h/2,PX_ALIGN_RIGHTMID,PX_NULL);
 			}
 		}
 		break;
@@ -116,9 +128,9 @@ px_void PX_Object_ImageRender(px_surface *psurface, PX_Object *pObject,px_uint e
 			if (pImage!=PX_NULL)
 			{
 				if(pImage->pmask)
-					PX_TextureRenderMask(psurface,pImage->pmask,pImage->pTexture,x+w,y+h,PX_ALIGN_RIGHTBOTTOM,PX_NULL);
+					PX_TextureRenderMask(psurface,pImage->pmask,prenderTexture,x+w,y+h,PX_ALIGN_RIGHTBOTTOM,PX_NULL);
 				else
-					PX_TextureRender(psurface,pImage->pTexture,x+w,y+h,PX_ALIGN_RIGHTBOTTOM,PX_NULL);
+					PX_TextureRender(psurface,prenderTexture,x+w,y+h,PX_ALIGN_RIGHTBOTTOM,PX_NULL);
 			}
 		}
 		break;
@@ -148,7 +160,7 @@ PX_Object * PX_Object_ImageCreate(px_memorypool *mp,PX_Object *Parent,px_int x,p
 		return PX_NULL;
 	}
 
-	pObject->pObject=pImage;
+	pObject->pObjectDesc=pImage;
 	pObject->Enabled=PX_TRUE;
 	pObject->Visible=PX_TRUE;
 	pObject->Type=PX_OBJECT_TYPE_IMAGE;
@@ -162,10 +174,10 @@ PX_Object * PX_Object_ImageCreate(px_memorypool *mp,PX_Object *Parent,px_int x,p
 }
 
 
-PX_Object_Image * PX_Object_GetImage( PX_Object *Object )
+PX_Object_Image * PX_Object_GetImage( PX_Object *pObject )
 {
-	if(Object->Type==PX_OBJECT_TYPE_IMAGE)
-		return (PX_Object_Image *)Object->pObject;
+	if(pObject->Type==PX_OBJECT_TYPE_IMAGE)
+		return (PX_Object_Image *)pObject->pObjectDesc;
 	else
 		return PX_NULL;
 }
@@ -196,6 +208,17 @@ px_void PX_Object_ImageSetTexture(PX_Object *pObject,px_texture *pTex)
 	if (pImg)
 	{
 		pImg->pTexture=pTex;
+		pImg->pgif= PX_NULL;
+	}
+}
+
+px_void PX_Object_ImageSetGif(PX_Object* pObject, px_gif* pgif)
+{
+	PX_Object_Image* pImg = PX_Object_GetImage(pObject);
+	if (pImg)
+	{
+		pImg->pgif = pgif;
+		pImg->pTexture = PX_NULL;
 	}
 }
 

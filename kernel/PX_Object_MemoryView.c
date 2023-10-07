@@ -363,7 +363,7 @@ PX_Object_MemoryView * PX_Object_GetMemoryView(PX_Object *pObject)
 		PX_ASSERT();
 		return PX_NULL;
 	}
-	return (PX_Object_MemoryView * )pObject->pObject;
+	return (PX_Object_MemoryView * )pObject->pObjectDesc;
 }
 
 px_void PX_Object_MemoryViewSetFontColor(PX_Object *pObject,px_color Color)

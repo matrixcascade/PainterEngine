@@ -5566,6 +5566,17 @@ px_word PX_MemoryStreamReadWord(PX_MemoryStream* pStream)
 	return (b1<<8)+b2;
 }
 
+px_dword PX_MemoryStreamReadDWord(PX_MemoryStream* pStream)
+{
+	px_byte b1, b2,b3,b4;
+	PX_MemoryStreamAlign(pStream);
+	b1=PX_MemoryStreamReadByte(pStream);
+	b2=PX_MemoryStreamReadByte(pStream);
+	b3=PX_MemoryStreamReadByte(pStream);
+	b4=PX_MemoryStreamReadByte(pStream);
+	return (b1<<24)+(b2<<16)+(b3<<8)+b4;
+}
+
 px_bool PX_MemoryStreamIsEnd(PX_MemoryStream* pStream)
 {
 	if (pStream->bitpointer  >= pStream->size * 8)

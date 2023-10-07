@@ -45,4 +45,5 @@
 #include "PX_Wavelet.h"
 #include "PX_Png.h"
 #include "PX_Keyboard.h"
+#include "px_gif.h"
 #endif

@@ -1,3 +1,5 @@
+#ifndef PX_WAVELET_H
+#define PX_WAVELET_H
 #include "PX_LTI.h"
 
 #define  PX_DWT_FILTER_MAX_ORDER 32
@@ -33,3 +35,4 @@ px_bool PX_DWTInitialize(px_memorypool* mp, PX_DWT* dwt, px_char name[8]);
 px_bool PX_DWTGo(PX_DWT* dwt, px_double in[], px_int in_size, px_double out[]);
 px_bool PX_IDWTGo(PX_DWT* dwt, px_double in[], px_int in_size, px_double out[]);
 px_void PX_DWTFree(PX_DWT* dwt);
+#endif

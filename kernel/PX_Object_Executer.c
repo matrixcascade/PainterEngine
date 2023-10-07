@@ -84,7 +84,6 @@ px_bool PX_ExecuterVM_Sleep(PX_VM *Ins,px_void *userptr)
 		return PX_TRUE;
 	}
 	pExecute->vm.pThread[Ins->T].sleep=PX_VM_STACK(Ins,0)._int;
-	PX_VMThreadSuspend(Ins,Ins->T);
 	PX_VM_RET(Ins,PX_VM_Variable_int(0));
 	return PX_TRUE;
 }
@@ -269,7 +268,7 @@ px_bool PX_ExecuterRegistryHostFunction(PX_Object *pObject,const px_char Name[],
 px_void PX_Object_ExecuterUpdate(PX_Object* pObject, px_dword elapsed)
 {
 	PX_Object_Executer *pdesc = PX_ObjectGetDesc(PX_Object_Executer, pObject);
-	PX_VMRun(&pdesc->vm, elapsed, elapsed);
+	PX_VMRun(&pdesc->vm, -1, elapsed);
 }
 
 px_void PX_Object_ExecuterRender(px_surface *psurface,PX_Object* pObject, px_dword elapsed)
@@ -288,7 +287,7 @@ px_void PX_Object_ExecuterFree(PX_Object* pObject)
 	PX_VMDebuggerMapFree(&pdesc->debugmap);
 }
 
-PX_Object* PX_Object_ExecuterCreate(px_memorypool* mp, PX_Object* Parent, px_int x, px_int y, px_int width, px_int height, PX_FontModule* fm, px_char shellcode[])
+PX_Object* PX_Object_ExecuterCreate(px_memorypool* mp, PX_Object* Parent, px_int x, px_int y, px_int width, px_int height, PX_FontModule* fm, const px_char shellcode[])
 {
 	PX_Object* pObject;
 	PX_Object_Executer desc, * pdesc;
@@ -314,7 +313,7 @@ PX_Object* PX_Object_ExecuterCreate(px_memorypool* mp, PX_Object* Parent, px_int
 
 	PX_Object_ExecuterPrintImage(pObject, &pdesc->fox);
 	PX_Object_ExecuterPrintText(pObject, "----------------------------------------");
-	PX_Object_ExecuterPrintText(pObject, "--------------Fox Console---------------");
+	PX_Object_ExecuterPrintText(pObject, "PainterEngine Script Executer");
 	PX_Object_ExecuterPrintText(pObject, "----------------------------------------");
 
 	return pObject;

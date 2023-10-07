@@ -1433,9 +1433,7 @@ px_void PX_GeoDrawSolidCircleFast(px_surface* psurface, px_int x, px_int y, px_i
 	}
 	
 }
-
-
-px_void PX_GeoDrawPenCircle(px_surface *psurface, px_float x,px_float y,px_float Radius,px_color color)
+px_void PX_GeoDrawPenCircleDecay(px_surface* psurface, px_float x, px_float y, px_float Radius, px_color color, px_float Decay)
 {
 	px_int left, top, right, bottom, i, j;
 	px_float d;
@@ -1444,7 +1442,7 @@ px_void PX_GeoDrawPenCircle(px_surface *psurface, px_float x,px_float y,px_float
 	{
 		return;
 	}
-	color._argb.a /= 5;
+	color._argb.a = (px_uchar)(color._argb.a/Decay);
 	left = (px_int)(x - Radius);
 	top = (px_int)(y - Radius);
 	right = (px_int)(x + Radius);
@@ -1506,7 +1504,100 @@ px_void PX_GeoDrawPenCircle(px_surface *psurface, px_float x,px_float y,px_float
 				{
 					PX_SurfaceDrawPixelWithoutLimit(psurface, j, i, color);
 				}
-					
+
+			}
+
+		}
+	}
+}
+
+px_void PX_GeoDrawPenCircle(px_surface *psurface, px_float x,px_float y,px_float Radius,px_color color)
+{
+	PX_GeoDrawPenCircleDecay(psurface, x, y, Radius, color, 5);
+}
+
+px_void PX_GeoDrawPenRing(px_surface* psurface, px_float x, px_float y, px_float Radius,px_float linewidth_inside, px_color color)
+{
+	px_int left, top, right, bottom, i, j;
+	px_float d;
+	px_color clr;
+	if (color._argb.a == 0 || Radius <= 0)
+	{
+		return;
+	}
+	
+	left = (px_int)(x - Radius);
+	top = (px_int)(y - Radius);
+	right = (px_int)(x + Radius);
+	bottom = (px_int)(y + Radius);
+
+
+
+	if (left < psurface->limit_left)
+	{
+		left = psurface->limit_left;
+	}
+	else if (left > psurface->limit_right)
+	{
+		return;
+	}
+
+	if (top < psurface->limit_top)
+	{
+		top = psurface->limit_top;
+	}
+	else if (top > psurface->limit_bottom)
+	{
+		return;
+	}
+
+	if (right > psurface->limit_right)
+	{
+		right = psurface->limit_right;
+	}
+	else if (right < psurface->limit_left)
+	{
+		return;
+	}
+
+	if (bottom > psurface->limit_bottom)
+	{
+		bottom = psurface->limit_bottom;
+	}
+	else if (bottom < psurface->limit_top)
+	{
+		return;
+	}
+
+
+	for (i = top; i <= bottom; i++)
+	{
+		for (j = left; j <= right; j++)
+		{
+			d = PX_sqrt((px_float)((i - y) * (i - y) + (j - x) * (j - x)));
+			if (d < Radius&&d>Radius - linewidth_inside)
+			{
+				
+				if ((px_float)Radius - d < 2)
+				{
+					clr = color;
+					clr._argb.a = (px_uchar)(clr._argb.a * ((px_float)Radius - d) / 2);
+					PX_SurfaceDrawPixelWithoutLimit(psurface, j, i, clr);
+				}
+				else
+				{
+					if (d - Radius + linewidth_inside<2)
+					{
+						clr = color;
+						clr._argb.a = (px_uchar)(clr._argb.a * (d - Radius + linewidth_inside) / 2);
+						PX_SurfaceDrawPixelWithoutLimit(psurface, j, i, clr);
+					}
+					else
+					{
+						PX_SurfaceDrawPixelWithoutLimit(psurface, j, i, color);
+					}
+				}
+
 			}
 
 		}
@@ -2678,9 +2769,7 @@ px_void PX_GeoDrawSolidRoundRect(px_surface *psurface, px_int left, px_int top, 
 			}
 		}
 		
-		x=(px_int)roundRaduis-(px_int)(PX_sqrt(roundRaduis*roundRaduis-(roundRaduis-y-1)*(roundRaduis-y-1)))-1;
-		if(x<0) x=0;
-		for (;x<(px_int)roundRaduis;x++)
+		for (x = 0;x<(px_int)roundRaduis;x++)
 		{
 			if (Width&1)
 			{
@@ -2703,12 +2792,12 @@ px_void PX_GeoDrawSolidRoundRect(px_surface *psurface, px_int left, px_int top, 
 			}
 
 			dis=PX_sqrt((x-r_x)*(x-r_x)+(y-r_y)*(y-r_y));
-			if (dis<roundRaduis+0.5f)
+			if (dis<roundRaduis+1.414f)
 			{
 				drawColor=color;
 
-				if (dis>roundRaduis)
-					drawColor._argb.a=(px_uchar)(color._argb.a*(dis-roundRaduis+0.5f));
+				if (dis > roundRaduis)
+					drawColor._argb.a = (px_uchar)(color._argb.a * (1 - (dis - roundRaduis) / 1.414f));
 
 				PX_SurfaceDrawPixel(psurface,left+x,top+y,drawColor);
 
@@ -2789,55 +2878,29 @@ px_void PX_GeoDrawRoundRect(px_surface *psurface, px_int left, px_int top, px_in
 	r_x=roundRaduis;
 	for (y=0;y<(px_int)roundRaduis;y++)
 	{
-		if (Height&1)
+		if (y > Height / 2)
 		{
-			if (y>Height/2)
-			{
-				break;
-			}
-		}
-		else
-		{
-			if (y>Height/2-1)
-			{
-				break;
-			}
+			break;
 		}
 
-		x=(px_int)roundRaduis-(px_int)(PX_sqrt(roundRaduis*roundRaduis-(roundRaduis-y-1)*(roundRaduis-y-1)))-1;
-		if(x<0)x=0;
-		for (;x<(px_int)roundRaduis;x++)
+		for (x = 0;x<(px_int)roundRaduis;x++)
 		{
-			if (Width&1)
-			{
-				if (x>Width/2)
-				{
-					break;
-				}
-			}
-			else
-			{
-				if (x>Width/2-1)
-				{
-					break;
-				}
-			}
-
+			
 			if (x>Width/2)
 			{
 				break;
 			}
 
 			dis=PX_sqrt((x-r_x)*(x-r_x)+(y-r_y)*(y-r_y));
-			if (dis<roundRaduis+0.5f&&dis>roundRaduis-linewidth-0.5f)
+			if (dis<roundRaduis+1.414f&&dis>roundRaduis-linewidth)
 			{
 				drawColor=color;
 
 				if (dis>roundRaduis)
-					drawColor._argb.a=(px_uchar)(color._argb.a*(dis-roundRaduis+0.5f));
-
-				if (dis<roundRaduis-linewidth+0.5f)
-					drawColor._argb.a=(px_uchar)(color._argb.a*(1.0f-(roundRaduis-linewidth+0.5f-dis)));
+					drawColor._argb.a=(px_uchar)(color._argb.a*(1 - (dis - roundRaduis)/1.414f));
+				
+				else if (dis>roundRaduis-linewidth-0.5f&&dis<roundRaduis - linewidth+1.414f-0.5f)
+					drawColor._argb.a=(px_uchar)(color._argb.a*(dis-roundRaduis+linewidth+0.5f)/1.414f);
 
 				PX_SurfaceDrawPixel(psurface,left+x,top+y,drawColor);
 

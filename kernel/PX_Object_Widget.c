@@ -223,7 +223,7 @@ PX_Object * PX_Object_WidgetCreate(px_memorypool *mp,PX_Object *Parent,px_int x,
 		return PX_NULL;
 	}
 
-	pObject->pObject=pWidget;
+	pObject->pObjectDesc=pWidget;
 	pObject->Type=PX_OBJECT_TYPE_WIDGET;
 	pObject->ReceiveEvents=PX_TRUE;
 	pObject->Func_ObjectFree=PX_Object_WidgetFree;
@@ -265,11 +265,11 @@ _ERROR:
 	return PX_FALSE;
 }
 
-PX_Object_Widget * PX_Object_GetWidget(PX_Object *Object)
+PX_Object_Widget * PX_Object_GetWidget(PX_Object *pObject)
 {
-	if (Object->Type==PX_OBJECT_TYPE_WIDGET)
+	if (pObject->Type==PX_OBJECT_TYPE_WIDGET)
 	{
-		return (PX_Object_Widget *)Object->pObject;
+		return (PX_Object_Widget *)pObject->pObjectDesc;
 	}
 	return PX_NULL;
 }

@@ -9,7 +9,7 @@ px_void PX_Object_PrinterUpdateLines(PX_Object* pObject)
 	while (pDesc->pObjects.size > pDesc->max_column)
 	{
 		pLine = (PX_VECTORAT(PX_Object_PrinterLine, &pDesc->pObjects, 0));
-		PX_ObjectDelete(pLine->Object);
+		PX_ObjectDelete(pLine->pObject);
 		PX_VectorErase(&pDesc->pObjects, 0);
 	}
 
@@ -17,33 +17,8 @@ px_void PX_Object_PrinterUpdateLines(PX_Object* pObject)
 	{
 		pLine = (PX_VECTORAT(PX_Object_PrinterLine, &pDesc->pObjects, i));
 
-		switch (pLine->Object->Type)
-		{
-		case PX_OBJECT_TYPE_AUTOTEXT:
-		{
-			PX_ObjectSetPosition(pLine->Object, 0, (px_float)y, 0);
-			y += (px_int)PX_ObjectGetHeight(pLine->Object);
-		}
-		break;
-		case PX_OBJECT_TYPE_IMAGE:
-		{
-			PX_ObjectSetPosition(pLine->Object, 0, (px_float)y, 0);
-			y += (px_int)PX_ObjectGetHeight(pLine->Object);
-		}
-		break;
-		case PX_OBJECT_TYPE_ANIMATION:
-		{
-			PX_ObjectSetPosition(pLine->Object, 0, (px_float)y, 0);
-			y += (px_int)PX_ObjectGetHeight(pLine->Object);
-		}
-		break;
-		default:
-		{
-			PX_ObjectSetPosition(pLine->Object, 0, (px_float)y, 0);
-			y += (px_int)PX_ObjectGetHeight(pLine->Object);
-		}
-		break;
-		}
+		PX_ObjectSetPosition(pLine->pObject, 0, (px_float)y, 0);
+		y += (px_int)PX_ObjectGetHeight(pLine->pObject);
 	}
 	PX_ObjectSetPosition(pDesc->Input, 0, (px_float)y, 0);
 }
@@ -57,22 +32,25 @@ PX_Object* PX_Object_PrinterPrintText(PX_Object* pObject, const px_char* text)
 
 		if (pAutoObject)
 		{
-			obj.Object = pAutoObject;
+			obj.pObject = pAutoObject;
 			obj.id = pDesc->id++;
-			PX_Object_AutoTextSetTextColor(pAutoObject, PX_COLOR(255, 0, 255, 0));
+			PX_Object_AutoTextSetTextColor(pAutoObject, pDesc->fontColor);
 			PX_Object_AutoTextSetText(pAutoObject, text);
 			PX_VectorPushback(&pDesc->pObjects, &obj);
 			PX_Object_PrinterUpdateLines(pObject);
+			
+			PX_Object_ScrollAreaUpdateRange(pDesc->Area);
 			PX_Object_ScrollAreaMoveToBottom(pDesc->Area);
-
 		}
 		return pAutoObject;
 	}
 	return PX_NULL;
 }
 
+
 PX_Object* PX_Object_PrinterLastPrintText(PX_Object* pObject, const px_char* text)
 {
+	px_int index;
 	if (pObject->Type == PX_OBJECT_TYPE_PRINTER)
 	{
 		PX_Object_PrinterLine* pobjColumn=PX_NULL;
@@ -81,19 +59,131 @@ PX_Object* PX_Object_PrinterLastPrintText(PX_Object* pObject, const px_char* tex
 		{
 			return PX_Object_PrinterPrintText(pObject,text);
 		}
-		pobjColumn = PX_VECTORLAST(PX_Object_PrinterLine, &pDesc->pObjects);
-		pObject = pobjColumn->Object;
-		if (pObject->Type == PX_OBJECT_TYPE_AUTOTEXT)
+		index=pDesc->pObjects.size - 1;
+		while (index>=0)
 		{
-			PX_Object_AutoTextSetTextColor(pObject, PX_COLOR(255, 0, 255, 0));
-			PX_Object_AutoTextSetText(pObject, text);
-			return pObject;
+			pobjColumn = PX_VECTORAT(PX_Object_PrinterLine, &pDesc->pObjects, index);
+			pObject = pobjColumn->pObject;
+			if (pObject->Type == PX_OBJECT_TYPE_AUTOTEXT)
+			{
+				PX_Object_AutoTextSetTextColor(pObject, pDesc->fontColor);
+				PX_Object_AutoTextSetText(pObject, text);
+				PX_Object_ScrollAreaUpdateRange(pDesc->Area);
+				return pObject;
+			}
+
+			index--;
 		}
-		else
-			return PX_NULL;
+		
 	}
 	return PX_NULL;
 }
+
+PX_Object* PX_Object_PrinterPrintProcessBar(PX_Object* pObject)
+{
+	if (pObject->Type == PX_OBJECT_TYPE_PRINTER)
+	{
+		PX_Object_PrinterLine obj;
+		PX_Object_Printer* pDesc = PX_ObjectGetDesc(PX_Object_Printer, pObject);
+		PX_Object* pNewObject = PX_Object_ProcessBarCreate(pObject->mp, pDesc->Area, 3, 0, (px_int)pDesc->Area->Width*2/3, 24);
+
+		if (pNewObject)
+		{
+			obj.pObject = pNewObject;
+			obj.id = pDesc->id++;
+			PX_Object_ProcessBarSetBackgroundColor(pNewObject, PX_COLOR_BLACK);
+			PX_Object_ProcessBarSetColor(pNewObject, PX_COLOR(255, 0, 192, 0));
+			PX_Object_ProcessBarSetTextColor(pNewObject, PX_COLOR_WHITE);
+			PX_VectorPushback(&pDesc->pObjects, &obj);
+			PX_Object_PrinterUpdateLines(pObject);
+			PX_Object_ScrollAreaUpdateRange(pDesc->Area);
+			PX_Object_ScrollAreaMoveToBottom(pDesc->Area);
+
+		}
+		return pNewObject;
+	}
+	return PX_NULL;
+}
+
+PX_Object* PX_Object_PrinterPrintButton(PX_Object* pObject, px_int width, px_int height, const px_char* text)
+{
+	if (pObject->Type == PX_OBJECT_TYPE_PRINTER)
+	{
+		PX_Object_PrinterLine obj;
+		PX_Object_Printer* pDesc = PX_ObjectGetDesc(PX_Object_Printer, pObject);
+		PX_Object* pNewObject = PX_Object_PushButtonCreate(pObject->mp, pDesc->Area, 0, 0,width, height,text, pDesc->fm);
+
+		if (pNewObject)
+		{
+			obj.pObject = pNewObject;
+			obj.id = pDesc->id++;
+			PX_Object_PushButtonSetStyle(pNewObject, PX_OBJECT_PUSHBUTTON_STYLE_ROUNDRECT);
+			PX_Object_PushButtonSetRoundRadius(pNewObject, height/2.f-1);
+			PX_Object_PushButtonSetBackgroundColor(pNewObject, PX_COLOR(255,132,197,255));
+			PX_Object_PushButtonSetBorderColor(pNewObject, PX_COLOR(192, 68, 100, 128));
+			PX_Object_PushButtonSetCursorColor(pNewObject, PX_COLOR(255, 168, 224, 255));
+			PX_Object_PushButtonSetPushColor(pNewObject, PX_COLOR(64, 0, 0, 0));
+			PX_Object_PushButtonSetTextColor(pNewObject, pDesc->fontColor);
+			PX_VectorPushback(&pDesc->pObjects, &obj);
+			PX_Object_PrinterUpdateLines(pObject);
+			PX_Object_ScrollAreaUpdateRange(pDesc->Area);
+			PX_Object_ScrollAreaMoveToBottom(pDesc->Area);
+		}
+		return pNewObject;
+	}
+	return PX_NULL;
+}
+
+PX_Object* PX_Object_PrinterPrintSpace(PX_Object* pObject, px_int height)
+{
+	if (pObject->Type == PX_OBJECT_TYPE_PRINTER)
+	{
+		PX_Object_PrinterLine obj;
+		PX_Object_Printer* pDesc = PX_ObjectGetDesc(PX_Object_Printer, pObject);
+		PX_Object* pNewObject = PX_ObjectCreate(pObject->mp, pDesc->Area,0,0,0,1,height*1.f,0);
+		if (pNewObject)
+		{
+			obj.pObject = pNewObject;
+			obj.id = pDesc->id++;
+			PX_VectorPushback(&pDesc->pObjects, &obj);
+			PX_Object_PrinterUpdateLines(pObject);
+			PX_Object_ScrollAreaUpdateRange(pDesc->Area);
+			PX_Object_ScrollAreaMoveToBottom(pDesc->Area);
+			return pNewObject;
+		}
+	}
+	return PX_NULL;
+}
+
+PX_Object* PX_Object_PrinterLastProcessBarValue(PX_Object* pObject, const px_int value)
+{
+	px_int index;
+	if (pObject->Type == PX_OBJECT_TYPE_PRINTER)
+	{
+		PX_Object_PrinterLine* pobjColumn = PX_NULL;
+		PX_Object_Printer* pDesc = PX_ObjectGetDesc(PX_Object_Printer, pObject);
+		if (pDesc->pObjects.size == 0)
+		{
+			PX_Object*pNewObject= PX_Object_PrinterPrintProcessBar(pObject);
+			PX_Object_ProcessBarSetValue(pNewObject, value);
+		}
+
+		index = pDesc->pObjects.size - 1;
+		while (index >= 0)
+		{
+			pobjColumn = PX_VECTORAT(PX_Object_PrinterLine, &pDesc->pObjects, index);
+			pObject = pobjColumn->pObject;
+			if (pObject->Type == PX_OBJECT_TYPE_PROCESSBAR)
+			{
+				PX_Object_ProcessBarSetValue(pObject, value);
+				return pObject;
+			}
+			index--;
+		}
+	}
+	return PX_NULL;
+}
+
 
 PX_Object* PX_Object_PrinterPrintImage(PX_Object* pObject, px_texture* pTexture)
 {
@@ -105,14 +195,12 @@ PX_Object* PX_Object_PrinterPrintImage(PX_Object* pObject, px_texture* pTexture)
 		pImageObject = PX_Object_ImageCreate(pObject->mp, pDesc->Area, 0, 0, pTexture->width, pTexture->height, pTexture);
 		PX_Object_ImageSetAlign(pImageObject, PX_ALIGN_LEFTTOP);
 		PX_ObjectSetSize(pImageObject, (px_float)pTexture->width, (px_float)pTexture->height, 0);
-		obj.Object = pImageObject;
+		obj.pObject = pImageObject;
 		obj.id = pDesc->id++;
 		PX_VectorPushback(&pDesc->pObjects, &obj);
 		PX_Object_PrinterUpdateLines(pObject);
-
+		PX_Object_ScrollAreaUpdateRange(pDesc->Area);
 		PX_Object_ScrollAreaMoveToBottom(pDesc->Area);
-
-
 	}
 	return pObject;
 }
@@ -135,7 +223,7 @@ PX_Object* PX_Object_PrinterGetObject(PX_Object* pObject, px_int id)
 			pCc = (PX_VECTORAT(PX_Object_PrinterLine, &pDesc->pObjects, i));
 			if (pCc->id==id)
 			{
-				return pCc->Object;
+				return pCc->pObject;
 			}
 		}
 	}
@@ -175,7 +263,7 @@ px_void PX_Object_PrinterClear(PX_Object* pObject)
 	for (i = 0; i < pDesc->pObjects.size; i++)
 	{
 		pCc = (PX_VECTORAT(PX_Object_PrinterLine, &pDesc->pObjects, i));
-		PX_ObjectDelete(pCc->Object);
+		PX_ObjectDelete(pCc->pObject);
 	}
 	PX_VectorClear(&pDesc->pObjects);
 }
@@ -287,6 +375,8 @@ PX_Object* PX_Object_PrinterCreate(px_memorypool* mp, PX_Object* Parent, px_int 
 	pDesc->max_column = PX_OBJECT_PRINTER_DEFAULT_MAX_COLUMN;
 	pDesc->column = 0;
 	pDesc->fm = fm;
+	pDesc->id = 1;
+	pDesc->fontColor = PX_COLOR_GREEN;
 	if (!(pDesc->Area = PX_Object_ScrollAreaCreate(mp, pObject, 0, 0,(px_int)width, (px_int)height))) return PX_NULL;
 
 	PX_ObjectRegisterEvent(pDesc->Area, PX_OBJECT_EVENT_KEYDOWN, PX_Object_PrinterOnEnter, pObject);
@@ -294,20 +384,30 @@ PX_Object* PX_Object_PrinterCreate(px_memorypool* mp, PX_Object* Parent, px_int 
 	PX_Object_ScrollAreaSetBorder(pDesc->Area, PX_NULL);
 
 	if (!(pDesc->Input = PX_Object_EditCreate(mp, (pDesc->Area), 0, 0, (px_int)width, fmheight, fm))) return PX_NULL;
-	PX_Object_EditSetTextColor(pDesc->Input, PX_COLOR(255, 0, 255, 0));
-	PX_Object_EditSetCursorColor(pDesc->Input, PX_COLOR(255, 0, 255, 0));
-	PX_Object_EditSetTextColor(pDesc->Input, PX_COLOR(255, 0, 255, 0));
-	PX_Object_EditSetBorderColor(pDesc->Input, PX_COLOR(255, 0, 255, 0));
+	PX_Object_EditSetTextColor(pDesc->Input, pDesc->fontColor);
+	PX_Object_EditSetCursorColor(pDesc->Input, pDesc->fontColor);
+	PX_Object_EditSetTextColor(pDesc->Input, pDesc->fontColor);
+	PX_Object_EditSetBorderColor(pDesc->Input, pDesc->fontColor);
 	PX_Object_EditSetOffset(pDesc->Input, 2, 3);
 	//PX_Object_EditSetLimit(pDesc->Input, "zxcvbnm,./asdfghjkl;'qwertyyuiop[]\\`1234567890-=ZXCVBNM<>?ASDFGHJKL:\"QWERTYUIOP{}|~!@#$%^&*()_+");
 	PX_Object_ScrollAreaSetBkColor(pDesc->Area, PX_COLOR(255, 0, 0, 0));
-	pDesc->id = 1;
-
+	
 	PX_VectorInitialize(mp, &pDesc->pObjects, sizeof(PX_Object_PrinterLine), PX_OBJECT_PRINTER_DEFAULT_MAX_COLUMN);
 
 	return pObject;
 }
 
+
+//set font color
+px_void PX_Object_PrinterSetFontColor(PX_Object* pObject, px_color color)
+{
+	PX_Object_Printer* pDesc = PX_ObjectGetDesc(PX_Object_Printer, pObject);
+	pDesc->fontColor = color;
+	PX_Object_EditSetTextColor(pDesc->Input, pDesc->fontColor);
+	PX_Object_EditSetCursorColor(pDesc->Input, pDesc->fontColor);
+	PX_Object_EditSetTextColor(pDesc->Input, pDesc->fontColor);
+	PX_Object_EditSetBorderColor(pDesc->Input, pDesc->fontColor);
+}
 
 
 /////////////////////////////////////////////////////////

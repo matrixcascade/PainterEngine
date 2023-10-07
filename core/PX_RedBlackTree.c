@@ -518,7 +518,7 @@ static px_void PX_RBTreeDeleteNode(PX_RBTree* tree, PX_RBNode* node)
 px_void PX_RBTreeFree(PX_RBTree* tree)
 {
 	PX_RBNode* node;
-	while (node=tree->root)
+	while ((node=tree->root)!=PX_NULL)
 	{
 		PX_RBTreeDeleteNode(tree, node);
 	}

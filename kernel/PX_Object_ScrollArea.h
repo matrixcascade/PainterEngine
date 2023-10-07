@@ -15,7 +15,7 @@ typedef struct
 
 
 PX_Object *PX_Object_ScrollAreaCreate(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y, px_int width, px_int height);
-PX_Object_ScrollArea * PX_Object_GetScrollArea( PX_Object *Object );
+PX_Object_ScrollArea * PX_Object_GetScrollArea( PX_Object *pObject );
 PX_Object * PX_Object_ScrollAreaGetIncludedObjects(PX_Object *pObj);
 px_void PX_Object_ScrollAreaMoveToBottom(PX_Object *pObject);
 px_void PX_Object_ScrollAreaMoveToTop(PX_Object *pObject);
@@ -28,5 +28,7 @@ px_void PX_Object_ScrollAreaSetBorderColor(PX_Object *pObj,px_color borderColor)
 px_void PX_Object_ScrollAreaFree(PX_Object *pObj);
 px_void PX_Object_ScrollAreaClear(PX_Object* pObj);
 PX_Object* PX_Object_ScrollAreaSetBackgroundColor(PX_Object* pObj, px_color color);
+
+px_color PX_Object_ScrollAreaGetBackgroundColor(PX_Object* pObj);
 #endif
 

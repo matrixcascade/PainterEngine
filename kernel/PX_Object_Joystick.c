@@ -6,7 +6,7 @@ PX_Object_Joystick *PX_Object_GetJoystick(PX_Object *pObject)
     {
         return PX_NULL;
     }
-    return (PX_Object_Joystick *)pObject->pObject;
+    return (PX_Object_Joystick *)pObject->pObjectDesc;
 }
 
 px_double PX_Object_JoystickGetAngle(PX_Object *pObject)
@@ -15,7 +15,7 @@ px_double PX_Object_JoystickGetAngle(PX_Object *pObject)
     {
         PX_ASSERT();
     }
-    return ((PX_Object_Joystick *)(pObject->pObject))->Angle;
+    return ((PX_Object_Joystick *)(pObject->pObjectDesc))->Angle;
 }
 
 px_double PX_Object_JoystickGetDistance(PX_Object *pObject)
@@ -24,7 +24,7 @@ px_double PX_Object_JoystickGetDistance(PX_Object *pObject)
     {
         PX_ASSERT();
     }
-    return ((PX_Object_Joystick *)(pObject->pObject))->Distance;
+    return ((PX_Object_Joystick *)(pObject->pObjectDesc))->Distance;
 }
 
 px_point2D PX_Object_JoystickGetVector(PX_Object *pObject)
@@ -36,10 +36,10 @@ px_point2D PX_Object_JoystickGetVector(PX_Object *pObject)
     }
     else
     {
-        p.x = ((PX_Object_Joystick *)(pObject->pObject))->Distance *
-              (px_float)PX_cosd(((PX_Object_Joystick *)(pObject->pObject))->Angle);
-        p.y = ((PX_Object_Joystick *)(pObject->pObject))->Distance *
-              (px_float)PX_sind(((PX_Object_Joystick *)(pObject->pObject))->Angle);
+        p.x = ((PX_Object_Joystick *)(pObject->pObjectDesc))->Distance *
+              (px_float)PX_cosd(((PX_Object_Joystick *)(pObject->pObjectDesc))->Angle);
+        p.y = ((PX_Object_Joystick *)(pObject->pObjectDesc))->Distance *
+              (px_float)PX_sind(((PX_Object_Joystick *)(pObject->pObjectDesc))->Angle);
     }
     return p;
 }
@@ -88,7 +88,7 @@ PX_Object *PX_Object_JoystickCreate(
 
 px_void Func_JoystickRender(px_surface *pSurface, PX_Object *pObject, px_uint elapsed)
 {
-    PX_Object_Joystick *pJoystick = (PX_Object_Joystick *)pObject->pObject;
+    PX_Object_Joystick *pJoystick = (PX_Object_Joystick *)pObject->pObjectDesc;
     px_float objx, objy, objWidth, objHeight;
     px_float inheritX, inheritY;
     PX_ObjectGetInheritXY(pObject, &inheritX, &inheritY);
@@ -114,7 +114,7 @@ px_void Func_JoystickRender(px_surface *pSurface, PX_Object *pObject, px_uint el
 
 px_void Func_JoystickOnCursorDown(PX_Object *pObject, PX_Object_Event e, px_void *ptr)
 {
-    PX_Object_Joystick *pJoystick = (PX_Object_Joystick *)pObject->pObject;
+    PX_Object_Joystick *pJoystick = (PX_Object_Joystick *)pObject->pObjectDesc;
     px_float objx, objy, objWidth, objHeight;
     px_float inheritX, inheritY;
     px_float x, y, r;
@@ -147,7 +147,7 @@ px_void Func_JoystickOnCursorDown(PX_Object *pObject, PX_Object_Event e, px_void
 
 px_void Func_JoystickOnCursorDrag(PX_Object *pObject, PX_Object_Event e, px_void *ptr)
 {
-    PX_Object_Joystick *pJoystick = (PX_Object_Joystick *)pObject->pObject;
+    PX_Object_Joystick *pJoystick = (PX_Object_Joystick *)pObject->pObjectDesc;
     px_float objx, objy, objWidth, objHeight;
     px_float inheritX, inheritY;
     px_float x, y, r;
@@ -183,7 +183,7 @@ px_void Func_JoystickOnCursorDrag(PX_Object *pObject, PX_Object_Event e, px_void
 
 px_void Func_JoystickOnCursorUp(PX_Object *pObject, PX_Object_Event e, px_void *ptr)
 {
-    PX_Object_Joystick *pJoystick = (PX_Object_Joystick *)pObject->pObject;
+    PX_Object_Joystick *pJoystick = (PX_Object_Joystick *)pObject->pObjectDesc;
     px_float objx, objy, objWidth, objHeight;
     px_float inheritX, inheritY;
     px_float x, y, r;

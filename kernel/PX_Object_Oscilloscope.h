@@ -216,7 +216,7 @@ px_void PX_Object_OscilloscopeSetMargin(PX_Object *pObject,px_int Left,px_int Ri
 px_void PX_Object_OscilloscopeRestoreOscilloscope(PX_Object *pObject);
 PX_Object *PX_Object_OscilloscopeCreate(px_memorypool *mp, PX_Object *Parent,px_int x,px_int y,px_int Width,px_int Height,PX_FontModule *fontmodule);
 
-
+PX_Designer_ObjectDesc PX_Object_OscilloscopeDesignerInstall();
 #define PX_OBJECT_FILTER_EDITOR_MAX_PT 256
 #define PX_OBJECT_FILTER_EDITOR_DEFAULT_RADIUS 6
 
@@ -258,25 +258,25 @@ typedef struct
 	PX_Object_FilterEditor_OperatorPoint pt[PX_OBJECT_FILTER_EDITOR_MAX_PT];
 }PX_Object_FilterEditor;
 
-PX_Object_FilterEditor *PX_Object_GetFilterEditor(PX_Object *Object);
+PX_Object_FilterEditor *PX_Object_GetFilterEditor(PX_Object *pObject);
 
 PX_Object *PX_Object_FilterEditorCreate(px_memorypool *mp, PX_Object *Parent,px_int x,px_int y,px_int Width,px_int Height,PX_OBJECT_FILTER_TYPE type);
-px_void PX_Object_FilterEditorSethelpLineColor(PX_Object *Object,px_color clr);
-px_void PX_Object_FilterEditorSetptColor(PX_Object *Object,px_color clr);
+px_void PX_Object_FilterEditorSethelpLineColor(PX_Object *pObject,px_color clr);
+px_void PX_Object_FilterEditorSetptColor(PX_Object *pObject,px_color clr);
 
-px_void PX_Object_FilterEditorSetOperateCount(PX_Object *Object,px_int opcount);
-px_void PX_Object_FilterEditorSetType(PX_Object *Object,PX_OBJECT_FILTER_TYPE type);
-px_void PX_Object_FilterEditorSetHorizontalShow(PX_Object *Object,px_bool HorizontalShow);
-px_void PX_Object_FilterEditorReset(PX_Object *Object);
-px_void PX_Object_FilterEditorSetRange(PX_Object *Object,px_double range);
-px_void PX_Object_FilterEditorSetFontColor(PX_Object *Object,px_color clr);
-px_void PX_Object_FilterEditorSetBorderColor(PX_Object *Object,px_color clr);
-px_void PX_Object_FilterEditorSethelpLineColor(PX_Object *Object,px_color clr);
-px_void PX_Object_FilterEditorSetFontSize(PX_Object *Object,px_int size);
-px_void PX_Object_FilterEditorSetHorizontalDividing(PX_Object *Object,px_int div);
-px_void PX_Object_FilterEditorSetVerticalDividing(PX_Object *Object,px_int div);
-px_void PX_Object_FilterEditorMapData(PX_Object *Object,px_double data[],px_int size);
-px_double PX_Object_FilterEditorMapValue(PX_Object *Object,px_double precent);
+px_void PX_Object_FilterEditorSetOperateCount(PX_Object *pObject,px_int opcount);
+px_void PX_Object_FilterEditorSetType(PX_Object *pObject,PX_OBJECT_FILTER_TYPE type);
+px_void PX_Object_FilterEditorSetHorizontalShow(PX_Object *pObject,px_bool HorizontalShow);
+px_void PX_Object_FilterEditorReset(PX_Object *pObject);
+px_void PX_Object_FilterEditorSetRange(PX_Object *pObject,px_double range);
+px_void PX_Object_FilterEditorSetFontColor(PX_Object *pObject,px_color clr);
+px_void PX_Object_FilterEditorSetBorderColor(PX_Object *pObject,px_color clr);
+px_void PX_Object_FilterEditorSethelpLineColor(PX_Object *pObject,px_color clr);
+px_void PX_Object_FilterEditorSetFontSize(PX_Object *pObject,px_int size);
+px_void PX_Object_FilterEditorSetHorizontalDividing(PX_Object *pObject,px_int div);
+px_void PX_Object_FilterEditorSetVerticalDividing(PX_Object *pObject,px_int div);
+px_void PX_Object_FilterEditorMapData(PX_Object *pObject,px_double data[],px_int size);
+px_double PX_Object_FilterEditorMapValue(PX_Object *pObject,px_double precent);
 
 
 

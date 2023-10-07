@@ -14,7 +14,7 @@ typedef struct
 }PX_Object_RingProcessBar;
 
 PX_Object * PX_Object_RingProcessBarCreate(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y,px_int r,PX_FontModule *fm);
-PX_Object_RingProcessBar *PX_Object_GetRingProcessBar(PX_Object *Object);
+PX_Object_RingProcessBar *PX_Object_GetRingProcessBar(PX_Object *pObject);
 px_void		PX_Object_RingProcessBarSetColor(PX_Object *pRingProcessBar,px_color Color);
 px_void		PX_Object_RingProcessBarSetBackgroundColor(PX_Object *pRingProcessBar,px_color Color);
 px_void		PX_Object_RingProcessBarSetValue(PX_Object *pRingProcessBar,px_int Value);

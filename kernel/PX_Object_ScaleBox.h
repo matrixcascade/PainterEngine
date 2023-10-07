@@ -15,8 +15,8 @@ typedef struct
 	px_color linecolor,regioncolor;
 }PX_Object_ScaleBox;
 PX_Object * PX_Object_ScaleBoxCreate(px_memorypool *mp,PX_Object *Parent);
-PX_Object_ScaleBox * PX_Object_GetScaleBox( PX_Object *Object );
-px_point2D *PX_Object_ScaleBoxGetPoints(PX_Object *Object);
+PX_Object_ScaleBox * PX_Object_GetScaleBox( PX_Object *pObject );
+px_point2D *PX_Object_ScaleBoxGetPoints(PX_Object *pObject);
 
 
 

@@ -2,7 +2,7 @@
 
 px_void Func_TimerUpadte(PX_Object *pObject, px_uint elapsed)
 {
-    PX_Object_Timer *pTimer = pObject->pObject;
+    PX_Object_Timer *pTimer = pObject->pObjectDesc;
     PX_Object_Event timeout = {0};
 
     if (pTimer->IsPaused)
@@ -13,7 +13,7 @@ px_void Func_TimerUpadte(PX_Object *pObject, px_uint elapsed)
     timeout.Event = PX_OBJECT_EVENT_TIMEOUT;
     pTimer->Elapsed += elapsed;
 
-    if (pTimer->Mode & PX_OBJECT_TIMER_MODE_STRICT)
+    if (pTimer->time_trigger_once)
     {
         while (pTimer->Elapsed >= pTimer->Interval && pTimer->ExecCount != 0)
         {
@@ -27,12 +27,12 @@ px_void Func_TimerUpadte(PX_Object *pObject, px_uint elapsed)
         if (pTimer->Elapsed >= pTimer->Interval && pTimer->ExecCount != 0)
         {
             pTimer->ExecCount -= 1;
-            pTimer->Elapsed %= pTimer->Interval;
+            pTimer->Elapsed = 0;
             PX_ObjectExecuteEvent(pObject, timeout);
         }
     }
 
-    if (pTimer->ExecCount == 0 && (pTimer->Mode & PX_OBJECT_TIMER_MODE_DELETE))
+    if (pTimer->ExecCount == 0 && (pTimer->delete_after_trigger))
     {
         PX_ObjectDelayDelete(pObject);
     }
@@ -43,7 +43,8 @@ PX_Object *PX_Object_TimerCreate(px_memorypool *mp, PX_Object *parent, px_int ex
     PX_Object_Timer timer;
     PX_Object *pObj;
 
-    timer.Mode = 0b00000011;
+    timer.delete_after_trigger = PX_FALSE;
+    timer.time_trigger_once = PX_FALSE;
     timer.IsPaused = PX_FALSE;
     timer.ExecCount = execCount;
     timer.Interval = interval;
@@ -69,7 +70,7 @@ PX_Object_Timer *PX_Object_GetTimer(PX_Object *pObject)
     {
         return PX_NULL;
     }
-    return (PX_Object_Timer *)(pObject->pObject);
+    return (PX_Object_Timer *)(pObject->pObjectDesc);
 }
 
 px_bool PX_Object_TimerPause(PX_Object *pObject)
@@ -104,46 +105,23 @@ px_bool PX_Object_TimerClear(PX_Object *pObject)
     return PX_TRUE;
 }
 
-px_bool PX_Object_Timer_SetModeStrict(PX_Object *pObject)
+px_void PX_Object_TimerDeleteAfterTrigger(PX_Object* pObject, px_bool b)
 {
-    PX_Object_Timer *pTimer = PX_Object_GetTimer(pObject);
+    PX_Object_Timer* pTimer = PX_Object_GetTimer(pObject);
     if (pTimer == PX_NULL)
     {
-        return PX_FALSE;
+        PX_ASSERT();
+        return;
     }
-    pTimer->Mode |= PX_OBJECT_TIMER_MODE_STRICT;
-    return PX_TRUE;
+    pTimer->delete_after_trigger = b;
 }
-
-px_bool PX_Object_Timer_ResetModeStrict(PX_Object *pObject)
+px_void PX_Object_TimerTimeOutTriggerOnce(PX_Object* pObject, px_bool b)
 {
-    PX_Object_Timer *pTimer = PX_Object_GetTimer(pObject);
+    PX_Object_Timer* pTimer = PX_Object_GetTimer(pObject);
     if (pTimer == PX_NULL)
     {
-        return PX_FALSE;
+        PX_ASSERT();
+        return;
     }
-    pTimer->Mode &= ~PX_OBJECT_TIMER_MODE_STRICT;
-    return PX_TRUE;
-}
-
-px_bool PX_Object_Timer_SetModeDelete(PX_Object *pObject)
-{
-    PX_Object_Timer *pTimer = PX_Object_GetTimer(pObject);
-    if (pTimer == PX_NULL)
-    {
-        return PX_FALSE;
-    }
-    pTimer->Mode |= PX_OBJECT_TIMER_MODE_DELETE;
-    return PX_TRUE;
-}
-
-px_bool PX_Object_Timer_ResetModeDelete(PX_Object *pObject)
-{
-    PX_Object_Timer *pTimer = PX_Object_GetTimer(pObject);
-    if (pTimer == PX_NULL)
-    {
-        return PX_FALSE;
-    }
-    pTimer->Mode &= ~PX_OBJECT_TIMER_MODE_DELETE;
-    return PX_TRUE;
+    pTimer->time_trigger_once = b;
 }

@@ -50,7 +50,7 @@ typedef struct
 }PX_Object_Edit;
 
 PX_Object* PX_Object_EditCreate(px_memorypool *mp, PX_Object *Parent,px_int x,px_int y,px_int Width,px_int Height,PX_FontModule *fontModule );
-PX_Object_Edit * PX_Object_GetEdit( PX_Object *Object );
+PX_Object_Edit * PX_Object_GetEdit( PX_Object *pObject );
 px_char * PX_Object_EditGetText( PX_Object *pObject );
 px_void PX_Object_EditSetMaxTextLength(PX_Object *pObject,px_int max_length);
 px_void PX_Object_EditSetText( PX_Object *pObject,const px_char *Text );

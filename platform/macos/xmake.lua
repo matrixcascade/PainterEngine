@@ -19,7 +19,7 @@ add_includedirs(painterengine_dir .. "/platform/framework")
 
 add_files(painterengine_dir .. "/core/*.c")
 add_files(painterengine_dir .. "/kernel/*.c")
-add_files(painterengine_dir .. "/architecture/*.c")
+add_files(painterengine_dir .. "/runtime/*.c")
 add_files(painterengine_dir .. "/platform/framework/*.c")
 add_files(painterengine_dir .. "/platform/macos/*.c")
 

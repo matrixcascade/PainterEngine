@@ -14,6 +14,8 @@ px_void PX_GeoDrawRect(px_surface *psurface, px_int left, px_int top, px_int rig
 px_void PX_GeoDrawSolidCircle(px_surface *psurface, px_int x,px_int y,px_int Radius,px_color color );
 px_void PX_GeoDrawSolidCircleFast(px_surface* psurface, px_int x, px_int y, px_int Radius, px_color color);
 px_void PX_GeoDrawPenCircle(px_surface *psurface, px_float x,px_float y,px_float Radius,px_color color );
+px_void PX_GeoDrawPenCircleDecay(px_surface* psurface, px_float x, px_float y, px_float Radius, px_color color, px_float Decay);
+px_void PX_GeoDrawPenRing(px_surface* psurface, px_float x, px_float y, px_float Radius, px_float linewidth_inside, px_color color);
 px_void PX_GeoDrawPenCircleEraser(px_surface* psurface, px_float x, px_float y, px_float Radius, px_bool white_background);
 px_void PX_GeoDrawSpray(px_surface* psurface, px_float x, px_float y, px_float Radius, px_color color);
 px_void PX_GeoDrawBall(px_surface* psurface, px_float x, px_float y, px_float Radius, px_color color);

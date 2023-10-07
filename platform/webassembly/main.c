@@ -10,7 +10,8 @@
 
 #include <stdio.h>
 #include <SDL.h>
-
+#include <string.h>
+#include <stdlib.h>
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>

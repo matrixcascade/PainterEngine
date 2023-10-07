@@ -7,7 +7,7 @@ PX_Object_VirtualKeyBoard *PX_Object_GetVirtualKeyBoard(PX_Object *pObject)
 	}
 	if (pObject->Type==PX_OBJECT_TYPE_VKEYBOARD)
 	{
-		return (PX_Object_VirtualKeyBoard *)pObject->pObject;
+		return (PX_Object_VirtualKeyBoard *)pObject->pObjectDesc;
 	}
 	return PX_NULL;
 }
@@ -149,7 +149,7 @@ px_void PX_Object_VirtualKeyBoardRender(px_surface *psurface, PX_Object *pObject
 	px_int i;
 	px_int oftx;
 	px_int ofty;
-	PX_Object_VirtualKeyBoard *keyBoard=(PX_Object_VirtualKeyBoard *)pObject->pObject;
+	PX_Object_VirtualKeyBoard *keyBoard=(PX_Object_VirtualKeyBoard *)pObject->pObjectDesc;
 	px_float objx,objy,objWidth,objHeight;
 	px_float inheritX,inheritY;
 
@@ -214,7 +214,7 @@ px_void PX_Object_VirtualKeyBoardOnCursorUp(PX_Object *pObject,PX_Object_Event e
 	px_float x=PX_Object_Event_GetCursorX(e);
 	px_float y=PX_Object_Event_GetCursorY(e);
 	px_int i;
-	PX_Object_VirtualKeyBoard *pkb=(PX_Object_VirtualKeyBoard *)pObject->pObject;
+	PX_Object_VirtualKeyBoard *pkb=(PX_Object_VirtualKeyBoard *)pObject->pObjectDesc;
 	if (!PX_ObjectIsPointInRegion(pObject,(px_float)x,(px_float)y))
 	{
 		return;
@@ -233,7 +233,7 @@ px_void PX_Object_VirtualKeyBoardOnCursorMove(PX_Object *pObject,PX_Object_Event
 	px_float y=PX_Object_Event_GetCursorY(e);
 	px_int i;
 	px_int kh=(px_int)(pObject->Height/5);
-	PX_Object_VirtualKeyBoard *pkb=(PX_Object_VirtualKeyBoard *)pObject->pObject;
+	PX_Object_VirtualKeyBoard *pkb=(PX_Object_VirtualKeyBoard *)pObject->pObjectDesc;
 	px_float objx,objy,objWidth,objHeight;
 	px_float inheritX,inheritY;
 
@@ -328,7 +328,7 @@ px_void PX_Object_VirtualKeyBoardOnCursorDown(PX_Object *pObject,PX_Object_Event
 	px_float y=PX_Object_Event_GetCursorY(e);
 	px_int i;
 	px_int kh=(px_int)(pObject->Height/5);
-	PX_Object_VirtualKeyBoard *pkb=(PX_Object_VirtualKeyBoard *)pObject->pObject;
+	PX_Object_VirtualKeyBoard *pkb=(PX_Object_VirtualKeyBoard *)pObject->pObjectDesc;
 
 	px_float objx,objy,objWidth,objHeight;
 	px_float inheritX,inheritY;
@@ -533,6 +533,10 @@ px_void PX_Object_VirtualKeyBoardOnCursorDown(PX_Object *pObject,PX_Object_Event
 		pkb->Keys[41].bhold=PX_FALSE;
 		if (pkb->LinkerObject)
 		{
+			if (pkb->LinkerObject->Type==PX_OBJECT_TYPE_EDIT)
+			{
+				PX_Object_EditSetFocus(pkb->LinkerObject, PX_TRUE);
+			}
 			strEve[0]=pkb->functionCode;
 			PX_ObjectPostEvent(pkb->LinkerObject,stringEvent);
 		}
@@ -694,7 +698,7 @@ PX_Object_VirtualNumberKeyBoard *PX_Object_GetVirtualNumberKeyBoard(PX_Object *p
 	}
 	if (pObject->Type==PX_OBJECT_TYPE_VNKEYBOARD)
 	{
-		return (PX_Object_VirtualNumberKeyBoard *)pObject->pObject;
+		return (PX_Object_VirtualNumberKeyBoard *)pObject->pObjectDesc;
 	}
 	return PX_NULL;
 }
@@ -779,7 +783,7 @@ px_void PX_Object_VirtualNumberKeyBoardRender(px_surface *psurface, PX_Object *p
 	px_int i;
 	px_int oftx;
 	px_int ofty;
-	PX_Object_VirtualNumberKeyBoard *keyBoard=(PX_Object_VirtualNumberKeyBoard *)pObject->pObject;
+	PX_Object_VirtualNumberKeyBoard *keyBoard=(PX_Object_VirtualNumberKeyBoard *)pObject->pObjectDesc;
 
 	px_float objx,objy,objWidth,objHeight;
 	px_float inheritX,inheritY;
@@ -838,7 +842,7 @@ px_void PX_Object_VirtualNumberKeyBoardOnCursorUp(PX_Object *pObject,PX_Object_E
 	px_float x=PX_Object_Event_GetCursorX(e);
 	px_float y=PX_Object_Event_GetCursorY(e);
 	px_int i;
-	PX_Object_VirtualNumberKeyBoard *pkb=(PX_Object_VirtualNumberKeyBoard *)pObject->pObject;
+	PX_Object_VirtualNumberKeyBoard *pkb=(PX_Object_VirtualNumberKeyBoard *)pObject->pObjectDesc;
 	if (!PX_ObjectIsPointInRegion(pObject,(px_float)x,(px_float)y))
 	{
 		return;
@@ -855,7 +859,7 @@ px_void PX_Object_VirtualNumberKeyBoardOnCursorMove(PX_Object *pObject,PX_Object
 	px_float y=PX_Object_Event_GetCursorY(e);
 	px_int i;
 	px_int kh=(px_int)(pObject->Height/5);
-	PX_Object_VirtualNumberKeyBoard *pkb=(PX_Object_VirtualNumberKeyBoard *)pObject->pObject;
+	PX_Object_VirtualNumberKeyBoard *pkb=(PX_Object_VirtualNumberKeyBoard *)pObject->pObjectDesc;
 	px_float objx,objy,objWidth,objHeight;
 	px_float inheritX,inheritY;
 
@@ -951,7 +955,7 @@ px_void PX_Object_VirtualNumberKeyBoardOnCursorDown(PX_Object *pObject,PX_Object
 	px_int i;
 	px_int kh=(px_int)(pObject->Height/5);
 	PX_Object_Event stringEvent;
-	PX_Object_VirtualKeyBoard *pkb=(PX_Object_VirtualKeyBoard *)pObject->pObject;
+	PX_Object_VirtualKeyBoard *pkb=(PX_Object_VirtualKeyBoard *)pObject->pObjectDesc;
 	PX_Object_Event ke;
 	px_float objx,objy,objWidth,objHeight;
 	px_float inheritX,inheritY;

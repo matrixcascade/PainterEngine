@@ -21,7 +21,7 @@ typedef struct
 }PX_Object_Label;
 
 PX_Object *	PX_Object_LabelCreate(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y,px_int Width,px_int Height,const px_char *Text,PX_FontModule *fm,px_color Color);
-PX_Object_Label  *	PX_Object_GetLabel(PX_Object *Object);
+PX_Object_Label  *	PX_Object_GetLabel(PX_Object *pObject);
 px_char	  * PX_Object_LabelGetText(PX_Object *Label);
 px_void		PX_Object_LabelSetText(PX_Object *pLabel,const px_char *Text);
 px_void		PX_Object_LabelSetTextColor(PX_Object *pLabel,px_color Color);

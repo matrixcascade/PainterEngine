@@ -54,5 +54,7 @@ px_void PX_Object_MessageBoxAlertYesNo(PX_Object *pObject,const char *Message,PX
 px_void PX_Object_MessageBoxInputBox(PX_Object *pObject,const char *Message,PX_Object_MessageBoxCallBack func_yescallback,px_void *yesptr,PX_Object_MessageBoxCallBack func_cancelcallback,px_void *cancelptr);
 px_char * PX_Object_MessageBoxGetInput(PX_Object *pObject);
 PX_Object * PX_Object_MessageBoxCreate(px_memorypool *mp,PX_Object *parent,PX_FontModule *fontmodule);
+px_void PX_Object_MessageBoxSetMode(PX_Object* pObject, PX_MESSAGEBOX_COLORMOD mode);
+px_void PX_Object_MessageBoxSetFillColor(PX_Object* pObject, px_color color);
 #endif
 

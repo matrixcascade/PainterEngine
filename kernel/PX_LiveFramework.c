@@ -2,6 +2,21 @@
 
 typedef struct
 {
+	union
+	{
+		struct
+		{
+			px_uchar r;
+			px_uchar g;
+			px_uchar b;
+			px_uchar a;
+		};
+		px_dword ucolor;
+	}_argb;
+}px_liveframework_rgba_color;
+
+typedef struct
+{
 	px_point position;
 	px_point normal;
 	px_float u,v;
@@ -1423,7 +1438,7 @@ px_bool PX_LiveFrameworkPlayAnimationByName(PX_LiveFramework *plive,const px_cha
 	for (i=0;i<plive->liveAnimations.size;i++)
 	{
 		PX_LiveAnimation *pAnimation=PX_VECTORAT(PX_LiveAnimation,&plive->liveAnimations,i);
-		if (PX_strequ(name,pAnimation->id))
+		if (PX_strequ2(name,pAnimation->id))
 		{
 			PX_LiveFrameworkPlayAnimation(plive,i);
 			return PX_TRUE;
@@ -2306,7 +2321,18 @@ px_bool PX_LiveFrameworkExport(PX_LiveFramework *plive,px_memory *exportbuffer)
 			//export pixels data
 			do 
 			{
-				if(!PX_MemoryCat(exportbuffer,pTexture->Texture.surfaceBuffer,sizeof(px_color)*pTexture->Texture.height*pTexture->Texture.width))return PX_FALSE;
+				px_int k;
+				px_liveframework_rgba_color renderColor;
+				px_color *pColor =(px_color*)(pTexture->Texture.surfaceBuffer);
+				for (k = 0; k < pTexture->Texture.width * pTexture->Texture.height; k++)
+				{
+					renderColor._argb.r = pColor[k]._argb.r;
+					renderColor._argb.g = pColor[k]._argb.g;
+					renderColor._argb.b = pColor[k]._argb.b;
+					renderColor._argb.a = pColor[k]._argb.a;
+					if (!PX_MemoryCat(exportbuffer, &renderColor, sizeof(px_liveframework_rgba_color)))return PX_FALSE;
+				}
+				//if(!PX_MemoryCat(exportbuffer,pTexture->Texture.surfaceBuffer,sizeof(px_color)*pTexture->Texture.height*pTexture->Texture.width))return PX_FALSE;
 			} while (0);
 		}
 	} while (0);
@@ -2502,6 +2528,9 @@ px_bool PX_LiveFrameworkImport(px_memorypool *mp,PX_LiveFramework *plive,px_void
 			PX_LiveTexture *pTexture=PX_VECTORAT(PX_LiveTexture,&plive->livetextures,i);
 			do 
 			{
+				px_liveframework_rgba_color *pColor;
+				px_color *prenderColor;
+				px_int k;
 				//import live texture structure
 				PX_LiveTextureImportInfo *pLiveTextureImportInfo;
 				pLiveTextureImportInfo=((PX_LiveTextureImportInfo *)(bBuffer+rOffset));
@@ -2516,7 +2545,16 @@ px_bool PX_LiveFrameworkImport(px_memorypool *mp,PX_LiveFramework *plive,px_void
 				rOffset+=sizeof(PX_LiveTextureImportInfo);if(rOffset>size) 
 					goto _ERROR;
 				//import texture data
-				PX_memcpy(pTexture->Texture.surfaceBuffer,(bBuffer+rOffset),pTexture->Texture.width*pTexture->Texture.height*sizeof(px_color));
+				for (k = 0; k < pTexture->Texture.width * pTexture->Texture.height; k++)
+				{
+					pColor=(px_liveframework_rgba_color *)(bBuffer+rOffset);
+					prenderColor= pTexture->Texture.surfaceBuffer;
+					prenderColor[k]._argb.r=pColor[k]._argb.r;
+					prenderColor[k]._argb.g=pColor[k]._argb.g;
+					prenderColor[k]._argb.b=pColor[k]._argb.b;
+					prenderColor[k]._argb.a=pColor[k]._argb.a;
+				}
+				//PX_memcpy(pTexture->Texture.surfaceBuffer,(bBuffer+rOffset),pTexture->Texture.width*pTexture->Texture.height*sizeof(px_color));
 				rOffset+=pTexture->Texture.width*pTexture->Texture.height*sizeof(px_color);if(rOffset>size) 
 					goto _ERROR;
 			} while (0);
@@ -2700,6 +2738,11 @@ px_void PX_LiveFree(PX_Live *pLive)
 px_void PX_LivePlay(PX_Live*plive)
 {
 	PX_LiveFrameworkPlay(plive);
+}
+
+px_int PX_LiveGetAnimationCount(PX_Live* plive)
+{
+	return plive->liveAnimations.size;
 }
 
 px_bool PX_LivePlayAnimation(PX_Live *plive,px_int index)

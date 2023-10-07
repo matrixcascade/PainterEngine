@@ -22,6 +22,8 @@ typedef struct
 
 
 px_color PX_Object_ColorPanelGetColor(PX_Object* pObject);
-PX_Object_ColorPanel* PX_Object_GetColorPanel(PX_Object* Object);
+PX_Object_ColorPanel* PX_Object_GetColorPanel(PX_Object* pObject);
 PX_Object* PX_Object_ColorPanelCreate(px_memorypool* mp, PX_Object* Parent, px_int x, px_int y, px_int width, px_int height);
+
+PX_Designer_ObjectDesc PX_Object_ColorPanelDesignerInstall();
 #endif

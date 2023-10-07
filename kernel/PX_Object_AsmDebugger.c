@@ -414,13 +414,18 @@ px_void PX_Object_AsmDebuggerDetach(PX_Object* pObject)
 		pDesc->map = 0;
 		pDesc->lastip = -1;
 	}
-	pObject->Visible = PX_FALSE;
 }
 
 px_bool PX_Object_AsmDebuggerAttach(PX_Object *pObject,PX_VM_DebuggerMap* map,PX_VM* vm)
 {
 	PX_Object_AsmDebugger* pDesc = PX_ObjectGetDesc(PX_Object_AsmDebugger, pObject);
 	px_int i, offset=0;
+
+	if (pDesc->map)
+	{
+		PX_Object_AsmDebuggerDetach(pObject);
+	}
+
 	pDesc->vm = vm;
 	pDesc->map = map;
 

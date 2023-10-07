@@ -267,3 +267,41 @@ PX_Object* PX_Object_Explosion03Create(px_memorypool* mp, PX_Object* parent, px_
 	return pObject;
 }
 
+px_void PX_Object_Explosion04Render(px_surface* psurface, PX_Object* pObject, px_dword elpased)
+{
+	PX_Object_Explosion04* pDesc =PX_ObjectGetDesc(PX_Object_Explosion04, pObject);
+	px_float fr;
+	px_float objx, objy, objWidth, objHeight;
+	px_float inheritX, inheritY;
+	PX_ObjectGetInheritXY(pObject, &inheritX, &inheritY);
+
+	objx = (pObject->x + inheritX);
+	objy = (pObject->y + inheritY);
+	objWidth = pObject->Width;
+	objHeight = pObject->Height;
+
+	pDesc->elapsed += elpased;
+	if (pDesc->elapsed > pDesc->alive)
+	{
+		PX_ObjectDelayDelete(pObject);
+		return;
+	}
+	fr = pDesc->elapsed / (px_float)pDesc->alive;
+	PX_GeoDrawPenRing(psurface, objx, objy,(PX_sqrt(fr) * pDesc->range * 4), ((1-fr) * pDesc->range * 0.3f+1), pDesc->color);
+}
+
+PX_Object* PX_Object_Explosion04Create(px_memorypool* mp, PX_Object* parent, px_float x, px_float y, px_color color, px_float range,px_dword alive)
+{
+	PX_Object_Explosion04 * pDesc;
+	PX_Object* pObject;
+	pObject = PX_ObjectCreateEx(mp, parent, x, y, 0, 0, 0, 0, 0, PX_NULL, PX_Object_Explosion04Render, 0, PX_NULL, sizeof(PX_Object_Explosion04));
+	pDesc=PX_ObjectGetDesc(PX_Object_Explosion04, pObject);
+	pDesc->color = color;
+	pDesc->range = range;
+	pDesc->elapsed = 0;
+	pDesc->alive = alive;
+	return pObject;
+}
+
+
+

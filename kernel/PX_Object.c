@@ -1,20 +1,20 @@
 #include "PX_Object.h"
 
 
-PX_Object  * PX_ObjectGetChild( PX_Object *Object,px_int Index )
+PX_Object  * PX_ObjectGetChild( PX_Object *pObject,px_int Index )
 {
-	PX_Object *pObject;
-	if (!Object)
+	PX_Object *pChildObject;
+	if (!pObject)
 	{
 		return PX_NULL;
 	}
-	pObject=Object->pChilds;
-	while (Index>0&&pObject)
+	pChildObject =pObject->pChilds;
+	while (Index>0&& pChildObject)
 	{
-		pObject=pObject->pNextBrother;
+		pChildObject = pChildObject->pNextBrother;
 		Index--;
 	}
-	return pObject;
+	return pChildObject;
 
 }
 
@@ -167,13 +167,13 @@ px_void PX_ObjectSetFocus(PX_Object *pObject)
 }
 
 
-PX_Object * PX_ObjectGetRoot(PX_Object *Object)
+PX_Object * PX_ObjectGetRoot(PX_Object *pObject)
 {
-	while(Object->pParent)
+	while(pObject->pParent)
 	{
-		Object=Object->pParent;
+		pObject=pObject->pParent;
 	}
-	return Object;
+	return pObject;
 }
 
 PX_Object_Event PX_OBJECT_BUILD_EVENT(px_uint Event)
@@ -395,28 +395,37 @@ PX_Object * PX_ObjectCreate(px_memorypool *mp,PX_Object *Parent,px_float x,px_fl
 	return pObject;
 }
 
-
+PX_Object* PX_ObjectCreateRoot(px_memorypool* mp)
+{
+	return PX_ObjectCreate(mp, PX_NULL, 0, 0, 0, 0, 0, 0);
+}
 
 PX_Object * PX_ObjectCreateEx(px_memorypool *mp,PX_Object *Parent,px_float x,px_float y,px_float z,px_float Width,px_float Height,px_float Lenght,px_int type,Function_ObjectUpdate Func_ObjectUpdate,Function_ObjectRender Func_ObjectRender,Function_ObjectFree Func_ObjectFree,px_void *desc,px_int size)
 {
 	PX_Object *pObject=PX_ObjectCreate(mp,Parent,x,y,z,Width,Height,Lenght);
 	if (pObject)
 	{
-		pObject->pObject=MP_Malloc(mp,size);
-		if (!pObject->pObject)
+		if (size)
 		{
-			MP_Free(mp,pObject);
-			return PX_NULL;
-		}
-		if (desc)
-		{
-			PX_memcpy(pObject->pObject,desc,size);
+			pObject->pObjectDesc = MP_Malloc(mp, size);
+			if (!pObject->pObjectDesc)
+			{
+				MP_Free(mp, pObject);
+				return PX_NULL;
+			}
+			if (desc)
+			{
+				PX_memcpy(pObject->pObjectDesc, desc, size);
+			}
+			else
+			{
+				PX_memset(pObject->pObjectDesc, 0, size);
+			}
 		}
 		else
 		{
-			PX_memset(pObject->pObject,0,size);
+			pObject->pObjectDesc = PX_NULL;
 		}
-		
 		pObject->Type=type;
 		pObject->Func_ObjectFree=Func_ObjectFree;
 		pObject->Func_ObjectRender=Func_ObjectRender;
@@ -425,63 +434,67 @@ PX_Object * PX_ObjectCreateEx(px_memorypool *mp,PX_Object *Parent,px_float x,px_
 	return pObject;
 }
 
+PX_Object* PX_ObjectCreateFunction(px_memorypool* mp, PX_Object* Parent,Function_ObjectUpdate Func_ObjectUpdate, Function_ObjectRender Func_ObjectRender, Function_ObjectFree Func_ObjectFree)
+{
+	return PX_ObjectCreateEx(mp,Parent,0,0,0,0,0,0,0,Func_ObjectUpdate,Func_ObjectRender,Func_ObjectFree,PX_NULL,0);
+}
 
-px_void PX_ObjectGetInheritXY(PX_Object *Object,px_float *x,px_float *y)
+px_void PX_ObjectGetInheritXY(PX_Object *pObject,px_float *x,px_float *y)
 {
 	*x=0;
 	*y=0;
-	Object=Object->pParent;
-	while (Object)
+	pObject=pObject->pParent;
+	while (pObject)
 	{
-		*x+=Object->x;
-		*y+=Object->y;
-		Object=Object->pParent;
+		*x+=pObject->x;
+		*y+=pObject->y;
+		pObject=pObject->pParent;
 	}
 }
 
-static px_void PX_Object_ObjectEventFree( PX_Object **Object )
+static px_void PX_Object_ObjectEventFree( PX_Object **pObject )
 {
 	PX_OBJECT_EventAction *pNext,*pCur;;
 	//PX_Object_Free Events linker
-	pCur=(*Object)->pEventActions;
+	pCur=(*pObject)->pEventActions;
 	while (pCur)
 	{
 		pNext=pCur->pNext;
-		MP_Free((*Object)->mp,pCur);
+		MP_Free((*pObject)->mp,pCur);
 		pCur=pNext;
 	}
 
-	(*Object)->pEventActions=PX_NULL;
+	(*pObject)->pEventActions=PX_NULL;
 }
 
 
 
-static px_void PX_Object_ObjectFree( PX_Object *Object )
+static px_void PX_Object_ObjectFree( PX_Object *pObject )
 {
-	PX_Object_ObjectEventFree(&Object);
-	if (Object->Func_ObjectFree!=0)
+	PX_Object_ObjectEventFree(&pObject);
+	if (pObject->Func_ObjectFree!=0)
 	{
-		Object->Func_ObjectFree(Object);
+		pObject->Func_ObjectFree(pObject);
 	}
-	if(Object->pObject)
-	MP_Free(Object->mp,Object->pObject);
+	if(pObject->pObjectDesc)
+	MP_Free(pObject->mp,pObject->pObjectDesc);
 
-	MP_Free(Object->mp,Object);
+	MP_Free(pObject->mp,pObject);
 }
 
 
 static px_void PX_Object_DeleteLinkerObject( PX_Object **ppObject )
 {   
-	PX_Object *Object=(*ppObject);
+	PX_Object *pObject=(*ppObject);
 
-	if (Object==PX_NULL)
+	if (pObject==PX_NULL)
 	{
 		return;
 	}
-	PX_Object_DeleteLinkerObject(&Object->pNextBrother);
-	PX_Object_DeleteLinkerObject(&Object->pChilds);
+	PX_Object_DeleteLinkerObject(&pObject->pNextBrother);
+	PX_Object_DeleteLinkerObject(&pObject->pChilds);
 
-	PX_Object_ObjectFree(Object);
+	PX_Object_ObjectFree(pObject);
 
 	(*ppObject)=PX_NULL;
 }
@@ -523,7 +536,7 @@ px_void PX_ObjectDelete( PX_Object *pObject )
 			}
 			else
 			{
-				PX_ERROR("Invalid Object struct");
+				PX_ERROR("Invalid pObject struct");
 			}
 		}
 	}
@@ -782,19 +795,19 @@ px_bool PX_ObjectIsPointInRegion( PX_Object *pObject,px_float x,px_float y )
 		return PX_isXYInRegion(x,y,objx,objy,objw,objh);
 }
 
-px_bool PX_ObjectIsCursorInRegion(PX_Object *Object,PX_Object_Event e)
+px_bool PX_ObjectIsCursorInRegion(PX_Object *pObject,PX_Object_Event e)
 {
-	return PX_ObjectIsPointInRegion(Object,PX_Object_Event_GetCursorX(e),PX_Object_Event_GetCursorY(e));
+	return PX_ObjectIsPointInRegion(pObject,PX_Object_Event_GetCursorX(e),PX_Object_Event_GetCursorY(e));
 }
 
-px_float PX_ObjectGetHeight(PX_Object *Object)
+px_float PX_ObjectGetHeight(PX_Object *pObject)
 {
-	return Object->Height;
+	return pObject->Height;
 }
 
-px_float PX_ObjectGetWidth(PX_Object *Object)
+px_float PX_ObjectGetWidth(PX_Object *pObject)
 {
-	return Object->Width;
+	return pObject->Width;
 }
 
 px_void PX_ObjectAddChild(PX_Object *Parent,PX_Object *child)
@@ -831,7 +844,7 @@ px_void PX_ObjectInitialize(px_memorypool *mp,PX_Object *pObject,PX_Object *Pare
 	pObject->Enabled=PX_TRUE;
 	pObject->Visible=PX_TRUE;
 	pObject->pChilds=PX_NULL;
-	pObject->pObject=PX_NULL;
+	pObject->pObjectDesc=PX_NULL;
 	pObject->pNextBrother=PX_NULL;
 	pObject->pPreBrother=PX_NULL;
 	pObject->Type=PX_OBJECT_TYPE_NULL;
@@ -885,25 +898,25 @@ px_void PX_ObjectSetVisible( PX_Object *pObject,px_bool visible )
 }
 
 
-px_void PX_ObjectSetEnabled(PX_Object *Object,px_bool enabled)
+px_void PX_ObjectSetEnabled(PX_Object *pObject,px_bool enabled)
 {
-	Object->Enabled=enabled;
+	pObject->Enabled=enabled;
 }
 
-px_void PX_ObjectEnable(PX_Object *Object)
+px_void PX_ObjectEnable(PX_Object *pObject)
 {
-	Object->Enabled=PX_TRUE;
+	pObject->Enabled=PX_TRUE;
 }
 
-px_void PX_ObjectDisable(PX_Object *Object)
+px_void PX_ObjectDisable(PX_Object *pObject)
 {
-	Object->Enabled=PX_FALSE;
+	pObject->Enabled=PX_FALSE;
 }
 
-px_int PX_ObjectRegisterEvent( PX_Object *Object,px_uint Event,px_void (*ProcessFunc)(PX_Object *,PX_Object_Event e,px_void *user_ptr),px_void *user)
+px_int PX_ObjectRegisterEvent( PX_Object *pObject,px_uint Event,px_void (*ProcessFunc)(PX_Object *,PX_Object_Event e,px_void *user_ptr),px_void *user)
 {
 	PX_OBJECT_EventAction *pPoint;
-	PX_OBJECT_EventAction *pAction=(PX_OBJECT_EventAction *)MP_Malloc(Object->mp,sizeof(PX_OBJECT_EventAction));
+	PX_OBJECT_EventAction *pAction=(PX_OBJECT_EventAction *)MP_Malloc(pObject->mp,sizeof(PX_OBJECT_EventAction));
 	if (pAction==PX_NULL)
 	{
 		return PX_FALSE;
@@ -915,10 +928,10 @@ px_int PX_ObjectRegisterEvent( PX_Object *Object,px_uint Event,px_void (*Process
 	
 	pAction->user_ptr=user;
 
-	pPoint=Object->pEventActions;
+	pPoint=pObject->pEventActions;
 	if (pPoint==PX_NULL)
 	{
-		Object->pEventActions=pAction;
+		pObject->pEventActions=pAction;
 		return PX_TRUE;
 	}
 
@@ -1036,27 +1049,27 @@ px_void PX_ObjectPostEvent( PX_Object *pPost,PX_Object_Event Event )
 }
 
 
-px_void PX_ObjectSetPosition( PX_Object *Object,px_float x,px_float y,px_float z)
+px_void PX_ObjectSetPosition( PX_Object *pObject,px_float x,px_float y,px_float z)
 {
-	if (Object==PX_NULL)
+	if (pObject==PX_NULL)
 	{
 		PX_ASSERT();
 		return;
 	}
 
-	Object->x=x;
-	Object->y=y;
-	Object->z=z;
+	pObject->x=x;
+	pObject->y=y;
+	pObject->z=z;
 }
 
 
 
-px_void PX_ObjectSetSize( PX_Object *Object,px_float Width,px_float Height,px_float length)
+px_void PX_ObjectSetSize( PX_Object *pObject,px_float Width,px_float Height,px_float length)
 {
-	if (Object!=PX_NULL)
+	if (pObject!=PX_NULL)
 	{
-		Object->Width=Width;
-		Object->Height=Height;
+		pObject->Width=Width;
+		pObject->Height=Height;
 
 	}
 	else
@@ -1104,7 +1117,7 @@ px_void PX_ObjectSetParent(PX_Object* pObject, PX_Object* pParent)
 			}
 			else
 			{
-				PX_ERROR("Invalid Object struct");
+				PX_ERROR("Invalid pObject struct");
 			}
 		}
 	}

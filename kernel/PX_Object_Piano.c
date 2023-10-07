@@ -5,7 +5,7 @@ px_void PX_Object_PianoRender(px_surface* psurface, PX_Object* pObject, px_dword
 	px_int step=0, i,j=2;
 	px_float x,white_key_w,keyw, keyh;
 
-	PX_Object_Piano* pPiano = (PX_Object_Piano*)pObject->pObject;
+	PX_Object_Piano* pPiano = (PX_Object_Piano*)pObject->pObjectDesc;
 	const px_char* note_content[] = { "A","#A","B", "C","#C","D","#D","E","F","#F","G","#G", };
 	px_float objx, objy, objWidth, objHeight;
 	px_float inheritX, inheritY;
@@ -76,7 +76,7 @@ px_int PX_Object_PianoCursorInkeyIndex(PX_Object* pObject, px_float cursorx, px_
 	px_int step = 0, x,i, j = 2;
 	px_float  white_key_w, keyw, keyh;
 	px_int lastIndex = -1;
-	PX_Object_Piano* pPiano = (PX_Object_Piano*)pObject->pObject;
+	PX_Object_Piano* pPiano = (PX_Object_Piano*)pObject->pObjectDesc;
 	const px_char* note_content[] = { "A","#A","B", "C","#C","D","#D","E","F","#F","G","#G", };
 	px_float objx, objy, objWidth, objHeight;
 	px_float inheritX, inheritY;

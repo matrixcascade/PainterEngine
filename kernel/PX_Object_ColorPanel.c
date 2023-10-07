@@ -296,3 +296,48 @@ PX_Object* PX_Object_ColorPanelCreate(px_memorypool* mp, PX_Object* Parent, px_i
 	return pObject;
 }
 
+
+PX_Object* PX_Designer_ColorPanelCreate(px_memorypool* mp, PX_Object* pparent, px_float x, px_float y, px_float width, px_float height, px_void* ptr)
+{
+	return PX_Object_ColorPanelCreate(mp, pparent, (px_int)x, (px_int)y, 200, 200);
+}
+
+
+PX_Designer_ObjectDesc PX_Object_ColorPanelDesignerInstall()
+{
+	PX_Designer_ObjectDesc desc;
+	px_int i = 0;
+	PX_memset(&desc, 0, sizeof(desc));
+	PX_strcat(desc.Name, "colorpanel");
+
+	desc.createfunc = PX_Designer_ColorPanelCreate;
+	desc.type = PX_DESIGNER_OBJECT_TYPE_UI;
+
+	PX_strcat(desc.properties[i].Name, "id");
+	desc.properties[i].getstring = PX_Designer_GetID;
+	desc.properties[i].setstring = PX_Designer_SetID;
+	i++;
+
+	PX_strcat(desc.properties[i].Name, "x");
+	desc.properties[i].getfloat = PX_Designer_GetX;
+	desc.properties[i].setfloat = PX_Designer_SetX;
+	i++;
+
+	PX_strcat(desc.properties[i].Name, "y");
+	desc.properties[i].getfloat = PX_Designer_GetY;
+	desc.properties[i].setfloat = PX_Designer_SetY;
+	i++;
+
+	PX_strcat(desc.properties[i].Name, "width");
+	desc.properties[i].getfloat = PX_Designer_GetWidth;
+	desc.properties[i].setfloat = PX_Designer_SetWidth;
+	i++;
+
+	PX_strcat(desc.properties[i].Name, "height");
+	desc.properties[i].getfloat = PX_Designer_GetHeight;
+	desc.properties[i].setfloat = PX_Designer_SetHeight;
+	i++;
+
+	return desc;
+}
+

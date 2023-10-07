@@ -8,7 +8,7 @@
 #include "PX_Vector.h"
 #include "PX_Tuning.h"
 
-#define PX_SOUND_DEFAULT_PARALLEL 8
+#define PX_SOUND_DEFAULT_PARALLEL 4
 
 typedef enum
 {
@@ -32,8 +32,10 @@ typedef struct
 
 typedef struct
 {
-	px_int offset;
-	px_bool loop;
+	px_int roffset;
+	px_int woffset;
+	px_uint32 datasize;
+	px_bool pause;
 	PX_SoundData *data;
 }PX_Sound;
 
@@ -57,17 +59,40 @@ typedef struct
 px_bool PX_SoundPlayInitialize(px_memorypool *mp, PX_SoundPlay *pSoundPlay);
 px_void PX_SoundPlaySetUserRead(PX_SoundPlay *pSoundPlay,px_void (*userread)(px_void *userptr,px_byte *pBuffer,px_int readSize),px_void *ptr);
 px_void PX_SoundPlayPause(PX_SoundPlay *pSoundPlay,px_bool pause);
-px_bool PX_SoundPlayAdd(PX_SoundPlay *pSoundPlay,PX_Sound sound);
+px_int PX_SoundPlayAdd(PX_SoundPlay *pSoundPlay,PX_Sound sound);
+px_void PX_SoundPlaySetMixMode(PX_SoundPlay *pSoundPlay,PX_SOUND_MIX_MODE mode);
 px_bool PX_SoundPlayRead(PX_SoundPlay *pSoundPlay,px_byte *pBuffer,px_int readSize);
+px_void PX_SoundPlayRemove(PX_SoundPlay* pSoundPlay, px_int index);
 px_bool PX_SoundPlayReadCurrentPlayingData(PX_SoundPlay *pSoundPlay,px_int soundIndex,px_int channel,px_int16 *out,px_int count);
 px_void PX_SoundPlayFree(PX_SoundPlay *pSoundPlay);
 px_void PX_SoundPlayClear(PX_SoundPlay *pSoundPlay);
 px_float PX_SoundPlayGetCurrentAmplitude(PX_SoundPlay* pSoundPlay);
 px_int  PX_SoundPlayGetDataCount(PX_SoundPlay *pSoundPlay);
 PX_Sound PX_SoundCreate(PX_SoundData *data,px_bool loop);
+px_void PX_SoundPause(PX_SoundPlay* pSoundPlay,px_int index);
+px_void PX_SoundReset(PX_SoundPlay* pSoundPlay, px_int index);
+px_void PX_SoundResume(PX_SoundPlay* pSoundPlay, px_int index);
 PX_SoundData PX_SoundDataCreate(PX_SOUND_CHANNEL channel, px_byte* data, px_int datasize);
 px_int PX_SoundDataReadSamples(PX_SoundData* sounddata, px_int byte_offset, px_int readcount, px_float unit_out[], px_int channel);
-px_bool PX_SoundStaticDataCopy(px_memorypool* mp, PX_SoundData* resSounddata, PX_SoundData* targetSounddata);
-px_bool PX_SoundStaticDataCreate(PX_SoundData *sounddata,px_memorypool *mp,px_byte *data,px_int datasize);
-px_void PX_SoundStaticDataFree(PX_SoundData *sounddata);
+px_bool PX_SoundDataCopy(px_memorypool* mp, PX_SoundData* resSounddata, PX_SoundData* targetSounddata);
+px_bool PX_SoundDataCreateFromWavFileData(PX_SoundData *sounddata,px_memorypool *mp,px_byte *data,px_int datasize);
+px_void PX_SoundDataFree(PX_SoundData *sounddata);
+px_bool PX_SoundCircularWrite(PX_Sound* pSound, px_byte* pBuffer, px_int writeSize);
+px_bool PX_SoundCircularWriteSample(PX_Sound* pSound, px_short sample);
+
+typedef struct
+{
+	px_double in_sample_rate;
+	px_double out_sample_rate;
+	px_double step;
+	
+	px_double last;
+	px_double x;
+	px_double k;
+	px_int    in_count;
+}PX_SoundResampler;
+
+px_void PX_SoundResamplerInitialize(PX_SoundResampler *pResampler,px_double in_sample_rate,px_double out_sample_rate);
+px_void PX_SoundResamplerIn(PX_SoundResampler *pResampler, px_double in);
+px_bool PX_SoundResamplerOut(PX_SoundResampler* pResampler, px_double *out);
 #endif
