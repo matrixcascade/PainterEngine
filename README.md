@@ -1,5 +1,9 @@
 <p align="center"><a href="https://painterengine.com" target="_blank" rel="noopener noreferrer"><img src="images/title.png" alt="PainterEngine Title"></a></p>
 
+PainterEngine是一个由C语言编写的跨平台图形引擎,支持windows/linux/ios/android/webassembly甚至无操作系统的裸嵌入式平台,它基于组件化的设计模式,即使是C语言初学者,也可以在几分钟内掌握它的使用,PainterEngine Make允许您一键将您的PainterEngine项目编译到多个平台.
+
+PainterEngine is a cross-platform graphics engine written in C language, with support for Windows, Linux, iOS, Android, WebAssembly, and even bare-metal embedded platforms without operating systems. It is built on a component-based design pattern, making it accessible to even C language beginners who can grasp its usage in minutes. PainterEngine Make enables you to compile your PainterEngine project for multiple platforms with just one click.
+
 ## 30秒快速入门PainterEngine
 
 ## 30-Second Quick Start Guide to PainterEngine
