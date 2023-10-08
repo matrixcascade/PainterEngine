@@ -49,6 +49,31 @@ Use ["PainterEngine Make"](https://www.painterengine.com/) to quickly compile an
 
 <p align="center"><a href="https://www.painterengine.com/download/PainterEngine_make.zip" target="_blank" rel="noopener noreferrer"><img src="images/onekey.png" alt="PainterEngine make"></a></p>
 
+## 快速开发,无缝迁移
+## Swift development and smooth transitions
+
+如果您不需要PainterEngine Make提供的一键编译功能,希望使用自己常用的IDE开发PainterEngine程序或组件,您只需要:
+
+1. 将"PainterEngine/core","PainterEngine/kernel","PainterEngine/runtime"的所有代码,添加到您的项目中. 
+
+2. 将PainterEngine源码所在目录,添加到包含文件夹中. 
+
+3. 将您的代码添加进项目中.
+
+即可使用您的IDE完成PainterEngine的编译,PainterEngine库将尽力保证所有平台的的运行结果一致性,在windows上开发,同样在Android/web/linux/ios..中能够得到一致的结果.
+
+
+
+If you don't need the one-key compilation feature provided by PainterEngine Make and prefer to develop PainterEngine programs or components using your preferred IDE, you just need to:
+
+1. Add all the code from PainterEngine/core, PainterEngine/kernel, and PainterEngine/runtime to your project.
+
+2. Include the directory containing PainterEngine source code in your project's include directories.
+
+3. Add your code to the project.
+
+You can now use your IDE to compile PainterEngine with these steps. PainterEngine library will strive to ensure consistent results across all platforms. What you develop on Windows will yield consistent results on Android, web, Linux, iOS, and more."
+
 ## 不仅是图形库,更是应用程序框架
 
 ## Not just a graphics library but also an application framework.
