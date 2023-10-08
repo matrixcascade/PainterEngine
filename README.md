@@ -58,7 +58,7 @@ Use ["PainterEngine Make"](https://www.painterengine.com/) to quickly compile an
 
 2. 在PainterEngine/platform中选择您的工作平台(例如windows中选择PainterEngine/platform/windows),并将对应文件夹中的所有代码添加到您的项目中.
 
-3. 将PainterEngine源码所在目录,添加到包含文件夹中. 
+3. 将PainterEngine所在目录,添加到包含目录中. 
 
 4. 将您的代码添加进项目中.
 
