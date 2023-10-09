@@ -1,6 +1,6 @@
 #include "PainterEngine_Application.h"
 
-extern px_bool px_main();
+extern int px_main();
 //////////////////////////////////////////////////////////////////////////
 PX_Application App;
 PX_Object* root;

@@ -422,7 +422,7 @@ typedef struct __px_timestamp
 	px_int16 second;
 }px_timestamp;
 
-px_timestamp PX_TimeFormString(const px_char* t);
+px_timestamp PX_TimeFromString(const px_char* t);
 //////////////////////////////////////////////////////////////////////////
 //endian
 
@@ -431,16 +431,6 @@ px_dword PX_ntohl(px_dword n);
 px_word PX_htons(px_word h);
 px_word PX_ntohs(px_word n);
 
-
-//////////////////////////////////////////////////////////////////////////
-//
-px_double PX_exp(px_double x);
-
-//////////////////////////////////////////////////////////////////////////
-//functions
-px_double PX_tanh(px_double x);
-px_double PX_sigmoid(px_double x);
-px_double PX_ReLU(px_double x);
 
 //////////////////////////////////////////////////////////////////////////
 //PMMCLCG
@@ -471,6 +461,11 @@ px_uint32 PX_sum32(px_void *buffer, px_uint size);
 
 //////////////////////////////////////////////////////////////////////////
 //maths
+
+px_double PX_tanh(px_double x);
+px_double PX_sigmoid(px_double x);
+px_double PX_ReLU(px_double x);
+
 px_int	PX_pow_ii(px_int i,px_int n);
 px_double PX_pow(px_double num,px_double m);
 px_float PX_sqrt( px_float number );
@@ -484,6 +479,7 @@ px_double PX_log10(px_double __x);
 #define  PX_RadianToAngle(radian) ((radian)*180/PX_PI)
 #define  PX_AngleToRadian(angle) ((angle)*PX_PI/180)
 
+px_double PX_exp(px_double x);
 px_double PX_tand(px_double radian);
 px_double PX_sind(px_double radian);
 px_double PX_sinc(px_double i);

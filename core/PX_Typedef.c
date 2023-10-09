@@ -4788,7 +4788,7 @@ px_bool PX_IsValidIPAddress(const px_char *ip_addr)
 	return PX_TRUE;
 }
 
-px_timestamp PX_TimeFormString(const px_char* t)
+px_timestamp PX_TimeFromString(const px_char* t)
 {
 	px_timestamp time = { 0 };
 	px_char data[20] = { 0 };

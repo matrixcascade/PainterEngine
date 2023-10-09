@@ -4,9 +4,11 @@ target :=PainterEngine
 project_path := ../../project
 painterengine_path := ../..
 #####################################################
-
 project_build := $(wildcard $(project_path)/*.c)
+project_build_cpp = $(wildcard $(project_path)/*.cpp)
+
 project_build_o := $(patsubst %.c,%.o,$(project_build))
+project_build_o += $(patsubst %.cpp,%.o,$(project_build_cpp))
 
 painterengine_build_core := $(wildcard $(painterengine_path)/core/*.c)
 painterengine_build_painterengine_o := $(patsubst %.c,%.o,$(painterengine_build_core))
@@ -33,6 +35,9 @@ all:$(project_build_o)  $(painterengine_build_painterengine_o)
 	
 
 $(project_path)/%.o:$(project_path)/%.c
+	gcc -c $^ -o $@ -I "$(painterengine_path)" -I "$(painterengine_path)/platform/linux"
+
+$(project_path)/%.o:$(project_path)/%.cpp
 	gcc -c $^ -o $@ -I "$(painterengine_path)" -I "$(painterengine_path)/platform/linux"
 
 $(painterengine_path)/runtime/%.o:$(painterengine_path)/runtime/%.c 
