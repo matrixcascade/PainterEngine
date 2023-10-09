@@ -8,7 +8,7 @@ PainterEngine is a cross-platform graphics engine written in C language, with su
 
 ## 30-Second Quick Start Guide to PainterEngine
 
-将PainterEngine引入到您的项目中,仅仅需要"#include "PainterEngine.h"
+将PainterEngine引入到您的C/C++项目中,仅仅需要"#include "PainterEngine.h"
 
 To incorporate PainterEngine into your project, all you need is 
 ```c
