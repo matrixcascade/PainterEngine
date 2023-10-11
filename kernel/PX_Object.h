@@ -105,6 +105,7 @@ enum PX_OBJECT_TYPE
   PX_OBJECT_TYPE_SOUNDVIEW		,
   PX_OBJECT_TYPE_LIVE2D			,
   PX_OBJECT_TYPE_FIREWORK		,
+  PX_OBJECT_TYPE_MATRIXEFFECT   ,
 };
 
 
@@ -636,6 +637,10 @@ px_void PX_Designer_SetEnable(PX_Object* pObject, px_bool v);
 /////////////////////////////////////////////////////////////////////////
 //Firework
 #include "PX_Object_Firework.h"
+
+//////////////////////////////////////////////////////////////////////////
+//MatrixEffect
+#include "PX_Object_MatrixEffect.h"
 
 #endif
 
