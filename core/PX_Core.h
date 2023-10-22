@@ -15,6 +15,7 @@
 #include "PX_Font.h"
 #include "PX_String.h"
 #include "PX_Memory.h"
+#include "PX_Mp3.h"
 #include "PX_Hashmap.h"
 #include "PX_Vector.h"
 #include "PX_List.h"

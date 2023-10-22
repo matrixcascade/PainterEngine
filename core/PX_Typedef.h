@@ -915,4 +915,20 @@ px_bool PX_MemoryStreamIsEnd(PX_MemoryStream* pStream);
 px_double PX_MelToHz(px_double mel);
 px_double PX_HzToMel(px_double hz);
 
+typedef struct
+{
+	px_double in_sample_rate;
+	px_double out_sample_rate;
+	px_double step;
+
+	px_double last;
+	px_double x;
+	px_double k;
+	px_int    in_count;
+}PX_SoundResampler;
+
+px_void PX_SoundResamplerInitialize(PX_SoundResampler* pResampler, px_double in_sample_rate, px_double out_sample_rate);
+px_void PX_SoundResamplerIn(PX_SoundResampler* pResampler, px_double in);
+px_bool PX_SoundResamplerOut(PX_SoundResampler* pResampler, px_double* out);
+
 #endif

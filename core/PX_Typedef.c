@@ -5619,3 +5619,32 @@ px_double PX_HzToMel(px_double hz)
 {
 	return 2595 * PX_log10(1 + hz / 700);
 }
+
+px_void PX_SoundResamplerInitialize(PX_SoundResampler* pResampler, px_double in_sample_rate, px_double out_sample_rate)
+{
+	PX_memset(pResampler, 0, sizeof(PX_SoundResampler));
+	pResampler->in_sample_rate = in_sample_rate;
+	pResampler->out_sample_rate = out_sample_rate;
+	pResampler->x = 1;
+	pResampler->step = in_sample_rate / out_sample_rate;
+}
+
+px_void PX_SoundResamplerIn(PX_SoundResampler* pResampler, px_double in)
+{
+	if (pResampler->x >= 1)
+	{
+		pResampler->k = in - pResampler->last;
+		pResampler->last = in;
+		pResampler->x -= 1;
+	}
+}
+px_bool PX_SoundResamplerOut(PX_SoundResampler* pResampler, px_double* out)
+{
+	if (pResampler->x < 1)
+	{
+		*out = pResampler->last + pResampler->x * pResampler->k;
+		pResampler->x += pResampler->step;
+		return PX_TRUE;
+	}
+	return PX_FALSE;
+}

@@ -12,7 +12,7 @@
 
 typedef enum
 {
-	PX_SOUND_CHANNEL_ONE,
+	PX_SOUND_CHANNEL_ONE=1,
 	PX_SOUND_CHANNEL_DOUBLE
 }PX_SOUND_CHANNEL;
 
@@ -80,19 +80,5 @@ px_void PX_SoundDataFree(PX_SoundData *sounddata);
 px_bool PX_SoundCircularWrite(PX_Sound* pSound, px_byte* pBuffer, px_int writeSize);
 px_bool PX_SoundCircularWriteSample(PX_Sound* pSound, px_short sample);
 
-typedef struct
-{
-	px_double in_sample_rate;
-	px_double out_sample_rate;
-	px_double step;
-	
-	px_double last;
-	px_double x;
-	px_double k;
-	px_int    in_count;
-}PX_SoundResampler;
 
-px_void PX_SoundResamplerInitialize(PX_SoundResampler *pResampler,px_double in_sample_rate,px_double out_sample_rate);
-px_void PX_SoundResamplerIn(PX_SoundResampler *pResampler, px_double in);
-px_bool PX_SoundResamplerOut(PX_SoundResampler* pResampler, px_double *out);
 #endif
