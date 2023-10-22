@@ -87,6 +87,7 @@ You can now use your IDE to compile PainterEngine with these steps. PainterEngin
 | 内存池                 | alloc/free                                                   | 平台无关的内存池实现                              |
 | 数据结构               | vector/list/map/stack/fifo/circular-buffer...                | 平台无关的数据结构算法实现                          |
 | 图片支持               | PNG/JPG/GIF/BMP                                              | 支持PNG/JPG/GIF/BMP解码及PNG编码.           |
+| 音频支持               | WAV/MP3                                              | 支持Wav,Mp3解码.及Wav编码|
 | 几何绘制               | Line/Triangle/Rectangle/Circle/Ring/Sector/Rounded.....      | 常用几何光栅化实现                                                                 |
 | 渲染器                | 2D/3D                                                        | 2D 3D渲染器实现及一个高质量制图引擎                                                 |
 | 动画                  | 2dx/live2D                                                   | 2D 动画和一个类Live2D 骨骼动画系统                                                  |
@@ -107,6 +108,7 @@ You can now use your IDE to compile PainterEngine with these steps. PainterEngin
 | memorypool            | alloc/free                                                   | Platform-agnostic memory management implementation.                               |
 | Data structures       | vector/list/map/stack/fifo/circular-buffer...                | Platform-agnostic common data structures and algorithms.                          |
 | image codec           | PNG/JPG/GIF/BMP                                              | Supports decoding of PNG/JPG/GIF/BMP images and encoding of PNG images.           |
+| audio codec           | Wav/Mp3                                              | Supports decoding of Wav/Mp3 and encoding of Wav.           |
 | Geometric             | Line/Triangle/Rectangle/Circle/Ring/Sector/Rounded.....      | Geometric rasterization                                                           |
 | Renderer              | 2d/3d                                                        | Implementation of a 2D/3D software renderer. A painting  engine.                  |
 | sound                 | mixer/piano/ks                                               | Includes an implementation of a mixer, a physically-modeled piano and Karplus-Strong string synthesis. Direct synthesis of PCM audio streams.|
