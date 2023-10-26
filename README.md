@@ -85,13 +85,15 @@ You can now use your IDE to compile PainterEngine with these steps. PainterEngin
 | functions             | support                                                      | Description                                                                       |
 | --------------------- | ------------------------------------------------------------ | ------------------------------------------------------------------------          |
 | 内存池                 | alloc/free                                                   | 平台无关的内存池实现                              |
-| 数据结构               | vector/list/map/stack/fifo/circular-buffer...                | 平台无关的数据结构算法实现                          |
+| 数学库               | sin/cos/tan/arsin/log/exp/relu....                | 绝大部分c标准数学库的完整实现                          |
+| 信号处理               | dft/dct/fft/dwt/window functions/mfcc/....                | 傅里叶/余弦/小波变换,常用窗函数,mfcc等特征采集算法...等等信号处理相关基础函数及上层特征采集算法                         |
+| 数据结构               | string/vector/list/map/stack/fifo/circular-buffer...                | 平台无关的数据结构算法实现                          |
 | 图片支持               | PNG/JPG/GIF/BMP                                              | 支持PNG/JPG/GIF/BMP解码及PNG编码.           |
 | 音频支持               | WAV/MP3                                              | 支持Wav,Mp3解码.及Wav编码|
 | 几何绘制               | Line/Triangle/Rectangle/Circle/Ring/Sector/Rounded.....      | 常用几何光栅化实现                                                                 |
 | 渲染器                | 2D/3D                                                        | 2D 3D渲染器实现及一个高质量制图引擎                                                 |
 | 动画                  | 2dx/live2D                                                   | 2D 动画和一个类Live2D 骨骼动画系统                                                  |
-| 声学模型               | mixer/piano/ks                                               | 包含一个混音器实现,一个物理建模的钢琴及karplus-strong合成的拨弦模型,直接合成PCM音频流   |
+| 声学模型               | mixer/piano/ks                                               | 包含一个混音器实现,一个相位声码器,一个物理建模的钢琴及karplus-strong合成的拨弦模型,直接合成PCM音频流   |
 | 脚本引擎               | Compiler/VM/Debugger                                         | A一个完整的脚本引擎,包含编译器虚拟机调试器                                           |
 | UI框架                 | button/radio/image/edit/label/list....                       | UI框架实现                                                                        |
 | 协议                   | MQTT/MODBUS/Game-network-synchronization                     | 常用的通讯协议                                                                    |
@@ -106,12 +108,14 @@ You can now use your IDE to compile PainterEngine with these steps. PainterEngin
 | functions             | support                                                      | Description                                                                       |
 | --------------------- | ------------------------------------------------------------ | ------------------------------------------------------------------------          |
 | memorypool            | alloc/free                                                   | Platform-agnostic memory management implementation.                               |
-| Data structures       | vector/list/map/stack/fifo/circular-buffer...                | Platform-agnostic common data structures and algorithms.                          |
+| math               | sin/cos/tan/arsin/log/exp/relu....                | The complete implementation of the vast majority of C standard math libraries.                          |
+| signal processing     | dft/dct/fft/dwt/window functions/mfcc/....                | Fourier/Cosine/Wavelet Transform, common window functions, MFCC (Mel-Frequency Cepstral Coefficients), and other signal processing fundamental functions and higher-level feature extraction algorithms, etc.                         |
+| Data structures       | string/vector/list/map/stack/fifo/circular-buffer...                | Platform-agnostic common data structures and algorithms.                          |
 | image codec           | PNG/JPG/GIF/BMP                                              | Supports decoding of PNG/JPG/GIF/BMP images and encoding of PNG images.           |
 | audio codec           | Wav/Mp3                                              | Supports decoding of Wav/Mp3 and encoding of Wav.           |
 | Geometric             | Line/Triangle/Rectangle/Circle/Ring/Sector/Rounded.....      | Geometric rasterization                                                           |
 | Renderer              | 2d/3d                                                        | Implementation of a 2D/3D software renderer. A painting  engine.                  |
-| sound                 | mixer/piano/ks                                               | Includes an implementation of a mixer, a physically-modeled piano and Karplus-Strong string synthesis. Direct synthesis of PCM audio streams.|
+| sound                 | VC codec/mixer/piano/ks                                               | Includes an implementation of a VC(voice conversion), a mixer, a physically-modeled piano and Karplus-Strong string synthesis. Direct synthesis of PCM audio streams.|
 | Animation             | 2dx/live2D                                                   | 2D frame-by-frame animation and a Live2D-style animation system.                  |
 | PainterScript         | Compiler/VM/Debugger                                         | A complete scripting engine, including a compiler, virtual machine, and debugger. |
 | UI                    | button/radio/image/edit/label/list....                       | Implementation of common UI controls.                                             |
