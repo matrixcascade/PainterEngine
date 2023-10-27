@@ -131,6 +131,7 @@ PX_Object * PX_Object_PushButtonCreate(px_memorypool *mp,PX_Object *Parent,px_in
 	pPushButton->style=PX_OBJECT_PUSHBUTTON_STYLE_RECT;
 	pPushButton->roundradius=PX_OBJECT_PUSHBUTTON_ROUNDRADIUS;
 	pPushButton->shape=PX_NULL;
+	pPushButton->gif = PX_NULL;
 	pPushButton->Texture=PX_NULL;
 	pPushButton->fontModule=fontmodule;
 
@@ -281,6 +282,15 @@ px_void PX_Object_PushButtonSetShape(PX_Object *pObject,px_shape *pshape)
 	}
 }
 
+px_void PX_Object_PushButtonSetGif(PX_Object* pObject, px_gif* gif)
+{
+	PX_Object_PushButton* pPushButton = PX_Object_GetPushButton(pObject);
+	if (pPushButton)
+	{
+		pPushButton->gif = gif;
+	}
+}
+
 px_void PX_Object_PushButtonSetBorderColor( PX_Object *pObject,px_color Color )
 {
 	PX_Object_PushButton * pPushButton=PX_Object_GetPushButton(pObject);
@@ -386,6 +396,7 @@ px_void PX_Object_PushButtonRender(px_surface *psurface, PX_Object *pObject,px_u
 			PX_GeoDrawRect(psurface,(px_int)objx,(px_int)objy,(px_int)objx+(px_int)objWidth-1,(px_int)objy+(px_int)objHeight-1,pPushButton->PushColor);
 			break;
 		case PX_OBJECT_BUTTON_STATE_ONCURSOR:
+
 			PX_GeoDrawRect(psurface,(px_int)objx,(px_int)objy,(px_int)objx+(px_int)objWidth-1,(px_int)objy+(px_int)objHeight-1,pPushButton->CursorColor);
 			break;
 		}
@@ -425,7 +436,23 @@ px_void PX_Object_PushButtonRender(px_surface *psurface, PX_Object *pObject,px_u
 	}
 
 
-
+	if (pPushButton->gif)
+	{
+		switch (pPushButton->state)
+		{
+		case PX_OBJECT_BUTTON_STATE_NORMAL:
+			if (pPushButton->gif->roffset!=0)
+			{
+				PX_GifReset(pPushButton->gif);
+			}
+			break;
+		case PX_OBJECT_BUTTON_STATE_ONPUSH:
+		case PX_OBJECT_BUTTON_STATE_ONCURSOR:
+			PX_GifUpdate(pPushButton->gif, elapsed);
+			break;
+		}
+		pPushButton->Texture = PX_GifGetTexture(pPushButton->gif);
+	}
 
 	if (pPushButton->Texture)
 	{

@@ -657,6 +657,13 @@ px_void PX_GifUpdate(px_gif* gif, px_dword elapsed)
     }
 }
 
+px_void PX_GifReset(px_gif* gif)
+{
+    gif->elapsed = 0;
+    px_gif_rewind(gif);
+    px_gif_get_frame(gif);
+}
+
 
 px_int px_gif_is_bgcolor(px_gif *gif, px_byte color[3])
 {

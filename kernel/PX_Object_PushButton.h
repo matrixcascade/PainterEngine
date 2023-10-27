@@ -34,6 +34,7 @@ typedef struct
 	PX_FontModule *fontModule;
 	px_texture *Texture;
 	px_shape *shape;
+	px_gif* gif;
 	px_float roundradius;
 	PX_OBJECT_PUSHBUTTON_STYLE style;
 	PX_Object_PUSHBUTTON_STATE state;
@@ -55,6 +56,7 @@ px_void PX_Object_PushButtonRender(px_surface *psurface, PX_Object *pObject,px_u
 px_void PX_Object_PushButtonSetTextColor( PX_Object *pObject,px_color Color );
 px_void PX_Object_PushButtonSetTexture(PX_Object *pObject,px_texture *texture);
 px_void PX_Object_PushButtonSetShape(PX_Object *pObject,px_shape *pshape);
+px_void PX_Object_PushButtonSetGif(PX_Object* pObject, px_gif* gif);
 px_void PX_Object_PushButtonFree( PX_Object *pObject );
 
 px_void PX_Object_PushButtonSetRoundRadius(PX_Object* pObject, px_float RoundRadius);

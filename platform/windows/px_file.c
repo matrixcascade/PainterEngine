@@ -458,6 +458,7 @@ char* PX_SaveFileDialog(const char Filter[], const char ext[])
 	return NULL;
 }
 
+px_char PX_RequestData_Extern[128] = {0};
 
 void PX_RequestData(const char url[], void* buffer, int size, void* ptr, void (*func_callback)(void* buffer, int size, void* ptr))
 {
@@ -469,6 +470,7 @@ void PX_RequestData(const char url[], void* buffer, int size, void* ptr, void (*
 			PX_IO_Data io = PX_LoadFileToIOData(ppath);
 			if (io.size > 0 && io.buffer && io.size <= (unsigned int)size)
 			{
+				PX_FileGetName(ppath, PX_RequestData_Extern, sizeof(PX_RequestData_Extern));
 				memcpy(buffer, io.buffer, io.size);
 				func_callback(buffer, io.size, ptr);
 			}

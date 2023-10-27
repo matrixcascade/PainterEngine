@@ -202,6 +202,10 @@ static px_void PX_Object_MessageBoxRender(px_surface *pSurface,PX_Object *pObjec
 px_void PX_Object_MessageBoxAlertOk(PX_Object *pObject,const px_char *message,PX_Object_MessageBoxCallBack func_callback,px_void *ptr)
 {
 	PX_Object_MessageBox *pm=PX_Object_GetMessageBox(pObject);
+	if (!pm)
+	{
+		return;
+	}
 	pm->function_yes=func_callback;
 	pm->function_yes_ptr=ptr;
 

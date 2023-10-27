@@ -283,11 +283,8 @@ void setCurrentDirectory()
 	SetCurrentDirectoryA(path);
 }
 
-#ifdef _DEBUG
 	int main()
-#else
-	int WINAPI WinMain( __in HINSTANCE hInstance, __in_opt HINSTANCE hPrevInstance, __in LPSTR lpCmdLine, __in int nShowCmd )
-#endif
+//	int WINAPI WinMain( __in HINSTANCE hInstance, __in_opt HINSTANCE hPrevInstance, __in LPSTR lpCmdLine, __in int nShowCmd )
 {
 	HANDLE hThread;
 	DWORD  threadId;

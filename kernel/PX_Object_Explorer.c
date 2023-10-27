@@ -623,7 +623,7 @@ px_void PX_Object_ExplorerGetPath(PX_Object *pObject,px_char path[PX_EXPLORER_MA
 	if (pExp->savemode)
 	{
 		PX_strcpy(path, PX_Object_EditGetText(pExp->edit_Path), PX_EXPLORER_MAX_PATH_LEN);
-		if(path[0])
+		if(path[0]&&path[PX_strlen(path)-1]!='\\'&&path[PX_strlen(path) - 1] != '/')
 			PX_strcat(path, "/");
 		PX_strcat(path, PX_Object_EditGetText(pExp->edit_FileName));
 	}

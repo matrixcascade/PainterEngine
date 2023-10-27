@@ -47,6 +47,7 @@ typedef struct _px_gif
 
 px_bool PX_GifCreate(px_memorypool* mp, px_gif* pgif,px_void *buffer,px_int size);
 px_void PX_GifUpdate(px_gif *gif,px_dword elapsed);
+px_void PX_GifReset(px_gif *gif);
 px_void PX_GifFree(px_gif *gif);
 px_void PX_GifSetLoop(px_gif *gif,px_bool loop);
 px_texture *PX_GifGetTexture(px_gif *gif);
