@@ -1,8 +1,10 @@
 <p align="center"><a href="https://painterengine.com" target="_blank" rel="noopener noreferrer"><img src="images/title.png" alt="PainterEngine Title"></a></p>
 
 PainterEngine是一个由C语言编写的跨平台图形引擎,支持windows/linux/ios/android/webassembly甚至无操作系统的裸嵌入式平台,它基于组件化的设计模式,即使是C语言初学者,也可以在几分钟内掌握它的使用,[PainterEngine Make](https://www.painterengine.com/)允许您一键将您的PainterEngine项目编译到多个平台.
+它涵盖了基础数据结构、图形学、声学、数字信号处理、编译原理、虚拟机系统、密码学、人机交互、游戏引擎等多个领域，你既可以用它制作微应用，也可以将它作为学习项目。
 
 PainterEngine is a cross-platform graphics engine written in C language, with support for Windows, Linux, iOS, Android, WebAssembly, and even bare-metal embedded platforms without OS. It is built on a component-based design pattern, making it accessible to even C language beginners . [PainterEngine Make](https://www.painterengine.com/) enables you to compile your PainterEngine project for multiple platforms with just one click.
+It covers various fields including basic data structures, graphics, acoustics, digital signal processing, compiler design, virtual machine systems, cryptography, human-computer interaction, game engines, and more. You can use it to create mini-applications or as a learning project for acquiring knowledge.
 
 ## 30秒快速入门PainterEngine
 
@@ -85,9 +87,10 @@ You can now use your IDE to compile PainterEngine with these steps. PainterEngin
 | functions             | support                                                      | Description                                                                       |
 | --------------------- | ------------------------------------------------------------ | ------------------------------------------------------------------------          |
 | 内存池                 | alloc/free                                                   | 平台无关的内存池实现                              |
-| 数学库               | sin/cos/tan/arsin/log/exp/relu....                | 绝大部分c标准数学库的完整实现                          |
+| 数学库               | sin/cos/tan/arcsin/log/exp/relu....                | 绝大部分c标准数学库的完整实现                          |
 | 信号处理               | dft/dct/fft/dwt/window functions/mfcc/....                | 傅里叶/余弦/小波变换,常用窗函数,mfcc等特征采集算法...等等信号处理相关基础函数及上层特征采集算法                         |
 | 数据结构               | string/vector/list/map/stack/fifo/circular-buffer...                | 平台无关的数据结构算法实现                          |
+| 密码学               | curve25519/AES/SHAx/MD5...                | 包含常用的密钥对称算法及密钥协商算法                          |
 | 图片支持               | PNG/JPG/GIF/BMP                                              | 支持PNG/JPG/GIF/BMP解码及PNG编码.           |
 | 音频支持               | WAV/MP3                                              | 支持Wav,Mp3解码.及Wav编码|
 | 几何绘制               | Line/Triangle/Rectangle/Circle/Ring/Sector/Rounded.....      | 常用几何光栅化实现                                                                 |
@@ -108,9 +111,10 @@ You can now use your IDE to compile PainterEngine with these steps. PainterEngin
 | functions             | support                                                      | Description                                                                       |
 | --------------------- | ------------------------------------------------------------ | ------------------------------------------------------------------------          |
 | memorypool            | alloc/free                                                   | Platform-agnostic memory management implementation.                               |
-| math               | sin/cos/tan/arsin/log/exp/relu....                | The complete implementation of the vast majority of C standard math libraries.                          |
+| math               | sin/cos/tan/arcsin/log/exp/relu....                | The complete implementation of the vast majority of C standard math libraries.                          |
 | signal processing     | dft/dct/fft/dwt/window functions/mfcc/....                | Fourier/Cosine/Wavelet Transform, common window functions, MFCC (Mel-Frequency Cepstral Coefficients), and other signal processing fundamental functions and higher-level feature extraction algorithms, etc.                         |
 | Data structures       | string/vector/list/map/stack/fifo/circular-buffer...                | Platform-agnostic common data structures and algorithms.                          |
+| Cryptography          | curve25519/AES/SHAx/MD5...                | This includes commonly used symmetric key algorithms and key exchange algorithms.                          |
 | image codec           | PNG/JPG/GIF/BMP                                              | Supports decoding of PNG/JPG/GIF/BMP images and encoding of PNG images.           |
 | audio codec           | Wav/Mp3                                              | Supports decoding of Wav/Mp3 and encoding of Wav.           |
 | Geometric             | Line/Triangle/Rectangle/Circle/Ring/Sector/Rounded.....      | Geometric rasterization                                                           |
