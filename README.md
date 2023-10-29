@@ -51,7 +51,7 @@ Use ["PainterEngine Make"](https://www.painterengine.com/) to quickly compile an
 
 <p align="center"><a href="https://cdn.painterengine.com/PainterEngine_make.zip" target="_blank" rel="noopener noreferrer"><img src="images/pemake.png" alt="PainterEngine make"></a></p>
 
-<p align="center"><a href="https://cdn.painterengine.com/PainterEngine_make_en.zip" target="_blank" rel="noopener noreferrer"><img src="images/pemake_en.png" alt="PainterEngine make"></a></p>
+<p align="center"><a href="https://cdn.painterengine.com/PainterEngine_make_en.zip" target="_blank" rel="noopener noreferrer"><img src="images/pemakeen.png" alt="PainterEngine make"></a></p>
 
 ## 快速开发,无缝迁移
 ## Swift development and smooth transitions
