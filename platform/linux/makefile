@@ -31,14 +31,15 @@ all:$(project_build_o)  $(painterengine_build_painterengine_o)
 	-I "$(painterengine_path)" \
 	-I "$(project_path)" \
 	-I "$(painterengine_path)/platform/linux" \
+	-I "$(painterengine_path)/runtime" \
 	-L. -lGL -lglut -lpthread
 	
 
 $(project_path)/%.o:$(project_path)/%.c
-	gcc -c $^ -o $@ -I "$(painterengine_path)" -I "$(painterengine_path)/platform/linux"
+	gcc -c $^ -o $@ -I "$(painterengine_path)" -I "$(painterengine_path)/platform/linux" -I "$(painterengine_path)/runtime"
 
 $(project_path)/%.o:$(project_path)/%.cpp
-	gcc -c $^ -o $@ -I "$(painterengine_path)" -I "$(painterengine_path)/platform/linux"
+	gcc -c $^ -o $@ -I "$(painterengine_path)" -I "$(painterengine_path)/platform/linux" -I "$(painterengine_path)/runtime"
 
 $(painterengine_path)/runtime/%.o:$(painterengine_path)/runtime/%.c 
 	gcc -c $^ -o $@ -I "$(painterengine_path)"
@@ -50,7 +51,7 @@ $(painterengine_path)/core/%.o:$(painterengine_path)/core/%.c
 	gcc -c $^ -o $@
 
 $(painterengine_path)/platform/linux/%.o:$(painterengine_path)/platform/linux/%.c
-	gcc -c $^ -o $@ -I "$(project_path)" -I "$(painterengine_path)" -I "$(painterengine_path)/platform/linux"
+	gcc -c $^ -o $@ -I "$(project_path)" -I "$(painterengine_path)" -I "$(painterengine_path)/platform/linux" -I "$(painterengine_path)/runtime"
 
 
 	
