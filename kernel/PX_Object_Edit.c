@@ -43,7 +43,7 @@ px_void PX_Object_EditGetCursorXY(PX_Object *pObject, px_int *cx, px_int *cy, px
 		{
 			px_dword code;
 			px_int width, height;
-			fsize = PX_FontModuleGetCharacterDesc(pEdit->fontModule, Text + cursor, &code, &width, &height);
+			fsize = PX_FontModuleGetOneCharacterDesc(pEdit->fontModule, Text + cursor, &code, &width, &height);
 			if (!fsize)
 			{
 				break;
@@ -477,7 +477,7 @@ px_void PX_Object_EditUpdateCursorOnDown(PX_Object *pObject,px_int cx,px_int cy)
 		{
 			px_dword code;
 			px_int width,height;
-			fsize=PX_FontModuleGetCharacterDesc(pEdit->fontModule,Text+cursor,&code,&width,&height);
+			fsize=PX_FontModuleGetOneCharacterDesc(pEdit->fontModule,Text+cursor,&code,&width,&height);
 			if (!fsize)
 			{
 				break;
@@ -642,7 +642,7 @@ px_void PX_Object_EditRender(px_surface *psurface, PX_Object *pObject,px_uint el
 			{
 				if (pEdit->fontModule)
 				{
-					PX_GeoDrawRect(&pEdit->EditSurface,x_draw_oft+1,y_draw_oft,x_draw_oft,y_draw_oft+pEdit->fontModule->max_Height-2,pEdit->TextColor);
+					PX_GeoDrawRect(&pEdit->EditSurface,x_draw_oft+1,y_draw_oft,x_draw_oft,y_draw_oft+pEdit->fontModule->max_Height-1,pEdit->TextColor);
 				}
 				else
 				{
@@ -657,7 +657,7 @@ px_void PX_Object_EditRender(px_surface *psurface, PX_Object *pObject,px_uint el
 		{
 			px_dword code;
 			px_int width,height;
-			fsize=PX_FontModuleGetCharacterDesc(pEdit->fontModule,Text+cursor,&code,&width,&height);
+			fsize=PX_FontModuleGetOneCharacterDesc(pEdit->fontModule,Text+cursor,&code,&width,&height);
 			if (!fsize)
 			{
 				break;
@@ -994,6 +994,15 @@ px_void PX_Object_EditSetInputMode(PX_Object* pObject, PX_OBJECT_EDIT_INPUT_MODE
 	if (pEdit != PX_NULL)
 	{
 		pEdit->inputmode = mode;
+	}
+}
+
+px_void PX_Object_EditSetMultiLines(PX_Object* pObject, px_bool b)
+{
+	PX_Object_Edit* pEdit = PX_Object_GetEdit(pObject);
+	if (pEdit != PX_NULL)
+	{
+		pEdit->multiLines = b;
 	}
 }
 
