@@ -70,9 +70,6 @@ px_bool PX_ExecuterVM_Print(PX_VM *Ins,px_void *userptr)
 }
 
 
-
-
-
 px_bool PX_ExecuterVM_Sleep(PX_VM *Ins,px_void *userptr)
 {
 	PX_Object* pObject = (PX_Object*)userptr;
@@ -155,6 +152,32 @@ px_bool PX_ExecuterVM_CreateThread(PX_VM *Ins,px_void *userptr)
 	return PX_TRUE;
 }
 
+px_bool PX_Object_ExecuterRunPayload(PX_Object* pObject, const px_byte bin[],px_int binsize)
+{
+	PX_Object_Executer* pExecute = PX_ObjectGetDesc(PX_Object_Executer, pObject);
+
+	if (!PX_VMInitialize(&pExecute->vm, pObject->mp, bin, binsize))
+	{
+		return PX_FALSE;
+	}
+
+	PX_VMRegistHostFunction(&pExecute->vm, "print", PX_ExecuterVM_Print, pObject);//Print
+	PX_VMRegistHostFunction(&pExecute->vm, "gets", PX_ExecuterVM_Gets, pObject);//Gets
+	PX_VMRegistHostFunction(&pExecute->vm, "clear", PX_ExecuterVM_Clear, pObject);//Clear
+	PX_VMRegistHostFunction(&pExecute->vm, "sleep", PX_ExecuterVM_Sleep, pObject);//Sleep
+	PX_VMRegistHostFunction(&pExecute->vm, "rand", PX_ExecuterVM_Rand, pObject);//Rand
+	PX_VMRegistHostFunction(&pExecute->vm, "sin", PX_ExecuterVM_Sin, pObject);//Sin
+	PX_VMRegistHostFunction(&pExecute->vm, "cos", PX_ExecuterVM_Cos, pObject);//Cos
+	PX_VMRegistHostFunction(&pExecute->vm, "lastprint", PX_ExecuterVM_LastPrint, pObject);//lastprint
+	PX_VMRegistHostFunction(&pExecute->vm, "createthread", PX_ExecuterVM_CreateThread, pObject);//createthread
+
+	if (!PX_VMBeginThreadFunction(&pExecute->vm, 0, "main", PX_NULL, 0))
+	{
+		PX_VMFree(&pExecute->vm);
+		return PX_FALSE;
+	}
+	return PX_TRUE;
+}
 
 static px_bool PX_Object_ExecuterRunScript(PX_Object *pObject,const px_char *pshellstr)
 {
@@ -187,31 +210,14 @@ static px_bool PX_Object_ExecuterRunScript(PX_Object *pObject,const px_char *psh
 	if (!PX_CompilerAddSource(&compiler, pshellstr))	goto _ERROR;
 	if (!PX_CompilerCompile(&compiler, &bin, &pExecute->debugmap, "main"))goto _ERROR;
 
+	PX_CompilerFree(&compiler);
+	PX_memset(&compiler, 0, sizeof(compiler));
 	//Load
-	if(!PX_VMInitialize(&pExecute->vm,pObject->mp,bin.buffer,bin.usedsize))
+	if (!PX_Object_ExecuterRunPayload(pObject, bin.buffer, bin.usedsize))
 	{
 		goto _ERROR;
 	}
 	PX_MemoryFree(&bin);
-	PX_CompilerFree(&compiler);
-	PX_memset(&compiler, 0, sizeof(compiler));
-	
-	PX_VMRegistHostFunction(&pExecute->vm,"print",PX_ExecuterVM_Print, pObject);//Print
-	PX_VMRegistHostFunction(&pExecute->vm,"gets",PX_ExecuterVM_Gets, pObject);//Gets
-	PX_VMRegistHostFunction(&pExecute->vm,"clear",PX_ExecuterVM_Clear, pObject);//Clear
-	PX_VMRegistHostFunction(&pExecute->vm,"sleep",PX_ExecuterVM_Sleep, pObject);//Sleep
-	PX_VMRegistHostFunction(&pExecute->vm,"rand",PX_ExecuterVM_Rand, pObject);//Rand
-	PX_VMRegistHostFunction(&pExecute->vm,"sin",PX_ExecuterVM_Sin, pObject);//Sin
-	PX_VMRegistHostFunction(&pExecute->vm,"cos",PX_ExecuterVM_Cos, pObject);//Cos
-	PX_VMRegistHostFunction(&pExecute->vm,"lastprint",PX_ExecuterVM_LastPrint, pObject);//lastprint
-	PX_VMRegistHostFunction(&pExecute->vm,"createthread",PX_ExecuterVM_CreateThread, pObject);//createthread
-
-	if(!PX_VMBeginThreadFunction(&pExecute->vm,0,"main",PX_NULL,0))
-	{
-		goto _ERROR;
-	}
-
-
 	return PX_TRUE;
 _ERROR:
 	PX_CompilerFree(&compiler);
@@ -283,7 +289,9 @@ px_void PX_Object_ExecuterFree(PX_Object* pObject)
 {
 	PX_Object_Executer* pdesc = PX_ObjectGetDesc(PX_Object_Executer, pObject);
 	PX_TextureFree(&pdesc->fox);
+	if (pdesc->vm._bin)
 	PX_VMFree(&pdesc->vm);
+	if(pdesc->debugmap.mp)
 	PX_VMDebuggerMapFree(&pdesc->debugmap);
 }
 
@@ -302,7 +310,7 @@ PX_Object* PX_Object_ExecuterCreate(px_memorypool* mp, PX_Object* Parent, px_int
 
 	pObject = PX_ObjectCreateEx(mp, Parent, 0, 0, 0, (px_float)width, (px_float)height, 0, PX_OBJECT_TYPE_EXECUTER, PX_Object_ExecuterUpdate, 0, PX_Object_ExecuterFree, &desc, sizeof(desc));
 	pdesc = PX_ObjectGetDesc(PX_Object_Executer, pObject);
-	pdesc->printer = PX_Object_PrinterCreate(mp, pObject, x, y, width, height, PX_NULL);
+	pdesc->printer = PX_Object_PrinterCreate(mp, pObject, x, y, width, height, fm);
 	
 
 	if (!PX_Object_ExecuterRunScript(pObject,shellcode))
@@ -319,3 +327,34 @@ PX_Object* PX_Object_ExecuterCreate(px_memorypool* mp, PX_Object* Parent, px_int
 	return pObject;
 }
 
+PX_Object* PX_Object_ExecuterCreatePayload(px_memorypool* mp, PX_Object* Parent, px_int x, px_int y, px_int width, px_int height, PX_FontModule* fm, const px_char bin[],px_int binsize)
+{
+	PX_Object* pObject;
+	PX_Object_Executer desc, * pdesc;
+	px_char const fox_executer_logo[] =
+	{
+	#include "PX_FoxLogo.h"
+	};
+	//console initialize
+	PX_memset(&desc, 0, sizeof(desc));
+	desc.fm = fm;
+	if (!PX_TextureCreateFromMemory(mp, (px_void*)fox_executer_logo, sizeof(fox_executer_logo), &desc.fox))return PX_NULL;
+
+	pObject = PX_ObjectCreateEx(mp, Parent, 0, 0, 0, (px_float)width, (px_float)height, 0, PX_OBJECT_TYPE_EXECUTER, PX_Object_ExecuterUpdate, 0, PX_Object_ExecuterFree, &desc, sizeof(desc));
+	pdesc = PX_ObjectGetDesc(PX_Object_Executer, pObject);
+	pdesc->printer = PX_Object_PrinterCreate(mp, pObject, x, y, width, height, fm);
+
+
+	if (!PX_Object_ExecuterRunPayload(pObject, bin,binsize))
+	{
+		PX_ObjectDelete(pObject);
+		return PX_NULL;
+	}
+
+	PX_Object_ExecuterPrintImage(pObject, &pdesc->fox);
+	PX_Object_ExecuterPrintText(pObject, "----------------------------------------");
+	PX_Object_ExecuterPrintText(pObject, "PainterEngine Script Executer");
+	PX_Object_ExecuterPrintText(pObject, "----------------------------------------");
+
+	return pObject;
+}

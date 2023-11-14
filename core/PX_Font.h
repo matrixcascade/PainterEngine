@@ -55,7 +55,7 @@ typedef enum
 typedef struct  
 {
 	px_memorypool *mp;
-	const px_byte* ttfbuffer;
+	px_byte* ttfbuffer;
 	px_int ttfsize;
 	px_map characters_map;
 	px_int max_BearingY;

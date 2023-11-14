@@ -275,6 +275,34 @@ px_bool PX_StringCat(px_string *str,const px_char *str2)
 }
 
 
+px_bool PX_StringCatLength(px_string* str, const px_char* str2,px_int cat_length)
+{
+	px_uchar shl = 0;
+	px_char* old = str->buffer;
+	px_int length;
+
+	length = PX_strlen(str->buffer) + cat_length;
+	if (length < str->bufferlen)
+	{
+		PX_strcatlen(str->buffer, str2, cat_length);
+		PX_StringUpdateExReg(str);
+		return PX_TRUE;
+	}
+
+	while ((px_int)(1 << ++shl) <= length);
+	str->bufferlen = (1 << shl);
+	str->buffer = (px_char*)MP_Malloc(str->mp, str->bufferlen);
+	if (!str->buffer)return PX_FALSE;
+	str->buffer[0] = '\0';
+	PX_strcat(str->buffer, old);
+	PX_strcatlen(str->buffer, str2, cat_length);
+	if (old)
+		MP_Free(str->mp, old);
+	PX_StringUpdateExReg(str);
+	return PX_TRUE;
+}
+
+
 
 px_char PX_StringLastChar(px_string* str)
 {

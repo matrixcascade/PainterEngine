@@ -77,6 +77,7 @@ typedef enum
 }PX_VM_RUNRETURN;
 
 typedef px_bool (*PX_VM_Function_Modules)(PX_VM *Ins,px_void *userptr);
+#define PX_VM_HOST_FUNCTION(name) px_bool name(PX_VM *Ins,px_void *userptr)
 
 px_int				PX_VM_GetFunctionIndex(PX_VM *Ins,px_char *func);
 px_bool             PX_VMThreadSwitch(PX_VM *Ins,px_int T);

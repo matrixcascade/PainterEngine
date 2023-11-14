@@ -24,6 +24,7 @@ px_char PX_StringLastChar(px_string* str);
 
 px_void PX_StringClear(px_string* str);
 px_bool PX_StringCatChar(px_string *str,px_char ch);
+px_bool PX_StringCatLength(px_string* str, const px_char* str2, px_int cat_length);
 px_int  PX_StringLen(px_string *str);
 px_void PX_StringFree(px_string *str);
 px_bool PX_StringCopy(px_string *dest,px_string *res);

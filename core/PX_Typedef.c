@@ -739,7 +739,6 @@ px_double PX_sind(px_double x)
 	result+=term;
 	term*=(-x*x)/(32*33);
 	return result;
-
 }
 
 px_double PX_sinc(px_double i)
@@ -2940,6 +2939,13 @@ px_void PX_strcat(px_char *src,const px_char *cat)
 	while(*src)src++;
 	while(len--)*src++=*cat++;
 	*src='\0';
+}
+
+px_void PX_strcatlen(px_char* src, const px_char* cat,px_int len)
+{
+	while (*src)src++;
+	while (len--)*src++ = *cat++;
+	*src = '\0';
 }
 
 px_void PX_strcat_s(px_char* src, px_int size, const px_char* cat)
