@@ -95,6 +95,7 @@ You can now use your IDE to compile PainterEngine with these steps. PainterEngin
 | 密码学               | curve25519/AES/SHAx/MD5...                | 包含常用的密钥对称算法及密钥协商算法                          |
 | 图片支持               | PNG/JPG/GIF/BMP                                              | 支持PNG/JPG/GIF/BMP解码及PNG编码.           |
 | 音频支持               | WAV/MP3                                              | 支持Wav,Mp3解码.及Wav编码|
+| 字模支持               | ttf                                              | 支持ttf字模文件(由stb_truetype.c移植而来)|
 | 几何绘制               | Line/Triangle/Rectangle/Circle/Ring/Sector/Rounded.....      | 常用几何光栅化实现                                                                 |
 | 渲染器                | 2D/3D                                                        | 2D 3D渲染器实现及一个高质量制图引擎                                                 |
 | 动画                  | 2dx/live2D                                                   | 2D 动画和一个类Live2D 骨骼动画系统                                                  |
@@ -119,6 +120,7 @@ You can now use your IDE to compile PainterEngine with these steps. PainterEngin
 | Cryptography          | curve25519/AES/SHAx/MD5...                | This includes commonly used symmetric key algorithms and key exchange algorithms.                          |
 | image codec           | PNG/JPG/GIF/BMP                                              | Supports decoding of PNG/JPG/GIF/BMP images and encoding of PNG images.           |
 | audio codec           | Wav/Mp3                                              | Supports decoding of Wav/Mp3 and encoding of Wav.           |
+| fontmodule            | TTF                                                  | Support fontmodule of truetype(reference:stb_truetype.c)|
 | Geometric             | Line/Triangle/Rectangle/Circle/Ring/Sector/Rounded.....      | Geometric rasterization                                                           |
 | Renderer              | 2d/3d                                                        | Implementation of a 2D/3D software renderer. A painting  engine.                  |
 | sound                 | VC codec/mixer/piano/ks                                               | Includes an implementation of a VC(voice conversion), a mixer, a physically-modeled piano and Karplus-Strong string synthesis. Direct synthesis of PCM audio streams.|
