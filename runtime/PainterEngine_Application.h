@@ -1,12 +1,9 @@
 #ifndef PAINTERENGINE_APPLICATION_H
 #define PAINTERENGINE_APPLICATION_H
 
-#ifdef __cplusplus
-extern "C"{
-#endif
 #define PX_APPLICATION_NAME "PainterEngine"
-#define PX_APPLICATION_MEMORYPOOL_STATIC_SIZE (1024*1024*128)
-#define PX_APPLICATION_MEMORYPOOL_DYNAMIC_SIZE (1024*1024*32)
+#define PX_APPLICATION_MEMORYPOOL_STATIC_SIZE (1024*1024*64)
+#define PX_APPLICATION_MEMORYPOOL_DYNAMIC_SIZE (1024*1024*48)
 #define PX_APPLICATION_MEMORYPOOL_SPACE_SIZE (1024*1024*16)
 
 #define PX_APPLICATION_MEMORYPOOL_ALL_SIZE (PX_APPLICATION_MEMORYPOOL_STATIC_SIZE+PX_APPLICATION_MEMORYPOOL_DYNAMIC_SIZE+PX_APPLICATION_MEMORYPOOL_SPACE_SIZE)
@@ -16,6 +13,7 @@ extern "C"{
 #include "platform/modules/px_request.h"
 #include "platform/modules/px_tcp.h"
 #include "platform/modules/px_udp.h"
+
 	typedef struct
 	{
 		px_color backgroundColor;
@@ -30,10 +28,7 @@ extern "C"{
 	px_bool PainterEngine_Initialize(px_int screen_width, px_int screen_height);
 	px_bool PainterEngine_InitializeWorld(px_int width, px_int height);
 	px_bool PainterEngine_InitializeAudio();
-	px_int PainterEngine_GetViewWidth();
-	px_int PainterEngine_GetViewHeight();
-	px_int PainterEngine_GetSurfaceWidth();
-	px_int PainterEngine_GetSurfaceHeight();
+
 	PX_Object* PainterEngine_GetRoot();
 	px_surface* PainterEngine_GetSurface();
 	PX_Runtime* PainterEngine_GetRuntime();
@@ -51,8 +46,6 @@ extern "C"{
 	px_void PX_ApplicationUpdate(PX_Application* App, px_dword elapsed);
 	px_void PX_ApplicationRender(PX_Application* App, px_dword elapsed);
 	px_void PX_ApplicationPostEvent(PX_Application* App, PX_Object_Event e);
-#ifdef __cplusplus
-}
-#endif
+
 
 #endif

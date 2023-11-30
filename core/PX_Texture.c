@@ -55,10 +55,10 @@ px_bool PX_TextureCreateFromMemory(px_memorypool *mp,px_void *data,px_int size,p
 		}
 	}
 
-	if (PX_JpgVerify(data, size))
+	if (PX_JpgVerify((px_byte *)data, size))
 	{
 		PX_JpgDecoder decoder;
-		if (PX_JpgDecoderInitialize(mp, &decoder, data, size))
+		if (PX_JpgDecoderInitialize(mp, &decoder, (px_byte*)data, size))
 		{
 			if (PX_TextureCreate(mp, tex, decoder.width, decoder.height))
 			{

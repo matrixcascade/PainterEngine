@@ -72,25 +72,6 @@ px_bool PainterEngine_InitializeWorld(px_int width, px_int height)
 	PX_Object_DesignerBindWorld(App.object_designer, &App.world);
 	return PX_TRUE;
 }
-px_int PainterEngine_GetViewWidth()
-{
-	return App.runtime.window_width;
-}
-
-px_int PainterEngine_GetViewHeight()
-{
-	return App.runtime.window_height;
-}
-
-px_int PainterEngine_GetSurfaceWidth()
-{
-	return App.runtime.window_width;
-}
-
-px_int PainterEngine_GetSurfaceHeight()
-{
-	return App.runtime.surface_width;
-}
 
 PX_Object* PainterEngine_GetRoot()
 {

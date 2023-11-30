@@ -33,6 +33,7 @@ int PX_FileGetDirectoryFileCount(const char path[],PX_FILEENUM_TYPE type,const c
 int PX_FileGetDirectoryFileName(const char path[],int count,char FileName[][260],PX_FILEENUM_TYPE type,const char *filter);
 
 //////////////////////////////////////////////////////////////////////////
+#define PX_OBJECT_REQUEST_FUNCTION(name) px_void name(void* buffer, int size, void* ptr)
 #include "../../kernel/PX_Kernel.h"
 px_bool PX_LoadTextureFromFile(px_memorypool *mp,px_texture *tex,const px_char path[]);
 px_bool PX_LoadStringFromFile(px_memorypool *mp,px_string *str,const px_char path[]);
@@ -44,7 +45,8 @@ px_bool PX_LoadScriptFromFile(px_memory *code,const px_char path[]);
 px_bool PX_LoadScriptInstanceFromFile(px_memorypool *mp,PX_VM *ins,const px_char path[]);
 px_bool PX_LoadLiveFromFile(px_memorypool* mp, PX_LiveFramework* pliveframework, const px_char path[]);
 px_bool PX_LoadUIFormFile(px_memorypool* mp, PX_Object* designerObject, PX_Object* proot, PX_FontModule* fm, const px_char path[]);
-
+px_bool PX_LoadFontModuleFromTTF(px_memorypool* mp, PX_FontModule* fm, const px_char Path[]);
+px_bool PX_LoadJsonFromJsonFile(px_memorypool* mp, PX_Json* json, const px_char* path);
 px_bool PX_LoadTextureToResource(PX_ResourceLibrary *presourcelib,const px_char Path[],const px_char key[]);
 px_bool PX_LoadShapeToResource(PX_ResourceLibrary *presourcelib,const px_char Path[],const px_char key[]);
 px_bool PX_LoadAnimationToResource(PX_ResourceLibrary *presourcelib,const px_char Path[],const px_char key[]);

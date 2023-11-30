@@ -8,7 +8,7 @@ static px_void PX_KeyboardBuildScanCodeMap()
 	px_int scan_code = 0;
 	PX_memset(px_kbkeys, 0, sizeof(px_kbkeys));
 	//no code
-	px_kbkeys[scan_code].content1[0] = 0xff;
+	px_kbkeys[scan_code].content1[0] = (px_char)0xff;
 	scan_code++;
 
 	px_kbkeys[scan_code].vk_code = PX_VK_ESCAPE;

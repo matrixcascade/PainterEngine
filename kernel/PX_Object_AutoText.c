@@ -80,7 +80,7 @@ px_void PX_Object_AutoTextRender(px_surface *psurface, PX_Object *pObject,px_uin
 		{
 			px_dword code;
 			px_int width,height;
-			fsize=PX_FontModuleGetCharacterDesc(pAt->fontModule,Text+cursor,&code,&width,&height);
+			fsize=PX_FontModuleGetOneCharacterDesc(pAt->fontModule,Text+cursor,&code,&width,&height);
 			if (!fsize)
 			{
 				break;

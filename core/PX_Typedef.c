@@ -648,6 +648,26 @@ px_double64 __px_pow_dd(px_double64 x, px_double64 y)
 	return s * z;
 }
 
+px_double PX_floor(px_double num) {
+
+	px_int64 n = (px_int64)num;
+	px_double d = (px_double)n;
+	if (d == num || num >= 0)
+		return d;
+	else
+		return d - 1;
+}
+
+px_int PX_ceil(px_double num) 
+{
+	px_int inum = (px_int)num;
+	if (num == (px_double)inum) 
+	{
+		return inum;
+	}
+	return inum + 1;
+}
+
 px_double PX_exp(px_double x)
 {
 	return __px_pow_dd(PX_e, x);
@@ -719,7 +739,6 @@ px_double PX_sind(px_double x)
 	result+=term;
 	term*=(-x*x)/(32*33);
 	return result;
-
 }
 
 px_double PX_sinc(px_double i)
@@ -2922,6 +2941,13 @@ px_void PX_strcat(px_char *src,const px_char *cat)
 	*src='\0';
 }
 
+px_void PX_strcatlen(px_char* src, const px_char* cat,px_int len)
+{
+	while (*src)src++;
+	while (len--)*src++ = *cat++;
+	*src = '\0';
+}
+
 px_void PX_strcat_s(px_char* src, px_int size, const px_char* cat)
 {
 	if (PX_strlen(src)+PX_strlen(cat)<size)
@@ -4170,6 +4196,11 @@ px_double PX_pow(px_double num,px_double m)
 	else 
 		return __px_pow_dd(num,m);
 	//return __px_pow_f(num,m);
+}
+
+px_double PX_fmod(px_double _X, px_double _Y)
+{
+	return _X - (px_int)(_X / _Y) * _Y;
 }
 
 px_int PX_pow_ii(px_int i,px_int n)

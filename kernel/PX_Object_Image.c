@@ -153,6 +153,7 @@ PX_Object * PX_Object_ImageCreate(px_memorypool *mp,PX_Object *Parent,px_int x,p
 	{
 		return PX_NULL;
 	}
+	PX_memset(pImage, 0, sizeof(PX_Object_Image));
 	pObject=PX_ObjectCreate(mp,Parent,(px_float)x,(px_float)y,0,(px_float)width,(px_float)height,0);
 	if (pObject==PX_NULL)
 	{

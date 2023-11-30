@@ -25,12 +25,12 @@ static px_ushort px_gif_read_num(px_byte *buffer)
 
 px_bool PX_GifCreate(px_memorypool* mp, px_gif* gif, px_void* buffer, px_int size)
 {
-    px_byte *pbyteBuffer=buffer,sigver[3];
-    px_ushort width, height, depth;
-    px_byte fdsz, bgidx, aspect;
+    px_byte *pbyteBuffer=(px_byte*)buffer,sigver[3];
+    px_ushort width=0, height=0, depth=0;
+    px_byte fdsz=0, bgidx=0, aspect=0;
     px_int i;
-    px_byte *bgcolor;
-    px_int gct_sz;
+    px_byte *bgcolor=PX_NULL;
+    px_int gct_sz=0;
     px_int read_offset = 0;
 
     PX_memcpy(sigver, pbyteBuffer+ read_offset, 3);
@@ -97,7 +97,7 @@ px_bool PX_GifCreate(px_memorypool* mp, px_gif* gif, px_void* buffer, px_int siz
     gif->palette = &gif->gct;
     gif->bgindex = bgidx;
    
-    gif->frame = MP_Malloc(mp,4* width * height);
+    gif->frame = (px_byte *)MP_Malloc(mp,4* width * height);
     if (!gif->frame) 
     {
         PX_MemoryFree(&gif->data);
@@ -143,8 +143,8 @@ static px_void px_gif_read_plain_text_ext(px_gif *gif)
 {
     if (gif->plain_text) 
     {
-        px_ushort tx, ty, tw, th;
-        px_byte cw, ch, fg, bg;
+        px_ushort tx=0, ty=0, tw=0, th=0;
+        px_byte cw=0, ch=0, fg=0, bg=0;
         px_int sub_block;
         //lseek(gif->fd, 1, SEEK_CUR); /* block size = 12 */
         gif->roffset++;
@@ -184,7 +184,7 @@ static px_void px_gif_read_plain_text_ext(px_gif *gif)
 
 static px_void px_gif_read_graphic_control_ext(px_gif *gif)
 {
-    px_byte rdit;
+    px_byte rdit=0;
 
     /* Discard block size (always 0x04). */
     gif->roffset++;
@@ -209,7 +209,7 @@ static px_void px_gif_read_comment_ext(px_gif *gif)
 {
     if (gif->comment)
     {
-        px_int sub_block;
+        px_int sub_block=0;
         //px_int sub_block = lseek(gif->fd, 0, SEEK_CUR);
         sub_block = gif->roffset;
         gif->comment(gif);
@@ -222,8 +222,8 @@ static px_void px_gif_read_comment_ext(px_gif *gif)
 
 static px_void read_application_ext(px_gif *gif)
 {
-    px_char app_id[8];
-    px_char app_auth_code[3];
+    px_char app_id[8] = {0};
+    px_char app_auth_code[3] = {0};
 
     /* Discard block size (always 0x0B). */
     //lseek(gif->fd, 1, SEEK_CUR);
@@ -288,15 +288,19 @@ static px_void read_ext(px_gif *gif)
 
 static px_gif_Table *new_table(px_gif* gif, px_int key_size)
 {
-    px_int key;
+    px_int key=0;
     px_int init_bulk = PX_GIF_MAX(1 << (key_size + 1), 0x100);
-    px_gif_Table *table = MP_Malloc(gif->mp, sizeof(*table) + sizeof(px_gif_Entry) * init_bulk);
+    px_gif_Table *table = (px_gif_Table *)MP_Malloc(gif->mp, sizeof(*table) + sizeof(px_gif_Entry) * init_bulk);
     if (table) {
         table->bulk = init_bulk;
         table->nentries = (1 << key_size) + 2;
         table->entries = (px_gif_Entry *) &table[1];
         for (key = 0; key < (1 << key_size); key++)
-            table->entries[key] = (px_gif_Entry) {1, 0xFFF, key};
+        {
+            table->entries[key].length = 1;
+            table->entries[key].prefix = 0xFFF;
+            table->entries[key].suffix = (px_byte) key;
+        }
     }
     return table;
 }
@@ -308,11 +312,11 @@ static px_gif_Table *new_table(px_gif* gif, px_int key_size)
 static px_int add_entry(px_memorypool *mp,px_gif_Table **tablep, px_ushort length, px_ushort prefix, px_byte suffix)
 {
     px_gif_Table *table = *tablep;
-    px_gif_Table *new_table;
+    px_gif_Table *new_table=PX_NULL;
     if (table->nentries == table->bulk) {
         table->bulk *= 2;
 
-        new_table = MP_Malloc(mp, sizeof(*table) + sizeof(px_gif_Entry) * table->bulk);
+        new_table = (px_gif_Table *)MP_Malloc(mp, sizeof(*table) + sizeof(px_gif_Entry) * table->bulk);
         if (!new_table) return -1;
 		PX_memcpy(new_table, table, sizeof(*table) + sizeof(px_gif_Entry) * table->nentries);
         MP_Free(mp, table);
@@ -334,10 +338,10 @@ static px_int add_entry(px_memorypool *mp,px_gif_Table **tablep, px_ushort lengt
 
 static px_ushort get_key(px_gif *gif, px_int key_size, px_byte *sub_len, px_byte *shift, px_byte *byte)
 {
-    px_int bits_read;
-    px_int rpad;
-    px_int frag_size;
-    px_ushort key;
+    px_int bits_read=0;
+    px_int rpad=0;
+    px_int frag_size=0;
+    px_ushort key=0;
 
     key = 0;
     for (bits_read = 0; bits_read < key_size; bits_read += frag_size) {
@@ -390,13 +394,13 @@ static px_int interlaced_line_index(px_int h, px_int y)
  * Return 0 on success or -1 on out-of-memory (w.r.t. LZW code table). */
 static px_int read_image_data(px_gif *gif, px_int interlace)
 {
-    px_byte sub_len, shift, byte;
-    px_int init_key_size, key_size, table_is_full;
-    px_int frm_off, frm_size, str_len, i, p, x, y;
-    px_ushort key, clear, stop;
-    px_int ret;
-    px_gif_Table *table;
-    px_gif_Entry entry;
+    px_byte sub_len=0, shift=0, byte=0;
+    px_int init_key_size=0, key_size=0, table_is_full=0;
+    px_int frm_off=0, frm_size=0, str_len=0, i, p, x, y;
+    px_ushort key=0, clear=0, stop=0;
+    px_int ret=0;
+    px_gif_Table *table=0;
+    px_gif_Entry entry = {0};
     px_int start, end;
 
     //read(gif->fd, &byte, 1);
@@ -480,8 +484,8 @@ static px_int read_image_data(px_gif *gif, px_int interlace)
  * Return 0 on success or -1 on out-of-memory (w.r.t. LZW code table). */
 static px_int read_image(px_gif *gif)
 {
-    px_byte fisrz;
-    px_int interlace;
+    px_byte fisrz=0;
+    px_int interlace=0;
 
     /* Image Descriptor. */
     //gif->fx = px_gif_read_num(gif->fd);
@@ -563,7 +567,7 @@ static px_void render_frame_texture(px_gif* gif, px_texture* ptexture)
 static px_void dispose(px_gif *gif)
 {
     px_int i, j, k;
-    px_byte *bgcolor;
+    px_byte *bgcolor=0;
     switch (gif->gce.disposal) {
     case 2: /* Restore to background color. */
         bgcolor = &gif->palette->colors[gif->bgindex*3];

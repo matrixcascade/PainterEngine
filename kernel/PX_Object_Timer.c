@@ -2,7 +2,7 @@
 
 px_void Func_TimerUpadte(PX_Object *pObject, px_uint elapsed)
 {
-    PX_Object_Timer *pTimer = pObject->pObjectDesc;
+    PX_Object_Timer *pTimer = (PX_Object_Timer *)pObject->pObjectDesc;
     PX_Object_Event timeout = {0};
 
     if (pTimer->IsPaused)

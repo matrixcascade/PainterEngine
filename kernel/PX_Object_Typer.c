@@ -114,7 +114,7 @@ px_void PX_Object_TyperRender(px_surface* psurface, PX_Object* pObject, px_uint 
 		{
 			px_dword code;
 			px_int width, height;
-			fsize = PX_FontModuleGetCharacterDesc(pDesc->fontModule, Text, &code, &width, &height);
+			fsize = PX_FontModuleGetOneCharacterDesc(pDesc->fontModule, Text, &code, &width, &height);
 			if (!fsize)
 			{
 				break;

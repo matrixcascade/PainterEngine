@@ -18,32 +18,35 @@ typedef enum
 	PX_WINODW_STYLE_FIXED,
 	PX_WINODW_STYLE_NOBOARD,
 }PX_WINODW_STYLE;
+extern "C"
+{
+	BOOL PX_CreateWindow(int windowWidth, int windowHeight, int surfaceWidth, int surfaceHeight, const char* name);
+	BOOL PX_WindowResize(int surfaceWidth, int surfaceHeight, int windowWidth, int windowHeight);
 
-extern "C" BOOL PX_CreateWindow( int windowWidth,int windowHeight, int surfaceWidth,int surfaceHeight,const char *name);
-extern "C" BOOL PX_WindowResize(int surfaceWidth,int surfaceHeight,int windowWidth,int windowHeight);
+	int  PX_GetScreenHeight();
+	int  PX_GetScreenWidth();
+	int PX_SetWindowResizeable();
 
-extern "C" int  PX_GetScreenHeight();
-extern "C" int  PX_GetScreenWidth();
-extern "C" int PX_SetWindowResizeable();
-
-extern "C" HWND PX_GetWindowHwnd();
-extern "C" VOID PX_SystemReadDeviceState();
-extern "C" BOOL PX_SystemLoop();
-extern "C" BOOL PX_SystemRender(void *raw,int width,int height);
-extern "C" BOOL PX_SystemisAvtivated();
-extern "C" BOOL PX_KeyboardDown(unsigned char X );
-extern "C" char *PX_KeyboardString();
-extern "C" char *PX_DragfileString();
-extern "C" BOOL PX_MouseLButtonDown();
-extern "C" BOOL PX_MouseRButtonDown();
-extern "C" BOOL PX_MouseMButtonDown();
-extern "C" POINT PX_MousePosition();
-extern "C" BOOL PX_KeyDown(unsigned char key);
-extern "C" BOOL PX_MouseWheel(int *x,int *y,int *delta);
-extern "C" BOOL PX_GetWinMessage(WM_MESSAGE *Msg);
-extern "C" double PX_GetWindowScale();
-extern "C" void PX_SetWindowStyle(PX_WINODW_STYLE style);
-extern "C" void PX_SetWindowPosition(int x, int y);
+	HWND PX_GetWindowHwnd();
+	VOID PX_SystemReadDeviceState();
+	BOOL PX_SystemLoop();
+	BOOL PX_SystemRender(void* raw, int width, int height);
+	BOOL PX_SystemisAvtivated();
+	BOOL PX_KeyboardDown(unsigned char X);
+	char* PX_KeyboardString();
+	char* PX_DragfileString();
+	BOOL PX_MouseLButtonDown();
+	BOOL PX_MouseRButtonDown();
+	BOOL PX_MouseMButtonDown();
+	POINT PX_MousePosition();
+	BOOL PX_KeyDown(unsigned char key);
+	BOOL PX_MouseWheel(int* x, int* y, int* delta);
+	BOOL PX_GetWinMessage(WM_MESSAGE * Msg);
+	double PX_GetWindowScale();
+	void PX_SetWindowStyle(PX_WINODW_STYLE style);
+	void PX_SetWindowPosition(int x, int y);
+}
+ 
 #define         WIN_MAX_INPUT_STRING_LEN   64
 #define         WIN_MAX_INPUT_SPECKEY_LEN  0xff
 

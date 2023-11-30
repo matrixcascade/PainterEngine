@@ -1379,7 +1379,7 @@ px_bool PX_JpgDecoderInitialize(px_memorypool* mp, PX_JpgDecoder* decoder, px_by
         return PX_FALSE;
     }
 
-    decoder->blocks =MP_Malloc(mp,sizeof(PX_JpgBlock)* decoder->blockHeightReal * decoder->blockWidthReal);
+    decoder->blocks =(PX_JpgBlock *)MP_Malloc(mp,sizeof(PX_JpgBlock)* decoder->blockHeightReal * decoder->blockWidthReal);
     if (decoder->blocks == 0) {
         return PX_FALSE;
     }

@@ -778,7 +778,7 @@ _LIMIT px_int PX_WorldSearch(PX_World* pw, PX_Object* pObject[], px_int MaxSearc
 
 _LIMIT PX_Object* PX_WorldSearchObject(PX_World* pWorld, const px_char id[])
 {
-	return PX_MapGet(&pWorld->idSearchmap, (const px_byte *)id,PX_strlen(id));
+	return (PX_Object*)PX_MapGet(&pWorld->idSearchmap, (const px_byte *)id,PX_strlen(id));
 }
 
 px_void PX_WorldSetSize(PX_World* pWorld, px_int world_width, px_int world_height)

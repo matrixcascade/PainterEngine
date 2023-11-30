@@ -16,7 +16,7 @@ px_void PX_ERROR(const px_char fmt[])
 
 px_char * PX_GETLOG(void)
 {
-	return "";
+	return (px_char *)"";
 }
 
 px_void PX_LOG(const px_char fmt[])

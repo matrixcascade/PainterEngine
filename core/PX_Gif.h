@@ -3,9 +3,6 @@
 
 #include "PX_Texture.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 typedef struct px_gif_Palette 
 {
@@ -52,9 +49,5 @@ px_void PX_GifFree(px_gif *gif);
 px_void PX_GifSetLoop(px_gif *gif,px_bool loop);
 px_texture *PX_GifGetTexture(px_gif *gif);
 
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* GIFDEC_H */

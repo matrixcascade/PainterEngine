@@ -479,6 +479,9 @@ px_double PX_log10(px_double __x);
 #define  PX_RadianToAngle(radian) ((radian)*180/PX_PI)
 #define  PX_AngleToRadian(angle) ((angle)*PX_PI/180)
 
+px_double PX_fmod(px_double _X, px_double _Y);
+px_double PX_floor(px_double num);
+px_int PX_ceil(px_double num);
 px_double PX_exp(px_double x);
 px_double PX_tand(px_double radian);
 px_double PX_sind(px_double radian);
@@ -551,6 +554,7 @@ px_int PX_memcmp(px_void* dst, const px_void* src, px_int size);
 px_void PX_strcpy(px_char *dst,const px_char *src,px_int size);
 px_void PX_wstrcpy(px_word *dst,const px_word *src,px_int size);
 px_void PX_strcat(px_char *src,const px_char *cat);
+px_void PX_strcatlen(px_char* src, const px_char* cat, px_int len);
 px_void PX_strcat_s(px_char* src, px_int size, const px_char* cat);
 px_void PX_wstrcat(px_word *src,const px_word *cat);
 px_void PX_strset(px_char *dst,const px_char *src);

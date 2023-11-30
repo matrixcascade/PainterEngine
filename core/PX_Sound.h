@@ -80,5 +80,4 @@ px_void PX_SoundDataFree(PX_SoundData *sounddata);
 px_bool PX_SoundCircularWrite(PX_Sound* pSound, px_byte* pBuffer, px_int writeSize);
 px_bool PX_SoundCircularWriteSample(PX_Sound* pSound, px_short sample);
 
-
 #endif

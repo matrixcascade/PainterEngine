@@ -3,9 +3,10 @@
 #include <dsound.h>
 #pragma comment (lib,"dsound.lib")
 
-extern "C"
-{
-	#include "../../core/PX_Sound.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
+	#include "core/PX_Sound.h"
 	int PX_AudioInitialize(PX_SoundPlay *soundPlay);
 	int PX_AudioInitializeHwnd(HWND hwnd);
 	void PX_AudioSetVolume( unsigned int Vol );
@@ -17,7 +18,9 @@ extern "C"
 	DWORD PX_AudioCaptureReadEx(void *pBuffer,px_int buffersize,px_int align);
 	DWORD PX_AudioCaptureRead(void *buffer,px_int buffersize);
 	LPDIRECTSOUNDBUFFER PX_AudioGetDirectSoundBuffer();
-};
+#ifdef __cplusplus
+}
+#endif
 
 #define DSOUND_BUFFER_SIZE (1764*16)
 

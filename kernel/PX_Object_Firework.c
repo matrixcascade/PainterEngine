@@ -358,7 +358,7 @@ PX_Object* PX_Object_Firework02Create(px_memorypool* mp, PX_Object* Parent, px_f
 	desc.livingTime = 0;
 	desc.particleTime = 0;
 	//COLOR  
-	desc.type = PX_rand() % PX_FIREWORK02_CLRNUM;
+	desc.type =(COLORTYPE)(PX_rand() % PX_FIREWORK02_CLRNUM);
 	switch (desc.type) {
 	case FIRE:
 		desc.boomClr.ar = 0xff;
@@ -524,7 +524,7 @@ PX_Object* PX_Object_Firework03Create(px_memorypool* mp, PX_Object* Parent, px_f
 	desc.livingTime = 0;
 	desc.boomTime = 1000 - PX_rand() % 600;
 	desc.particleTime = 0;
-	desc.type = PX_rand() % 4;
+	desc.type = (COLORTYPE)(PX_rand() % 4);
 	switch (desc.type) 
 	{
 	case FIRE:

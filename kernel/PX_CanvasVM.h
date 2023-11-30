@@ -124,7 +124,7 @@ px_void PX_CanvasVMOnBegin(PX_CanvasVM* pCanvasVM);
 px_void PX_CanvasVMOnMove(PX_CanvasVM* pCanvasVM, px_float x, px_float y, px_float z);
 px_void PX_CanvasVMOnEnd(PX_CanvasVM* pCanvasVM);
 px_void PX_CanvasVMStorePaintShell(PX_CanvasVM* pCanvasVM);
-px_void PX_CanvasVMRegisterTool(PX_CanvasVM* pCanvasVM, px_char name[PX_CANVASVM_MAX_TOOL_NAME], pfun_PX_CanvasVMOnPaint paint, px_bool store, px_void* ptr);
+px_void PX_CanvasVMRegisterTool(PX_CanvasVM* pCanvasVM, const px_char name[PX_CANVASVM_MAX_TOOL_NAME], pfun_PX_CanvasVMOnPaint paint, px_bool store, px_void* ptr);
 px_void PX_CanvasVMFree(PX_CanvasVM* pCanvasVM);
 px_void PX_CanvasVMReset(PX_CanvasVM* pCanvasVM);
 px_bool PX_CanvasVMExport(PX_CanvasVM* pCanvasVM,px_memory *bin);

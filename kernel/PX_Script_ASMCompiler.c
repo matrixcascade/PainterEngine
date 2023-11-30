@@ -2,7 +2,7 @@
 
 static px_char PX_Script_ASMError[128];
 
-static px_void PX_ScriptAsmError(px_lexer *lexer,px_char *err)
+static px_void PX_ScriptAsmError(px_lexer *lexer,const px_char *err)
 {
 	lexer->Sources[lexer->SourceOffset]='\0';
 
@@ -56,7 +56,7 @@ px_bool PX_ScriptAsm_isInt(px_char token[])
 	return PX_strIsInt(token);
 }
 
-static px_void PX_ScriptAsmRegistInstr(PX_SCRIPT_ASM_COMPILER *compiler,px_char mnemonic[__PX_SCRIPT_ASM_INSTR_MNEMONIC_NAME_LEN],px_char opcode,px_int accType[],px_char paramcout)
+static px_void PX_ScriptAsmRegistInstr(PX_SCRIPT_ASM_COMPILER *compiler, const px_char mnemonic[__PX_SCRIPT_ASM_INSTR_MNEMONIC_NAME_LEN],px_char opcode,px_int accType[],px_char paramcout)
 {
 	px_int i=0;
 	PX_SCRIPT_ASM_GRAMMAR_INSTR instr;
@@ -1445,17 +1445,17 @@ px_void PX_ScriptAsmLink(PX_SCRIPT_ASM_COMPILER *compiler)
 	}
 }
 
-static px_void PX_ScriptAsmRegistInstr_0(PX_SCRIPT_ASM_COMPILER *compiler,px_char mnemonic[__PX_SCRIPT_ASM_INSTR_MNEMONIC_NAME_LEN],px_char opcode)
+static px_void PX_ScriptAsmRegistInstr_0(PX_SCRIPT_ASM_COMPILER *compiler, const px_char mnemonic[__PX_SCRIPT_ASM_INSTR_MNEMONIC_NAME_LEN],px_char opcode)
 {
 	PX_ScriptAsmRegistInstr(compiler,mnemonic,opcode,PX_NULL,0);
 }
 
-static px_void PX_ScriptAsmRegistInstr_1(PX_SCRIPT_ASM_COMPILER *compiler,px_char mnemonic[__PX_SCRIPT_ASM_INSTR_MNEMONIC_NAME_LEN],px_char opcode,px_int accType1)
+static px_void PX_ScriptAsmRegistInstr_1(PX_SCRIPT_ASM_COMPILER *compiler, const px_char mnemonic[__PX_SCRIPT_ASM_INSTR_MNEMONIC_NAME_LEN],px_char opcode,px_int accType1)
 {
 	PX_ScriptAsmRegistInstr(compiler,mnemonic,opcode,&accType1,1);
 }
 
-static px_void PX_ScriptAsmRegistInstr_2(PX_SCRIPT_ASM_COMPILER *compiler,px_char mnemonic[__PX_SCRIPT_ASM_INSTR_MNEMONIC_NAME_LEN],px_char opcode,px_int accType1,px_int accType2)
+static px_void PX_ScriptAsmRegistInstr_2(PX_SCRIPT_ASM_COMPILER *compiler,const px_char mnemonic[__PX_SCRIPT_ASM_INSTR_MNEMONIC_NAME_LEN],px_char opcode,px_int accType1,px_int accType2)
 {
 	px_int accType[2];
 	accType[0]=accType1;
@@ -1463,7 +1463,7 @@ static px_void PX_ScriptAsmRegistInstr_2(PX_SCRIPT_ASM_COMPILER *compiler,px_cha
 	PX_ScriptAsmRegistInstr(compiler,mnemonic,opcode,accType,2);
 }
 
-static px_void PX_ScriptAsmRegistInstr_3(PX_SCRIPT_ASM_COMPILER *compiler,px_char mnemonic[__PX_SCRIPT_ASM_INSTR_MNEMONIC_NAME_LEN],px_char opcode,px_int accType1,px_int accType2,px_int accType3)
+static px_void PX_ScriptAsmRegistInstr_3(PX_SCRIPT_ASM_COMPILER *compiler, const px_char mnemonic[__PX_SCRIPT_ASM_INSTR_MNEMONIC_NAME_LEN],px_char opcode,px_int accType1,px_int accType2,px_int accType3)
 {
 	px_int accType[3];
 	accType[0]=accType1;

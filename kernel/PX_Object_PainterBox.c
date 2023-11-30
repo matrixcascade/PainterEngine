@@ -413,5 +413,5 @@ PX_OBJECT_PAINTERBOX_TOOL_TYPE PX_Object_PainterBoxGetCurrentTool(PX_Object* pOb
 		return PX_ObjectGetDesc(PX_Object_PainterBox, pObject)->tool_type;
 	}
 	PX_ASSERT();
-	return 0;
+	return (PX_OBJECT_PAINTERBOX_TOOL_TYPE)0;
 }

@@ -1,9 +1,9 @@
 #include "PX_Script_Interpreter.h"
 
-static px_char *PX_Script_Keywords[]={"IF","ELSE","SWITCH","CASE","WHILE","FOR","BREAK","RETURN","STRUCT","FUNCTION","EXPORT","HOST","INT","FLOAT","STRING","MEMORY","_BOOT","RETURN","_ASM"};
+static const px_char *PX_Script_Keywords[]={"IF","ELSE","SWITCH","CASE","WHILE","FOR","BREAK","RETURN","STRUCT","FUNCTION","EXPORT","HOST","INT","FLOAT","STRING","MEMORY","_BOOT","RETURN","_ASM"};
 
 
-px_void PX_ScriptTranslatorError(PX_ScriptInterpreter* analysis,px_char *info)
+px_void PX_ScriptTranslatorError(PX_ScriptInterpreter* analysis, const px_char *info)
 {
 	if (analysis)
 	{
@@ -162,7 +162,7 @@ static px_bool PX_ScriptParseInclude(PX_ScriptInterpreter *analysis,px_string *c
 	px_lexer lexer;
 	PX_LEXER_STATE lexerState;
 	px_int allocsize;
-	px_int quotes,singleQuotes,i;
+	px_int quotes,mquotes,singleQuotes,i;
 	px_bool bfound;
 	px_char *exchangeBuffer;
 	PX_LEXER_LEXEME_TYPE type;
@@ -191,6 +191,7 @@ static px_bool PX_ScriptParseInclude(PX_ScriptInterpreter *analysis,px_string *c
 	PX_LexerRegisterSpacer(&lexer,' ');
 	PX_LexerRegisterSpacer(&lexer,'\t');
 	quotes=PX_LexerRegisterContainer(&lexer,"\"","\"");
+	mquotes= PX_LexerRegisterContainer(&lexer, "<", ">");
 	PX_LexerRegisterContainerTransfer(&lexer,quotes,'\\');
 	singleQuotes=PX_LexerRegisterContainer(&lexer,"\'","\'");
 	PX_LexerSetTokenCase(&lexer,PX_LEXER_LEXEME_CASE_UPPER);
@@ -219,7 +220,7 @@ static px_bool PX_ScriptParseInclude(PX_ScriptInterpreter *analysis,px_string *c
 			{
 					if (PX_ScriptTranslatorNextToken(&lexer)==PX_LEXER_LEXEME_TYPE_CONATINER)
 					{
-						if (PX_LexerGetCurrentContainerType(&lexer)!=quotes)
+						if (PX_LexerGetCurrentContainerType(&lexer)!=quotes&& PX_LexerGetCurrentContainerType(&lexer) != mquotes)
 						{
 							PX_ScriptTranslatorError(analysis,"syntactic error: include \"name\" expected but not found.");
 							goto _ERROR;
@@ -552,7 +553,7 @@ static PX_SCRIPT_STRUCT *PX_ScriptParseGetStructByIndex(PX_ScriptInterpreter *an
 
 	return PX_VECTORAT(PX_SCRIPT_STRUCT,&analysis->v_struct,index);
 }
-static px_char PX_ScriptParseGetOpLevel(px_char *op,px_bool binary)
+static px_char PX_ScriptParseGetOpLevel(const px_char *op,px_bool binary)
 {
 	if (PX_strlen(op)==1)
 	{
@@ -6272,7 +6273,7 @@ _EXPR_OUT:
 			switch(pfunc->type)
 			{
 			case PX_SCRIPT_TRANSLATOR_FUNCTION_TYPE_EXPORT:
-			case PX_SCRIPT_TRANSLATOR_FUNCTION_TYPE_CUSTOM:
+			case PX_SCRIPT_TRANSLATOR_FUNCTION_TYPE_INLINE:
 				PX_StringInitialize(analysis->mp,&fmrString);
 				PX_StringFormat1(&fmrString,"CALL %1\n",PX_STRINGFORMAT_STRING(pfunc->name));
 				PX_StringCat(out,fmrString.buffer);
@@ -9638,7 +9639,7 @@ px_bool PX_ScriptCompilerCompile(PX_SCRIPT_LIBRARY *lib,const px_char *name,px_s
 					goto _ERROR;
 				}
 
-				if (!PX_ScriptParseFunctionDefined(&analysis, PX_SCRIPT_TRANSLATOR_FUNCTION_TYPE_CUSTOM))
+				if (!PX_ScriptParseFunctionDefined(&analysis, PX_SCRIPT_TRANSLATOR_FUNCTION_TYPE_EXPORT))
 				{
 					PX_ScriptTranslatorError(&analysis, "function define error");
 					goto _ERROR;
@@ -9799,8 +9800,12 @@ px_bool PX_ScriptCompilerCompile(PX_SCRIPT_LIBRARY *lib,const px_char *name,px_s
 
 		//////////////////////////////////////////////////////////////////////////
 		// Export function define
-		if (PX_strequ(analysis.lexer.CurLexeme.buffer,PX_SCRIPT_TRANSLATOR_KEYWORD_EXPORT))
+		if (PX_strequ(analysis.lexer.CurLexeme.buffer,PX_SCRIPT_TRANSLATOR_KEYWORD_EXPORT)|| PX_strequ(analysis.lexer.CurLexeme.buffer, PX_SCRIPT_TRANSLATOR_KEYWORD_INLINE))
 		{
+			px_bool fun_export,fun_inline;
+			fun_export=PX_strequ(analysis.lexer.CurLexeme.buffer,PX_SCRIPT_TRANSLATOR_KEYWORD_EXPORT);
+			fun_inline=PX_strequ(analysis.lexer.CurLexeme.buffer,PX_SCRIPT_TRANSLATOR_KEYWORD_INLINE);
+			
 			state=PX_LexerGetState(&analysis.lexer);
 
 			if (analysis.functionInside)
@@ -9823,11 +9828,23 @@ px_bool PX_ScriptCompilerCompile(PX_SCRIPT_LIBRARY *lib,const px_char *name,px_s
 				)
 			{
 				PX_LexerSetState(state);
-				if (!PX_ScriptParseFunctionDefined(&analysis, PX_SCRIPT_TRANSLATOR_FUNCTION_TYPE_EXPORT))
+				if (fun_inline)
 				{
-					PX_ScriptTranslatorError(&analysis, "Invalid function defined");
-					goto _ERROR;
+					if (!PX_ScriptParseFunctionDefined(&analysis, PX_SCRIPT_TRANSLATOR_FUNCTION_TYPE_INLINE))
+					{
+						PX_ScriptTranslatorError(&analysis, "Invalid function defined");
+						goto _ERROR;
+					}
 				}
+				else
+				{
+					if (!PX_ScriptParseFunctionDefined(&analysis, PX_SCRIPT_TRANSLATOR_FUNCTION_TYPE_EXPORT))
+					{
+						PX_ScriptTranslatorError(&analysis, "Invalid function defined");
+						goto _ERROR;
+					}
+				}
+				
 			}
 			else
 			{

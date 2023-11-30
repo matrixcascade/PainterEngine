@@ -513,7 +513,7 @@ px_void PX_CanvasVMStorePaintShell(PX_CanvasVM* pCanvasVM)
 
 }
 
-px_void PX_CanvasVMRegisterTool(PX_CanvasVM* pCanvasVM, px_char name[PX_CANVASVM_MAX_TOOL_NAME], pfun_PX_CanvasVMOnPaint paint,px_bool store, px_void* ptr)
+px_void PX_CanvasVMRegisterTool(PX_CanvasVM* pCanvasVM,const px_char name[PX_CANVASVM_MAX_TOOL_NAME], pfun_PX_CanvasVMOnPaint paint,px_bool store, px_void* ptr)
 {
 	px_int i;
 	for (i=0;i<PX_COUNTOF(pCanvasVM->tools);i++)

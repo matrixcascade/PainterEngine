@@ -1,12 +1,12 @@
 #include "PX_Script_VM.h"
 
 
-static px_void PX_VM_Error(PX_VM *Ins,px_char *log)
+static px_void PX_VM_Error(PX_VM *Ins, const px_char *log)
 {
 	PX_LOG(log);
 }
 
-static px_void PX_VM_LOG(px_char *log)
+static px_void PX_VM_LOG(const px_char *log)
 {
 	PX_LOG(log);
 }

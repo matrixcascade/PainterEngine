@@ -20,9 +20,9 @@ px_void PX_Object_LayerBoxListOnChanged(PX_Object* pObject, PX_Object_Event e, p
 px_void PX_Object_LayerBoxListItemOnRender(px_surface* psurface, PX_Object* pObject, px_dword elapsed)
 {
 	px_float x, y, w, h;
-	PX_Object* pLayerBoxObject = pObject->User_ptr;
+	PX_Object* pLayerBoxObject = (PX_Object*)pObject->User_ptr;
 	PX_Object_LayerBox* pdesc=PX_ObjectGetDesc(PX_Object_LayerBox, pLayerBoxObject);
-	PX_Object_Layer *pLayer=PX_Object_ListItemGetData(pObject);
+	PX_Object_Layer *pLayer=(PX_Object_Layer*)PX_Object_ListItemGetData(pObject);
 	PX_Object* pButtonObject;
 	PX_OBJECT_INHERIT_CODE(pObject, x, y, w, h);
 
@@ -68,7 +68,7 @@ px_void PX_Object_LayerBoxListItemOnRender(px_surface* psurface, PX_Object* pObj
 px_void PX_Object_LayerBoxOnLayerVisibleButtonClick(PX_Object* pObject, PX_Object_Event e, px_void* ptr)
 {
 	PX_Object* ItemObject = (PX_Object*)ptr;
-	PX_Object* pLayerBoxObject= ItemObject->User_ptr;
+	PX_Object* pLayerBoxObject= (PX_Object*)ItemObject->User_ptr;
 	PX_Object_LayerBox* pdesc = PX_ObjectGetDesc(PX_Object_LayerBox, pLayerBoxObject);
 	PX_CanvasVMLayerVisible(pdesc->pCanvasVM);
 
