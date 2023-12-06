@@ -5,6 +5,7 @@ px_bool PX_WorldInitialize(px_memorypool *mp,PX_World *World,px_int world_width,
 {
 	px_void *ptr;
 	PX_memset(World, 0, sizeof(PX_World));
+	if(!PX_MapInitialize(mp,&World->classes)) return PX_FALSE;
 	if(!PX_VectorInitialize(mp,&World->pObjects,sizeof(PX_WorldObject),256)) return PX_FALSE;
 	if(!PX_VectorInitialize(mp,&World->pNewObjects,sizeof(PX_Object *),128)) return PX_FALSE;
 	World->mp=mp;
@@ -154,6 +155,32 @@ px_void PX_WorldClear(PX_World* world)
 		PX_WorldRemoveObjectEx(world,i);
 	}
 	PX_VectorClear(&world->pObjects);
+}
+
+px_void PX_WorldBindSoundPlay(PX_World* pWorld, PX_SoundPlay* pSoundPlay)
+{
+	pWorld->psoundplay = pSoundPlay;
+}
+
+px_void PX_WorldBindResourceLibrary(PX_World* pWorld, PX_ResourceLibrary* pResourceLibrary)
+{
+	pWorld->presourceLibrary = pResourceLibrary;
+}
+
+px_void PX_WorldSoundPlay(PX_World* pWorld, const px_char key[], px_float x, px_float y)
+{
+	if (pWorld->presourceLibrary&&pWorld->psoundplay)
+	{
+		if (PX_isXYInRegion(x, y, pWorld->offsetx-100, pWorld->offsety-100, pWorld->surface_width+200.f, pWorld->surface_height+200.f))
+		{
+			PX_SoundPlayPlayData(pWorld->psoundplay, PX_ResourceLibraryGetSound(pWorld->presourceLibrary, key));
+		}
+		else
+		{
+			PX_LOG("view error");
+		}
+	}
+	
 }
 
 static px_void PX_WorldUpdateNewObjectList(PX_World* pworld)
@@ -637,6 +664,38 @@ px_void PX_WorldPostEvent(PX_World* pw, PX_Object_Event e)
 	}
 }
 
+px_bool PX_WorldRegisterClass(PX_World* pw, PX_WorldClass cls)
+{
+	PX_WorldClass *pNewClass=(PX_WorldClass *)MP_Malloc(pw->mp,sizeof(PX_WorldClass));
+	if (pNewClass==PX_NULL)
+	{
+		return PX_FALSE;
+	}
+	*pNewClass=cls;
+	if (PX_MapPut(&pw->classes,(const px_byte *)cls.name,PX_strlen(cls.name),pNewClass)!=PX_HASHMAP_RETURN_OK)
+	{
+		MP_Free(pw->mp,pNewClass);
+		return PX_FALSE;
+	}
+	return PX_TRUE;
+}
+
+px_bool  PX_WorldCreateClassObject(PX_World* pWorld, px_char name[], px_float x, px_float y, px_float z, px_float width, px_float height, px_float length, px_abi* abi)
+{
+	PX_WorldClass* pClass = (PX_WorldClass*)PX_MapGet(&pWorld->classes, (const px_byte*)name, PX_strlen(name));
+	if (pClass)
+	{
+		PX_Object* pObject = pClass->func(pWorld, x, y, z, width, height, length, abi);
+		if (pObject)
+		{
+			PX_WorldAddObject(pWorld, pObject);
+			return PX_TRUE;
+		}
+	}
+	return PX_FALSE;
+
+}
+
 px_void PX_WorldFree(PX_World *pw)
 {
 	PX_WorldObject *pwo;
@@ -661,6 +720,15 @@ px_void PX_WorldFree(PX_World *pw)
 
 	PX_VectorFree(&pw->pObjects);
 	PX_VectorFree(&pw->pNewObjects);
+	
+	PX_RBNode* pNode = PX_MapFirst(&pw->classes);
+	while (pNode)
+	{
+		MP_Free(pw->mp, pNode->_ptr);
+		pNode->_ptr = PX_NULL;
+		pNode = PX_MapNext(pNode);
+	}
+	PX_MapFree(&pw->classes);
 
 	MP_Free(pw->mp,pw->mp_WorldCalc.StartAddr);
 
@@ -683,6 +751,7 @@ px_void PX_WorldRemoveObject(PX_World *world,PX_Object *pObject)
 			pwo->DeleteMark=PX_TRUE;
 			return;
 		}
+		PX_ASSERT();
 	}
 }
 

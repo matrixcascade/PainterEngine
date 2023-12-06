@@ -69,6 +69,7 @@ PX_RBNode* PX_MapNext(PX_RBNode* node)
 	return PX_RBTreeNext(node);
 }
 
+
 PX_HASHMAP_RETURN PX_MapErase(px_map * m, const px_byte code[], px_int codesize)
 {
 	if (PX_RBTreeDelete(&m->tree, code,codesize))

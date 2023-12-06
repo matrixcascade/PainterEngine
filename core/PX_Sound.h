@@ -8,7 +8,7 @@
 #include "PX_Vector.h"
 #include "PX_Tuning.h"
 
-#define PX_SOUND_DEFAULT_PARALLEL 4
+#define PX_SOUND_DEFAULT_PARALLEL 8
 
 typedef enum
 {
@@ -59,6 +59,7 @@ typedef struct
 px_bool PX_SoundPlayInitialize(px_memorypool *mp, PX_SoundPlay *pSoundPlay);
 px_void PX_SoundPlaySetUserRead(PX_SoundPlay *pSoundPlay,px_void (*userread)(px_void *userptr,px_byte *pBuffer,px_int readSize),px_void *ptr);
 px_void PX_SoundPlayPause(PX_SoundPlay *pSoundPlay,px_bool pause);
+px_void PX_SoundPlayPlayData(PX_SoundPlay *pSoundPlay,PX_SoundData *pdata);
 px_int PX_SoundPlayAdd(PX_SoundPlay *pSoundPlay,PX_Sound sound);
 px_void PX_SoundPlaySetMixMode(PX_SoundPlay *pSoundPlay,PX_SOUND_MIX_MODE mode);
 px_bool PX_SoundPlayRead(PX_SoundPlay *pSoundPlay,px_byte *pBuffer,px_int readSize);

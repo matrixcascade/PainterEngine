@@ -62,15 +62,29 @@ px_bool PainterEngine_Initialize(px_int _screen_width,px_int _screen_height)
 	render_surface=&App.runtime.RenderSurface;
 	resource_library =&App.runtime.ResourceLibrary;
 	soundplay = &App.soundplay;
+	#ifdef PX_AUDIO_H
+	PX_SoundPlayInitialize(mp, &App.soundplay);
+	PainterEngine_InitializeAudio();
+	#endif
 	return PX_TRUE;
 }
 
 px_bool PainterEngine_InitializeWorld(px_int width, px_int height)
 {
+	if (!PainterEngine_Initialize(width,height))
+		return PX_FALSE;
+
 	if (!PX_WorldInitialize(&App.runtime.mp_dynamic, &App.world, width, height, App.runtime.surface_width, App.runtime.surface_height, 2 * 1024 * 1024))
 		return PX_FALSE;
 	PX_Object_DesignerBindWorld(App.object_designer, &App.world);
+	PX_WorldBindResourceLibrary(&App.world, &App.runtime.ResourceLibrary);
+	PX_WorldBindSoundPlay(&App.world, &App.soundplay);
 	return PX_TRUE;
+}
+
+PX_World *PainterEngine_GetWorld()
+{
+	return &App.world;
 }
 
 PX_Object* PainterEngine_GetRoot()
@@ -100,7 +114,13 @@ px_memorypool* PainterEngine_GetStaticMP()
 
 px_bool PainterEngine_InitializeAudio()
 {
-	return PX_AudioInitialize(&App.soundplay);
+	static px_bool audioInit = PX_FALSE;
+	if (!audioInit)
+	{
+		audioInit = PX_TRUE;
+		return PX_AudioInitialize(&App.soundplay);
+	}
+	return PX_TRUE;	
 }
 
 px_void PainterEngine_SetBackgroundColor(px_color color)
@@ -165,19 +185,30 @@ px_bool PX_ApplicationInitialize(PX_Application *pApp,px_int screen_width,px_int
 px_void PX_ApplicationUpdate(PX_Application *pApp,px_dword elapsed)
 {
 	PX_ObjectUpdate(pApp->object_root, elapsed);
+	if (pApp->world.mp)
+	{
+		PX_WorldUpdate(&pApp->world, elapsed);
+	}
 }
 
 px_void PX_ApplicationRender(PX_Application *pApp,px_dword elapsed)
 {
 	px_surface *pRenderSurface=&pApp->runtime.RenderSurface;
 	PX_RuntimeRenderClear(&pApp->runtime,pApp->backgroundColor);
+	if (pApp->world.mp)
+	{
+		PX_WorldRender(pRenderSurface, &pApp->world, elapsed);
+	}
+
 	PX_ObjectRender(pRenderSurface, pApp->object_root,elapsed);
 }
 
 px_void PX_ApplicationPostEvent(PX_Application *pApp,PX_Object_Event e)
 {
 	PX_ObjectPostEvent(pApp->object_root,e);
-
-
+	if (pApp->world.mp)
+	{
+		PX_WorldPostEvent(&pApp->world, e);
+	}
 }
 

@@ -5,7 +5,7 @@ px_bool PX_SoundPlayInitialize(px_memorypool *mp, PX_SoundPlay *pSoundPlay)
 	PX_memset(pSoundPlay,0,sizeof(PX_SoundPlay));
     pSoundPlay->mp=mp;
     pSoundPlay->bLock=PX_FALSE;
-    pSoundPlay->mix_mode=PX_SOUND_MIX_MODE_PARALLEL;
+    pSoundPlay->mix_mode=PX_SOUND_MIX_MODE_AVG;
     pSoundPlay->parallel=PX_SOUND_DEFAULT_PARALLEL;
     pSoundPlay->pause=PX_FALSE;
 	pSoundPlay->current_amplitude = 0;
@@ -23,6 +23,11 @@ px_void PX_SoundPlaySetUserRead(PX_SoundPlay *pSoundPlay,px_void (*userread)(px_
 px_void PX_SoundPlayPause(PX_SoundPlay *pSoundPlay,px_bool pause)
 {
 	pSoundPlay->pause=pause;
+}
+
+px_void PX_SoundPlayPlayData(PX_SoundPlay* pSoundPlay, PX_SoundData* pdata)
+{
+	PX_SoundPlayAdd(pSoundPlay, PX_SoundCreate(pdata, 0));
 }
 
 px_void PX_SoundPlayRemove(PX_SoundPlay* pSoundPlay, px_int index)
@@ -64,7 +69,7 @@ px_bool PX_SoundPlayRead(PX_SoundPlay *pSoundPlay,px_byte *pBuffer,px_int readSi
 	px_int i,j,ReadblockCount;
 	PX_Sound *pSound;
 	px_short *pSourcePCM16,*pTargetPCM16=(px_short *)pBuffer;
-	px_short div;
+	px_int div;
 	if (readSize%4)
 	{
 		return PX_FALSE;
@@ -75,6 +80,7 @@ px_bool PX_SoundPlayRead(PX_SoundPlay *pSoundPlay,px_byte *pBuffer,px_int readSi
 	{
 		return PX_TRUE;
 	}
+	
 
 	if (pSoundPlay->userread)
 	{
@@ -109,7 +115,16 @@ px_bool PX_SoundPlayRead(PX_SoundPlay *pSoundPlay,px_byte *pBuffer,px_int readSi
 		return PX_TRUE;
 	}
 
-	div=PX_COUNTOF(pSoundPlay->Sounds);
+	div = 0;
+	for (j = 0; j < PX_COUNTOF(pSoundPlay->Sounds); j++)
+	{
+		pSound = pSoundPlay->Sounds + j;
+		if (!pSound->datasize || pSound->pause)
+		{
+			continue;
+		}
+		div++;
+	}
 
 	for (j=0;j<PX_COUNTOF(pSoundPlay->Sounds);j++)
 	{
@@ -128,7 +143,8 @@ px_bool PX_SoundPlayRead(PX_SoundPlay *pSoundPlay,px_byte *pBuffer,px_int readSi
 			resBlockCount = pSound->data->channel==PX_SOUND_CHANNEL_ONE?pSound->datasize/2:pSound->datasize/4;
 			if (ReadblockCount > resBlockCount)
 			{
-				continue;
+				ReadblockCount=resBlockCount;
+				pSound->datasize = 0;
 			}
 			else
 			{
@@ -141,26 +157,30 @@ px_bool PX_SoundPlayRead(PX_SoundPlay *pSoundPlay,px_byte *pBuffer,px_int readSi
 			switch (pSoundPlay->mix_mode)
 			{
 			case PX_SOUND_MIX_MODE_PARALLEL:
-				pTargetPCM16[i * 2] += pSourcePCM16[pSound->roffset / 2] / pSoundPlay->parallel;
-				if (pSound->data->channel == PX_SOUND_CHANNEL_DOUBLE)
 				{
+					pTargetPCM16[i * 2] += pSourcePCM16[pSound->roffset / 2] / pSoundPlay->parallel;
+					if (pSound->data->channel == PX_SOUND_CHANNEL_DOUBLE)
+					{
+						pSound->roffset += 2;
+						pSound->roffset %= pSound->data->size;
+					}
+					pTargetPCM16[i * 2 + 1] += pSourcePCM16[pSound->roffset / 2] / pSoundPlay->parallel;
 					pSound->roffset += 2;
 					pSound->roffset %= pSound->data->size;
 				}
-				pTargetPCM16[i * 2 + 1] += pSourcePCM16[pSound->roffset / 2] / pSoundPlay->parallel;
-				pSound->roffset += 2;
-				pSound->roffset %= pSound->data->size;
 				break;
 			case PX_SOUND_MIX_MODE_AVG:
-				pTargetPCM16[i * 2] += pSourcePCM16[pSound->roffset / 2] / div;
-				if (pSound->data->channel == PX_SOUND_CHANNEL_DOUBLE)
 				{
+					pTargetPCM16[i * 2] += pSourcePCM16[pSound->roffset / 2] / div;
+					if (pSound->data->channel == PX_SOUND_CHANNEL_DOUBLE)
+					{
+						pSound->roffset += 2;
+						pSound->roffset %= pSound->data->size;
+					}
+					pTargetPCM16[i * 2 + 1] += pSourcePCM16[pSound->roffset / 2] / div;
 					pSound->roffset += 2;
 					pSound->roffset %= pSound->data->size;
 				}
-				pTargetPCM16[i * 2 + 1] += pSourcePCM16[pSound->roffset / 2] / div;
-				pSound->roffset += 2;
-				pSound->roffset %= pSound->data->size;
 				break;
 			}
 		}

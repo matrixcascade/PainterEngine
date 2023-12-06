@@ -487,7 +487,7 @@ px_void PX_RBTreeDisconnectNode(PX_RBTree* tree, PX_RBNode* pDeleteNode)
 
 
 
-static px_void PX_RBTreeDeleteNode(PX_RBTree* tree, PX_RBNode* node)
+px_void PX_RBTreeDeleteNode(PX_RBTree* tree, PX_RBNode* node)
 {
 	PX_RBNode* pDeleteNode = node;
 	//find predecess

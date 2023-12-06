@@ -49,7 +49,7 @@ px_bool PX_RBTreeGetInt(PX_RBTree* tree, const px_byte code[], px_int codesize, 
 px_bool PX_RBTreeGetPtr(PX_RBTree* tree, const px_byte code[], px_int codesize, px_void** ptr);
 px_bool PX_RBTreeGetFloat(PX_RBTree* tree, const px_byte code[], px_int codesize, px_float* value);
 px_bool PX_RBTreeDelete(PX_RBTree* tree, const px_byte code[], px_int codesize);
-
+px_void PX_RBTreeDeleteNode(PX_RBTree* tree, PX_RBNode* node);
 px_void PX_RBTreeFree(PX_RBTree* tree);
 PX_RBNode* PX_RBTreeFirst(PX_RBTree* tree);
 PX_RBNode* PX_RBTreeNext(PX_RBNode *node);

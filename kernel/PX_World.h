@@ -14,9 +14,17 @@ typedef struct
 	PX_Object *pObject;
 }PX_WorldObject;
 
+typedef PX_Object *(*PX_WorldCreateObjectFunc)(struct _PX_World *pWorld,px_float x,px_float y,px_float z,px_float width,px_float height,px_float length,px_abi *abi);
+
+#define PX_WORLD_CREATE_OBJECT_FUNCTION(name) PX_Object *name(PX_World *pWorld,px_float x,px_float y,px_float z,px_float width,px_float height,px_float length,px_abi *pabi)
+typedef struct
+{
+	px_char name[PX_WORLD_OBJECT_TYPE_NAME_LEN];
+	PX_WorldCreateObjectFunc func;
+}PX_WorldClass;
 
 
-typedef struct 
+typedef struct _PX_World
 {
 	px_vector pNewObjects;
 	px_vector pObjects;//PX_World_Object;
@@ -36,10 +44,13 @@ typedef struct
 	px_map idSearchmap;
 	px_texture* pbackgroundtexture;
 	px_texture* pfrontwardtexture;
+	PX_ResourceLibrary *presourceLibrary;
+	PX_SoundPlay* psoundplay;
 	PX_Quadtree Impact_Test_array[sizeof(px_dword)*8];
+	px_map classes;
 }PX_World;
 
-typedef PX_Object *(*px_world_func_CreateObject)(PX_World *pWorld,px_float x,px_float y,px_float z,px_float width,px_float height,px_float length,px_void *user);
+typedef PX_Object *(*px_world_func_CreateObject)(PX_World *pWorld,px_float x,px_float y,px_float z,px_float width,px_float height,px_float length,px_void *user,px_abi *abi);
 typedef struct
 {
 	const px_char *name;
@@ -56,7 +67,9 @@ PX_Object*		PX_WorldGetObject(PX_World* World, px_int index);
 px_void         PX_WorldRemoveObject(PX_World *pWorld,PX_Object *pObject);
 px_void			PX_WorldRemoveObjectByIndex(PX_World *pWorld,px_int i_index);
 px_void			PX_WorldClear(PX_World* world);
-
+px_void         PX_WorldSoundPlay(PX_World* pWorld, const px_char key[],px_float x,px_float y);
+px_void         PX_WorldBindSoundPlay(PX_World* pWorld, PX_SoundPlay* pSoundPlay);
+px_void         PX_WorldBindResourceLibrary(PX_World* pWorld, PX_ResourceLibrary* pResourceLibrary);
 //LIMIT-Only used to ObjectUpdate Function 
 _LIMIT px_int	PX_WorldSearchRegion(PX_World *pWorld,px_float centerX,px_float centerY,px_float raduis,PX_Object *pObject[],px_int MaxSearchCount,px_dword impact_test_type);
 _LIMIT px_int	PX_WorldSearch(PX_World* world, PX_Object* pObject[], px_int MaxSearchCount, px_dword impact_object_type);
@@ -73,5 +86,7 @@ px_void			PX_WorldEnableAuxiliaryLine(PX_World *pw,px_bool bline);
 px_void			PX_WorldSetAuxiliaryLineColor(PX_World *pw,px_color color);
 px_point        PX_WorldObjectXYtoScreenXY(PX_World *pw,px_float x,px_float y);
 px_void			PX_WorldPostEvent(PX_World* pw, PX_Object_Event e);
+px_bool			PX_WorldRegisterClass(PX_World* pw, PX_WorldClass cls);
+px_bool         PX_WorldCreateClassObject(PX_World* pWorld,px_char name[], px_float x, px_float y, px_float z, px_float width, px_float height, px_float length, px_abi* abi);
 px_void         PX_WorldFree(PX_World *pw);
 #endif

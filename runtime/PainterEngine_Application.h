@@ -29,6 +29,7 @@
 	px_bool PainterEngine_InitializeWorld(px_int width, px_int height);
 	px_bool PainterEngine_InitializeAudio();
 
+	PX_World* PainterEngine_GetWorld();
 	PX_Object* PainterEngine_GetRoot();
 	px_surface* PainterEngine_GetSurface();
 	PX_Runtime* PainterEngine_GetRuntime();

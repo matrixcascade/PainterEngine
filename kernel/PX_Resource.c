@@ -174,6 +174,15 @@ px_bool PX_ResourceLibraryAddTexture(PX_ResourceLibrary *lib,const px_char key[]
 	return PX_TRUE;
 }
 
+px_texture *PX_ResourceLibraryCreateTexture(PX_ResourceLibrary* lib, const px_char key[], px_int width,px_int height)
+{
+	PX_Resource res;
+	res.Type = PX_RESOURCE_TYPE_TEXTURE;
+	if (!PX_TextureCreate(lib->mp, &res.texture,width, height))return PX_NULL;
+	if(PX_MapPut(&lib->map, (const px_byte*)key, PX_strlen(key), PX_ListPush(&lib->resources, &res, sizeof(res)))!=PX_HASHMAP_RETURN_OK) 
+		return 0;
+	return PX_ResourceLibraryGetTexture(lib,key);
+}
 
 
 

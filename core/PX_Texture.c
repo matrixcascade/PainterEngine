@@ -104,10 +104,10 @@ static px_int PX_TextureRenderParallel(px_void *parallel_data)
 				bG=(px_int)(clr._argb.g*param_data->blend->hdr_G);
 				bB=(px_int)(clr._argb.b*param_data->blend->hdr_B);
 
-				clr._argb.a=bA>255?255:(px_uchar)bA;
-				clr._argb.r=bR>255?255:(px_uchar)bR;
-				clr._argb.g=bG>255?255:(px_uchar)bG;
-				clr._argb.b=bB>255?255:(px_uchar)bB;
+				clr._argb.a = (px_uchar)(((bA > 255) * 0xff) | bA);
+				clr._argb.r = (px_uchar)(((bR > 255) * 0xff) | bR);
+				clr._argb.g = (px_uchar)(((bG > 255) * 0xff) | bG);
+				clr._argb.b = (px_uchar)(((bB > 255) * 0xff) | bB);
 				PX_SurfaceDrawPixel(param_data->psurface,param_data->x+i,param_data->y+j,clr);
 			}
 		}
@@ -872,10 +872,10 @@ px_void PX_TextureRenderRotation_sincos(px_surface *psurface,px_texture *tex,px_
 				bG=(px_int)(clr._argb.g*Gb/1000);
 				bB=(px_int)(clr._argb.b*Bb/1000);
 
-				clr._argb.a=bA>255?255:(px_uchar)bA;
-				clr._argb.r=bR>255?255:(px_uchar)bR;
-				clr._argb.g=bG>255?255:(px_uchar)bG;
-				clr._argb.b=bB>255?255:(px_uchar)bB;
+				clr._argb.a = (px_uchar)(((bA > 255) * 0xff) | bA);
+				clr._argb.r = (px_uchar)(((bR > 255) * 0xff) | bR);
+				clr._argb.g = (px_uchar)(((bG > 255) * 0xff) | bG);
+				clr._argb.b = (px_uchar)(((bB > 255) * 0xff) | bB);
 
 				PX_SurfaceDrawPixel(psurface,i+x,j+y,clr);
 			}
@@ -1054,10 +1054,10 @@ px_void PX_TextureRenderMask(px_surface *psurface,px_texture *mask_tex,px_textur
 				bG=(px_int)(clr._argb.g*Gb/1000);
 				bB=(px_int)(clr._argb.b*Bb/1000);
 
-				clr._argb.a=bA>255?255:(px_uchar)bA;
-				clr._argb.r=bR>255?255:(px_uchar)bR;
-				clr._argb.g=bG>255?255:(px_uchar)bG;
-				clr._argb.b=bB>255?255:(px_uchar)bB;
+				clr._argb.a = (px_uchar)(((bA > 255) * 0xff) | bA);
+				clr._argb.r = (px_uchar)(((bR > 255) * 0xff) | bR);
+				clr._argb.g = (px_uchar)(((bG > 255) * 0xff) | bG);
+				clr._argb.b = (px_uchar)(((bB > 255) * 0xff) | bB);
 				PX_SurfaceDrawPixel(psurface,x+i,y+j,clr);
 			}
 		}
@@ -1649,10 +1649,12 @@ px_void PX_TextureRenderEx(px_surface *psurface,px_texture *resTexture,px_int x,
 				bG=(px_int)(clr._argb.g*Gb/1000);
 				bB=(px_int)(clr._argb.b*Bb/1000);
 
-				clr._argb.a=bA>255?255:(px_uchar)bA;
-				clr._argb.r=bR>255?255:(px_uchar)bR;
-				clr._argb.g=bG>255?255:(px_uchar)bG;
-				clr._argb.b=bB>255?255:(px_uchar)bB;
+				clr._argb.a = (px_uchar)(((bA > 255) * 0xff) | bA);
+				clr._argb.r = (px_uchar)(((bR > 255) * 0xff) | bR);
+				clr._argb.g = (px_uchar)(((bG > 255) * 0xff) | bG);
+				clr._argb.b = (px_uchar)(((bB > 255) * 0xff) | bB);
+
+
 				PX_SurfaceDrawPixel(psurface,x+i,y+j,clr);
 			}
 
@@ -1878,10 +1880,10 @@ px_void PX_TextureRenderMaskEx(px_surface *psurface,px_texture *mask_tex,px_text
 				bG=(px_int)(clr._argb.g*Gb/1000);
 				bB=(px_int)(clr._argb.b*Bb/1000);
 
-				clr._argb.a=bA>255?255:(px_uchar)bA;
-				clr._argb.r=bR>255?255:(px_uchar)bR;
-				clr._argb.g=bG>255?255:(px_uchar)bG;
-				clr._argb.b=bB>255?255:(px_uchar)bB;
+				clr._argb.a = (px_uchar)(((bA > 255) * 0xff) | bA);
+				clr._argb.r = (px_uchar)(((bR > 255) * 0xff) | bR);
+				clr._argb.g = (px_uchar)(((bG > 255) * 0xff) | bG);
+				clr._argb.b = (px_uchar)(((bB > 255) * 0xff) | bB);
 				PX_SurfaceDrawPixel(psurface,x+i,y+j,clr);
 			}
 
@@ -2169,10 +2171,10 @@ px_void PX_TextureRegionRender(px_surface *psurface,px_texture *resTexture,px_in
 				bG=(px_int)(clr._argb.g*Gb/1000);
 				bB=(px_int)(clr._argb.b*Bb/1000);
 
-				clr._argb.a=bA>255?255:(px_uchar)bA;
-				clr._argb.r=bR>255?255:(px_uchar)bR;
-				clr._argb.g=bG>255?255:(px_uchar)bG;
-				clr._argb.b=bB>255?255:(px_uchar)bB;
+				clr._argb.a = (px_uchar)(((bA > 255) * 0xff) | bA);
+				clr._argb.r = (px_uchar)(((bR > 255) * 0xff) | bR);
+				clr._argb.g = (px_uchar)(((bG > 255) * 0xff) | bG);
+				clr._argb.b = (px_uchar)(((bB > 255) * 0xff) | bB);
 				PX_SurfaceDrawPixel(psurface,x+i,y+j,clr);
 			}
 		}
@@ -2306,10 +2308,10 @@ px_void PX_TextureRegionCopy(px_surface *psurface,px_texture *resTexture,px_int 
 				bG=(px_int)(clr._argb.g*Gb/1000);
 				bB=(px_int)(clr._argb.b*Bb/1000);
 
-				clr._argb.a=bA>255?255:(px_uchar)bA;
-				clr._argb.r=bR>255?255:(px_uchar)bR;
-				clr._argb.g=bG>255?255:(px_uchar)bG;
-				clr._argb.b=bB>255?255:(px_uchar)bB;
+				clr._argb.a = (px_uchar)(((bA > 255) * 0xff) | bA);
+				clr._argb.r = (px_uchar)(((bR > 255) * 0xff) | bR);
+				clr._argb.g = (px_uchar)(((bG > 255) * 0xff) | bG);
+				clr._argb.b = (px_uchar)(((bB > 255) * 0xff) | bB);
 				PX_SurfaceSetPixel(psurface,x+i,y+j,clr);
 			}
 		}
@@ -3014,10 +3016,10 @@ px_void PX_TextureRenderEx_sincos(px_surface *psurface,px_texture *resTexture,px
 				bG=(px_int)(clr._argb.g*Gb/1000);
 				bB=(px_int)(clr._argb.b*Bb/1000);
 
-				clr._argb.a=bA>255?255:(px_uchar)bA;
-				clr._argb.r=bR>255?255:(px_uchar)bR;
-				clr._argb.g=bG>255?255:(px_uchar)bG;
-				clr._argb.b=bB>255?255:(px_uchar)bB;
+				clr._argb.a = (px_uchar)(((bA > 255) * 0xff) | bA);
+				clr._argb.r = (px_uchar)(((bR > 255) * 0xff) | bR);
+				clr._argb.g = (px_uchar)(((bG > 255) * 0xff) | bG);
+				clr._argb.b = (px_uchar)(((bB > 255) * 0xff) | bB);
 				PX_SurfaceDrawPixel(psurface,x+i,y+j,clr);
 			}
 
