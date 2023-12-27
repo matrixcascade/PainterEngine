@@ -249,6 +249,11 @@ px_int PX_Object_Event_GetCursorIndex(PX_Object_Event e)
 	return e.Param_int[2];
 }
 
+px_float PX_Object_Event_GetDamage(PX_Object_Event e)
+{
+	return e.Param_float[0];
+}
+
 px_float PX_Object_Event_GetWidth(PX_Object_Event e)
 {
 	return e.Param_float[0];
@@ -303,6 +308,11 @@ px_void PX_Object_Event_SetCursorY(PX_Object_Event *e,px_float y)
 px_void PX_Object_Event_SetCursorZ(PX_Object_Event *e,px_float z)
 {
 	e->Param_float[2]=z;
+}
+
+px_void PX_Object_Event_SetDamage(PX_Object_Event* e, px_float damage)
+{
+	e->Param_float[0] = damage;
 }
 
 px_void PX_Object_Event_SetCursorIndex(PX_Object_Event *e,px_int index)
@@ -611,6 +621,70 @@ static px_void PX_ObjectUpdateDelayDelete(PX_Object* pObject)
 	}
 }
 
+px_void PX_ObjectUpdatePhysics(PX_Object* pObject, px_uint elapsed)
+{
+	px_float vfx, vfy, vfz;
+	if (pObject == PX_NULL)
+	{
+		PX_ASSERT();
+		return;
+	}
+	if (pObject->Enabled == PX_FALSE)
+	{
+		return;
+	}
+
+	vfx = pObject->vx * pObject->vx * pObject->ak;
+	vfy = pObject->vy * pObject->vy * pObject->ak;
+	vfz = pObject->vz * pObject->vz * pObject->ak;
+
+	if (PX_ABS(vfx * elapsed / 1000.f) > PX_ABS(pObject->vx))
+	{
+		pObject->vx = 0;
+	}
+	else
+	{
+		if (pObject->vx > 0)
+			pObject->vx -= vfx * elapsed / 1000.f;
+		else
+			pObject->vx += vfx * elapsed / 1000.f;
+	}
+
+	if (PX_ABS(vfy * elapsed / 1000.f) > PX_ABS(pObject->vy))
+	{
+		pObject->vy = 0;
+	}
+	else
+	{
+		if (pObject->vy > 0)
+			pObject->vy -= vfy * elapsed / 1000.f;
+		else
+			pObject->vy += vfy * elapsed / 1000.f;
+	}
+
+	if (PX_ABS(vfz * elapsed / 1000.f) > PX_ABS(pObject->vz))
+	{
+		pObject->vz = 0;
+	}
+	else
+	{
+		if (pObject->vz > 0)
+			pObject->vz -= vfz * elapsed / 1000.f;
+		else
+			pObject->vz += vfz * elapsed / 1000.f;
+	}
+
+
+	pObject->vx += pObject->fx * elapsed / 1000.f;
+	pObject->vy += pObject->fy * elapsed / 1000.f;
+	pObject->vz += pObject->fz * elapsed / 1000.f;
+
+	pObject->x += pObject->vx * elapsed / 1000.f;
+	pObject->y += pObject->vy * elapsed / 1000.f;
+	pObject->z += pObject->vz * elapsed / 1000.f;
+}
+
+
 px_void PX_ObjectUpdate(PX_Object *pObject,px_uint elapsed )
 {
 	if (pObject==PX_NULL)
@@ -641,6 +715,7 @@ px_void PX_ObjectUpdate(PX_Object *pObject,px_uint elapsed )
 	}
 
 }
+
 
 static px_void PX_ObjectRenderEx(px_surface *pSurface, PX_Object *pObject,px_uint elapsed )
 {
@@ -1051,18 +1126,31 @@ px_void PX_ObjectPostEvent( PX_Object *pPost,PX_Object_Event Event )
 
 px_void PX_ObjectSetPosition( PX_Object *pObject,px_float x,px_float y,px_float z)
 {
-	if (pObject==PX_NULL)
-	{
-		PX_ASSERT();
-		return;
-	}
+	PX_ASSERTIF(pObject == PX_NULL);
 
 	pObject->x=x;
 	pObject->y=y;
 	pObject->z=z;
 }
 
-
+px_void	  PX_ObjectSetForce(PX_Object* pObject, px_float x, px_float y, px_float z)
+{
+	PX_ASSERTIF(pObject == PX_NULL);
+	pObject->fx = x;
+	pObject->fy = y;
+	pObject->fz = z;
+}
+px_void	  PX_ObjectSetVelocity(PX_Object* pObject, px_float x, px_float y, px_float z)
+{
+	PX_ASSERTIF(pObject == PX_NULL);
+	pObject->vx = x;
+	pObject->vy = y;
+	pObject->vz = z;
+}
+px_void	  PX_ObjectSetResistance(PX_Object* pObject, px_float ak)
+{
+	pObject->ak = ak;
+}
 
 px_void PX_ObjectSetSize( PX_Object *pObject,px_float Width,px_float Height,px_float length)
 {

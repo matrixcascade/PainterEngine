@@ -1,6 +1,6 @@
 #include "PX_Script_Interpreter.h"
 
-static const px_char *PX_Script_Keywords[]={"IF","ELSE","SWITCH","CASE","WHILE","FOR","BREAK","RETURN","STRUCT","FUNCTION","EXPORT","HOST","INT","FLOAT","STRING","MEMORY","_BOOT","RETURN","_ASM"};
+static const px_char *PX_Script_Keywords[]={"IF","ELSE","SWITCH","CASE","WHILE","FOR","BREAK","RETURN","STRUCT","FUNCTION","EXPORT","HOST","INT","HANDLE","FLOAT","STRING","MEMORY","_BOOT","RETURN","_ASM"};
 
 
 px_void PX_ScriptTranslatorError(PX_ScriptInterpreter* analysis, const px_char *info)
@@ -162,7 +162,7 @@ static px_bool PX_ScriptParseInclude(PX_ScriptInterpreter *analysis,px_string *c
 	px_lexer lexer;
 	PX_LEXER_STATE lexerState;
 	px_int allocsize;
-	px_int quotes,mquotes,singleQuotes,i;
+	px_int quotes,singleQuotes,i;
 	px_bool bfound;
 	px_char *exchangeBuffer;
 	PX_LEXER_LEXEME_TYPE type;
@@ -191,7 +191,6 @@ static px_bool PX_ScriptParseInclude(PX_ScriptInterpreter *analysis,px_string *c
 	PX_LexerRegisterSpacer(&lexer,' ');
 	PX_LexerRegisterSpacer(&lexer,'\t');
 	quotes=PX_LexerRegisterContainer(&lexer,"\"","\"");
-	mquotes= PX_LexerRegisterContainer(&lexer, "<", ">");
 	PX_LexerRegisterContainerTransfer(&lexer,quotes,'\\');
 	singleQuotes=PX_LexerRegisterContainer(&lexer,"\'","\'");
 	PX_LexerSetTokenCase(&lexer,PX_LEXER_LEXEME_CASE_UPPER);
@@ -220,7 +219,7 @@ static px_bool PX_ScriptParseInclude(PX_ScriptInterpreter *analysis,px_string *c
 			{
 					if (PX_ScriptTranslatorNextToken(&lexer)==PX_LEXER_LEXEME_TYPE_CONATINER)
 					{
-						if (PX_LexerGetCurrentContainerType(&lexer)!=quotes&& PX_LexerGetCurrentContainerType(&lexer) != mquotes)
+						if (PX_LexerGetCurrentContainerType(&lexer)!=quotes)
 						{
 							PX_ScriptTranslatorError(analysis,"syntactic error: include \"name\" expected but not found.");
 							goto _ERROR;
@@ -678,6 +677,15 @@ static px_bool PX_ScriptParse_AST_PushToken(PX_ScriptInterpreter *analysis,px_ve
 							return PX_TRUE;
 						}
 						break;
+					case PX_SCRIPT_PARSER_VAR_TYPE_HANDLE:
+						{
+							operand.operandType = PX_SCRIPT_AST_OPERAND_TYPE_HANDLE;
+							operand._oft = psetmem->offset;
+							operand.pStruct = PX_NULL;
+							PX_VectorPushback(tk, &operand);
+							return PX_TRUE;
+						}
+						break;
 					case PX_SCRIPT_PARSER_VAR_TYPE_FLOAT:
 						{
 							operand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_FLOAT;
@@ -854,6 +862,14 @@ static px_bool PX_ScriptParse_AST_PushToken(PX_ScriptInterpreter *analysis,px_ve
 				PX_VectorPushback(tk,&operand);
 			}
 			break;
+		case PX_SCRIPT_PARSER_VAR_TYPE_HANDLE:
+		{
+			operand.operandType = PX_SCRIPT_AST_OPERAND_TYPE_HANDLE;
+			operand._oft = pvar->BeginIndex;
+			operand.pStruct = PX_NULL;
+			PX_VectorPushback(tk, &operand);
+		}
+		break;
 		case PX_SCRIPT_PARSER_VAR_TYPE_FLOAT:
 			{
 				operand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_FLOAT;
@@ -896,6 +912,14 @@ static px_bool PX_ScriptParse_AST_PushToken(PX_ScriptInterpreter *analysis,px_ve
 				PX_VectorPushback(tk,&operand);
 			}
 			break;
+		case PX_SCRIPT_PARSER_VAR_TYPE_HANDLE_ARRAY:
+		{
+			operand.operandType = PX_SCRIPT_AST_OPERAND_TYPE_HANDLE_PTR_CONST;
+			operand._oft = pvar->BeginIndex;
+			operand.pStruct = PX_NULL;
+			PX_VectorPushback(tk, &operand);
+		}
+		break;
 		case PX_SCRIPT_PARSER_VAR_TYPE_FLOAT_ARRAY:
 			{
 				operand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_FLOAT_PTR_CONST;
@@ -938,6 +962,15 @@ static px_bool PX_ScriptParse_AST_PushToken(PX_ScriptInterpreter *analysis,px_ve
 				PX_VectorPushback(tk,&operand);
 			}
 			break;
+		case PX_SCRIPT_PARSER_VAR_TYPE_HANDLE_PTR:
+		{
+			*_outset = PX_NULL;
+			operand.operandType = PX_SCRIPT_AST_OPERAND_TYPE_HANDLE_PTR;
+			operand._oft = pvar->BeginIndex;
+			operand.pStruct = PX_NULL;
+			PX_VectorPushback(tk, &operand);
+		}
+		break;
 		case PX_SCRIPT_PARSER_VAR_TYPE_FLOAT_PTR:
 			{
 				*_outset=PX_NULL;
@@ -1274,9 +1307,11 @@ static px_bool PX_ScriptParseAST_MapTokenToR2(PX_ScriptInterpreter *analysis,PX_
 		//R2
 	case PX_SCRIPT_AST_OPERAND_TYPE_FLOAT:
 	case PX_SCRIPT_AST_OPERAND_TYPE_INT:
+	case PX_SCRIPT_AST_OPERAND_TYPE_HANDLE:
 	case PX_SCRIPT_AST_OPERAND_TYPE_STRING: //string var
 	case PX_SCRIPT_AST_OPERAND_TYPE_MEMORY://memory var
 	case PX_SCRIPT_AST_OPERAND_TYPE_INT_PTR: //int var[x]
+	case PX_SCRIPT_AST_OPERAND_TYPE_HANDLE_PTR: //handle var[x]
 	case PX_SCRIPT_AST_OPERAND_TYPE_FLOAT_PTR://float var[x]
 	case PX_SCRIPT_AST_OPERAND_TYPE_STRING_PTR://string var[x]
 	case PX_SCRIPT_AST_OPERAND_TYPE_MEMORY_PTR://memory var[x]
@@ -1342,6 +1377,7 @@ static px_bool PX_ScriptParseAST_MapTokenToR2(PX_ScriptInterpreter *analysis,PX_
 		break;
 
 	case PX_SCRIPT_AST_OPERAND_TYPE_INT_PTR_CONST:
+	case PX_SCRIPT_AST_OPERAND_TYPE_HANDLE_PTR_CONST:
 	case PX_SCRIPT_AST_OPERAND_TYPE_FLOAT_PTR_CONST:
 	case PX_SCRIPT_AST_OPERAND_TYPE_STRING_PTR_CONST:
 	case PX_SCRIPT_AST_OPERAND_TYPE_MEMORY_PTR_CONST:
@@ -1373,8 +1409,8 @@ static px_bool PX_ScriptParseAST_MapTokenToR2(PX_ScriptInterpreter *analysis,PX_
 
 		}
 		break;
-
 	case PX_SCRIPT_AST_OPERAND_TYPE_INT_CONST:
+	case PX_SCRIPT_AST_OPERAND_TYPE_HANDLE_CONST:
 		{
 			PX_StringInitialize(analysis->mp,&fmrString);
 
@@ -1397,6 +1433,7 @@ static px_bool PX_ScriptParseAST_MapTokenToR2(PX_ScriptInterpreter *analysis,PX_
 			PX_StringFree(&fmrString);
 		}
 		break;
+	
 
 	case PX_SCRIPT_AST_OPERAND_TYPE_FLOAT_CONST:
 		{
@@ -1598,9 +1635,11 @@ static px_bool PX_ScriptParseAST_MapTokenToR1(PX_ScriptInterpreter *analysis,PX_
 		//R2
 	case PX_SCRIPT_AST_OPERAND_TYPE_FLOAT:
 	case PX_SCRIPT_AST_OPERAND_TYPE_INT:
+	case PX_SCRIPT_AST_OPERAND_TYPE_HANDLE:
 	case PX_SCRIPT_AST_OPERAND_TYPE_STRING: //string var
 	case PX_SCRIPT_AST_OPERAND_TYPE_MEMORY://memory var
 	case PX_SCRIPT_AST_OPERAND_TYPE_INT_PTR: //int var[x]
+	case PX_SCRIPT_AST_OPERAND_TYPE_HANDLE_PTR: //int var[x]
 	case PX_SCRIPT_AST_OPERAND_TYPE_FLOAT_PTR://float var[x]
 	case PX_SCRIPT_AST_OPERAND_TYPE_STRING_PTR://string var[x]
 	case PX_SCRIPT_AST_OPERAND_TYPE_MEMORY_PTR://memory var[x]
@@ -1628,6 +1667,7 @@ static px_bool PX_ScriptParseAST_MapTokenToR1(PX_ScriptInterpreter *analysis,PX_
 			else
 			{
 				PX_StringFree(&fmrString);
+				PX_ScriptTranslatorError(analysis, "map to r1 error");
 				return PX_FALSE;
 			}
 
@@ -1666,6 +1706,7 @@ static px_bool PX_ScriptParseAST_MapTokenToR1(PX_ScriptInterpreter *analysis,PX_
 		break;
 
 	case PX_SCRIPT_AST_OPERAND_TYPE_INT_PTR_CONST:
+	case PX_SCRIPT_AST_OPERAND_TYPE_HANDLE_PTR_CONST:
 	case PX_SCRIPT_AST_OPERAND_TYPE_FLOAT_PTR_CONST:
 	case PX_SCRIPT_AST_OPERAND_TYPE_STRING_PTR_CONST:
 	case PX_SCRIPT_AST_OPERAND_TYPE_MEMORY_PTR_CONST:
@@ -1699,6 +1740,7 @@ static px_bool PX_ScriptParseAST_MapTokenToR1(PX_ScriptInterpreter *analysis,PX_
 		break;
 
 	case PX_SCRIPT_AST_OPERAND_TYPE_INT_CONST:
+	case PX_SCRIPT_AST_OPERAND_TYPE_HANDLE_CONST:
 		{
 			PX_StringInitialize(analysis->mp,&fmrString);
 
@@ -1715,6 +1757,7 @@ static px_bool PX_ScriptParseAST_MapTokenToR1(PX_ScriptInterpreter *analysis,PX_
 			else
 			{
 				PX_StringFree(&fmrString);
+				PX_ScriptTranslatorError(analysis, "map to r1 error");
 				return PX_FALSE;
 			}
 
@@ -1739,6 +1782,7 @@ static px_bool PX_ScriptParseAST_MapTokenToR1(PX_ScriptInterpreter *analysis,PX_
 			else
 			{
 				PX_StringFree(&fmrString);
+				PX_ScriptTranslatorError(analysis, "map to r1 error");
 				return PX_FALSE;
 			}
 			PX_StringFree(&fmrString);
@@ -1765,6 +1809,7 @@ static px_bool PX_ScriptParseAST_MapTokenToR1(PX_ScriptInterpreter *analysis,PX_
 			else
 			{
 				PX_StringFree(&fmrString);
+				PX_ScriptTranslatorError(analysis, "map to r1 error");
 				return PX_FALSE;
 			}
 			PX_StringFree(&fmrString);
@@ -1833,6 +1878,7 @@ static px_bool PX_ScriptParseAST_MapTokenToR1(PX_ScriptInterpreter *analysis,PX_
 				}
 				break;
 			default:
+				PX_ScriptTranslatorError(analysis, "map to r1 error");
 				return PX_FALSE;
 			}
 		}
@@ -1898,6 +1944,7 @@ static px_bool PX_ScriptParseAST_MapTokenToR1(PX_ScriptInterpreter *analysis,PX_
 				}
 				break;
 			default:
+				PX_ScriptTranslatorError(analysis, "map to r1 error");
 				return PX_FALSE;
 			}
 
@@ -1905,6 +1952,7 @@ static px_bool PX_ScriptParseAST_MapTokenToR1(PX_ScriptInterpreter *analysis,PX_
 		break;
 
 	default:
+		PX_ScriptTranslatorError(analysis, "map to r1 error");
 		return PX_FALSE;
 	}
 
@@ -2212,7 +2260,62 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_ScriptInterpreter *analysis,px_v
 			
 		}
 		break;
+	case PX_SCRIPT_AST_OPERAND_TYPE_HANDLE:
+		{
+			if (!PX_ScriptParseAST_MapTokenToR2(analysis, operandRight, out))
+			{
+				return PX_FALSE;
+			}
 
+			if (operandLeft.operandType== PX_SCRIPT_AST_OPERAND_TYPE_HANDLE)
+			{
+				pTop->operandType = PX_SCRIPT_AST_OPERAND_TYPE_HANDLE_CONST;
+				pTop->region = PX_SCRIPT_VARIABLE_REGION_POP;
+				pTop->_oft = 0;
+
+				switch (operandLeft.region)
+				{
+				case PX_SCRIPT_VARIABLE_REGION_LOCAL:
+				{
+					PX_StringInitialize(analysis->mp, &fmrString);
+					PX_StringFormat1(&fmrString, "MOV LOCAL[%1],R2\n", PX_STRINGFORMAT_INT(operandLeft._oft));
+					PX_StringCat(out, fmrString.buffer);
+					PX_StringFormat1(&fmrString, "PUSH LOCAL[%1]\n", PX_STRINGFORMAT_INT(operandLeft._oft));
+					PX_StringCat(out, fmrString.buffer);
+					PX_StringFree(&fmrString);
+				}
+				break;
+				case PX_SCRIPT_VARIABLE_REGION_GLOBAL:
+				{
+					PX_StringInitialize(analysis->mp, &fmrString);
+					PX_StringFormat1(&fmrString, "MOV GLOBAL[%1],R2\n", PX_STRINGFORMAT_INT(operandLeft._oft));
+					PX_StringCat(out, fmrString.buffer);
+					PX_StringFormat1(&fmrString, "PUSH GLOBAL[%1]\n", PX_STRINGFORMAT_INT(operandLeft._oft));
+					PX_StringCat(out, fmrString.buffer);
+					PX_StringFree(&fmrString);
+				}
+				break;
+				case PX_SCRIPT_VARIABLE_REGION_POP:
+				{
+					PX_StringInitialize(analysis->mp, &fmrString);
+					PX_StringCat(out, "POP R1\n");
+					PX_StringSet(&fmrString, "MOV GLOBAL[R1],R2\n");
+					PX_StringCat(out, fmrString.buffer);
+					PX_StringSet(&fmrString, "PUSH GLOBAL[R1]\n");
+					PX_StringCat(out, fmrString.buffer);
+					PX_StringFree(&fmrString);
+				}
+				break;
+				default:
+					return PX_FALSE;
+				}
+			}
+			else
+			{
+				return PX_FALSE;
+			}
+		}
+		break;
 	case PX_SCRIPT_AST_OPERAND_TYPE_FLOAT:
 		{
 			if(!PX_ScriptParseAST_MapTokenToR2(analysis,operandRight,out)) return PX_FALSE;
@@ -2287,6 +2390,7 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_ScriptInterpreter *analysis,px_v
 	case PX_SCRIPT_AST_OPERAND_TYPE_STRING: //string var
 	case PX_SCRIPT_AST_OPERAND_TYPE_MEMORY://memory var
 	case PX_SCRIPT_AST_OPERAND_TYPE_INT_PTR: //int var[x]
+	case PX_SCRIPT_AST_OPERAND_TYPE_HANDLE_PTR: //int var[x]
 	case PX_SCRIPT_AST_OPERAND_TYPE_FLOAT_PTR://float var[x]
 	case PX_SCRIPT_AST_OPERAND_TYPE_STRING_PTR://string var[x]
 	case PX_SCRIPT_AST_OPERAND_TYPE_MEMORY_PTR://memory var[x]
@@ -2315,6 +2419,10 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_ScriptInterpreter *analysis,px_v
 			else if (operandLeft.operandType==PX_SCRIPT_AST_OPERAND_TYPE_MEMORY_PTR)
 			{
 				pTop->operandType=PX_SCRIPT_AST_OPERAND_TYPE_MEMORY_PTR_CONST;
+			}
+			else if (operandLeft.operandType == PX_SCRIPT_AST_OPERAND_TYPE_HANDLE_PTR)
+			{
+				pTop->operandType = PX_SCRIPT_AST_OPERAND_TYPE_HANDLE_PTR_CONST;
 			}
 			else
 			{
@@ -2432,12 +2540,17 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_ScriptInterpreter *analysis,px_v
 		break;
 
 	case PX_SCRIPT_AST_OPERAND_TYPE_INT_PTR_CONST:
+	case PX_SCRIPT_AST_OPERAND_TYPE_HANDLE_PTR_CONST:
 	case PX_SCRIPT_AST_OPERAND_TYPE_FLOAT_PTR_CONST:
 	case PX_SCRIPT_AST_OPERAND_TYPE_STRING_PTR_CONST:
 	case PX_SCRIPT_AST_OPERAND_TYPE_MEMORY_PTR_CONST:
 	case PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR_CONST:
 		{
 			if (operandRight.operandType==PX_SCRIPT_AST_OPERAND_TYPE_INT_PTR_CONST&&operandLeft.operandType!=PX_SCRIPT_AST_OPERAND_TYPE_INT_PTR)
+			{
+				return PX_FALSE;
+			}
+			if (operandRight.operandType == PX_SCRIPT_AST_OPERAND_TYPE_HANDLE_PTR_CONST && operandLeft.operandType != PX_SCRIPT_AST_OPERAND_TYPE_HANDLE_PTR)
 			{
 				return PX_FALSE;
 			}
@@ -2753,79 +2866,140 @@ static px_bool PX_ScriptParseLastInstr_EQUAL(PX_ScriptInterpreter *analysis,px_v
 			}
 		}
 		break;
+	
+	case PX_SCRIPT_AST_OPERAND_TYPE_HANDLE_CONST:
+	{
+		if (!PX_ScriptParseAST_MapTokenToR2(analysis, operandRight, out))
+		{
+			return PX_FALSE;
+		}
 
-		case PX_SCRIPT_AST_OPERAND_TYPE_FLOAT_CONST:
+		//Check operand1
+		switch (operandLeft.operandType)
+		{
+		case PX_SCRIPT_AST_OPERAND_TYPE_HANDLE:
+		{
+			pTop->operandType = PX_SCRIPT_AST_OPERAND_TYPE_HANDLE_CONST;
+			pTop->region = PX_SCRIPT_VARIABLE_REGION_POP;
+			pTop->_oft = 0;
+
+			switch (operandLeft.region)
 			{
-				if (!PX_ScriptParseAST_MapTokenToR2(analysis,operandRight,out))
-				{
-					return PX_FALSE;
-				}
-
-				//Check operand1
-				switch (operandLeft.operandType)
-				{
-				case PX_SCRIPT_AST_OPERAND_TYPE_FLOAT:
-				case PX_SCRIPT_AST_OPERAND_TYPE_INT:
-					{
-						if (operandLeft.operandType==PX_SCRIPT_AST_OPERAND_TYPE_FLOAT)
-						{
-							pTop->operandType=PX_SCRIPT_AST_OPERAND_TYPE_FLOAT_CONST;
-							pTop->region=PX_SCRIPT_VARIABLE_REGION_POP;
-							pTop->_oft=0;
-						}
-						else
-						{
-							pTop->operandType=PX_SCRIPT_AST_OPERAND_TYPE_INT_CONST;
-							pTop->region=PX_SCRIPT_VARIABLE_REGION_POP;
-							pTop->_oft=0;
-						}
-
-						if(operandLeft.operandType==PX_SCRIPT_AST_OPERAND_TYPE_INT)
-							PX_StringCat(out,"INT R2\n");
-
-						switch(operandLeft.region)
-						{
-						case PX_SCRIPT_VARIABLE_REGION_LOCAL:
-							{
-								PX_StringInitialize(analysis->mp,&fmrString);
-								PX_StringFormat1(&fmrString,"MOV LOCAL[%1],R2\n",PX_STRINGFORMAT_INT(operandLeft._oft));
-								PX_StringCat(out,fmrString.buffer);
-								PX_StringFormat1(&fmrString,"PUSH LOCAL[%1]\n",PX_STRINGFORMAT_INT(operandLeft._oft));
-								PX_StringCat(out,fmrString.buffer);
-								PX_StringFree(&fmrString);
-							}
-							break;
-						case PX_SCRIPT_VARIABLE_REGION_GLOBAL:
-							{
-								PX_StringInitialize(analysis->mp,&fmrString);
-								PX_StringFormat1(&fmrString,"MOV GLOBAL[%1],R2\n",PX_STRINGFORMAT_INT(operandLeft._oft));
-								PX_StringCat(out,fmrString.buffer);
-								PX_StringFormat1(&fmrString,"PUSH GLOBAL[%1]\n",PX_STRINGFORMAT_INT(operandLeft._oft));
-								PX_StringCat(out,fmrString.buffer);
-								PX_StringFree(&fmrString);
-							}
-							break;
-						case PX_SCRIPT_VARIABLE_REGION_POP:
-							{
-								PX_StringInitialize(analysis->mp,&fmrString);
-								PX_StringCat(out,"POP R1\n");
-								PX_StringSet(&fmrString,"MOV GLOBAL[R1],R2\n");
-								PX_StringCat(out,fmrString.buffer);
-								PX_StringSet(&fmrString,"PUSH GLOBAL[R1]\n");
-								PX_StringCat(out,fmrString.buffer);
-								PX_StringFree(&fmrString);
-							}
-							break;
-						default:
-							return PX_FALSE;
-						}
-					}
-					break;
-				default:
-					return PX_FALSE;
-				}
+			case PX_SCRIPT_VARIABLE_REGION_LOCAL:
+			{
+				PX_StringInitialize(analysis->mp, &fmrString);
+				PX_StringFormat1(&fmrString, "MOV LOCAL[%1],R2\n", PX_STRINGFORMAT_INT(operandLeft._oft));
+				PX_StringCat(out, fmrString.buffer);
+				PX_StringFormat1(&fmrString, "PUSH LOCAL[%1]\n", PX_STRINGFORMAT_INT(operandLeft._oft));
+				PX_StringCat(out, fmrString.buffer);
+				PX_StringFree(&fmrString);
 			}
 			break;
+			case PX_SCRIPT_VARIABLE_REGION_GLOBAL:
+			{
+				PX_StringInitialize(analysis->mp, &fmrString);
+				PX_StringFormat1(&fmrString, "MOV GLOBAL[%1],R2\n", PX_STRINGFORMAT_INT(operandLeft._oft));
+				PX_StringCat(out, fmrString.buffer);
+				PX_StringFormat1(&fmrString, "PUSH GLOBAL[%1]\n", PX_STRINGFORMAT_INT(operandLeft._oft));
+				PX_StringCat(out, fmrString.buffer);
+				PX_StringFree(&fmrString);
+			}
+			break;
+			case PX_SCRIPT_VARIABLE_REGION_POP:
+			{
+				PX_StringInitialize(analysis->mp, &fmrString);
+				PX_StringCat(out, "POP R1\n");
+				PX_StringSet(&fmrString, "MOV GLOBAL[R1],R2\n");
+				PX_StringCat(out, fmrString.buffer);
+				PX_StringSet(&fmrString, "PUSH GLOBAL[R1]\n");
+				PX_StringCat(out, fmrString.buffer);
+				PX_StringFree(&fmrString);
+			}
+			break;
+			default:
+				return PX_FALSE;
+			}
+		}
+		break;
+
+		default:
+			return PX_FALSE;
+		}
+	}
+	break;
+
+	case PX_SCRIPT_AST_OPERAND_TYPE_FLOAT_CONST:
+		{
+			if (!PX_ScriptParseAST_MapTokenToR2(analysis,operandRight,out))
+			{
+				return PX_FALSE;
+			}
+
+			//Check operand1
+			switch (operandLeft.operandType)
+			{
+			case PX_SCRIPT_AST_OPERAND_TYPE_FLOAT:
+			case PX_SCRIPT_AST_OPERAND_TYPE_INT:
+				{
+					if (operandLeft.operandType==PX_SCRIPT_AST_OPERAND_TYPE_FLOAT)
+					{
+						pTop->operandType=PX_SCRIPT_AST_OPERAND_TYPE_FLOAT_CONST;
+						pTop->region=PX_SCRIPT_VARIABLE_REGION_POP;
+						pTop->_oft=0;
+					}
+					else
+					{
+						pTop->operandType=PX_SCRIPT_AST_OPERAND_TYPE_INT_CONST;
+						pTop->region=PX_SCRIPT_VARIABLE_REGION_POP;
+						pTop->_oft=0;
+					}
+
+					if(operandLeft.operandType==PX_SCRIPT_AST_OPERAND_TYPE_INT)
+						PX_StringCat(out,"INT R2\n");
+
+					switch(operandLeft.region)
+					{
+					case PX_SCRIPT_VARIABLE_REGION_LOCAL:
+						{
+							PX_StringInitialize(analysis->mp,&fmrString);
+							PX_StringFormat1(&fmrString,"MOV LOCAL[%1],R2\n",PX_STRINGFORMAT_INT(operandLeft._oft));
+							PX_StringCat(out,fmrString.buffer);
+							PX_StringFormat1(&fmrString,"PUSH LOCAL[%1]\n",PX_STRINGFORMAT_INT(operandLeft._oft));
+							PX_StringCat(out,fmrString.buffer);
+							PX_StringFree(&fmrString);
+						}
+						break;
+					case PX_SCRIPT_VARIABLE_REGION_GLOBAL:
+						{
+							PX_StringInitialize(analysis->mp,&fmrString);
+							PX_StringFormat1(&fmrString,"MOV GLOBAL[%1],R2\n",PX_STRINGFORMAT_INT(operandLeft._oft));
+							PX_StringCat(out,fmrString.buffer);
+							PX_StringFormat1(&fmrString,"PUSH GLOBAL[%1]\n",PX_STRINGFORMAT_INT(operandLeft._oft));
+							PX_StringCat(out,fmrString.buffer);
+							PX_StringFree(&fmrString);
+						}
+						break;
+					case PX_SCRIPT_VARIABLE_REGION_POP:
+						{
+							PX_StringInitialize(analysis->mp,&fmrString);
+							PX_StringCat(out,"POP R1\n");
+							PX_StringSet(&fmrString,"MOV GLOBAL[R1],R2\n");
+							PX_StringCat(out,fmrString.buffer);
+							PX_StringSet(&fmrString,"PUSH GLOBAL[R1]\n");
+							PX_StringCat(out,fmrString.buffer);
+							PX_StringFree(&fmrString);
+						}
+						break;
+					default:
+						return PX_FALSE;
+					}
+				}
+				break;
+			default:
+				return PX_FALSE;
+			}
+		}
+		break;
 
 		case PX_SCRIPT_AST_OPERAND_TYPE_STRING_CONST:
 		case PX_SCRIPT_AST_OPERAND_TYPE_MEMORY_CONST:
@@ -3347,6 +3521,8 @@ static px_bool PX_ScriptParseLastInstr_IDX(PX_ScriptInterpreter *analysis,px_vec
 	{
 	case PX_SCRIPT_AST_OPERAND_TYPE_INT_CONST:
 	case PX_SCRIPT_AST_OPERAND_TYPE_INT:
+	case PX_SCRIPT_AST_OPERAND_TYPE_HANDLE_CONST:
+	case PX_SCRIPT_AST_OPERAND_TYPE_HANDLE:
 	case PX_SCRIPT_AST_OPERAND_TYPE_STRING_IDX:
 	case PX_SCRIPT_AST_OPERAND_TYPE_MEMORY_IDX:
 		{
@@ -3366,6 +3542,7 @@ static px_bool PX_ScriptParseLastInstr_IDX(PX_ScriptInterpreter *analysis,px_vec
 	switch (operand1.operandType)
 	{
 	case PX_SCRIPT_AST_OPERAND_TYPE_INT_PTR:
+	case PX_SCRIPT_AST_OPERAND_TYPE_HANDLE_PTR:
 	case PX_SCRIPT_AST_OPERAND_TYPE_FLOAT_PTR:
 	case PX_SCRIPT_AST_OPERAND_TYPE_MEMORY_PTR:
 	case PX_SCRIPT_AST_OPERAND_TYPE_STRING_PTR:
@@ -3376,6 +3553,13 @@ static px_bool PX_ScriptParseLastInstr_IDX(PX_ScriptInterpreter *analysis,px_vec
 				resOperand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_INT;
 				resOperand.pStruct=PX_NULL;
 			}
+
+			if (operand1.operandType == PX_SCRIPT_AST_OPERAND_TYPE_HANDLE_PTR)
+			{
+				resOperand.operandType = PX_SCRIPT_AST_OPERAND_TYPE_HANDLE;
+				resOperand.pStruct = PX_NULL;
+			}
+
 			if (operand1.operandType==PX_SCRIPT_AST_OPERAND_TYPE_FLOAT_PTR)
 			{
 				resOperand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_FLOAT;
@@ -3424,6 +3608,7 @@ static px_bool PX_ScriptParseLastInstr_IDX(PX_ScriptInterpreter *analysis,px_vec
 		break;
 
 		case PX_SCRIPT_AST_OPERAND_TYPE_INT_PTR_CONST:
+		case PX_SCRIPT_AST_OPERAND_TYPE_HANDLE_PTR_CONST:
 		case PX_SCRIPT_AST_OPERAND_TYPE_FLOAT_PTR_CONST:
 		case PX_SCRIPT_AST_OPERAND_TYPE_STRING_PTR_CONST:
 		case PX_SCRIPT_AST_OPERAND_TYPE_MEMORY_PTR_CONST:
@@ -3434,28 +3619,36 @@ static px_bool PX_ScriptParseLastInstr_IDX(PX_ScriptInterpreter *analysis,px_vec
 					resOperand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_INT;
 					resOperand.pStruct=PX_NULL;
 				}
-				if (operand1.operandType==PX_SCRIPT_AST_OPERAND_TYPE_FLOAT_PTR_CONST)
+				else if (operand1.operandType == PX_SCRIPT_AST_OPERAND_TYPE_HANDLE_PTR_CONST)
+				{
+					resOperand.operandType = PX_SCRIPT_AST_OPERAND_TYPE_HANDLE;
+					resOperand.pStruct = PX_NULL;
+				}
+				else if (operand1.operandType==PX_SCRIPT_AST_OPERAND_TYPE_FLOAT_PTR_CONST)
 				{
 					resOperand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_FLOAT;
 					resOperand.pStruct=PX_NULL;
 				}
-				if (operand1.operandType==PX_SCRIPT_AST_OPERAND_TYPE_STRING_PTR_CONST)
+				else if (operand1.operandType==PX_SCRIPT_AST_OPERAND_TYPE_STRING_PTR_CONST)
 				{
 					resOperand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_STRING;
 					resOperand.pStruct=PX_NULL;
 				}
-				if (operand1.operandType==PX_SCRIPT_AST_OPERAND_TYPE_MEMORY_PTR_CONST)
+				else if (operand1.operandType==PX_SCRIPT_AST_OPERAND_TYPE_MEMORY_PTR_CONST)
 				{
 					resOperand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_MEMORY;
 					resOperand.pStruct=PX_NULL;
 				}
-				if (operand1.operandType==PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR_CONST)
+				else if (operand1.operandType==PX_SCRIPT_AST_OPERAND_TYPE_STRUCT_PTR_CONST)
 				{
 					resOperand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_STRUCT;
 					resOperand.pStruct=operand1.pStruct;
 					PX_StringFormat1(&fmrString,"MUL R2,%1\n",PX_STRINGFORMAT_INT(operand1.pStruct->size));
 					PX_StringCat(out,fmrString.buffer);
-
+				}
+				else
+				{
+					return PX_FALSE;
 				}
 
 				if (operand1.region==PX_SCRIPT_VARIABLE_REGION_GLOBAL)
@@ -3580,6 +3773,11 @@ static px_bool PX_ScriptParseLastInstr_PTR(PX_ScriptInterpreter *analysis,px_vec
 		resOperand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_INT;
 		resOperand.pStruct=PX_NULL;
 	}
+	else if (operand1.operandType == PX_SCRIPT_AST_OPERAND_TYPE_HANDLE_PTR)
+	{
+		resOperand.operandType = PX_SCRIPT_AST_OPERAND_TYPE_HANDLE;
+		resOperand.pStruct = PX_NULL;
+	}
 	else if (operand1.operandType==PX_SCRIPT_AST_OPERAND_TYPE_FLOAT_PTR)
 	{
 		resOperand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_FLOAT;
@@ -3605,6 +3803,11 @@ static px_bool PX_ScriptParseLastInstr_PTR(PX_ScriptInterpreter *analysis,px_vec
 	{
 		resOperand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_INT;
 		resOperand.pStruct=PX_NULL;
+	}
+	else if (operand1.operandType == PX_SCRIPT_AST_OPERAND_TYPE_HANDLE_PTR_CONST)
+	{
+		resOperand.operandType = PX_SCRIPT_AST_OPERAND_TYPE_HANDLE;
+		resOperand.pStruct = PX_NULL;
 	}
 	else if (operand1.operandType==PX_SCRIPT_AST_OPERAND_TYPE_FLOAT_PTR_CONST)
 	{
@@ -3664,6 +3867,9 @@ static px_bool PX_ScriptParseLastInstr_ADR(PX_ScriptInterpreter *analysis,px_vec
 	{
 	case PX_SCRIPT_AST_OPERAND_TYPE_INT:
 		pTop->operandType=PX_SCRIPT_AST_OPERAND_TYPE_INT_PTR_CONST;
+		break;
+	case PX_SCRIPT_AST_OPERAND_TYPE_HANDLE:
+		pTop->operandType = PX_SCRIPT_AST_OPERAND_TYPE_HANDLE_PTR_CONST;
 		break;
 	case PX_SCRIPT_AST_OPERAND_TYPE_FLOAT:
 		pTop->operandType=PX_SCRIPT_AST_OPERAND_TYPE_FLOAT_PTR_CONST;
@@ -6033,7 +6239,7 @@ static px_bool PX_ScriptParseExpressionStream(PX_ScriptInterpreter *analysis,px_
 		{
 			if(!PX_ScriptParse_AST_PushToken(analysis,op,tk,pVec[*offset],pcurrentSet,&pcurrentSet)) 
 			{
-				PX_ScriptTranslatorError(analysis,"Function error.");
+				PX_ScriptTranslatorError(analysis,"unknown token error.");
 				goto _ERROR;
 			}
 		}
@@ -6183,6 +6389,16 @@ _EXPR_OUT:
 						goto _ERROR;
 					}
 					break;
+				case PX_SCRIPT_AST_OPERAND_TYPE_HANDLE:
+				case PX_SCRIPT_AST_OPERAND_TYPE_HANDLE_CONST:
+					{
+						if (pfunc->parameters[i].type != PX_SCRIPT_PARSER_VAR_TYPE_HANDLE)
+						{
+							PX_ScriptTranslatorError(analysis, "Parameter not matched.");
+							goto _ERROR;
+						}
+					}
+					break;
 				case PX_SCRIPT_AST_OPERAND_TYPE_STRING:
 				case PX_SCRIPT_AST_OPERAND_TYPE_STRING_CONST:
 					if (pfunc->parameters[i].type!=PX_SCRIPT_PARSER_VAR_TYPE_STRING)
@@ -6204,6 +6420,14 @@ _EXPR_OUT:
 					if (pfunc->parameters[i].type!=PX_SCRIPT_PARSER_VAR_TYPE_INT_ARRAY&&pfunc->parameters[i].type!=PX_SCRIPT_PARSER_VAR_TYPE_INT_PTR)
 					{
 						PX_ScriptTranslatorError(analysis,"Parameter not matched.");
+						goto _ERROR;
+					}
+					break;
+				case PX_SCRIPT_AST_OPERAND_TYPE_HANDLE_PTR:
+				case PX_SCRIPT_AST_OPERAND_TYPE_HANDLE_PTR_CONST:
+					if (pfunc->parameters[i].type != PX_SCRIPT_PARSER_VAR_TYPE_HANDLE_ARRAY && pfunc->parameters[i].type != PX_SCRIPT_PARSER_VAR_TYPE_HANDLE_PTR)
+					{
+						PX_ScriptTranslatorError(analysis, "Parameter not matched.");
 						goto _ERROR;
 					}
 					break;
@@ -6259,7 +6483,11 @@ _EXPR_OUT:
 				if (retOperand.operandType==PX_SCRIPT_AST_OPERAND_TYPE_INT||retOperand.operandType==PX_SCRIPT_AST_OPERAND_TYPE_INT_CONST\
 					||retOperand.operandType==PX_SCRIPT_AST_OPERAND_TYPE_STRING_IDX||retOperand.operandType==PX_SCRIPT_AST_OPERAND_TYPE_MEMORY_IDX)
 				{
-					if (pfunc->parameters[i].type==PX_SCRIPT_PARSER_VAR_TYPE_FLOAT)
+					if (pfunc->parameters[i].type == PX_SCRIPT_PARSER_VAR_TYPE_INT)
+					{
+						PX_StringCat(out, "INT R1\n");
+					}
+					else if (pfunc->parameters[i].type==PX_SCRIPT_PARSER_VAR_TYPE_FLOAT)
 					{
 						PX_StringCat(out,"FLT R1\n");
 					}
@@ -6309,6 +6537,9 @@ _EXPR_OUT:
 			case PX_SCRIPT_PARSER_VAR_TYPE_INT:
 				retOperand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_INT_CONST;
 				break;
+			case PX_SCRIPT_PARSER_VAR_TYPE_HANDLE:
+				retOperand.operandType = PX_SCRIPT_AST_OPERAND_TYPE_HANDLE_CONST;
+				break;
 			case PX_SCRIPT_PARSER_VAR_TYPE_FLOAT:
 				retOperand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_FLOAT_CONST;
 				break;
@@ -6320,6 +6551,9 @@ _EXPR_OUT:
 				break;
 			case PX_SCRIPT_PARSER_VAR_TYPE_INT_PTR:
 				retOperand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_INT_PTR_CONST;
+				break;
+			case PX_SCRIPT_PARSER_VAR_TYPE_HANDLE_PTR:
+				retOperand.operandType = PX_SCRIPT_AST_OPERAND_TYPE_HANDLE_PTR_CONST;
 				break;
 			case PX_SCRIPT_PARSER_VAR_TYPE_FLOAT_PTR:
 				retOperand.operandType=PX_SCRIPT_AST_OPERAND_TYPE_FLOAT_PTR_CONST;
@@ -7600,6 +7834,10 @@ static px_bool PX_ScriptParseVar(PX_ScriptInterpreter *analysis)
 	{
 		resType=PX_SCRIPT_PARSER_VAR_TYPE_INT;
 	}
+	else if (PX_strequ(analysis->lexer.CurLexeme.buffer, PX_SCRIPT_TRANSLATOR_KEYWORD_VAR_HANDLE))
+	{
+		resType = PX_SCRIPT_PARSER_VAR_TYPE_HANDLE;
+	}
 	else if (PX_strequ(analysis->lexer.CurLexeme.buffer,PX_SCRIPT_TRANSLATOR_KEYWORD_VAR_FLOAT))
 	{
 		resType=PX_SCRIPT_PARSER_VAR_TYPE_FLOAT;
@@ -7638,6 +7876,11 @@ static px_bool PX_ScriptParseVar(PX_ScriptInterpreter *analysis)
 					variable.type=PX_SCRIPT_PARSER_VAR_TYPE_INT_PTR;
 				}
 				break;
+			case PX_SCRIPT_PARSER_VAR_TYPE_HANDLE:
+			{
+				variable.type = PX_SCRIPT_PARSER_VAR_TYPE_HANDLE_PTR;
+			}
+			break;
 			case PX_SCRIPT_PARSER_VAR_TYPE_FLOAT:
 				{
 					variable.type=PX_SCRIPT_PARSER_VAR_TYPE_FLOAT_PTR;
@@ -7694,6 +7937,11 @@ static px_bool PX_ScriptParseVar(PX_ScriptInterpreter *analysis)
 					variable.type=PX_SCRIPT_PARSER_VAR_TYPE_INT_ARRAY;
 				}
 				break;
+			case PX_SCRIPT_PARSER_VAR_TYPE_HANDLE:
+			{
+				variable.type = PX_SCRIPT_PARSER_VAR_TYPE_HANDLE_ARRAY;
+			}
+			break;
 			case PX_SCRIPT_PARSER_VAR_TYPE_FLOAT:
 				{
 					variable.type=PX_SCRIPT_PARSER_VAR_TYPE_FLOAT_ARRAY;
@@ -8417,6 +8665,10 @@ px_bool PX_ScriptParseStructDefine(PX_ScriptInterpreter *analysis)
 			{
 				member.defvar.type=PX_SCRIPT_PARSER_VAR_TYPE_INT;
 			}
+			else if (PX_strequ(analysis->lexer.CurLexeme.buffer, PX_SCRIPT_TRANSLATOR_KEYWORD_VAR_HANDLE))
+			{
+				member.defvar.type = PX_SCRIPT_PARSER_VAR_TYPE_HANDLE;
+			}
 			else if (PX_strequ(analysis->lexer.CurLexeme.buffer,PX_SCRIPT_TRANSLATOR_KEYWORD_VAR_FLOAT))
 			{
 				member.defvar.type=PX_SCRIPT_PARSER_VAR_TYPE_FLOAT;
@@ -8446,6 +8698,11 @@ px_bool PX_ScriptParseStructDefine(PX_ScriptInterpreter *analysis)
 					case PX_SCRIPT_PARSER_VAR_TYPE_INT:
 						{
 							member.defvar.type=PX_SCRIPT_PARSER_VAR_TYPE_INT_PTR;
+						}
+						break;
+					case PX_SCRIPT_PARSER_VAR_TYPE_HANDLE:
+						{
+							member.defvar.type = PX_SCRIPT_PARSER_VAR_TYPE_HANDLE_PTR;
 						}
 						break;
 					case PX_SCRIPT_PARSER_VAR_TYPE_FLOAT:
@@ -8502,6 +8759,11 @@ px_bool PX_ScriptParseStructDefine(PX_ScriptInterpreter *analysis)
 					case PX_SCRIPT_PARSER_VAR_TYPE_INT:
 						{
 							member.defvar.type=PX_SCRIPT_PARSER_VAR_TYPE_INT_ARRAY;
+						}
+						break;
+					case PX_SCRIPT_PARSER_VAR_TYPE_HANDLE:
+						{
+							member.defvar.type = PX_SCRIPT_PARSER_VAR_TYPE_HANDLE_ARRAY;
 						}
 						break;
 					case PX_SCRIPT_PARSER_VAR_TYPE_FLOAT:
@@ -8662,6 +8924,10 @@ px_bool PX_ScriptParseFunctionDefined(PX_ScriptInterpreter *analysis,PX_SCRIPT_T
 	{
 		func.retType=PX_SCRIPT_PARSER_VAR_TYPE_INT;
 	}
+	else if (PX_strequ(analysis->lexer.CurLexeme.buffer, PX_SCRIPT_TRANSLATOR_KEYWORD_VAR_HANDLE))
+	{
+		func.retType = PX_SCRIPT_PARSER_VAR_TYPE_HANDLE;
+	}
 	else if (PX_strequ(analysis->lexer.CurLexeme.buffer,PX_SCRIPT_TRANSLATOR_KEYWORD_VAR_FLOAT))
 	{
 		func.retType=PX_SCRIPT_PARSER_VAR_TYPE_FLOAT;
@@ -8699,6 +8965,9 @@ px_bool PX_ScriptParseFunctionDefined(PX_ScriptInterpreter *analysis,PX_SCRIPT_T
 		{
 			case PX_SCRIPT_PARSER_VAR_TYPE_INT:
 				func.retType=PX_SCRIPT_PARSER_VAR_TYPE_INT_PTR;
+				break;
+			case PX_SCRIPT_PARSER_VAR_TYPE_HANDLE:
+				func.retType = PX_SCRIPT_PARSER_VAR_TYPE_HANDLE_PTR;
 				break;
 			case PX_SCRIPT_PARSER_VAR_TYPE_FLOAT:
 				func.retType=PX_SCRIPT_PARSER_VAR_TYPE_FLOAT_PTR;
@@ -8765,6 +9034,10 @@ px_bool PX_ScriptParseFunctionDefined(PX_ScriptInterpreter *analysis,PX_SCRIPT_T
 		{
 			fvar.type=PX_SCRIPT_PARSER_VAR_TYPE_INT;
 		}
+		else if (PX_strequ(analysis->lexer.CurLexeme.buffer, PX_SCRIPT_TRANSLATOR_KEYWORD_VAR_HANDLE))
+		{
+			fvar.type = PX_SCRIPT_PARSER_VAR_TYPE_HANDLE;
+		}
 		else if (PX_strequ(analysis->lexer.CurLexeme.buffer,PX_SCRIPT_TRANSLATOR_KEYWORD_VAR_FLOAT))
 		{
 			fvar.type=PX_SCRIPT_PARSER_VAR_TYPE_FLOAT;
@@ -8802,6 +9075,9 @@ px_bool PX_ScriptParseFunctionDefined(PX_ScriptInterpreter *analysis,PX_SCRIPT_T
 			{
 			case PX_SCRIPT_PARSER_VAR_TYPE_INT:
 				fvar.type=PX_SCRIPT_PARSER_VAR_TYPE_INT_PTR;
+				break;
+			case PX_SCRIPT_PARSER_VAR_TYPE_HANDLE:
+				fvar.type = PX_SCRIPT_PARSER_VAR_TYPE_HANDLE_PTR;
 				break;
 			case PX_SCRIPT_PARSER_VAR_TYPE_FLOAT:
 				fvar.type=PX_SCRIPT_PARSER_VAR_TYPE_FLOAT_PTR;
@@ -9603,6 +9879,7 @@ px_bool PX_ScriptCompilerCompile(PX_SCRIPT_LIBRARY *lib,const px_char *name,px_s
 		//////////////////////////////////////////////////////////////////////////
 		if ((pset=PX_ScriptParseGetStructInfo(&analysis,analysis.lexer.CurLexeme.buffer))!=PX_NULL||\
 			PX_strequ(analysis.lexer.CurLexeme.buffer,PX_SCRIPT_TRANSLATOR_KEYWORD_VAR_INT)||\
+			PX_strequ(analysis.lexer.CurLexeme.buffer, PX_SCRIPT_TRANSLATOR_KEYWORD_VAR_HANDLE) || \
 			PX_strequ(analysis.lexer.CurLexeme.buffer,PX_SCRIPT_TRANSLATOR_KEYWORD_VAR_FLOAT)||\
 			PX_strequ(analysis.lexer.CurLexeme.buffer,PX_SCRIPT_TRANSLATOR_KEYWORD_VAR_STRING)||\
 			PX_strequ(analysis.lexer.CurLexeme.buffer,PX_SCRIPT_TRANSLATOR_KEYWORD_VAR_VOID)||\
@@ -9758,6 +10035,7 @@ px_bool PX_ScriptCompilerCompile(PX_SCRIPT_LIBRARY *lib,const px_char *name,px_s
 				goto _ERROR;
 			}
 			if (PX_strequ(analysis.lexer.CurLexeme.buffer,PX_SCRIPT_TRANSLATOR_KEYWORD_VAR_INT)||\
+				PX_strequ(analysis.lexer.CurLexeme.buffer, PX_SCRIPT_TRANSLATOR_KEYWORD_VAR_HANDLE) || \
 				PX_strequ(analysis.lexer.CurLexeme.buffer,PX_SCRIPT_TRANSLATOR_KEYWORD_VAR_FLOAT)||\
 				PX_strequ(analysis.lexer.CurLexeme.buffer,PX_SCRIPT_TRANSLATOR_KEYWORD_VAR_STRING)||\
 				PX_strequ(analysis.lexer.CurLexeme.buffer,PX_SCRIPT_TRANSLATOR_KEYWORD_VAR_MEMORY)||\
@@ -9820,6 +10098,7 @@ px_bool PX_ScriptCompilerCompile(PX_SCRIPT_LIBRARY *lib,const px_char *name,px_s
 			}
 
 			if (PX_strequ(analysis.lexer.CurLexeme.buffer,PX_SCRIPT_TRANSLATOR_KEYWORD_VAR_INT)||\
+				PX_strequ(analysis.lexer.CurLexeme.buffer, PX_SCRIPT_TRANSLATOR_KEYWORD_VAR_HANDLE) || \
 				PX_strequ(analysis.lexer.CurLexeme.buffer,PX_SCRIPT_TRANSLATOR_KEYWORD_VAR_FLOAT)||\
 				PX_strequ(analysis.lexer.CurLexeme.buffer,PX_SCRIPT_TRANSLATOR_KEYWORD_VAR_STRING)||\
 				PX_strequ(analysis.lexer.CurLexeme.buffer,PX_SCRIPT_TRANSLATOR_KEYWORD_VAR_MEMORY)||\
@@ -10650,6 +10929,13 @@ _CONTINUEOUT:
 						PX_StringCat(&analysis.code,"INT R1\n");
 				}
 				break;
+			case PX_SCRIPT_PARSER_VAR_TYPE_HANDLE:
+				if (retOperand.operandType != PX_SCRIPT_AST_OPERAND_TYPE_HANDLE && retOperand.operandType != PX_SCRIPT_AST_OPERAND_TYPE_HANDLE_CONST)
+				{
+					PX_ScriptTranslatorError(&analysis, "Return-type not matched.");
+					goto _ERROR;
+				}
+				break;
 			case PX_SCRIPT_PARSER_VAR_TYPE_FLOAT:
 				if (retOperand.operandType!=PX_SCRIPT_AST_OPERAND_TYPE_INT&&retOperand.operandType!=PX_SCRIPT_AST_OPERAND_TYPE_INT_CONST&&\
 					retOperand.operandType!=PX_SCRIPT_AST_OPERAND_TYPE_FLOAT&&retOperand.operandType!=PX_SCRIPT_AST_OPERAND_TYPE_FLOAT_CONST&&\
@@ -10824,10 +11110,41 @@ _CONTINUEOUT:
 			PX_StringFormat1(&fmrString,"MOV GLOBAL[%1],\"\"\n",PX_STRINGFORMAT_INT(pvar->BeginIndex));
 			PX_StringCat(ASM,fmrString.buffer);
 		}
+
+		if (!pvar->bParam && pvar->type == PX_SCRIPT_PARSER_VAR_TYPE_STRING_ARRAY)
+		{
+			px_int i;
+			for(i=0;i<pvar->size;i++)
+				PX_StringFormat1(&fmrString, "MOV GLOBAL[%1],\"\"\n", PX_STRINGFORMAT_INT(pvar->BeginIndex+i));
+			PX_StringCat(ASM, fmrString.buffer);
+		}
+
 		if (!pvar->bParam&&pvar->type==PX_SCRIPT_PARSER_VAR_TYPE_MEMORY)
 		{
 			PX_StringFormat1(&fmrString,"MOV GLOBAL[%1],@@\n",PX_STRINGFORMAT_INT(pvar->BeginIndex));
 			PX_StringCat(ASM,fmrString.buffer);
+		}
+
+		if (!pvar->bParam && pvar->type == PX_SCRIPT_PARSER_VAR_TYPE_MEMORY_ARRAY)
+		{
+			px_int i;
+			for (i = 0; i < pvar->size; i++)
+				PX_StringFormat1(&fmrString, "MOV GLOBAL[%1],@@\n", PX_STRINGFORMAT_INT(pvar->BeginIndex + i));
+			PX_StringCat(ASM, fmrString.buffer);
+		}
+
+		if (!pvar->bParam && pvar->type == PX_SCRIPT_PARSER_VAR_TYPE_FLOAT)
+		{
+			PX_StringFormat1(&fmrString, "FLT GLOBAL[%1]\n", PX_STRINGFORMAT_INT(pvar->BeginIndex));
+			PX_StringCat(ASM, fmrString.buffer);
+		}
+
+		if (!pvar->bParam && pvar->type == PX_SCRIPT_PARSER_VAR_TYPE_FLOAT_ARRAY)
+		{
+			px_int i;
+			for (i = 0; i < pvar->size; i++)
+				PX_StringFormat1(&fmrString, "FLT GLOBAL[%1]\n", PX_STRINGFORMAT_INT(pvar->BeginIndex+i));
+			PX_StringCat(ASM, fmrString.buffer);
 		}
 	}
 	PX_StringFree(&fmrString);

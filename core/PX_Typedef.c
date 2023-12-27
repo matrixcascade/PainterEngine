@@ -1697,6 +1697,17 @@ px_color PX_COLOR(px_uchar a,px_uchar r,px_uchar g,px_uchar b)
 	return color;
 }
 
+px_color PX_COLORF(px_float a, px_float r, px_float g, px_float b)
+{
+	px_color color;
+	color._argb.a = (px_uchar)(a*255);
+	color._argb.r = (px_uchar)(r*255);
+	color._argb.g = (px_uchar)(g*255);
+	color._argb.b = (px_uchar)(b*255);
+	return color;
+}
+
+
 px_color PX_ColorInverse(px_color clr)
 {
 	px_color color;
@@ -2189,6 +2200,12 @@ px_point PX_PointInverse(px_point p1)
 	return PX_POINT(-p1.x,-p1.y,-p1.z);
 }
 
+px_point2D PX_Point2DInverse(px_point2D p1)
+{
+	return PX_POINT2D(-p1.x, -p1.y);
+}
+
+
 px_float PX_PointMod(px_point p)
 {
 	return PX_sqrt(p.x*p.x+p.y*p.y+p.z*p.z);
@@ -2204,6 +2221,12 @@ px_float  PX_PointSquare(px_point p)
 {
 	return (p.x*p.x+p.y*p.y+p.z*p.z);
 }
+
+px_float  PX_Point2DSquare(px_point2D p)
+{
+	return (p.x * p.x + p.y * p.y );
+}
+
 
 px_point PX_PointNormalization(px_point p)
 {
@@ -2251,6 +2274,19 @@ px_point PX_PointReflectX(px_point vector_refer,px_point respoint)
 	ret.x=respoint.x*cosx+respoint.y*sinx;
 	ret.y=respoint.y*cosx-respoint.x*sinx;
 	ret.z=respoint.z;
+	return ret;
+}
+
+px_point2D PX_Point2DReflectX(px_point2D vector_refer, px_point2D respoint)
+{
+	px_point2D ret;
+	px_float cosx, sinx;
+	px_float mod = PX_Point2DMod(vector_refer);
+	cosx = vector_refer.x / mod;
+	sinx = -vector_refer.y / mod;
+
+	ret.x = respoint.x * cosx + respoint.y * sinx;
+	ret.y = respoint.y * cosx - respoint.x * sinx;
 	return ret;
 }
 
@@ -2995,6 +3031,25 @@ px_int PX_wstrlen(const px_word *dst)
 	return len-1;
 }
 
+px_bool PX_chrequ2(px_char _l, px_char _r)
+{
+	if (_l >= 'a' && _l <= 'z')
+	{
+		_l += 'A' - 'a';
+	}
+	if (_r >= 'a' && _r <= 'z')
+	{
+		_r += 'A' - 'a';
+	}
+	if (_l == _r)
+	{
+		return PX_TRUE;
+	}
+	else
+	{
+		return PX_FALSE;
+	}
+}
 
 px_bool PX_strequ2(const px_char* src, const px_char* dst)
 {
@@ -4001,8 +4056,15 @@ px_void PX_DownSampled(_IN px_complex x[],_OUT px_complex X[],px_int N,px_int M)
 }
 
 
+px_point PX_POINT2D_3D(px_point2D p)
+{
+	return PX_POINT(p.x, p.y, 0);
+}
 
-
+px_point2D PX_POINT3D_2D(px_point p)
+{
+	return PX_POINT2D(p.x, p.y);
+}
 
 px_point PX_POINT(px_float x,px_float y,px_float z)
 {
@@ -4664,6 +4726,29 @@ px_char* PX_strstr(const px_char* dest, const px_char* src)
 	{
 		start = cp;
 		while (*start != '\0' && *substart !='\0' && *start == *substart)
+		{
+			start++;
+			substart++;
+		}
+		if (*substart == '\0')
+		{
+			return cp;
+		}
+		substart = (px_char*)src;
+		cp++;
+	}
+	return PX_NULL;
+}
+
+px_char* PX_strstr2(const px_char* dest, const px_char* src)
+{
+	px_char* start = (px_char*)dest;
+	px_char* substart = (px_char*)src;
+	px_char* cp = (px_char*)dest;
+	while (*cp)
+	{
+		start = cp;
+		while (*start != '\0' && *substart != '\0' && PX_chrequ2(*start,*substart))
 		{
 			start++;
 			substart++;

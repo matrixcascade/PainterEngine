@@ -39,6 +39,7 @@
 #define PX_OBJECT_EVENT_OPEN				27
 #define PX_OBJECT_EVENT_SAVE				28
 #define PX_OBJECT_EVENT_TIMEOUT				29
+#define PX_OBJECT_EVENT_DAMAGE				30
 //////////////////////////////////////////////////////////////////////////////
 //    Type of Controls
 /////////////////////////////////////////////////////////////////////////////
@@ -166,9 +167,11 @@ typedef px_void  (*Function_ObjectLinkChild)(PX_Object *parent,PX_Object *child)
 struct _PX_Object
 {
 	px_char id[PX_OBJECT_ID_MAXLEN];
-	px_float x;
-	px_float y;
-	px_float z;
+	px_float x, y, z;
+	px_float vx, vy, vz;
+	px_float fx, fy, fz;
+	px_float ak;
+
 	px_float Width;
 	px_float Height;
 	px_float Length;
@@ -191,6 +194,7 @@ struct _PX_Object
 	px_bool  delay_delete;
 	px_dword impact_object_type;
 	px_dword impact_target_type;
+	
 	px_void *pObjectDesc;
 	px_memorypool *mp;
 	struct _PX_Object *pChilds;
@@ -247,6 +251,7 @@ px_float PX_Object_Event_GetCursorY(PX_Object_Event e);
 px_float PX_Object_Event_GetCursorZ(PX_Object_Event e);
 px_float PX_Object_Event_GetCursorPressure(PX_Object_Event e);
 px_int PX_Object_Event_GetCursorIndex(PX_Object_Event e);
+px_float PX_Object_Event_GetDamage(PX_Object_Event e);
 
 px_float PX_Object_Event_GetWidth(PX_Object_Event e);
 px_float PX_Object_Event_GetHeight(PX_Object_Event e);
@@ -261,6 +266,7 @@ px_void PX_Object_Event_SetHeight(PX_Object_Event *e,px_float h);
 px_void PX_Object_Event_SetCursorX(PX_Object_Event *e,px_float x);
 px_void PX_Object_Event_SetCursorY(PX_Object_Event *e,px_float y);
 px_void PX_Object_Event_SetCursorZ(PX_Object_Event *e,px_float z);
+px_void PX_Object_Event_SetDamage(PX_Object_Event* e, px_float damage);
 px_void PX_Object_Event_SetCursorIndex(PX_Object_Event *e,px_int index);
 
 px_float PX_Object_Event_GetScaleCursorX(PX_Object_Event e);
@@ -314,6 +320,9 @@ px_void    PX_ObjectDelete(PX_Object *pObject);
 px_void    PX_ObjectDelayDelete(PX_Object* pObject);
 px_void	   PX_ObjectDeleteChilds( PX_Object *pObject );
 px_void	   PX_ObjectSetPosition(PX_Object *pObject,px_float x,px_float y,px_float z);
+px_void	   PX_ObjectSetForce(PX_Object* pObject, px_float x, px_float y, px_float z);
+px_void	   PX_ObjectSetVelocity(PX_Object* pObject, px_float x, px_float y, px_float z);
+px_void	   PX_ObjectSetResistance(PX_Object* pObject, px_float ak);
 px_void    PX_ObjectSetSize(PX_Object *pObject,px_float Width,px_float Height,px_float length);
 px_void	   PX_ObjectSetVisible(PX_Object *pObject,px_bool visible);
 px_void    PX_ObjectSetEnabled(PX_Object *pObject,px_bool enabled);
@@ -332,6 +341,7 @@ px_float	PX_ObjectGetWidth(PX_Object *pObject);
 
 px_void PX_ObjectAddChild(PX_Object *Parent,PX_Object *child);
 px_void PX_ObjectUpdate(PX_Object *pObject,px_uint elapsed );
+px_void PX_ObjectUpdatePhysics(PX_Object* pObject, px_uint elapsed);
 px_void PX_ObjectRender(px_surface *pSurface,PX_Object *pObject,px_uint elapsed);
 
 px_int PX_ObjectRegisterEvent(PX_Object *pObject,px_uint Event,px_void (*ProcessFunc)(PX_Object *,PX_Object_Event e,px_void *user_ptr),px_void *ptr);

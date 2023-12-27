@@ -56,6 +56,18 @@ px_bool PX_AbiWrite_color(px_abi* pabi,const px_char name[],px_color color);
 px_bool PX_AbiWrite_bool(px_abi* pabi,const px_char name[],px_bool _bool);
 px_bool PX_AbiWrite_data(px_abi* pabi,const px_char name[],px_void *data,px_int size);
 
+px_bool PX_AbiMemoryWrite_int(px_memory* pmem, const px_char name[], px_int _int);
+px_bool PX_AbiMemoryWrite_ptr(px_memory* pmem, const px_char name[], px_void* ptr);
+px_bool PX_AbiMemoryWrite_float(px_memory* pmem, const px_char name[], px_float _float);
+px_bool PX_AbiMemoryWrite_double(px_memory* pmem, const px_char name[], px_double _double);
+px_bool PX_AbiMemoryWrite_string(px_memory* pmem, const px_char name[], const px_char _string[]);
+px_bool PX_AbiMemoryWrite_point(px_memory* pmem, const px_char name[], px_point point);
+px_bool PX_AbiMemoryWrite_color(px_memory* pmem, const px_char name[], px_color color);
+px_bool PX_AbiMemoryWrite_bool(px_memory* pmem, const px_char name[], px_bool _bool);
+px_bool PX_AbiMemoryWrite_data(px_memory* pmem, const px_char name[], px_void* data, px_int size);
+
+
+
 px_bool PX_AbiRead_int(px_abi* pabi,const px_char name[],px_int *_int);
 px_bool PX_AbiRead_float(px_abi* pabi,const px_char name[],px_float *_float);
 px_bool PX_AbiRead_double(px_abi* pabi,const px_char name[],px_double *_double);

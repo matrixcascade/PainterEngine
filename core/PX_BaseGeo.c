@@ -1873,7 +1873,7 @@ px_void PX_GeoDrawPath(px_surface *psurface, px_point path[],px_int pathCount,px
 			{
 				px_point drawPoint=PX_PointAdd(path[i],PX_PointMul(path_unit_vector,step));
 				PX_GeoDrawSolidCircle_Ex2(psurface,drawPoint.x,drawPoint.y,linewidth/2,color);
-				step+=(linewidth/4)<0.5f?0.5f:(linewidth/4);
+				step+=(linewidth/8)<0.5f?0.5f:(linewidth/8);
 			} while (step<length);
 		}
 	}

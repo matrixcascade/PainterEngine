@@ -45,7 +45,7 @@ px_bool PX_LoadScriptFromFile(px_memory *code,const px_char path[]);
 px_bool PX_LoadScriptInstanceFromFile(px_memorypool *mp,PX_VM *ins,const px_char path[]);
 px_bool PX_LoadLiveFromFile(px_memorypool* mp, PX_LiveFramework* pliveframework, const px_char path[]);
 px_bool PX_LoadUIFormFile(px_memorypool* mp, PX_Object* designerObject, PX_Object* proot, PX_FontModule* fm, const px_char path[]);
-px_bool PX_LoadFontModuleFromTTF(px_memorypool* mp, PX_FontModule* fm, const px_char Path[]);
+px_bool PX_LoadFontModuleFromTTF(px_memorypool* mp, PX_FontModule* fm, const px_char Path[], PX_FONTMODULE_CODEPAGE codepage, px_int fontsize);
 px_bool PX_LoadJsonFromJsonFile(px_memorypool* mp, PX_Json* json, const px_char* path);
 px_bool PX_LoadTextureToResource(PX_ResourceLibrary *presourcelib,const px_char Path[],const px_char key[]);
 px_bool PX_LoadShapeToResource(PX_ResourceLibrary *presourcelib,const px_char Path[],const px_char key[]);

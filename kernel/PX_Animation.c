@@ -334,7 +334,10 @@ px_bool PX_AnimationIsActivity(PX_Animation* animation)
 px_bool PX_AnimationCreate(PX_Animation *animation,PX_AnimationLibrary *linker)
 {
 	PX_memset(animation,0,sizeof(PX_Animation));
-
+	if (linker==0)
+	{
+		return PX_FALSE;
+	}
 	animation->linker=linker;
 	animation->reg_currentFrameIndex=-1;
 	animation->reg_currentAnimation = -1;

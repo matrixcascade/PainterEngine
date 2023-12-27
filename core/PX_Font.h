@@ -70,8 +70,6 @@ px_int PX_FontDrawChar(px_surface *psurface, px_int x,px_int y,px_uchar chr,px_c
 px_int PX_FontDrawText(px_surface *psurface,px_int x,px_int y,PX_ALIGN align,const px_char *Text,px_color Color);
 px_void PX_FontTextGetRenderWidthHeight(const px_char *Text,px_int *width,px_int *height);
 
-
-
 px_int PX_FontModuleGetCharacterRawCode(PX_FONTMODULE_CODEPAGE codePage,const px_char *Text,px_dword *code);
 px_bool PX_FontModuleInitialize(px_memorypool *mp,PX_FontModule *module);
 px_void PX_FontModuleSetCodepage(PX_FontModule* module, PX_FONTMODULE_CODEPAGE codePage);

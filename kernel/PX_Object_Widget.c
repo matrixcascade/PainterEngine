@@ -175,7 +175,9 @@ px_void PX_Object_WidgetRender(px_surface *psurface, PX_Object *pObject,px_uint 
 		}
 
 		pwidget->bevent_update=PX_FALSE;
+		
 		PX_SurfaceClear(&pwidget->renderTarget,0,0,pwidget->renderTarget.width-1,pwidget->renderTarget.height-1,pwidget->backgroundcolor);
+
 		PX_ObjectRender(&pwidget->renderTarget,pwidget->root,elapsed);
 		PX_SurfaceRender(psurface,&pwidget->renderTarget,(px_int)objx,(px_int)objy+PX_OBJECT_WIDGET_BAR_SIZE,PX_ALIGN_LEFTTOP,PX_NULL);
 		if (pwidget->showShader)
@@ -205,7 +207,7 @@ PX_Object * PX_Object_WidgetCreate(px_memorypool *mp,PX_Object *Parent,px_int x,
 {
 	PX_Object *pObject;
 	PX_Object_Widget *pWidget=(PX_Object_Widget *)MP_Malloc(mp,sizeof(PX_Object_Widget));
-
+	PX_memset(pWidget,0,sizeof(PX_Object_Widget));
 	if(width<=0) width=1;
 	if(height<=PX_OBJECT_WIDGET_BAR_SIZE)height=PX_OBJECT_WIDGET_BAR_SIZE+1;
 
@@ -309,6 +311,16 @@ px_int PX_Object_WidgetGetRenderTargetWidth(PX_Object *pObject)
 	if (pWidget)
 	{
 		return pWidget->renderTarget.width;
+	}
+	return 0;
+}
+
+px_surface* PX_Object_WidgetGetRenderTarget(PX_Object* pObject)
+{
+	PX_Object_Widget* pWidget = PX_Object_GetWidget(pObject);
+	if (pWidget)
+	{
+		return &pWidget->renderTarget;
 	}
 	return 0;
 }

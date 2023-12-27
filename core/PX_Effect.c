@@ -87,3 +87,23 @@ px_bool PX_EffectOutline(px_surface *s,px_int radius,px_color color)
 		PX_SurfaceFree(&ns);
 		return PX_TRUE;
 }
+
+px_void PX_EffectRenderAsh(px_surface* s, px_float x, px_float y, px_float radius)
+{
+	px_int dx, dy;
+	for ( dx = (px_int)(x-radius); dx < (px_int)(x + radius); dx++)
+	{
+		for ( dy = (px_int)(y-radius); dy < (px_int)(y + radius); dy++)
+		{
+			px_float r=PX_sqrt((dx-x)*(dx-x)+(dy-y)*(dy-y));
+			if (r<radius)
+			{
+				px_float a=(1-r/radius);
+				px_color clr=PX_COLOR((px_uchar)(255*a),(px_uchar)(255),(px_uchar)(255*a),(px_uchar)(255*a/2));
+				PX_SurfaceDrawPixel(s,dx,dy,clr);
+			}
+		}
+
+	}
+	return ;
+}

@@ -136,6 +136,8 @@ px_void PX_TextureRenderClipMirror(px_surface* psurface, px_texture* tex, px_int
 	px_color* pdata;
 	px_color clr;
 
+	PX_ASSERTIF(tex == PX_NULL);
+
 	if (clipx < 0)
 	{
 		clipx = 0;
@@ -616,6 +618,10 @@ px_void PX_TextureRenderRotation_vector(px_surface *psurface,px_texture *tex,px_
 	if (p_vector.x|| p_vector.y)
 	{
 		PX_TextureRenderRotation_sincos(psurface, tex, x, y, refPoint, blend, PX_Point2D_sin(p_vector), PX_Point2D_cos(p_vector));
+	}
+	else
+	{
+		PX_TextureRender(psurface, tex, x, y, refPoint, blend);
 	}
 	
 }

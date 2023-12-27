@@ -43,6 +43,12 @@ px_void PX_Object_AsmDebuggerPrintVar(PX_Object_AsmDebugger* pAsm, PX_VM_VARIABL
 		PX_Object_LabelSetText(pAsm->label_name, content);
 		PX_Object_AutoTextSetText(pAsm->autotext_data, pvar->_string.buffer);
 		break;
+	case PX_VM_VARIABLE_TYPE_HANDLE:
+		PX_sprintf1(content, sizeof(content), "%1(handle)", PX_STRINGFORMAT_STRING(name));
+		PX_Object_LabelSetText(pAsm->label_name, content);
+		PX_sprintf1(content, sizeof(content), "%1", PX_STRINGFORMAT_INT((px_int)(pvar->_uint)));
+		PX_Object_AutoTextSetText(pAsm->autotext_data, content);
+		break;
 	default:
 		break;
 	}

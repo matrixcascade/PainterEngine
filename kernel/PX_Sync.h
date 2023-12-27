@@ -5,7 +5,7 @@
 
 
 #define PX_SYNC_SERVER_ID 0
-#define PX_SYNC_SERVER_SEND_DURATION   3
+#define PX_SYNC_SERVER_SEND_DURATION   30
 #define PX_SYNC_SERVER_SEND_TIMES      3
 
 #define PX_SYNC_CLIENT_SEND_TIMES    3
@@ -14,7 +14,7 @@
 #define PX_SYNC_CACHESIZE 1420
 #define PX_SYNC_INSTRS_SIZE 128*1024
 #define PX_SYNC_INSTRS_BYTES_SIZE 1024*1024
-#define PX_SYNC_CLIENT_SEND_DURATION 3
+#define PX_SYNC_CLIENT_SEND_DURATION 30
 
 typedef enum
 {
@@ -252,10 +252,14 @@ typedef struct _PX_SyncData_Client
 	px_dword last_recv_elapsed;
 }PX_SyncDataClient;
 
-#define PX_SYNCDATA_OPCODE_QUERY 0x680
+#define PX_SYNCDATA_OPCODE_QUERY 0x6800
 #define PX_SYNCDATA_OPCODE_QUERYACK 0x6802
 #define PX_SYNCDATA_OPCODE_REQUEST 0x6803
 #define PX_SYNCDATA_OPCODE_REQUESTACK 0x6804
+#define PX_SYNCDATA_OPCODE_REGISTERID 0x6805
+#define PX_SYNCDATA_OPCODE_REGISTERIDACK 0x6806
+
+#define PX_SYN_CLIENT_REGISTER_ID 0
 
 
 typedef struct
@@ -271,6 +275,18 @@ typedef struct
 	px_dword clientID;
 	px_dword reserved;
 }PX_SyncData_Query;
+
+typedef struct
+{
+	px_dword opcode;
+	px_dword clientID;
+}PX_SyncData_RegisterID;
+
+typedef struct
+{
+	px_dword opcode;
+	px_dword clientID;
+}PX_SyncData_RegisterIDAck;
 
 typedef struct
 {
@@ -304,6 +320,8 @@ typedef union
 	PX_SyncData_QueryAck queryack;
 	PX_SyncData_Request request;
 	PX_SyncData_RequestAck requestAck;
+	PX_SyncData_RegisterID registerid;
+	PX_SyncData_RegisterIDAck registeridack;
 }PX_SyncData_Datagram;
 
 px_bool PX_SyncDataServerInitialize(PX_SyncDataServer *syncdata_server,px_memorypool *mp,px_dword serverID,PX_Linker *linker);
@@ -312,9 +330,9 @@ px_bool PX_SyncDataServerSetSyncData(PX_SyncDataServer *s,px_void *data,px_dword
 px_bool PX_SyncDataServerUpdate(PX_SyncDataServer *syncdata_server,px_int elapsed);
 px_void PX_SyncDataServerFree(PX_SyncDataServer *syncdata_server);
 
-
 px_bool PX_SyncDataClientInitialize(PX_SyncDataClient *syncdata_client,px_memorypool *mp,px_dword serverID,px_dword clientID,PX_Linker *linker);
 px_bool PX_SyncDataClientIsCompleted(PX_SyncDataClient *syncdata_client);
 px_bool PX_SyncDataClientUpdate(PX_SyncDataClient *syncdata_client,px_int elapsed);
 px_void PX_SyncDataClientFree(PX_SyncDataClient *syncdata_client);
+px_dword  PX_SyncDataClientGetDelayMS(PX_SyncDataClient *syncdata_client);
 #endif

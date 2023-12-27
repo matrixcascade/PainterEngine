@@ -2493,7 +2493,9 @@ px_void PX_FontTextGetRenderWidthHeight(const px_char *Text,px_int *width,px_int
 			max_height=y+__PX_FONT_HEIGHT;
 		}
 	}
+	if(width)
 	*width=max_width;
+	if(height)
 	*height=max_height;
 }
 
@@ -2822,7 +2824,9 @@ px_void PX_FontModuleTextGetRenderWidthHeight(PX_FontModule *module,const px_cha
 				max_height = dy + height;
 			}
 		}
+		if(width)
 		*width = max_width;
+		if(height)
 		*height = max_height;
 	}
 	

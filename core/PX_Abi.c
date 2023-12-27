@@ -13,32 +13,39 @@ px_void PX_AbiCreateDynamic(px_abi* pabi, px_memorypool* mp)
 	PX_MemoryInitialize(mp, &pabi->dynamic);
 }
 
-px_bool PX_AbiWrite(px_abi* pabi, PX_ABI_TYPE type, const px_char name[], px_void* buffer, px_int buffersize)
+px_bool PX_AbiWriteMemory(px_memory* pmemory, PX_ABI_TYPE type, const px_char name[], px_void* buffer, px_int buffersize)
 {
 	px_dword size;
-	size=PX_strlen(name)+1+buffersize;
+	size = PX_strlen(name) + 1 + buffersize;
+	if (!PX_MemoryCat(pmemory, &type, sizeof(type)))
+	{
+		return PX_FALSE;
+	}
+	if (!PX_MemoryCat(pmemory, &size, sizeof(size)))
+	{
+		return PX_FALSE;
+	}
+	if (!PX_MemoryCat(pmemory, name, PX_strlen(name) + 1))
+	{
+		return PX_FALSE;
+	}
+	if (!PX_MemoryCat(pmemory, buffer, buffersize))
+	{
+		return PX_FALSE;
+	}
+	return PX_TRUE;
+}
+
+px_bool PX_AbiWrite(px_abi* pabi, PX_ABI_TYPE type, const px_char name[], px_void* buffer, px_int buffersize)
+{
 	if (pabi->dynamic.mp)
 	{
-		if (!PX_MemoryCat(&pabi->dynamic, &type, sizeof(type)))
-		{
-			return PX_FALSE;
-		}
-		if (!PX_MemoryCat(&pabi->dynamic, &size, sizeof(size)))
-		{
-			return PX_FALSE;
-		}
-		if (!PX_MemoryCat(&pabi->dynamic, name, PX_strlen(name) + 1))
-		{
-			return PX_FALSE;
-		}
-		if (!PX_MemoryCat(&pabi->dynamic, buffer, buffersize))
-		{
-			return PX_FALSE;
-		}
-		return PX_TRUE;
+		return PX_AbiWriteMemory(&pabi->dynamic, type, name, buffer, buffersize);
 	}
 	else
 	{
+		px_dword size;
+		size = PX_strlen(name) + 1 + buffersize;
 		if (pabi->static_write_offset + sizeof(type) + sizeof(size) + PX_strlen(name) + 1 + buffersize > pabi->static_size)
 		{
 			return PX_FALSE;
@@ -54,6 +61,9 @@ px_bool PX_AbiWrite(px_abi* pabi, PX_ABI_TYPE type, const px_char name[], px_voi
 		return PX_TRUE;
 	}
 }
+
+
+
 
 px_bool PX_AbiWrite_int(px_abi* pabi, const px_char name[], px_int _int)
 {
@@ -92,6 +102,43 @@ px_bool PX_AbiWrite_data(px_abi* pabi, const px_char name[], px_void* data, px_i
 	return PX_AbiWrite(pabi, PX_ABI_TYPE_DATA, name, data, size);
 }
 
+px_bool PX_AbiMemoryWrite_int(px_memory* pmem, const px_char name[], px_int _int)
+{
+	return PX_AbiWriteMemory(pmem, PX_ABI_TYPE_INT, name, &_int, sizeof(_int));
+}
+px_bool PX_AbiMemoryWrite_ptr(px_memory* pmem, const px_char name[], px_void* ptr)
+{
+	return PX_AbiWriteMemory(pmem, PX_ABI_TYPE_PTR, name, &ptr, sizeof(ptr));
+}
+px_bool PX_AbiMemoryWrite_float(px_memory* pmem, const px_char name[], px_float _float)
+{
+	return PX_AbiWriteMemory(pmem, PX_ABI_TYPE_FLOAT, name, &_float, sizeof(_float));
+}
+px_bool PX_AbiMemoryWrite_double(px_memory* pmem, const px_char name[], px_double _double)
+{
+	return PX_AbiWriteMemory(pmem, PX_ABI_TYPE_DOUBLE, name, &_double, sizeof(_double));
+}
+px_bool PX_AbiMemoryWrite_string(px_memory* pmem, const px_char name[], const px_char _string[])
+{
+	return PX_AbiWriteMemory(pmem, PX_ABI_TYPE_STRING, name, (px_void*)_string, PX_strlen(_string) + 1);
+}
+px_bool PX_AbiMemoryWrite_point(px_memory* pmem, const px_char name[], px_point point)
+{
+	return PX_AbiWriteMemory(pmem, PX_ABI_TYPE_POINT, name, &point, sizeof(point));
+}
+px_bool PX_AbiMemoryWrite_color(px_memory* pmem, const px_char name[], px_color color)
+{
+	return PX_AbiWriteMemory(pmem, PX_ABI_TYPE_COLOR, name, &color, sizeof(color));
+}
+px_bool PX_AbiMemoryWrite_bool(px_memory* pmem, const px_char name[], px_bool _bool)
+{
+	return PX_AbiWriteMemory(pmem, PX_ABI_TYPE_BOOL, name, &_bool, sizeof(_bool));
+}
+px_bool PX_AbiMemoryWrite_data(px_memory* pmem, const px_char name[], px_void* data, px_int size)
+{
+	return PX_AbiWriteMemory(pmem, PX_ABI_TYPE_DATA, name, data, size);
+}
+
 px_void* PX_AbiRead(px_abi* pabi, PX_ABI_TYPE type, const px_char name[])
 {
 	PX_ABI_TYPE *ptype;
@@ -110,7 +157,7 @@ px_void* PX_AbiRead(px_abi* pabi, PX_ABI_TYPE type, const px_char name[])
 	else
 	{
 		pbuffer = pabi->pstatic_buffer;
-		readsize = pabi->static_write_offset;
+		readsize = pabi->static_size;
 	}
 
 	while (readoffset<readsize)

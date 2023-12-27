@@ -142,7 +142,15 @@ px_void PX_Object_ImageRender(px_surface *psurface, PX_Object *pObject,px_uint e
 
 px_void PX_Object_ImageFree( PX_Object *pBitmap )
 {
-
+	PX_Object_Image *pImage=PX_Object_GetImage(pBitmap);
+	if (pImage->texture.MP)
+	{
+		PX_TextureFree(&pImage->texture);
+	}
+	if (pImage->gif.mp)
+	{
+		PX_GifFree(&pImage->gif);
+	}
 }
 
 PX_Object * PX_Object_ImageCreate(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y,px_int width,px_int height,px_texture *ptex )
@@ -221,6 +229,54 @@ px_void PX_Object_ImageSetGif(PX_Object* pObject, px_gif* pgif)
 		pImg->pgif = pgif;
 		pImg->pTexture = PX_NULL;
 	}
+}
+
+px_void PX_Object_ImageAutoSize(PX_Object* pObject)
+{
+	PX_Object_Image* pImg = PX_Object_GetImage(pObject);
+	if (pImg)
+	{
+		if (pImg->pTexture)
+		{
+			PX_ObjectSetSize(pObject, pImg->pTexture->width*1.0f, pImg->pTexture->height*1.0f, 0);
+		}
+	else if (pImg->pgif)
+		{
+			PX_ObjectSetSize(pObject, pImg->pgif->width*1.0f, pImg->pgif->height*1.0f, 0);
+		}
+	}
+}
+
+px_bool PX_Object_ImageLoadTexture(PX_Object* pObject, px_void* buffer, px_int size)
+{
+	PX_Object_Image* pImg = PX_Object_GetImage(pObject);
+	if (pImg)
+	{
+		if (pImg->texture.MP)
+		{
+			PX_TextureFree(&pImg->texture);
+		}
+		if (!PX_TextureCreateFromMemory(pObject->mp, buffer, size, &pImg->texture))return PX_FALSE;
+		pImg->pTexture=&pImg->texture;
+		return PX_TRUE;
+	}
+	return PX_FALSE;
+}
+
+px_bool PX_Object_ImageLoadGif(PX_Object* pObject, px_void* buffer, px_int size)
+{
+	PX_Object_Image* pImg = PX_Object_GetImage(pObject);
+	if (pImg)
+	{
+		if (pImg->gif.mp)
+		{
+			PX_GifFree(&pImg->gif);
+		}
+		if (!PX_GifCreate(pObject->mp, &pImg->gif, buffer, size))return PX_FALSE;
+		pImg->pgif=&pImg->gif;
+		return PX_TRUE;
+	}
+	return PX_FALSE;
 }
 
 

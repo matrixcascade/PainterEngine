@@ -523,6 +523,7 @@ px_int PX_itoa(px_int num,px_char *str,px_int MaxStrSize,px_int radix);
 px_dword PX_SwapEndian(px_dword val);
 px_char *PX_strchr(const px_char *s,int ch);
 px_char* PX_strstr(const px_char* dest, const px_char* src);
+px_char* PX_strstr2(const px_char* dest, const px_char* src);
 px_void PX_strcut(px_char* dest, px_int left, px_int right);
 ///////////////////////////////////////////////////////////////////////////
 //rectangle circle
@@ -674,6 +675,7 @@ px_void PX_MatrixTranspose(px_matrix *matrix);
 //////////////////////////////////////////////////////////////////////////
 //color
 px_color PX_COLOR(px_uchar a,px_uchar r,px_uchar g,px_uchar b); 
+px_color PX_COLORF(px_float a, px_float r, px_float g, px_float b);
 px_color PX_ColorInverse(px_color clr);
 px_void  PX_ColorIncrease(px_color* color, px_uchar inc);
 px_color PX_ColorAdd(px_color color1,px_color color2);
@@ -694,6 +696,9 @@ px_color PX_ColorYCbCrToRGB(px_color_YCbCr YCbCr);
 px_point PX_POINT(px_float x,px_float y,px_float z);
 px_point2D PX_POINT2D(px_float x,px_float y);
 px_point4D PX_POINT4D(px_float x, px_float y, px_float z);
+px_point PX_POINT2D_3D(px_point2D p);
+px_point2D PX_POINT3D_2D(px_point p);
+
 px_point PX_PointRotate(px_point p, px_float angle);
 px_point2D PX_Point2DRotate(px_point2D p,px_float angle);
 px_float PX_PointDistance(px_point p1,px_point p2);
@@ -708,7 +713,7 @@ px_point4D PX_Point4DSub(px_point4D p1,px_point4D p2);
 px_point PX_PointMul(px_point p1,px_float m);
 px_point2D PX_Point2DMul(px_point2D p1,px_float m);
 px_point PX_PointDiv(px_point p1,px_float m);
-
+px_float  PX_Point2DSquare(px_point2D p);
 px_point2D PX_Point2DRrthonormal(px_point2D v);
 px_point2D PX_Point2DBase(px_point2D base1,px_point2D base2,px_point2D target);
 px_point2D PX_Point2DDiv(px_point2D p1,px_float m);
@@ -718,6 +723,7 @@ px_float PX_Point4DDot(px_point4D p1,px_point4D p2);
 px_point PX_PointCross(px_point p1,px_point p2);
 px_point4D PX_Point4DCross(px_point4D p1,px_point4D p2);
 px_point PX_PointInverse(px_point p1);
+px_point2D PX_Point2DInverse(px_point2D p1);
 px_float PX_PointMod(px_point p);
 px_float PX_Point2DMod(px_point2D p);
 px_float PX_PointSquare(px_point p);
@@ -725,6 +731,7 @@ px_point PX_PointNormalization(px_point p);
 px_point2D PX_Point2DNormalization(px_point2D p);
 px_point4D PX_Point4DUnit(px_point4D p);
 px_point PX_PointReflectX(px_point vector_refer,px_point respoint);
+px_point2D PX_Point2DReflectX(px_point2D vector_refer, px_point2D respoint);
 
 px_point2D PX_Point2DMulMatrix(px_point2D p,px_matrix m);
 px_point PX_PointMulMatrix(px_point p,px_matrix m);

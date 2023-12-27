@@ -1001,6 +1001,38 @@ px_bool PX_SyncDataServerUpdate(PX_SyncDataServer *s,px_int elapsed)
 	{
 		if (R_datagram.header.serverID==s->serverID)
 		{
+			if (R_datagram.header.opcode == PX_SYNCDATA_OPCODE_REGISTERID)
+			{
+				for (i = 0; i < s->clients.size; i++)
+				{
+					pClient = PX_VECTORAT(PX_SyncData_Server_Client, &s->clients, i);
+					if (pClient->clientID == R_datagram.query.clientID)
+					{
+						PX_SyncData_RegisterIDAck Ack;
+						Ack.opcode = PX_SYNCDATA_OPCODE_REGISTERIDACK;
+						Ack.clientID = pClient->clientID;
+						PX_SyncDataServer_WriteBlock(s, (px_byte*)&Ack, sizeof(Ack));
+						break;
+					}
+				}
+				if (i==s->clients.size)
+				{
+					for (i = 0; i < s->clients.size; i++)
+					{
+						pClient = PX_VECTORAT(PX_SyncData_Server_Client, &s->clients, i);
+						if (pClient->clientID == 0)
+						{
+							PX_SyncData_RegisterIDAck Ack;
+							Ack.opcode = PX_SYNCDATA_OPCODE_REGISTERIDACK;
+							pClient->clientID=R_datagram.registerid.clientID;
+							Ack.clientID = pClient->clientID;
+							PX_SyncDataServer_WriteBlock(s, (px_byte*)&Ack, sizeof(Ack));
+							break;
+						}
+					}
+				}
+			}
+
 			if (R_datagram.header.opcode==PX_SYNCDATA_OPCODE_QUERY)
 			{
 				if ((px_int)R_datagram.request.blockIndex>=s->clients.size)
@@ -1269,3 +1301,7 @@ px_void PX_SyncDataClientFree(PX_SyncDataClient *syncdata_client)
 
 
 
+px_dword  PX_SyncDataClientGetDelayMS(PX_SyncDataClient *syncdata_client)
+{
+	return syncdata_client->last_recv_elapsed;
+}

@@ -1,4 +1,4 @@
-#include "../modules/px_websocketserver.h"
+#include "px_websocketserver.h"
 
 px_int PX_WebsocketServerLinkerRead_func(struct _PX_Linker* linker, px_void* data, px_int datasize, px_void* userPtr)
 {

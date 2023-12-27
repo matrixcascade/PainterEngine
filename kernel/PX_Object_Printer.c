@@ -79,6 +79,16 @@ PX_Object* PX_Object_PrinterLastPrintText(PX_Object* pObject, const px_char* tex
 	return PX_NULL;
 }
 
+PX_Object* PX_Object_PrinterGetArea(PX_Object* pObject)
+{
+	if (pObject->Type == PX_OBJECT_TYPE_PRINTER)
+	{
+		PX_Object_Printer* pDesc = PX_ObjectGetDesc(PX_Object_Printer, pObject);
+		return pDesc->Area;
+	}
+	return 0;
+}
+
 PX_Object* PX_Object_PrinterPrintProcessBar(PX_Object* pObject)
 {
 	if (pObject->Type == PX_OBJECT_TYPE_PRINTER)
@@ -132,6 +142,24 @@ PX_Object* PX_Object_PrinterPrintButton(PX_Object* pObject, px_int width, px_int
 		return pNewObject;
 	}
 	return PX_NULL;
+}
+
+PX_Object* PX_Object_PrinterPrintObject(PX_Object* pObject, PX_Object* pNewObject)
+{
+	PX_Object_PrinterLine obj;
+	PX_Object_Printer* pDesc = PX_ObjectGetDesc(PX_Object_Printer, pObject);
+	PX_ASSERTIF(pNewObject == PX_NULL);
+	if (pNewObject)
+	{
+		obj.pObject = pNewObject;
+		obj.id = pDesc->id++;
+		PX_VectorPushback(&pDesc->pObjects, &obj);
+		PX_Object_PrinterUpdateLines(pObject);
+		PX_Object_ScrollAreaUpdateRange(pDesc->Area);
+		PX_Object_ScrollAreaMoveToBottom(pDesc->Area);
+	}
+
+	return pNewObject;
 }
 
 PX_Object* PX_Object_PrinterPrintSpace(PX_Object* pObject, px_int height)
@@ -192,17 +220,20 @@ PX_Object* PX_Object_PrinterPrintImage(PX_Object* pObject, px_texture* pTexture)
 		PX_Object_PrinterLine obj;
 		PX_Object_Printer* pDesc = PX_ObjectGetDesc(PX_Object_Printer, pObject);
 		PX_Object* pImageObject;
-		pImageObject = PX_Object_ImageCreate(pObject->mp, pDesc->Area, 0, 0, pTexture->width, pTexture->height, pTexture);
+		if(pTexture)
+			pImageObject = PX_Object_ImageCreate(pObject->mp, pDesc->Area, 0, 0, pTexture->width, pTexture->height, pTexture);
+		else
+			pImageObject = PX_Object_ImageCreate(pObject->mp, pDesc->Area, 0, 0, 100, 100, 0);
 		PX_Object_ImageSetAlign(pImageObject, PX_ALIGN_LEFTTOP);
-		PX_ObjectSetSize(pImageObject, (px_float)pTexture->width, (px_float)pTexture->height, 0);
 		obj.pObject = pImageObject;
 		obj.id = pDesc->id++;
 		PX_VectorPushback(&pDesc->pObjects, &obj);
 		PX_Object_PrinterUpdateLines(pObject);
 		PX_Object_ScrollAreaUpdateRange(pDesc->Area);
 		PX_Object_ScrollAreaMoveToBottom(pDesc->Area);
+		return pImageObject;
 	}
-	return pObject;
+	return PX_NULL;
 }
 
 
@@ -266,6 +297,18 @@ px_void PX_Object_PrinterClear(PX_Object* pObject)
 		PX_ObjectDelete(pCc->pObject);
 	}
 	PX_VectorClear(&pDesc->pObjects);
+}
+
+px_void PX_Object_PrinterUpdateAll(PX_Object* pObject)
+{
+	if (pObject->Type == PX_OBJECT_TYPE_PRINTER)
+	{
+		PX_Object_Printer* pDesc = PX_ObjectGetDesc(PX_Object_Printer, pObject);
+		PX_Object_PrinterUpdateLines(pObject);
+		PX_Object_ScrollAreaUpdateRange(pDesc->Area);
+		PX_Object_ScrollAreaMoveToBottom(pDesc->Area);
+	}
+	
 }
 
 px_int PX_Object_PrinterGetLastCreateId(PX_Object* pObject)

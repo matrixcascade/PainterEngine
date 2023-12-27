@@ -681,20 +681,18 @@ _ERROR:
     return PX_FALSE;
 }
 
-px_bool PX_LoadFontModuleFromTTF(px_memorypool *mp,PX_FontModule* fm, const px_char Path[])
+px_bool PX_LoadFontModuleFromTTF(px_memorypool *mp,PX_FontModule* fm, const px_char Path[], PX_FONTMODULE_CODEPAGE codepage, px_int fontsize)
 {
 	PX_IO_Data io;
 	io = PX_LoadFileToIOData(Path);
 	if (!io.size)goto _ERROR;
-	if(!PX_FontModuleInitialize(mp, fm)) goto _ERROR;
-	if (!PX_FontModuleLoad(fm, io.buffer, io.size)) goto _ERROR;
+	if (!PX_FontModuleInitializeTTF(mp,fm, codepage, fontsize,io.buffer,io.size)) goto _ERROR;
 	PX_FreeIOData(&io);
 	return PX_TRUE;
 _ERROR:
 	PX_FreeIOData(&io);
 	return PX_FALSE;
 }
-
 px_bool PX_LoadJsonFromJsonFile(px_memorypool* mp, PX_Json* json, const px_char* path)
 {
 	PX_IO_Data io = PX_LoadFileToIOData((px_char*)path);

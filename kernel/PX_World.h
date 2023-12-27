@@ -7,21 +7,12 @@
 #include "PX_Object.h"
 
 #define PX_WORLD_OBJECT_TYPE_NAME_LEN 32
-
+#define PX_WORLD_CALC_SIZE 1024*1024*2
 typedef struct
 {
 	px_bool DeleteMark;
 	PX_Object *pObject;
 }PX_WorldObject;
-
-typedef PX_Object *(*PX_WorldCreateObjectFunc)(struct _PX_World *pWorld,px_float x,px_float y,px_float z,px_float width,px_float height,px_float length,px_abi *abi);
-
-#define PX_WORLD_CREATE_OBJECT_FUNCTION(name) PX_Object *name(PX_World *pWorld,px_float x,px_float y,px_float z,px_float width,px_float height,px_float length,px_abi *pabi)
-typedef struct
-{
-	px_char name[PX_WORLD_OBJECT_TYPE_NAME_LEN];
-	PX_WorldCreateObjectFunc func;
-}PX_WorldClass;
 
 
 typedef struct _PX_World
@@ -42,13 +33,28 @@ typedef struct _PX_World
 	px_memorypool *mp;
 	px_memorypool mp_WorldCalc;
 	px_map idSearchmap;
+	PX_FontModule* fontmodule;
 	px_texture* pbackgroundtexture;
 	px_texture* pfrontwardtexture;
 	PX_ResourceLibrary *presourceLibrary;
 	PX_SoundPlay* psoundplay;
 	PX_Quadtree Impact_Test_array[sizeof(px_dword)*8];
+	PX_Compiler compiler;
+	px_memory vmbin;
+	PX_VM_DebuggerMap debugmap;
+	PX_VM  vm;
+	px_uint64 rand_seed;
 	px_map classes;
 }PX_World;
+
+typedef PX_Object* (*PX_WorldCreateObjectFunc)(PX_World* pWorld, px_float x, px_float y, px_float z, px_float width, px_float height, px_float length, px_abi* abi);
+
+#define PX_WORLD_CREATE_OBJECT_FUNCTION(name) PX_Object *name(PX_World *pWorld,px_float x,px_float y,px_float z,px_float width,px_float height,px_float length,px_abi *pabi)
+typedef struct
+{
+	px_char name[PX_WORLD_OBJECT_TYPE_NAME_LEN];
+	PX_WorldCreateObjectFunc func;
+}PX_WorldClass;
 
 typedef PX_Object *(*px_world_func_CreateObject)(PX_World *pWorld,px_float x,px_float y,px_float z,px_float width,px_float height,px_float length,px_void *user,px_abi *abi);
 typedef struct
@@ -57,7 +63,7 @@ typedef struct
 	px_world_func_CreateObject func;
 }PX_WorldObjectType;
 
-px_bool			PX_WorldInitialize(px_memorypool *mp,PX_World *pWorld,px_int world_width,px_int world_height,px_int surface_width,px_int surface_height,px_dword calcsize);
+px_bool			PX_WorldInitialize(px_memorypool* mp, PX_World* pWorld, px_int world_width, px_int world_height, px_int surface_width, px_int surface_height, const px_char script[]);
 px_void			PX_WorldSetBackwardTexture(PX_World* pWorld, px_texture* ptexture);
 px_void			PX_WorldSetFrontwardTexture(PX_World* pWorld, px_texture* ptexture);
 px_int			PX_WorldGetCount(PX_World *pWorld);
@@ -87,6 +93,6 @@ px_void			PX_WorldSetAuxiliaryLineColor(PX_World *pw,px_color color);
 px_point        PX_WorldObjectXYtoScreenXY(PX_World *pw,px_float x,px_float y);
 px_void			PX_WorldPostEvent(PX_World* pw, PX_Object_Event e);
 px_bool			PX_WorldRegisterClass(PX_World* pw, PX_WorldClass cls);
-px_bool         PX_WorldCreateClassObject(PX_World* pWorld,px_char name[], px_float x, px_float y, px_float z, px_float width, px_float height, px_float length, px_abi* abi);
+PX_Object*      PX_WorldCreateClassObject(PX_World* pWorld,px_char name[], px_float x, px_float y, px_float z, px_float width, px_float height, px_float length, px_abi* abi);
 px_void         PX_WorldFree(PX_World *pw);
 #endif
