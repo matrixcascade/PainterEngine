@@ -343,3 +343,52 @@ PX_Designer_ObjectDesc PX_Object_LabelDesignerInstall()
 	return slabel;
 }
 
+
+PX_OBJECT_RENDER_FUNCTION(PX_Object_SliderTextOnRender)
+{
+	PX_Object_SliderText* pDesc = (PX_Object_SliderText*)pObject->pObjectDesc;
+	px_float x, y, w, h;
+	PX_OBJECT_INHERIT_CODE(pObject, x, y, w, h);
+	PX_ObjectUpdatePhysics(pObject, elapsed);
+	if (elapsed>pDesc->alive)
+	{
+		PX_ObjectDelayDelete(pObject);
+		return;
+	}
+	PX_FontModuleDrawText(psurface, pDesc->fm, (px_int)x, (px_int)y, PX_ALIGN_LEFTMID, pDesc->text.buffer, pDesc->color);
+}
+
+PX_OBJECT_FREE_FUNCTION(PX_Object_SliderTextOnFree)
+{
+	PX_Object_SliderText* pDesc = (PX_Object_SliderText*)pObject->pObjectDesc;
+	PX_StringFree(&pDesc->text);
+}
+
+PX_Object* PX_Object_SliderTextCreate(px_memorypool* mp, PX_Object* Parent, px_float x, px_float y, px_float vx,px_float vy,px_dword alive, const px_char* Text, PX_FontModule* fm, px_color Color)
+{
+	PX_Object* pObject;
+	PX_Object_SliderText Desc = {0};
+	px_int fh, fw;
+	if (!PX_StringInitialize(mp, &Desc.text))return 0;
+	if (!PX_StringCat(&Desc.text, Text))
+	{
+		PX_StringFree(&Desc.text);
+		return 0;
+	}
+	Desc.fm = fm;
+	Desc.color = Color;
+	Desc.alive = alive;
+	PX_FontModuleTextGetRenderWidthHeight(fm, Text, &fw, &fh);
+	pObject = PX_ObjectCreateEx(mp, Parent,  x, y, 0,fw*1.0f, fh*1.0f, 0, 0, 0,PX_Object_SliderTextOnRender, PX_Object_SliderTextOnFree,&Desc,sizeof(Desc));
+	if (pObject)
+	{
+		pObject->vx = vx;
+		pObject->vy = vy;
+	}
+	else
+	{
+		PX_StringFree(&Desc.text);
+	}
+	return pObject;
+}
+

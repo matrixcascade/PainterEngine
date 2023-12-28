@@ -33,5 +33,15 @@ px_void		PX_Object_LabelSetStyle(PX_Object *pLabel,PX_OBJECT_LABEL_STYLE style);
 px_int		PX_Object_LabelGetTextRenderWidth(PX_Object* pLabel);
 
 PX_Designer_ObjectDesc PX_Object_LabelDesignerInstall();
+
+
+typedef struct
+{
+	px_string text;
+	px_color color;
+	px_dword alive;
+	PX_FontModule* fm;
+}PX_Object_SliderText;
+PX_Object* PX_Object_SliderTextCreate(px_memorypool* mp, PX_Object* Parent, px_float x, px_float y, px_float vx, px_float vy, px_dword alive, const px_char* Text, PX_FontModule* fm, px_color Color);
 #endif
 
