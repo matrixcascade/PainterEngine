@@ -45,7 +45,7 @@ static void resize(struct mfb_opaque_window* window, int width, int height) {
         window_title = (const char*)mfb_get_user_data(window);
     }
 
-    fprintf(stdout, "%s > resize: %d, %d\n", window_title, width, height);
+    // fprintf(stdout, "%s > resize: %d, %d\n", window_title, width, height);
     if (width > PX_GetScreenWidth()) {
         x = (width - PX_GetScreenWidth()) >> 1;
         width = PX_GetScreenWidth();
@@ -63,7 +63,7 @@ static px_bool window_close(struct mfb_opaque_window* window) {
     if (window) {
         window_title = (const char*)mfb_get_user_data(window);
     }
-    fprintf(stdout, "%s > close\n", window_title);
+    // fprintf(stdout, "%s > close\n", window_title);
     return PX_TRUE; // true => confirm close
                     // false => don't close
 }
@@ -74,15 +74,25 @@ static void keyboard(struct mfb_opaque_window* window, mfb_key key, mfb_key_mod 
     if (window) {
         window_title = (const char*)mfb_get_user_data(window);
     }
-    fprintf(stdout, "%s > keyboard: key: %s (pressed: %d) [key_mod: %x]\n", window_title, mfb_get_key_name(key), isPressed, mod);
+    // fprintf(stdout, "%s > keyboard: key: %s (pressed: %d) [key_mod: %x]\n", window_title, mfb_get_key_name(key), isPressed, mod);
     if (key == KB_KEY_ESCAPE) {
         mfb_window_close(window);
     }
 
-    mfb_event.Event = PX_OBJECT_EVENT_KEYDOWN;
-    PX_Object_Event_SetKeyDown(&mfb_event, (px_uint)key);
+    if (key == KB_KEY_BACKSPACE) {
+        if (isPressed) {
+            static px_char text = '\b';
+            mfb_event.Event = PX_OBJECT_EVENT_STRING;
+            PX_Object_Event_SetStringPtr(&mfb_event, &text);
 
-    PX_ApplicationPostEvent(&App, mfb_event);
+            PX_ApplicationPostEvent(&App, mfb_event);
+        }
+    } else {
+        mfb_event.Event = PX_OBJECT_EVENT_KEYDOWN;
+        PX_Object_Event_SetKeyDown(&mfb_event, (px_uint)key);
+
+        PX_ApplicationPostEvent(&App, mfb_event);
+    }
 }
 
 // ------------------------------------
@@ -91,7 +101,7 @@ static void char_input(struct mfb_opaque_window* window, unsigned int charCode) 
     if (window) {
         window_title = (const char*)mfb_get_user_data(window);
     }
-    fprintf(stdout, "%s > charCode: %#X\n", window_title, charCode);
+    // fprintf(stdout, "%s > charCode: %#X\n", window_title, charCode);
 
     // Little-Endian byte order
     static px_char text[4] = {0};
