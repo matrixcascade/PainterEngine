@@ -17,5 +17,6 @@ typedef struct
 }px_thread;
 
 int PX_ThreadCreate(px_thread *thread,func_thread func,void *ptr);
+void PX_ThreadDestroy(px_thread* thread);
 
 #endif
