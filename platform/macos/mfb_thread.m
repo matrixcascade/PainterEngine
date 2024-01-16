@@ -20,10 +20,10 @@
 - (instancetype)initWithThread:(px_thread*)thread {
     self = [super init];
     if (self) {
-        // 保存 px_thread 引用
+        // Save px_thread reference
         _pxthread = thread;
 
-        // 创建并保留 NSThread 实例
+        // Create and retain NSThread instance
         _nsthread = [[NSThread alloc] initWithTarget:self selector:@selector(PX_ThreadRun) object:nil];
     }
     return self;

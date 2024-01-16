@@ -20,6 +20,8 @@ mfb_state mfb_window_update(struct mfb_opaque_window* window, void* buffer, unsi
 mfb_state mfb_window_update_events(struct mfb_opaque_window* window);
 void mfb_window_close(struct mfb_opaque_window* window);
 mfb_state mfb_window_timer_reset(struct mfb_opaque_window* window);
+unsigned mfb_get_screen_width();
+unsigned mfb_get_screen_height();
 
 // ------------------------------------
 int mfb_is_window_active(struct mfb_opaque_window* window);

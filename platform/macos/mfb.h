@@ -177,12 +177,12 @@ typedef enum {
 } mfb_window_flags;
 
 // ------------------------------------
-// 不透明指针
+// Opaque pointer
 struct mfb_opaque_window;
 extern struct mfb_opaque_window* window;
 
 // ------------------------------------
-// 事件回调函数
+// Event callback function
 typedef void (*mfb_active_func)(struct mfb_opaque_window* window, int isActive);
 typedef void (*mfb_resize_func)(struct mfb_opaque_window* window, int width, int height);
 typedef int (*mfb_close_func)(struct mfb_opaque_window* window);

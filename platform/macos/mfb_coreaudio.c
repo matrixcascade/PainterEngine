@@ -54,15 +54,15 @@ short* loadWAVFile(const char* filename, WAVHeader* header, int* numSamples) {
         return NULL;
     }
 
-    // 读取头部信息
+    // Read header information
     fread(header, sizeof(WAVHeader), 1, file);
 
-    // 跳过非"data"块
+    // Skip non-data blocks
     while (strncmp(header->data, "data", 4) != 0) {
-        // 跳过当前块
+        // Skip the current block
         fseek(file, header->dataSize, SEEK_CUR);
 
-        // 尝试读取下一个块头
+        // Attempt to read next block header
         if (fread(header->data, sizeof(header->data) + sizeof(header->dataSize), 1, file) != 1) {
             fprintf(stderr, "Error reading file.\n");
             fclose(file);
@@ -70,7 +70,7 @@ short* loadWAVFile(const char* filename, WAVHeader* header, int* numSamples) {
         }
     }
 
-    // 检查格式是否支持
+    // Check if the format is supported
     printf("audioFormat: %d, bitsPerSample: %d\n", header->audioFormat, header->bitsPerSample);
     if (header->audioFormat != 1 || header->bitsPerSample != 16) {
         fprintf(stderr, "Unsupported WAV format.\n");
@@ -80,7 +80,7 @@ short* loadWAVFile(const char* filename, WAVHeader* header, int* numSamples) {
 
     *numSamples = header->dataSize / sizeof(short);
 
-    // 读取音频数据
+    // Read audio data
     short* pcmData = (short*)malloc(header->dataSize);
     if (!pcmData) {
         fprintf(stderr, "Memory allocation error.\n");
@@ -251,7 +251,7 @@ int main() {
         return 1;
     }
 
-    // 播放PCM数据
+    // Play pcm data
     write_audio(NULL, pcmData, numSamples * sizeof(short));
 
     free(pcmData);

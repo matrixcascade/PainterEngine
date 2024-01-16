@@ -93,7 +93,7 @@ static void char_input(struct mfb_opaque_window* window, unsigned int charCode) 
     }
     fprintf(stdout, "%s > charCode: %#X\n", window_title, charCode);
 
-    // 小端字节序
+    // Little-Endian byte order
     static px_char text[4] = {0};
     text[0] = (char)(charCode & 0xFF);         // Lowest byte
     text[1] = (char)((charCode >> 8) & 0xFF);  // Next byte
@@ -238,11 +238,11 @@ px_void PX_app_thread_func(px_void* ptr) {
     void* renderBuffer = NULL;
     px_surface* pRenderSurface = NULL;
 
-    // 事件
     LastDownPoint.x = -1;
     LastDownPoint.y = -1;
     reset_cursor_scale();
 
+    // Register event
     mfb_set_active_callback(window, active);
     mfb_set_resize_callback(window, resize);
     mfb_set_close_callback(window, window_close);
@@ -280,13 +280,13 @@ int PX_SystemLoop() {
     } while (0);
 #endif
 
-    // 启动渲染线程
+    // Start rendering thread
     PX_ThreadCreate(&mfb_appThread, PX_app_thread_func, NULL);
 
-    // 启动主线程
+    // Start main thread
     mfb_wait_sync(window);
 
-    // 关闭渲染线程
+    // Destroy rendering thread
     PX_ThreadDestroy(&mfb_appThread);
 
 #ifdef PX_AUDIO_H

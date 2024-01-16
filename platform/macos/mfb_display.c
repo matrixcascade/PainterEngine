@@ -12,7 +12,7 @@ int PX_CreateWindow(int surfaceWidth, int surfaceHeight, int windowWidth, int wi
 }
 
 // ------------------------------------
-int PX_GetScreenHeight() { return mfb_get_window_height(window); }
+int PX_GetScreenHeight() { return mfb_get_screen_height(); }
 
 // ------------------------------------
-int PX_GetScreenWidth() { return mfb_get_window_width(window); }
+int PX_GetScreenWidth() { return mfb_get_screen_width(); }

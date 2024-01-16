@@ -411,10 +411,10 @@ void mfb_timer_init() {
         window_data->mouse_pos_y = window_data->window_height - point.y;
 #endif
         if (event.type == NSEventTypeLeftMouseDragged) {
-            // 处理拖拽时的鼠标移动
+            // Handling mouse movement during drag and drop
             kCall(mouse_drag_func, window_data->mouse_pos_x, window_data->mouse_pos_y);
         } else {
-            // 处理普通的鼠标移动
+            // Handling regular mouse movement
             kCall(mouse_move_func, window_data->mouse_pos_x, window_data->mouse_pos_y);
         }
     }
@@ -599,7 +599,7 @@ NSString* g_shader_src = kShader(
         // We return the color of the texture
         // return float4(colorSample);
         
-        // 将颜色从RGBA转换为BGRA格式
+        // Converting color from RGBA to BGRA format
         return float4(colorSample.b, colorSample.g, colorSample.r, colorSample.a);
     });
 
@@ -986,6 +986,20 @@ mfb_state mfb_window_timer_reset(struct mfb_opaque_window* window) {
     mfb_timer_now(window_data->timer);
 
     return STATE_OK;
+}
+
+// ------------------------------------
+unsigned mfb_get_screen_width() {
+    NSSize screenSize = [[NSScreen mainScreen] frame].size;
+    CGFloat screenWidth = screenSize.width;
+    return screenWidth;
+}
+
+// ------------------------------------
+unsigned mfb_get_screen_height() {
+    NSSize screenSize = [[NSScreen mainScreen] frame].size;
+    CGFloat screenHeight = screenSize.height;
+    return screenHeight;
 }
 
 // ------------------------------------

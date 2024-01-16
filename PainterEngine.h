@@ -1,6 +1,6 @@
 #ifndef PAINTERENGINE
 #define PAINTERENGINE
-// #define main px_main
+#define main px_main
 
 #ifdef __cplusplus 
 extern "C" {
