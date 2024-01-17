@@ -708,16 +708,6 @@ NSString* g_shader_src = kShader(
 
 // ------------------
 - (void)drawInMTKView:(nonnull MTKView*)view {
-    if (g_target_fps_changed) {
-        if (g_time_for_frame == 0) {
-            // Contrary to what is stated in the documentation,
-            // 0 means that it does not update. Like pause.
-            view.preferredFramesPerSecond = 9999;
-        } else {
-            view.preferredFramesPerSecond = (int)(1.0 / g_time_for_frame);
-        }
-        g_target_fps_changed = false;
-    }
 
     // Wait to ensure only MaxBuffersInFlight number of frames are getting proccessed
     // by any stage in the Metal pipeline (App, Metal, Drivers, GPU, etc)
@@ -904,9 +894,12 @@ struct mfb_opaque_window* mfb_open_ex(const char* title, unsigned width, unsigne
         view.device = window_data->viewController->metal_device;
         view.delegate = window_data->viewController;
         view.autoresizingMask = NSViewWidthSizable | NSViewHeightSizable;
+        view.preferredFramesPerSecond = 0;
+        
+        window_data->render_view = view;
         [window_data->window.contentView addSubview:view];
 
-        //[window_data->window updateSize];
+        window_data->timer = mfb_timer_create();
 
         [window_data->window setTitle:[NSString stringWithUTF8String:title]];
         [window_data->window setReleasedWhenClosed:NO];
@@ -914,7 +907,6 @@ struct mfb_opaque_window* mfb_open_ex(const char* title, unsigned width, unsigne
         [window_data->window setAcceptsMouseMovedEvents:YES];
 
         [window_data->window center];
-        window_data->timer = mfb_timer_create();
 
         [NSApp activateIgnoringOtherApps:YES];
 
@@ -1035,6 +1027,8 @@ mfb_state mfb_window_update(struct mfb_opaque_window* window, void* buffer, unsi
     if (window_data->close) {
         return STATE_EXIT;
     }
+    
+    [window_data->render_view draw];
 
     while (1) {
         current = mfb_timer_now(window_data->timer);
@@ -1053,7 +1047,7 @@ mfb_state mfb_window_update(struct mfb_opaque_window* window, void* buffer, unsi
 }
 
 // ------------------------------------
-mfb_state mfb_update_events(struct mfb_opaque_window* window) {
+mfb_state mfb_window_update_events(struct mfb_opaque_window* window) {
     if (window == 0x0) {
         return STATE_INVALID_WINDOW;
     }
@@ -1070,7 +1064,7 @@ mfb_state mfb_update_events(struct mfb_opaque_window* window) {
         return STATE_EXIT;
     }
 
-    [[window_data->window contentView] setNeedsDisplay:YES];
+    // [[window_data->window contentView] setNeedsDisplay:YES];
 
     return STATE_OK;
 }
@@ -1098,7 +1092,6 @@ int mfb_wait_sync(struct mfb_opaque_window* window) {
             return false;
         }
 
-        uint32_t millis = 1;
         while (1) {
             event = [NSApp nextEventMatchingMask:NSEventMaskAny untilDate:[NSDate distantFuture] inMode:NSDefaultRunLoopMode dequeue:YES];
             if (event) {
@@ -1108,8 +1101,6 @@ int mfb_wait_sync(struct mfb_opaque_window* window) {
                     destroy_window_data(window_data);
                     break;
                 }
-
-                // [[window_data->window contentView] setNeedsDisplay:YES];
             }
         }
     }

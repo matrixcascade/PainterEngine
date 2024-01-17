@@ -74,6 +74,8 @@ typedef struct {
     struct {
         mfb_vertex vertices[4];
     } metal;
+    
+    MTKView* render_view;
 
 } mfb_window_data;
 
