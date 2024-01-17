@@ -75,6 +75,8 @@ static void keyboard(struct mfb_opaque_window* window, mfb_key key, mfb_key_mod 
         window_title = (const char*)mfb_get_user_data(window);
     }
     // fprintf(stdout, "%s > keyboard: key: %s (pressed: %d) [key_mod: %x]\n", window_title, mfb_get_key_name(key), isPressed, mod);
+    
+    mfb_event.Event = PX_OBJECT_EVENT_ANY;
     if (key == KB_KEY_ESCAPE) {
         mfb_window_close(window);
     }
@@ -84,14 +86,10 @@ static void keyboard(struct mfb_opaque_window* window, mfb_key key, mfb_key_mod 
             static px_char text = '\b';
             mfb_event.Event = PX_OBJECT_EVENT_STRING;
             PX_Object_Event_SetStringPtr(&mfb_event, &text);
-
-            PX_ApplicationPostEvent(&App, mfb_event);
         }
     } else {
         mfb_event.Event = PX_OBJECT_EVENT_KEYDOWN;
         PX_Object_Event_SetKeyDown(&mfb_event, (px_uint)key);
-
-        PX_ApplicationPostEvent(&App, mfb_event);
     }
 }
 
@@ -112,8 +110,6 @@ static void char_input(struct mfb_opaque_window* window, unsigned int charCode) 
     mfb_event.Event = PX_OBJECT_EVENT_STRING;
 
     PX_Object_Event_SetStringPtr(&mfb_event, text);
-
-    PX_ApplicationPostEvent(&App, mfb_event);
 }
 
 // ------------------------------------
@@ -127,6 +123,7 @@ static void mouse_btn(struct mfb_opaque_window* window, mfb_mouse_button button,
     y = mfb_get_mouse_y(window);
     // fprintf(stdout, "%s > mouse_btn: button: %d (pressed: %d) (at: %d, %d) [key_mod: %x]\n", window_title, button, isPressed, x, y, mod);
 
+    mfb_event.Event = PX_OBJECT_EVENT_ANY;
     switch (button) {
         case MOUSE_BTN_1: {
             if (isPressed) {
@@ -176,8 +173,6 @@ static void mouse_btn(struct mfb_opaque_window* window, mfb_mouse_button button,
         default:
             break;
     }
-
-    PX_ApplicationPostEvent(&App, mfb_event);
 }
 
 // ------------------------------------
@@ -197,8 +192,6 @@ static void mouse_move(struct mfb_opaque_window* window, int x, int y) {
 
     PX_Object_Event_SetCursorX(&mfb_event, cursor_x * cursor_x_scale);
     PX_Object_Event_SetCursorY(&mfb_event, cursor_y * cursor_y_scale);
-
-    PX_ApplicationPostEvent(&App, mfb_event);
 }
 
 // ------------------------------------
@@ -218,8 +211,6 @@ static void mouse_drag(struct mfb_opaque_window* window, int x, int y) {
 
     PX_Object_Event_SetCursorX(&mfb_event, cursor_x * cursor_x_scale);
     PX_Object_Event_SetCursorY(&mfb_event, cursor_y * cursor_y_scale);
-
-    PX_ApplicationPostEvent(&App, mfb_event);
 }
 
 // ------------------------------------
@@ -237,8 +228,6 @@ static void mouse_scroll(struct mfb_opaque_window* window, mfb_key_mod mod, floa
     PX_Object_Event_SetCursorX(&mfb_event, cursor_x * cursor_x_scale);
     PX_Object_Event_SetCursorY(&mfb_event, cursor_y * cursor_y_scale);
     PX_Object_Event_SetCursorZ(&mfb_event, cursor_z);
-
-    PX_ApplicationPostEvent(&App, mfb_event);
 }
 
 // ------------------------------------
@@ -274,6 +263,10 @@ px_void PX_app_thread_func(px_void* ptr) {
         width = pRenderSurface->width;
         height = pRenderSurface->height;
 
+        if (mfb_event.Event != PX_OBJECT_EVENT_ANY) {
+            PX_ApplicationPostEvent(&App, mfb_event);
+        }
+        
         PX_ApplicationUpdate(&App, elapsed);
         PX_ApplicationRender(&App, elapsed);
 
