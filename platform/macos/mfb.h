@@ -5,6 +5,8 @@
 #ifndef MFB_ENUM_H
 #define MFB_ENUM_H
 
+#include <pthread.h>
+
 // ------------------------------------
 typedef enum {
     STATE_OK = 0,
@@ -175,6 +177,9 @@ typedef enum {
     WF_BORDERLESS = 0x08,
     WF_ALWAYS_ON_TOP = 0x10,
 } mfb_window_flags;
+
+// ------------------------------------
+extern pthread_mutex_t _eventMutex;
 
 // ------------------------------------
 // Opaque pointer

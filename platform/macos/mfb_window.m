@@ -598,7 +598,7 @@ NSString* g_shader_src = kShader(
 
         // We return the color of the texture
         // return float4(colorSample);
-        
+
         // Converting color from RGBA to BGRA format
         return float4(colorSample.b, colorSample.g, colorSample.r, colorSample.a);
     });
@@ -708,7 +708,6 @@ NSString* g_shader_src = kShader(
 
 // ------------------
 - (void)drawInMTKView:(nonnull MTKView*)view {
-
     // Wait to ensure only MaxBuffersInFlight number of frames are getting proccessed
     // by any stage in the Metal pipeline (App, Metal, Drivers, GPU, etc)
     dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
@@ -895,7 +894,7 @@ struct mfb_opaque_window* mfb_open_ex(const char* title, unsigned width, unsigne
         view.delegate = window_data->viewController;
         view.autoresizingMask = NSViewWidthSizable | NSViewHeightSizable;
         view.preferredFramesPerSecond = 0;
-        
+
         window_data->render_view = view;
         [window_data->window.contentView addSubview:view];
 
@@ -969,6 +968,10 @@ static void update_events(mfb_window_data* window_data) {
 
 // ------------------------------------
 mfb_state mfb_window_timer_reset(struct mfb_opaque_window* window) {
+    if (window == 0x0) {
+        return STATE_INVALID_WINDOW;
+    }
+
     mfb_window_data* window_data = (mfb_window_data*)window;
     if (window_data->close) {
         return STATE_EXIT;
@@ -1027,7 +1030,7 @@ mfb_state mfb_window_update(struct mfb_opaque_window* window, void* buffer, unsi
     if (window_data->close) {
         return STATE_EXIT;
     }
-    
+
     [window_data->render_view draw];
 
     while (1) {
@@ -1095,7 +1098,9 @@ int mfb_wait_sync(struct mfb_opaque_window* window) {
         while (1) {
             event = [NSApp nextEventMatchingMask:NSEventMaskAny untilDate:[NSDate distantFuture] inMode:NSDefaultRunLoopMode dequeue:YES];
             if (event) {
+                pthread_mutex_lock(&_eventMutex);
                 [NSApp sendEvent:event];
+                pthread_mutex_unlock(&_eventMutex);
 
                 if (window_data->close) {
                     destroy_window_data(window_data);
