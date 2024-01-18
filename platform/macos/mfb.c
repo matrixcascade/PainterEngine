@@ -20,6 +20,8 @@ static px_float cursor_x = -1, cursor_y = -1, cursor_z = -1;
 static px_float cursor_x_scale, cursor_y_scale;
 static CGPoint LastDownPoint;
 
+pthread_mutex_t _eventMutex;
+
 // ------------------------------------
 static void reset_cursor_scale() {
     cursor_x_scale = App.runtime.surface_width * 1.0f / App.runtime.window_width;
@@ -75,7 +77,7 @@ static void keyboard(struct mfb_opaque_window* window, mfb_key key, mfb_key_mod 
         window_title = (const char*)mfb_get_user_data(window);
     }
     // fprintf(stdout, "%s > keyboard: key: %s (pressed: %d) [key_mod: %x]\n", window_title, mfb_get_key_name(key), isPressed, mod);
-    
+
     mfb_event.Event = PX_OBJECT_EVENT_ANY;
     if (key == KB_KEY_ESCAPE) {
         mfb_window_close(window);
@@ -90,6 +92,10 @@ static void keyboard(struct mfb_opaque_window* window, mfb_key key, mfb_key_mod 
     } else {
         mfb_event.Event = PX_OBJECT_EVENT_KEYDOWN;
         PX_Object_Event_SetKeyDown(&mfb_event, (px_uint)key);
+    }
+
+    if (mfb_event.Event != PX_OBJECT_EVENT_ANY) {
+        PX_ApplicationPostEvent(&App, mfb_event);
     }
 }
 
@@ -107,9 +113,11 @@ static void char_input(struct mfb_opaque_window* window, unsigned int charCode) 
     text[1] = (char)((charCode >> 8) & 0xFF);  // Next byte
     text[2] = (char)((charCode >> 16) & 0xFF); // Next byte
     text[3] = (char)((charCode >> 24) & 0xFF); // Highest byte
-    mfb_event.Event = PX_OBJECT_EVENT_STRING;
 
+    mfb_event.Event = PX_OBJECT_EVENT_STRING;
     PX_Object_Event_SetStringPtr(&mfb_event, text);
+
+    PX_ApplicationPostEvent(&App, mfb_event);
 }
 
 // ------------------------------------
@@ -173,6 +181,10 @@ static void mouse_btn(struct mfb_opaque_window* window, mfb_mouse_button button,
         default:
             break;
     }
+
+    if (mfb_event.Event != PX_OBJECT_EVENT_ANY) {
+        PX_ApplicationPostEvent(&App, mfb_event);
+    }
 }
 
 // ------------------------------------
@@ -192,6 +204,8 @@ static void mouse_move(struct mfb_opaque_window* window, int x, int y) {
 
     PX_Object_Event_SetCursorX(&mfb_event, cursor_x * cursor_x_scale);
     PX_Object_Event_SetCursorY(&mfb_event, cursor_y * cursor_y_scale);
+
+    PX_ApplicationPostEvent(&App, mfb_event);
 }
 
 // ------------------------------------
@@ -211,6 +225,8 @@ static void mouse_drag(struct mfb_opaque_window* window, int x, int y) {
 
     PX_Object_Event_SetCursorX(&mfb_event, cursor_x * cursor_x_scale);
     PX_Object_Event_SetCursorY(&mfb_event, cursor_y * cursor_y_scale);
+
+    PX_ApplicationPostEvent(&App, mfb_event);
 }
 
 // ------------------------------------
@@ -228,6 +244,8 @@ static void mouse_scroll(struct mfb_opaque_window* window, mfb_key_mod mod, floa
     PX_Object_Event_SetCursorX(&mfb_event, cursor_x * cursor_x_scale);
     PX_Object_Event_SetCursorY(&mfb_event, cursor_y * cursor_y_scale);
     PX_Object_Event_SetCursorZ(&mfb_event, cursor_z);
+
+    PX_ApplicationPostEvent(&App, mfb_event);
 }
 
 // ------------------------------------
@@ -263,12 +281,10 @@ px_void PX_app_thread_func(px_void* ptr) {
         width = pRenderSurface->width;
         height = pRenderSurface->height;
 
-        if (mfb_event.Event != PX_OBJECT_EVENT_ANY) {
-            PX_ApplicationPostEvent(&App, mfb_event);
-        }
-        
+        pthread_mutex_lock(&_eventMutex);
         PX_ApplicationUpdate(&App, elapsed);
         PX_ApplicationRender(&App, elapsed);
+        pthread_mutex_unlock(&_eventMutex);
 
         if (mfb_window_update(window, renderBuffer, width, height) != STATE_OK) window = NULL;
     }
@@ -276,6 +292,7 @@ px_void PX_app_thread_func(px_void* ptr) {
 
 // ------------------------------------
 int PX_SystemLoop() {
+    pthread_mutex_init(&_eventMutex, NULL);
 #ifdef PX_AUDIO_H
     do {
         extern int mfb_audio_device_start();
@@ -298,5 +315,6 @@ int PX_SystemLoop() {
         if (!mfb_audio_device_stop()) return 0;
     } while (0);
 #endif
+    pthread_mutex_destroy(&_eventMutex);
     return PX_TRUE;
 }
