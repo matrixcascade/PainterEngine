@@ -240,20 +240,20 @@ const char* mfb_get_key_name(mfb_key key) {
         case KB_KEY_SPACE:
             return "Space";
 
-        case KB_KEY_APOSTROPHE:
-            return "Apostrophe";
+        // case KB_KEY_APOSTROPHE:
+        //     return "Apostrophe";
 
-        case KB_KEY_COMMA:
-            return "Comma";
+        // case KB_KEY_COMMA:
+        //     return "Comma";
 
-        case KB_KEY_MINUS:
-            return "Minus";
+        // case KB_KEY_MINUS:
+        //     return "Minus";
 
-        case KB_KEY_PERIOD:
-            return "Period";
+        // case KB_KEY_PERIOD:
+        //     return "Period";
 
-        case KB_KEY_SLASH:
-            return "Slash";
+        // case KB_KEY_SLASH:
+        //     return "Slash";
 
         case KB_KEY_0:
             return "0";
@@ -285,11 +285,11 @@ const char* mfb_get_key_name(mfb_key key) {
         case KB_KEY_9:
             return "9";
 
-        case KB_KEY_SEMICOLON:
-            return "Semicolon";
+        // case KB_KEY_SEMICOLON:
+        //     return "Semicolon";
 
-        case KB_KEY_EQUAL:
-            return "Equal";
+        // case KB_KEY_EQUAL:
+        //     return "Equal";
 
         case KB_KEY_A:
             return "A";
@@ -369,23 +369,23 @@ const char* mfb_get_key_name(mfb_key key) {
         case KB_KEY_Z:
             return "Z";
 
-        case KB_KEY_LEFT_BRACKET:
-            return "Left_Bracket";
+        // case KB_KEY_LEFT_BRACKET:
+        //     return "Left_Bracket";
 
-        case KB_KEY_BACKSLASH:
-            return "Backslash";
+        // case KB_KEY_BACKSLASH:
+        //     return "Backslash";
 
-        case KB_KEY_RIGHT_BRACKET:
-            return "Right_Bracket";
+        // case KB_KEY_RIGHT_BRACKET:
+        //     return "Right_Bracket";
 
-        case KB_KEY_GRAVE_ACCENT:
-            return "Grave_Accent";
+        // case KB_KEY_GRAVE_ACCENT:
+        //     return "Grave_Accent";
 
-        case KB_KEY_WORLD_1:
-            return "World_1";
+        // case KB_KEY_WORLD_1:
+        //     return "World_1";
 
-        case KB_KEY_WORLD_2:
-            return "World_2";
+        // case KB_KEY_WORLD_2:
+        //     return "World_2";
 
         case KB_KEY_ESCAPE:
             return "Escape";
@@ -417,11 +417,11 @@ const char* mfb_get_key_name(mfb_key key) {
         case KB_KEY_UP:
             return "Up";
 
-        case KB_KEY_PAGE_UP:
-            return "Page_Up";
+        // case KB_KEY_PAGE_UP:
+        //     return "Page_Up";
 
-        case KB_KEY_PAGE_DOWN:
-            return "Page_Down";
+        // case KB_KEY_PAGE_DOWN:
+        //     return "Page_Down";
 
         case KB_KEY_HOME:
             return "Home";
@@ -429,8 +429,8 @@ const char* mfb_get_key_name(mfb_key key) {
         case KB_KEY_END:
             return "End";
 
-        case KB_KEY_CAPS_LOCK:
-            return "Caps_Lock";
+        // case KB_KEY_CAPS_LOCK:
+        //     return "Caps_Lock";
 
         case KB_KEY_SCROLL_LOCK:
             return "Scroll_Lock";
@@ -516,8 +516,8 @@ const char* mfb_get_key_name(mfb_key key) {
         case KB_KEY_F24:
             return "F24";
 
-        case KB_KEY_F25:
-            return "F25";
+        // case KB_KEY_F25:
+        //     return "F25";
 
         case KB_KEY_KP_0:
             return "KP_0";
@@ -564,11 +564,11 @@ const char* mfb_get_key_name(mfb_key key) {
         case KB_KEY_KP_ADD:
             return "KP_Add";
 
-        case KB_KEY_KP_ENTER:
-            return "KP_Enter";
+        // case KB_KEY_KP_ENTER:
+        //     return "KP_Enter";
 
-        case KB_KEY_KP_EQUAL:
-            return "KP_Equal";
+        // case KB_KEY_KP_EQUAL:
+        //     return "KP_Equal";
 
         case KB_KEY_LEFT_SHIFT:
             return "Left_Shift";
@@ -576,11 +576,11 @@ const char* mfb_get_key_name(mfb_key key) {
         case KB_KEY_LEFT_CONTROL:
             return "Left_Control";
 
-        case KB_KEY_LEFT_ALT:
-            return "Left_Alt";
+        // case KB_KEY_LEFT_ALT:
+        //     return "Left_Alt";
 
-        case KB_KEY_LEFT_SUPER:
-            return "Left_Super";
+        // case KB_KEY_LEFT_SUPER:
+        //     return "Left_Super";
 
         case KB_KEY_RIGHT_SHIFT:
             return "Right_Shift";
@@ -588,11 +588,11 @@ const char* mfb_get_key_name(mfb_key key) {
         case KB_KEY_RIGHT_CONTROL:
             return "Right_Control";
 
-        case KB_KEY_RIGHT_ALT:
-            return "Right_Alt";
+        // case KB_KEY_RIGHT_ALT:
+        //     return "Right_Alt";
 
-        case KB_KEY_RIGHT_SUPER:
-            return "Right_Super";
+        // case KB_KEY_RIGHT_SUPER:
+        //     return "Right_Super";
 
         case KB_KEY_MENU:
             return "Menu";
