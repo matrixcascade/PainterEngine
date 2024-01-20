@@ -83,15 +83,26 @@ static void keyboard(struct mfb_opaque_window* window, mfb_key key, mfb_key_mod 
         mfb_window_close(window);
     }
 
-    if (key == KB_KEY_BACKSPACE) {
-        if (isPressed) {
-            static px_char text = '\b';
-            mfb_event.Event = PX_OBJECT_EVENT_STRING;
-            PX_Object_Event_SetStringPtr(&mfb_event, &text);
-        }
-    } else {
-        mfb_event.Event = PX_OBJECT_EVENT_KEYDOWN;
-        PX_Object_Event_SetKeyDown(&mfb_event, (px_uint)key);
+    switch (key) {
+        case KB_KEY_BACKSPACE:
+            if (isPressed) {
+                static px_char text[2] = {'\b', '\0'};
+                mfb_event.Event = PX_OBJECT_EVENT_STRING;
+                PX_Object_Event_SetStringPtr(&mfb_event, &text);
+            }
+            break;
+        case KB_KEY_ENTER:
+            if (isPressed) {
+                static px_char text[2] = {'\n', '\0'};
+                ;
+                mfb_event.Event = PX_OBJECT_EVENT_STRING;
+                PX_Object_Event_SetStringPtr(&mfb_event, &text);
+            }
+            break;
+        default:
+            mfb_event.Event = PX_OBJECT_EVENT_KEYDOWN;
+            PX_Object_Event_SetKeyDown(&mfb_event, (px_uint)key);
+            break;
     }
 
     if (mfb_event.Event != PX_OBJECT_EVENT_ANY) {
