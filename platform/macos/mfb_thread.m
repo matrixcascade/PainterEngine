@@ -46,7 +46,7 @@ int PX_ThreadCreate(px_thread* pthread, func_thread func, void* ptr) {
     pthread->handle_ptr = (__bridge_retained void*)sysThread;
 
     if (pthread->handle_ptr) {
-        [sysThread.nsthread start]; // 启动 NSThread
+        [sysThread.nsthread start]; // start NSThread
         return 1;
     } else {
         return 0;
