@@ -155,9 +155,12 @@ int mfb_is_window_active(struct mfb_opaque_window* window) {
 
 // ------------------------------------
 double mfb_get_window_elapsed(struct mfb_opaque_window* window) {
+    double elapsed = 0;
     if (window != 0x0) {
         mfb_window_data* window_data = (mfb_window_data*)window;
-        return window_data->elapsed * 1000;
+        elapsed = window_data->elapsed * 1000;
+        window_data->elapsed = (elapsed - (unsigned int)elapsed) / 1000;
+        return elapsed;
     }
     return 0;
 }
