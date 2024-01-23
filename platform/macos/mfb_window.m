@@ -914,7 +914,8 @@ struct mfb_opaque_window* mfb_open_ex(const char* title, unsigned width, unsigne
         mfb_set_keyboard_callback((struct mfb_opaque_window*)window_data, keyboard_default);
 
         NSLog(@"Window created using Metal API");
-
+        
+        window_data->elapsed = 0;
         window_data->is_initialized = true;
         return (struct mfb_opaque_window*)window_data;
     }
@@ -1037,7 +1038,7 @@ mfb_state mfb_window_update(struct mfb_opaque_window* window, void* buffer, unsi
         current = mfb_timer_now(window_data->timer);
         if (current >= g_time_for_frame * 0.960) {
             mfb_timer_reset(window_data->timer);
-            window_data->elapsed = current; // 每帧微秒数
+            window_data->elapsed += current; // 每帧微秒数
             return STATE_OK;
         } else if (current >= g_time_for_frame * 0.900) {
             usleep((millis * 0) * 1000);
