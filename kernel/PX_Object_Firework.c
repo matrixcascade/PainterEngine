@@ -181,7 +181,7 @@ PX_Object* PX_Object_Firework01Create(px_memorypool* mp, PX_Object* Parent, px_f
 	}
 	desc.particals[0].vx = 0;
 	desc.particals[0].vy = -400;
-	desc.particals[0].size = 6;
+	desc.particals[0].size = 3;
 	desc.raisingTime=800+PX_rand()%800;
 	desc.particals[0].clr = PX_COLOR(255, 128 + (PX_rand() % 128), 128 + (PX_rand() % 128), 128 + (PX_rand() % 128));
 	return PX_ObjectCreateEx(mp, Parent, x, y, 0, 0, 0, 0, PX_OBJECT_TYPE_FIREWORK, 0, PX_Object_Firework01Render, 0, &desc, sizeof(desc));

@@ -5759,6 +5759,7 @@ px_bool PX_SoundResamplerOut(PX_SoundResampler* pResampler, px_double* out)
 	if (pResampler->x < 1)
 	{
 		*out = pResampler->last + pResampler->x * pResampler->k;
+	
 		pResampler->x += pResampler->step;
 		return PX_TRUE;
 	}

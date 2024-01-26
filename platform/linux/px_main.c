@@ -118,11 +118,6 @@ px_void PX_glutOnMouseMoveEvent(int x,int y)
 	PX_ApplicationPostEvent(&App,e);
 }
 
-int  PX_AudioInitialize(PX_SoundPlay* soundPlay)
-{
-    px_main_soundPlay = soundPlay;
-    return 1;
-}
 
 int main(int argc,char **argv)
 {

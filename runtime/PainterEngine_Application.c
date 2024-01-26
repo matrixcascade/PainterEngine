@@ -51,6 +51,11 @@ px_void PainterEngine_Print(const px_char content[])
 	PX_Object_PrinterPrintText(App.object_printer, content);
 }
 
+px_void PainterEngine_PrintClear()
+{
+	PX_Object_PrinterClear(App.object_printer);
+}
+
 px_void PainterEngine_PrintSetBackgroundColor(px_color clr)
 {
 	PX_Object_PrinterSetBackgroundColor(App.object_printer, clr);
@@ -242,13 +247,17 @@ px_memorypool* PainterEngine_GetStaticMP()
 
 px_bool PainterEngine_InitializeAudio()
 {
+#ifdef PX_AUDIO_H
 	static px_bool audioInit = PX_FALSE;
 	if (!audioInit)
 	{
 		audioInit = PX_TRUE;
 		return PX_AudioInitialize(&App.soundplay);
 	}
-	return PX_TRUE;	
+	return PX_TRUE;
+#else
+	return PX_FALSE;
+#endif //  PX_AUDIO_H
 }
 
 px_void PainterEngine_SetBackgroundColor(px_color color)

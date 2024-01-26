@@ -45,6 +45,7 @@
 	px_void PainterEngine_EnterDesignerMode();
 
 	px_void PainterEngine_Print(const px_char content[]);
+	px_void PainterEngine_PrintClear();
 	px_void PainterEngine_PrintImage(const px_char path[]);
 	PX_Object* PainterEngine_PrintButton(px_int width, px_int height, const px_char text[]);
 	PX_Object* PainterEngine_PrintProcessBar();

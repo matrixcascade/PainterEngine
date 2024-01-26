@@ -20,6 +20,7 @@ int PX_TCPInitialize(PX_TCP *tcp,PX_TCP_IP_TYPE type)
 	int nSendBuf=1024*1024*2;
 	int optval=TRUE;
 	static int init = 0;
+	int disable = 0;
 
 	tcp->type=type;
 
@@ -48,6 +49,7 @@ int PX_TCPInitialize(PX_TCP *tcp,PX_TCP_IP_TYPE type)
 	  	
 	setsockopt(tcp->socket,SOL_SOCKET,SO_RCVBUF,(const char*)&nRecvBuf,sizeof(int));
 	setsockopt(tcp->socket,SOL_SOCKET,SO_SNDBUF,(const char*)&nSendBuf,sizeof(int));
+	setsockopt(tcp->socket, IPPROTO_TCP, TCP_NODELAY, (const char*)&disable, sizeof(int));
 
 	return 1;
 }

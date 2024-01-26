@@ -1553,8 +1553,10 @@ px_int PX_MP3DecoderRead_44100HZ_2Channel(PX_MP3Decoder* mp3, px_double samples[
                 presampler = &mp3->resampler1;
                 if (!PX_SoundResamplerOut(presampler, &out))
                     break;
-                if(out>1.0)	out = 1.0;
-                if(out<-1.0)out = -1.0;
+                if(out>1.0)	
+                    out = 1.0;
+                if(out<-1.0)
+                    out = -1.0;
                 if (mp3->fifo_count < PX_COUNTOF(mp3->fifo))
 					mp3->fifo[mp3->fifo_count++] = (px_double)out;
 
@@ -1562,8 +1564,10 @@ px_int PX_MP3DecoderRead_44100HZ_2Channel(PX_MP3Decoder* mp3, px_double samples[
 				{
 					presampler = &mp3->resampler2;
                     PX_SoundResamplerOut(presampler, &out);
-                    if (out > 1.0)	out = 1.0;
-                    if (out < -1.0)out = -1.0;
+                    if (out > 1.0)	
+                        out = 1.0;
+                    if (out < -1.0)
+                        out = -1.0;
                     if (mp3->fifo_count < PX_COUNTOF(mp3->fifo))
 						mp3->fifo[mp3->fifo_count++] = (px_double)out;
 				}

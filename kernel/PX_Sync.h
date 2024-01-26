@@ -18,6 +18,8 @@
 
 typedef enum
 {
+	PX_SYNC_IO_TYPE_PING,
+	PX_SYNC_IO_TYPE_PINGACK,
 	PX_SYNC_IO_TYPE_QUERYDATA,
 	PX_SYNC_IO_TYPE_QUERYDATAACK,
 	PX_SYNC_IO_TYPE_CONNECT,
@@ -141,7 +143,6 @@ typedef struct _PX_SyncFrame_Client
 	px_int   connectSumCount;
 	px_dword version;
 	px_dword time;
-	px_dword delayms;
 	px_dword sendDurationTick;
 	px_dword updateDuration;
 	px_dword uniqueQueuewIndex;
@@ -160,6 +161,10 @@ typedef struct _PX_SyncFrame_Client
 	px_int send_cache_Instr_size;
 	px_byte send_cache_Instr_buffer[PX_SYNC_CACHESIZE];
 	px_int send_times;
+
+	px_dword delay;
+	px_dword delay_stamp;
+	px_dword delayid;
 }PX_SyncFrameClient;
 
 
@@ -182,6 +187,7 @@ px_void PX_SyncFrameClientAddInstr(PX_SyncFrameClient *client,px_void *instr,px_
 px_void PX_SyncFrameClientSetVersion(PX_SyncFrameClient *sync,px_dword version);
 px_void PX_SyncFrameClientUpdate(PX_SyncFrameClient *sync,px_dword elapsed);
 px_int  PX_SyncFrameClientGetReadyFrameCount(PX_SyncFrameClient *sync);
+px_void PX_SyncFrameClientPing(PX_SyncFrameClient* sync);
 px_void PX_SyncFrameClientFree(PX_SyncFrameClient *sync);
 px_uint32 PX_SyncFrameClientSum32(PX_SyncFrameClient *sync);
 
@@ -250,6 +256,7 @@ typedef struct _PX_SyncData_Client
 	
 	px_dword query_elapsed;
 	px_dword last_recv_elapsed;
+	
 }PX_SyncDataClient;
 
 #define PX_SYNCDATA_OPCODE_QUERY 0x6800

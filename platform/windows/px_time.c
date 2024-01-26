@@ -15,7 +15,7 @@ int PX_TimeGetYear()
 	return 1900+p.tm_year;
 }
 
-int PX_TimeGetMouth()
+int PX_TimeGetMonth()
 {
 	time_t timep;
 	struct tm p;
