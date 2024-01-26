@@ -2,7 +2,7 @@
 #define PX_TIME_H
 
 int PX_TimeGetYear();
-int PX_TimeGetMouth();
+int PX_TimeGetMonth();
 int PX_TimeGetDay();
 int PX_TimeGetHour();
 int PX_TimeGetMinute();

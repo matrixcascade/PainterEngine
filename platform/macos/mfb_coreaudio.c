@@ -119,7 +119,7 @@ static OSStatus playbackCallback(void* inRefCon, AudioUnitRenderActionFlags* ioA
         dataByteSize = ioData->mBuffers[i].mDataByteSize;
         totalNumberOfSamples = dataByteSize / 4;
 
-        if (PX_SoundPlayGetDataCount(Sound_soundplay)) {
+        if (Sound_soundplay && PX_SoundPlayGetDataCount(Sound_soundplay)) {
             PX_SoundPlayRead(Sound_soundplay, Sound_data, dataByteSize);
         } else {
             memset(Sound_data, 0, SOUND_BUFFER_SIZE);
@@ -199,6 +199,10 @@ int mfb_audio_device_start(char* dummy) {
     // Enable IO for playback
     status = AudioUnitSetProperty(*_audioUnit, kAudioOutputUnitProperty_EnableIO, kAudioUnitScope_Output, kOutputBus, &flag, sizeof(flag));
     // checkStatus(status);
+    
+    Float32 volume = 1.0;
+    status = AudioUnitSetParameter(*_audioUnit, kHALOutputParam_Volume, kAudioUnitScope_Output, kOutputBus, volume, 0);
+    // checkStatus(status);
 
     // Describe format
     AudioStreamBasicDescription audioFormat;
@@ -234,6 +238,17 @@ int mfb_audio_device_start(char* dummy) {
 px_int PX_AudioInitialize(PX_SoundPlay* soundPlay) {
     Sound_soundplay = soundPlay;
     return PX_TRUE;
+}
+
+// ------------------------------------
+void PX_AudioSetVolume(unsigned int volume) {
+    OSStatus status;
+
+    float volumeLevel = volume / 100.0f;
+    if (_audioUnit) {
+        status = AudioUnitSetParameter(*_audioUnit, kHALOutputParam_Volume, kAudioUnitScope_Output, kOutputBus, volumeLevel, 0);
+        // checkStatus(status);
+    }
 }
 
 #if 0
