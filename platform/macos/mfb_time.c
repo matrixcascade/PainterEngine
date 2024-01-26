@@ -3,8 +3,12 @@
 // https://github.com/emoon/minifb MIT License
 
 #include <stdlib.h>
+#include <time.h>
+#include <sys/time.h>
+#include <unistd.h>
 
 #include "mfb_time.h"
+#include "platform/modules/px_time.h"
 
 // ------------------------------------
 double g_timer_frequency;
@@ -102,3 +106,87 @@ double mfb_timer_get_frequency() { return g_timer_frequency; }
 
 // ------------------------------------
 double mfb_timer_get_resolution() { return g_timer_resolution; }
+
+// ------------------------------------
+int PX_TimeGetYear() {
+    time_t timep;
+    struct tm p;
+    time(&timep);
+    gmtime_r(&timep, &p); // Using gmtime_r for thread safety
+
+    p.tm_hour += 8; // Convert to the target timezone (e.g., UTC+8)
+    mktime(&p); // Recalculate the tm structure
+    return 1900 + p.tm_year;
+}
+
+// ------------------------------------
+int PX_TimeGetMonth() {
+    time_t timep;
+    struct tm p;
+    time(&timep);
+    gmtime_r(&timep, &p);
+    
+    p.tm_hour += 8;
+    mktime(&p);
+    return p.tm_mon + 1;
+}
+
+// ------------------------------------
+int PX_TimeGetDay() {
+    time_t timep;
+    struct tm p;
+    time(&timep);
+    gmtime_r(&timep, &p);
+    
+    p.tm_hour += 8;
+    mktime(&p);
+    return p.tm_mday;
+}
+
+// ------------------------------------
+int PX_TimeGetHour() {
+    time_t timep;
+    struct tm p;
+    time(&timep);
+    gmtime_r(&timep, &p);
+    
+    p.tm_hour += 8;
+    mktime(&p);
+    return p.tm_hour;
+}
+
+// ------------------------------------
+int PX_TimeGetMinute() {
+    time_t timep;
+    struct tm p;
+    time(&timep);
+    gmtime_r(&timep, &p);
+    
+    p.tm_hour += 8;
+    mktime(&p);
+    return p.tm_min;
+}
+
+// ------------------------------------
+int PX_TimeGetSecond() {
+    time_t timep;
+    struct tm p;
+    time(&timep);
+    gmtime_r(&timep, &p);
+    
+    p.tm_hour += 8;
+    mktime(&p);
+    return p.tm_sec;
+}
+
+// ------------------------------------
+unsigned int PX_TimeGetTime() {
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+
+    // Convert time to milliseconds
+    return (unsigned int)(ts.tv_sec * 1000 + ts.tv_nsec / 1000000);
+}
+
+// ------------------------------------
+void PX_Sleep(unsigned int ms) { usleep(ms * 1000); }

@@ -4,6 +4,12 @@
 
 // ------------------------------------
 int main(int argc, char** argv) {
+#ifdef PX_AUDIO_H
+    do {
+        extern int mfb_audio_device_start();
+        if (!mfb_audio_device_start()) return 0;
+    } while (0);
+#endif
 
     if (!PX_ApplicationInitialize(&App, PX_GetScreenWidth(), PX_GetScreenHeight())) {
         return 0;
@@ -15,5 +21,12 @@ int main(int argc, char** argv) {
     }
 
     PX_SystemLoop();
+    
+#ifdef PX_AUDIO_H
+    do {
+        extern int mfb_audio_device_stop();
+        if (!mfb_audio_device_stop()) return 0;
+    } while (0);
+#endif
     return 0;
 }

@@ -304,12 +304,6 @@ px_void PX_app_thread_func(px_void* ptr) {
 // ------------------------------------
 int PX_SystemLoop() {
     pthread_mutex_init(&_eventMutex, NULL);
-#ifdef PX_AUDIO_H
-    do {
-        extern int mfb_audio_device_start();
-        if (!mfb_audio_device_start()) return 0;
-    } while (0);
-#endif
 
     // Start rendering thread
     PX_ThreadCreate(&mfb_appThread, PX_app_thread_func, NULL);
@@ -320,12 +314,6 @@ int PX_SystemLoop() {
     // Destroy rendering thread
     PX_ThreadDestroy(&mfb_appThread);
 
-#ifdef PX_AUDIO_H
-    do {
-        extern int mfb_audio_device_stop();
-        if (!mfb_audio_device_stop()) return 0;
-    } while (0);
-#endif
     pthread_mutex_destroy(&_eventMutex);
     return PX_TRUE;
 }
