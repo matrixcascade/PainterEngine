@@ -19,7 +19,7 @@ static PX_Object_Event mfb_event;
 static px_float cursor_x = -1, cursor_y = -1, cursor_z = -1;
 static px_float cursor_x_scale, cursor_y_scale;
 static CGPoint LastDownPoint;
-
+static mfb_key arrow_keys[4] = {KB_KEY_LEFT, KB_KEY_RIGHT, KB_KEY_DOWN, KB_KEY_UP};
 pthread_mutex_t _eventMutex;
 
 // ------------------------------------
@@ -98,6 +98,11 @@ static void keyboard(struct mfb_opaque_window* window, mfb_key key, mfb_key_mod 
                 mfb_event.Event = PX_OBJECT_EVENT_STRING;
                 PX_Object_Event_SetStringPtr(&mfb_event, &text);
             }
+            break;
+        case KB_KEY_LEFT:
+        case KB_KEY_RIGHT:
+        case KB_KEY_DOWN:
+        case KB_KEY_UP:
             break;
         default:
             mfb_event.Event = PX_OBJECT_EVENT_KEYDOWN;
@@ -289,10 +294,19 @@ px_void PX_app_thread_func(px_void* ptr) {
         elapsed = mfb_get_window_elapsed(window);
         pRenderSurface = &App.runtime.RenderSurface;
         renderBuffer = pRenderSurface->surfaceBuffer;
-        width = pRenderSurface->width;
-        height = pRenderSurface->height;
+        width = App.runtime.surface_width;
+        height = App.runtime.surface_height;
 
         pthread_mutex_lock(&_eventMutex);
+        // check keyboard arrow keys
+        for (unsigned int i = 0; i < sizeof(arrow_keys) / sizeof(arrow_keys[0]); i++) {
+            mfb_key press_key = arrow_keys[i];
+            if (mfb_get_key_status(window, press_key)) {
+                mfb_event.Event = PX_OBJECT_EVENT_KEYDOWN;
+                PX_Object_Event_SetKeyDown(&mfb_event, (px_uint)press_key);
+                PX_ApplicationPostEvent(&App, mfb_event);
+            }
+        }
         PX_ApplicationUpdate(&App, elapsed);
         PX_ApplicationRender(&App, elapsed);
         pthread_mutex_unlock(&_eventMutex);

@@ -23,6 +23,7 @@ void keyboard_default(struct mfb_opaque_window* window, mfb_key key, mfb_key_mod
 
 // ------------------------------------
 const char* mfb_get_key_name(mfb_key key);
+const int mfb_get_key_status(struct mfb_opaque_window* window, int key_index);
 
 // ------------------------------------
 void mfb_set_active_callback(struct mfb_opaque_window* window, mfb_active_func callback);
