@@ -19,10 +19,10 @@ static PX_Object_Event mfb_event;
 static px_float cursor_x = -1, cursor_y = -1, cursor_z = -1;
 static px_float cursor_x_scale, cursor_y_scale;
 static CGPoint LastDownPoint;
-static mfb_key mfb_press_keys[30] = {KB_KEY_A, KB_KEY_B, KB_KEY_C,    KB_KEY_D,     KB_KEY_E,    KB_KEY_F, KB_KEY_G, KB_KEY_H,
-                                     KB_KEY_I, KB_KEY_J, KB_KEY_K,    KB_KEY_L,     KB_KEY_M,    KB_KEY_N, KB_KEY_O, KB_KEY_P,
-                                     KB_KEY_Q, KB_KEY_R, KB_KEY_S,    KB_KEY_T,     KB_KEY_U,    KB_KEY_V, KB_KEY_W, KB_KEY_X,
-                                     KB_KEY_Y, KB_KEY_Z, KB_KEY_LEFT, KB_KEY_RIGHT, KB_KEY_DOWN, KB_KEY_UP};
+static mfb_key mfb_press_keys[31] = {KB_KEY_SPACE, KB_KEY_A, KB_KEY_B, KB_KEY_C,    KB_KEY_D,     KB_KEY_E,    KB_KEY_F, KB_KEY_G,
+                                     KB_KEY_H,     KB_KEY_I, KB_KEY_J, KB_KEY_K,    KB_KEY_L,     KB_KEY_M,    KB_KEY_N, KB_KEY_O,
+                                     KB_KEY_P,     KB_KEY_Q, KB_KEY_R, KB_KEY_S,    KB_KEY_T,     KB_KEY_U,    KB_KEY_V, KB_KEY_W,
+                                     KB_KEY_X,     KB_KEY_Y, KB_KEY_Z, KB_KEY_LEFT, KB_KEY_RIGHT, KB_KEY_DOWN, KB_KEY_UP};
 pthread_mutex_t _eventMutex;
 
 // ------------------------------------
@@ -105,6 +105,7 @@ static void keyboard(struct mfb_opaque_window* window, mfb_key key, mfb_key_mod 
                 PX_Object_Event_SetStringPtr(&mfb_event, &text);
             }
             break;
+        case KB_KEY_SPACE:
         case KB_KEY_A:
         case KB_KEY_B:
         case KB_KEY_C:
