@@ -15,7 +15,9 @@ px_bool PX_DelaunaryVerifyCircle(px_point2D pt[],px_int p1,px_int p2,px_int p3)
 	{
 		return PX_FALSE;
 	}
-	if ((pt[p1].y-pt[p2].y)/(pt[p1].x-pt[p2].x)==(pt[p1].y-pt[p3].y)/(pt[p1].x-pt[p3].x))
+	// Determine collinearity
+	// replace y1/x1 = y2/x2 => x1*y2 = x2*y1. when x1 = 0 or x2 = 0 it still works
+	if((pt[p1].x-pt[p2].x)*(pt[p1].y-pt[p3].y) == (pt[p1].y-pt[p2].y)*(pt[p1].x-pt[p3].x))
 	{
 		return PX_FALSE;
 	}
