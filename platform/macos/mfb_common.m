@@ -606,3 +606,12 @@ const char* mfb_get_key_name(mfb_key key) {
 
     return "Unknown";
 }
+
+// ------------------------------------
+const int mfb_get_key_status(struct mfb_opaque_window* window, int key_index) {
+    if (window == 0x0) {
+        return 0;
+    }
+    mfb_window_data* window_data = (mfb_window_data*)window;
+    return window_data->key_status[key_index];
+}
