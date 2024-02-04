@@ -1280,12 +1280,12 @@ px_bool PX_CanvasVMExecuteShell(PX_CanvasVM* pCanvasVM)
 px_int PX_CanvasVMGetLastShellIP(PX_CanvasVM* pCanvasVM)
 {
 	px_int ip;
+	PX_CanvasVMShell_Header* pheader;
 	if (pCanvasVM->shell.usedsize == 0)
 	{
 		return -1;
 	}
 	ip = 0;
-	PX_CanvasVMShell_Header* pheader;
 	while (PX_TRUE)
 	{
 		pheader = (PX_CanvasVMShell_Header*)(pCanvasVM->shell.buffer + ip);
