@@ -1303,6 +1303,7 @@ px_void PX_WorldFree(PX_World *pw)
 {
 	PX_WorldObject *pwo;
 	px_int i;
+    PX_RBNode *pNode;
 	for (i=0;i<pw->pObjects.size;i++)
 	{
 		pwo=PX_VECTORAT(PX_WorldObject,&pw->pObjects,i);
@@ -1324,7 +1325,7 @@ px_void PX_WorldFree(PX_World *pw)
 	PX_VectorFree(&pw->pObjects);
 	PX_VectorFree(&pw->pNewObjects);
 	
-	PX_RBNode* pNode = PX_MapFirst(&pw->classes);
+	pNode = PX_MapFirst(&pw->classes);
 	while (pNode)
 	{
 		MP_Free(pw->mp, pNode->_ptr);
