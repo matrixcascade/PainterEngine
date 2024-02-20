@@ -26,6 +26,9 @@ static mfb_key mfb_press_keys[31] = {KB_KEY_SPACE, KB_KEY_A, KB_KEY_B, KB_KEY_C,
 pthread_mutex_t _eventMutex;
 
 // ------------------------------------
+extern void PX_ThreadDestroy(px_thread* thread);
+
+// ------------------------------------
 px_void PX_PressKeysUpdate();
 
 // ------------------------------------
