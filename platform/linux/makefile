@@ -1,7 +1,7 @@
 #gcc freeglut makefile
 #####################################################
 target :=PainterEngine
-project_path := "your project path here"
+project_path := "your project path"
 painterengine_path := ../..
 #####################################################
 project_build := $(wildcard $(project_path)/*.c)

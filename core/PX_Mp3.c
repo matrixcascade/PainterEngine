@@ -379,10 +379,9 @@ static px_int L3_read_side_info(bs_t* bs, L3_gr_info_t* gr, const px_byte* hdr)
 
     px_uint tables, scfsi = 0;
     px_int main_data_begin, part_23_sum = 0;
-    px_int sr_idx = HDR_GET_MY_SAMPLE_RATE(hdr);
+    px_int sr_idx = HDR_GET_MY_SAMPLE_RATE(hdr); 
     px_int gr_count = HDR_IS_MONO(hdr) ? 1 : 2;
     sr_idx -= (sr_idx != 0);
-
     if (HDR_TEST_MPEG1(hdr))
     {
         gr_count *= 2;

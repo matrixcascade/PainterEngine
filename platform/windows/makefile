@@ -1,5 +1,5 @@
 project_path := E:\PainterEngine_Test_main
-painterengine_path := ..\PainterEngine
+painterengine_path := ..\..
 target :=PainterEngine.exe
 #####################################################
 #mingw32-64 makefile

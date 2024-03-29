@@ -1,0 +1,21 @@
+{
+    "tasks": [
+      {
+        "type": "shell",
+        "label": "painterengine build",
+        "command": "make project_path=${workspaceFolder}",
+        "args": [],
+        "options": {
+          "cwd": "c:\\working\\PainterEngine\\platform\\windows",
+        },
+        "problemMatcher": ["$gcc"],
+
+        "group": {
+          "kind": "build",
+          "isDefault": true
+        },
+        "detail": "PainterEngine build task"
+      }
+    ],
+    "version": "2.0.0"
+  }

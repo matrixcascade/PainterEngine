@@ -1,4 +1,4 @@
-#include "PX_Typedef.h"
+﻿#include "PX_Typedef.h"
 
 
 static void px_triangle_copy_point( px_point2D* p, px_point f )
