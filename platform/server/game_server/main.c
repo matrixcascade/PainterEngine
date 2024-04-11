@@ -9,7 +9,8 @@ typedef struct
 	px_float prediction;
 	px_float truely;
 }PX_Object_AnnBall;
-PX_Object* PX_AnnBallCreate(px_float vx, px_float vy);
+
+PX_Object* PX_AnnBallCreate();
 
 px_void PX_AnnTrainOnEpoch()
 {
@@ -61,7 +62,7 @@ PX_OBJECT_UPDATE_FUNCTION(AnnBallUpdate)
 		}
 		epoch += 1;
 		PX_ObjectDelayDelete(pObject);
-		PX_AnnBallCreate(PX_randRange(300, 600), PX_randRange(300, 600));
+		PX_AnnBallCreate();
 	}
 }
 
@@ -79,8 +80,6 @@ PX_OBJECT_RENDER_FUNCTION(AnnBallRender)
 	PX_GeoDrawBall(psurface,32+pBall->prediction * 1000.0, 500-16, 16, PX_COLOR(255, 255, 0, 0));
 	PX_FontDrawText(psurface, 32 + pBall->prediction * 1000.0, 500 - 16, PX_ALIGN_MIDBOTTOM, "prediction", PX_COLOR(255, 0, 0, 0));
 	PX_GeoDrawBall(psurface, 32+pBall->truely * 1000.0, 500-16, 16, PX_COLOR(64, 0, 0, 255));
-
-
 }
 
 PX_Object* PX_AnnBallCreate()
@@ -143,4 +142,5 @@ px_int main()
 	PX_ANNAddLayer(&ann,128,1, PX_ANN_ACTIVATION_FUNCTION_SIGMOID, PX_ANN_LAYER_WEIGHT_INITMODE_GAUSSRAND,0.5);
 	PX_ANNAddLayer(&ann,1,0, PX_ANN_ACTIVATION_FUNCTION_LINEAR, PX_ANN_LAYER_WEIGHT_INITMODE_GAUSSRAND,0.5);
 
+    return 0;
 }
