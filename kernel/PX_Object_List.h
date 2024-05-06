@@ -54,6 +54,7 @@ px_void PX_Object_ListMoveToBottom(PX_Object* pObject);
 px_void PX_Object_ListClear(PX_Object* pListObj);
 px_void PX_Object_ListSetCurrentSelectIndex(PX_Object *pObject,px_int index);
 px_int PX_Object_ListGetCurrentSelectIndex(PX_Object *pObject);
+px_void* PX_Object_ListGetCurrentSelectData(PX_Object* pObject);
 px_int PX_Object_ListAdd(PX_Object *pListObj,px_void *ptr);
 px_void *PX_Object_ListGetItemData(PX_Object *pListObject,px_int index);
 px_int  PX_Object_ListGetItemCount(PX_Object* pListObject);

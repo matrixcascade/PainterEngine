@@ -602,3 +602,29 @@ _ERROR:
     PX_FreeIOData(&io);
     return PX_FALSE;
 }
+
+px_bool PX_LoadJsonToResource(PX_ResourceLibrary* ResourceLibrary, const px_char Path[], const px_char key[])
+{
+	PX_IO_Data io;
+	io = PX_LoadFileToIOData(Path);
+	if (!io.size)goto _ERROR;
+	if (!PX_ResourceLibraryLoad(ResourceLibrary, PX_RESOURCE_TYPE_JSON, io.buffer, io.size, key)) goto _ERROR;
+	PX_FreeIOData(&io);
+	return PX_TRUE;
+_ERROR:
+	PX_FreeIOData(&io);
+	return PX_FALSE;
+}
+
+px_bool PX_LoadDataToResource(PX_ResourceLibrary* ResourceLibrary, const px_char Path[], const px_char key[])
+{
+	PX_IO_Data io;
+	io = PX_LoadFileToIOData(Path);
+	if (!io.size)goto _ERROR;
+	if (!PX_ResourceLibraryLoad(ResourceLibrary, PX_RESOURCE_TYPE_DATA, io.buffer, io.size, key)) goto _ERROR;
+	PX_FreeIOData(&io);
+	return PX_TRUE;
+_ERROR:
+	PX_FreeIOData(&io);
+	return PX_FALSE;
+}

@@ -379,6 +379,8 @@ px_bool PX_Designer_ObjectsListItemOnCreate(px_memorypool* mp, PX_Object* ItemOb
 	ItemObject->User_ptr = userptr;
 	return PX_TRUE;
 }
+
+
 px_void PX_DesignerRender(px_surface* psurface,PX_Object *pObject, px_dword elapsed)
 {
 	PX_Object_Designer*pDesc=PX_ObjectGetDesc(PX_Object_Designer,pObject);

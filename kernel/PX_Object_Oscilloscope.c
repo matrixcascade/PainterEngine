@@ -1874,7 +1874,7 @@ PX_Object *PX_Object_OscilloscopeCreate(px_memorypool *mp, PX_Object *Parent,px_
 }
 
 
-PX_Object* PX_Designer_OscilloscopeCreate(px_memorypool* mp, PX_Object* pparent, px_float x, px_float y, px_float width, px_float height, px_void* ptr)
+PX_Object* PX_Designer_OscilloscopeCreate(px_memorypool* mp, PX_Object* pparent, px_float x, px_float y, px_float width, px_float height, px_abi* ptr)
 {
 	PX_FontModule* fm = (PX_FontModule*)ptr;
 	return PX_Object_OscilloscopeCreate(mp, pparent, (px_int)x, (px_int)y, 256, 256, fm);

@@ -1,6 +1,6 @@
-`timescale 1ns / 1ps
+`timescale 1 ns / 1 ns
 
-module PX_HDL_alphablend(
+module painterengine_gpu_alphablend(
 input wire [7:0] a1,
 input wire [7:0] r1,
 input wire [7:0] g1,

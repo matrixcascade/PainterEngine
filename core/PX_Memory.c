@@ -41,6 +41,11 @@ px_bool PX_MemoryCat(px_memory *memory,const px_void *buffer,px_int size)
 	return PX_TRUE;
 }
 
+px_bool PX_MemoryCatString(px_memory* memory, const px_char* src)
+{
+	return PX_MemoryCat(memory, src, PX_strlen(src));
+}
+
 px_void PX_MemoryFree(px_memory *memory)
 {
 	if (memory->allocsize==0||memory->buffer==PX_NULL)

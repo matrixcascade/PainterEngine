@@ -297,7 +297,7 @@ PX_Object* PX_Object_ColorPanelCreate(px_memorypool* mp, PX_Object* Parent, px_i
 }
 
 
-PX_Object* PX_Designer_ColorPanelCreate(px_memorypool* mp, PX_Object* pparent, px_float x, px_float y, px_float width, px_float height, px_void* ptr)
+PX_Object* PX_Designer_ColorPanelCreate(px_memorypool* mp, PX_Object* pparent, px_float x, px_float y, px_float width, px_float height, px_abi* pabi)
 {
 	return PX_Object_ColorPanelCreate(mp, pparent, (px_int)x, (px_int)y, 200, 200);
 }

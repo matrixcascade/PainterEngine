@@ -297,7 +297,8 @@ PX_Object * PX_Object_SliderBarCreate(px_memorypool *mp,PX_Object *Parent,px_int
 	pDesc->style=style;
 	pDesc->status=PX_OBJECT_SLIDERBAR_STATUS_NORMAL;
 	pDesc->Type=Type;
-	pDesc->color=PX_OBJECT_UI_DEFAULT_FONTCOLOR;
+	pDesc->color=PX_OBJECT_UI_DEFAULT_PUSHCOLOR;
+	pDesc->bordercolor=PX_OBJECT_UI_DEFAULT_BORDERCOLOR;
 	pDesc->BackgroundColor=PX_OBJECT_UI_DEFAULT_BACKGROUNDCOLOR;
 	pDesc->btnDownX=0;
 	pDesc->btnDownY=0;
@@ -484,7 +485,7 @@ px_void PX_Object_SliderBarRender(px_surface *psurface, PX_Object *pObject,px_ui
 				case PX_OBJECT_SLIDERBAR_STYLE_BOX:
 					{
 						//draw border
-						PX_GeoDrawBorder(psurface,(px_int)objx,(px_int)objy,(px_int)objx+(px_int)objWidth-1,(px_int)objy+(px_int)objHeight-1,1,pSliderBar->color);
+						PX_GeoDrawBorder(psurface,(px_int)objx,(px_int)objy,(px_int)objx+(px_int)objWidth-1,(px_int)objy+(px_int)objHeight-1,1,pSliderBar->bordercolor);
 						Sx=((objWidth-pSliderBar->SliderButtonLength)*(1.0f)*relValue/Range);
 						pSliderBar->DargButtonX=Sx;
 						Sx+=SliderBtnLen/2;
@@ -531,7 +532,7 @@ px_void PX_Object_SliderBarRender(px_surface *psurface, PX_Object *pObject,px_ui
 				case PX_OBJECT_SLIDERBAR_STYLE_BOX:
 					{
 						//draw border
-						PX_GeoDrawBorder(psurface,(px_int)objx,(px_int)objy,(px_int)objx+(px_int)objWidth-1,(px_int)objy+(px_int)objHeight-1,1,pSliderBar->color);
+						PX_GeoDrawBorder(psurface,(px_int)objx,(px_int)objy,(px_int)objx+(px_int)objWidth-1,(px_int)objy+(px_int)objHeight-1,1,pSliderBar->bordercolor);
 						Sy=((objHeight-pSliderBar->SliderButtonLength)*(1.0f)*relValue/Range);
 						pSliderBar->DargButtonY=Sy;
 						Sy+=SliderBtnLen/2;
@@ -763,9 +764,14 @@ px_void PX_Object_SliderBarSetShowValue(PX_Object* pSliderBar, px_bool b, px_col
 //////////////////////////////////////////////////////////////////////////
 //SliderBar
 //////////////////////////////////////////////////////////////////////////
-PX_Object* PX_Designer_SliderBarCreate(px_memorypool* mp, PX_Object* pparent, px_float x, px_float y, px_float width, px_float height, px_void* ptr)
+PX_Object* PX_Designer_SliderBarCreate(px_memorypool* mp, PX_Object* pparent, px_float x, px_float y, px_float width, px_float height, px_abi* pabi)
 {
-	PX_FontModule* fm = (PX_FontModule*)ptr;
+	PX_FontModule* fm;
+	if (!PX_AbiRead_ptr(pabi, "fontmodule", (px_void**)&fm))
+	{
+		fm = PX_NULL;
+	}
+
 	return PX_Object_SliderBarCreate(mp, pparent, (px_int)x, (px_int)y, 192, 32, PX_OBJECT_SLIDERBAR_TYPE_HORIZONTAL, PX_OBJECT_SLIDERBAR_STYLE_LINER);
 }
 

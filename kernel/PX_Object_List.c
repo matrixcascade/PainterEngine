@@ -379,12 +379,16 @@ px_void PX_Object_ListRender(px_surface *psurface, PX_Object *pObject,px_uint el
 			{
 				if (index==pList->currentCursorIndex&&index!=pList->currentSelectedIndex)
 				{
+					
 					PX_GeoDrawRect(&pList->renderSurface,(px_int)pItemObject->x,(px_int)pItemObject->y,(px_int)(pItemObject->x+pItemObject->Width-1),(px_int)(pItemObject->y+pItemObject->Height-1),pList->CursorColor);
+					PX_GeoDrawBorder(&pList->renderSurface, 0, (px_int)pItemObject->y, (px_int)pItemObject->Width - 1, (px_int)(pItemObject->y + pItemObject->Height - 1), 1, pList->BorderColor);
 				}
 			}
 			if (index==pList->currentSelectedIndex)
 			{
-				PX_GeoDrawRect(&pList->renderSurface,(px_int)pItemObject->x,(px_int)pItemObject->y,(px_int)(pItemObject->x+pItemObject->Width-1),(px_int)(pItemObject->y+pItemObject->Height-1),pList->SelectColor);
+				PX_GeoDrawRect(&pList->renderSurface, (px_int)pItemObject->x, (px_int)pItemObject->y, (px_int)(pItemObject->x + pItemObject->Width - 1), (px_int)(pItemObject->y + pItemObject->Height - 1), pList->SelectColor);
+				PX_GeoDrawBorder(&pList->renderSurface, 0, (px_int)pItemObject->y, (px_int)pItemObject->Width - 1, (px_int)(pItemObject->y + pItemObject->Height - 1), 1, pList->BorderColor);
+				
 			}
 			PX_ObjectRender(&pList->renderSurface,pItemObject,elapsed);
 		}
@@ -428,6 +432,19 @@ px_int PX_Object_ListGetCurrentSelectIndex(PX_Object *pObject)
 		return pList->currentSelectedIndex;
 	}
 	return -1;
+}
+
+px_void * PX_Object_ListGetCurrentSelectData(PX_Object* pObject)
+{
+	PX_Object_List* pList = PX_Object_GetList(pObject);
+	if (pList)
+	{
+		if (pList->currentSelectedIndex >= 0 && pList->currentSelectedIndex < pList->pData.size)
+		{
+			return *PX_VECTORAT(px_void *, &pList->pData, pList->currentSelectedIndex);
+		}
+	}
+	return PX_NULL;
 }
 
 px_int PX_Object_ListAdd(PX_Object *pListObj,px_void *ptr)
@@ -520,7 +537,7 @@ PX_Object * PX_Object_ListCreate(px_memorypool *mp, PX_Object *Parent,px_int x,p
 	List.BorderColor=PX_OBJECT_UI_DEFAULT_BORDERCOLOR;
 	List.BackgroundColor=PX_OBJECT_UI_DEFAULT_BACKGROUNDCOLOR;
 	List.CursorColor=PX_OBJECT_UI_DEFAULT_CURSORCOLOR;
-	List.SelectColor=PX_OBJECT_UI_DEFAULT_PUSHCOLOR;
+	List.SelectColor= PX_COLOR_FORCECOLOR;
 
 	List.offsetx=0;
 	List.currentSelectedIndex=-1;
@@ -918,9 +935,14 @@ px_void *PX_Object_ListArrayItemGetData(PX_Object* pListItemObject)
 //list
 //////////////////////////////////////////////////////////////////////////
 
-PX_Object* PX_Designer_ListCreate(px_memorypool* mp, PX_Object* pparent, px_float x, px_float y, px_float width, px_float height, px_void* ptr)
+PX_Object* PX_Designer_ListCreate(px_memorypool* mp, PX_Object* pparent, px_float x, px_float y, px_float width, px_float height, px_abi* pabi)
 {
-	PX_FontModule* fm = (PX_FontModule*)ptr;
+	PX_FontModule* fm;
+	if (!PX_AbiRead_ptr(pabi, "fontmodule", (px_void**)&fm))
+	{
+		fm = PX_NULL;
+	}
+
 	return PX_Object_ListContentCreate(mp, pparent, (px_int)x, (px_int)y, 256, 128, fm);
 }
 

@@ -45,6 +45,7 @@ typedef struct _memoryPool
 	px_void* userptr;
 #if defined(PX_DEBUG_MODE) && defined(PX_MEMORYPOOL_DEBUG_CHECK)
 	MP_alloc_debug DEBUG_allocdata[256];
+	px_dword DEBUG_allocdata_catch[16];
 	px_bool enable_allocdata_tracert;
 #endif
 }px_memorypool;
@@ -52,9 +53,11 @@ typedef struct _memoryPool
 
 #if defined(PX_DEBUG_MODE) && defined(PX_MEMORYPOOL_DEBUG_CHECK)
 px_void MP_UnreleaseInfo(px_memorypool *mp);
+px_void MP_Catch(px_memorypool *mp,px_dword MID);
 #define MP_DEBUG_AID(x) MP_UnreleaseInfo(x)
 #else
 #define MP_DEBUG_AID(x)
+#define MP_Catch(x,y)
 #endif
 
 

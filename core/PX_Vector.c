@@ -146,6 +146,17 @@ px_bool PX_VectorPop(px_vector *vec)
 	return PX_TRUE;
 }
 
+px_bool PX_VectorPopN(px_vector* vec,px_int N)
+{
+	if (N == 0)
+		return PX_TRUE;
+	if (vec->size < N)
+	{
+		return PX_FALSE;
+	}
+	vec->size-=N;
+	return PX_TRUE;
+}
 
 px_bool PX_VectorCopy(px_vector *destvec,px_vector *resvec)
 {

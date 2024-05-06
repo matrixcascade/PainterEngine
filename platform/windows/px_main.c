@@ -290,7 +290,10 @@ void setCurrentDirectory()
 	do 
 	{
 		extern int PX_AudioInitializeHwnd(HWND hwnd);
-		if(!PX_AudioInitializeHwnd(PX_GetWindowHwnd()))return 0;
+		if (!PX_AudioInitializeHwnd(PX_GetWindowHwnd()))
+		{
+			PX_LOG("Audio Initialize Failed\n");
+		}
 	} while (0);
 #endif
 	//////////////////////////////////////////////////////////////////////////

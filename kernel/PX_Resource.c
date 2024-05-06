@@ -103,6 +103,17 @@ px_bool PX_ResourceLibraryLoad(PX_ResourceLibrary *lib,PX_RESOURCE_TYPE type,px_
 			return PX_FALSE;
 		}
 		break;
+	case PX_RESOURCE_TYPE_JSON:
+		{
+		if (!PX_JsonInitialize(lib->mp, &res.json))
+			return PX_FALSE;
+		if (!PX_JsonParse(&res.json, (const px_char *)data))
+			{
+				PX_JsonFree(&res.json);
+				return PX_FALSE;
+			}
+		}
+		break;
 	}
 	
 	PX_MapPut(&lib->map,(const px_byte *)key,PX_strlen(key), PX_ListPush(&lib->resources, &res, sizeof(res)));
@@ -146,12 +157,17 @@ px_void PX_ResourceLibraryFree(PX_ResourceLibrary *lib)
 		case PX_RESOURCE_TYPE_DATA:
 			PX_MemoryFree(&pres->data);
 			break;
-			case PX_RESOURCE_TYPE_SOUND:
+		case PX_RESOURCE_TYPE_SOUND:
 				PX_SoundDataFree(&pres->sound);
 				break;
-			case PX_RESOURCE_TYPE_SHAPE:
+		case PX_RESOURCE_TYPE_SHAPE:
 				PX_ShapeFree(&pres->shape);
 				break;
+		case PX_RESOURCE_TYPE_JSON:
+			PX_JsonFree(&pres->json);
+			break;
+		default:
+			PX_ASSERT();
 		}
 		pNode=pNode->pnext;
 	}
@@ -184,6 +200,15 @@ px_texture *PX_ResourceLibraryCreateTexture(PX_ResourceLibrary* lib, const px_ch
 	return PX_ResourceLibraryGetTexture(lib,key);
 }
 
+px_memory* PX_ResourceLibraryCreateMemory(PX_ResourceLibrary* lib, const px_char key[])
+{
+	PX_Resource res;
+	res.Type = PX_RESOURCE_TYPE_DATA;
+	PX_MemoryInitialize(lib->mp, &res.data);
+	if (PX_MapPut(&lib->map, (const px_byte*)key, PX_strlen(key), PX_ListPush(&lib->resources, &res, sizeof(res))) != PX_HASHMAP_RETURN_OK)
+		return 0;
+	return PX_ResourceLibraryGetData(lib, key);
+}
 
 
 px_void PX_ResourceLibraryDelete(PX_ResourceLibrary *lib,const px_char key[])
@@ -218,12 +243,15 @@ px_void PX_ResourceLibraryDelete(PX_ResourceLibrary *lib,const px_char key[])
 				case PX_RESOURCE_TYPE_DATA:
 					PX_MemoryFree(&pres->data);
 					break;
-					case PX_RESOURCE_TYPE_SOUND:
-						PX_SoundDataFree(&pres->sound);
-						break;
-                    case PX_RESOURCE_TYPE_SHAPE:
-                        PX_ShapeFree(&pres->shape);
-                        break;
+				case PX_RESOURCE_TYPE_SOUND:
+					PX_SoundDataFree(&pres->sound);
+					break;
+                 case PX_RESOURCE_TYPE_SHAPE:
+                     PX_ShapeFree(&pres->shape);
+                     break;
+				case PX_RESOURCE_TYPE_JSON:
+					PX_JsonFree(&pres->json);
+					break;
 				}
 				PX_ListPop(&lib->resources,pNode);
 				PX_MapErase(&lib->map,(const px_byte *)key, PX_strlen(key));
@@ -260,6 +288,16 @@ px_string* PX_ResourceLibraryGetString(PX_ResourceLibrary* lib, const px_char ke
 	if (pres && pres->Type == PX_RESOURCE_TYPE_STRING)
 	{
 		return &pres->stringdata;
+	}
+	return PX_NULL;
+}
+
+PX_Json* PX_ResourceLibraryGetJson(PX_ResourceLibrary* lib, const px_char key[])
+{
+	PX_Resource* pres = PX_ResourceLibraryGet(lib, key);
+	if (pres && pres->Type == PX_RESOURCE_TYPE_JSON)
+	{
+		return &pres->json;
 	}
 	return PX_NULL;
 }

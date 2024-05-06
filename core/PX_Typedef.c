@@ -2085,6 +2085,13 @@ px_point2D PX_Point2DAdd(px_point2D p1,px_point2D p2)
 	return p1;
 }
 
+px_point2Di PX_Point2DiAdd(px_point2Di p1, px_point2Di p2)
+{
+	p1.x += p2.x;
+	p1.y += p2.y;
+	return p1;
+}
+
 
 px_point PX_PointSub(px_point p1,px_point p2)
 {
@@ -2098,6 +2105,13 @@ px_point2D PX_Point2DSub(px_point2D p1,px_point2D p2)
 {
 	p1.x-=p2.x;
 	p1.y-=p2.y;
+	return p1;
+}
+
+px_point2Di PX_Point2DiSub(px_point2Di p1, px_point2Di p2)
+{
+	p1.x -= p2.x;
+	p1.y -= p2.y;
 	return p1;
 }
 
@@ -2124,6 +2138,14 @@ px_point2D PX_Point2DMul(px_point2D p1,px_float m)
 {
 	p1.x*=m;
 	p1.y*=m;
+	return p1;
+}
+
+px_point2Di PX_Point2DiMul(px_point2Di p1, px_float m)
+{
+	p1.x =(px_int)(p1.x* m);
+	p1.y =(px_int)(p1.y* m);
+
 	return p1;
 }
 
@@ -2181,6 +2203,11 @@ px_point PX_PointCross(px_point p1,px_point p2)
 	pt.y=p1.z*p2.x-p2.z*p1.x;
 	pt.z=p1.x*p2.y-p2.x*p1.y;
 	return pt;
+}
+
+px_float PX_Point2DCross(px_point2D p1,px_point2D p2)
+{
+	return p1.x*p2.y-p2.x*p1.y;
 }
 
 
@@ -2620,6 +2647,57 @@ px_bool PX_isLineCrossRect(px_point p1,px_point p2,px_rect rect,px_point *cp1,px
 
 	return bcross;
 }
+
+px_bool PX_isLineCrossCircle(px_point2D p1, px_point2D p2, px_point2D c, px_float r)
+{
+	px_bool flag1 = (p1.x - c.x) * (p1.x - c.x) + (p1.y - c.y) * (p1.y - c.y) <= r * r;
+	px_bool flag2 = (p2.x - c.x) * (p2.x - c.x) + (p2.y - c.y) * (p2.y - c.y) <= r * r;
+	if (flag1 && flag2)	
+		return PX_FALSE;
+	else if (flag1 || flag2) 
+		return PX_TRUE;
+	else 
+	{
+		px_float A, B, C, dist1, dist2, angle1, angle2;
+		A = p1.y - p2.y;
+		B = p2.x - p1.x;
+		C = p1.x * p2.y - p2.x * p1.y;
+		dist1 = A * c.x + B * c.y + C;
+		dist1 *= dist1;
+		dist2 = (A * A + B * B) * r * r;
+		if (dist1 > dist2)
+			return PX_FALSE;
+		angle1 = (c.x - p1.x) * (p2.x - p1.x) + (c.y - p1.y) * (p2.y - p1.y);
+		angle2 = (c.x - p2.x) * (p1.x - p2.x) + (c.y - p2.y) * (p1.y - p2.y);
+		if (angle1 > 0 && angle2 > 0)
+			return PX_TRUE;
+		else
+			return PX_FALSE;
+	}
+}
+
+
+
+px_bool PX_is3Point2DInALine(px_point2D p1,px_point2D p2,px_point2D p3)
+{
+	px_float a,b,c;
+	a=PX_Point2DMod(PX_Point2DSub(p1,p2));
+	b=PX_Point2DMod(PX_Point2DSub(p1,p3));
+	c=PX_Point2DMod(PX_Point2DSub(p2,p3));
+	if (a+b-c<1E-6f||a+c-b< 1E-6f ||b+c-a< 1E-6f)
+	{
+		return PX_TRUE;
+	}
+	return PX_FALSE;
+}
+
+px_point2D PX_VectorMap(px_point2D base1, px_point2D base2, px_point2D v)
+{
+	base1=PX_Point2DNormalization(base1);
+	base2=PX_Point2DNormalization(base2);
+	return PX_Point2DAdd(PX_Point2DMul(base1,PX_Point2DDot(v,base1)),PX_Point2DMul(base2,PX_Point2DDot(v,base2)));
+}
+
 
 px_void PX_memset(px_void *dst,px_byte byte,px_int size)
 {
@@ -4066,6 +4144,11 @@ px_point2D PX_POINT3D_2D(px_point p)
 	return PX_POINT2D(p.x, p.y);
 }
 
+px_point2D PX_POINT2Di_2D(px_point2Di p)
+{
+	return PX_POINT2D((px_float)p.x, (px_float)p.y);
+}
+
 px_point PX_POINT(px_float x,px_float y,px_float z)
 {
 	px_point p;
@@ -4080,6 +4163,14 @@ px_point2D PX_POINT2D(px_float x,px_float y)
 	px_point2D p;
 	p.x=x;
 	p.y=y;
+	return p;
+}
+
+px_point2Di PX_POINT2DI(px_int x, px_int y)
+{
+	px_point2Di p;
+	p.x = x;
+	p.y = y;
 	return p;
 }
 

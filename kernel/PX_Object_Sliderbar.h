@@ -34,7 +34,7 @@ typedef struct
 	px_int lastValue;
 	px_int Value;
 	px_int SliderButtonLength;
-	px_color color;
+	px_color color, bordercolor;
 	px_color BackgroundColor;
 	px_bool showvalue;
 	px_color showvalue_color;

@@ -755,6 +755,8 @@ _ERROR:
 	return PX_FALSE;
 }
 
+
+
 px_bool PX_LoadStringToResource(PX_ResourceLibrary* ResourceLibrary, const px_char Path[], const px_char key[])
 {
 	PX_IO_Data io;
@@ -853,6 +855,19 @@ _ERROR:
 	return PX_FALSE;
 }
 
+px_bool PX_LoadJsonToResource(PX_ResourceLibrary* ResourceLibrary, const px_char Path[], const px_char key[])
+{
+	PX_IO_Data io;
+	io = PX_LoadFileToIOData(Path);
+	if (!io.size)goto _ERROR;
+	if (!PX_ResourceLibraryLoad(ResourceLibrary, PX_RESOURCE_TYPE_JSON, io.buffer, io.size, key)) goto _ERROR;
+	PX_FreeIOData(&io);
+	return PX_TRUE;
+_ERROR:
+	PX_FreeIOData(&io);
+	return PX_FALSE;
+}
+
 
 px_bool PX_LoadGifFromFile(px_memorypool* mp, px_gif* gif, const px_char path[])
 {
@@ -911,6 +926,19 @@ px_bool PX_LoadJsonFromJsonFile(px_memorypool* mp, PX_Json* json, const px_char*
 	}
 	if(!PX_JsonInitialize(mp, json))goto _ERROR;
 	if (!PX_JsonParse(json, (px_char*)io.buffer))goto _ERROR;
+	PX_FreeIOData(&io);
+	return PX_TRUE;
+_ERROR:
+	PX_FreeIOData(&io);
+	return PX_FALSE;
+}
+
+px_bool PX_LoadDataToResource(PX_ResourceLibrary* ResourceLibrary, const px_char Path[], const px_char key[])
+{
+	PX_IO_Data io;
+	io = PX_LoadFileToIOData(Path);
+	if (!io.size)goto _ERROR;
+	if (!PX_ResourceLibraryLoad(ResourceLibrary, PX_RESOURCE_TYPE_DATA, io.buffer, io.size, key)) goto _ERROR;
 	PX_FreeIOData(&io);
 	return PX_TRUE;
 _ERROR:

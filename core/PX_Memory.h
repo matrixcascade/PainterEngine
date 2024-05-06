@@ -17,6 +17,7 @@ px_void PX_MemoryClear(px_memory *memory);
 px_bool PX_MemoryAlloc(px_memory *memory,px_int size);
 px_bool PX_MemoryResize(px_memory *memory,px_int size);
 px_bool PX_MemoryCat(px_memory *memory,const px_void *buffer,px_int size);
+px_bool PX_MemoryCatString(px_memory *memory,const px_char *src);
 px_bool PX_MemoryCopy(px_memory *memory,const px_void *buffer,px_int startoffset,px_int size);
 px_byte *PX_MemoryFind(px_memory *memory,const px_void *buffer,px_int size);
 px_void PX_MemoryRemove(px_memory *memory,px_int start,px_int end);

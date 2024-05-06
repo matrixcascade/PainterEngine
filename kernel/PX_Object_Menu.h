@@ -32,6 +32,7 @@ typedef struct
 	PX_FontModule *fontmodule;
 	px_color backgroundColor;
 	px_color fontColor;
+	px_color borderColor;
 	px_color disableColor;
 	px_color cursorColor;
 }PX_Object_Menu;

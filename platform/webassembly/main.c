@@ -206,7 +206,7 @@ void mainloop(void *ptr)
 			{
 				px_int px = event.button.x;
 				px_int py = event.button.y;
-				PX_Object_Event e;
+				PX_Object_Event e={0};;
 				lastcursorx=px;
 				lastcursory=py;
 				mouseldown=PX_TRUE;
@@ -226,13 +226,22 @@ void mainloop(void *ptr)
 				PX_ApplicationPostEvent(&App,e);
 			}
 		}
+		else if(event.type == SDL_MOUSEWHEEL)
+    	{
+			PX_Object_Event e={0};
+			e.Event=PX_OBJECT_EVENT_CURSORWHEEL;
+			PX_Object_Event_SetCursorX(&e,(px_float)lastcursorx);
+			PX_Object_Event_SetCursorY(&e,(px_float)lastcursory);
+			PX_Object_Event_SetCursorZ(&e,(px_float)event.wheel.y);
+    	    PX_ApplicationPostEvent(&App,e);
+    	}
 		else if (SDL_MOUSEBUTTONUP== event.type) 
 		{
 			if(SDL_BUTTON_LEFT == event.button.button)
 			{
 				px_int px = event.button.x;
 				px_int py = event.button.y;
-				PX_Object_Event e;
+				PX_Object_Event e={0};
 				mouseldown=PX_FALSE;
 				if (px==lastcursorx&&py==lastcursory)
 				{

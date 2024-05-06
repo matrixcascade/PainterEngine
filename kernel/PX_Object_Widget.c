@@ -163,9 +163,10 @@ px_void PX_Object_WidgetRender(px_surface *psurface, PX_Object *pObject,px_uint 
 		if(!PX_TextureCreate(pObject->mp,&pwidget->renderTarget,(px_int)pObject->Width,(px_int)pObject->Height+PX_OBJECT_WIDGET_BAR_SIZE))return;
 		PX_TextureFree(old);
 	}
-
+	
 	do 
 	{
+		
 		if (pwidget->event_optimization)
 		{
 			if (!pwidget->bevent_update)
@@ -177,20 +178,21 @@ px_void PX_Object_WidgetRender(px_surface *psurface, PX_Object *pObject,px_uint 
 		pwidget->bevent_update=PX_FALSE;
 		
 		PX_SurfaceClear(&pwidget->renderTarget,0,0,pwidget->renderTarget.width-1,pwidget->renderTarget.height-1,pwidget->backgroundcolor);
-
+		
 		PX_ObjectRender(&pwidget->renderTarget,pwidget->root,elapsed);
+		
 		PX_SurfaceRender(psurface,&pwidget->renderTarget,(px_int)objx,(px_int)objy+PX_OBJECT_WIDGET_BAR_SIZE,PX_ALIGN_LEFTTOP,PX_NULL);
 		if (pwidget->showShader)
 		{
 			px_color sd = pwidget->backgroundcolor;
-			sd._argb.a = sd._argb.a/3*2;
+			sd._argb.a = sd._argb.a/2;
 			PX_GeoDrawRect(psurface, (px_int)(objx + objWidth), (px_int)objy + 6, (px_int)(objx + objWidth + 6), (px_int)(objy + objHeight + 6), sd);
 			PX_GeoDrawRect(psurface, (px_int)(objx + 6), (px_int)(objy + objHeight), (px_int)(objx + objWidth - 1), (px_int)(objy + objHeight + 6), sd);
 		}
 		
 	} while (0);
 
-
+	
 	PX_GeoDrawRect(psurface,(px_int)objx,(px_int)objy,(px_int)(objx+pObject->Width-1),(px_int)objy+PX_OBJECT_WIDGET_BAR_SIZE-1,pwidget->barColor);
 
 	if (pObject->OnFocus)
@@ -248,7 +250,7 @@ PX_Object * PX_Object_WidgetCreate(px_memorypool *mp,PX_Object *Parent,px_int x,
 	pWidget->backgroundcolor=PX_OBJECT_UI_DEFAULT_BACKGROUNDCOLOR;
 	pWidget->barColor=PX_COLOR(255,128,128,128);
 	pWidget->borderColor=PX_OBJECT_UI_DEFAULT_BORDERCOLOR;
-	pWidget->focusColor=PX_COLOR_WHITE;
+	pWidget->focusColor=PX_COLOR_FORCEBORDERCOLOR;
 	pWidget->bevent_update=PX_TRUE;
 	pWidget->bmoveable=PX_TRUE;
 	pWidget->fontcolor=PX_OBJECT_UI_DEFAULT_FONTCOLOR;
@@ -325,6 +327,11 @@ px_surface* PX_Object_WidgetGetRenderTarget(PX_Object* pObject)
 	return 0;
 }
 
+px_void PX_Object_WidgetReleaseFocus(PX_Object* pObject)
+{
+	PX_ObjectClearFocus(pObject);
+}
+
 px_void PX_Object_WidgetSetBorderColor(PX_Object *pObject,px_color clr)
 {
 	PX_Object_Widget *pWidget=PX_Object_GetWidget(pObject);
@@ -333,6 +340,7 @@ px_void PX_Object_WidgetSetBorderColor(PX_Object *pObject,px_color clr)
 		pWidget->borderColor=clr;
 	}
 }
+
 
 px_void PX_Object_WidgetSetBarColor(PX_Object *pObject,px_color clr)
 {

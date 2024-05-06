@@ -114,6 +114,7 @@ static px_bool PX_Object_MenuInitialize(px_memorypool *mp,PX_Object_Menu *pMenu,
 	pMenu->cursorColor=PX_OBJECT_UI_DEFAULT_CURSORCOLOR;
 	pMenu->fontColor=PX_OBJECT_UI_DEFAULT_FONTCOLOR;
 	pMenu->disableColor=PX_OBJECT_UI_DISABLE_FONTCOLOR;
+	pMenu->borderColor=PX_OBJECT_UI_DEFAULT_BORDERCOLOR;
 	PX_ListInitialize(mp,&pMenu->root.Items);
 	pMenu->root.Activated=PX_TRUE;
 	return PX_TRUE;
@@ -307,7 +308,9 @@ static px_void PX_MenuRenderItem(px_surface *pSurface,PX_Object_Menu *pMenu,PX_O
 	{
 		if (pItem->onCursor||pItem->Activated)
 		{
+			//draw border	
 			PX_GeoDrawRect(pSurface,pItem->x,pItem->y,pItem->x+pItem->width-1,pItem->y+pItem->height-1,pMenu->cursorColor);
+			PX_GeoDrawBorder(pSurface, pItem->x, pItem->y, pItem->x + pItem->width - 1, pItem->y + pItem->height - 1, 1, pMenu->borderColor);
 		}
 		else
 		{

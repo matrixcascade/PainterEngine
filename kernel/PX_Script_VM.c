@@ -182,41 +182,45 @@ _ERROR:
 	return PX_FALSE;
 }
 
-PX_VM_VARIABLE PX_VM_VaribaleCopy(PX_VM *Ins,PX_VM_VARIABLE var,px_bool *bOutOfMemory)
+PX_VM_VARIABLE PX_VM_VariableCopy(px_memorypool *mp,PX_VM_VARIABLE var,px_bool *bOutOfMemory)
 {
 	PX_VM_VARIABLE cpyVar;
 	cpyVar=var;
-	*bOutOfMemory=PX_FALSE;
+	if(bOutOfMemory)
+		*bOutOfMemory=PX_FALSE;
 
 	if (var.type==PX_VM_VARIABLE_TYPE_STRING)
 	{
-		if(!PX_StringInitialize(Ins->mp,&cpyVar._string)) 
+		if(!PX_StringInitialize(mp,&cpyVar._string)) 
 		{
 			cpyVar.type=PX_VM_VARIABLE_TYPE_INT;
-			*bOutOfMemory=PX_TRUE;
+			if (bOutOfMemory)
+				*bOutOfMemory=PX_TRUE;
 		}
 		else
 		{
 			if(!PX_StringCopy(&cpyVar._string,&var._string))
 			{
 				cpyVar.type=PX_VM_VARIABLE_TYPE_INT;
-				*bOutOfMemory=PX_TRUE;
+				if (bOutOfMemory)
+					*bOutOfMemory=PX_TRUE;
 			}
 		}
 	}
 	else if (var.type==PX_VM_VARIABLE_TYPE_MEMORY)
 	{
-		PX_MemoryInitialize(Ins->mp,&cpyVar._memory);
+		PX_MemoryInitialize(mp,&cpyVar._memory);
 		if(!PX_MemoryCat(&cpyVar._memory,var._memory.buffer,var._memory.usedsize))
 		{
 			cpyVar.type=PX_VM_VARIABLE_TYPE_INT;
-			*bOutOfMemory=PX_TRUE;
+			if (bOutOfMemory)
+				*bOutOfMemory=PX_TRUE;
 		}
 	}
 	return cpyVar;
 }
 
-px_void PX_VM_VariableFree(PX_VM *Ins,PX_VM_VARIABLE *var)
+px_void PX_VM_VariableFree(PX_VM_VARIABLE *var)
 {
 	if (var->type==PX_VM_VARIABLE_TYPE_MEMORY)
 	{
@@ -311,7 +315,7 @@ static PX_VM_VARIABLE  PX_VM_GetParamConst(PX_VM *Ins,px_char optype,px_int para
 		{
 			if (param<PX_VM_REG_COUNT)
 			{
-				return PX_VM_VaribaleCopy(Ins,pT->R[param],bOutofMemory);
+				return PX_VM_VariableCopy(Ins->mp,pT->R[param],bOutofMemory);
 			}
 			else
 			{
@@ -322,7 +326,7 @@ static PX_VM_VARIABLE  PX_VM_GetParamConst(PX_VM *Ins,px_char optype,px_int para
 	case PX_SCRIPT_ASM_OPTYPE_LOCAL_CONST:
 		{
 			if(pT->BP-param>=0&&pT->BP-param<Ins->VM_memsize)
-				return PX_VM_VaribaleCopy(Ins,Ins->_mem[pT->BP-param],bOutofMemory);
+				return PX_VM_VariableCopy(Ins->mp,Ins->_mem[pT->BP-param],bOutofMemory);
 			else
 				goto _ERROR;
 		}
@@ -336,7 +340,7 @@ static PX_VM_VARIABLE  PX_VM_GetParamConst(PX_VM *Ins,px_char optype,px_int para
 				{
 					if (pT->BP-rVar._int>=0&&pT->BP-rVar._int<Ins->VM_memsize)
 					{
-						return PX_VM_VaribaleCopy(Ins,Ins->_mem[rVar._int-pT->BP],bOutofMemory);
+						return PX_VM_VariableCopy(Ins->mp,Ins->_mem[rVar._int-pT->BP],bOutofMemory);
 					}
 					else
 					{
@@ -364,7 +368,7 @@ static PX_VM_VARIABLE  PX_VM_GetParamConst(PX_VM *Ins,px_char optype,px_int para
 				{
 					if (pT->BP-rVar._int>=0&&pT->BP-rVar._int<Ins->VM_memsize)
 					{
-						return PX_VM_VaribaleCopy(Ins,Ins->_mem[pT->BP-rVar._int],bOutofMemory);
+						return PX_VM_VariableCopy(Ins->mp,Ins->_mem[pT->BP-rVar._int],bOutofMemory);
 					}
 					else
 					{
@@ -391,7 +395,7 @@ static PX_VM_VARIABLE  PX_VM_GetParamConst(PX_VM *Ins,px_char optype,px_int para
 				{
 					if (pT->BP-rVar._int>=0&&pT->BP-rVar._int<Ins->VM_memsize)
 					{
-						return PX_VM_VaribaleCopy(Ins,Ins->_mem[pT->BP-rVar._int],bOutofMemory);
+						return PX_VM_VariableCopy(Ins->mp,Ins->_mem[pT->BP-rVar._int],bOutofMemory);
 					}
 					else
 					{
@@ -412,7 +416,7 @@ static PX_VM_VARIABLE  PX_VM_GetParamConst(PX_VM *Ins,px_char optype,px_int para
 	case PX_SCRIPT_ASM_OPTYPE_GLOBAL_CONST:
 		{
 			if(param>=0&&param<Ins->VM_memsize)
-				return PX_VM_VaribaleCopy(Ins,Ins->_mem[param],bOutofMemory);
+				return PX_VM_VariableCopy(Ins->mp,Ins->_mem[param],bOutofMemory);
 			else
 				goto _ERROR;
 		}
@@ -420,7 +424,7 @@ static PX_VM_VARIABLE  PX_VM_GetParamConst(PX_VM *Ins,px_char optype,px_int para
 	case PX_SCRIPT_ASM_OPTYPE_GLOBAL_SPREF:
 		{
 			if(pT->SP + param>=0&&pT->SP+param<Ins->VM_memsize)
-				return PX_VM_VaribaleCopy(Ins,Ins->_mem[pT->SP+param],bOutofMemory);
+				return PX_VM_VariableCopy(Ins->mp,Ins->_mem[pT->SP+param],bOutofMemory);
 			else
 				goto _ERROR;
 		}
@@ -434,7 +438,7 @@ static PX_VM_VARIABLE  PX_VM_GetParamConst(PX_VM *Ins,px_char optype,px_int para
 				{
 					if (rVar._int>=0&&rVar._int<Ins->VM_memsize)
 					{
-						return PX_VM_VaribaleCopy(Ins,Ins->_mem[rVar._int],bOutofMemory);
+						return PX_VM_VariableCopy(Ins->mp,Ins->_mem[rVar._int],bOutofMemory);
 					}
 					else
 					{
@@ -461,7 +465,7 @@ static PX_VM_VARIABLE  PX_VM_GetParamConst(PX_VM *Ins,px_char optype,px_int para
 				{
 					if (rVar._int>=0&&rVar._int<Ins->VM_memsize)
 					{
-						return PX_VM_VaribaleCopy(Ins,Ins->_mem[rVar._int],bOutofMemory);
+						return PX_VM_VariableCopy(Ins->mp,Ins->_mem[rVar._int],bOutofMemory);
 					}
 					else
 					{
@@ -488,7 +492,7 @@ static PX_VM_VARIABLE  PX_VM_GetParamConst(PX_VM *Ins,px_char optype,px_int para
 				{
 					if (rVar._int>=0&&rVar._int<Ins->VM_memsize)
 					{
-						return PX_VM_VaribaleCopy(Ins,Ins->_mem[rVar._int],bOutofMemory);
+						return PX_VM_VariableCopy(Ins->mp,Ins->_mem[rVar._int],bOutofMemory);
 					}
 					else
 					{
@@ -823,9 +827,9 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 	
 		if(tick==0)
 		{
-			PX_VM_VariableFree(Ins,&cVar);
-			PX_VM_VariableFree(Ins,&sVar);
-			PX_VM_VariableFree(Ins,&tVar);
+			PX_VM_VariableFree(&cVar);
+			PX_VM_VariableFree(&sVar);
+			PX_VM_VariableFree(&tVar);
 			return PX_VM_RUNRETURN_TIMEOUT;
 		}
 
@@ -901,7 +905,7 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 				PX_VM_Error(Ins, "MOV crash.");
 				goto _ERROR;
 			}
-			PX_VM_VariableFree(Ins,pVar);
+			PX_VM_VariableFree(pVar);
 			
 			if (cVar.type==PX_VM_VARIABLE_TYPE_STRING)
 			{
@@ -1456,7 +1460,7 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 				PX_VM_Error(Ins,"strlen parameters error.");
 				goto _ERROR;
 			}
-			PX_VM_VariableFree(Ins,pVar);
+			PX_VM_VariableFree(pVar);
 			pVar->type=PX_VM_VARIABLE_TYPE_INT;
 			pVar->_int=PX_strlen(cVar._string.buffer);
 			pT->IP+=(4+2*4);
@@ -1520,7 +1524,7 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 			if(bOutofMemory) goto _ERROR;
 			sVar=PX_VM_GetParamConst(Ins,opType[2],PX_SCRIPT_VM_PARAM(2),&bOutofMemory);
 			if(bOutofMemory) goto _ERROR;
-			PX_VM_VariableFree(Ins,pVar);
+			PX_VM_VariableFree(pVar);
 
 			if (cVar.type!=PX_VM_VARIABLE_TYPE_STRING)
 			{
@@ -1546,7 +1550,7 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 			pVar=PX_VMGetVariablePointer(Ins,opType[0],PX_SCRIPT_VM_PARAM(0));
 			cVar=PX_VM_GetParamConst(Ins,opType[1],PX_SCRIPT_VM_PARAM(1),&bOutofMemory);
 			if(bOutofMemory) goto _ERROR;
-			PX_VM_VariableFree(Ins,pVar);
+			PX_VM_VariableFree(pVar);
 
 			if (cVar.type!=PX_VM_VARIABLE_TYPE_STRING)
 			{
@@ -1564,7 +1568,7 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 			pVar=PX_VMGetVariablePointer(Ins,opType[0],PX_SCRIPT_VM_PARAM(0));
 			cVar=PX_VM_GetParamConst(Ins,opType[1],PX_SCRIPT_VM_PARAM(1),&bOutofMemory);
 			if(bOutofMemory) goto _ERROR;
-			PX_VM_VariableFree(Ins,pVar);
+			PX_VM_VariableFree(pVar);
 
 			if (cVar.type!=PX_VM_VARIABLE_TYPE_STRING)
 			{
@@ -1583,7 +1587,7 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 			pVar=PX_VMGetVariablePointer(Ins,opType[0],PX_SCRIPT_VM_PARAM(0));
 			cVar=PX_VM_GetParamConst(Ins,opType[1],PX_SCRIPT_VM_PARAM(1),&bOutofMemory);
 			if(bOutofMemory) goto _ERROR;
-			PX_VM_VariableFree(Ins,pVar);
+			PX_VM_VariableFree(pVar);
 			if (cVar.type!=PX_VM_VARIABLE_TYPE_INT&&cVar.type!=PX_VM_VARIABLE_TYPE_FLOAT)
 			{
 				PX_VM_Error(Ins,"strfri parameters error.");
@@ -1607,7 +1611,7 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 			pVar=PX_VMGetVariablePointer(Ins,opType[0],PX_SCRIPT_VM_PARAM(0));
 			cVar=PX_VM_GetParamConst(Ins,opType[1],PX_SCRIPT_VM_PARAM(1),&bOutofMemory);
 			if(bOutofMemory) goto _ERROR;
-			PX_VM_VariableFree(Ins,pVar);
+			PX_VM_VariableFree(pVar);
 
 			if (cVar.type!=PX_VM_VARIABLE_TYPE_INT&&cVar.type!=PX_VM_VARIABLE_TYPE_FLOAT)
 			{
@@ -1705,7 +1709,7 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 			if(bOutofMemory) goto _ERROR;
 			tVar=PX_VM_GetParamConst(Ins,opType[2],PX_SCRIPT_VM_PARAM(2),&bOutofMemory);
 			if(bOutofMemory) goto _ERROR;
-			PX_VM_VariableFree(Ins,pVar);
+			PX_VM_VariableFree(pVar);
 			if (sVar.type!=PX_VM_VARIABLE_TYPE_STRING||tVar.type!=PX_VM_VARIABLE_TYPE_STRING)
 			{
 				PX_VM_Error(Ins,"strfind parameters error.");
@@ -1746,7 +1750,7 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 			pVar=PX_VMGetVariablePointer(Ins,opType[0],PX_SCRIPT_VM_PARAM(0));
 			cVar=PX_VM_GetParamConst(Ins,opType[1],PX_SCRIPT_VM_PARAM(1),&bOutofMemory);
 			if(bOutofMemory) goto _ERROR;
-			PX_VM_VariableFree(Ins,pVar);
+			PX_VM_VariableFree(pVar);
 			if (cVar.type!=PX_VM_VARIABLE_TYPE_STRING)
 			{
 				PX_VM_Error(Ins,"asc parameters error.");
@@ -1766,7 +1770,7 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 			if(bOutofMemory) goto _ERROR;
 			tVar=PX_VM_GetParamConst(Ins,opType[2],PX_SCRIPT_VM_PARAM(2),&bOutofMemory);
 			if(bOutofMemory) goto _ERROR;
-			PX_VM_VariableFree(Ins,pVar);
+			PX_VM_VariableFree(pVar);
 
 			if (sVar.type!=PX_VM_VARIABLE_TYPE_MEMORY||tVar.type!=PX_VM_VARIABLE_TYPE_INT)
 			{
@@ -1884,7 +1888,7 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 			if(bOutofMemory) goto _ERROR;
 			tVar=PX_VM_GetParamConst(Ins,opType[2],PX_SCRIPT_VM_PARAM(2),&bOutofMemory);
 			if(bOutofMemory) goto _ERROR;
-			PX_VM_VariableFree(Ins,pVar);
+			PX_VM_VariableFree(pVar);
 			if (sVar.type!=PX_VM_VARIABLE_TYPE_MEMORY||tVar.type!=PX_VM_VARIABLE_TYPE_MEMORY)
 			{
 				PX_VM_Error(Ins,"memfind parameters error.");
@@ -1909,7 +1913,7 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 			pVar=PX_VMGetVariablePointer(Ins,opType[0],PX_SCRIPT_VM_PARAM(0));
 			sVar=PX_VM_GetParamConst(Ins,opType[1],PX_SCRIPT_VM_PARAM(1),&bOutofMemory);
 			if(bOutofMemory) goto _ERROR;
-			PX_VM_VariableFree(Ins,pVar);
+			PX_VM_VariableFree(pVar);
 			pVar->type=PX_VM_VARIABLE_TYPE_INT;
 			pVar->_int=sVar._memory.usedsize;
 			
@@ -2438,7 +2442,7 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 			if(bOutofMemory) goto _ERROR;
 			tVar=PX_VM_GetParamConst(Ins,opType[2],PX_SCRIPT_VM_PARAM(2),&bOutofMemory);
 			if(bOutofMemory) goto _ERROR;
-			PX_VM_VariableFree(Ins,pVar);
+			PX_VM_VariableFree(pVar);
 			pVar->type=PX_VM_VARIABLE_TYPE_INT;
 			pVar->_int=0;
 			
@@ -2506,7 +2510,7 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 			if(bOutofMemory) goto _ERROR;
 			tVar=PX_VM_GetParamConst(Ins,opType[2],PX_SCRIPT_VM_PARAM(2),&bOutofMemory);
 			if(bOutofMemory) goto _ERROR;
-			PX_VM_VariableFree(Ins,pVar);
+			PX_VM_VariableFree(pVar);
 			pVar->type=PX_VM_VARIABLE_TYPE_INT;
 			pVar->_int=1;
 
@@ -2902,7 +2906,7 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 	case PX_SCRIPT_ASM_INSTR_OPCODE_ADR:
 		{
 			pVar=PX_VMGetVariablePointer(Ins,opType[0],PX_SCRIPT_VM_PARAM(0));
-			PX_VM_VariableFree(Ins,pVar);
+			PX_VM_VariableFree(pVar);
 			switch(opType[1])
 			{
 			case PX_SCRIPT_ASM_OPTYPE_GLOBAL:
@@ -2969,9 +2973,9 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 		{
 			if (pT->SP>=Ins->VM_memsize)
 			{
-				PX_VM_VariableFree(Ins,&cVar);
-				PX_VM_VariableFree(Ins,&sVar);
-				PX_VM_VariableFree(Ins,&tVar);
+				PX_VM_VariableFree(&cVar);
+				PX_VM_VariableFree(&sVar);
+				PX_VM_VariableFree(&tVar);
 
 				PX_VMThreadStop(Ins,Ins->T);
 				return PX_VM_RUNRETURN_END;
@@ -2987,9 +2991,9 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 				pT->SP+=1;
 				if (pT->SP>=Ins->VM_memsize||cVar._int==-1)
 				{
-					PX_VM_VariableFree(Ins,&cVar);
-					PX_VM_VariableFree(Ins,&sVar);
-					PX_VM_VariableFree(Ins,&tVar);
+					PX_VM_VariableFree(&cVar);
+					PX_VM_VariableFree(&sVar);
+					PX_VM_VariableFree(&tVar);
 
 					PX_VMThreadStop(Ins,Ins->T);
 					return PX_VM_RUNRETURN_END;
@@ -3027,9 +3031,9 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 			}
 			if (Ins->signal[cVar._int])
 			{
-				PX_VM_VariableFree(Ins,&cVar);
-				PX_VM_VariableFree(Ins,&sVar);
-				PX_VM_VariableFree(Ins,&tVar);
+				PX_VM_VariableFree(&cVar);
+				PX_VM_VariableFree(&sVar);
+				PX_VM_VariableFree(&tVar);
 				return PX_VM_RUNRETURN_WAIT;
 			}
 			else
@@ -3062,9 +3066,9 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 		goto _ERROR;
 	}
 
-	PX_VM_VariableFree(Ins,&cVar);
-	PX_VM_VariableFree(Ins,&sVar);
-	PX_VM_VariableFree(Ins,&tVar);
+	PX_VM_VariableFree(&cVar);
+	PX_VM_VariableFree(&sVar);
+	PX_VM_VariableFree(&tVar);
 
 	if (pT->IP==-1)
 		{
@@ -3075,9 +3079,9 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 	return PX_VM_RUNRETURN_END;
 _ERROR:
 
-	PX_VM_VariableFree(Ins,&cVar);
-	PX_VM_VariableFree(Ins,&sVar);
-	PX_VM_VariableFree(Ins,&tVar);
+	PX_VM_VariableFree(&cVar);
+	PX_VM_VariableFree(&sVar);
+	PX_VM_VariableFree(&tVar);
 	PX_VMSuspend(Ins);
 	PX_VM_Error(Ins,"Virtual Machine runtime error");
 	return PX_VM_RUNRETURN_ERROR;
@@ -3120,7 +3124,7 @@ px_bool PX_VMCallFunctionEx(PX_VM* Ins, px_int threadID, const px_char* function
 		Ins->pThread[threadID].IP = ip;
 		for (j = 0; j < sizeof(Ins->pThread[threadID].R) / sizeof(Ins->pThread[threadID].R[0]); j++)
 		{
-			PX_VM_VariableFree(Ins, &Ins->pThread[threadID].R[j]);
+			PX_VM_VariableFree( &Ins->pThread[threadID].R[j]);
 		}
 	}
 	else
@@ -3179,7 +3183,7 @@ px_bool PX_VMRunFunctionIndex(PX_VM *Ins,px_int threadID,px_int funcIndex,PX_VM_
 		Ins->pThread[threadID].IP=ip;
 		for(j=0;j<sizeof(Ins->pThread[threadID].R)/sizeof(Ins->pThread[threadID].R[0]);j++)
 		{
-			PX_VM_VariableFree(Ins,&Ins->pThread[threadID].R[j]);
+			PX_VM_VariableFree(&Ins->pThread[threadID].R[j]);
 		}
 	}
 	else
@@ -3255,7 +3259,7 @@ px_bool PX_VMBeginThreadFunction(PX_VM *Ins,px_int threadID,const px_char *func,
 		Ins->pThread[threadID].IP=ip;
 		for(j=0;j<sizeof(Ins->pThread[threadID].R)/sizeof(Ins->pThread[threadID].R[0]);j++)
 		{
-			PX_VM_VariableFree(Ins,&Ins->pThread[threadID].R[j]);
+			PX_VM_VariableFree(&Ins->pThread[threadID].R[j]);
 		}
 	}
 	else
@@ -3303,7 +3307,7 @@ px_bool PX_VMBeginThreadFunctionIndex(PX_VM *Ins,px_int threadID,px_int funcInde
 		Ins->pThread[threadID].IP=ip;
 		for(j=0;j<PX_VM_REG_COUNT;j++)
 		{
-			PX_VM_VariableFree(Ins,&Ins->pThread[threadID].R[j]);
+			PX_VM_VariableFree(&Ins->pThread[threadID].R[j]);
 		}
 	}
 	else
@@ -3492,7 +3496,7 @@ px_void PX_VM_RET(PX_VM *Ins,PX_VM_VARIABLE cVar)
 	PX_VM_VARIABLE *pVar;
 	pVar=&Ins->pThread[Ins->T].R[1];
 
-	PX_VM_VariableFree(Ins,pVar);
+	PX_VM_VariableFree(pVar);
 	
 	if (cVar.type==PX_VM_VARIABLE_TYPE_STRING)
 	{
@@ -3517,7 +3521,7 @@ px_void PX_VM_RET_String(PX_VM* Ins, const px_char* pstr)
 {
 	PX_VM_VARIABLE* pVar;
 	pVar = &Ins->pThread[Ins->T].R[1];
-	PX_VM_VariableFree(Ins, pVar);
+	PX_VM_VariableFree( pVar);
 	pVar->type = PX_VM_VARIABLE_TYPE_STRING;
 
 	PX_StringInitialize(Ins->mp, &pVar->_string);
@@ -3528,7 +3532,7 @@ px_void PX_VM_RET_int(PX_VM* Ins, px_int _int)
 {
 	PX_VM_VARIABLE* pVar;
 	pVar = &Ins->pThread[Ins->T].R[1];
-	PX_VM_VariableFree(Ins, pVar);
+	PX_VM_VariableFree( pVar);
 	pVar->type = PX_VM_VARIABLE_TYPE_INT;
 	pVar->_int = _int;
 }
@@ -3537,7 +3541,7 @@ px_void PX_VM_RET_ptr(PX_VM* Ins, px_void *ptr)
 {
 	PX_VM_VARIABLE* pVar;
 	pVar = &Ins->pThread[Ins->T].R[1];
-	PX_VM_VariableFree(Ins, pVar);
+	PX_VM_VariableFree( pVar);
 	pVar->type = PX_VM_VARIABLE_TYPE_INT;
 	pVar->_userptr = ptr;
 }
@@ -3546,7 +3550,7 @@ px_void PX_VM_RET_float(PX_VM* Ins, px_float _float)
 {
 	PX_VM_VARIABLE* pVar;
 	pVar = &Ins->pThread[Ins->T].R[1];
-	PX_VM_VariableFree(Ins, pVar);
+	PX_VM_VariableFree( pVar);
 	pVar->type = PX_VM_VARIABLE_TYPE_FLOAT;
 	pVar->_float = _float;
 }
@@ -3556,7 +3560,7 @@ px_void PX_VM_RET_memory(PX_VM* Ins, const px_byte* data,px_int size)
 	PX_VM_VARIABLE* pVar;
 	pVar = &Ins->pThread[Ins->T].R[1];
 
-	PX_VM_VariableFree(Ins, pVar);
+	PX_VM_VariableFree( pVar);
 	pVar->type = PX_VM_VARIABLE_TYPE_MEMORY;
 
 	PX_MemoryInitialize(Ins->mp, &pVar->_memory);
@@ -3680,6 +3684,15 @@ PX_VM_VARIABLE PX_VM_Variable_string(px_string _string)
 	PX_VM_VARIABLE var;
 	var.type=PX_VM_VARIABLE_TYPE_STRING;
 	var._string=_string;
+	return var;
+}
+
+PX_VM_VARIABLE PX_VM_Variable_build_string(px_memorypool* mp, const px_char* buffer)
+{
+	PX_VM_VARIABLE var = {0};
+	var.type=PX_VM_VARIABLE_TYPE_STRING;
+	PX_StringInitialize(mp,&var._string);
+	PX_StringCat(&var._string,buffer);
 	return var;
 }
 
@@ -3844,7 +3857,7 @@ px_void PX_VMThreadClear(PX_VM *Ins,px_int ThreadId)
 			//Clear registers
 			for (i=0;i<PX_VM_REG_COUNT;i++)
 			 {
-			 	PX_VM_VariableFree(Ins,&Ins->pThread[ThreadId].R[i]);
+			 	PX_VM_VariableFree(&Ins->pThread[ThreadId].R[i]);
 			 }
 			Ins->pThread[ThreadId].Activated=PX_FALSE;
 	}

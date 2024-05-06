@@ -125,7 +125,7 @@ px_bool PX_RFC1951Inflate(px_byte* _in, px_uint input_size, px_memory* _out)
 
 
 
-px_bool PX_RFC1951DeflateBlock(px_byte* _in, px_uint input_size,px_bool isLastBlock, px_memory* _out)
+px_bool PX_RFC1951DeflateBlock(px_byte* _in, px_uint input_size,px_bool isLastBlock, px_memory* _out,px_int forward_scan_size)
 {
 	px_int raw_size, dynamic_size, fixed_size;
 	px_memory mem,test_mem;
@@ -134,7 +134,7 @@ px_bool PX_RFC1951DeflateBlock(px_byte* _in, px_uint input_size,px_bool isLastBl
 	PX_MemoryInitialize(_out->mp, &mem);
 	PX_MemoryInitialize(_out->mp, &test_mem);
 
-	if (!PX_LZ77Deflate(_in, input_size, &mem, 128))
+	if (!PX_LZ77Deflate(_in, input_size, &mem, forward_scan_size))
 	{
 		PX_MemoryFree(&mem);
 		return PX_FALSE;
@@ -219,7 +219,7 @@ px_bool PX_RFC1951DeflateBlock(px_byte* _in, px_uint input_size,px_bool isLastBl
 
 #define PX_RFC1951_MAX_BLOCK 32768
 
-px_bool PX_RFC1951Deflate(px_byte* _in, px_uint input_size, px_memory* _out)
+px_bool PX_RFC1951Deflate(px_byte* _in, px_uint input_size, px_memory* _out,px_int forward_scan_size)
 {
 	px_int block = input_size / PX_RFC1951_MAX_BLOCK;
 	px_int remain = input_size % PX_RFC1951_MAX_BLOCK;
@@ -231,12 +231,12 @@ px_bool PX_RFC1951Deflate(px_byte* _in, px_uint input_size, px_memory* _out)
 		{
 			last_block = 1;
 		}
-		if (!PX_RFC1951DeflateBlock(_in+i* PX_RFC1951_MAX_BLOCK, PX_RFC1951_MAX_BLOCK, last_block, _out))
+		if (!PX_RFC1951DeflateBlock(_in+i* PX_RFC1951_MAX_BLOCK, PX_RFC1951_MAX_BLOCK, last_block, _out, forward_scan_size))
 			return PX_FALSE;
 	}
 	if (remain)
 	{
-		if (!PX_RFC1951DeflateBlock(_in + i * PX_RFC1951_MAX_BLOCK, remain,PX_TRUE, _out))
+		if (!PX_RFC1951DeflateBlock(_in + i * PX_RFC1951_MAX_BLOCK, remain,PX_TRUE, _out, forward_scan_size))
 			return PX_FALSE;
 
 	}

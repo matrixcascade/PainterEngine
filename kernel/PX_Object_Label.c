@@ -252,9 +252,14 @@ px_int PX_Object_LabelGetTextRenderWidth(PX_Object* pObject)
 //////////////////////////////////////////////////////////////////////////
 //Label
 //////////////////////////////////////////////////////////////////////////
-PX_Object* PX_Designer_LabelCreate(px_memorypool* mp, PX_Object* pparent, px_float x, px_float y, px_float width, px_float height, px_void *ptr)
+PX_Object* PX_Designer_LabelCreate(px_memorypool* mp, PX_Object* pparent, px_float x, px_float y, px_float width, px_float height, px_abi *pabi)
 {
-	PX_FontModule* fm = (PX_FontModule*)ptr;
+	PX_FontModule* fm;
+	if (!PX_AbiRead_ptr(pabi, "fontmodule", (px_void**)&fm))
+	{
+		fm = PX_NULL;
+	}
+
 	return PX_Object_LabelCreate(mp, pparent, (px_int)x, (px_int)y, 128, 32, "Label", fm, PX_OBJECT_UI_DEFAULT_FONTCOLOR);
 }
 

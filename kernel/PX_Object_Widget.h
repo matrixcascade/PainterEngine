@@ -33,6 +33,8 @@ px_int PX_Object_WidgetGetRenderTargetHeight(PX_Object *pObject);
 px_int PX_Object_WidgetGetRenderTargetWidth(PX_Object *pObject);
 px_surface *PX_Object_WidgetGetRenderTarget(PX_Object *pObject);
 
+px_void PX_Object_WidgetReleaseFocus(PX_Object *pObject);
+
 px_void PX_Object_WidgetSetBorderColor(PX_Object *pObject,px_color clr);
 px_void PX_Object_WidgetSetBarColor(PX_Object *pObject,px_color clr);
 px_void PX_Object_WidgetSetBackgroundColor(PX_Object *pObject,px_color clr);

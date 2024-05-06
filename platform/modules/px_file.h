@@ -55,6 +55,8 @@ px_bool PX_LoadScriptToResource(PX_ResourceLibrary *presourcelib,const px_char P
 px_bool PX_LoadSoundToResource(PX_ResourceLibrary *presourcelib,const px_char Path[],const px_char key[]);
 px_bool PX_LoadFontModuleFromFile(PX_FontModule *fm,const px_char Path[]);
 px_bool PX_LoadJsonFromFile(PX_Json *json,const px_char *path);
+px_bool PX_LoadJsonToResource(PX_ResourceLibrary *presourcelib,const px_char Path[],const px_char key[]);
+px_bool PX_LoadDataToResource(PX_ResourceLibrary* ResourceLibrary, const px_char Path[], const px_char key[]);
 
 px_bool PX_LoadGifFromFile(px_memorypool* mp, px_gif* gif, const px_char path[]);
 px_bool PX_LoadLive2DFromFile(px_memorypool* mp, PX_LiveFramework* liveframework, const px_char path[]);

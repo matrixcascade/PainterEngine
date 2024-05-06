@@ -8,8 +8,20 @@ px_void MP_UnreleaseInfo(px_memorypool *mp)
 	for (i=0;i<sizeof(mp->DEBUG_allocdata)/sizeof(mp->DEBUG_allocdata[0]);i++)
 	{
 		if(mp->DEBUG_allocdata[i].offset) 
-			printf("Warning:Unreleased memory in MID %d\n",mp->DEBUG_allocdata[i].offset);
+			printf("Warning:Unreleased memory in MID 0x%x\n",mp->DEBUG_allocdata[i].offset);
+	}
+}
 
+px_void MP_Catch(px_memorypool* mp, px_dword MID)
+{
+	px_int i;
+	for (i = 0; i < sizeof(mp->DEBUG_allocdata_catch) / sizeof(mp->DEBUG_allocdata_catch[0]); i++)
+	{
+		if (mp->DEBUG_allocdata_catch[i]==-1)
+		{
+			mp->DEBUG_allocdata_catch[i]= MID;
+			break;
+		}
 	}
 }
 
@@ -195,6 +207,14 @@ px_memorypool MP_Create( px_void *MemoryAddr,px_uint MemorySize )
 		MP.DEBUG_allocdata[DEBUG_i].endAddr=PX_NULL;
 	}
 	MP.enable_allocdata_tracert = PX_TRUE;
+	do
+	{
+		px_int i;
+		for (i = 0; i < PX_COUNTOF(MP.DEBUG_allocdata_catch); i++)
+		{
+			MP.DEBUG_allocdata_catch[i] = -1;
+		}
+	} while (0);
 #endif
 	return MP;
 
@@ -276,6 +296,18 @@ px_void * MP_Malloc(px_memorypool *MP, px_uint Size )
 		}
 		pAppend=(MP_Append_data *)((px_uchar *)MemNode->EndAddr-sizeof(MP_Append_data)+1);
 		pAppend->append=MP_APPENDDATA_MAGIC;
+		do
+		{
+			px_int i;
+			for (i = 0; i < PX_COUNTOF(MP->DEBUG_allocdata_catch); i++)
+			{
+				if (MP->DEBUG_allocdata_catch[i]==-1)
+				{
+					break;
+				}
+				PX_ASSERTIF(MP->DEBUG_allocdata_catch[i] == (px_byte *)MemNode->StartAddr- (px_byte*)MP->StartAddr);
+			}
+		} while (0);
 	#endif
 		MP->nodeCount++; 
 	
@@ -306,6 +338,18 @@ px_void * MP_Malloc(px_memorypool *MP, px_uint Size )
 		}
 		pAppend=(MP_Append_data *)((px_uchar *)MemNode->EndAddr-sizeof(MP_Append_data)+1);
 		pAppend->append=MP_APPENDDATA_MAGIC;
+		do
+		{
+			px_int i;
+			for (i = 0; i < PX_COUNTOF(MP->DEBUG_allocdata_catch); i++)
+			{
+				if (MP->DEBUG_allocdata_catch[i] == -1)
+				{
+					break;
+				}
+				PX_ASSERTIF(MP->DEBUG_allocdata_catch[i] == (px_byte*)MemNode->StartAddr - (px_byte*)MP->StartAddr);
+			}
+		} while (0);
 		#endif
 		MP->nodeCount++;
 		return MemNode->StartAddr;
@@ -354,6 +398,19 @@ px_void MP_Free(px_memorypool *MP, px_void *pAddress )
 
 
 #if defined(PX_DEBUG_MODE) && defined(PX_MEMORYPOOL_DEBUG_CHECK)
+	do
+	{
+		px_int i;
+		for (i = 0; i < PX_COUNTOF(MP->DEBUG_allocdata_catch); i++)
+		{
+			if (MP->DEBUG_allocdata_catch[i] == -1)
+			{
+				break;
+			}
+			PX_ASSERTIF(MP->DEBUG_allocdata_catch[i] == (px_byte*)pAddress - (px_byte*)MP->StartAddr);
+		}
+	} while (0);
+
 	if(FreeNode.StartAddr!=pAddress) PX_ASSERT();
 	
 	for (DEBUG_i=0;DEBUG_i<sizeof(MP->DEBUG_allocdata)/sizeof(MP->DEBUG_allocdata[0]);DEBUG_i++)

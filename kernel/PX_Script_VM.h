@@ -90,6 +90,7 @@ px_bool				PX_VMBeginThreadFunctionIndex(PX_VM *Ins,px_int threadID,px_int funcI
 px_int				PX_VMGetFreeThreadId(PX_VM *Ins);
 px_void				PX_VMSleep(PX_VM* Ins, px_int thread, px_uint sleepms);
 
+
 px_void				PX_VMRun(PX_VM* Ins, px_int tick, px_dword elapsed);
 px_void				PX_VMTriggerBreakPoint(PX_VM* Ins, px_int IP);
 px_void				PX_VMAddBreakPoint(PX_VM* Ins, px_int IP);
@@ -132,13 +133,15 @@ px_void  PX_VM_PUSH(PX_VM* Ins, PX_VM_VARIABLE val);
 px_void  PX_VM_Sleep(PX_VM* Ins, px_uint sleep);
 px_void  PX_VM_ThreadSleep(PX_VM* Ins,px_int threadid, px_uint sleep);
 PX_VM_VARIABLE PX_VM_Variable_int(px_int _int);
+px_void PX_VM_VariableFree(PX_VM_VARIABLE* var);
 PX_VM_VARIABLE PX_VM_Variable_handle(px_void* _ptr);
 PX_VM_VARIABLE PX_VM_Variable_float(px_float _float);
 PX_VM_VARIABLE PX_VM_Variable_string(px_string _ref_string);
+PX_VM_VARIABLE PX_VM_Variable_build_string(px_memorypool *mp, const px_char* buffer);
 PX_VM_VARIABLE PX_VM_Variable_memory(px_byte *buffer,px_int _size);
 PX_VM_VARIABLE PX_VM_Variable_const_string(const px_char *buffer);
 PX_VM_VARIABLE PX_VM_Variable_const_memory(const px_byte *buffer,px_int _size);
-PX_VM_VARIABLE PX_VM_VaribaleCopy(PX_VM *Ins,PX_VM_VARIABLE var,px_bool *bOutofMemory);
+PX_VM_VARIABLE PX_VM_VariableCopy(px_memorypool *mp,PX_VM_VARIABLE var,px_bool *bOutofMemory);
 PX_VM_VARIABLE*	PX_VMGetVariablePointer(PX_VM* Ins, px_char optype, px_int param);
 px_bool				PX_VMDebuggerMapInitialize(px_memorypool* mp, PX_VM_DebuggerMap* pDebugMap);
 px_void				PX_VMDebuggerMapFree(PX_VM_DebuggerMap* pDebugMap);

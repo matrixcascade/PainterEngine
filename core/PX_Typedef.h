@@ -11,6 +11,7 @@
 #define PX_DBL_NEGATIVE_MIN -1.79769313486231570E+308
 #define PX_DBL_NEGATIVE_MAX -4.94065645841246544E-324
 
+
 #define     _IN
 #define     _OUT
 #define     _LIMIT
@@ -30,12 +31,13 @@
 #define PX_COLOR_NONE PX_COLOR(0,0,0,0)
 
 
-#define PX_COLOR_BACKGROUNDCOLOR PX_COLOR(255,48,48,48)
-#define PX_COLOR_CURSORCOLOR PX_COLOR(255,32,32,32)
-#define PX_COLOR_FONTCOLOR PX_COLOR(255,192,192,192)
-#define PX_COLOR_BORDERCOLOR PX_COLOR(255,192,192,192)
-#define PX_COLOR_PUSHCOLOR PX_COLOR(255,64,64,64)
-
+#define PX_COLOR_BACKGROUNDCOLOR PX_COLOR(255,224,224,224)
+#define PX_COLOR_CURSORCOLOR PX_COLOR(255,200,200,200)
+#define PX_COLOR_FONTCOLOR PX_COLOR(255,32,32,32)
+#define PX_COLOR_BORDERCOLOR PX_COLOR(255,16,16,16)
+#define PX_COLOR_PUSHCOLOR PX_COLOR(255,168,168,168)
+#define PX_COLOR_FORCECOLOR PX_COLOR(255,188,188,188)
+#define PX_COLOR_FORCEBORDERCOLOR PX_COLOR(255,64,64,64)
 
 #define PX_CSS_COLOR_AliceBlue PX_COLOR(0xFF, 0xF0, 0xF8, 0xFF)
 #define PX_CSS_COLOR_AntiqueWhite PX_COLOR(0xFF, 0xFA, 0xEB, 0xD7)
@@ -187,7 +189,8 @@
 
 
 #define PX_COUNTOF(x) (sizeof(x)/sizeof(x[0]))
-
+#define PX_MAX(a,b) ((a)>(b)?(a):(b))
+#define PX_MIN(a,b) ((a)<(b)?(a):(b))
 
 typedef		void				px_void;
 typedef		int					px_bool;
@@ -373,6 +376,11 @@ typedef struct
 	px_float x, y;
 }px_point2D;
 
+typedef struct
+{
+	px_int x, y;
+}px_point2Di;
+
 typedef px_point2D px_vector2D;
 typedef px_point px_point3D;
 typedef px_point px_vector3D;
@@ -536,6 +544,7 @@ px_bool PX_isXYInRegion(px_float x,px_float y,px_float rectx,px_float recty,px_f
 //////////////////////////////////////////////////////////////////////////
 //cross
 px_bool PX_isLineCrossRect(px_point p1,px_point p2,px_rect rect,px_point *cp1,px_point *cp2);
+px_bool PX_isLineCrossCircle(px_point2D p1, px_point2D p2, px_point2D c, px_float r);
 px_bool PX_isRectCrossRect(px_rect rect1,px_rect rect2);
 px_bool PX_isRectCrossCircle(px_rect rect1,px_point center,px_float radius);
 px_bool PX_isCircleCrossCircle(px_point center1,px_float radius1,px_point center2,px_float radius2);
@@ -695,9 +704,12 @@ px_color PX_ColorYCbCrToRGB(px_color_YCbCr YCbCr);
 //point
 px_point PX_POINT(px_float x,px_float y,px_float z);
 px_point2D PX_POINT2D(px_float x,px_float y);
+px_point2Di PX_POINT2DI(px_int x,px_int y);
 px_point4D PX_POINT4D(px_float x, px_float y, px_float z);
 px_point PX_POINT2D_3D(px_point2D p);
 px_point2D PX_POINT3D_2D(px_point p);
+px_point2D PX_POINT2Di_2D(px_point2Di p);
+
 
 px_point PX_PointRotate(px_point p, px_float angle);
 px_point2D PX_Point2DRotate(px_point2D p,px_float angle);
@@ -707,11 +719,14 @@ px_float PX_PointDistance(px_point p1,px_point p2);
 px_float PX_Point2DDistance(px_point2D p1, px_point2D p2);
 px_point PX_PointAdd(px_point p1, px_point p2);
 px_point2D PX_Point2DAdd(px_point2D p1,px_point2D p2);
+px_point2Di PX_Point2DiAdd(px_point2Di p1, px_point2Di p2);
 px_point PX_PointSub(px_point p1,px_point p2);
 px_point2D PX_Point2DSub(px_point2D p1,px_point2D p2);
+px_point2Di PX_Point2DiSub(px_point2Di p1, px_point2Di p2);
 px_point4D PX_Point4DSub(px_point4D p1,px_point4D p2);
 px_point PX_PointMul(px_point p1,px_float m);
 px_point2D PX_Point2DMul(px_point2D p1,px_float m);
+px_point2Di PX_Point2DiMul(px_point2Di p1, px_float m);
 px_point PX_PointDiv(px_point p1,px_float m);
 px_float  PX_Point2DSquare(px_point2D p);
 px_point2D PX_Point2DRrthonormal(px_point2D v);
@@ -721,6 +736,7 @@ px_float PX_PointDot(px_point p1,px_point p2);
 px_float PX_Point2DDot(px_point2D p1,px_point2D p2);
 px_float PX_Point4DDot(px_point4D p1,px_point4D p2);
 px_point PX_PointCross(px_point p1,px_point p2);
+px_float PX_Point2DCross(px_point2D p1, px_point2D p2);
 px_point4D PX_Point4DCross(px_point4D p1,px_point4D p2);
 px_point PX_PointInverse(px_point p1);
 px_point2D PX_Point2DInverse(px_point2D p1);

@@ -347,10 +347,8 @@ static px_void PX_HuffmanBuildDymanicTable(px_dword *symbol_counter,px_uint symb
 	PX_HuffmanBuildCodeBitLengthTable(nodes,nodes,0,code_bit_length);
 	PX_HuffmanBuildCodeTableFromCodeBitLengthTable(code_table, code_bit_length, symbol_count);
 
-	if (PX_HuffmanIsConflict(code_table, code_bit_length, symbol_count))
-	{
-		PX_ASSERT();
-	}
+	PX_ASSERTIF(PX_HuffmanIsConflict(code_table, code_bit_length, symbol_count));
+
 
 }
 
@@ -617,10 +615,7 @@ px_bool PX_HuffmanDeflateCodeData(px_word* _in, px_uint in_size, px_memory* _out
 					i += 2;
 				}
 			}
-			if (counter[287]!=0|| counter[286] != 0)
-			{
-				PX_ASSERT();
-			}
+
 			PX_HuffmanBuildDymanicTable(counter, 288, raw_code, raw_code_bl);//code_bit_length [1-19] 5bit
 
 			for (i = 0; i < 288; i++)
@@ -652,10 +647,6 @@ px_bool PX_HuffmanDeflateCodeData(px_word* _in, px_uint in_size, px_memory* _out
 						if (length < distance_table[j + 1])
 							break;
 					}
-					if (j>=30)
-					{
-						PX_ASSERT();
-					}
 					counter[j]++;
 					distance_index_counter[j]++;
 				}
@@ -671,19 +662,11 @@ px_bool PX_HuffmanDeflateCodeData(px_word* _in, px_uint in_size, px_memory* _out
 			
 			for (i = 0; i < 288; i++)
 			{
-				if (raw_code_bl[i]>=19)
-				{
-					PX_ASSERT();
-				}
 				counter[raw_code_bl[i]]++;
 			}
 
 			for (i = 0; i < 30; i++)
 			{
-				if (distance_code_bl[i] >= 19)
-				{
-					PX_ASSERT();
-				}
 				counter[distance_code_bl[i]]++;
 			}
 
@@ -699,13 +682,6 @@ px_bool PX_HuffmanDeflateCodeData(px_word* _in, px_uint in_size, px_memory* _out
 
 		} while (0);
 		
-		if (raw_code_bl[287] != 0|| raw_code_bl[286] != 0)
-		{
-			PX_ASSERT();
-		}
-
-
-		
 		hlit = 288 - 257;
 		hdist = 30-1;
 		hclen = 19-4;
@@ -714,18 +690,11 @@ px_bool PX_HuffmanDeflateCodeData(px_word* _in, px_uint in_size, px_memory* _out
 		while (raw_code_bl_code_bl[rfc1951_map[hclen + 4 - 1]] == 0 && hclen > 0)
 			hclen--;
 
-		if (hlit+257>286)
-		{
-			PX_ASSERT();
-		}
-
 		if(!PX_MemoryCatBits(_out, (px_byte*)&hlit, 5))return PX_FALSE;
 		if (!PX_MemoryCatBits(_out, (px_byte*)&hdist, 5))return PX_FALSE;
 			if (!PX_MemoryCatBits(_out, (px_byte*)&hclen, 4))return PX_FALSE;
 
-		
-
-		
+	
 		do
 		{
 			px_uint i;
@@ -741,10 +710,6 @@ px_bool PX_HuffmanDeflateCodeData(px_word* _in, px_uint in_size, px_memory* _out
 			{
 				px_dword symbol = raw_code_bl[i];
 				px_dword code = PX_HuffmanGetCode(symbol, raw_code_bl_code, raw_code_bl_code_bl);
-				if (raw_code_bl_code_bl[symbol]==0)
-				{
-					PX_ASSERT();
-				}
 				PX_MemoryCatBits(_out, (px_byte*)&code, raw_code_bl_code_bl[symbol]);
 			}
 
@@ -752,11 +717,6 @@ px_bool PX_HuffmanDeflateCodeData(px_word* _in, px_uint in_size, px_memory* _out
 			{
 				px_dword symbol = distance_code_bl[i];
 				px_dword code = PX_HuffmanGetCode(symbol, raw_code_bl_code, raw_code_bl_code_bl);
-
-				if (raw_code_bl_code_bl[symbol] == 0)
-				{
-					PX_ASSERT();
-				}
 				PX_MemoryCatBits(_out, (px_byte*)&code, raw_code_bl_code_bl[symbol]);
 			}
 
@@ -820,10 +780,6 @@ px_bool PX_HuffmanDeflateCodeData(px_word* _in, px_uint in_size, px_memory* _out
 				extra = distance-distance_table[j];
 
 				symbol = j;
-				if (distance_code_bl[symbol]==0)
-				{
-					PX_ASSERT();
-				}
 				code = PX_HuffmanGetCode(symbol, distance_code, distance_code_bl);
 				if (!PX_MemoryCatBits(_out, (px_byte*)&code, distance_code_bl[symbol]))return PX_FALSE;
 				if (!PX_MemoryCatBits(_out, (px_byte*)&extra, distance_extra[j]))return PX_FALSE;;

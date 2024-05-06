@@ -7,6 +7,17 @@ extern unsigned int rendertexture;
 static px_int windowWidth;
 static px_int windowHeight;
 
+int  PX_AudioInitialize(PX_SoundPlay* soundPlay)
+{
+    return 0;
+}
+
+void PX_AudioSetVolume(unsigned int volume)
+{
+    
+}
+
+
 px_void PX_glutDisplayResize(px_int width,px_int height)
 {
 	PX_Object_Event e;

@@ -1116,6 +1116,52 @@ px_double PX_JsonGetNumber(PX_Json *pjson,const px_char payload[])
 	return 0;
 }
 
+px_color PX_JsonGetColor(PX_Json* pjson, const px_char payload[])
+{
+	PX_Json_Value* pValue = PX_JsonGetValue(pjson, payload);
+	if (pValue && pValue->type == PX_JSON_VALUE_TYPE_ARRAY)
+	{
+		if (pValue->_array.size==4)
+		{
+			px_byte a,r, g, b;
+			PX_Json_Value* pArrayValue;
+			pArrayValue =PX_LISTAT(PX_Json_Value,&pValue->_array,0);
+			if (pArrayValue->type!=PX_JSON_VALUE_TYPE_NUMBER)
+			{
+				goto _ERROR;
+			}
+			a = (px_byte)pArrayValue->_number;
+			//r
+			pArrayValue =PX_LISTAT(PX_Json_Value,&pValue->_array,1);
+			if (pArrayValue->type!=PX_JSON_VALUE_TYPE_NUMBER)
+			{
+				goto _ERROR;
+			}
+			r = (px_byte)pArrayValue->_number;
+			//g
+			pArrayValue =PX_LISTAT(PX_Json_Value,&pValue->_array,2);
+			if (pArrayValue->type!=PX_JSON_VALUE_TYPE_NUMBER)
+			{
+				goto _ERROR;
+			}
+			g = (px_byte)pArrayValue->_number;
+			//b
+			pArrayValue =PX_LISTAT(PX_Json_Value,&pValue->_array,3);
+			if (pArrayValue->type!=PX_JSON_VALUE_TYPE_NUMBER)
+			{
+				goto _ERROR;
+			}
+			b = (px_byte)pArrayValue->_number;
+			return PX_COLOR(a,r,g,b);
+
+		}
+		
+	}
+	_ERROR:
+	return PX_COLOR_WHITE;
+}
+
+
 px_bool PX_JsonGetBoolean(PX_Json *pjson,const px_char payload[])
 {
 	PX_Json_Value *pValue=PX_JsonGetValue(pjson,payload);

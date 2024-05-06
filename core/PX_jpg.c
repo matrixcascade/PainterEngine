@@ -117,7 +117,7 @@ px_byte PX_JpgReadBit(PX_MemoryStream* pstream)
                 {
                     if (pstream->bitstream[byteindex + 1] != 0x00)
                     {
-                        return -1;
+                        return 0xff;
                     }
                 }
             }
@@ -134,9 +134,9 @@ px_uint PX_JpgReadBits(PX_MemoryStream* pstream,const px_uint length) {
     px_uint i;
     for (i = 0; i < length; ++i) 
     {
-        px_uint bit = PX_JpgReadBit(pstream);
-        if (bit == -1) {
-            bits = -1;
+        px_byte bit = PX_JpgReadBit(pstream);
+        if (bit == 0xff) {
+            bits = 0xff;
             break;
         }
         bits = (bits << 1) | bit;
@@ -660,9 +660,9 @@ px_byte PX_JpgGetNextSymbol(PX_JpgDecoder* pJpgdecoder,  PX_JpgHuffmanTable* hTa
     px_uint currentCode = 0;
     px_uint i,j;
     for (i = 0; i < 16; ++i) {
-        px_int bit = PX_JpgReadBit(pstream);
-        if (bit == -1) {
-            return -1;
+        px_byte bit = PX_JpgReadBit(pstream);
+        if (bit == 0xff) {
+            return 0xff;
         }
 
         currentCode = (currentCode << 1) | bit;
@@ -672,7 +672,7 @@ px_byte PX_JpgGetNextSymbol(PX_JpgDecoder* pJpgdecoder,  PX_JpgHuffmanTable* hTa
             }
         }
     }
-    return -1;
+    return 0xff;
 }
 
 // fill the coefficients of a block component based on Huffman codes
@@ -705,7 +705,7 @@ px_bool PX_JpgDecodeBlockComponent(
         }
 
         coeff = PX_JpgReadBits(pstream,length);
-        if (coeff == -1) {
+        if (coeff == 0xff) {
             // "Error - Invalid DC value\n";
             return PX_FALSE;
         }
@@ -745,7 +745,7 @@ px_bool PX_JpgDecodeBlockComponent(
                 return PX_FALSE;
             }
             coeff = PX_JpgReadBits(pstream,coeffLength);
-            if (coeff == -1) {
+            if (coeff == 0xff) {
                 // "Error - Invalid AC value\n";
                 return PX_FALSE;
             }
@@ -772,7 +772,7 @@ px_bool PX_JpgDecodeBlockComponent(
             }
 
             coeff = PX_JpgReadBits(pstream, length);
-            if (coeff == -1) {
+            if (coeff == 0xff) {
                 // "Error - Invalid DC value\n";
                 return PX_FALSE;
             }
@@ -787,8 +787,8 @@ px_bool PX_JpgDecodeBlockComponent(
         else if (pJpgdecoder->startOfSelection == 0 && pJpgdecoder->successiveApproximationHigh != 0) 
         {
             // DC refinement
-            int bit = PX_JpgReadBit(pstream);
-            if (bit == -1) {
+            px_byte bit = PX_JpgReadBit(pstream);
+            if (bit == 0xff) {
                 // "Error - Invalid DC value\n";
                 return PX_FALSE;
             }
@@ -814,7 +814,7 @@ px_bool PX_JpgDecodeBlockComponent(
                 coeffLength = symbol & 0x0F;
 
                 if (coeffLength != 0) {
-                    px_int coeff;
+                    px_byte coeff;
                     if (i + numZeroes > pJpgdecoder->endOfSelection) {
                         // "Error - Zero run-length exceeded spectral selection\n";
                         return PX_FALSE;
@@ -828,7 +828,7 @@ px_bool PX_JpgDecodeBlockComponent(
                     }
 
                     coeff = PX_JpgReadBits(pstream, coeffLength);
-                    if (coeff == -1) {
+                    if (coeff == 0xff) {
                         // "Error - Invalid AC value\n";
                         return PX_FALSE;
                     }
@@ -1011,7 +1011,8 @@ px_bool PX_JpgDecodeHuffmanData(PX_JpgDecoder* pJpgdecoder)
                     for (v = 0; v < vMax; ++v) {
                         for (h = 0; h < hMax; ++h) 
                         {
-
+                            if (y == 18 && v == 1 && x == 1644 && h == 0)
+                                PX_LOG("");
                             if(i==0)
                                 if (!PX_JpgDecodeBlockComponent(
                                     pJpgdecoder,

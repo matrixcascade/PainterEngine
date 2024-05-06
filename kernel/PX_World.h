@@ -56,12 +56,6 @@ typedef struct
 	PX_WorldCreateObjectFunc func;
 }PX_WorldClass;
 
-typedef PX_Object *(*px_world_func_CreateObject)(PX_World *pWorld,px_float x,px_float y,px_float z,px_float width,px_float height,px_float length,px_void *user,px_abi *abi);
-typedef struct
-{
-	const px_char *name;
-	px_world_func_CreateObject func;
-}PX_WorldObjectType;
 
 px_bool			PX_WorldInitialize(px_memorypool* mp, PX_World* pWorld, px_int world_width, px_int world_height, px_int surface_width, px_int surface_height, const px_char script[]);
 px_void			PX_WorldSetBackwardTexture(PX_World* pWorld, px_texture* ptexture);

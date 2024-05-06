@@ -186,11 +186,16 @@ struct _PX_Object
 	px_int  designerType;
 	union
 	{
-	px_int  User_int;
-	px_void *User_ptr;
+		px_int  User_int;
+		px_void *User_ptr;
 	};
 	
-	px_int   world_index;
+	union
+	{
+		px_int   world_index;
+		px_int   cda_index;
+	};
+	
 	px_bool  delay_delete;
 	px_dword impact_object_type;
 	px_dword impact_target_type;
@@ -354,7 +359,7 @@ px_void PX_ObjectExecuteEvent(PX_Object *pPost,PX_Object_Event Event);
 /////////////////////////////////////////////////////////////////////////
 #define PX_DESIGNER_NAME_LENGTH 48
 #define PX_DESIGNER_MAX_PROPERTYS 32
-#define PX_DESIGNER_CONTROLLER_ITEM_HEIGHT 22
+#define PX_DESIGNER_CONTROLLER_ITEM_HEIGHT 48
 typedef enum
 {
 	PX_DESIGNER_OBJECT_TYPE_UI,
@@ -363,7 +368,7 @@ typedef enum
 }PX_DESIGNER_OBJECT_TYPE;
 
 
-typedef PX_Object* (*px_designer_createfunc)(px_memorypool* mp, PX_Object* pparent, px_float x, px_float y, px_float width, px_float height, px_void* userptr);
+typedef PX_Object* (*px_designer_createfunc)(px_memorypool* mp, PX_Object* pparent, px_float x, px_float y, px_float width, px_float height, px_abi* pabi);
 
 typedef px_float(*px_designer_getproperty_float)(PX_Object* pObject);
 typedef px_int(*px_designer_getproperty_int)(PX_Object* pObject);
@@ -400,6 +405,9 @@ typedef struct
 	px_designer_createfunc createfunc;
 	PX_DESIGNER_OBJECT_TYPE type;
 	PX_Designer_Object_property properties[PX_DESIGNER_MAX_PROPERTYS];
+	px_float defaultWidth, defaultHeight;
+	px_texture *pIndicateTexture;
+	px_texture *pListMiniTexture;
 }PX_Designer_ObjectDesc;
 
 //common

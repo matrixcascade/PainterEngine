@@ -7,6 +7,7 @@
 #include "PX_Partical.h"
 #include "PX_Script_Interpreter.h"
 #include "PX_Script_ASMCompiler.h"
+#include "PX_Json.h"
 
 typedef enum 
 {
@@ -18,6 +19,7 @@ typedef enum
 	PX_RESOURCE_TYPE_SHAPE,
 	PX_RESOURCE_TYPE_SOUND,
 	PX_RESOURCE_TYPE_DATA,
+	PX_RESOURCE_TYPE_JSON,
 }PX_RESOURCE_TYPE;
 
 
@@ -33,6 +35,7 @@ typedef struct
 		PX_SoundData sound;
 		px_string stringdata;
 		px_memory data;
+		PX_Json json;
 	};
 }PX_Resource;
 
@@ -58,6 +61,8 @@ PX_VM *PX_ResourceLibraryGetScript(PX_ResourceLibrary *lib,const px_char key[]);
 PX_SoundData *PX_ResourceLibraryGetSound(PX_ResourceLibrary *lib,const px_char key[]);
 px_memory *PX_ResourceLibraryGetData(PX_ResourceLibrary *lib,const px_char key[]);
 px_string* PX_ResourceLibraryGetString(PX_ResourceLibrary* lib, const px_char key[]);
+PX_Json* PX_ResourceLibraryGetJson(PX_ResourceLibrary* lib, const px_char key[]);
+px_memory* PX_ResourceLibraryCreateMemory(PX_ResourceLibrary* lib, const px_char key[]);
 
 px_void PX_ResourceLibraryDelete(PX_ResourceLibrary *lib,const px_char key[]);
 px_void PX_ResourceLibraryFree(PX_ResourceLibrary *lib);

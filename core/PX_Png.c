@@ -841,7 +841,7 @@ px_bool PX_PngSurfaceToBuffer(px_surface* prenderbuffer, px_memory* out)
 		adler32 = PX_adler32(filter_data.buffer, filter_data.usedsize);
 
 
-		if (!PX_RFC1951Deflate(filter_data.buffer,filter_data.usedsize,&deflate_data))
+		if (!PX_RFC1951Deflate(filter_data.buffer,filter_data.usedsize,&deflate_data,1024))
 		{
 			PX_MemoryFree(&filter_data);
 			PX_MemoryFree(&deflate_data);

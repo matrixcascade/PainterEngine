@@ -82,6 +82,11 @@ PX_HASHMAP_RETURN PX_MapErase(px_map * m, const px_byte code[], px_int codesize)
 	}
 }
 
+px_void PX_MapClear(px_map* m)
+{
+	PX_RBTreeFree(&m->tree);
+}
+
 px_void* PX_MapGet(px_map* m, const px_byte code[],px_int codesize)
 {
 	px_void* ptr;

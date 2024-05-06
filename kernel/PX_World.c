@@ -150,7 +150,6 @@ px_bool PX_World_VM_SetObjectResistance(PX_VM* Ins, px_void* userptr)
 	return PX_TRUE;
 }
 
-
 px_bool PX_World_VM_SetObjectType(PX_VM* Ins, px_void* userptr)
 {
 	PX_World* pWorld = (PX_World*)userptr;
@@ -211,7 +210,6 @@ px_bool PX_World_VM_GetObjectName(PX_VM* Ins, px_void* userptr)
 	PX_VM_RET_String(Ins, handler->id);
 	return PX_TRUE;
 }
-
 
 px_bool PX_World_VM_SetObjectImpactTargetType(PX_VM* Ins, px_void* userptr)
 {
@@ -1303,7 +1301,7 @@ px_void PX_WorldFree(PX_World *pw)
 {
 	PX_WorldObject *pwo;
 	px_int i;
-    PX_RBNode *pNode;
+	PX_RBNode* pNode;
 	for (i=0;i<pw->pObjects.size;i++)
 	{
 		pwo=PX_VECTORAT(PX_WorldObject,&pw->pObjects,i);
