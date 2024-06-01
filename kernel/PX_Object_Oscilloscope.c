@@ -57,7 +57,7 @@ PX_Object_Oscilloscope *PX_Object_GetOscilloscope(PX_Object *pObject)
 {
 	if (pObject->Type==PX_OBJECT_TYPE_OSCILLOSCOPE)
 	{
-		return (PX_Object_Oscilloscope *)pObject->pObjectDesc;
+		return PX_ObjectGetDesc(PX_Object_Oscilloscope, pObject);
 	}
 	return PX_NULL;
 }
@@ -1921,7 +1921,7 @@ PX_Object_FilterEditor * PX_Object_GetFilterEditor(PX_Object *pObject)
 {
 	if (pObject->Type==PX_OBJECT_TYPE_FILTEREDITOR)
 	{
-		return (PX_Object_FilterEditor *)pObject->pObjectDesc;
+		return PX_ObjectGetDesc(PX_Object_FilterEditor, pObject);
 	}
 	return PX_NULL;
 }

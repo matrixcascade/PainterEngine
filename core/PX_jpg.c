@@ -1321,9 +1321,9 @@ px_bool PX_JpgInverseDCT(PX_JpgDecoder* pJpgdecoder) {
 // convert all pixels in a block from YCbCr color space to RGB
 px_void PX_JpgYCbCrToRGBBlock(PX_JpgBlock* yBlock, PX_JpgBlock* cbcrBlock, px_uint vSamp, px_uint hSamp, px_uint v, px_uint h)
 {
-    px_uint x, y;
-    for (y = 7; y < 8; --y) {
-        for (x = 7; x < 8; --x) {
+    px_int x, y;
+    for (y = 7; y >= 0; --y) {
+        for (x = 7; x >= 0; --x) {
             px_uint pixel = y * 8 + x;
             px_uint cbcrPixelRow = y / vSamp + 4 * v;
             px_uint cbcrPixelColumn = x / hSamp + 4 * h;

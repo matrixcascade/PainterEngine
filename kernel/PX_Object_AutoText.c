@@ -3,39 +3,14 @@
 PX_Object * PX_Object_AutoTextCreate(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y,px_int width,PX_FontModule *fm)
 {
 	PX_Object *pObject;
-
-	PX_Object_AutoText *pAt=(PX_Object_AutoText *)MP_Malloc(mp,sizeof(PX_Object_AutoText));
-	PX_StringInitialize(mp,&pAt->text);
-	if (pAt==PX_NULL)
-	{
-		return PX_NULL;
-	}
-
-	if (width<=0)
-	{
-		return PX_NULL;
-	}
-
-
-	pObject=PX_ObjectCreate(mp,Parent,(px_float)x,(px_float)y,0,(px_float)width,16,0);
-
+	PX_Object_AutoText* pAt;
+	pObject=PX_ObjectCreateEx(mp,Parent,(px_float)x,(px_float)y,0,(px_float)width,16,0, PX_OBJECT_TYPE_AUTOTEXT,0, PX_Object_AutoTextRender, PX_Object_AutoTextFree,0,sizeof(PX_Object_AutoText));
 	if (pObject==PX_NULL)
 	{
 		return PX_NULL;
 	}
-
-	if (!pObject)
-	{
-		MP_Free(mp,pAt);
-		return PX_NULL;
-	}
-
-	pObject->pObjectDesc=pAt;
-	pObject->Type=PX_OBJECT_TYPE_AUTOTEXT;
-	pObject->ReceiveEvents=PX_TRUE;
-	pObject->Func_ObjectFree=PX_Object_AutoTextFree;
-	pObject->Func_ObjectRender=PX_Object_AutoTextRender;
-
+	pAt=PX_ObjectGetDesc(PX_Object_AutoText,pObject);
+	if(!PX_StringInitialize(mp,&pAt->text))return PX_NULL;
 	pAt->TextColor=PX_OBJECT_UI_DEFAULT_FONTCOLOR;
 	pAt->fontModule=fm;
 	return pObject;
@@ -44,7 +19,7 @@ PX_Object * PX_Object_AutoTextCreate(px_memorypool *mp,PX_Object *Parent,px_int 
 px_void PX_Object_AutoTextRender(px_surface *psurface, PX_Object *pObject,px_uint elapsed)
 {
 	px_int x_draw_oft,y_draw_oft,cursor,fsize;
-	PX_Object_AutoText *pAt=(PX_Object_AutoText *)pObject->pObjectDesc;
+	PX_Object_AutoText* pAt = PX_ObjectGetDesc(PX_Object_AutoText, pObject);
 	const px_char *Text=pAt->text.buffer;
 	px_float objx,objy,objHeight,objWidth;
 	px_float inheritX,inheritY;
@@ -169,7 +144,7 @@ px_void PX_Object_AutoTextFree(PX_Object *pObject)
 PX_Object_AutoText * PX_Object_GetAutoText(PX_Object *pObject)
 {
 	if(pObject->Type==PX_OBJECT_TYPE_AUTOTEXT)
-		return (PX_Object_AutoText *)pObject->pObjectDesc;
+		return PX_ObjectGetDesc(PX_Object_AutoText,pObject);
 	else
 		return PX_NULL;
 }

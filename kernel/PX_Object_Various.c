@@ -100,12 +100,12 @@ px_void PX_Object_VariousSetEditStyle(PX_Object* pObject,PX_OBJECT_VARIOUS_EIDT_
 			{
 			case PX_OBJECT_VARIOUS_EDIT_TYPE_INT:
 			{
-				PX_Object_EditSetLimit(pDesc->various, "-01234567890");
+				PX_Object_EditSetInputMode(pDesc->various, PX_OBJECT_EDIT_INPUT_MODE_INTEGER);
 			}
 			break;
 			case PX_OBJECT_VARIOUS_EDIT_TYPE_FLOAT:
 			{
-				PX_Object_EditSetLimit(pDesc->various, "-01234567890.");
+				PX_Object_EditSetInputMode(pDesc->various, PX_OBJECT_EDIT_INPUT_MODE_FLOAT);
 			}
 			break;
 			case PX_OBJECT_VARIOUS_EDIT_TYPE_HEX:

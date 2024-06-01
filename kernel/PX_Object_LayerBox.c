@@ -79,7 +79,7 @@ px_bool PX_Object_LayerBoxListItemOnCreate(px_memorypool* mp, PX_Object* ItemObj
 	PX_Object* pObject = (PX_Object*)userptr;
 	PX_Object* pButton;
 	PX_Object_LayerBox* pdesc;
-	ItemObject->Func_ObjectRender = PX_Object_LayerBoxListItemOnRender;
+	PX_ObjectAddRenderFunction(ItemObject, PX_Object_LayerBoxListItemOnRender);
 	ItemObject->User_ptr = userptr;
 	pdesc = PX_ObjectGetDesc(PX_Object_LayerBox, pObject);
 	pButton =PX_Object_PushButtonCreate(mp, ItemObject, 8, 2, 24, 24, "", 0);

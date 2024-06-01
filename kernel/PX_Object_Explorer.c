@@ -7,7 +7,7 @@ PX_Object_Explorer * PX_Object_GetExplorer(PX_Object *pObject)
 {
 	if(pObject->Type==PX_OBJECT_TYPE_EXPLORER)
 	{
-		return (PX_Object_Explorer *)pObject->pObjectDesc;
+		return PX_ObjectGetDesc(PX_Object_Explorer,pObject);
 	}
 	return PX_NULL;
 }
@@ -580,10 +580,13 @@ px_void PX_Object_ExplorerRefresh(PX_Object *pObject)
 		pExp->func_getpathfilename(path,count,FileNames,pExp->filter);
 		for (i=0;i<count;i++)
 		{
-			pExp->Items[pExp->ItemCount+i].bcursor=PX_FALSE;
-			pExp->Items[pExp->ItemCount+i].bFolder=PX_FALSE;
-			pExp->Items[pExp->ItemCount+i].bselect=PX_FALSE;
-			PX_strcpy(pExp->Items[pExp->ItemCount+i].name,FileNames[i],sizeof(pExp->Items[0].name));
+			if (pExp->ItemCount + i < PX_COUNTOF(pExp->Items))
+			{
+				pExp->Items[pExp->ItemCount + i].bcursor = PX_FALSE;
+				pExp->Items[pExp->ItemCount + i].bFolder = PX_FALSE;
+				pExp->Items[pExp->ItemCount + i].bselect = PX_FALSE;
+				PX_strcpy(pExp->Items[pExp->ItemCount + i].name, FileNames[i], sizeof(pExp->Items[0].name));
+			}
 		}
 		pExp->ItemCount+=count;
 		PX_Object_SliderBarSetValue(pExp->SliderBar,0);

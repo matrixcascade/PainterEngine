@@ -4,7 +4,7 @@ PX_Object_TransformAdapter * PX_Object_GetTransformAdapter(PX_Object *pObject)
 {
 	if (pObject->Type==PX_OBJECT_TYPE_TRANSFORMADAPTER)
 	{
-		return (PX_Object_TransformAdapter *)pObject->pObjectDesc;
+		return PX_ObjectGetDesc(PX_Object_TransformAdapter,pObject);
 	}
 	return PX_NULL;
 }

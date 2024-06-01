@@ -17,20 +17,20 @@ static px_void PX_Designer_RefreshProperties(PX_Object *pObject)
 		if (PX_VectorCheckIndex(&pDesignerDesc->ObjectDesc,pdobject->descIndex))
 		{
 			px_int j;
-			PX_Designer_ObjectDesc *pObjectDesc=PX_VECTORAT(PX_Designer_ObjectDesc,&pDesignerDesc->ObjectDesc,pdobject->descIndex);
-			for (j=0;j<PX_COUNTOF(pObjectDesc->properties);j++)
+			PX_Designer_ObjectDesc *pDesignerObjectDesc=PX_VECTORAT(PX_Designer_ObjectDesc,&pDesignerDesc->ObjectDesc,pdobject->descIndex);
+			for (j=0;j<PX_COUNTOF(pDesignerObjectDesc->properties);j++)
 			{
-				if (!pObjectDesc->properties[j].Name[0])
+				if (!pDesignerObjectDesc->properties[j].Name[0])
 				{
 					break;
 				}
 				PX_ObjectSetVisible(pDesignerDesc->label_propertys[j],PX_TRUE);
 				PX_ObjectSetVisible(pDesignerDesc->edit_propertys[j],PX_TRUE);
-				PX_Object_LabelSetText(pDesignerDesc->label_propertys[j],pObjectDesc->properties[j].Name);
+				PX_Object_LabelSetText(pDesignerDesc->label_propertys[j],pDesignerObjectDesc->properties[j].Name);
 
-				if(pObjectDesc->properties[j].getbool)
+				if(pDesignerObjectDesc->properties[j].getbool)
 				{
-					px_bool v=pObjectDesc->properties[j].getbool(pdobject->pObject);
+					px_bool v=pDesignerObjectDesc->properties[j].getbool(pdobject->pObject);
 					if (v)
 					{
 						PX_Object_EditSetText(pDesignerDesc->edit_propertys[j],"1");
@@ -42,9 +42,9 @@ static px_void PX_Designer_RefreshProperties(PX_Object *pObject)
 					continue;
 				}
 
-				if(pObjectDesc->properties[j].getfloat)
+				if(pDesignerObjectDesc->properties[j].getfloat)
 				{
-					px_float v=pObjectDesc->properties[j].getfloat(pdobject->pObject);
+					px_float v=pDesignerObjectDesc->properties[j].getfloat(pdobject->pObject);
 					px_char content[32];
 					PX_ftoa(v,content,32,2);
 					if (v)
@@ -57,21 +57,21 @@ static px_void PX_Designer_RefreshProperties(PX_Object *pObject)
 					}
 					continue;
 				}
-				if(pObjectDesc->properties[j].getint)
+				if(pDesignerObjectDesc->properties[j].getint)
 				{
-					px_int v=pObjectDesc->properties[j].getint(pdobject->pObject);
+					px_int v=pDesignerObjectDesc->properties[j].getint(pdobject->pObject);
 					px_char content[32];
 					PX_itoa(v,content,32,10);
 					PX_Object_EditSetText(pDesignerDesc->edit_propertys[j],content);
 					continue;
 				}
 
-				if(pObjectDesc->properties[j].getstring)
+				if(pDesignerObjectDesc->properties[j].getstring)
 				{
 					px_string str;
 					PX_StringInitialize(pDesignerDesc->mp, &str);
 					;
-					if (pObjectDesc->properties[j].getstring(pdobject->pObject,&str))
+					if (pDesignerObjectDesc->properties[j].getstring(pdobject->pObject,&str))
 					{
 						PX_Object_EditSetText(pDesignerDesc->edit_propertys[j],str.buffer);
 					}
@@ -100,48 +100,48 @@ static px_void PX_Designer_UpdateProperties(PX_Object *pObject)
 		if (PX_VectorCheckIndex(&pDesignerDesc->ObjectDesc,pdobject->descIndex))
 		{
 			px_int j;
-			PX_Designer_ObjectDesc *pObjectDesc=PX_VECTORAT(PX_Designer_ObjectDesc,&pDesignerDesc->ObjectDesc,pdobject->descIndex);
-			for (j=0;j<PX_COUNTOF(pObjectDesc->properties);j++)
+			PX_Designer_ObjectDesc *pDesignerObjectDesc=PX_VECTORAT(PX_Designer_ObjectDesc,&pDesignerDesc->ObjectDesc,pdobject->descIndex);
+			for (j=0;j<PX_COUNTOF(pDesignerObjectDesc->properties);j++)
 			{
-				if (!pObjectDesc->properties[j].Name[0])
+				if (!pDesignerObjectDesc->properties[j].Name[0])
 				{
 					break;
 				}
 
-				if(pObjectDesc->properties[j].setbool)
+				if(pDesignerObjectDesc->properties[j].setbool)
 				{
 					const px_char *pContent=PX_Object_EditGetText(pDesignerDesc->edit_propertys[j]);;
 					if (pContent[0]=='0')
 					{
-						pObjectDesc->properties[j].setbool(pdobject->pObject,PX_FALSE);
+						pDesignerObjectDesc->properties[j].setbool(pdobject->pObject,PX_FALSE);
 					}
 					else
 					{
-						pObjectDesc->properties[j].setbool(pdobject->pObject,PX_TRUE);
+						pDesignerObjectDesc->properties[j].setbool(pdobject->pObject,PX_TRUE);
 					}
 					continue;
 				}
 
-				if(pObjectDesc->properties[j].setfloat)
+				if(pDesignerObjectDesc->properties[j].setfloat)
 				{
 					const px_char *pContent=PX_Object_EditGetText(pDesignerDesc->edit_propertys[j]);;
 
-					pObjectDesc->properties[j].setfloat(pdobject->pObject,PX_atof(pContent));
+					pDesignerObjectDesc->properties[j].setfloat(pdobject->pObject,PX_atof(pContent));
 
 					continue;
 				}
 
-				if(pObjectDesc->properties[j].setint)
+				if(pDesignerObjectDesc->properties[j].setint)
 				{
 					const px_char *pContent=PX_Object_EditGetText(pDesignerDesc->edit_propertys[j]);;
-					pObjectDesc->properties[j].setint(pdobject->pObject,PX_atoi(pContent));
+					pDesignerObjectDesc->properties[j].setint(pdobject->pObject,PX_atoi(pContent));
 					continue;
 				}
 
-				if(pObjectDesc->properties[j].setstring)
+				if(pDesignerObjectDesc->properties[j].setstring)
 				{
 					const px_char *pContent=PX_Object_EditGetText(pDesignerDesc->edit_propertys[j]);;
-					pObjectDesc->properties[j].setstring(pdobject->pObject,pContent);
+					pDesignerObjectDesc->properties[j].setstring(pdobject->pObject,pContent);
 					continue;
 				}
 			}
@@ -161,8 +161,8 @@ static px_void PX_Designer_UpdateObjectsList(PX_Object* pObject)
 }
 px_void PX_DesignerOnDesignerBoxValueChanged(PX_Object *pObject,PX_Object_Event e,px_void *ptr)
 {
-	PX_Object_DesignerBox *pDesignerBox=(PX_Object_DesignerBox *)pObject->pObjectDesc;
-	PX_Object_Designer *pDesc=(PX_Object_Designer *)((PX_Object *)ptr)->pObjectDesc;
+	PX_Object_DesignerBox* pDesignerBox = PX_ObjectGetDesc(PX_Object_DesignerBox, pObject);
+	PX_Object_Designer *pDesc= PX_ObjectGetDesc(PX_Object_Designer, (PX_Object*)ptr);
 
 	if (pDesc->selectObjectIndex>=0&&pDesc->selectObjectIndex<pDesc->Objects.size)
 	{
@@ -207,7 +207,7 @@ px_void PX_DesignerOnDesignerBoxValueChanged(PX_Object *pObject,PX_Object_Event 
 px_void PX_DesignerUpdate(PX_Object *pObject,px_dword elapsed)
 {
 	px_int i,count;
-	PX_Object_Designer *pDesc=(PX_Object_Designer *)pObject->pObjectDesc;
+	PX_Object_Designer* pDesc = PX_ObjectGetDesc(PX_Object_Designer, pObject);
 
 	//////////////////////////////////////////////////////////////////////////
 	//designer box
@@ -329,7 +329,7 @@ px_void PX_Designer_ControllersListItemOnRender(px_surface* psurface,PX_Object *
 
 px_bool PX_Designer_ControllersListItemOnCreate(px_memorypool* mp, PX_Object* ItemObject, px_void* userptr)
 {
-	ItemObject->Func_ObjectRender = PX_Designer_ControllersListItemOnRender;
+	PX_ObjectAddRenderFunction(ItemObject, PX_Designer_ControllersListItemOnRender);
 	ItemObject->User_ptr = userptr;
 	return PX_TRUE;
 }
@@ -375,7 +375,7 @@ px_void PX_Designer_ObjectsListItemOnRender(px_surface* psurface, PX_Object* pOb
 
 px_bool PX_Designer_ObjectsListItemOnCreate(px_memorypool* mp, PX_Object* ItemObject, px_void* userptr)
 {
-	ItemObject->Func_ObjectRender = PX_Designer_ObjectsListItemOnRender;
+	PX_ObjectAddRenderFunction(ItemObject, PX_Designer_ObjectsListItemOnRender);
 	ItemObject->User_ptr = userptr;
 	return PX_TRUE;
 }
@@ -558,16 +558,16 @@ px_void PX_Designer_OnCursorDown(PX_Object *pObject,PX_Object_Event e,px_void *p
 				if (selectDescIndex!=-1)
 				{
 					//create new object
-					PX_Designer_ObjectDesc *pObjectDesc=PX_VECTORAT(PX_Designer_ObjectDesc,&pDesignerDesc->ObjectDesc,selectDescIndex);
+					PX_Designer_ObjectDesc *pDesignerObjectDesc=PX_VECTORAT(PX_Designer_ObjectDesc,&pDesignerDesc->ObjectDesc,selectDescIndex);
 
-					switch (pObjectDesc->type)
+					switch (pDesignerObjectDesc->type)
 					{
 					case PX_DESIGNER_OBJECT_TYPE_UI:
 						{
 						if (pDesignerDesc->pLinkObject)
 						{
-							PX_Object* pNewObject = pObjectDesc->createfunc(pDesignerDesc->mp, pDesignerDesc->pLinkObject, x, y, 100, 100, pDesignerDesc->userptr);
-							PX_sprintf2(pNewObject->id, sizeof(pNewObject->id), "%1%2", PX_STRINGFORMAT_STRING(pObjectDesc->Name), PX_STRINGFORMAT_INT(pDesignerDesc->allocID++));
+							PX_Object* pNewObject = pDesignerObjectDesc->createfunc(pDesignerDesc->mp, pDesignerDesc->pLinkObject, x, y, 100, 100, pDesignerDesc->userptr);
+							PX_sprintf2(pNewObject->id, sizeof(pNewObject->id), "%1%2", PX_STRINGFORMAT_STRING(pDesignerObjectDesc->Name), PX_STRINGFORMAT_INT(pDesignerDesc->allocID++));
 
 							dobject.pObject = pNewObject;
 							dobject.type = PX_DESIGNER_OBJECT_TYPE_UI;
@@ -581,8 +581,8 @@ px_void PX_Designer_OnCursorDown(PX_Object *pObject,PX_Object_Event e,px_void *p
 						{
 						if (pDesignerDesc->pLinkWorld)
 						{
-							PX_Object* pNewObject = pObjectDesc->createfunc(pDesignerDesc->mp, PX_NULL, x + pDesignerDesc->pLinkWorld->offsetx, y + pDesignerDesc->pLinkWorld->offsety, 100, 100, pDesignerDesc->userptr);
-							PX_sprintf2(pNewObject->id, sizeof(pNewObject->id), "%1%2", PX_STRINGFORMAT_STRING(pObjectDesc->Name), PX_STRINGFORMAT_INT(pDesignerDesc->allocID++));
+							PX_Object* pNewObject = pDesignerObjectDesc->createfunc(pDesignerDesc->mp, PX_NULL, x + pDesignerDesc->pLinkWorld->offsetx, y + pDesignerDesc->pLinkWorld->offsety, 100, 100, pDesignerDesc->userptr);
+							PX_sprintf2(pNewObject->id, sizeof(pNewObject->id), "%1%2", PX_STRINGFORMAT_STRING(pDesignerObjectDesc->Name), PX_STRINGFORMAT_INT(pDesignerDesc->allocID++));
 
 							PX_WorldAddObject(pDesignerDesc->pLinkWorld, pNewObject);
 							dobject.pObject = pNewObject;
@@ -595,7 +595,7 @@ px_void PX_Designer_OnCursorDown(PX_Object *pObject,PX_Object_Event e,px_void *p
 						break;
 					case PX_DESIGNER_OBJECT_TYPE_FUNCTION:
 						{
-							PX_Object *pNewObject=pObjectDesc->createfunc(pDesignerDesc->mp,PX_NULL,x,y,100,100,pDesignerDesc->userptr);
+							PX_Object *pNewObject=pDesignerObjectDesc->createfunc(pDesignerDesc->mp,PX_NULL,x,y,100,100,pDesignerDesc->userptr);
 							if (pNewObject!=PX_NULL)
 							{
 								PX_ASSERT();
@@ -876,7 +876,7 @@ PX_Object * PX_Object_DesignerCreate(px_memorypool *mp,PX_Object *pparent,PX_Obj
 	PX_memset(&desc,0,sizeof(desc));
 
 	pObject=PX_ObjectCreateEx(mp,pparent,0,0,0,0,0,0,0x21080210,PX_DesignerUpdate,PX_DesignerRender, PX_Object_DesignerFree,&desc,sizeof(desc));
-	pdesc=(PX_Object_Designer *)pObject->pObjectDesc;
+	pdesc = PX_ObjectGetDesc(PX_Object_Designer, pObject);
 	pdesc->pLinkWorld=pLinkWorld;
 	pdesc->pLinkObject=pLinkObject;
 	pdesc->showsliderbar = PX_TRUE;
@@ -1234,25 +1234,25 @@ px_bool PX_Object_DesignerImportToUIObject(px_memorypool *mp,PX_Object *Designer
 	for (i = 0; i < Json.rootValue._object.values.size; i++)
 	{
 		PX_Json_Value* pJsonValue = PX_JsonGetObjectValueByIndex(&Json.rootValue, i);
-		PX_Designer_ObjectDesc* pObjectDesc;
+		PX_Designer_ObjectDesc* pDesignerObjectDesc;
 		
 		px_int j, descindex = -1;
 		if (!pJsonValue || pJsonValue->type != PX_JSON_VALUE_TYPE_OBJECT)
 		{
 			continue;
 		}
-		pObjectDesc = PX_NULL;
+		pDesignerObjectDesc = PX_NULL;
 		for (j = 0; j < pdescvec->size; j++)
 		{
 			PX_Designer_ObjectDesc* pEnumObjectDesc = PX_VECTORAT(PX_Designer_ObjectDesc, pdescvec, j);
 			if (PX_strequ(pJsonValue->name.buffer, pEnumObjectDesc->Name))
 			{
-				pObjectDesc = pEnumObjectDesc;
+				pDesignerObjectDesc = pEnumObjectDesc;
 				descindex = j;
 				break;
 			}
 		}
-		if (pObjectDesc)
+		if (pDesignerObjectDesc)
 		{
 			PX_Json_Value* TypeValue = PX_JsonGetObjectValue(pJsonValue, "type");
 			PX_DESIGNER_OBJECT_TYPE type;
@@ -1273,13 +1273,13 @@ px_bool PX_Object_DesignerImportToUIObject(px_memorypool *mp,PX_Object *Designer
 					type = PX_DESIGNER_OBJECT_TYPE_FUNCTION;
 				}
 
-				switch (pObjectDesc->type)
+				switch (pDesignerObjectDesc->type)
 				{
 				case PX_DESIGNER_OBJECT_TYPE_UI:
 				{
 					if (pDesignerDesc->pLinkObject)
 					{
-						pNewObject = pObjectDesc->createfunc(pDesignerDesc->mp, pDesignerDesc->pLinkObject, 0, 0, 100, 100, pDesignerDesc->userptr);
+						pNewObject = pDesignerObjectDesc->createfunc(pDesignerDesc->mp, pDesignerDesc->pLinkObject, 0, 0, 100, 100, pDesignerDesc->userptr);
 						dobject.pObject = pNewObject;
 						dobject.type = PX_DESIGNER_OBJECT_TYPE_UI;
 						dobject.descIndex = descindex;
@@ -1292,7 +1292,7 @@ px_bool PX_Object_DesignerImportToUIObject(px_memorypool *mp,PX_Object *Designer
 				{
 					if (pDesignerDesc->pLinkWorld)
 					{
-						pNewObject = pObjectDesc->createfunc(pDesignerDesc->mp, PX_NULL, 0 + pDesignerDesc->pLinkWorld->offsetx, 0 + pDesignerDesc->pLinkWorld->offsety, 100, 100, pDesignerDesc->userptr);
+						pNewObject = pDesignerObjectDesc->createfunc(pDesignerDesc->mp, PX_NULL, 0 + pDesignerDesc->pLinkWorld->offsetx, 0 + pDesignerDesc->pLinkWorld->offsety, 100, 100, pDesignerDesc->userptr);
 						PX_WorldAddObject(pDesignerDesc->pLinkWorld, pNewObject);
 						dobject.pObject = pNewObject;
 						dobject.type = PX_DESIGNER_OBJECT_TYPE_GAME;
@@ -1304,7 +1304,7 @@ px_bool PX_Object_DesignerImportToUIObject(px_memorypool *mp,PX_Object *Designer
 				break;
 				case PX_DESIGNER_OBJECT_TYPE_FUNCTION:
 				{
-					pNewObject = pObjectDesc->createfunc(pDesignerDesc->mp, PX_NULL, 0, 0, 100, 100, pDesignerDesc->userptr);
+					pNewObject = pDesignerObjectDesc->createfunc(pDesignerDesc->mp, PX_NULL, 0, 0, 100, 100, pDesignerDesc->userptr);
 					if (pNewObject != PX_NULL)
 					{
 						PX_ASSERT();
@@ -1318,42 +1318,42 @@ px_bool PX_Object_DesignerImportToUIObject(px_memorypool *mp,PX_Object *Designer
 
 			if (pNewObject)
 			{
-				for (j = 0; j < PX_COUNTOF(pObjectDesc->properties); j++)
+				for (j = 0; j < PX_COUNTOF(pDesignerObjectDesc->properties); j++)
 				{
-					if (pObjectDesc->properties[j].Name[0] == '\0')
+					if (pDesignerObjectDesc->properties[j].Name[0] == '\0')
 					{
 						break;
 					}
-					if (pObjectDesc->properties[j].setbool)
+					if (pDesignerObjectDesc->properties[j].setbool)
 					{
-						PX_Json_Value* pvalue = PX_JsonGetObjectValue(pJsonValue, pObjectDesc->properties[j].Name);
+						PX_Json_Value* pvalue = PX_JsonGetObjectValue(pJsonValue, pDesignerObjectDesc->properties[j].Name);
 						if (pvalue && pvalue->type == PX_JSON_VALUE_TYPE_BOOLEAN)
 						{
-							pObjectDesc->properties[j].setbool(pNewObject, pvalue->_boolean);
+							pDesignerObjectDesc->properties[j].setbool(pNewObject, pvalue->_boolean);
 						}
 					}
-					else if (pObjectDesc->properties[j].setfloat)
+					else if (pDesignerObjectDesc->properties[j].setfloat)
 					{
-						PX_Json_Value* pvalue = PX_JsonGetObjectValue(pJsonValue, pObjectDesc->properties[j].Name);
+						PX_Json_Value* pvalue = PX_JsonGetObjectValue(pJsonValue, pDesignerObjectDesc->properties[j].Name);
 						if (pvalue && pvalue->type == PX_JSON_VALUE_TYPE_NUMBER)
 						{
-							pObjectDesc->properties[j].setfloat(pNewObject, (px_float)pvalue->_number);
+							pDesignerObjectDesc->properties[j].setfloat(pNewObject, (px_float)pvalue->_number);
 						}
 					}
-					else if (pObjectDesc->properties[j].setint)
+					else if (pDesignerObjectDesc->properties[j].setint)
 					{
-						PX_Json_Value* pvalue = PX_JsonGetObjectValue(pJsonValue, pObjectDesc->properties[j].Name);
+						PX_Json_Value* pvalue = PX_JsonGetObjectValue(pJsonValue, pDesignerObjectDesc->properties[j].Name);
 						if (pvalue && pvalue->type == PX_JSON_VALUE_TYPE_NUMBER)
 						{
-							pObjectDesc->properties[j].setint(pNewObject, (px_int)pvalue->_number);
+							pDesignerObjectDesc->properties[j].setint(pNewObject, (px_int)pvalue->_number);
 						}
 					}
-					else if (pObjectDesc->properties[j].setstring)
+					else if (pDesignerObjectDesc->properties[j].setstring)
 					{
-						PX_Json_Value* pvalue = PX_JsonGetObjectValue(pJsonValue, pObjectDesc->properties[j].Name);
+						PX_Json_Value* pvalue = PX_JsonGetObjectValue(pJsonValue, pDesignerObjectDesc->properties[j].Name);
 						if (pvalue && pvalue->type == PX_JSON_VALUE_TYPE_STRING)
 						{
-							pObjectDesc->properties[j].setstring(pNewObject, pvalue->_string.buffer);
+							pDesignerObjectDesc->properties[j].setstring(pNewObject, pvalue->_string.buffer);
 						}
 					}
 				}
@@ -1381,24 +1381,24 @@ px_bool PX_Object_DesignerImport(PX_Object* pObject, const px_char* pText)
 	for (i=0;i<Json.rootValue._object.values.size;i++)
 	{
 		PX_Json_Value *pJsonValue=PX_JsonGetObjectValueByIndex(&Json.rootValue,i);
-		PX_Designer_ObjectDesc *pObjectDesc;
+		PX_Designer_ObjectDesc *pDesignerObjectDesc;
 		px_int j,descindex=-1;
 		if (!pJsonValue||pJsonValue->type!=PX_JSON_VALUE_TYPE_OBJECT)
 		{
 			continue;
 		}
-		pObjectDesc=PX_NULL;
+		pDesignerObjectDesc=PX_NULL;
 		for (j=0;j<pdesigner->ObjectDesc.size;j++)
 		{
 			PX_Designer_ObjectDesc *pEnumObjectDesc=PX_VECTORAT(PX_Designer_ObjectDesc,&pdesigner->ObjectDesc,j);
 			if (PX_strequ(pJsonValue->name.buffer,pEnumObjectDesc->Name))
 			{
-				pObjectDesc=pEnumObjectDesc;
+				pDesignerObjectDesc=pEnumObjectDesc;
 				descindex=j;
 				break;
 			}
 		}
-		if (pObjectDesc)
+		if (pDesignerObjectDesc)
 		{
 			PX_Json_Value *TypeValue=PX_JsonGetObjectValue(pJsonValue,"type");
 			PX_DESIGNER_OBJECT_TYPE type;
@@ -1423,7 +1423,7 @@ px_bool PX_Object_DesignerImport(PX_Object* pObject, const px_char* pText)
 				case PX_DESIGNER_OBJECT_TYPE_UI:
 				{
 					PX_Designer_Object dobject;
-					pNewObject = pObjectDesc->createfunc(pdesigner->mp, pdesigner->pLinkObject, 0, 0, 100, 100, pdesigner->userptr);
+					pNewObject = pDesignerObjectDesc->createfunc(pdesigner->mp, pdesigner->pLinkObject, 0, 0, 100, 100, pdesigner->userptr);
 					dobject.pObject = pNewObject;
 					dobject.type = PX_DESIGNER_OBJECT_TYPE_UI;
 					dobject.descIndex = descindex;
@@ -1433,7 +1433,7 @@ px_bool PX_Object_DesignerImport(PX_Object* pObject, const px_char* pText)
 				case PX_DESIGNER_OBJECT_TYPE_GAME:
 				{
 					PX_Designer_Object dobject;
-					pNewObject = pObjectDesc->createfunc(pdesigner->mp, PX_NULL, 0, 0, 100, 100, pdesigner->userptr);
+					pNewObject = pDesignerObjectDesc->createfunc(pdesigner->mp, PX_NULL, 0, 0, 100, 100, pdesigner->userptr);
 					PX_WorldAddObject(pdesigner->pLinkWorld, pNewObject);
 					dobject.pObject = pNewObject;
 					dobject.type = PX_DESIGNER_OBJECT_TYPE_GAME;
@@ -1448,42 +1448,42 @@ px_bool PX_Object_DesignerImport(PX_Object* pObject, const px_char* pText)
 
 			if (pNewObject)
 			{
-				for(j=0;j<PX_COUNTOF(pObjectDesc->properties);j++)
+				for(j=0;j<PX_COUNTOF(pDesignerObjectDesc->properties);j++)
 				{
-					if (pObjectDesc->properties[j].Name[0]=='\0')
+					if (pDesignerObjectDesc->properties[j].Name[0]=='\0')
 					{
 						break;
 					}
-					if (pObjectDesc->properties[j].setbool)
+					if (pDesignerObjectDesc->properties[j].setbool)
 					{
-						PX_Json_Value *pvalue=PX_JsonGetObjectValue(pJsonValue,pObjectDesc->properties[j].Name);
+						PX_Json_Value *pvalue=PX_JsonGetObjectValue(pJsonValue,pDesignerObjectDesc->properties[j].Name);
 						if (pvalue&&pvalue->type==PX_JSON_VALUE_TYPE_BOOLEAN)
 						{
-							pObjectDesc->properties[j].setbool(pNewObject,pvalue->_boolean);
+							pDesignerObjectDesc->properties[j].setbool(pNewObject,pvalue->_boolean);
 						}
 					}
-					else if(pObjectDesc->properties[j].setfloat)
+					else if(pDesignerObjectDesc->properties[j].setfloat)
 					{
-						PX_Json_Value *pvalue=PX_JsonGetObjectValue(pJsonValue,pObjectDesc->properties[j].Name);
+						PX_Json_Value *pvalue=PX_JsonGetObjectValue(pJsonValue,pDesignerObjectDesc->properties[j].Name);
 						if (pvalue&&pvalue->type==PX_JSON_VALUE_TYPE_NUMBER)
 						{
-							pObjectDesc->properties[j].setfloat(pNewObject,(px_float)pvalue->_number);
+							pDesignerObjectDesc->properties[j].setfloat(pNewObject,(px_float)pvalue->_number);
 						}
 					}
-					else if(pObjectDesc->properties[j].setint)
+					else if(pDesignerObjectDesc->properties[j].setint)
 					{
-						PX_Json_Value *pvalue=PX_JsonGetObjectValue(pJsonValue,pObjectDesc->properties[j].Name);
+						PX_Json_Value *pvalue=PX_JsonGetObjectValue(pJsonValue,pDesignerObjectDesc->properties[j].Name);
 						if (pvalue&&pvalue->type==PX_JSON_VALUE_TYPE_NUMBER)
 						{
-							pObjectDesc->properties[j].setint(pNewObject,(px_int)pvalue->_number);
+							pDesignerObjectDesc->properties[j].setint(pNewObject,(px_int)pvalue->_number);
 						}
 					}
-					else if(pObjectDesc->properties[j].setstring)
+					else if(pDesignerObjectDesc->properties[j].setstring)
 					{
-						PX_Json_Value *pvalue=PX_JsonGetObjectValue(pJsonValue,pObjectDesc->properties[j].Name);
+						PX_Json_Value *pvalue=PX_JsonGetObjectValue(pJsonValue,pDesignerObjectDesc->properties[j].Name);
 						if (pvalue&&pvalue->type==PX_JSON_VALUE_TYPE_STRING)
 						{
-							pObjectDesc->properties[j].setstring(pNewObject,pvalue->_string.buffer);
+							pDesignerObjectDesc->properties[j].setstring(pNewObject,pvalue->_string.buffer);
 						}
 					}
 				}

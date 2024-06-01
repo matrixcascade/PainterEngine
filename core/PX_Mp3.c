@@ -1104,7 +1104,7 @@ static px_void mp3d_DCT_II(px_float* grbuf, px_int n)
 
         for (; k < n; k++)
         {
-            px_float t[4][8], * x, * y = grbuf + k;
+            px_float t[4][8] = {0}, * x, * y = grbuf + k;
 
             for (x = t[0], i = 0; i < 8; i++, x++)
             {

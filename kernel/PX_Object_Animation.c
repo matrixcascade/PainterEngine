@@ -59,7 +59,7 @@ px_void PX_Object_AnimationSetLibrary(PX_Object *pObject,PX_AnimationLibrary *li
 PX_Object_Animation * PX_Object_GetAnimation(PX_Object *pObject)
 {
 	if(pObject->Type==PX_OBJECT_TYPE_ANIMATION)
-		return (PX_Object_Animation *)pObject->pObjectDesc;
+		return PX_ObjectGetDesc(PX_Object_Animation,pObject);
 	else
 		return PX_NULL;
 }

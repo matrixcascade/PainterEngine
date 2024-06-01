@@ -2,7 +2,7 @@
 
 PX_Object_CheckBox * PX_Object_GetCheckBox(PX_Object *pObject)
 {
-	PX_Object_CheckBox *pcb=(PX_Object_CheckBox *)pObject->pObjectDesc;
+	PX_Object_CheckBox *pcb=PX_ObjectGetDesc(PX_Object_CheckBox,pObject);
 	if (pObject->Type==PX_OBJECT_TYPE_CHECKBOX)
 	{
 		return pcb;

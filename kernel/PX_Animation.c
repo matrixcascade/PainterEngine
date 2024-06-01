@@ -998,7 +998,15 @@ px_rect PX_AnimationGetSize(PX_Animation *panimation)
 
 px_texture * PX_AnimationGetCurrentTexture(PX_Animation *panimation)
 {
-	return PX_VECTORAT(px_texture,&panimation->linker->frames,panimation->reg_currentFrameIndex);
+	if (!panimation->linker)
+	{
+		return PX_NULL;
+	}
+	if (panimation->reg_currentFrameIndex>=0&&panimation->reg_currentFrameIndex<panimation->linker->frames.size)
+	{
+		return PX_VECTORAT(px_texture,&panimation->linker->frames,panimation->reg_currentFrameIndex);
+	}
+	return PX_NULL;
 }
 
 px_void PX_AnimationRenderRotation(px_surface *psurface,PX_Animation *animation,px_point position,px_int angle,PX_ALIGN refPoint,PX_TEXTURERENDER_BLEND *blend)

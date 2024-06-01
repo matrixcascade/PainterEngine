@@ -46,11 +46,11 @@ px_bool PX_ExecuterVM_LastPrint(PX_VM *Ins,px_void *userptr)
 
 	if (PX_VM_STACK(Ins,0).type!=PX_VM_VARIABLE_TYPE_STRING)
 	{
-		PX_VM_RET(Ins,PX_VM_Variable_int(0));
+		PX_VM_RET(Ins,PX_Variable_int(0));
 		return PX_TRUE;
 	}
 	PX_Object_ExecuterLastPrintText(pObject,PX_VM_STACK(Ins,0)._string.buffer);
-	PX_VM_RET(Ins,PX_VM_Variable_int(PX_Object_PrinterGetLastCreateId(pExecute->printer)));
+	PX_VM_RET(Ins,PX_Variable_int(PX_Object_PrinterGetLastCreateId(pExecute->printer)));
 	return PX_TRUE;
 }
 
@@ -61,11 +61,25 @@ px_bool PX_ExecuterVM_Print(PX_VM *Ins,px_void *userptr)
 
 	if (PX_VM_STACK(Ins,0).type!=PX_VM_VARIABLE_TYPE_STRING)
 	{
-		PX_VM_RET(Ins,PX_VM_Variable_int(0));
+		PX_VM_RET(Ins,PX_Variable_int(0));
 		return PX_TRUE;
 	}
+	if (pExecute->preslib)
+	{
+		PX_Resource* pRes = PX_ResourceLibraryGet(pExecute->preslib, PX_VM_STACK(Ins, 0)._string.buffer);
+		if (pRes)
+		{
+			if (pRes->Type == PX_RESOURCE_TYPE_TEXTURE)
+			{
+				PX_Object_ExecuterPrintImage(pObject, &pRes->texture);
+				PX_VM_RET(Ins, PX_Variable_int(PX_Object_PrinterGetLastCreateId(pExecute->printer)));
+				return PX_TRUE;
+			}
+		}
+	}
+
 	PX_Object_ExecuterPrintText(pObject,PX_VM_STACK(Ins,0)._string.buffer);
-	PX_VM_RET(Ins, PX_VM_Variable_int(PX_Object_PrinterGetLastCreateId(pExecute->printer)));
+	PX_VM_RET(Ins, PX_Variable_int(PX_Object_PrinterGetLastCreateId(pExecute->printer)));
 	return PX_TRUE;
 }
 
@@ -77,17 +91,17 @@ px_bool PX_ExecuterVM_Sleep(PX_VM *Ins,px_void *userptr)
 
 	if (PX_VM_STACK(Ins,0).type!=PX_VM_VARIABLE_TYPE_INT)
 	{
-		PX_VM_RET(Ins,PX_VM_Variable_int(0));
+		PX_VM_RET(Ins,PX_Variable_int(0));
 		return PX_TRUE;
 	}
 	pExecute->vm.pThread[Ins->T].sleep=PX_VM_STACK(Ins,0)._int;
-	PX_VM_RET(Ins,PX_VM_Variable_int(0));
+	PX_VM_RET(Ins,PX_Variable_int(0));
 	return PX_TRUE;
 }
 
 px_bool PX_ExecuterVM_Rand(PX_VM *Ins,px_void *userptr)
 {
-	PX_VM_RET(Ins,PX_VM_Variable_int(PX_rand()%0x7fffffff));
+	PX_VM_RET(Ins,PX_Variable_int(PX_rand()%0x7fffffff));
 	return PX_TRUE;
 }
 
@@ -95,10 +109,10 @@ px_bool PX_ExecuterVM_Sin(PX_VM *Ins,px_void *userptr)
 {
 	if (PX_VM_STACK(Ins,0).type!=PX_VM_VARIABLE_TYPE_FLOAT)
 	{
-		PX_VM_RET(Ins,PX_VM_Variable_int(0));
+		PX_VM_RET(Ins,PX_Variable_int(0));
 		return PX_TRUE;
 	}
-	PX_VM_RET(Ins,PX_VM_Variable_float((px_float)PX_sind(PX_VM_STACK(Ins,0)._float)));
+	PX_VM_RET(Ins,PX_Variable_float((px_float)PX_sind(PX_VM_STACK(Ins,0)._float)));
 	return PX_TRUE;
 }
 
@@ -106,10 +120,10 @@ px_bool PX_ExecuterVM_Cos(PX_VM *Ins,px_void *userptr)
 {
 	if (PX_VM_STACK(Ins,0).type!=PX_VM_VARIABLE_TYPE_FLOAT)
 	{
-		PX_VM_RET(Ins,PX_VM_Variable_int(0));
+		PX_VM_RET(Ins,PX_Variable_int(0));
 		return PX_TRUE;
 	}
-	PX_VM_RET(Ins,PX_VM_Variable_float((px_float)PX_cosd(PX_VM_STACK(Ins,0)._float)));
+	PX_VM_RET(Ins,PX_Variable_float((px_float)PX_cosd(PX_VM_STACK(Ins,0)._float)));
 	return PX_TRUE;
 }
 
@@ -141,13 +155,13 @@ px_bool PX_ExecuterVM_CreateThread(PX_VM *Ins,px_void *userptr)
 
 	if (PX_VM_STACK(Ins,0).type!=PX_VM_VARIABLE_TYPE_STRING)
 	{
-		PX_VM_RET(Ins,PX_VM_Variable_int(0));
+		PX_VM_RET(Ins,PX_Variable_int(0));
 		return PX_TRUE;
 	}
 
 	if(!PX_VMBeginThreadFunction(&pExecute->vm,PX_VMGetFreeThreadId(Ins),PX_VM_STACK(Ins,0)._string.buffer,PX_NULL,0))
 	{
-		PX_VM_RET(Ins,PX_VM_Variable_int(0));
+		PX_VM_RET(Ins,PX_Variable_int(0));
 	}
 	return PX_TRUE;
 }
@@ -180,7 +194,7 @@ px_bool PX_Object_ExecuterRunPayload(PX_Object* pObject, const px_byte bin[],px_
 	return PX_TRUE;
 }
 
-static px_bool PX_Object_ExecuterRunScript(PX_Object *pObject,const px_char *pshellstr)
+px_bool PX_Object_ExecuterRunScript(PX_Object *pObject,const px_char pshellstr[])
 {
 	PX_Compiler compiler = {0};
 	px_memory bin = {0};
@@ -233,7 +247,29 @@ _ERROR:
 	return PX_FALSE;
 }
 
+px_void PX_Object_ExecuterSetBackgroundColor(PX_Object* pObject, px_color color)
+{
+	PX_Object_Executer* pExecuter = PX_ObjectGetDesc(PX_Object_Executer, pObject);
+	PX_ASSERTIF(pObject->Type != PX_OBJECT_TYPE_EXECUTER);
+	PX_Object_PrinterSetBackgroundColor(pExecuter->printer, color);
+	
+}
 
+px_void PX_Object_ExecuterSetFontColor(PX_Object* pObject, px_color color)
+{
+	PX_Object_Executer* pExecuter = PX_ObjectGetDesc(PX_Object_Executer, pObject);
+	PX_ASSERTIF(pObject->Type != PX_OBJECT_TYPE_EXECUTER);
+	PX_Object_PrinterSetFontColor(pExecuter->printer, color);
+
+}
+
+px_void PX_Object_ExecuterSetRunTick(PX_Object* pObject, px_int tick)
+{
+	PX_Object_Executer* pExecuter = PX_ObjectGetDesc(PX_Object_Executer, pObject);
+	PX_ASSERTIF(pObject->Type != PX_OBJECT_TYPE_EXECUTER);
+	pExecuter->runtick=tick;
+
+}
 
 PX_VM_DebuggerMap* PX_Object_ExecuterGetDebugMap(PX_Object* pObject)
 {
@@ -263,7 +299,7 @@ PX_VM* PX_Object_ExecuterGetVM(PX_Object* pObject)
 	}
 }
 
-px_bool PX_ExecuterRegistryHostFunction(PX_Object *pObject,const px_char Name[],PX_VM_Function_Modules function,px_void *userptr)
+px_bool PX_ExecuterRegistryHostFunction(PX_Object *pObject,const px_char Name[],PX_VM_Host_Function_Modules function,px_void *userptr)
 {
 	if (pObject->Type!=PX_OBJECT_TYPE_EXECUTER)
 	{
@@ -280,7 +316,7 @@ px_bool PX_ExecuterRegistryHostFunction(PX_Object *pObject,const px_char Name[],
 px_void PX_Object_ExecuterUpdate(PX_Object* pObject, px_dword elapsed)
 {
 	PX_Object_Executer *pdesc = PX_ObjectGetDesc(PX_Object_Executer, pObject);
-	PX_VMRun(&pdesc->vm, -1, elapsed);
+	PX_VMRun(&pdesc->vm,pdesc->runtick, elapsed);
 }
 
 px_void PX_Object_ExecuterRender(px_surface *psurface,PX_Object* pObject, px_dword elapsed)
@@ -307,22 +343,31 @@ PX_Object* PX_Object_ExecuterCreate(px_memorypool* mp, PX_Object* Parent, px_int
 	//console initialize
 	PX_memset(&desc, 0, sizeof(desc));
 	desc.fm = fm;
+	desc.runtick = -1;
 
 	pObject = PX_ObjectCreateEx(mp, Parent, 0, 0, 0, (px_float)width, (px_float)height, 0, PX_OBJECT_TYPE_EXECUTER, PX_Object_ExecuterUpdate, 0, PX_Object_ExecuterFree, &desc, sizeof(desc));
 	pdesc = PX_ObjectGetDesc(PX_Object_Executer, pObject);
 	pdesc->printer = PX_Object_PrinterCreate(mp, pObject, x, y, width, height, fm);
 	
-
-	if (!PX_Object_ExecuterRunScript(pObject,shellcode))
+	if (shellcode)
 	{
-		PX_ObjectDelete(pObject);
-		return PX_NULL;
+		if (!PX_Object_ExecuterRunScript(pObject, shellcode))
+		{
+			PX_ObjectDelete(pObject);
+			return PX_NULL;
+		}
+		PX_Object_ExecuterPrintText(pObject, "----------------------------------------");
+		PX_Object_ExecuterPrintText(pObject, "PainterEngine Console");
+		PX_Object_ExecuterPrintText(pObject, "----------------------------------------");
 	}
-	PX_Object_ExecuterPrintText(pObject, "----------------------------------------");
-	PX_Object_ExecuterPrintText(pObject, "PainterEngine Console");
-	PX_Object_ExecuterPrintText(pObject, "----------------------------------------");
 
 	return pObject;
+}
+
+px_void PX_Object_ExecuterSetResourceLibrary(PX_Object* pObject, PX_ResourceLibrary* preslib)
+{
+	PX_Object_Executer* pdesc = PX_ObjectGetDesc(PX_Object_Executer, pObject);
+	pdesc->preslib = preslib;
 }
 
 PX_Object* PX_Object_ExecuterCreatePayload(px_memorypool* mp, PX_Object* Parent, px_int x, px_int y, px_int width, px_int height, PX_FontModule* fm, const px_byte bin[],px_int binsize)

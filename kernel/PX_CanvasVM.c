@@ -480,7 +480,7 @@ px_void PX_CanvasVMLayerSetEditing(PX_CanvasVM* pCanvasVM, px_int index)
 	}
 
 	PX_CanvasVMExecuteShell(pCanvasVM);
-	PX_CanvasVMRepaintAllCache(pCanvasVM);
+	PX_CanvasVMRepaintAll(pCanvasVM);
 }
 
 px_int PX_CanvasVMGetEditingLayerIndex(PX_CanvasVM* pCanvasVM)
@@ -580,7 +580,7 @@ px_void PX_CanvasVMReset(PX_CanvasVM* pCanvasVM)
 	pCanvasVM->reg_ip = 0;
 	pCanvasVM->reg_snapshot_ip = 0;
 
-	PX_CanvasVMRepaintAllCache(pCanvasVM);
+	PX_CanvasVMRepaintAll(pCanvasVM);
 	PX_CanvasVMRepaintAllLayersPreview(pCanvasVM);
 }
 
@@ -628,7 +628,7 @@ px_bool PX_CanvasVMImport(PX_CanvasVM* pCanvasVM, const px_byte data[], px_int s
 	{
 		PX_CanvasVMExecuteShell(pCanvasVM);
 	}
-	PX_CanvasVMRepaintAllCache(pCanvasVM);
+	PX_CanvasVMRepaintAll(pCanvasVM);
 	PX_CanvasVMRepaintAllLayersPreview(pCanvasVM);
 	PX_CanvasVMPopad(pCanvasVM);
 	return PX_TRUE;
@@ -693,7 +693,7 @@ px_void PX_CanvasVMLayerCreate(PX_CanvasVM* pCanvasVM, const px_char name[])
 	if (!PX_MemoryCat(&pCanvasVM->shell, name, PX_strlen(name) + 1))return;
 
 	PX_CanvasVMExecuteShell(pCanvasVM);
-	PX_CanvasVMRepaintAllCache(pCanvasVM);
+	PX_CanvasVMRepaintAll(pCanvasVM);
 	return;
 }
 
@@ -712,7 +712,7 @@ px_void PX_CanvasVMLayerDelete(PX_CanvasVM* pCanvasVM)
 	PX_MemoryLeft(&pCanvasVM->shell, pCanvasVM->reg_ip);
 	if (!PX_MemoryCat(&pCanvasVM->shell, &header, sizeof(header)))return;
 	PX_CanvasVMExecuteShell(pCanvasVM);
-	PX_CanvasVMRepaintAllCache(pCanvasVM);
+	PX_CanvasVMRepaintAll(pCanvasVM);
 
 }
 
@@ -735,7 +735,7 @@ px_void PX_CanvasVMLayerMoveUp(PX_CanvasVM* pCanvasVM)
 
 	PX_CanvasVMExecuteShell(pCanvasVM);
 
-	PX_CanvasVMRepaintAllCache(pCanvasVM);
+	PX_CanvasVMRepaintAll(pCanvasVM);
 }
 
 px_void PX_CanvasVMLayerMoveDown(PX_CanvasVM* pCanvasVM)
@@ -756,7 +756,7 @@ px_void PX_CanvasVMLayerMoveDown(PX_CanvasVM* pCanvasVM)
 
 	PX_CanvasVMExecuteShell(pCanvasVM);
 
-	PX_CanvasVMRepaintAllCache(pCanvasVM);
+	PX_CanvasVMRepaintAll(pCanvasVM);
 }
 
 px_void PX_CanvasVMLayerVisible(PX_CanvasVM* pCanvasVM)
@@ -777,7 +777,7 @@ px_void PX_CanvasVMLayerVisible(PX_CanvasVM* pCanvasVM)
 
 	PX_CanvasVMExecuteShell(pCanvasVM);
 
-	PX_CanvasVMRepaintAllCache(pCanvasVM);
+	PX_CanvasVMRepaintAll(pCanvasVM);
 
 
 }
@@ -802,7 +802,36 @@ px_void PX_CanvasVMLayerClip(PX_CanvasVM* pCanvasVM)
 
 	PX_CanvasVMExecuteShell(pCanvasVM);
 
-	PX_CanvasVMRepaintAllCache(pCanvasVM);
+	PX_CanvasVMRepaintAll(pCanvasVM);
+}
+
+px_texture* PX_CanvasVMLayerGetEditingSurface(PX_CanvasVM* pCanvasVM)
+{
+	return PX_CanvasVMLayerGetSurface(pCanvasVM, PX_CanvasVMGetEditingLayerIndex(pCanvasVM));
+}
+
+px_texture* PX_CanvasVMLayerGetSurface(PX_CanvasVM* pCanvasVM, px_int index)
+{
+	if (index < 0 || index >= PX_COUNTOF(pCanvasVM->layers))
+	{
+		return PX_NULL;
+	}
+	if (!pCanvasVM->layers[index].activating)
+	{
+		return PX_NULL;
+	}
+	return &pCanvasVM->layers[index].surface_layer;
+	
+}
+
+px_surface* PX_CanvasVMLayerGetViewSurface(PX_CanvasVM* pCanvasVM)
+{
+	return &pCanvasVM->view_surface;
+}
+
+px_surface* PX_CanvasVMLayerGetCacheSurface(PX_CanvasVM* pCanvasVM)
+{
+	return &pCanvasVM->cache_surface;
 }
 
 static px_void PX_CanvasVMRenderLayerToSurface(PX_CanvasVM* pCanvasVM, px_int index, px_texture* prendertarget)
@@ -1038,7 +1067,7 @@ px_void PX_CanvasVMRepaintCacheToView(PX_CanvasVM* pdesc)
 
 }
 
-px_void PX_CanvasVMRepaintAllCache(PX_CanvasVM* pCanvasVM)
+px_void PX_CanvasVMRepaintAll(PX_CanvasVM* pCanvasVM)
 {
 	PX_CanvasVMRepaintBackFrontCache(pCanvasVM);
 	PX_CanvasVMUpdateMaskEditingCache(pCanvasVM);
@@ -1347,7 +1376,7 @@ px_void PX_CanvasVMMoveBack(PX_CanvasVM* pCanvasVM)
 		PX_CanvasVMExecuteShell(pCanvasVM);
 	}
 	pCanvasVM->reg_state_id++;
-	PX_CanvasVMRepaintAllCache(pCanvasVM);
+	PX_CanvasVMRepaintAll(pCanvasVM);
 	PX_CanvasVMRepaintAllLayersPreview(pCanvasVM);
 	PX_CanvasVMPopad(pCanvasVM);
 }
@@ -1358,7 +1387,7 @@ px_void PX_CanvasVMMoveForward(PX_CanvasVM* pCanvasVM)
 	{
 		PX_CanvasVMPushad(pCanvasVM);
 		PX_CanvasVMExecuteShell(pCanvasVM);
-		PX_CanvasVMRepaintAllCache(pCanvasVM);
+		PX_CanvasVMRepaintAll(pCanvasVM);
 		PX_CanvasVMRepaintAllLayersPreview(pCanvasVM);
 		PX_CanvasVMPopad(pCanvasVM);
 	}

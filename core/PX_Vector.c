@@ -203,6 +203,18 @@ px_bool PX_VectorCheckIndex(px_vector *vec,px_int index)
 	return PX_TRUE;
 }
 
+px_int PX_VectorGetPtrIndex(px_vector* vec, px_void* data)
+{
+	px_byte *pp=(px_byte *)vec->data;
+	px_byte *pd=(px_byte *)data;
+	if (pd>pp&&(pd-pp)/vec->nodesize<vec->size)
+	{
+		return (px_int)((pd-pp)/vec->nodesize);
+	}
+	return -1;
+	
+}
+
 px_bool PX_VectorAllocSize(px_vector *vec,px_int size)
 {
 	if (size<0||size<vec->size)

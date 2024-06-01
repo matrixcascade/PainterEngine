@@ -315,7 +315,7 @@ PX_Object * PX_Object_SliderBarCreate(px_memorypool *mp,PX_Object *Parent,px_int
 PX_Object_SliderBar * PX_Object_GetSliderBar( PX_Object *pObject )
 {
 	if(pObject->Type==PX_OBJECT_TYPE_SLIDERBAR)
-		return (PX_Object_SliderBar *)pObject->pObjectDesc;
+		return PX_ObjectGetDesc(PX_Object_SliderBar,pObject);
 	else
 		return PX_NULL;
 }

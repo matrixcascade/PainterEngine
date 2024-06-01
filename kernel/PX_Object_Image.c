@@ -156,26 +156,13 @@ px_void PX_Object_ImageFree( PX_Object *pBitmap )
 PX_Object * PX_Object_ImageCreate(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y,px_int width,px_int height,px_texture *ptex )
 {
 	PX_Object *pObject;
-	PX_Object_Image *pImage=(PX_Object_Image *)MP_Malloc(mp,sizeof(PX_Object_Image));
-	if (pImage==PX_NULL)
+	PX_Object_Image *pImage;
+	pObject=PX_ObjectCreateEx(mp,Parent,(px_float)x,(px_float)y,0,(px_float)width,(px_float)height,0,PX_OBJECT_TYPE_IMAGE,PX_NULL,PX_Object_ImageRender,PX_Object_ImageFree,PX_NULL,sizeof(PX_Object_Image));
+	if (pObject ==PX_NULL)
 	{
 		return PX_NULL;
 	}
-	PX_memset(pImage, 0, sizeof(PX_Object_Image));
-	pObject=PX_ObjectCreate(mp,Parent,(px_float)x,(px_float)y,0,(px_float)width,(px_float)height,0);
-	if (pObject==PX_NULL)
-	{
-		MP_Free(pObject->mp,pImage);
-		return PX_NULL;
-	}
-
-	pObject->pObjectDesc=pImage;
-	pObject->Enabled=PX_TRUE;
-	pObject->Visible=PX_TRUE;
-	pObject->Type=PX_OBJECT_TYPE_IMAGE;
-	pObject->ReceiveEvents=PX_TRUE;
-	pObject->Func_ObjectFree=PX_Object_ImageFree;
-	pObject->Func_ObjectRender=PX_Object_ImageRender;
+	pImage=PX_ObjectGetDesc(PX_Object_Image,pObject);
 	pImage->pTexture=ptex;
 	pImage->pmask=PX_NULL;
 	pImage->Align=PX_ALIGN_CENTER;
@@ -186,7 +173,7 @@ PX_Object * PX_Object_ImageCreate(px_memorypool *mp,PX_Object *Parent,px_int x,p
 PX_Object_Image * PX_Object_GetImage( PX_Object *pObject )
 {
 	if(pObject->Type==PX_OBJECT_TYPE_IMAGE)
-		return (PX_Object_Image *)pObject->pObjectDesc;
+		return PX_ObjectGetDesc(PX_Object_Image,pObject);
 	else
 		return PX_NULL;
 }

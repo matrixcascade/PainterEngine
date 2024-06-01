@@ -11,12 +11,12 @@ px_void PX_Object_AsmDebuggerMonitorOnRender(px_surface* psurface, PX_Object* pO
 
 px_bool PX_Object_AsmDebuggerMonitorOnCreate(px_memorypool* mp, PX_Object* ItemObject, px_void* userptr)
 {
-	ItemObject->Func_ObjectRender = PX_Object_AsmDebuggerMonitorOnRender;
+	PX_ObjectAddRenderFunction(ItemObject, PX_Object_AsmDebuggerMonitorOnRender);
 	ItemObject->User_ptr = userptr;
 	return PX_TRUE;
 }
 
-px_void PX_Object_AsmDebuggerPrintVar(PX_Object_AsmDebugger* pAsm, PX_VM_VARIABLE* pvar, px_char name[])
+px_void PX_Object_AsmDebuggerPrintVar(PX_Object_AsmDebugger* pAsm, px_variable* pvar, px_char name[])
 {
 	px_char content[64];
 	switch (pvar->type)
@@ -103,7 +103,7 @@ px_void PX_Object_AsmDebuggerSourceOnRender(px_surface *psurface,PX_Object *pObj
 
 px_bool PX_Object_AsmDebuggerSourceOnCreate(px_memorypool* mp, PX_Object* ItemObject, px_void* userptr)
 {
-	ItemObject->Func_ObjectRender = PX_Object_AsmDebuggerSourceOnRender;
+	PX_ObjectAddRenderFunction(ItemObject, PX_Object_AsmDebuggerSourceOnRender);
 	ItemObject->User_ptr = userptr;
 	return PX_TRUE;
 }
@@ -201,7 +201,7 @@ px_void PX_Object_AsmDebuggerRender(px_surface* prendersurface, PX_Object* pObje
 
 				for (i = 0; i < paramcount; i++)
 				{
-					PX_VM_VARIABLE* pvar = PX_VMGetVariablePointer(pDesc->vm, optype[i], param[i]);
+					px_variable* pvar = PX_VMGetVariablePointer(pDesc->vm, optype[i], param[i]);
 					px_char name[32];
 
 					if (pvar)
@@ -310,7 +310,7 @@ px_void PX_Object_AsmDebuggerOnSourceChanged(PX_Object* pObject, PX_Object_Event
 
 			for (i = 0; i < paramcount; i++)
 			{
-				PX_VM_VARIABLE* pvar = PX_VMGetVariablePointer(pAsm->vm, optype[i], param[i]);
+				px_variable* pvar = PX_VMGetVariablePointer(pAsm->vm, optype[i], param[i]);
 				px_char name[32];
 
 				if (pvar)

@@ -24,6 +24,7 @@ typedef enum
 
 struct _PX_Object_MessageBox;
 
+#define PX_OBJECT_MESSAGXBOX_CALLBACK_FUNCTION(name) px_void name(PX_Object *pObject,PX_Object_Event e, px_void *ptr)
 typedef px_void  (*PX_Object_MessageBoxCallBack)(PX_Object *pmessagebox,PX_Object_Event e, px_void *ptr);
 
 typedef struct _PX_Object_MessageBox

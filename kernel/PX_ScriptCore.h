@@ -316,36 +316,7 @@ typedef struct __PX_SCRIPT_ASM_HEADER
 	px_dword reserved[6];
 }PX_SCRIPT_ASM_HEADER;
 
-typedef enum __PX_SCRIPT_VM_VARIABLE_TYPE
-{
-	PX_VM_VARIABLE_TYPE_INT=1,
-	PX_VM_VARIABLE_TYPE_FLOAT=2,
-	PX_VM_VARIABLE_TYPE_STRING=4,
-	PX_VM_VARIABLE_TYPE_MEMORY=8,
-	PX_VM_VARIABLE_TYPE_HANDLE=16,
-}PX_VM_VARIABLE_TYPE;
 
-#define PX_VM_VARIABLE_TYPE_PTR PX_VM_VARIABLE_TYPE_INT
-#define PX_VM_VARIABLE_TYPE_NUMERIC (PX_VM_VARIABLE_TYPE_INT|PX_VM_VARIABLE_TYPE_FLOAT)
-
-typedef struct __PX_VM_VARIABLE
-{
-	px_int type;
-	union
-	{
-		px_char _byte;
-		px_char _char;
-		px_word _word;
-		px_dword _dword;
-		px_short _short;
-		px_int _int;
-		px_uint _uint;
-		px_float _float;
-		px_void* _userptr;
-		px_string _string;
-		px_memory _memory;
-	};
-}PX_VM_VARIABLE;
 
 typedef struct __PX_ASM_GRAMMAR
 {

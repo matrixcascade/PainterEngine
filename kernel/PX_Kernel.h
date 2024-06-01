@@ -11,7 +11,7 @@
 #define _PX_KERNEL_H
 #include "PX_Script_Interpreter.h"
 #include "PX_Script_ASMCompiler.h"
-#include "PX_Script_VM.h"
+#include "PX_VM.h"
 #include "PX_Partical.h"
 #include "PX_Animation.h"
 #include "PX_World.h"

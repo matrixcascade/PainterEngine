@@ -154,14 +154,18 @@ px_void PX_CanvasVMLayerMoveUp(PX_CanvasVM* pCanvasVM);
 px_void PX_CanvasVMLayerMoveDown(PX_CanvasVM* pCanvasVM);
 px_void PX_CanvasVMLayerVisible(PX_CanvasVM* pCanvasVM);
 px_void PX_CanvasVMLayerClip(PX_CanvasVM* pCanvasVM);
-
+px_texture * PX_CanvasVMLayerGetEditingSurface(PX_CanvasVM* pCanvasVM);
+px_texture* PX_CanvasVMLayerGetSurface(PX_CanvasVM* pCanvasVM, px_int index);
+px_texture* PX_CanvasVMLayerGetSurface(PX_CanvasVM* pCanvasVM, px_int index);
+px_surface* PX_CanvasVMLayerGetViewSurface(PX_CanvasVM* pCanvasVM);
+px_surface* PX_CanvasVMLayerGetCacheSurface(PX_CanvasVM* pCanvasVM);
 
 px_bool PX_CanvasVMExecuteShell(PX_CanvasVM* pCanvasVM);
 
 px_void PX_CanvasVMRepaintBackFrontCache(PX_CanvasVM* pCanvasVM);
 px_void PX_CanvasVMRepaintCache(PX_CanvasVM* pCanvasVM);
 px_void PX_CanvasVMRepaintCacheToView(PX_CanvasVM* pCanvasVM);
-px_void PX_CanvasVMRepaintAllCache(PX_CanvasVM* pCanvasVM);
+px_void PX_CanvasVMRepaintAll(PX_CanvasVM* pCanvasVM);
 px_void PX_CanvasVMRepaintAllLayersPreview(PX_CanvasVM* pCanvasVM);
 px_void PX_CanvasVMUpdateMaskEditingCache(PX_CanvasVM* pdesc);
 px_point2D PX_CanvasVMCanvasPostionToViewPosition(PX_CanvasVM* pCanvasVM, px_point2D canvasPos);

@@ -54,38 +54,19 @@ px_void PX_Object_ScrollAreaVSliderChanged(PX_Object *pObject,PX_Object_Event e,
 PX_Object * PX_Object_ScrollAreaCreate(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y,px_int Width,px_int Height)
 {
 	PX_Object *pObject;
-	PX_Object_ScrollArea *pSA=(PX_Object_ScrollArea *)MP_Malloc(mp,sizeof(PX_Object_ScrollArea));
+	PX_Object_ScrollArea *pSA;
 
-	if (pSA==PX_NULL)
-	{
-		return PX_NULL;
-	}
-	PX_memset(pSA,0,sizeof(PX_Object_ScrollArea));
-
-	if (Height<=24||Width<=24)
+	if (Height <= 24 || Width <= 24)
 	{
 		return PX_NULL;
 	}
 
-	pObject=PX_ObjectCreate(mp,Parent,(px_float)x,(px_float)y,0,(px_float)Width,(px_float)Height,0);
-
-	if (pObject==PX_NULL)
+	pObject=PX_ObjectCreateEx(mp,Parent,(px_float)x,(px_float)y,0,(px_float)Width,(px_float)Height,0,PX_OBJECT_TYPE_SCROLLAREA,PX_NULL,PX_Object_ScrollAreaRender,PX_Object_ScrollAreaFree,PX_NULL,sizeof(PX_Object_ScrollArea));
+	if (pObject ==PX_NULL)
 	{
 		return PX_NULL;
 	}
-
-	if (!pObject)
-	{
-		MP_Free(mp,pSA);
-		return PX_NULL;
-	}
-
-	pObject->pObjectDesc=pSA;
-	pObject->Type=PX_OBJECT_TYPE_SCROLLAREA;
-	pObject->ReceiveEvents=PX_TRUE;
-	pObject->Func_ObjectFree=PX_Object_ScrollAreaFree;
-	pObject->Func_ObjectRender=PX_Object_ScrollAreaRender;
-
+	pSA=PX_ObjectGetDesc(PX_Object_ScrollArea,pObject);
 	pSA->BackgroundColor=PX_COLOR(0,0,0,0);
 	pSA->bBorder=PX_TRUE;
 	pSA->borderColor=PX_COLOR(255,0,0,0);
@@ -95,8 +76,6 @@ PX_Object * PX_Object_ScrollAreaCreate(px_memorypool *mp,PX_Object *Parent,px_in
 	pSA->vscroll=PX_Object_SliderBarCreate(mp,pObject,0,0,16,16,PX_OBJECT_SLIDERBAR_TYPE_VERTICAL,PX_OBJECT_SLIDERBAR_STYLE_BOX);
 	if(!PX_SurfaceCreate(mp,Width,Height,&pSA->surface))
 	{
-		MP_Free(mp,pSA);
-		MP_Free(mp,pObject);
 		return PX_NULL;
 	}
 	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_ANY,PX_Object_ScrollArea_EventDispatcher,PX_NULL);
@@ -393,8 +372,8 @@ px_void PX_Object_ScrollAreaSetBorderColor(PX_Object *pObj,px_color borderColor)
 
 PX_Object_ScrollArea * PX_Object_GetScrollArea(PX_Object *pObject)
 {
-	if(pObject->Type==PX_OBJECT_TYPE_SCROLLAREA)
-		return (PX_Object_ScrollArea *)pObject->pObjectDesc;
+	if (pObject->Type == PX_OBJECT_TYPE_SCROLLAREA)
+		return PX_ObjectGetDesc(PX_Object_ScrollArea, pObject);
 	else
 		return PX_NULL;
 }

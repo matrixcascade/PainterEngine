@@ -3,7 +3,7 @@
 
 PX_Object_RadioBox * PX_Object_GetRadioBox(PX_Object *pObject)
 {
-	PX_Object_RadioBox *pcb=(PX_Object_RadioBox *)pObject->pObjectDesc;
+	PX_Object_RadioBox *pcb=PX_ObjectGetDesc(PX_Object_RadioBox,pObject);
 	if (pObject->Type==PX_OBJECT_TYPE_RADIOBOX)
 	{
 		return pcb;

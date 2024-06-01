@@ -12,7 +12,7 @@ PX_Object_SelectBar *PX_Object_GetSelectBar(PX_Object *pSelecrBar)
 {
 	if (pSelecrBar->Type==PX_OBJECT_TYPE_SELECTBAR)
 	{
-		return (PX_Object_SelectBar *)pSelecrBar->pObjectDesc;
+		return PX_ObjectGetDesc(PX_Object_SelectBar,pSelecrBar);
 	}
 	return PX_NULL;
 }
@@ -350,14 +350,14 @@ static px_void PX_SelectbarRender(px_surface *pRenderSurface,PX_Object *pObject,
 PX_Object * PX_Object_SelectBarCreate(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y,px_int width,px_int height,PX_FontModule *fontmodule)
 {
 	PX_Object *pObject;
-	PX_Object_SelectBar *pSelectbar=(PX_Object_SelectBar *)MP_Malloc(mp,sizeof(PX_Object_SelectBar));
-
-	if (pSelectbar==PX_NULL)
+	PX_Object_SelectBar *pSelectbar;
+	pObject=PX_ObjectCreateEx(mp,Parent,(px_float)x,(px_float)y,0,(px_float)width,(px_float)height,0,PX_OBJECT_TYPE_SELECTBAR,PX_NULL,PX_SelectbarRender,PX_SelectbarFree,PX_NULL,sizeof(PX_Object_SelectBar));
+	if (pObject ==PX_NULL)
 	{
 		return PX_NULL;
 	}
-
-	PX_memset(pSelectbar,0,sizeof(PX_Object_SelectBar));
+	pObject->OnLostFocusReleaseEvent = PX_TRUE;
+	pSelectbar=PX_ObjectGetDesc(PX_Object_SelectBar,pObject);
 	pSelectbar->fontmodule=fontmodule;
 	pSelectbar->mp=mp;
 	pSelectbar->activating=PX_FALSE;
@@ -379,23 +379,6 @@ PX_Object * PX_Object_SelectBarCreate(px_memorypool *mp,PX_Object *Parent,px_int
 	pSelectbar->activating=PX_FALSE;
 	pSelectbar->style=PX_OBJECT_SELECTBAR_STYLE_RECT;
 	PX_VectorInitialize(mp,&pSelectbar->Items,sizeof(PX_Object_SelectBar_Item),16);
-
-
-	pObject=PX_ObjectCreate(mp,Parent,(px_float)x,(px_float)y,0,(px_float)width,(px_float)height,0);
-	if (pObject==PX_NULL)
-	{
-		MP_Free(pObject->mp,pSelectbar);
-		return PX_NULL;
-	}
-
-
-	pObject->pObjectDesc=pSelectbar;
-	pObject->Enabled=PX_TRUE;
-	pObject->Visible=PX_TRUE;
-	pObject->Type=PX_OBJECT_TYPE_SELECTBAR;
-	pObject->Func_ObjectFree=PX_SelectbarFree;
-	pObject->Func_ObjectRender=PX_SelectbarRender;
-	pObject->OnLostFocusReleaseEvent=PX_TRUE;
 
 	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_CURSORDOWN,PX_SelectbarOnCursorEvent,PX_NULL);
 	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_CURSORMOVE,PX_SelectbarOnCursorEvent,PX_NULL);
@@ -509,6 +492,24 @@ px_void PX_Object_SelectBarSetCurrentIndex(PX_Object *pObject,px_int index)
 			pSelectBar->selectIndex=index;
 		}
 	}
+}
+
+px_void PX_Object_SelectBarSetCurrentIndexByName(PX_Object* pObject, const px_char name[])
+{
+	PX_Object_SelectBar* pSelectBar = PX_Object_GetSelectBar(pObject);
+	if (pSelectBar)
+	{
+		px_int i;
+		for (i = 0; i < pSelectBar->Items.size; i++)
+		{
+			if (PX_strequ(name, PX_VECTORAT(PX_Object_SelectBar_Item, &pSelectBar->Items, i)->Text))
+			{
+				pSelectBar->selectIndex = i;
+				return;
+			}
+		}
+	}
+
 }
 
 px_void PX_Object_SelectBarSetStyle(PX_Object *pObject,PX_OBJECT_SELECTBAR_STYLE style)

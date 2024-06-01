@@ -2,7 +2,7 @@
 #define PX_RESOURCE_H
 
 #include "../core/PX_Core.h"
-#include "PX_Script_VM.h"
+#include "PX_VM.h"
 #include "PX_Animation.h"
 #include "PX_Partical.h"
 #include "PX_Script_Interpreter.h"

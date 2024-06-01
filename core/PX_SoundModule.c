@@ -157,8 +157,8 @@ px_int PX_SoundModuleFilter(PX_SoundModule *SoundModule,_IN px_double _in[],px_i
 						max=Frame[HZindex].re;
 					}
 				}
-
-				ModuleAmplitude[HZindex]=max;
+				if(HZindex<PX_SOUNDMODULE_FORMANT_COUNT)
+					ModuleAmplitude[HZindex]=max;
 			}
 
 			//now rebuild signal 

@@ -46,6 +46,7 @@ const px_char* PX_Object_SelectBarGetItemText(PX_Object* pObject, px_int index);
 px_void PX_Object_SelectBarSetDisplayCount(PX_Object* pObject, px_int count);
 px_int  PX_Object_SelectBarGetCurrentIndex(PX_Object *pObject);
 px_void  PX_Object_SelectBarSetCurrentIndex(PX_Object *pObject,px_int index);
+px_void PX_Object_SelectBarSetCurrentIndexByName(PX_Object* pObject, const px_char name[]);
 px_void PX_Object_SelectBarSetStyle(PX_Object *pObject,PX_OBJECT_SELECTBAR_STYLE style);
 px_void PX_Object_SelectBarSetFontColor(PX_Object *pObject,px_color color);
 px_void PX_Object_SelectBarSetCursorColor(PX_Object *pObject,px_color color);

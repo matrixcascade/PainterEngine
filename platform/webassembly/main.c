@@ -289,24 +289,104 @@ void mainloop(void *ptr)
 			PX_Object_Event e;
 			px_char str[2]={0};
 			e.Event=PX_OBJECT_EVENT_KEYDOWN;
-			PX_Object_Event_SetKeyDown(&e,event.key.keysym.sym);
-			PX_ApplicationPostEvent(&App,e);
 
 			str[0]=event.key.keysym.sym;
-			if ((str[0]>=0x20&&str[0]<=0x7E)||str[0]==0x08||str[0]==0x0d||str[0]==0x0a)
+			if (event.key.keysym.sym==SDLK_BACKSPACE)
 			{
-				e.Event=PX_OBJECT_EVENT_STRING;
-				PX_Object_Event_SetStringPtr(&e,str);
+				str[0]=PX_VK_BACK;
+			}
+			else if (event.key.keysym.sym==SDLK_TAB)
+			{
+				str[0]=PX_VK_SPACE;
+			}
+			else if (event.key.keysym.sym==SDLK_DELETE)
+			{
+				str[0]=PX_VK_BACK;
+			}
+			else if (event.key.keysym.sym==SDLK_UP)
+			{
+				str[0]=PX_VK_UP;
+			}
+			else if (event.key.keysym.sym==SDLK_DOWN)
+			{
+				str[0]=PX_VK_DOWN;
+			}
+			else if (event.key.keysym.sym==SDLK_LEFT)
+			{
+				str[0]=PX_VK_LEFT;
+			}
+			else if (event.key.keysym.sym==SDLK_RIGHT)
+			{
+				str[0]=PX_VK_RIGHT;
+			}
+			else if(event.key.keysym.sym>=0x20&&event.key.keysym.sym<=0x7E)
+			{
+				str[0]=event.key.keysym.sym;
+			}
+			else
+			{
+				str[0]=0;
+			}
+			if(str[0])
+			{
+				PX_Object_Event_SetKeyDown(&e,event.key.keysym.sym);
 				PX_ApplicationPostEvent(&App,e);
 			}
-
+		}
+		else if(SDL_TEXTINPUT==event.type)
+		{
+			PX_Object_Event e;
+			e.Event=PX_OBJECT_EVENT_STRING;
+			PX_Object_Event_SetStringPtr(&e,event.text.text);
+			PX_ApplicationPostEvent(&App,e);
 		}
 		else if (SDL_KEYUP == event.type)
 		{
+			px_char keye;
 			PX_Object_Event e;
 			e.Event=PX_OBJECT_EVENT_KEYUP;
-			PX_Object_Event_SetKeyUp(&e,event.key.keysym.sym);
-			PX_ApplicationPostEvent(&App,e);
+			keye=event.key.keysym.sym;
+			if (event.key.keysym.sym==SDLK_BACKSPACE)
+			{
+				keye=PX_VK_BACK;
+			}
+			else if (event.key.keysym.sym==SDLK_TAB)
+			{
+				keye=PX_VK_SPACE;
+			}
+			else if (event.key.keysym.sym==SDLK_DELETE)
+			{
+				keye=PX_VK_BACK;
+			}
+			else if (event.key.keysym.sym==SDLK_UP)
+			{
+				keye=PX_VK_UP;
+			}
+			else if (event.key.keysym.sym==SDLK_DOWN)
+			{
+				keye=PX_VK_DOWN;
+			}
+			else if (event.key.keysym.sym==SDLK_LEFT)
+			{
+				keye=PX_VK_LEFT;
+			}
+			else if (event.key.keysym.sym==SDLK_RIGHT)
+			{
+				keye=PX_VK_RIGHT;
+			}
+			else if(event.key.keysym.sym>=0x20&&event.key.keysym.sym<=0x7E)
+			{
+				keye=event.key.keysym.sym;
+			}
+			else
+			{
+				keye=0;
+			}
+			if(keye)
+			{
+				PX_Object_Event_SetKeyUp(&e,keye);
+				PX_ApplicationPostEvent(&App,e);
+			}
 		}
 		if (event.type == SDL_QUIT) {};
 

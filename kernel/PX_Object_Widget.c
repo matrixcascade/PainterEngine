@@ -208,30 +208,21 @@ px_void PX_Object_WidgetRender(px_surface *psurface, PX_Object *pObject,px_uint 
 PX_Object * PX_Object_WidgetCreate(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y,px_int width,px_int height,const px_char title[],PX_FontModule *fontmodule)
 {
 	PX_Object *pObject;
-	PX_Object_Widget *pWidget=(PX_Object_Widget *)MP_Malloc(mp,sizeof(PX_Object_Widget));
-	PX_memset(pWidget,0,sizeof(PX_Object_Widget));
-	if(width<=0) width=1;
-	if(height<=PX_OBJECT_WIDGET_BAR_SIZE)height=PX_OBJECT_WIDGET_BAR_SIZE+1;
+	PX_Object_Widget *pWidget;
+	if (width <= 0) width = 1;
+	if (height <= PX_OBJECT_WIDGET_BAR_SIZE)height = PX_OBJECT_WIDGET_BAR_SIZE + 1;
 
+	pObject=PX_ObjectCreateEx(mp,Parent,(px_float)x,(px_float)y,0,(px_float)width,(px_float)height,0,PX_OBJECT_TYPE_WIDGET,PX_NULL,PX_Object_WidgetRender,PX_Object_WidgetFree,PX_NULL,sizeof(PX_Object_Widget));
+	if (pObject==PX_NULL)
+	{
+		return PX_NULL;
+	}
+	pWidget=PX_Object_GetWidget(pObject);
+	
 	if (pWidget==PX_NULL)
 	{
 		return PX_NULL;
 	}
-	PX_memset(pWidget,0,sizeof(PX_Object_Widget));
-
-	pObject=PX_ObjectCreate(mp,Parent,(px_float)x,(px_float)y,0,(px_float)width,(px_float)height,0);
-
-	if (pObject==PX_NULL)
-	{
-
-		return PX_NULL;
-	}
-
-	pObject->pObjectDesc=pWidget;
-	pObject->Type=PX_OBJECT_TYPE_WIDGET;
-	pObject->ReceiveEvents=PX_TRUE;
-	pObject->Func_ObjectFree=PX_Object_WidgetFree;
-	pObject->Func_ObjectRender=PX_Object_WidgetRender;
 	pObject->OnLostFocusReleaseEvent=PX_FALSE;
 
 	if (PX_strlen(title)<sizeof(pWidget->title)-1)
@@ -262,18 +253,14 @@ PX_Object * PX_Object_WidgetCreate(px_memorypool *mp,PX_Object *Parent,px_int x,
 	pObject->Func_ObjectLinkChild=PX_Object_WidgetLinkChild;
 	return pObject;
 _ERROR:
-	if(pWidget)
-		MP_Free(mp,pWidget);
-	if(pObject)
-		PX_ObjectDelete(pObject);
-	return PX_FALSE;
+	return PX_NULL;
 }
 
 PX_Object_Widget * PX_Object_GetWidget(PX_Object *pObject)
 {
 	if (pObject->Type==PX_OBJECT_TYPE_WIDGET)
 	{
-		return (PX_Object_Widget *)pObject->pObjectDesc;
+		return PX_ObjectGetDesc(PX_Object_Widget,pObject);
 	}
 	return PX_NULL;
 }
@@ -330,6 +317,11 @@ px_surface* PX_Object_WidgetGetRenderTarget(PX_Object* pObject)
 px_void PX_Object_WidgetReleaseFocus(PX_Object* pObject)
 {
 	PX_ObjectClearFocus(pObject);
+}
+
+px_bool PX_Object_WidgetIsOnFocus(PX_Object* pObject)
+{
+	return PX_ObjectIsOnFocus(pObject);
 }
 
 px_void PX_Object_WidgetSetBorderColor(PX_Object *pObject,px_color clr)

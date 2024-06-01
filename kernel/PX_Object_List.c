@@ -2,7 +2,7 @@
 PX_Object_List  * PX_Object_GetList( PX_Object *pObject )
 {
 	if(pObject->Type==PX_OBJECT_TYPE_LIST)
-		return (PX_Object_List *)pObject->pObjectDesc;
+		return PX_ObjectGetDesc(PX_Object_List, pObject);
 	else
 		return PX_NULL;
 }
@@ -10,7 +10,7 @@ PX_Object_List  * PX_Object_GetList( PX_Object *pObject )
 PX_Object_ListItem  * PX_Object_GetListItem( PX_Object *pObject )
 {
 	if(pObject->Type==PX_OBJECT_TYPE_LISTITEM)
-		return (PX_Object_ListItem *)pObject->pObjectDesc;
+		return PX_ObjectGetDesc(PX_Object_ListItem, pObject);
 	else
 		return PX_NULL;
 }
@@ -582,7 +582,7 @@ static px_void PX_Object_ListContentItemOnRender(px_surface* psurface, PX_Object
 
 px_bool PX_Designer_ListContentItemOnCreate(px_memorypool* mp, PX_Object* ItemObject, px_void* userptr)
 {
-	ItemObject->Func_ObjectRender = PX_Object_ListContentItemOnRender;
+	PX_ObjectAddRenderFunction(ItemObject, PX_Object_ListContentItemOnRender);
 	return PX_TRUE;
 }
 
@@ -729,7 +729,7 @@ px_int PX_Object_ListGetItemCount(PX_Object* pListObject)
 
 px_void* PX_Object_ListItemGetData(PX_Object* pItemObject)
 {
-	PX_Object_ListItem* pItem=(PX_Object_ListItem *)pItemObject->pObjectDesc;
+	PX_Object_ListItem* pItem=PX_ObjectGetDesc(PX_Object_ListItem,pItemObject);
 	return pItem->pdata;
 }
 
@@ -892,8 +892,10 @@ px_void PX_Object_ListArrayRender(px_surface* psurface, PX_Object* pObject, px_u
 
 px_bool PX_Designer_ListArrayItemOnCreate(px_memorypool* mp, PX_Object* ItemObject, px_void* userptr)
 {
-	PX_Object_List* pList = (PX_Object_List*)PX_ObjectGetDesc(PX_Object_ListItem, ItemObject)->pList->pObjectDesc;
-	ItemObject->Func_ObjectRender = pList->ArrayRender;
+	PX_Object_ListItem* pItem = PX_ObjectGetDesc(PX_Object_ListItem, ItemObject);
+	PX_Object_List* pList =PX_ObjectGetDesc(PX_Object_List, pItem->pList);
+
+	PX_ObjectSetRenderFunction(ItemObject, pList->ArrayRender,0);
 	return PX_TRUE;
 }
 PX_Object* PX_Object_ListArrayCreate(px_memorypool* mp, PX_Object* Parent, px_int x, px_int y, px_int Width, px_int Height, px_int ItemHeight, Function_ObjectRender render, px_void* userptr)
@@ -905,7 +907,7 @@ PX_Object* PX_Object_ListArrayCreate(px_memorypool* mp, PX_Object* Parent, px_in
 	{
 		PX_Object_List* pList = PX_ObjectGetDesc(PX_Object_List, pObject);
 		pList->ArrayRender = render;
-		pObject->Func_ObjectRender = PX_Object_ListArrayRender;
+		PX_ObjectSetRenderFunction(pObject, PX_Object_ListArrayRender, 0);
 		return pObject;
 	}
 	return PX_NULL;

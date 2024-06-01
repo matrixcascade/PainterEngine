@@ -7,7 +7,7 @@ px_void PX_Object_ProcessBarRender(px_surface *psurface, PX_Object *pObject,px_u
 	px_int x,y,w,h;
 	px_float inheritX,inheritY;
 
-	PX_Object_ProcessBar *pProcessBar=(PX_Object_ProcessBar *)pObject->pObjectDesc;
+	PX_Object_ProcessBar *pProcessBar=PX_ObjectGetDesc(PX_Object_ProcessBar,pObject);
 	PX_ObjectGetInheritXY(pObject,&inheritX,&inheritY);
 
 	x=(px_int)(pObject->x+inheritX);
@@ -72,25 +72,13 @@ px_void PX_Object_ProcessBarRender(px_surface *psurface, PX_Object *pObject,px_u
 PX_Object * PX_Object_ProcessBarCreate(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y,px_int Width,px_int Height )
 {
 	PX_Object *pObject;
-	PX_Object_ProcessBar *ProcessBar=(PX_Object_ProcessBar *)MP_Malloc(mp,sizeof(PX_Object_ProcessBar));
-	if (ProcessBar==PX_NULL)
+	PX_Object_ProcessBar *ProcessBar;
+	pObject=PX_ObjectCreateEx(mp,Parent,(px_float)x,(px_float)y,0,(px_float)Width,(px_float)Height,0,PX_OBJECT_TYPE_PROCESSBAR,PX_NULL,PX_Object_ProcessBarRender,PX_NULL,PX_NULL,sizeof(PX_Object_ProcessBar));
+	if (pObject ==PX_NULL)
 	{
 		return PX_NULL;
 	}
-	pObject=PX_ObjectCreate(mp,Parent,(px_float)x,(px_float)y,0,(px_float)Width,(px_float)Height,0);
-	if (pObject==PX_NULL)
-	{
-		MP_Free(pObject->mp,ProcessBar);
-		return PX_NULL;
-	}
-
-	pObject->pObjectDesc=ProcessBar;
-	pObject->Enabled=PX_TRUE;
-	pObject->Visible=PX_TRUE;
-	pObject->Type=PX_OBJECT_TYPE_PROCESSBAR;
-	pObject->ReceiveEvents=PX_FALSE;
-	pObject->Func_ObjectFree=PX_NULL;
-	pObject->Func_ObjectRender=PX_Object_ProcessBarRender;
+	ProcessBar = PX_ObjectGetDesc(PX_Object_ProcessBar,pObject);
 
 	ProcessBar->MAX=100;
 	ProcessBar->Value=0;
@@ -162,7 +150,7 @@ px_int PX_Object_ProcessBarGetMax(PX_Object* pProcessBar)
 PX_Object_ProcessBar * PX_Object_GetProcessBar( PX_Object *pObject )
 {
 	if(pObject->Type==PX_OBJECT_TYPE_PROCESSBAR)
-		return (PX_Object_ProcessBar *)pObject->pObjectDesc;
+		return PX_ObjectGetDesc(PX_Object_ProcessBar,pObject);
 	else
 		return PX_NULL;
 }

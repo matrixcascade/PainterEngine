@@ -3,7 +3,7 @@ static PX_Object_Menu *PX_Object_GetMenu(PX_Object *pMenuObject)
 {
 	if (pMenuObject->Type==PX_OBJECT_TYPE_MENU)
 	{
-		return (PX_Object_Menu *)pMenuObject->pObjectDesc;
+		return PX_ObjectGetDesc(PX_Object_Menu,pMenuObject);
 	}
 	return PX_NULL;
 }
@@ -433,33 +433,18 @@ px_void PX_Object_MenuOnCursorEvent(PX_Object *pObject,PX_Object_Event e,px_void
 PX_Object * PX_Object_MenuCreate(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y,px_int width,PX_FontModule *fontmodule)
 {
 	PX_Object *pObject;
-	PX_Object_Menu *pMenu=(PX_Object_Menu *)MP_Malloc(mp,sizeof(PX_Object_Menu));
+	PX_Object_Menu* pMenu;
+	pObject=PX_ObjectCreateEx(mp,Parent,(px_float)x,(px_float)y,0,(px_float)width,0,0,PX_OBJECT_TYPE_MENU,PX_NULL,PX_Object_MenuRender,PX_Object_MenuFree,PX_NULL,sizeof(PX_Object_Menu));
 
-	if (pMenu==PX_NULL)
+	if (pObject ==PX_NULL)
 	{
 		return PX_NULL;
 	}
-
+	pMenu=PX_ObjectGetDesc(PX_Object_Menu,pObject);
 	if (!PX_Object_MenuInitialize(mp,pMenu,x,y,width,fontmodule))
 	{
 		return PX_NULL;
 	}
-
-
-	pObject=PX_ObjectCreate(mp,Parent,(px_float)x,(px_float)y,0,0,0,0);
-	if (pObject==PX_NULL)
-	{
-		MP_Free(pObject->mp,pMenu);
-		return PX_NULL;
-	}
-
-
-	pObject->pObjectDesc=pMenu;
-	pObject->Enabled=PX_TRUE;
-	pObject->Visible=PX_TRUE;
-	pObject->Type=PX_OBJECT_TYPE_MENU;
-	pObject->Func_ObjectFree=PX_Object_MenuFree;
-	pObject->Func_ObjectRender=PX_Object_MenuRender;
 	pObject->OnLostFocusReleaseEvent=PX_TRUE;
 	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_CURSORDOWN,PX_Object_MenuOnCursorEvent,PX_NULL);
 	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_CURSORMOVE,PX_Object_MenuOnCursorEvent,PX_NULL);

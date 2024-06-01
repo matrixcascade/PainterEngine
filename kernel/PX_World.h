@@ -2,12 +2,12 @@
 #define PX_WORLD_OBJECT_H
 
 #include "../core/PX_Core.h"
-#include "PX_Script_VM.h"
+#include "PX_VM.h"
 #include "PX_Resource.h"
 #include "PX_Object.h"
 
 #define PX_WORLD_OBJECT_TYPE_NAME_LEN 32
-#define PX_WORLD_CALC_SIZE 1024*1024*2
+#define PX_WORLD_CALC_SIZE 1024*1024
 typedef struct
 {
 	px_bool DeleteMark;
@@ -45,6 +45,8 @@ typedef struct _PX_World
 	PX_VM  vm;
 	px_uint64 rand_seed;
 	px_map classes;
+
+	px_byte calc_buffer[PX_WORLD_CALC_SIZE];
 }PX_World;
 
 typedef PX_Object* (*PX_WorldCreateObjectFunc)(PX_World* pWorld, px_float x, px_float y, px_float z, px_float width, px_float height, px_float length, px_abi* abi);

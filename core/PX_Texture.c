@@ -91,7 +91,7 @@ px_void PX_TextureRenderClipMirror(px_surface* psurface, px_texture* tex, px_int
 	px_color clr;
 
 	PX_ASSERTIF(tex == PX_NULL);
-
+	PX_ASSERTIF(psurface == PX_NULL);
 	switch (refPoint)
 	{
 	case PX_ALIGN_LEFTTOP:

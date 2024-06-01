@@ -148,7 +148,7 @@ PX_Object* PX_Object_CircleButtonCreate(px_memorypool* mp, PX_Object* Parent, px
 	PX_Object *pObject= PX_Object_PushButtonCreate(mp, Parent, x, y, Radius*2, Radius*2, Text, fontmodule);
 	if (pObject)
 	{
-		PX_Object_PushButton *pPushButton = (PX_Object_PushButton *)pObject->pObjectDesc;
+		PX_Object_PushButton *pPushButton = PX_ObjectGetDesc(PX_Object_PushButton, pObject);
 		pPushButton->style = PX_OBJECT_PUSHBUTTON_STYLE_CIRCLE;
 		pObject->diameter=Radius*2.f;
 	}
@@ -158,7 +158,7 @@ PX_Object* PX_Object_CircleButtonCreate(px_memorypool* mp, PX_Object* Parent, px
 PX_Object_PushButton  * PX_Object_GetPushButton( PX_Object *pObject )
 {
 	if(pObject->Type==PX_OBJECT_TYPE_PUSHBUTTON)
-		return (PX_Object_PushButton *)pObject->pObjectDesc;
+		return PX_ObjectGetDesc(PX_Object_PushButton,pObject);
 	else
 		return PX_NULL;
 }
@@ -187,7 +187,7 @@ px_void PX_Object_PushButtonSetText( PX_Object *pObject,const px_char *Text )
 	}
 
 	TextLen=PX_strlen(Text);
-	pPushButton=(PX_Object_PushButton *)pObject->pObjectDesc;
+	pPushButton=PX_ObjectGetDesc(PX_Object_PushButton,pObject);
 
 	if (TextLen>PX_strlen(pPushButton->Text))
 	{
@@ -217,7 +217,7 @@ px_void PX_Object_PushButtonSetTips(PX_Object* pObject, const px_char* tips)
 	}
 
 	TextLen = PX_strlen(tips);
-	pPushButton = (PX_Object_PushButton*)pObject->pObjectDesc;
+	pPushButton = PX_ObjectGetDesc(PX_Object_PushButton, pObject);
 
 	if (pPushButton->Tips)
 	{

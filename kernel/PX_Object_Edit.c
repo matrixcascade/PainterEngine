@@ -4,7 +4,7 @@
 px_void PX_Object_EditGetCursorXY(PX_Object *pObject, px_int *cx, px_int *cy, px_int *height)
 {
 	px_int x = 0, y = 0, cursor = 0, fsize = 0;
-	PX_Object_Edit *pEdit = (PX_Object_Edit *)pObject->pObjectDesc;
+	PX_Object_Edit *pEdit = PX_ObjectGetDesc(PX_Object_Edit, pObject);
 	const px_char *Text = pEdit->text.buffer;
 	px_float objx, objy, objWidth, objHeight;
 	px_float inheritX, inheritY;
@@ -114,7 +114,7 @@ px_void PX_Object_EditGetCursorXY(PX_Object *pObject, px_int *cx, px_int *cy, px
 px_void PX_Object_EditUpdateCursorViewRegion(PX_Object *pObject)
 {
 	px_int cursorX, cursorY, cursorHeight;
-	PX_Object_Edit *pEdit = (PX_Object_Edit *)pObject->pObjectDesc;
+	PX_Object_Edit *pEdit = PX_ObjectGetDesc(PX_Object_Edit, pObject);
 	px_float objWidth, objHeight;
 	objWidth = pObject->Width;
 	objHeight = pObject->Height;
@@ -191,7 +191,19 @@ px_void PX_Object_EditOnMouseLButtonDown(PX_Object *pObject,PX_Object_Event e,px
 			PX_Object_EditUpdateCursorOnDown(pObject,(px_int)(x-objx),(px_int)(y-objy));
 		}
 		else
-			PX_Object_EditSetFocus(pObject,PX_FALSE);
+		{
+			PX_Object_EditSetFocus(pObject, PX_FALSE);
+			PX_memset(&e, sizeof(e), 0);
+			e.Event = PX_OBJECT_EVENT_LOSTFOCUS;
+			PX_ObjectExecuteEvent(pObject,e);
+			if (pEdit->lastChange)
+			{
+				pEdit->lastChange = PX_FALSE;
+				PX_memset(&e, sizeof(e), 0);
+				e.Event = PX_OBJECT_EVENT_LASTVALUECHANGED;
+				PX_ObjectExecuteEvent(pObject, e);
+			}
+		}
 	}
 }
 
@@ -202,6 +214,21 @@ px_void PX_Object_EditOnKeyboardString(PX_Object *pObject,PX_Object_Event e,px_v
 	if (pEdit->onFocus)
 	{
 		PX_Object_EditAddString(pObject,PX_Object_Event_GetStringPtr(e));
+	}
+}
+
+px_void PX_Object_EditOnKeyboardDown(PX_Object* pObject, PX_Object_Event e, px_void* user_ptr)
+{
+	PX_Object_Edit* pEdit = PX_Object_GetEdit(pObject);
+
+	if (pEdit->onFocus)
+	{
+		px_char key[2]= { 0 };
+		key[0] = (px_char)PX_Object_Event_GetKeyDown(e);
+		if(key[0]==PX_VK_LEFT||key[0]==PX_VK_RIGHT||key[0]==PX_VK_TAB)
+		{
+			PX_Object_EditAddString(pObject,key);
+		}
 	}
 }
 
@@ -220,24 +247,13 @@ static px_void PX_Object_EditCheckCursor(PX_Object_Edit*pedit)
 PX_Object* PX_Object_EditCreate(px_memorypool *mp, PX_Object *Parent,px_int x,px_int y,px_int Width,px_int Height,PX_FontModule *fontModule )
 {
 	PX_Object *pObject;
-	PX_Object_Edit *pEdit=(PX_Object_Edit *)MP_Malloc(mp,sizeof(PX_Object_Edit));
-	PX_memset(pEdit, 0, sizeof(PX_Object_Edit));
-	if (pEdit==PX_NULL)
-	{
-		return PX_NULL;
-	}
-	pObject=PX_ObjectCreate(mp,Parent,(px_float)x,(px_float)y,0,(px_float)Width,(px_float)Height,0);
-
-	if (pObject==PX_NULL)
-	{
-		return PX_NULL;
-	}
-
+	PX_Object_Edit *pEdit;
+	pObject=PX_ObjectCreateEx(mp, Parent,(px_float)x,(px_float)y,0,(px_float)Width,(px_float)Height,0,PX_OBJECT_TYPE_EDIT,PX_NULL,PX_Object_EditRender,PX_Object_EditFree,PX_NULL,sizeof(PX_Object_Edit));
 	if (!pObject)
 	{
-		MP_Free(mp,pEdit);
 		return PX_NULL;
 	}
+	pEdit=PX_ObjectGetDesc(PX_Object_Edit,pObject);
 
 	if(!PX_SurfaceCreate(mp,Width,Height,&pEdit->EditSurface))
 	{
@@ -246,19 +262,9 @@ PX_Object* PX_Object_EditCreate(px_memorypool *mp, PX_Object *Parent,px_int x,px
 		return PX_NULL;
 	}
 
-	pObject->pObjectDesc=pEdit;
-	pObject->Type=PX_OBJECT_TYPE_EDIT;
-	pObject->ReceiveEvents=PX_TRUE;
-	pObject->Func_ObjectFree=PX_Object_EditFree;
-	pObject->Func_ObjectRender=PX_Object_EditRender;
-
-
-
 	PX_StringInitialize(mp,&pEdit->text);
 
-
 	pEdit->TextColor=PX_OBJECT_UI_DEFAULT_FONTCOLOR;
-
 	pEdit->CursorColor=PX_COLOR_WHITE;
 	pEdit->BorderColor=PX_OBJECT_UI_DEFAULT_BORDERCOLOR;
 	pEdit->BackgroundColor=PX_OBJECT_UI_DEFAULT_BACKGROUNDCOLOR;
@@ -282,14 +288,14 @@ PX_Object* PX_Object_EditCreate(px_memorypool *mp, PX_Object *Parent,px_int x,px
 	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_CURSORMOVE,PX_Object_EditOnMouseMove,PX_NULL);
 	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_CURSORDOWN,PX_Object_EditOnMouseLButtonDown,PX_NULL);
 	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_STRING,PX_Object_EditOnKeyboardString,PX_NULL);
-
+	PX_ObjectRegisterEvent(pObject, PX_OBJECT_EVENT_KEYDOWN, PX_Object_EditOnKeyboardDown, PX_NULL);
 	return pObject;
 }
 
 PX_Object_Edit  * PX_Object_GetEdit( PX_Object *pObject )
 {
 	if(pObject->Type==PX_OBJECT_TYPE_EDIT)
-		return (PX_Object_Edit *)pObject->pObjectDesc;
+		return PX_ObjectGetDesc(PX_Object_Edit,pObject);
 	else
 		return PX_NULL;
 }
@@ -445,7 +451,7 @@ px_void PX_Object_EditSetBorder( PX_Object *pObj,px_bool Border )
 px_void PX_Object_EditUpdateCursorOnDown(PX_Object *pObject,px_int cx,px_int cy)
 {
 	px_int x_draw_oft=0,y_draw_oft=0,x=0,y=0,cursor=0,fsize=0;
-	PX_Object_Edit *pEdit=(PX_Object_Edit *)pObject->pObjectDesc;
+	PX_Object_Edit *pEdit=PX_ObjectGetDesc(PX_Object_Edit,pObject);
 	const px_char *Text=pEdit->text.buffer;
 	px_float objx,objy,objWidth,objHeight;
 	px_float inheritX,inheritY;
@@ -564,7 +570,7 @@ px_void PX_Object_EditUpdateCursorOnDown(PX_Object *pObject,px_int cx,px_int cy)
 px_void PX_Object_EditRender(px_surface *psurface, PX_Object *pObject,px_uint elapsed)
 {
 	px_int x_draw_oft,y_draw_oft,x,y,cursor,fsize;
-	PX_Object_Edit *pEdit=(PX_Object_Edit *)pObject->pObjectDesc;
+	PX_Object_Edit *pEdit=PX_ObjectGetDesc(PX_Object_Edit,pObject);
 	const px_char *Text=pEdit->text.buffer;
 	px_float objx,objy,objWidth,objHeight;
 	px_float inheritX,inheritY;
@@ -746,13 +752,30 @@ px_void PX_Object_EditAddString(PX_Object *pObject,px_char *Text)
 {
 	PX_Object_Edit *pEdit=PX_Object_GetEdit(pObject);
 	PX_Object_Event e;
+	px_char ch;
 	if (pObject!=PX_NULL)
 	{
 		PX_Object_EditCheckCursor(pEdit);
 		while (*Text)
 		{
-
-			if(*Text!=8)
+			pEdit->lastChange=PX_TRUE;
+			if(*Text==PX_VK_BACK)
+			{
+				PX_Object_EditBackspace(pObject);
+			}
+			else if(*Text==PX_VK_LEFT)
+			{
+				PX_Object_EditBackward(pObject);
+			}
+			else if(*Text==PX_VK_RIGHT)
+			{
+				PX_Object_EditForward(pObject);
+			}
+			else if(*Text==PX_VK_TAB)
+			{
+				PX_StringInsertChar(&pEdit->text, pEdit->cursor_index, ' '); 
+			}
+			else
 			{
 				if (!pEdit->multiLines&&Text[1]==0&&(*Text=='\n'||*Text=='\r'))
 				{
@@ -781,61 +804,58 @@ px_void PX_Object_EditAddString(PX_Object *pObject,px_char *Text)
 
 				if (pEdit->max_length>0)
 				{
-					if (PX_StringLen(&pEdit->text)<pEdit->max_length)
+					if (PX_StringLen(&pEdit->text)>=pEdit->max_length)
 					{
-						px_char ch=*Text;
-						if (ch=='\r')
-						{
-							ch='\n';
-						}
-						if (pEdit->inputmode == PX_OBJECT_EDIT_INPUT_MODE_LOWERCASE)
-						{
-							if (ch>='A'&& ch <= 'Z')
-							{
-								ch += 'a' - 'A';
-							}
-						}
-						else if(pEdit->inputmode == PX_OBJECT_EDIT_INPUT_MODE_UPPERCASE)
-						{
-							if (ch >= 'a' && ch <= 'z')
-							{
-								ch += 'A' - 'a';
-							}
-						}
-						PX_StringInsertChar(&pEdit->text,pEdit->cursor_index,ch);
+						return;
+					}
+				}
+				
+				ch = *Text;
+				if (ch == '\r')
+				{
+					ch = '\n';
+				}
+				if (pEdit->inputmode == PX_OBJECT_EDIT_INPUT_MODE_LOWERCASE)
+				{
+					if (ch >= 'A' && ch <= 'Z')
+					{
+						ch += 'a' - 'A';
+					}
+					PX_StringInsertChar(&pEdit->text, pEdit->cursor_index, ch);
+					pEdit->cursor_index++;
+				}
+				else if (pEdit->inputmode == PX_OBJECT_EDIT_INPUT_MODE_UPPERCASE)
+				{
+					if (ch >= 'a' && ch <= 'z')
+					{
+						ch += 'A' - 'a';
+					}
+					PX_StringInsertChar(&pEdit->text, pEdit->cursor_index, ch);
+					pEdit->cursor_index++;
+				}
+				else if (pEdit->inputmode == PX_OBJECT_EDIT_INPUT_MODE_INTEGER)
+				{
+					if (ch >= '0' && ch <= '9' || ch == '-')
+					{
+						PX_StringInsertChar(&pEdit->text, pEdit->cursor_index, ch);
+						pEdit->cursor_index++;
+					}
+				}
+				else if (pEdit->inputmode == PX_OBJECT_EDIT_INPUT_MODE_FLOAT)
+				{
+					if ((ch >= '0' && ch <= '9') || ch == '-' || ch == '.')
+					{
+						PX_StringInsertChar(&pEdit->text, pEdit->cursor_index, ch);
 						pEdit->cursor_index++;
 					}
 				}
 				else
 				{
-					px_char ch=*Text;
-					if (ch=='\r')
-					{
-						ch='\n';
-					}
-					if (pEdit->inputmode == PX_OBJECT_EDIT_INPUT_MODE_LOWERCASE)
-					{
-						if (ch >= 'A' && ch <= 'Z')
-						{
-							ch += 'a' - 'A';
-						}
-					}
-					else if (pEdit->inputmode == PX_OBJECT_EDIT_INPUT_MODE_UPPERCASE)
-					{
-						if (ch >= 'a' && ch <= 'z')
-						{
-							ch += 'A' - 'a';
-						}
-					}
-					PX_StringInsertChar(&pEdit->text,pEdit->cursor_index,ch);
+					PX_StringInsertChar(&pEdit->text, pEdit->cursor_index, ch);
 					pEdit->cursor_index++;
 				}
-
 			}
-			else
-			{
-				PX_Object_EditBackspace(pObject);
-			}
+			
 			Text++;
 		}
 	}
@@ -956,6 +976,195 @@ px_void PX_Object_EditBackspace(PX_Object *pObject)
 		e.Event=PX_OBJECT_EVENT_VALUECHANGED;
 		e.Param_ptr[0]=0;
 		PX_ObjectExecuteEvent(pObject,e);
+	}
+}
+
+px_void PX_Object_EditBackward(PX_Object* pObject)
+{
+	PX_Object_Edit* pEdit = PX_Object_GetEdit(pObject);
+	if (pObject != PX_NULL && pEdit->onFocus)
+	{
+		px_char* pText;
+		pText = pEdit->text.buffer;
+
+		if (!pEdit->fontModule)
+		{
+			if (pEdit->cursor_index)
+			{
+				pEdit->cursor_index--;
+			}
+			return;
+		}
+
+		switch (pEdit->fontModule->codePage)
+		{
+		case PX_FONTMODULE_CODEPAGE_GBK:
+		{
+			px_int idx = 0;
+			px_int c = 0;
+			while (PX_TRUE)
+			{
+
+				if (idx == pEdit->cursor_index)
+				{
+					break;
+				}
+
+				if (pText[idx] == 0)
+				{
+					break;
+				}
+
+				if (pText[idx] & 0x80)
+				{
+					c = 2;
+					idx += 2;
+				}
+				else
+				{
+					idx++;
+					c = 1;
+				}
+			}
+
+			while (c)
+			{
+				pEdit->cursor_index--;
+				c--;
+			}
+
+		}
+		break;
+		case PX_FONTMODULE_CODEPAGE_UTF8:
+		{
+			px_int i;
+			for (i = 0; i < 6; i++)
+			{
+				if (pEdit->cursor_index == 0)
+				{
+					break;
+				}
+
+				if ((pText[pEdit->cursor_index - 1] & 0x80) == 0x00)
+				{
+					pEdit->cursor_index--;
+					break;
+				}
+
+				if ((pText[pEdit->cursor_index - 1] & 0xc0) == 0x80)
+				{
+					pEdit->cursor_index--;
+					continue;
+				}
+
+				if ((pText[pEdit->cursor_index - 1] & 0xc0) == 0xc0)
+				{
+					pEdit->cursor_index--;
+					break;
+				}
+
+			}
+		}
+		break;
+		case PX_FONTMODULE_CODEPAGE_UTF16:
+		{
+			//not support
+		}
+		break;
+		default:
+		{
+			//not support
+		}
+		break;
+		}
+
+	}
+}
+
+px_void PX_Object_EditForward(PX_Object* pObject)
+{
+	PX_Object_Edit* pEdit = PX_Object_GetEdit(pObject);
+	if (pObject != PX_NULL && pEdit->onFocus)
+	{
+		px_char* pText;
+		pText = pEdit->text.buffer;
+
+		if (!pEdit->fontModule)
+		{
+			if (pEdit->cursor_index < PX_strlen(pText))
+			{
+				pEdit->cursor_index++;
+			}
+			return;
+		}
+
+		switch (pEdit->fontModule->codePage)
+		{
+		case PX_FONTMODULE_CODEPAGE_GBK:
+		{
+			if (pText[pEdit->cursor_index] == 0)
+			{
+				break;
+			}
+
+			if (pText[pEdit->cursor_index] & 0x80)
+			{
+				pEdit->cursor_index += 2;
+				break;
+			}
+			else
+			{
+				pEdit->cursor_index += 1;
+				break;
+			}
+			if (pEdit->cursor_index>PX_strlen(pEdit->text.buffer))
+			{
+				pEdit->cursor_index = PX_strlen(pEdit->text.buffer);
+			}
+		}
+		break;
+		case PX_FONTMODULE_CODEPAGE_UTF8:
+		{
+			px_int i;
+			for (i = 0; i < 6; i++)
+			{
+				if (pEdit->cursor_index == PX_strlen(pText))
+				{
+					break;
+				}
+
+				if ((pText[pEdit->cursor_index] & 0x80) == 0x00)
+				{
+					pEdit->cursor_index++;
+					break;
+				}
+
+				if ((pText[pEdit->cursor_index] & 0xc0) == 0x80)
+				{
+					pEdit->cursor_index++;
+					continue;
+				}
+
+				if ((pText[pEdit->cursor_index] & 0xc0) == 0xc0)
+				{
+					pEdit->cursor_index++;
+					break;
+				}
+
+			}
+		}
+		break;
+		case PX_FONTMODULE_CODEPAGE_UTF16:
+		{
+			//not support
+		}
+		break;
+		default:
+		{
+			//not support
+		}
+		break;
+		}
 	}
 }
 

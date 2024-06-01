@@ -10,7 +10,7 @@ typedef enum
 
 px_int PX_ArleCompressData(px_byte *_in,px_uchar size,PX_ARLE_TYPE type,px_byte *_out)
 {
-	px_uchar ecode;
+	px_uchar ecode=0;
 	if (size==0)
 	{
 		return 0;

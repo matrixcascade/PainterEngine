@@ -4,7 +4,7 @@ PX_Object_Protractor * PX_Object_GetProtractor(PX_Object *pObject)
 {
 	if (pObject->Type==PX_OBJECT_TYPE_PROTRACTOR)
 	{
-		return (PX_Object_Protractor *)pObject->pObjectDesc;
+		return PX_ObjectGetDesc(PX_Object_Protractor,pObject);
 	}
 	return PX_NULL;
 }

@@ -4,7 +4,7 @@ PX_Object_MessageBox *PX_Object_GetMessageBox(PX_Object *pObject)
 {
 	if (pObject->Type==PX_OBJECT_TYPE_MESSAGEBOX)
 	{
-		return (PX_Object_MessageBox *)pObject->pObjectDesc;
+		return PX_ObjectGetDesc(PX_Object_MessageBox,pObject);
 	}
 	return PX_NULL;
 }

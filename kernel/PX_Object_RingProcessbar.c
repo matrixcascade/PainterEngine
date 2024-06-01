@@ -8,7 +8,7 @@ px_void PX_Object_RingProcessBarRender(px_surface *psurface, PX_Object *pObject,
 	px_float process;
 	px_float inheritX,inheritY;
 
-	PX_Object_RingProcessBar *pDesc=(PX_Object_RingProcessBar *)pObject->pObjectDesc;
+	PX_Object_RingProcessBar *pDesc=PX_ObjectGetDesc(PX_Object_RingProcessBar,pObject);
 	PX_ObjectGetInheritXY(pObject,&inheritX,&inheritY);
 
 	x=(px_int)(pObject->x+inheritX);
@@ -102,7 +102,7 @@ px_int PX_Object_RingProcessBarGetMax(PX_Object* pRingProcessBar)
 PX_Object_RingProcessBar * PX_Object_GetRingProcessBar( PX_Object *pObject )
 {
 	if(pObject->Type== PX_OBJECT_TYPE_RINGPROGRESS)
-		return (PX_Object_RingProcessBar *)pObject->pObjectDesc;
+		return PX_ObjectGetDesc(PX_Object_RingProcessBar,pObject);
 	else
 		return PX_NULL;
 }

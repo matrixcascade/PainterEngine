@@ -24,7 +24,7 @@ painterengine_build_painterengine_o += $(patsubst %.cpp,%.o,$(painterengine_buil
 
 all:$(project_build_o)  $(painterengine_build_painterengine_o) 
 	gcc $(project_build_o) $(painterengine_build_painterengine_o) \
-	-o "$(project_path)\$(target)" \
+	-O3 -o "$(project_path)\$(target)" \
 	-I "$(painterengine_path)" \
 	-I "$(project_path)" \
 	-I "$(painterengine_path)\platform\windows" \
@@ -33,19 +33,19 @@ all:$(project_build_o)  $(painterengine_build_painterengine_o)
 	
 
 $(project_path)/%.o:$(project_path)/%.c
-	gcc -c $^ -o $@ -I "$(painterengine_path)" -I "$(painterengine_path)/platform/windows" -I "$(painterengine_path)/runtime"
+	gcc -O3 -c $^ -o $@ -I "$(painterengine_path)" -I "$(painterengine_path)/platform/windows" -I "$(painterengine_path)/runtime"
 
 $(painterengine_path)/runtime/%.o:$(painterengine_path)/runtime/%.c 
-	gcc -c $^ -o $@ -I "$(painterengine_path)"
+	gcc -O3 -c $^ -o $@ -I "$(painterengine_path)"
 
 $(painterengine_path)/kernel/%.o:$(painterengine_path)/kernel/%.c
-	gcc -c $^ -o $@
+	gcc -O3 -c $^ -o $@
 
 $(painterengine_path)/core/%.o:$(painterengine_path)/core/%.c
-	gcc -c $^ -o $@
+	gcc -O3 -c $^ -o $@
 
 $(painterengine_path)/platform/windows/%.o:$(painterengine_path)/platform/windows/%.c
-	gcc -c $^ -o $@ -I "$(project_path)" -I "$(painterengine_path)" -I "$(painterengine_path)/platform/windows"
+	gcc -O3 -c $^ -o $@ -I "$(project_path)" -I "$(painterengine_path)" -I "$(painterengine_path)/platform/windows"
 
 
 .PHONY:clean

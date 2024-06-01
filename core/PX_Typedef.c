@@ -3034,6 +3034,19 @@ px_void PX_strcpy(px_char *dst,const px_char *src,px_int size)
 	*(dst-1)='\0';
 }
 
+px_void PX_strcpy_until(px_char* dst, const px_char* src,px_char until, px_int size)
+{
+	while (size--)
+		if (*src&& *src!= until)
+			*(dst++) = *(src++);
+		else
+		{
+			*dst = '\0';
+			return;
+		}
+	*(dst - 1) = '\0';
+}
+
 px_void PX_wstrcpy(px_word *dst,const px_word *src,px_int size)
 {
 	while(size--)

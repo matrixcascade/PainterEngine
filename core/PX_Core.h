@@ -48,4 +48,5 @@
 #include "PX_Keyboard.h"
 #include "PX_Gif.h"
 #include "PX_Abi.h"
+#include "PX_Variable.h"
 #endif

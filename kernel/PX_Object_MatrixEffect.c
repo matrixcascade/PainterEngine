@@ -421,7 +421,7 @@ px_void PX_Object_MatrixEffectFreeEx(PX_Object_MatrixEffect *effect)
 
 PX_OBJECT_RENDER_FUNCTION(PX_Object_MatrixEffectRender)
 {
-	PX_Object_MatrixEffect *effect=(PX_Object_MatrixEffect *)pObject->pObjectDesc;
+	PX_Object_MatrixEffect *effect=PX_ObjectGetDesc(PX_Object_MatrixEffect,pObject);
 	PX_Object_MatrixEffectUpdateEx(effect,elapsed);
 	PX_Object_MatrixEffectRenderEx(effect,psurface);
 	if (effect->Done)
@@ -432,7 +432,7 @@ PX_OBJECT_RENDER_FUNCTION(PX_Object_MatrixEffectRender)
 
 PX_OBJECT_FREE_FUNCTION(PX_Object_MatrixEffectFree)
 {
-	PX_Object_MatrixEffect* effect = (PX_Object_MatrixEffect*)pObject->pObjectDesc;
+	PX_Object_MatrixEffect* effect = PX_ObjectGetDesc(PX_Object_MatrixEffect, pObject);
 	PX_Object_MatrixEffectFreeEx(effect);
 }
 

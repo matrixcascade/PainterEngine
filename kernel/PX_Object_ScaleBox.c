@@ -368,7 +368,7 @@ PX_Object_ScaleBox * PX_Object_GetScaleBox(PX_Object *pObject)
 {
 	if (pObject->Type==PX_OBJECT_TYPE_SCALEBOX)
 	{
-		return (PX_Object_ScaleBox *)pObject->pObjectDesc;
+		return PX_ObjectGetDesc(PX_Object_ScaleBox,pObject);
 	}
 	return PX_NULL;
 }

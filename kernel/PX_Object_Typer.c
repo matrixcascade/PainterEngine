@@ -4,7 +4,7 @@
 px_void PX_Object_TyperRender(px_surface* psurface, PX_Object* pObject, px_uint elapsed)
 {
 	px_int x_draw_oft, y_draw_oft, fsize;
-	PX_Object_Typer* pDesc = (PX_Object_Typer*)pObject->pObjectDesc;
+	PX_Object_Typer* pDesc = PX_ObjectGetDesc(PX_Object_Typer, pObject);
 	px_float objx, objy, objHeight, objWidth;
 	px_float inheritX, inheritY;
 	px_float h = 0;
@@ -258,7 +258,7 @@ px_void PX_Object_TyperFree(PX_Object* pObject)
 PX_Object_Typer* PX_Object_GetTyper(PX_Object* pObject)
 {
 	if (pObject->Type == PX_OBJECT_TYPE_TYPER)
-		return (PX_Object_Typer*)pObject->pObjectDesc;
+		return PX_ObjectGetDesc(PX_Object_Typer, pObject);
 	else
 		return PX_NULL;
 }
@@ -277,7 +277,7 @@ PX_Object* PX_Object_TyperCreate(px_memorypool* mp, PX_Object* Parent, px_int x,
 	{
 		return PX_NULL;
 	}
-	pDesc = (PX_Object_Typer *)pObject->pObjectDesc;
+	pDesc =PX_ObjectGetDesc(PX_Object_Typer, pObject);
 	pDesc->fontModule = fm;
 	pDesc->reg_color = PX_COLOR_FONTCOLOR;
 	pDesc->reg_speed = 1.0;

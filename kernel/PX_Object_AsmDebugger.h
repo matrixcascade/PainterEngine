@@ -15,7 +15,7 @@ typedef struct
 {
 	px_char name[64];
 	px_int line;
-	PX_VM_VARIABLE* pvar;
+	px_variable* pvar;
 }PX_Object_AsmDebugger_VarMonitor;
 
 typedef struct  

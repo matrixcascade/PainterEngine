@@ -101,28 +101,13 @@ px_void PX_Object_CursorButtonOnMouseMove(PX_Object *pObject,PX_Object_Event e,p
 
 PX_Object *PX_Object_CursorButtonCreate(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y,px_int Width,px_int Height,const px_char *Text,PX_FontModule *fontmodule,px_color Color)
 {
-	PX_Object *pObject;
-	PX_Object_CursorButton *pCb=(PX_Object_CursorButton *)MP_Malloc(mp,sizeof(PX_Object_CursorButton));
-	if (pCb==PX_NULL)
+	PX_Object *pObject=PX_ObjectCreateEx(mp,Parent,(px_float)x,(px_float)y,0,(px_float)Width,(px_float)Height,0,PX_OBJECT_TYPE_CURSORBUTTON,PX_NULL,PX_Object_CursorButtonRender,PX_Object_CursorButtonFree,PX_NULL,sizeof(PX_Object_CursorButton));
+	PX_Object_CursorButton* pCb;
+	if(!pObject) 
 	{
 		return PX_NULL;
 	}
-	pObject=PX_ObjectCreate(mp,Parent,(px_float)x,(px_float)y,0,(px_float)Width,(px_float)Height,0);
-	if (pObject==PX_NULL)
-	{
-		MP_Free(mp,pCb);
-		return PX_NULL;
-	}
-	pObject->pObjectDesc=pCb;
-	pObject->Enabled=PX_TRUE;
-	pObject->Visible=PX_TRUE;
-	pObject->Type=PX_OBJECT_TYPE_CURSORBUTTON;
-	pObject->ReceiveEvents=PX_TRUE;
-	pObject->Func_ObjectFree=PX_NULL;
-	pObject->Func_ObjectUpdate=PX_NULL;
-	pObject->Func_ObjectRender=PX_Object_CursorButtonRender;
-
-
+	pCb=PX_ObjectGetDesc(PX_Object_CursorButton, pObject);
 	pCb->pushbutton=PX_Object_PushButtonCreate(mp,pObject,x,y,Width,Height,Text,fontmodule);
 	pCb->c_color= PX_OBJECT_UI_DEFAULT_BORDERCOLOR;
 	pCb->c_distance=0;
@@ -142,7 +127,7 @@ PX_Object *PX_Object_CursorButtonCreate(px_memorypool *mp,PX_Object *Parent,px_i
 PX_Object_CursorButton * PX_Object_GetCursorButton( PX_Object *pObject )
 {
 	if(pObject->Type==PX_OBJECT_TYPE_CURSORBUTTON)
-		return (PX_Object_CursorButton *)pObject->pObjectDesc;
+		return PX_ObjectGetDesc(PX_Object_CursorButton,pObject);
 	else
 		return PX_NULL;
 }

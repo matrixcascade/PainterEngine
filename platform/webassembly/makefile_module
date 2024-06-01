@@ -41,22 +41,22 @@ all:$(project_build_o)  $(painterengine_build_painterengine_o)
 	
 
 $(project_path)/%.o:$(project_path)/%.c
-	emcc -c $^ -o $@ -I "$(painterengine_path)" -I "$(painterengine_path)/platform/webassembly"
+	emcc -O3 -c $^ -o $@ -I "$(painterengine_path)" -I "$(painterengine_path)/platform/webassembly"
 
 $(project_path)/%.o:$(project_path)/%.cpp
-	emcc -c $^ -o $@ -I "$(painterengine_path)" -I "$(painterengine_path)/platform/webassembly"
+	emcc -O3 -c $^ -o $@ -I "$(painterengine_path)" -I "$(painterengine_path)/platform/webassembly"
 
 $(painterengine_path)/runtime/%.o:$(painterengine_path)/runtime/%.c 
-	emcc -c $^ -o $@ -I "$(painterengine_path)"
+	emcc -O3 -c $^ -o $@ -I "$(painterengine_path)"
 
 $(painterengine_path)/kernel/%.o:$(painterengine_path)/kernel/%.c
-	emcc -c $^ -o $@
+	emcc -O3 -c $^ -o $@
 
 $(painterengine_path)/core/%.o:$(painterengine_path)/core/%.c
-	emcc -c $^ -o $@
+	emcc -O3 -c $^ -o $@
 
 $(painterengine_path)/platform/webassembly/%.o:$(painterengine_path)/platform/webassembly/%.c
-	emcc -c $^ -o $@ -I "$(project_path)" -I "$(painterengine_path)" -I "$(painterengine_path)/platform/webassembly" -I "$(painterengine_path)/runtime"
+	emcc -O3 -c $^ -o $@ -I "$(project_path)" -I "$(painterengine_path)" -I "$(painterengine_path)/platform/webassembly" -I "$(painterengine_path)/runtime"
 
 .PHONY:clean
 clean:

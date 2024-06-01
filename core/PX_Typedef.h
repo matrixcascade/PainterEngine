@@ -37,7 +37,7 @@
 #define PX_COLOR_BORDERCOLOR PX_COLOR(255,16,16,16)
 #define PX_COLOR_PUSHCOLOR PX_COLOR(255,168,168,168)
 #define PX_COLOR_FORCECOLOR PX_COLOR(255,188,188,188)
-#define PX_COLOR_FORCEBORDERCOLOR PX_COLOR(255,64,64,64)
+#define PX_COLOR_FORCEBORDERCOLOR PX_COLOR(255,255,64,64)
 
 #define PX_CSS_COLOR_AliceBlue PX_COLOR(0xFF, 0xF0, 0xF8, 0xFF)
 #define PX_CSS_COLOR_AntiqueWhite PX_COLOR(0xFF, 0xFA, 0xEB, 0xD7)
@@ -562,6 +562,7 @@ px_bool PX_memequ(const px_void *dst,const px_void *src,px_int size);
 px_void PX_memcpy(px_void *dst,const px_void *src,px_int size);
 px_int PX_memcmp(px_void* dst, const px_void* src, px_int size);
 px_void PX_strcpy(px_char *dst,const px_char *src,px_int size);
+px_void PX_strcpy_until(px_char* dst, const px_char* src, px_char until, px_int size);
 px_void PX_wstrcpy(px_word *dst,const px_word *src,px_int size);
 px_void PX_strcat(px_char *src,const px_char *cat);
 px_void PX_strcatlen(px_char* src, const px_char* cat, px_int len);

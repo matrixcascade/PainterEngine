@@ -129,6 +129,11 @@ static px_void PX_ObjectClearFocusEx(PX_Object *pObject)
 	PX_ObjectClearFocusEx(pObject->pNextBrother);
 }
 
+px_bool PX_ObjectIsOnFocus(PX_Object* pObject)
+{
+	return pObject->OnFocus&&pObject->OnFocusNode;
+}
+
 px_void PX_ObjectClearFocus(PX_Object *pObject)
 {
 	PX_Object *pClearObject=pObject;
@@ -410,43 +415,140 @@ PX_Object* PX_ObjectCreateRoot(px_memorypool* mp)
 	return PX_ObjectCreate(mp, PX_NULL, 0, 0, 0, 0, 0, 0);
 }
 
-PX_Object * PX_ObjectCreateEx(px_memorypool *mp,PX_Object *Parent,px_float x,px_float y,px_float z,px_float Width,px_float Height,px_float Lenght,px_int type,Function_ObjectUpdate Func_ObjectUpdate,Function_ObjectRender Func_ObjectRender,Function_ObjectFree Func_ObjectFree,px_void *desc,px_int size)
+PX_Object * PX_ObjectCreateExN(px_memorypool *mp,PX_Object *Parent,px_float x,px_float y,px_float z,px_float Width,px_float Height,px_float Lenght,px_int type,Function_ObjectUpdate Func_ObjectUpdate,Function_ObjectRender Func_ObjectRender,Function_ObjectFree Func_ObjectFree,px_void *desc,px_int index,px_int size)
 {
 	PX_Object *pObject=PX_ObjectCreate(mp,Parent,x,y,z,Width,Height,Lenght);
 	if (pObject)
 	{
 		if (size)
 		{
-			pObject->pObjectDesc = MP_Malloc(mp, size);
-			if (!pObject->pObjectDesc)
+			if (PX_ObjectCreateDesc(pObject,index,desc,size)==-1)
 			{
 				MP_Free(mp, pObject);
 				return PX_NULL;
 			}
-			if (desc)
-			{
-				PX_memcpy(pObject->pObjectDesc, desc, size);
-			}
-			else
-			{
-				PX_memset(pObject->pObjectDesc, 0, size);
-			}
-		}
-		else
-		{
-			pObject->pObjectDesc = PX_NULL;
 		}
 		pObject->Type=type;
-		pObject->Func_ObjectFree=Func_ObjectFree;
-		pObject->Func_ObjectRender=Func_ObjectRender;
-		pObject->Func_ObjectUpdate=Func_ObjectUpdate;
+		PX_ObjectAddFreeFunction(pObject, Func_ObjectFree);
+		PX_ObjectAddRenderFunction(pObject, Func_ObjectRender);
+		PX_ObjectAddUpdateFunction(pObject, Func_ObjectUpdate);
 	}
 	return pObject;
+}
+PX_Object* PX_ObjectCreateEx(px_memorypool* mp, PX_Object* Parent, px_float x, px_float y, px_float z, px_float Width, px_float Height, px_float Lenght, px_int type, Function_ObjectUpdate Func_ObjectUpdate, Function_ObjectRender Func_ObjectRender, Function_ObjectFree Func_ObjectFree, px_void* desc, px_int size)
+{
+		return PX_ObjectCreateExN(mp, Parent, x, y, z, Width, Height, Lenght, type, Func_ObjectUpdate, Func_ObjectRender, Func_ObjectFree, desc, 0, size);
+}
+
+PX_Object* PX_ObjectCreateEx1(px_memorypool* mp, PX_Object* Parent, px_float x, px_float y, px_float z, px_float Width, px_float Height, px_float Lenght, px_int type, Function_ObjectUpdate Func_ObjectUpdate, Function_ObjectRender Func_ObjectRender, Function_ObjectFree Func_ObjectFree, px_void* desc, px_int size)
+{
+		return PX_ObjectCreateExN(mp, Parent, x, y, z, Width, Height, Lenght, type, Func_ObjectUpdate, Func_ObjectRender, Func_ObjectFree, desc, 1, size);
+}
+
+PX_Object* PX_ObjectCreateEx2(px_memorypool* mp, PX_Object* Parent, px_float x, px_float y, px_float z, px_float Width, px_float Height, px_float Lenght, px_int type, Function_ObjectUpdate Func_ObjectUpdate, Function_ObjectRender Func_ObjectRender, Function_ObjectFree Func_ObjectFree, px_void* desc, px_int size)
+{
+		return PX_ObjectCreateExN(mp, Parent, x, y, z, Width, Height, Lenght, type, Func_ObjectUpdate, Func_ObjectRender, Func_ObjectFree, desc, 2, size);
+}
+
+PX_Object* PX_ObjectCreateEx3(px_memorypool* mp, PX_Object* Parent, px_float x, px_float y, px_float z, px_float Width, px_float Height, px_float Lenght, px_int type, Function_ObjectUpdate Func_ObjectUpdate, Function_ObjectRender Func_ObjectRender, Function_ObjectFree Func_ObjectFree, px_void* desc, px_int size)
+{
+		return PX_ObjectCreateExN(mp, Parent, x, y, z, Width, Height, Lenght, type, Func_ObjectUpdate, Func_ObjectRender, Func_ObjectFree, desc, 3, size);
+}
+
+
+px_int PX_ObjectCreateDesc(PX_Object* pObject, px_int index, px_void* pDesc, px_int descSize)
+{
+	PX_ASSERTIF(index < 0 || index >= PX_OBJECT_MAX_DESC_COUNT|| pObject->pObjectDesc[index] != PX_NULL);
+	if (index >= 0 && index < PX_OBJECT_MAX_DESC_COUNT&& pObject->pObjectDesc[index] == PX_NULL)
+	{
+		pObject->pObjectDesc[index] = MP_Malloc(pObject->mp, descSize);
+		if (!pObject->pObjectDesc[index])
+		{
+			return -1;
+		}
+		if(pDesc)
+			PX_memcpy(pObject->pObjectDesc[index], pDesc, descSize);
+		else
+			PX_memset(pObject->pObjectDesc[index], 0, descSize);
+		return index;
+	}
+	return -1;
+}
+
+px_int PX_ObjectAddRenderFunction(PX_Object* pObject, Function_ObjectRender Func_ObjectRender)
+{
+	px_int i;
+	for (i = 0; i < PX_OBJECT_MAX_DESC_COUNT; i++)
+	{
+		if (pObject->Func_ObjectRender[i] == PX_NULL)
+		{
+			pObject->Func_ObjectRender[i] = Func_ObjectRender;
+			return i;
+		}
+	}
+	PX_ASSERTIF(i == PX_OBJECT_MAX_DESC_COUNT);
+	return -1;
+}
+
+px_int PX_ObjectSetRenderFunction(PX_Object* pObject, Function_ObjectRender Func_ObjectRender,px_int index)
+{
+	pObject->Func_ObjectRender[index] = Func_ObjectRender;
+	return index;
+}
+
+px_int PX_ObjectAddUpdateFunction(PX_Object* pObject, Function_ObjectUpdate Func_ObjectUpdate)
+{
+	px_int i;
+	for (i = 0; i < PX_OBJECT_MAX_DESC_COUNT; i++)
+	{
+		if (pObject->Func_ObjectUpdate[i] == PX_NULL)
+		{
+			pObject->Func_ObjectUpdate[i] = Func_ObjectUpdate;
+			return i;
+		}
+	}
+	PX_ASSERTIF(i == PX_OBJECT_MAX_DESC_COUNT);
+	return -1;
+}
+
+px_int PX_ObjectSetUpdateFunction(PX_Object* pObject, Function_ObjectUpdate Func_ObjectUpdate, px_int index)
+{
+	pObject->Func_ObjectUpdate[index] = Func_ObjectUpdate;
+	return index;
+}
+
+px_int PX_ObjectAddFreeFunction(PX_Object* pObject, Function_ObjectFree Func_ObjectFree)
+{
+	px_int i;
+	for (i = 0; i < PX_OBJECT_MAX_DESC_COUNT; i++)
+	{
+		if (pObject->Func_ObjectFree[i] == PX_NULL)
+		{
+			pObject->Func_ObjectFree[i] = Func_ObjectFree;
+			return i;
+		}
+	}
+	PX_ASSERTIF(i == PX_OBJECT_MAX_DESC_COUNT);
+	return -1;
+}
+
+px_int PX_ObjectSetFreeFunction(PX_Object* pObject, Function_ObjectFree Func_ObjectFree, px_int index)
+{
+	pObject->Func_ObjectFree[index] = Func_ObjectFree;
+	return index;
 }
 
 PX_Object* PX_ObjectCreateFunction(px_memorypool* mp, PX_Object* Parent,Function_ObjectUpdate Func_ObjectUpdate, Function_ObjectRender Func_ObjectRender, Function_ObjectFree Func_ObjectFree)
 {
 	return PX_ObjectCreateEx(mp,Parent,0,0,0,0,0,0,0,Func_ObjectUpdate,Func_ObjectRender,Func_ObjectFree,PX_NULL,0);
+}
+
+px_void PX_ObjectAttachDesc(PX_Object* pObject, Function_ObjectUpdate Func_ObjectUpdate, Function_ObjectRender Func_ObjectRender, Function_ObjectFree Func_ObjectFree, px_int index, px_void* pDesc, px_int descSize)
+{
+	PX_ObjectCreateDesc(pObject, index, pDesc, descSize);
+	PX_ObjectAddRenderFunction(pObject, Func_ObjectRender);
+	PX_ObjectAddUpdateFunction(pObject, Func_ObjectUpdate);
+	PX_ObjectAddFreeFunction(pObject, Func_ObjectFree);
 }
 
 px_void PX_ObjectGetInheritXY(PX_Object *pObject,px_float *x,px_float *y)
@@ -481,13 +583,24 @@ static px_void PX_Object_ObjectEventFree( PX_Object **pObject )
 
 static px_void PX_Object_ObjectFree( PX_Object *pObject )
 {
+	px_int i;
 	PX_Object_ObjectEventFree(&pObject);
-	if (pObject->Func_ObjectFree!=0)
+	
+	for (i = 0; i < PX_OBJECT_MAX_DESC_COUNT; i++)
 	{
-		pObject->Func_ObjectFree(pObject);
+		if (pObject->Func_ObjectFree[i])
+		{
+			pObject->Func_ObjectFree[i](pObject);
+		}
 	}
-	if(pObject->pObjectDesc)
-	MP_Free(pObject->mp,pObject->pObjectDesc);
+
+	for (i = 0; i < PX_OBJECT_MAX_DESC_COUNT; i++)
+	{
+		if (pObject->pObjectDesc[i])
+		{
+			MP_Free(pObject->mp, pObject->pObjectDesc[i]);
+		}
+	}
 
 	MP_Free(pObject->mp,pObject);
 }
@@ -590,9 +703,13 @@ px_void PX_Object_ObjectLinkerUpdate( PX_Object *pObject,px_uint elapsed)
 	}
 	if (pObject->Enabled)
 	{
-		if (pObject->Func_ObjectUpdate!=0)
+		px_int i;
+		for (i = 0; i < PX_OBJECT_MAX_DESC_COUNT; i++)
 		{
-			pObject->Func_ObjectUpdate(pObject,elapsed);
+			if (pObject->Func_ObjectUpdate[i])
+			{
+				pObject->Func_ObjectUpdate[i](pObject, elapsed);
+			}
 		}
 		if (!pObject->delay_delete)
 		{
@@ -687,6 +804,7 @@ px_void PX_ObjectUpdatePhysics(PX_Object* pObject, px_uint elapsed)
 
 px_void PX_ObjectUpdate(PX_Object *pObject,px_uint elapsed )
 {
+	px_int i;
 	if (pObject==PX_NULL)
 	{
 		PX_ASSERT();
@@ -696,10 +814,15 @@ px_void PX_ObjectUpdate(PX_Object *pObject,px_uint elapsed )
 	{
 		return;
 	}
-	if (pObject->Func_ObjectUpdate!=0)
+
+	for (i=0;i<PX_OBJECT_MAX_DESC_COUNT;i++)
 	{
-		pObject->Func_ObjectUpdate(pObject,elapsed);
+		if (pObject->Func_ObjectUpdate[i] != 0)
+		{
+			pObject->Func_ObjectUpdate[i](pObject, elapsed);
+		}
 	}
+	
 	if (pObject->pChilds!=PX_NULL&&!pObject->delay_delete)
 	{
 		PX_Object_ObjectLinkerUpdate(pObject->pChilds,elapsed);
@@ -732,26 +855,17 @@ static px_void PX_ObjectRenderEx(px_surface *pSurface, PX_Object *pObject,px_uin
 		{
 			if (pObject->Width>=0&&pObject->Height>=0)
 			{
-				if (pObject->Func_ObjectBeginRender)
+				px_int i;
+				for ( i = 0; i < PX_OBJECT_MAX_DESC_COUNT; i++)
 				{
-					pObject->Func_ObjectBeginRender(pSurface, pObject, elapsed);
-				}
-
-				if (pObject->Func_ObjectRender != 0)
-				{
-					pObject->Func_ObjectRender(pSurface, pObject, elapsed);
+					if (pObject->Func_ObjectRender[i] != 0)
+					{
+						pObject->Func_ObjectRender[i](pSurface, pObject, elapsed);
+					}
 				}
 			}
 			
 			PX_ObjectRenderEx(pSurface,pObject->pChilds,elapsed);
-
-			if (pObject->Width >= 0 && pObject->Height >= 0)
-			{
-				if (pObject->Func_ObjectEndRender)
-				{
-					pObject->Func_ObjectEndRender(pSurface, pObject, elapsed);
-				}
-			}
 			
 		}
 	}
@@ -761,27 +875,16 @@ static px_void PX_ObjectRenderEx(px_surface *pSurface, PX_Object *pObject,px_uin
 		{
 			if (pObject->Width >= 0 && pObject->Height >= 0)
 			{
-				if (pObject->Func_ObjectBeginRender)
+				px_int i;
+				for (i = 0; i < PX_OBJECT_MAX_DESC_COUNT; i++)
 				{
-					pObject->Func_ObjectBeginRender(pSurface, pObject, elapsed);
-				}
-				if (pObject->Func_ObjectRender != 0)
-				{
-					pObject->Func_ObjectRender(pSurface, pObject, elapsed);
-				}
-			}
-			
-
-			PX_ObjectRenderEx(pSurface,pObject->pChilds,elapsed);
-			
-			if (pObject->Width >= 0 && pObject->Height >= 0)
-			{
-				if (pObject->Func_ObjectEndRender)
-				{
-					pObject->Func_ObjectEndRender(pSurface, pObject, elapsed);
+					if (pObject->Func_ObjectRender[i] != 0)
+					{
+						pObject->Func_ObjectRender[i](pSurface, pObject, elapsed);
+					}
 				}
 			}
-			
+			PX_ObjectRenderEx(pSurface,pObject->pChilds,elapsed);		
 		}
 		PX_ObjectRenderEx(pSurface,pObject->pNextBrother,elapsed);	
 	}
@@ -799,23 +902,17 @@ px_void PX_ObjectRender(px_surface *pSurface, PX_Object *pObject,px_uint elapsed
 		
 		if (pObject->Visible!=PX_FALSE)
 		{
-			if (pObject->Func_ObjectBeginRender)
+			px_int i;
+			for (i = 0; i < PX_OBJECT_MAX_DESC_COUNT; i++)
 			{
-				pObject->Func_ObjectBeginRender(pSurface,pObject,elapsed);
-			}
-
-			if (pObject->Func_ObjectRender!=0)
-			{
-				pObject->Func_ObjectRender(pSurface,pObject,elapsed);
+				if (pObject->Func_ObjectRender[i] != 0)
+				{
+					pObject->Func_ObjectRender[i](pSurface, pObject, elapsed);
+				}
 			}
 			if (!pObject->delay_delete)
 			{
 				PX_ObjectRenderEx(pSurface, pObject->pChilds, elapsed);
-			}
-			
-			if (pObject->Func_ObjectEndRender)
-			{
-				pObject->Func_ObjectEndRender(pSurface,pObject,elapsed);
 			}
 		}
 	}
@@ -823,21 +920,17 @@ px_void PX_ObjectRender(px_surface *pSurface, PX_Object *pObject,px_uint elapsed
 	{
 		if (pObject->Visible!=PX_FALSE)
 		{
-			if (pObject->Func_ObjectBeginRender)
+			px_int i;
+			for (i = 0; i < PX_OBJECT_MAX_DESC_COUNT; i++)
 			{
-				pObject->Func_ObjectBeginRender(pSurface,pObject,elapsed);
-			}
-			if (pObject->Func_ObjectRender!=0)
-			{
-				pObject->Func_ObjectRender(pSurface,pObject,elapsed);
+				if (pObject->Func_ObjectRender[i] != 0)
+				{
+					pObject->Func_ObjectRender[i](pSurface, pObject, elapsed);
+				}
 			}
 			if (!pObject->delay_delete)
 			{
 				PX_ObjectRenderEx(pSurface, pObject->pChilds, elapsed);
-			}
-			if (pObject->Func_ObjectEndRender)
-			{
-				pObject->Func_ObjectEndRender(pSurface,pObject,elapsed);
 			}
 		}
 	}
@@ -919,7 +1012,6 @@ px_void PX_ObjectInitialize(px_memorypool *mp,PX_Object *pObject,PX_Object *Pare
 	pObject->Enabled=PX_TRUE;
 	pObject->Visible=PX_TRUE;
 	pObject->pChilds=PX_NULL;
-	pObject->pObjectDesc=PX_NULL;
 	pObject->pNextBrother=PX_NULL;
 	pObject->pPreBrother=PX_NULL;
 	pObject->Type=PX_OBJECT_TYPE_NULL;
@@ -933,12 +1025,7 @@ px_void PX_ObjectInitialize(px_memorypool *mp,PX_Object *pObject,PX_Object *Pare
 	pObject->User_ptr=PX_NULL;
 	pObject->OnFocus=PX_FALSE;
 	pObject->mp=mp;
-	pObject->Func_ObjectFree=PX_NULL;
-	pObject->Func_ObjectRender=PX_NULL;
-	pObject->Func_ObjectUpdate=PX_NULL;
 	pObject->Func_ObjectLinkChild=PX_NULL;
-	pObject->Func_ObjectBeginRender=PX_NULL;
-	pObject->Func_ObjectEndRender=PX_NULL;
 
 	if (Parent!=PX_NULL)
 	{
@@ -964,7 +1051,7 @@ px_void PX_ObjectSetVisible( PX_Object *pObject,px_bool visible )
 {
 	if(pObject!=PX_NULL)
 	{
-		if (pObject->OnFocus)
+		if (visible==PX_FALSE&&pObject->OnFocus)
 		{
 			PX_ObjectClearFocus(pObject);
 		}
@@ -1018,6 +1105,37 @@ px_int PX_ObjectRegisterEvent( PX_Object *pObject,px_uint Event,px_void (*Proces
 	pPoint->pNext=pAction;
 
 	return PX_TRUE;
+}
+
+px_void PX_ObjectRemoveEvent(PX_Object* pObject, px_uint Event)
+{
+	PX_OBJECT_EventAction *pPoint;
+	PX_OBJECT_EventAction *pAction;
+
+	pPoint = pObject->pEventActions;
+	while (pPoint)
+	{
+		pAction = pPoint;
+		pPoint = pPoint->pNext;
+		if (pAction->EventAction == Event)
+		{
+			if (pAction->pPre)
+			{
+				pAction->pPre->pNext = pAction->pNext;
+			}
+			else
+			{
+				pObject->pEventActions = pAction->pNext;
+			}
+
+			if (pAction->pNext)
+			{
+				pAction->pNext->pPre = pAction->pPre;
+			}
+			MP_Free(pObject->mp, pAction);
+		}
+	}
+	
 }
 
 

@@ -163,7 +163,7 @@ px_void PX_Object_CanvasOnCursorMove(PX_Object* pObject, PX_Object_Event  e, px_
 	if (pdesc->pCanvasVM->reg_state==PX_CanvasVM_State_Painting)
 	{
 		PX_CanvasVMOnEnd(pdesc->pCanvasVM);
-		PX_CanvasVMRepaintAllCache(pdesc->pCanvasVM);
+		PX_CanvasVMRepaintAll(pdesc->pCanvasVM);
 	}
 
 }
@@ -232,7 +232,7 @@ px_void PX_Object_CanvasOnCursorUp(PX_Object* pObject, PX_Object_Event  e, px_vo
 	if (pdesc->pCanvasVM->reg_state == PX_CanvasVM_State_Painting)
 	{
 		PX_CanvasVMOnEnd(pdesc->pCanvasVM);
-		PX_CanvasVMRepaintAllCache(pdesc->pCanvasVM);
+		PX_CanvasVMRepaintAll(pdesc->pCanvasVM);
 
 	}
 	
