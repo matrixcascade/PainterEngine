@@ -100,7 +100,7 @@ You can now use your IDE to compile PainterEngine with these steps. PainterEngin
 | 渲染器                | 2D/3D                                                        | 2D 3D渲染器实现及一个高质量制图引擎                                                 |
 | 动画                  | 2dx/live2D                                                   | 2D 动画和一个类Live2D 骨骼动画系统                                                  |
 | 声学模型               | mixer/piano/ks                                               | 包含一个混音器实现,一个相位声码器,一个物理建模的钢琴及karplus-strong合成的拨弦模型,直接合成PCM音频流   |
-| 脚本引擎               | Compiler/VM/Debugger                                         | A一个完整的脚本引擎,包含编译器虚拟机调试器                                           |
+| 脚本引擎               | Compiler/VM/Debugger                                         | 一个完整的脚本引擎,包含编译器虚拟机调试器                                           |
 | UI框架                 | button/radio/image/edit/label/list....                       | UI框架实现                                                                        |
 | 协议                   | MQTT/MODBUS/Game-network-synchronization                     | 常用的通讯协议                                                                    |
 | 游戏引擎               |                                                              | 集成一个游戏世界框架                                                               |
