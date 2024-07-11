@@ -1,10 +1,10 @@
 #include "PX_Object_ScaleBox.h"
 
 
-px_void PX_Object_ScaleBoxRender(px_surface *psurface, PX_Object *pObject,px_uint elapsed)
+PX_OBJECT_RENDER_FUNCTION(PX_Object_ScaleBoxRender)
 {
 
-	PX_Object_ScaleBox * pScaleBox=PX_Object_GetScaleBox(pObject);
+	PX_Object_ScaleBox * pScaleBox=PX_ObjectGetDesc(PX_Object_ScaleBox,pObject);
 	px_float objx,objy,objWidth,objHeight;
 	px_float inheritX,inheritY;
 
@@ -164,7 +164,7 @@ px_void PX_Object_ScaleBoxRender(px_surface *psurface, PX_Object *pObject,px_uin
 	}
 }
 
-px_void PX_Object_ScaleBoxOnCursorDown(PX_Object *pObject,PX_Object_Event e,px_void *ptr)
+PX_OBJECT_EVENT_FUNCTION(PX_Object_ScaleBoxOnCursorDown)
 {
 	PX_Object_ScaleBox *pscalebox=PX_Object_GetScaleBox(pObject);
 	px_float inheritX,inheritY;
@@ -214,7 +214,7 @@ px_void PX_Object_ScaleBoxOnCursorDown(PX_Object *pObject,PX_Object_Event e,px_v
 
 	}
 }
-px_void PX_Object_ScaleBoxOnCursorDrag(PX_Object *pObject,PX_Object_Event e,px_void *ptr)
+PX_OBJECT_EVENT_FUNCTION(PX_Object_ScaleBoxOnCursorDrag)
 {
 	PX_Object_ScaleBox *pscalebox=PX_Object_GetScaleBox(pObject);
 	px_float inheritX,inheritY;
@@ -301,7 +301,7 @@ px_void PX_Object_ScaleBoxOnCursorDrag(PX_Object *pObject,PX_Object_Event e,px_v
 	}
 }
 
-px_void PX_Object_ScaleBoxOnCursorMove(PX_Object *pObject,PX_Object_Event e,px_void *ptr)
+PX_OBJECT_EVENT_FUNCTION(PX_Object_ScaleBoxOnCursorMove)
 {
 	PX_Object_ScaleBox *pscalebox=PX_Object_GetScaleBox(pObject);
 	px_float inheritX,inheritY;
@@ -344,33 +344,56 @@ px_void PX_Object_ScaleBoxOnCursorMove(PX_Object *pObject,PX_Object_Event e,px_v
 		pscalebox->cursor_pt=PX_POINT2D(PX_Object_Event_GetCursorX(e)-inheritX,PX_Object_Event_GetCursorY(e)-inheritY);
 	}
 }
+
+
+PX_Object* PX_Object_ScaleBoxAttachObject(PX_Object* pObject,px_int attachIndex)
+{
+	PX_Object_ScaleBox scaleBox,*pdesc;
+
+	PX_memset(&scaleBox, 0, sizeof(scaleBox));
+	scaleBox.linecolor = PX_COLOR(204, 0, 0, 255);
+	scaleBox.regioncolor = PX_COLOR(64, 0, 0, 255);
+	scaleBox.current_cursorpt = -1;
+	scaleBox.current_selectpt = -1;
+	scaleBox.editpt_count = 3;
+	
+	PX_ASSERTIF(pObject == PX_NULL);
+	PX_ASSERTIF(attachIndex < 0 || attachIndex >= PX_COUNTOF(pObject->pObjectDesc));
+	PX_ASSERTIF(pObject->pObjectDesc[attachIndex] != PX_NULL);
+	pdesc = (PX_Object_ScaleBox*)PX_ObjectCreateDesc(pObject, attachIndex, PX_OBJECT_TYPE_SCALEBOX, 0, PX_Object_ScaleBoxRender, 0, &scaleBox, sizeof(scaleBox));
+	PX_ASSERTIF(pdesc == PX_NULL);
+
+	PX_ObjectRegisterEventEx(pObject, PX_OBJECT_EVENT_CURSORDOWN, PX_OBJECT_TYPE_SCALEBOX, PX_Object_ScaleBoxOnCursorDown, PX_NULL);
+	PX_ObjectRegisterEventEx(pObject, PX_OBJECT_EVENT_CURSORMOVE, PX_OBJECT_TYPE_SCALEBOX, PX_Object_ScaleBoxOnCursorMove, PX_NULL);
+	PX_ObjectRegisterEventEx(pObject, PX_OBJECT_EVENT_CURSORDRAG, PX_OBJECT_TYPE_SCALEBOX, PX_Object_ScaleBoxOnCursorDrag, PX_NULL);
+	return pObject;
+}
+
+
 PX_Object * PX_Object_ScaleBoxCreate(px_memorypool *mp,PX_Object *Parent)
 {
-	PX_Object_ScaleBox scaleBox;
 	PX_Object *pObject;
-	PX_memset(&scaleBox,0,sizeof(scaleBox));
-	scaleBox.linecolor=PX_COLOR(204,0,0,255);
-	scaleBox.regioncolor=PX_COLOR(64,0,0,255);
-	scaleBox.current_cursorpt=-1;
-	scaleBox.current_selectpt=-1;
-	pObject=PX_ObjectCreateEx(mp,Parent,0,0,0,0,0,0,PX_OBJECT_TYPE_SCALEBOX,PX_NULL,PX_Object_ScaleBoxRender,PX_NULL,&scaleBox,sizeof(scaleBox));
+
+	pObject=PX_ObjectCreate(mp,Parent,0,0,0,0,0,0);
 	if (!pObject)
 	{
 		return pObject;
 	}
-	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_CURSORDOWN,PX_Object_ScaleBoxOnCursorDown,PX_NULL);
-	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_CURSORMOVE,PX_Object_ScaleBoxOnCursorMove,PX_NULL);
-	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_CURSORDRAG,PX_Object_ScaleBoxOnCursorDrag,PX_NULL);
+	if (!PX_Object_ScaleBoxAttachObject(pObject,0))
+	{
+		PX_ObjectDelete(pObject);
+		return PX_NULL;
+	}
+
 	return pObject;
 }
 
 PX_Object_ScaleBox * PX_Object_GetScaleBox(PX_Object *pObject)
 {
-	if (pObject->Type==PX_OBJECT_TYPE_SCALEBOX)
-	{
-		return PX_ObjectGetDesc(PX_Object_ScaleBox,pObject);
-	}
-	return PX_NULL;
+	PX_Object_ScaleBox *pdesc= (PX_Object_ScaleBox *)PX_ObjectGetDescByType(pObject,PX_OBJECT_TYPE_SCALEBOX);
+	PX_ASSERTIF(pdesc==PX_NULL);
+	return pdesc;
+	
 }
 
 px_point2D * PX_Object_ScaleBoxGetPoints(PX_Object *pObject)

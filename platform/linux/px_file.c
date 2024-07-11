@@ -516,20 +516,6 @@ px_bool PX_LoadLiveFromFile(px_memorypool *mp,PX_LiveFramework *pliveframework, 
 
 }
 
-px_bool PX_LoadUIFormFile(px_memorypool* mp, PX_Object* designerObject, PX_Object* proot,PX_FontModule *fm, const px_char path[])
-{
-	px_bool ret = PX_FALSE;
-	PX_IO_Data io = PX_LoadFileToIOData(path);
-	if (!io.size)
-	{
-		return PX_FALSE;
-	}
-	if (PX_Object_DesignerImportToUIObject(mp, designerObject,proot, (const px_char *)io.buffer,fm))
-		ret = PX_TRUE;
-	PX_FreeIOData(&io);
-	return PX_TRUE;
-}
-
 
 
 px_bool PX_LoadScriptInstanceFromFile(px_memorypool *mp,PX_VM *ins,const px_char path[])

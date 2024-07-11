@@ -2,7 +2,7 @@
 
 PX_OBJECT_RENDER_FUNCTION(PX_Object_ParticalRender)
 {
-	PX_Object_Partical *pDesc = (PX_Object_Partical *)pObject->pObjectDesc;
+	PX_Object_Partical *pDesc = (PX_Object_Partical *)pObject->pObjectDesc[0];
 	px_float objx, objy, objWidth, objHeight;
 	px_float inheritX, inheritY;
 	PX_ObjectGetInheritXY(pObject, &inheritX, &inheritY);
@@ -25,7 +25,7 @@ PX_Object* PX_Object_ParticalCreate(px_memorypool* mp, PX_Object* Parent, px_int
 	{
 		return PX_NULL;
 	}
-	pDesc=(PX_Object_Partical *)pObject->pObjectDesc;
+	pDesc=(PX_Object_Partical *)pObject->pObjectDesc[0];
 	PX_ParticalLauncherInitialize(&pDesc->launcher, mp, ParticalInfo);
 
 	return pObject;

@@ -3,16 +3,15 @@
 
 PX_Object_ModbusVarBox* PX_Object_GetModbusVarBox(PX_Object* pObject)
 {
-	if (pObject->Type==PX_OBJECT_TYPE_MODBUSVARBOX)
-	{
-		return PX_ObjectGetDesc(PX_Object_ModbusVarBox, pObject);
-	}
-	return PX_NULL;
+	PX_Object_ModbusVarBox *pDesc=(PX_Object_ModbusVarBox*)PX_ObjectGetDescByType(pObject,PX_OBJECT_TYPE_MODBUSVARBOX);
+	PX_ASSERTIF(pDesc==PX_NULL);
+	return pDesc;
+	
 }
 
-px_void PX_Object_ModbusVarBoxOnConfirm(PX_Object* pObject, PX_Object_Event e, px_void* ptr)
+PX_OBJECT_EVENT_FUNCTION(PX_Object_ModbusVarBoxOnConfirm)
 {
-	PX_Object_ModbusVarBox* pdesc = PX_ObjectGetDesc(PX_Object_ModbusVarBox, ((PX_Object*)ptr));
+	PX_Object_ModbusVarBox* pdesc = PX_Object_GetModbusVarBox(pObject);
 	if (!*PX_Object_VariousGetText(pdesc->various_name))
 	{
 		return;
@@ -33,7 +32,7 @@ px_void PX_Object_ModbusVarBoxOnConfirm(PX_Object* pObject, PX_Object_Event e, p
 	PX_Object_ModbusVarBoxClose((PX_Object*)ptr);
 }
 
-px_void PX_Object_ModbusVarBoxOnKeyDown(PX_Object* pObject, PX_Object_Event e, px_void* ptr)
+PX_OBJECT_EVENT_FUNCTION(PX_Object_ModbusVarBoxOnKeyDown)
 {
 	if (e.Event == PX_OBJECT_EVENT_KEYDOWN && PX_Object_Event_GetKeyDown(e) == '\r')
 	{
@@ -42,25 +41,31 @@ px_void PX_Object_ModbusVarBoxOnKeyDown(PX_Object* pObject, PX_Object_Event e, p
 }
 
 
-px_void PX_Object_ModbusVarBoxOnCancel(PX_Object* pObject, PX_Object_Event e, px_void* ptr)
+PX_OBJECT_EVENT_FUNCTION(PX_Object_ModbusVarBoxOnCancel)
 {
 	PX_Object_ModbusVarBoxClose((PX_Object*)ptr);
 }
 
-px_void PX_Object_ModbusVarBoxOnTypeChanged(PX_Object* pObject, PX_Object_Event e, px_void* ptr)
+PX_OBJECT_EVENT_FUNCTION(PX_Object_ModbusVarBoxOnTypeChanged)
 {
 	PX_Object_ModbusVarBox* pDesc = (PX_Object_ModbusVarBox*)ptr;
 }
 
-PX_Object* PX_Object_ModbusVarBoxCreate(px_memorypool* mp, PX_Object* Parent, px_int x, px_int y, px_int width, px_int height, const px_char title[], PX_FontModule* fontmodule)
+PX_Object* PX_Object_ModbusVarBoxAttachObject( PX_Object* pObject,px_int attachIndex,px_int x, px_int y, px_int width, px_int height, const px_char title[], PX_FontModule* fontmodule)
 {
-	PX_Object_ModbusVarBox desc, * pdesc;
-	PX_Object* pObject;
-	pObject = PX_ObjectCreateEx(mp, Parent, (px_float)x, (px_float)y, 0, (px_float)width, (px_float)height, 0, PX_OBJECT_TYPE_MODBUSVARBOX, PX_NULL, PX_NULL, PX_NULL, &desc, sizeof(desc));
-	pdesc = PX_ObjectGetDesc(PX_Object_ModbusVarBox, pObject);
+	PX_Object_ModbusVarBox  * pdesc;
+
+	px_memorypool* mp=pObject->mp;
+
+	PX_ASSERTIF(pObject == PX_NULL);
+	PX_ASSERTIF(attachIndex < 0 || attachIndex >= PX_COUNTOF(pObject->pObjectDesc));
+	PX_ASSERTIF(pObject->pObjectDesc[attachIndex] != PX_NULL);
+	pdesc = (PX_Object_ModbusVarBox*)PX_ObjectCreateDesc(pObject, attachIndex, PX_OBJECT_TYPE_MODBUSVARBOX, 0, 0, 0, 0, sizeof(PX_Object_ModbusVarBox));
+	PX_ASSERTIF(pdesc == PX_NULL);
+
 	pdesc->widget = PX_Object_WidgetCreate(mp, pObject, 0, 0, width, height, "", fontmodule);
 	PX_Object_WidgetShowHideCloseButton(pdesc->widget, PX_FALSE);
-	pdesc->various_name = PX_Object_VariousCreate(mp, pdesc->widget, width / 2 - 128, 32, 256, 32, "Name:",PX_OBJECT_VARIOUS_TYPE_EDIT, fontmodule);
+	pdesc->various_name = PX_Object_VariousCreate(mp, pdesc->widget, width / 2 - 128, 32, 256, 32, "Name:", PX_OBJECT_VARIOUS_TYPE_EDIT, fontmodule);
 	PX_Object_VariousSetEditStyle(pdesc->various_name, PX_OBJECT_VARIOUS_EDIT_TYPE_STRING);
 	pdesc->various_address = PX_Object_VariousCreate(mp, pdesc->widget, width / 2 - 128, 72, 256, 32, "Address:", PX_OBJECT_VARIOUS_TYPE_EDIT, fontmodule);
 	PX_Object_VariousSetEditStyle(pdesc->various_address, PX_OBJECT_VARIOUS_EDIT_TYPE_HEX);
@@ -89,15 +94,30 @@ PX_Object* PX_Object_ModbusVarBoxCreate(px_memorypool* mp, PX_Object* Parent, px
 	return pObject;
 }
 
+PX_Object* PX_Object_ModbusVarBoxCreate(px_memorypool* mp, PX_Object* Parent, px_int x, px_int y, px_int width, px_int height, const px_char title[], PX_FontModule* fontmodule)
+{
+	PX_Object* pObject;
+	pObject = PX_ObjectCreate(mp, Parent, (px_float)x, (px_float)y, 0, (px_float)width, (px_float)height, 0);
+	if (pObject == PX_NULL)
+	{
+		return PX_NULL;
+	}
+	//Attach Object
+	if (PX_Object_ModbusVarBoxAttachObject(pObject,0,x,y,width,height,title,fontmodule))
+	{
+		PX_ObjectDelete(pObject);
+		return PX_NULL;
+	}
+
+	
+	return pObject;
+}
+
 px_void PX_Object_ModbusVarBoxShow(PX_Object* pObject)
 {
 	
-	PX_Object_ModbusVarBox* pDesc = PX_ObjectGetDesc(PX_Object_ModbusVarBox,pObject);
-	if (pObject->Type != PX_OBJECT_TYPE_MODBUSVARBOX)
-	{
-		PX_ASSERT();
-		return;
-	}
+	PX_Object_ModbusVarBox* pDesc = PX_Object_GetModbusVarBox(pObject);
+
 	pDesc->various_address->Enabled = PX_TRUE;
 	pDesc->various_name->Enabled = PX_TRUE;
 	pDesc->checkbox_readonly->Enabled = PX_TRUE;
@@ -111,12 +131,8 @@ px_void PX_Object_ModbusVarBoxShow(PX_Object* pObject)
 
 px_void PX_Object_ModbusVarBoxShowEdit(PX_Object* pObject,const px_char name[],px_dword address,px_int type,px_word value)
 {
-	PX_Object_ModbusVarBox* pDesc = PX_ObjectGetDesc(PX_Object_ModbusVarBox, pObject);
-	if (pObject->Type != PX_OBJECT_TYPE_MODBUSVARBOX)
-	{
-		PX_ASSERT();
-		return;
-	}
+	PX_Object_ModbusVarBox* pDesc = PX_Object_GetModbusVarBox(pObject);
+
 
 	PX_Object_VariousSetText(pDesc->various_name, name);
 	PX_Object_VariousSetHex(pDesc->various_address, address);
@@ -135,22 +151,15 @@ px_void PX_Object_ModbusVarBoxShowEdit(PX_Object* pObject,const px_char name[],p
 
 px_void PX_Object_ModbusVarBoxClose(PX_Object* pObject)
 {
-	if (pObject->Type != PX_OBJECT_TYPE_MODBUSVARBOX)
-	{
-		PX_ASSERT();
-		return;
-	}
+	PX_ASSERTIF(PX_Object_GetModbusVarBox(pObject));
+
 	pObject->Visible = PX_FALSE;
 	PX_ObjectClearFocus(pObject);
 }
 
 px_void PX_Object_ModbusVarBoxHide(PX_Object* pObject)
 {
-	if (pObject->Type != PX_OBJECT_TYPE_MODBUSVARBOX)
-	{
-		PX_ASSERT();
-		return;
-	}
+	PX_ASSERTIF(PX_Object_GetModbusVarBox(pObject));
 	pObject->Visible = PX_FALSE;
 	PX_ObjectClearFocus(pObject);
 }

@@ -63,9 +63,6 @@ void PX_Firework01ParticalUpdate(PX_Firework01_paritcal* pdesc, px_dword elapsed
 			}
 		}
 	}
-
-
-	
 }
 
 void PX_Object_Firework01ParticalRender(PX_Firework01_paritcal* pdesc, px_surface * psurface, px_bool bb,px_dword elapsed)
@@ -96,7 +93,7 @@ void PX_Object_Firework01ParticalRender(PX_Firework01_paritcal* pdesc, px_surfac
 	}
 }
 
-void PX_Object_Firework01Render(px_surface* psurface, PX_Object* pObject, px_dword elapsed)
+PX_OBJECT_RENDER_FUNCTION(PX_Object_Firework01Render)
 {
 	PX_Object_Firework01* pdesc = PX_ObjectGetDesc(PX_Object_Firework01, pObject);
 	pdesc->elapsed += elapsed;
@@ -326,7 +323,8 @@ void PX_Firework02ParticleRender(px_surface* psurface, PX_Object_Firework02* pde
 		}
 	}
 }
-void PX_Object_Firework02Render(px_surface* psurface, PX_Object* pObject, px_uint elapsed)
+
+PX_OBJECT_RENDER_FUNCTION(PX_Object_Firework02Render)
 {
 	PX_Object_Firework02* pdesc = PX_ObjectGetDesc(PX_Object_Firework02, pObject);
 
@@ -397,7 +395,7 @@ typedef struct {
 	px_uint particleTime;
 }PX_Object_Firework03;
 
-void ParticleUpdate(PX_Object_Firework03* pdesc, px_uint elapsed) 
+px_void ParticleUpdate(PX_Object_Firework03* pdesc, px_uint elapsed) 
 {
 	px_int i, j;
 	pdesc->particleTime += elapsed;
@@ -458,7 +456,7 @@ void ParticleUpdate(PX_Object_Firework03* pdesc, px_uint elapsed)
 	}
 }
 
-void ParticleRender(px_surface* psurface, PX_Object_Firework03* pdesc) 
+px_void ParticleRender(px_surface* psurface, PX_Object_Firework03* pdesc) 
 {
 	px_int i, j;
 	if (pdesc->state == RISE) 
@@ -491,7 +489,8 @@ void ParticleRender(px_surface* psurface, PX_Object_Firework03* pdesc)
 		}
 	}
 }
-px_void PX_Object_Firework03Render(px_surface* psurface, PX_Object* pObject, px_uint elapsed)
+
+PX_OBJECT_RENDER_FUNCTION(PX_Object_Firework03Render)
 {
 	PX_Object_Firework03* pdesc = PX_ObjectGetDesc(PX_Object_Firework03, pObject);
 

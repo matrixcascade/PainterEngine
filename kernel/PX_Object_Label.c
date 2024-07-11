@@ -1,11 +1,11 @@
 #include "PX_Object_Label.h"
 
-px_void PX_Object_LabelRender(px_surface *psurface, PX_Object *pObject,px_uint elapsed)
+PX_OBJECT_RENDER_FUNCTION(PX_Object_LabelRender)
 {
 	px_int x,y,w,h;
 	px_float inheritX,inheritY;
 	PX_SurfaceLimitInfo limitInfo;
-	PX_Object_Label *pLabel= PX_Object_GetLabel(pObject);
+	PX_Object_Label *pLabel= PX_ObjectGetDesc(PX_Object_Label,pObject);
 	if (pLabel==PX_NULL)
 	{
 		return;
@@ -71,64 +71,71 @@ px_void PX_Object_LabelRender(px_surface *psurface, PX_Object *pObject,px_uint e
 	PX_SurfaceSetLimitInfo(psurface,limitInfo);
 }
 
-px_void PX_Object_LabelFree( PX_Object *pLabel )
+PX_OBJECT_FREE_FUNCTION(PX_Object_LabelFree)
 {
-	PX_Object_Label *Label=PX_Object_GetLabel(pLabel);
+	PX_Object_Label *pLabel=PX_ObjectGetDesc(PX_Object_Label,pObject);
 	if (pLabel!=PX_NULL)
 	{
-		MP_Free(pLabel->mp,Label->Text);
+		MP_Free(pObject->mp, pLabel->Text);
 	}
 }
-
-PX_Object* PX_Object_LabelCreate(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y,px_int Width,px_int Height,const px_char *Text,PX_FontModule *fm,px_color Color )
+PX_Object* PX_Object_LabelAttachObject( PX_Object* pObject,px_int attachIndex, px_int x, px_int y, px_int Width, px_int Height, const px_char* Text, PX_FontModule* fm, px_color Color)
 {
+	px_memorypool* mp= pObject->mp;
+	PX_Object_Label* pLabel;
 	px_int TextLen;
-	PX_Object *pObject;
-	PX_Object_Label *pLable;
+	PX_ASSERTIF(pObject == PX_NULL);
+	PX_ASSERTIF(attachIndex < 0 || attachIndex >= PX_COUNTOF(pObject->pObjectDesc));
+	PX_ASSERTIF(pObject->pObjectDesc[attachIndex] != PX_NULL);
+	pLabel = (PX_Object_Label*)PX_ObjectCreateDesc(pObject, attachIndex, PX_OBJECT_TYPE_LABEL, 0, PX_Object_LabelRender, PX_Object_LabelFree, 0, sizeof(PX_Object_Label));
+	PX_ASSERTIF(pLabel == PX_NULL);
 
-	pObject=PX_ObjectCreateEx(mp,Parent,(px_float)x,(px_float)y,0,(px_float)Width,(px_float)Height,0,PX_OBJECT_TYPE_LABEL,PX_NULL,PX_Object_LabelRender,PX_Object_LabelFree,PX_NULL,sizeof(PX_Object_Label));
+	TextLen = PX_strlen(Text);
+
+	pLabel->Text = (px_char*)MP_Malloc(mp, TextLen + 1);
+	if (pLabel->Text == PX_NULL)
+	{
+		return PX_NULL;
+	}
+	PX_strcpy(pLabel->Text, Text, TextLen + 1);
+	pLabel->TextColor = Color;
+	pLabel->BackgroundColor = PX_COLOR(0, 0, 0, 0);
+	pLabel->Align = PX_ALIGN_LEFTMID;
+	pLabel->bBorder = PX_FALSE;
+	pLabel->borderColor = PX_COLOR(255, 0, 0, 0);
+	pLabel->fontModule = fm;
+	pLabel->style = PX_OBJECT_LABEL_STYLE_RECT;
+	return pObject;
+}
+
+PX_Object* PX_Object_LabelCreate(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y,px_int Width,px_int Height,const px_char *Text,PX_FontModule *fm,px_color Color)
+{
+	PX_Object *pObject;
+	pObject=PX_ObjectCreate(mp,Parent,(px_float)x,(px_float)y,0,(px_float)Width,(px_float)Height,0);
 
 	if (pObject==PX_NULL)
 	{
 		return PX_NULL;
 	}
-	pLable=PX_ObjectGetDesc(PX_Object_Label,pObject);
-
-	TextLen=PX_strlen(Text);
-
-	pLable->Text=(px_char *)MP_Malloc(mp,TextLen+1);
-	if (pLable->Text==PX_NULL)
+	if (!PX_Object_LabelAttachObject(pObject,0,x,y,Width,Height,Text,fm,Color))
 	{
+		PX_ObjectDelete(pObject);
 		return PX_NULL;
 	}
-	PX_strcpy(pLable->Text,Text,TextLen+1);
-	pLable->TextColor=Color;
-	pLable->BackgroundColor=PX_COLOR(0,0,0,0);
-	pLable->Align=PX_ALIGN_LEFTMID;
-	pLable->bBorder=PX_FALSE;
-	pLable->borderColor=PX_COLOR(255,0,0,0);
-	pLable->fontModule=fm;
-	pLable->style=PX_OBJECT_LABEL_STYLE_RECT;
 	return pObject;
 }
 
 
 PX_Object_Label  * PX_Object_GetLabel( PX_Object *pObject )
 {
-	if(pObject->Type==PX_OBJECT_TYPE_LABEL)
-		return PX_ObjectGetDesc(PX_Object_Label,pObject);
-	else
-		return PX_NULL;
+	return (PX_Object_Label*)PX_ObjectGetDescByType(pObject,PX_OBJECT_TYPE_LABEL);
 }
 
-px_char	  * PX_Object_LabelGetText( PX_Object *Label )
+px_char	  * PX_Object_LabelGetText( PX_Object * pObject)
 {
-	PX_Object_Label *pLabel=PX_Object_GetLabel(Label);
-	if (pLabel!=PX_NULL)
-	{
-		return pLabel->Text;
-	}
-	return PX_NULL;
+	PX_Object_Label *pLabel=PX_Object_GetLabel(pObject);
+	PX_ASSERTIF(pLabel==PX_NULL);
+	return pLabel->Text;
 }
 px_void PX_Object_LabelSetText( PX_Object *pObject,const px_char *Text )
 {
@@ -138,11 +145,9 @@ px_void PX_Object_LabelSetText( PX_Object *pObject,const px_char *Text )
 	{
 		return;
 	}
-	if (pObject->Type!=PX_OBJECT_TYPE_LABEL)
-	{
-		PX_ASSERT();
-		return;
-	}
+	pLabel = PX_Object_GetLabel(pObject);
+	PX_ASSERTIF(pLabel == PX_NULL);
+	
 
 	TextLen=PX_strlen(Text);
 	pLabel= PX_Object_GetLabel(pObject);
@@ -166,170 +171,56 @@ px_void PX_Object_LabelSetText( PX_Object *pObject,const px_char *Text )
 px_void PX_Object_LabelSetTextColor(PX_Object *pObject,px_color Color)
 {
 	PX_Object_Label * pLabel=PX_Object_GetLabel(pObject);
-	if (pLabel)
-	{
-		pLabel->TextColor=Color;
-	}
+	PX_ASSERTIF(pLabel == PX_NULL);
+	pLabel->TextColor = Color;
 }
 
 
 px_void PX_Object_LabelSetBackgroundColor( PX_Object *pObject,px_color Color )
 {
 	PX_Object_Label * pLabel=PX_Object_GetLabel(pObject);
-	if (pLabel)
-	{
-		pLabel->BackgroundColor=Color;
-	}
+	PX_ASSERTIF(pLabel == PX_NULL);
+	pLabel->BackgroundColor = Color;
 }
 px_void PX_Object_LabelSetAlign( PX_Object *pObject,PX_ALIGN Align )
 {
-	PX_Object_Label * pLabel=PX_Object_GetLabel(pObject);
-	if (pLabel)
-	{
-
-		pLabel->Align=Align;
-	}
+	PX_Object_Label* pLabel = PX_Object_GetLabel(pObject);
+	PX_ASSERTIF(pLabel == PX_NULL);
+	pLabel->Align=Align;
 }
 
 
 
 px_void PX_Object_LabelSetBorder(PX_Object *pObject,px_bool b)
 {
-	PX_Object_Label * pLabel=PX_Object_GetLabel(pObject);
-	if (pLabel)
-	{
-		pLabel->bBorder=b;
-	}
+	PX_Object_Label* pLabel = PX_Object_GetLabel(pObject);
+	PX_ASSERTIF(pLabel == PX_NULL);
+	pLabel->bBorder=b;
 }
 
 px_void PX_Object_LabelSetBorderColor(PX_Object *pObject,px_color color)
 {
-	PX_Object_Label * pLabel=PX_Object_GetLabel(pObject);
-	if (pLabel)
-	{
-		pLabel->borderColor=color;
-	}
+	PX_Object_Label* pLabel = PX_Object_GetLabel(pObject);
+	PX_ASSERTIF(pLabel == PX_NULL);
+	pLabel->borderColor=color;
 }
 
 px_void PX_Object_LabelSetStyle(PX_Object *pObject,PX_OBJECT_LABEL_STYLE style)
 {
-	PX_Object_Label * pLabel=PX_Object_GetLabel(pObject);
-	if (pLabel)
-	{
-		pLabel->style=style;
-	}
+	PX_Object_Label* pLabel = PX_Object_GetLabel(pObject);
+	PX_ASSERTIF(pLabel == PX_NULL);
+	pLabel->style=style;
 }
 
 px_int PX_Object_LabelGetTextRenderWidth(PX_Object* pObject)
 {
 	PX_Object_Label* pLabel = PX_Object_GetLabel(pObject);
-	if (pLabel)
-	{
-		px_int w, h;
-		PX_FontModuleTextGetRenderWidthHeight(pLabel->fontModule, pLabel->Text, &w, &h);
-		return w;
-	}
-	return 0;
+	px_int w, h;
+	PX_ASSERTIF(pLabel == PX_NULL);
+    PX_FontModuleTextGetRenderWidthHeight(pLabel->fontModule, pLabel->Text, &w, &h);
+	return w;
 }
 
-//////////////////////////////////////////////////////////////////////////
-//Label
-//////////////////////////////////////////////////////////////////////////
-PX_Object* PX_Designer_LabelCreate(px_memorypool* mp, PX_Object* pparent, px_float x, px_float y, px_float width, px_float height, px_abi *pabi)
-{
-	PX_FontModule* fm;
-	if (!PX_AbiRead_ptr(pabi, "fontmodule", (px_void**)&fm))
-	{
-		fm = PX_NULL;
-	}
-
-	return PX_Object_LabelCreate(mp, pparent, (px_int)x, (px_int)y, 128, 32, "Label", fm, PX_OBJECT_UI_DEFAULT_FONTCOLOR);
-}
-
-px_void PX_Designer_LabelSetText(PX_Object* pobject, const px_char text[])
-{
-	PX_Object_LabelSetText(pobject, text);
-}
-
-px_bool PX_Designer_LabelGetText(PX_Object* pobject, px_string* str)
-{
-	return PX_StringSet(str, PX_Object_LabelGetText(pobject));
-}
-
-px_void PX_Designer_LabelSetAlign(PX_Object* pobject, px_int align)
-{
-	switch (align)
-	{
-	case		PX_ALIGN_LEFTTOP:
-	case 		PX_ALIGN_MIDTOP:
-	case 		PX_ALIGN_RIGHTTOP:
-	case 		PX_ALIGN_LEFTMID:
-	case 		PX_ALIGN_CENTER:
-	case 		PX_ALIGN_RIGHTMID:
-	case 		PX_ALIGN_LEFTBOTTOM:
-	case 		PX_ALIGN_MIDBOTTOM:
-	case 		PX_ALIGN_RIGHTBOTTOM:
-	{
-		PX_Object_LabelSetAlign(pobject, (PX_ALIGN)align);
-	}
-	default:
-		break;
-	}
-
-}
-
-px_int PX_Designer_LabelGetAlign(PX_Object* pobject)
-{
-	return PX_Object_GetLabel(pobject)->Align;
-}
-
-PX_Designer_ObjectDesc PX_Object_LabelDesignerInstall()
-{
-	PX_Designer_ObjectDesc slabel;
-	px_int i = 0;
-	PX_memset(&slabel, 0, sizeof(slabel));
-	PX_strcat(slabel.Name, "label");
-	slabel.createfunc = PX_Designer_LabelCreate;
-	slabel.type = PX_DESIGNER_OBJECT_TYPE_UI;
-
-	PX_strcat(slabel.properties[i].Name, "id");
-	slabel.properties[i].getstring = PX_Designer_GetID;
-	slabel.properties[i].setstring = PX_Designer_SetID;
-	i++;
-
-	PX_strcat(slabel.properties[i].Name, "x");
-	slabel.properties[i].getfloat = PX_Designer_GetX;
-	slabel.properties[i].setfloat = PX_Designer_SetX;
-	i++;
-
-	PX_strcat(slabel.properties[i].Name, "y");
-	slabel.properties[i].getfloat = PX_Designer_GetY;
-	slabel.properties[i].setfloat = PX_Designer_SetY;
-	i++;
-
-	PX_strcat(slabel.properties[i].Name, "width");
-	slabel.properties[i].getfloat = PX_Designer_GetWidth;
-	slabel.properties[i].setfloat = PX_Designer_SetWidth;
-	i++;
-
-	PX_strcat(slabel.properties[i].Name, "height");
-	slabel.properties[i].getfloat = PX_Designer_GetHeight;
-	slabel.properties[i].setfloat = PX_Designer_SetHeight;
-	i++;
-
-	PX_strcat(slabel.properties[i].Name, "text");
-	slabel.properties[i].setstring = PX_Designer_LabelSetText;
-	slabel.properties[i].getstring = PX_Designer_LabelGetText;
-	i++;
-
-
-	PX_strcat(slabel.properties[i].Name, "align");
-	slabel.properties[i].setint = PX_Designer_LabelSetAlign;
-	slabel.properties[i].getint = PX_Designer_LabelGetAlign;
-	i++;
-
-	return slabel;
-}
 
 
 PX_OBJECT_RENDER_FUNCTION(PX_Object_SliderTextOnRender)
@@ -337,7 +228,6 @@ PX_OBJECT_RENDER_FUNCTION(PX_Object_SliderTextOnRender)
 	PX_Object_SliderText* pDesc = PX_ObjectGetDesc(PX_Object_SliderText, pObject);
 	px_float x, y, w, h;
 	PX_OBJECT_INHERIT_CODE(pObject, x, y, w, h);
-	PX_ObjectUpdatePhysics(pObject, elapsed);
 	if (elapsed>pDesc->alive)
 	{
 		PX_ObjectDelayDelete(pObject);
@@ -352,11 +242,10 @@ PX_OBJECT_FREE_FUNCTION(PX_Object_SliderTextOnFree)
 	PX_StringFree(&pDesc->text);
 }
 
-PX_Object* PX_Object_SliderTextCreate(px_memorypool* mp, PX_Object* Parent, px_float x, px_float y, px_float vx,px_float vy,px_dword alive, const px_char* Text, PX_FontModule* fm, px_color Color)
+PX_Object* PX_Object_SliderTextAttachObject( PX_Object* pObject,px_int attachIndex, px_float x, px_float y, px_float vx, px_float vy, px_dword alive, const px_char* Text, PX_FontModule* fm, px_color Color)
 {
-	PX_Object* pObject;
-	PX_Object_SliderText Desc = {0};
-	px_int fh, fw;
+	px_memorypool* mp=pObject->mp;
+	PX_Object_SliderText Desc = { 0 },*pdesc;
 	if (!PX_StringInitialize(mp, &Desc.text))return 0;
 	if (!PX_StringCat(&Desc.text, Text))
 	{
@@ -366,16 +255,28 @@ PX_Object* PX_Object_SliderTextCreate(px_memorypool* mp, PX_Object* Parent, px_f
 	Desc.fm = fm;
 	Desc.color = Color;
 	Desc.alive = alive;
+	PX_ASSERTIF(pObject == PX_NULL);
+	PX_ASSERTIF(attachIndex < 0 || attachIndex >= PX_COUNTOF(pObject->pObjectDesc));
+	PX_ASSERTIF(pObject->pObjectDesc[attachIndex] != PX_NULL);
+	pdesc = (PX_Object_SliderText*)PX_ObjectCreateDesc(pObject, attachIndex, PX_OBJECT_TYPE_SLIDERTEXT,0 , PX_Object_SliderTextOnRender, PX_Object_SliderTextOnFree, &Desc, sizeof(PX_Object_SliderText));
+	PX_ASSERTIF(pdesc == PX_NULL);
+	return pObject;
+}
+
+PX_Object* PX_Object_SliderTextCreate(px_memorypool* mp, PX_Object* Parent, px_float x, px_float y, px_float vx,px_float vy,px_dword alive, const px_char* Text, PX_FontModule* fm, px_color Color)
+{
+	PX_Object* pObject;
+	px_int fh, fw;
 	PX_FontModuleTextGetRenderWidthHeight(fm, Text, &fw, &fh);
-	pObject = PX_ObjectCreateEx(mp, Parent,  x, y, 0,fw*1.0f, fh*1.0f, 0, 0, 0,PX_Object_SliderTextOnRender, PX_Object_SliderTextOnFree,&Desc,sizeof(Desc));
-	if (pObject)
+	pObject = PX_ObjectCreate(mp, Parent,  x, y, 0,fw*1.0f, fh*1.0f, 0);
+	if (!pObject)
 	{
-		pObject->vx = vx;
-		pObject->vy = vy;
+		return PX_NULL;
 	}
-	else
+	if (!PX_Object_SliderTextAttachObject(pObject, 0, x, y, vx, vy, alive, Text, fm, Color))
 	{
-		PX_StringFree(&Desc.text);
+		PX_ObjectDelete(pObject);
+		return PX_NULL;
 	}
 	return pObject;
 }

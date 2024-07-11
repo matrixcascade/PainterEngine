@@ -13,6 +13,7 @@
 	`define VIDEO_DISPLAY_MODE_800_600    3'b100
 	`define VIDEO_DISPLAY_MODE_1024_768   3'b101
 	`define VIDEO_DISPLAY_MODE_1920_1080  3'b110
+	`define VIDEO_DISPLAY_MODE_128_64  	  3'b111
 
     `define DVI_RGB_MODE_ARGB 3'b00
 	`define DVI_RGB_MODE_RGBA 3'b01
@@ -118,6 +119,17 @@
 		parameter VIDEO_1920_1080_V_BP  = 16'd36;
 		parameter VIDEO_1920_1080_HS_POL = 1'b1;
 		parameter VIDEO_1920_1080_VS_POL = 1'b1;
+
+		parameter VIDEO_128_64_H_ACTIVE = 16'd128;
+		parameter VIDEO_128_64_H_FP = 16'd1;
+		parameter VIDEO_128_64_H_SYNC = 16'd1;
+		parameter VIDEO_128_64_H_BP = 16'd1; 
+		parameter VIDEO_128_64_V_ACTIVE = 16'd64;
+		parameter VIDEO_128_64_V_FP  = 16'd1;
+		parameter VIDEO_128_64_V_SYNC  = 16'd1;
+		parameter VIDEO_128_64_V_BP  = 16'd1;
+		parameter VIDEO_128_64_HS_POL = 1'b1;
+		parameter VIDEO_128_64_VS_POL = 1'b1;
 
 		//dvi registers
 		reg [15:0] 				H_ACTIVE; 
@@ -232,6 +244,19 @@
 					HS_POL = VIDEO_1920_1080_HS_POL;
 					VS_POL = VIDEO_1920_1080_VS_POL;
 
+				end
+				`VIDEO_DISPLAY_MODE_128_64:
+				begin
+					H_ACTIVE = VIDEO_128_64_H_ACTIVE;
+					H_FP = VIDEO_128_64_H_FP;
+					H_SYNC = VIDEO_128_64_H_SYNC;
+					H_BP = VIDEO_128_64_H_BP;
+					V_ACTIVE = VIDEO_128_64_V_ACTIVE;
+					V_FP = VIDEO_128_64_V_FP;
+					V_SYNC = VIDEO_128_64_V_SYNC;
+					V_BP = VIDEO_128_64_V_BP;
+					HS_POL = VIDEO_128_64_HS_POL;
+					VS_POL = VIDEO_128_64_VS_POL;
 				end
 				default:
 				begin

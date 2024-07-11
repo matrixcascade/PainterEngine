@@ -156,7 +156,6 @@ px_bool PX_CDA_VM_SetObjectImpact(PX_VM* Ins, px_void* userptr)
 {
 	PX_Object* handler;
 	px_int x;
-	PX_CDA_Object *pDesc;
 	if (PX_VM_STACK(Ins, 0).type != PX_VM_VARIABLE_TYPE_HANDLE)
 	{
 		PX_VM_RET(Ins, PX_Variable_int(0));
@@ -170,9 +169,6 @@ px_bool PX_CDA_VM_SetObjectImpact(PX_VM* Ins, px_void* userptr)
 		return PX_FALSE;
 	}
 	x = PX_VM_STACK(Ins, 1)._int;
-
-	pDesc = PX_ObjectGetDesc(PX_CDA_Object, handler);
-
 
 	return PX_TRUE;
 }
@@ -204,7 +200,7 @@ px_bool PX_CDA_VM_SetObjectPosition(PX_VM* Ins, px_void* userptr)
 	}
 	y = PX_VM_STACK(Ins, 2)._float;
 
-	pDesc = PX_ObjectGetDesc(PX_CDA_Object, handler);
+	pDesc = PX_Object_GetCDAObject(handler);
 	pDesc->grid_x = x;
 	pDesc->grid_y = x;
 
@@ -244,7 +240,7 @@ px_bool PX_CDA_VM_GetObjectPosition(PX_VM* Ins, px_void* userptr)
 		PX_VM_RET(Ins, PX_Variable_int(0));
 		return PX_TRUE;
 	}
-	pDesc = PX_ObjectGetDesc(PX_CDA_Object, handler);
+	pDesc = PX_Object_GetCDAObject(handler);
 
 	PX_VM_GLOBAL(Ins, x)._float = pDesc->grid_x;
 	PX_VM_GLOBAL(Ins, y)._float = pDesc->grid_y;

@@ -37,66 +37,87 @@ px_void PX_Object_3DModel_PixelShader(px_surface* psurface, px_int x, px_int y, 
 	}
 }
 
-PX_Object* PX_Object_3DModelCreate(px_memorypool* mp, PX_Object* parent, px_float x, px_float y,px_float width,px_float height, PX_3D_ObjectData* pdata)
+PX_Object *PX_Object_3DModelAttachObject( PX_Object* pObject, px_int attachIndex, px_float x, px_float y, px_float width, px_float height, PX_3D_ObjectData* pdata)
 {
-	PX_Object_3DModel* pdesc;
-	PX_Object* pObject;
-	pObject = PX_ObjectCreateEx(mp, parent, x, y, 0, 0, 0, 0, PX_OBJECT_TYPE_3DMODEL, 0, PX_Object_3DModelRender, PX_Object_3DModelFree, 0, sizeof(PX_Object_3DModel));
-	pdesc=PX_ObjectGetDesc(PX_Object_3DModel, pObject);
-	pdesc->mp = mp;
-	pdesc->pObjData = pdata;
-	//create surface
-	if (!PX_SurfaceCreate(mp, (px_int)width, (px_int)height, &pdesc->renderSurface))
+	px_memorypool* mp= pObject->mp;
+	PX_Object_3DModel* pDesc;
+
+	PX_ASSERTIF(pObject == PX_NULL);
+	PX_ASSERTIF(attachIndex < 0 || attachIndex >= PX_COUNTOF(pObject->pObjectDesc));
+	PX_ASSERTIF(pObject->pObjectDesc[attachIndex] != PX_NULL);
+	pDesc = (PX_Object_3DModel*)PX_ObjectCreateDesc(pObject, attachIndex, PX_OBJECT_TYPE_3DMODEL, 0, PX_Object_3DModelRender, PX_Object_3DModelFree, 0, sizeof(PX_Object_3DModel));
+	if (!pDesc)
 	{
-		PX_ObjectDelete(pObject);
 		return PX_NULL;
 	}
 
-	if (!PX_3D_RenderListInitialize(mp, &pdesc->renderlist, PX_3D_PRESENTMODE_TEXTURE | PX_3D_PRESENTMODE_PURE, PX_3D_CULLMODE_CCW, PX_NULL))
+	pDesc->pObjData = pdata;
+	//create surface
+	if (!PX_SurfaceCreate(mp, (px_int)width, (px_int)height, &pDesc->renderSurface))
 	{
-		PX_ObjectDelete(pObject);
-		PX_TextureFree(&pdesc->renderSurface);
 		return PX_NULL;
 	}
-	PX_3D_RenderListSetPixelShader(&pdesc->renderlist, PX_Object_3DModel_PixelShader);
-	if (!PX_3D_ObjectDataToRenderList(pdata, &pdesc->renderlist))
+
+	if (!PX_3D_RenderListInitialize(mp, &pDesc->renderlist, PX_3D_PRESENTMODE_TEXTURE | PX_3D_PRESENTMODE_PURE, PX_3D_CULLMODE_CCW, PX_NULL))
 	{
-		PX_ObjectDelete(pObject);
-		PX_TextureFree(&pdesc->renderSurface);
-		PX_3D_RenderListFree(&pdesc->renderlist);
+		PX_TextureFree(&pDesc->renderSurface);
 		return PX_NULL;
 	}
-	
-	if (!PX_3D_CameraUVNInitialize(mp, &pdesc->camera, PX_POINT4D(0, 0, 0), PX_POINT4D(0, 0, 1), 1, 32767, 90, width, height))
+	PX_3D_RenderListSetPixelShader(&pDesc->renderlist, PX_Object_3DModel_PixelShader);
+	if (!PX_3D_ObjectDataToRenderList(pdata, &pDesc->renderlist))
 	{
-		PX_ObjectDelete(pObject);
-		PX_TextureFree(&pdesc->renderSurface);
-		PX_3D_RenderListFree(&pdesc->renderlist);
+		PX_TextureFree(&pDesc->renderSurface);
+		PX_3D_RenderListFree(&pDesc->renderlist);
 		return PX_NULL;
 	}
-	PX_3D_WorldInitialize(&pdesc->world, 0, 0, 1.2f, 0, 0, 0, 1);
+
+	if (!PX_3D_CameraUVNInitialize(mp, &pDesc->camera, PX_POINT4D(0, 0, 0), PX_POINT4D(0, 0, 1), 1, 32767, 90, width, height))
+	{
+		PX_TextureFree(&pDesc->renderSurface);
+		PX_3D_RenderListFree(&pDesc->renderlist);
+		return PX_NULL;
+	}
+	PX_3D_WorldInitialize(&pDesc->world, 0, 0, 1.2f, 0, 0, 0, 1);
+	return pObject;
+}
+
+
+PX_Object* PX_Object_3DModelCreate(px_memorypool* mp, PX_Object* parent, px_float x, px_float y,px_float width,px_float height, PX_3D_ObjectData* pdata)
+{
+	PX_Object* pObject;
+	pObject = PX_ObjectCreate(mp, parent, x, y, 0, 0, 0, 0);
+	if (!PX_Object_3DModelAttachObject(pObject, 0, x, y, width, height, pdata))
+	{
+		PX_ObjectDelete(pObject);
+		return PX_NULL;
+	}
 	return pObject;
 }
 
 px_void PX_Object_3DModelSetCamera(PX_Object* pObject,px_point4D pos,px_point4D direction)
 {
 	PX_Object_3DModel* pdesc;
-	if (pObject->Type== PX_OBJECT_TYPE_3DMODEL)
+	px_int idesc;
+	for (idesc = 0; idesc < PX_COUNTOF(pObject->Type); idesc++)
 	{
-		pdesc = PX_ObjectGetDesc(PX_Object_3DModel, pObject);
-		PX_3D_CameraSetPosition(&pdesc->camera, pos, direction);
+		if (pObject->Type[idesc] == PX_OBJECT_TYPE_3DMODEL)
+		{
+			pdesc = PX_ObjectGetDescIndex(PX_Object_3DModel, pObject, idesc);
+			PX_3D_CameraSetPosition(&pdesc->camera, pos, direction);
+		}
 	}
-	
 }
 
-px_void PX_Object_3DModelSetWorld(PX_Object* pObject, px_float x, px_float y, px_float z, px_float rotX, px_float rotY, px_float rotZ, px_float scale)
+px_void PX_Object_3DModelSetWorld(PX_Object* pObject,px_float x, px_float y, px_float z, px_float rotX, px_float rotY, px_float rotZ, px_float scale)
 {
 	PX_Object_3DModel* pdesc;
-	pdesc = PX_ObjectGetDesc(PX_Object_3DModel, pObject);
-	if (pObject->Type == PX_OBJECT_TYPE_3DMODEL)
+	px_int idesc;
+	for (idesc = 0; idesc < PX_COUNTOF(pObject->Type); idesc++)
 	{
-		pdesc = PX_ObjectGetDesc(PX_Object_3DModel, pObject);
-		PX_3D_WorldInitialize(&pdesc->world, x, y, z, rotX, rotY, rotZ, scale);
+		if (pObject->Type[idesc] == PX_OBJECT_TYPE_3DMODEL)
+		{
+			pdesc = PX_ObjectGetDescIndex(PX_Object_3DModel, pObject, idesc);
+			PX_3D_WorldInitialize(&pdesc->world, x, y, z, rotX, rotY, rotZ, scale);
+		}
 	}
-
 }

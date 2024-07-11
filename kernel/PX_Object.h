@@ -40,14 +40,14 @@
 #define PX_OBJECT_EVENT_SAVE				28
 #define PX_OBJECT_EVENT_TIMEOUT				29
 #define PX_OBJECT_EVENT_DAMAGE				30
-#define PX_OBJECT_EVENT_LASTVALUECHANGED    31
 //////////////////////////////////////////////////////////////////////////////
 //    Type of Controls
 /////////////////////////////////////////////////////////////////////////////
 
 enum PX_OBJECT_TYPE
 {
-  PX_OBJECT_TYPE_NULL			,
+  PX_OBJECT_TYPE_NULL		 = 0,
+  PX_OBJECT_TYPE_UNKNOW		 = 0,
   PX_OBJECT_TYPE_LABEL			,
   PX_OBJECT_TYPE_PROCESSBAR		,
   PX_OBJECT_TYPE_IMAGE			,
@@ -108,6 +108,9 @@ enum PX_OBJECT_TYPE
   PX_OBJECT_TYPE_LIVE2D			,
   PX_OBJECT_TYPE_FIREWORK		,
   PX_OBJECT_TYPE_MATRIXEFFECT   ,
+  PX_OBJECT_TYPE_SLIDERTEXT		,
+  PX_OBJECT_TYPE_CDA_DESIGNER		,
+  PX_OBJECT_TYPE_CDA_OBJECT		,
 };
 
 
@@ -149,22 +152,15 @@ enum PX_OBJECT_TYPE
 struct _PX_Object;
 typedef struct _PX_Object PX_Object;
 
-typedef px_void  (*Function_ObjectUpdate)(PX_Object *,px_uint elapsed);
-typedef px_void  (*Function_ObjectBeginRender)(px_surface *,PX_Object *,px_dword);
-typedef px_void  (*Function_ObjectRender)(px_surface *psurface,PX_Object *,px_uint elapsed);
-typedef px_void  (*Function_ObjectEndRender)(px_surface *,PX_Object *,px_dword);
-typedef px_void  (*Function_ObjectFree)(PX_Object *);
+typedef px_void	 (*Function_ObjectUpdate)(PX_Object *,px_int, px_dword elapsed);
+typedef px_void  (*Function_ObjectRender)(px_surface *psurface,PX_Object *, px_int, px_dword elapsed);
+typedef px_void  (*Function_ObjectFree)(PX_Object *, px_int);
 typedef px_void  (*Function_ObjectLinkChild)(PX_Object *parent,PX_Object *child);
 
 #define PX_OBJECT_EVENT_FUNCTION(name) px_void name(PX_Object *pObject,PX_Object_Event e,px_void * ptr)
-#define PX_OBJECT_RENDER_FUNCTION(name) px_void name(px_surface *psurface,PX_Object *pObject,px_uint elapsed)
-#define PX_OBJECT_UPDATE_FUNCTION(name) px_void name(PX_Object *pObject,px_uint elapsed)
-#define PX_OBJECT_FREE_FUNCTION(name) px_void name(PX_Object *pObject)
-
-#define PX_OBJECT_EVENTFUNCTION(name) PX_OBJECT_EVENT_FUNCTION(name)
-#define PX_OBJECT_RENDERFUNCTION(name) PX_OBJECT_RENDER_FUNCTION(name)
-#define PX_OBJECT_UPDATEFUNCTION(name) PX_OBJECT_UPDATE_FUNCTION(name)
-#define PX_OBJECT_FREEFUNCTION(name) PX_OBJECT_FREE_FUNCTION(name)
+#define PX_OBJECT_RENDER_FUNCTION(name) px_void name(px_surface *psurface,PX_Object *pObject,px_int idesc,px_dword elapsed)
+#define PX_OBJECT_UPDATE_FUNCTION(name) px_void name(PX_Object *pObject,px_int idesc,px_dword elapsed)
+#define PX_OBJECT_FREE_FUNCTION(name) px_void name(PX_Object *pObject,px_int idesc)
 
 struct _PX_Object
 {
@@ -178,25 +174,25 @@ struct _PX_Object
 	px_float Height;
 	px_float Length;
 	px_float diameter;//if the member is not zero,The pObject is round shape
-	px_bool OnFocus;
-	px_bool OnFocusNode;
-	px_bool OnLostFocusReleaseEvent;
-	px_bool Enabled;
-	px_bool Visible;
-	px_bool ReceiveEvents;
-	px_int	Type;
-	px_int  designerType;
+	px_bool  OnFocus;
+	px_bool  OnFocusNode;
+	px_bool  OnLostFocusReleaseEvent;
+	px_bool  Enabled;
+	px_bool  Visible;
+	px_bool  ReceiveEvents;
+	px_bool  delay_delete;
+	px_dword impact_object_type;
+	px_dword impact_target_type;
+
 	union
 	{
 		px_int  User_int;
 		px_void *User_ptr;
 	};
 	
-	px_int   world_index;
-	px_bool  delay_delete;
-	px_dword impact_object_type;
-	px_dword impact_target_type;
+	//px_int   world_index;
 	
+	px_int	Type[PX_OBJECT_MAX_DESC_COUNT];
 	px_void *pObjectDesc[PX_OBJECT_MAX_DESC_COUNT];
 	Function_ObjectUpdate Func_ObjectUpdate[PX_OBJECT_MAX_DESC_COUNT];
 	Function_ObjectRender Func_ObjectRender[PX_OBJECT_MAX_DESC_COUNT];
@@ -289,6 +285,8 @@ px_void PX_Object_Event_SetIndex(PX_Object_Event *e,px_int index);
 struct _PX_Object_EventAction
 {
 	px_uint EventAction;
+	px_int  owner;
+	px_bool enable;
 	px_void (*EventActionFunc)(PX_Object *,PX_Object_Event e,px_void *user_ptr);
 	px_void *user_ptr;
 	struct _PX_Object_EventAction *pNext;
@@ -297,30 +295,24 @@ struct _PX_Object_EventAction
 
 typedef struct _PX_Object_EventAction PX_OBJECT_EventAction;
 
+#define    PX_ObjectGetDescIndex(type,pobject,index) ((type *)((pobject)->pObjectDesc[index]))
+#define    PX_ObjectGetDesc(type,pobject) PX_ObjectGetDescIndex(type,pobject,idesc)
 
-PX_Object *PX_ObjectCreate(px_memorypool *mp,PX_Object *Parent,px_float x,px_float y,px_float z,px_float Width,px_float Height,px_float Length);
-PX_Object* PX_ObjectCreateEx(px_memorypool* mp, PX_Object* Parent, px_float x, px_float y, px_float z, px_float Width, \
-	px_float Height, px_float Lenght, px_int type, Function_ObjectUpdate Func_ObjectUpdate, Function_ObjectRender Func_ObjectRender, Function_ObjectFree Func_ObjectFree, px_void* desc, px_int size);
-PX_Object* PX_ObjectCreateEx1(px_memorypool* mp, PX_Object* Parent, px_float x, px_float y, px_float z, px_float Width,\
-	px_float Height, px_float Lenght, px_int type, Function_ObjectUpdate Func_ObjectUpdate, Function_ObjectRender Func_ObjectRender, Function_ObjectFree Func_ObjectFree, px_void* desc, px_int size);
-PX_Object* PX_ObjectCreateEx2(px_memorypool* mp, PX_Object* Parent, px_float x, px_float y, px_float z, px_float Width,\
-	px_float Height, px_float Lenght, px_int type, Function_ObjectUpdate Func_ObjectUpdate, Function_ObjectRender Func_ObjectRender, Function_ObjectFree Func_ObjectFree, px_void* desc, px_int size);
-PX_Object* PX_ObjectCreateEx3(px_memorypool* mp, PX_Object* Parent, px_float x, px_float y, px_float z, px_float Width,\
-	px_float Height, px_float Lenght, px_int type, Function_ObjectUpdate Func_ObjectUpdate, Function_ObjectRender Func_ObjectRender, Function_ObjectFree Func_ObjectFree, px_void* desc, px_int size);
-px_void PX_ObjectAttachDesc(PX_Object *pObject, Function_ObjectUpdate Func_ObjectUpdate, Function_ObjectRender Func_ObjectRender, Function_ObjectFree Func_ObjectFree,\
-	px_int index,px_void* pDesc, px_int descSize);
-px_int PX_ObjectCreateDesc(PX_Object* pObject,px_int index, px_void *pDesc,px_int descSize);
-px_int PX_ObjectAddRenderFunction(PX_Object *pObject,Function_ObjectRender Func_ObjectRender);
-px_int PX_ObjectSetRenderFunction(PX_Object* pObject, Function_ObjectRender Func_ObjectRender, px_int index);
-px_int PX_ObjectAddUpdateFunction(PX_Object *pObject,Function_ObjectUpdate Func_ObjectUpdate);
-px_int PX_ObjectSetUpdateFunction(PX_Object* pObject, Function_ObjectUpdate Func_ObjectUpdate, px_int index);
-px_int PX_ObjectAddFreeFunction(PX_Object *pObject,Function_ObjectFree Func_ObjectFree);
-px_int PX_ObjectSetFreeFunction(PX_Object* pObject, Function_ObjectFree Func_ObjectFree, px_int index);
+px_int     PX_ObjectGetFreeDescIndex(PX_Object *pObject);
+px_bool    PX_ObjectCheckType(PX_Object* pObject, px_int type);
+px_int     PX_ObjectGetTypeIndex(PX_Object* pObject, px_int type);
 
+px_int     PX_ObjectGetDescIndexByType(PX_Object* pObject,px_int type);
+px_void*	PX_ObjectGetDescByType(PX_Object* pObject, px_int type);
+PX_Object* PX_ObjectCreate(px_memorypool *mp,PX_Object *Parent,px_float x,px_float y,px_float z,px_float Width,px_float Height,px_float Length);
+px_void	 * PX_ObjectCreateDesc(PX_Object* pObject, px_int idesc, px_int type, Function_ObjectUpdate Func_ObjectUpdate, Function_ObjectRender Func_ObjectRender, Function_ObjectFree Func_ObjectFree, px_void* pDesc, px_int descSize);
 PX_Object* PX_ObjectCreateFunction(px_memorypool* mp, PX_Object* Parent, Function_ObjectUpdate Func_ObjectUpdate, Function_ObjectRender Func_ObjectRender, Function_ObjectFree Func_ObjectFree);
 PX_Object* PX_ObjectCreateRoot(px_memorypool* mp);
-#define    PX_ObjectGetDesc(type,pobject) ((type *)((pobject)->pObjectDesc[0]))
-#define    PX_ObjectGetDescIndex(type,pobject,index) ((type *)((pobject)->pObjectDesc[index]))
+PX_Object* PX_ObjectCreateEx(px_memorypool* mp, PX_Object* Parent, px_float x, px_float y, px_float z, px_float Width, px_float Height, px_float Lenght, px_int type, Function_ObjectUpdate Func_ObjectUpdate, Function_ObjectRender Func_ObjectRender, Function_ObjectFree Func_ObjectFree, px_void* desc, px_int size);
+px_void    PX_ObjectDetach(PX_Object *pObject,px_int type);
+px_int	   PX_ObjectSetRenderFunction(PX_Object* pObject, Function_ObjectRender Func_ObjectRender, px_int index);
+px_int	   PX_ObjectSetUpdateFunction(PX_Object* pObject, Function_ObjectUpdate Func_ObjectUpdate, px_int index);
+px_int	   PX_ObjectSetFreeFunction(PX_Object* pObject, Function_ObjectFree Func_ObjectFree, px_int index);
 
 px_void    PX_ObjectGetInheritXY(PX_Object *pObject,px_float *x,px_float *y);
 px_void	   PX_ObjectInitialize(px_memorypool *mp,PX_Object *pObject,PX_Object *Parent,px_float x,px_float y,px_float z,px_float Width,px_float Height,px_float Length);
@@ -345,6 +337,7 @@ PX_Object  *PX_ObjectGetObject(PX_Object *pObject,const px_char payload[]);
 px_void     PX_ObjectSetFocus(PX_Object *pObject);
 px_bool		PX_ObjectIsOnFocus(PX_Object* pObject);
 px_void     PX_ObjectClearFocus(PX_Object *pObject);
+
 #define		PX_ObjectReleaseFocus PX_ObjectClearFocus
 
 px_bool		PX_ObjectIsPointInRegion(PX_Object *pObject,px_float x,px_float y);
@@ -357,82 +350,27 @@ px_void PX_ObjectUpdate(PX_Object *pObject,px_uint elapsed );
 px_void PX_ObjectUpdatePhysics(PX_Object* pObject, px_uint elapsed);
 px_void PX_ObjectRender(px_surface *pSurface,PX_Object *pObject,px_uint elapsed);
 
-px_int PX_ObjectRegisterEvent(PX_Object *pObject,px_uint Event,px_void (*ProcessFunc)(PX_Object *,PX_Object_Event e,px_void *user_ptr),px_void *ptr);
+px_void PX_ObjectEnableEventAction(PX_Object* pObject, px_int ownerType);
+px_void PX_ObjectDisableEventAction(PX_Object *pObject,px_int ownerType);
+px_void PX_ObjectEnableNoTheEventAction(PX_Object* pObject, px_int ownerType);
+px_void PX_ObjectDisableNoTheEventAction(PX_Object* pObject, px_int ownerType);
+
+px_bool PX_ObjectRegisterEvent(PX_Object *pObject,px_uint Event,px_void (*ProcessFunc)(PX_Object *,PX_Object_Event e,px_void *user_ptr),px_void *ptr);
+px_bool PX_ObjectRegisterEventEx(PX_Object* pObject, px_uint Event,px_int owner,px_void(*ProcessFunc)(PX_Object*, PX_Object_Event e, px_void* user_ptr), px_void* ptr);
 px_void PX_ObjectRemoveEvent(PX_Object *pObject,px_uint Event);
 px_void PX_ObjectPostEvent(PX_Object *pPost,PX_Object_Event Event);
 px_void PX_ObjectExecuteEvent(PX_Object *pPost,PX_Object_Event Event);
 
-
-//////////////////////////////////////////////////////////////////////////
-//designer
-/////////////////////////////////////////////////////////////////////////
-#define PX_DESIGNER_NAME_LENGTH 48
-#define PX_DESIGNER_MAX_PROPERTYS 32
-#define PX_DESIGNER_CONTROLLER_ITEM_HEIGHT 48
-typedef enum
-{
-	PX_DESIGNER_OBJECT_TYPE_UI,
-	PX_DESIGNER_OBJECT_TYPE_GAME,
-	PX_DESIGNER_OBJECT_TYPE_FUNCTION,
-}PX_DESIGNER_OBJECT_TYPE;
-
-
-typedef PX_Object* (*px_designer_createfunc)(px_memorypool* mp, PX_Object* pparent, px_float x, px_float y, px_float width, px_float height, px_abi* pabi);
-
-typedef px_float(*px_designer_getproperty_float)(PX_Object* pObject);
-typedef px_int(*px_designer_getproperty_int)(PX_Object* pObject);
-typedef px_bool(*px_designer_getproperty_string)(PX_Object* pObject, px_string* str);
-typedef px_bool(*px_designer_getproperty_bool)(PX_Object* pObject);
-
-typedef px_void(*px_designer_setproperty_float)(PX_Object* pObject, px_float v);
-typedef px_void(*px_designer_setproperty_int)(PX_Object* pObject, px_int v);
-typedef px_void(*px_designer_setproperty_string)(PX_Object* pObject, const px_char v[]);
-typedef px_void(*px_designer_setproperty_bool)(PX_Object* pObject, px_bool v);
-
 typedef struct
 {
-	px_char Name[PX_DESIGNER_NAME_LENGTH];
-	//get
-	px_designer_getproperty_float getfloat;
-	px_designer_getproperty_int getint;
-	px_designer_getproperty_string getstring;
-	px_designer_getproperty_bool getbool;
 
-	//set
-	px_designer_setproperty_float setfloat;
-	px_designer_setproperty_int setint;
-	px_designer_setproperty_string setstring;
-	px_designer_setproperty_bool setbool;
+	px_memorypool *mp,calc_mp;
+	PX_Quadtree Impact_Test_array[sizeof(px_dword) * 8];
+}PX_Object_CollisionTest;
 
-}PX_Designer_Object_property;
-
-
-
-typedef struct
-{
-	px_char Name[PX_DESIGNER_NAME_LENGTH];
-	px_designer_createfunc createfunc;
-	PX_DESIGNER_OBJECT_TYPE type;
-	PX_Designer_Object_property properties[PX_DESIGNER_MAX_PROPERTYS];
-	px_float defaultWidth, defaultHeight;
-	px_texture *pIndicateTexture;
-	px_texture *pListMiniTexture;
-}PX_Designer_ObjectDesc;
-
-//common
-px_bool PX_Designer_GetID(PX_Object* pObject, px_string* str);
-px_float PX_Designer_GetX(PX_Object* pObject);
-px_float PX_Designer_GetY(PX_Object* pObject);
-px_float PX_Designer_GetWidth(PX_Object* pObject);
-px_float PX_Designer_GetHeight(PX_Object* pObject);
-px_bool PX_Designer_GetEnable(PX_Object* pObject);
-
-px_void PX_Designer_SetID(PX_Object* pObject, const px_char id[]);
-px_void PX_Designer_SetX(PX_Object* pObject, px_float v);
-px_void PX_Designer_SetY(PX_Object* pObject, px_float v);
-px_void PX_Designer_SetHeight(PX_Object* pObject, px_float v);
-px_void PX_Designer_SetWidth(PX_Object* pObject, px_float v);
-px_void PX_Designer_SetEnable(PX_Object* pObject, px_bool v);
+px_bool PX_ObjectCollisionTestCreate(px_memorypool* mp, PX_Object_CollisionTest* ptest, px_int width, px_int height, px_vector* pObjects);
+px_int	PX_ObjectSearchRegion(PX_Object_CollisionTest* ptest, px_float x, px_float y, px_float raduis, PX_Object* pObject[], px_int MaxSearchCount, px_dword impact_test_type);
+px_void PX_ObjectCollisionTestFree(PX_Object_CollisionTest* ptest);
 
 
 //////////////////////////////////////////////////////////////////////////

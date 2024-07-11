@@ -2,14 +2,13 @@
 
 PX_Object_TransformAdapter * PX_Object_GetTransformAdapter(PX_Object *pObject)
 {
-	if (pObject->Type==PX_OBJECT_TYPE_TRANSFORMADAPTER)
-	{
-		return PX_ObjectGetDesc(PX_Object_TransformAdapter,pObject);
-	}
-	return PX_NULL;
+	PX_Object_TransformAdapter* pdesc;
+	pdesc=(PX_Object_TransformAdapter*)PX_ObjectGetDescByType(pObject,PX_OBJECT_TYPE_TRANSFORMADAPTER);
+	PX_ASSERTIF(pdesc==PX_NULL);
+	return pdesc;
 }
 
-px_void PX_Object_TransformAdapterRender(px_surface *rendersurface,PX_Object *pObject,px_dword elapsed)
+PX_OBJECT_RENDER_FUNCTION(PX_Object_TransformAdapterRender)
 {
 	px_float objx,objy,objWidth,objHeight;
 	px_float inheritX,inheritY;
@@ -34,7 +33,7 @@ px_void PX_Object_TransformAdapterRender(px_surface *rendersurface,PX_Object *pO
 		//draw circle
 		px_color rendercolor=pTransformAdapter->color;
 		rendercolor._argb.a/=4;
-		PX_GeoDrawCircle(rendersurface,(px_int)pObject->x,(px_int)pObject->y,(px_int)PX_Point2DMod(vres),1,rendercolor);
+		PX_GeoDrawCircle(psurface,(px_int)pObject->x,(px_int)pObject->y,(px_int)PX_Point2DMod(vres),1,rendercolor);
 	}
 
 	if (pTransformAdapter->mode==PX_OBJECT_TRANSFORMADAPTER_MODE_ANY||pTransformAdapter->mode==PX_OBJECT_TRANSFORMADAPTER_MODE_STRETCH)
@@ -43,33 +42,33 @@ px_void PX_Object_TransformAdapterRender(px_surface *rendersurface,PX_Object *pO
 		px_color rendercolor=pTransformAdapter->color;
 		rendercolor._argb.a/=4;
 
-		PX_GeoDrawLine(rendersurface,(px_int)pObject->x,(px_int)pObject->y,(px_int)(vres.x+pObject->x),(px_int)(vres.y+pObject->y),1,rendercolor);
-		PX_GeoDrawLine(rendersurface,(px_int)pObject->x,(px_int)pObject->y,(px_int)(vnow.x+pObject->x),(px_int)(vnow.y+pObject->y),1,rendercolor);
+		PX_GeoDrawLine(psurface,(px_int)pObject->x,(px_int)pObject->y,(px_int)(vres.x+pObject->x),(px_int)(vres.y+pObject->y),1,rendercolor);
+		PX_GeoDrawLine(psurface,(px_int)pObject->x,(px_int)pObject->y,(px_int)(vnow.x+pObject->x),(px_int)(vnow.y+pObject->y),1,rendercolor);
 	}
 
 	//draw point
 	vnow=PX_Point2DMul(vnow,pTransformAdapter->stretch);
-	PX_GeoDrawSector(rendersurface,(px_int)objx,(px_int)objy,PX_Point2DMod(vnow),1,PX_COLOR(16,0,255,255),(px_int)pTransformAdapter->startAngle, (px_int)pTransformAdapter->endAngle);
+	PX_GeoDrawSector(psurface,(px_int)objx,(px_int)objy,PX_Point2DMod(vnow),1,PX_COLOR(16,0,255,255),(px_int)pTransformAdapter->startAngle, (px_int)pTransformAdapter->endAngle);
 
-	PX_GeoDrawSolidCircle(rendersurface,(px_int)(vnow.x+pObject->x),(px_int)(vnow.y+pObject->y),5,pTransformAdapter->color);
+	PX_GeoDrawSolidCircle(psurface,(px_int)(vnow.x+pObject->x),(px_int)(vnow.y+pObject->y),5,pTransformAdapter->color);
 	if (pTransformAdapter->bSelect)
 	{
-		PX_GeoDrawCircle(rendersurface,(px_int)(vnow.x+pObject->x),(px_int)(vnow.y+pObject->y),8,1,pTransformAdapter->color);
+		PX_GeoDrawCircle(psurface,(px_int)(vnow.x+pObject->x),(px_int)(vnow.y+pObject->y),8,1,pTransformAdapter->color);
 	}
-	PX_GeoDrawCircle(rendersurface,(px_int)pObject->x,(px_int)pObject->y,(px_int)PX_Point2DMod(vnow),1,pTransformAdapter->color);
-	PX_GeoDrawLine(rendersurface,(px_int)pObject->x,(px_int)pObject->y,(px_int)(vnow.x+pObject->x),(px_int)(vnow.y+pObject->y),1,pTransformAdapter->color);
+	PX_GeoDrawCircle(psurface,(px_int)pObject->x,(px_int)pObject->y,(px_int)PX_Point2DMod(vnow),1,pTransformAdapter->color);
+	PX_GeoDrawLine(psurface,(px_int)pObject->x,(px_int)pObject->y,(px_int)(vnow.x+pObject->x),(px_int)(vnow.y+pObject->y),1,pTransformAdapter->color);
 
 	do 
 	{
 		px_char content[32];
 		PX_sprintf2(content,sizeof(content),"rotation:%1.1 stretch:%2.2",PX_STRINGFORMAT_FLOAT(pTransformAdapter->endAngle-pTransformAdapter->startAngle),PX_STRINGFORMAT_FLOAT(pTransformAdapter->stretch));
-		PX_FontDrawText(rendersurface,(px_int)(vnow.x+pObject->x),(px_int)(vnow.y+pObject->y-2),PX_ALIGN_MIDBOTTOM,content,pTransformAdapter->fontColor);
+		PX_FontDrawText(psurface,(px_int)(vnow.x+pObject->x),(px_int)(vnow.y+pObject->y-2),PX_ALIGN_MIDBOTTOM,content,pTransformAdapter->fontColor);
 	} while (0);
 
 
 }
 
-px_void PX_Object_TransformAdapterOnCursorDown(PX_Object *pObject,PX_Object_Event e,px_void *ptr)
+PX_OBJECT_EVENT_FUNCTION(PX_Object_TransformAdapterOnCursorDown)
 {
 	px_float objx,objy,objWidth,objHeight;
 
@@ -105,7 +104,7 @@ px_void PX_Object_TransformAdapterOnCursorDown(PX_Object *pObject,PX_Object_Even
 }
 
 
-px_void PX_Object_TransformAdapterOnCursorDrag(PX_Object *pObject,PX_Object_Event e,px_void *ptr)
+PX_OBJECT_EVENT_FUNCTION(PX_Object_TransformAdapterOnCursorDrag)
 {
 	px_float objx,objy,objWidth,objHeight;
 	px_point2D vres;
@@ -154,21 +153,44 @@ px_void PX_Object_TransformAdapterOnCursorDrag(PX_Object *pObject,PX_Object_Even
 }
 
 
+PX_Object* PX_Object_TransformAdapterAttachObject( PX_Object* pObject,px_int attachIndex, px_int x, px_int y, px_point2D sourceAdaptPoint)
+{
+	px_memorypool* mp=pObject->mp;
+	PX_Object_TransformAdapter TransformAdapter,*pDesc;
+	PX_memset(&TransformAdapter, 0, sizeof(TransformAdapter));
+	TransformAdapter.color = PX_COLOR(255, 255, 64, 64);
+	TransformAdapter.fontColor = PX_COLOR(255, 255, 0, 0);
+	TransformAdapter.stretch = 1;
+	TransformAdapter.currentAdaptPoint = sourceAdaptPoint;
+	TransformAdapter.sourceAdaptPoint = sourceAdaptPoint;
+	TransformAdapter.startAngle = (px_float)PX_RadianToAngle(PX_atan2(sourceAdaptPoint.y - y * 1.0, sourceAdaptPoint.x - x * 1.0));
+	TransformAdapter.endAngle = TransformAdapter.startAngle;
+
+	PX_ASSERTIF(pObject == PX_NULL);
+	PX_ASSERTIF(attachIndex < 0 || attachIndex >= PX_COUNTOF(pObject->pObjectDesc));
+	PX_ASSERTIF(pObject->pObjectDesc[attachIndex] != PX_NULL);
+	pDesc = (PX_Object_TransformAdapter*)PX_ObjectCreateDesc(pObject, attachIndex, PX_OBJECT_TYPE_TRANSFORMADAPTER, 0, PX_Object_TransformAdapterRender,0 , &TransformAdapter, sizeof(TransformAdapter));
+	PX_ASSERTIF(pDesc == PX_NULL);
+
+	PX_ObjectRegisterEvent(pObject, PX_OBJECT_EVENT_CURSORDOWN, PX_Object_TransformAdapterOnCursorDown, PX_NULL);
+	PX_ObjectRegisterEvent(pObject, PX_OBJECT_EVENT_CURSORDRAG, PX_Object_TransformAdapterOnCursorDrag, PX_NULL);
+	return pObject;
+}
+
 PX_Object * PX_Object_TransformAdapterCreate(px_memorypool *mp, PX_Object *Parent,px_int x,px_int y,px_point2D sourceAdaptPoint)
 {
 	PX_Object *pObject;
-	PX_Object_TransformAdapter TransformAdapter;
-	PX_memset(&TransformAdapter,0,sizeof(TransformAdapter));
-	TransformAdapter.color=PX_COLOR(255,255,64,64);
-	TransformAdapter.fontColor=PX_COLOR(255,255,0,0);
-	TransformAdapter.stretch=1;
-	TransformAdapter.currentAdaptPoint=sourceAdaptPoint;
-	TransformAdapter.sourceAdaptPoint=sourceAdaptPoint;
-	TransformAdapter.startAngle=(px_float)PX_RadianToAngle(PX_atan2(sourceAdaptPoint.y-y*1.0,sourceAdaptPoint.x-x*1.0));
-	TransformAdapter.endAngle=TransformAdapter.startAngle;
-	pObject=PX_ObjectCreateEx(mp,Parent,(px_float)x,(px_float)y,0,0,0,0,PX_OBJECT_TYPE_TRANSFORMADAPTER,0,PX_Object_TransformAdapterRender,0,&TransformAdapter,sizeof(TransformAdapter));
-	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_CURSORDOWN,PX_Object_TransformAdapterOnCursorDown,PX_NULL);
-	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_CURSORDRAG,PX_Object_TransformAdapterOnCursorDrag,PX_NULL);
+	pObject=PX_ObjectCreate(mp,Parent,(px_float)x,(px_float)y,0,0,0,0);
+	if (pObject==PX_NULL)
+	{
+		return PX_NULL;
+	}
+	if (!PX_Object_TransformAdapterAttachObject(pObject,0,x,y,sourceAdaptPoint))
+	{
+		PX_ObjectDelete(pObject);
+		return PX_NULL;
+	}
+
 	return pObject;
 }
 

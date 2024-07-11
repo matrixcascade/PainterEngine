@@ -40,9 +40,6 @@ px_char *PX_Object_CheckBoxGetText(PX_Object *pObject);
 px_void PX_Object_CheckBoxSetTextColor(PX_Object *pObject,px_color clr);
 px_void PX_Object_CheckBoxSetCheck(PX_Object *pObject,px_bool check);
 
-PX_Designer_ObjectDesc PX_Object_CheckBoxDesignerInstall();
-
-
 
 #endif
 

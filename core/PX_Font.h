@@ -72,10 +72,12 @@ px_void PX_FontTextGetRenderWidthHeight(const px_char *Text,px_int *width,px_int
 
 px_int PX_FontModuleGetCharacterRawCode(PX_FONTMODULE_CODEPAGE codePage,const px_char *Text,px_dword *code);
 px_bool PX_FontModuleInitialize(px_memorypool *mp,PX_FontModule *module);
+px_void PX_FontModuleSetSize(PX_FontModule* module,px_int size);
 px_void PX_FontModuleSetCodepage(PX_FontModule* module, PX_FONTMODULE_CODEPAGE codePage);
 px_bool PX_FontModuleInitializeTTF(px_memorypool* mp, PX_FontModule* module, PX_FONTMODULE_CODEPAGE codepage, px_int fontsize, const px_byte* ttf_buffer, px_int ttf_size);
 px_bool PX_FontModuleLoad(PX_FontModule *module,px_byte *buffer,px_int size);
 px_void PX_FontModuleFree(PX_FontModule *module);
+
 px_int PX_FontModuleGetOneCharacterDesc(PX_FontModule *module,const px_char *Text,px_dword *code,px_int *width,px_int *height);
 px_void PX_FontModuleTextGetRenderWidthHeight(PX_FontModule *module,const px_char *Text,px_int *advance,px_int *height);
 px_int PX_FontModuleDrawCharacter(px_surface *psurface,PX_FontModule *mod,px_int x,px_int y,const px_dword code,px_color Color);

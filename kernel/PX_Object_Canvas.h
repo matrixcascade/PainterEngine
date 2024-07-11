@@ -25,6 +25,7 @@ typedef struct
 	PX_CanvasVM *pCanvasVM;
 }PX_Object_Canvas;
 
+PX_Object* PX_Object_CanvasAttachObject(PX_Object* pObject, px_int attachIndex, px_int x, px_int y, PX_CanvasVM* pCanvasVM);
 PX_Object* PX_Object_CanvasCreate(px_memorypool* mp, PX_Object* Parent, px_int x, px_int y, PX_CanvasVM* pCanvasVM);
 PX_Object_Canvas*PX_Object_GetCanvas(PX_Object *pObject);
 

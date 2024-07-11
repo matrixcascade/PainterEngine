@@ -15,32 +15,8 @@ PX_ResourceLibrary *resource_library;
 PX_SoundPlay* soundplay;
 //////////////////////////////////////////////////////////////////////////
 
-PX_OBJECT_EVENT_FUNCTION(PainterEngine_DesignerOnSave)
-{
-	px_string json;
-	PX_StringInitialize(mp, &json);
-	PX_Object_DesignerExport(App.object_designer, &json);
-	if (PX_SaveDataToFile(json.buffer,PX_strlen(json.buffer),"assets/objects.json"))
-	{
-		PX_Object_MessageBoxAlertOk(App.object_messagebox, "save to assets/objects.json", 0, 0);
-	}
-	else
-	{
-		PX_Object_MessageBoxAlertOk(App.object_messagebox, "failed to save assets/objects.json", 0, 0);
-	}
-	PX_StringFree(&json);
-}
-
-px_void PainterEngine_OnDesignerLoad(px_void* buffer, px_int size, px_void* ptr)
-{
-	PX_Object_DesignerImport(App.object_designer, (const px_char*)buffer);
-}
 
 px_char painterengine_loadbuffer[1024 * 1024 * 8];
-PX_OBJECT_EVENT_FUNCTION(PainterEngine_DesignerOnOpen)
-{
-	PX_RequestData("open", painterengine_loadbuffer, sizeof(painterengine_loadbuffer), 0, PainterEngine_OnDesignerLoad);
-}
 
 px_void PainterEngine_Print(const px_char content[])
 {
@@ -89,6 +65,58 @@ px_void PainterEngine_PrintImage(const px_char path[])
 		PX_Object_PrinterUpdateAll(App.object_printer);
 		PX_FreeIOData(&data);
 	}
+}
+
+px_void PainterEngine_DrawTexture(px_texture *ptexture,px_int x,px_int y,PX_ALIGN align)
+{
+	if (App.object_printer->Visible == PX_FALSE)
+	{
+		PX_ObjectSetVisible(App.object_printer, PX_TRUE);
+	}
+	PX_TextureRender(PX_Object_PanelGetSurface(App.object_printer), ptexture, x, y, align, 0);
+}
+
+px_void PainterEngine_DrawLine(px_int x1,px_int y1,px_int x2,px_int y2,px_int linewidth,px_color color)
+{
+	if (App.object_printer->Visible == PX_FALSE)
+	{
+		PX_ObjectSetVisible(App.object_printer, PX_TRUE);
+	}
+	PX_GeoDrawLine(PX_Object_PanelGetSurface(App.object_printer), x1, y1, x2, y2, linewidth, color);
+}
+
+px_void PainterEngine_DrawRect(px_int x,px_int y,px_int width,px_int height,px_int linewidth,px_color color)
+{
+	if (App.object_printer->Visible == PX_FALSE)
+	{
+		PX_ObjectSetVisible(App.object_printer, PX_TRUE);
+	}
+	PX_GeoDrawRect(PX_Object_PanelGetSurface(App.object_printer), x, y, x+width-1, y+height-1, color);
+}
+
+px_void PainterEngine_DrawCircle(px_int x,px_int y,px_int radius,px_int linewidth,px_color color)
+{
+	if (App.object_printer->Visible == PX_FALSE)
+	{
+		PX_ObjectSetVisible(App.object_printer, PX_TRUE);
+	}
+	PX_GeoDrawCircle(PX_Object_PanelGetSurface(App.object_printer), x, y, radius, linewidth, color);
+}
+
+px_void PainterEngine_DrawSolidCircle(px_int x, px_int y, px_int radius,  px_color color)
+{
+	if (App.object_printer->Visible == PX_FALSE)
+	{
+		PX_ObjectSetVisible(App.object_printer, PX_TRUE);
+	}
+	PX_GeoDrawSolidCircle(PX_Object_PanelGetSurface(App.object_printer), x, y, radius, color);
+}
+
+
+px_void PainterEngie_SetFontSize(px_int size)
+{
+if(App.pfontmodule)
+		PX_FontModuleSetSize(App.pfontmodule, size);
 }
 
 PX_Object* PainterEngine_PrintButton(px_int width,px_int height,const px_char text[])
@@ -160,13 +188,14 @@ px_bool PainterEngine_Initialize(px_int _screen_width,px_int _screen_height)
 	}
 #endif
 
-	App.object_root = PX_ObjectCreateRoot(&runtime->mp_dynamic);
+	App.object_root = PX_ObjectCreateRoot(&runtime->mp_static);
 	App.object_printer=PX_Object_PrinterCreate(&runtime->mp, App.object_root, 0, 0, _screen_width, _screen_height, App.pfontmodule);
+	PX_Object_PanelAttachObject(App.object_printer, PX_ObjectGetFreeDescIndex(App.object_printer));
+	PX_Object_PrinterSetBackgroundColor(App.object_printer, PX_COLOR_NONE);
 	App.object_printer->Visible = PX_FALSE;
-	App.object_designer = PX_Object_DesignerCreate(&runtime->mp, App.object_root, App.object_root, PX_NULL, PX_NULL, PX_NULL);
-	PX_ObjectRegisterEvent(App.object_designer, PX_OBJECT_EVENT_SAVE, PainterEngine_DesignerOnSave, PX_NULL);
-	PX_ObjectRegisterEvent(App.object_designer, PX_OBJECT_EVENT_OPEN, PainterEngine_DesignerOnOpen, PX_NULL);
-	App.object_messagebox = PX_Object_MessageBoxCreate(&runtime->mp, App.object_root, 0);
+	
+
+	App.object_messagebox = PX_Object_MessageBoxCreate(&runtime->mp_static, App.object_root, 0);
 	root = App.object_root;
 	mp = &runtime->mp_dynamic;
 	mp_static=&runtime->mp_static;
@@ -184,41 +213,6 @@ px_bool PainterEngine_Initialize(px_int _screen_width,px_int _screen_height)
 	return PX_TRUE;
 }
 
-px_bool  PainterEngine_InitializeWorld(px_int view_width, px_int view_height, px_int world_width, px_int world_height)
-{
-	const px_char* scriptPath=PX_NULL;
-	if (!PainterEngine_Initialize(view_width, view_height))
-		return PX_FALSE;
-
-#ifdef PAINTERENGIN_FILE_SUPPORT
-	if (PX_FileExist("assets/game.c"))
-	{
-		PX_IO_Data io = PX_LoadFileToIOData("assets/game.c");
-		if (!PX_WorldInitialize(&App.runtime.mp_dynamic, &App.world, world_width, world_height, view_width, view_height, (const px_char *)io.buffer))
-			return PX_FALSE;
-		PX_FreeIOData(&io);
-	}
-	else
-	{
-		if (!PX_WorldInitialize(&App.runtime.mp_dynamic, &App.world, world_width, world_height, view_width, view_height, PX_NULL))
-			return PX_FALSE;
-	}
-#else
-	if (!PX_WorldInitialize(&App.runtime.mp_dynamic, &App.world, world_width, world_height, view_width, view_height, PX_NULL))
-		return PX_FALSE;
-#endif
-	
-	PX_Object_DesignerBindWorld(App.object_designer, &App.world);
-	PX_WorldBindResourceLibrary(&App.world, &App.runtime.ResourceLibrary);
-	PX_WorldBindSoundPlay(&App.world, &App.soundplay);
-	PX_WorldSetCamera(&App.world, PX_POINT(world_width / 2.f, world_height / 2.f, 0));
-	return PX_TRUE;
-}
-
-PX_World *PainterEngine_GetWorld()
-{
-	return &App.world;
-}
 
 PX_Object* PainterEngine_GetRoot()
 {
@@ -274,34 +268,6 @@ PX_SoundPlay* PainterEngine_GetSoundPlay()
 //////////////////////////////////////////////////////////////////////////
 //Functions
 
-px_void PainterEngine_LoadObjects()
-{
-#ifdef PAINTERENGIN_FILE_SUPPORT
-	PX_LoadUIFormFile(&App.runtime.mp_dynamic, App.object_designer, App.object_root,PX_NULL, "assets/objects.json");
-#endif
-}
-
-px_void PainterEngine_EnterDesignerMode()
-{
-	PX_Object_DesignerEnable(App.object_designer);
-}
-
-px_void PainterEngine_DesignerInstall(PX_Designer_ObjectDesc desc)
-{
-	if (App.object_designer)
-	{
-		PX_Object_DesignerAddObjectDescription(App.object_designer, &desc);
-	}
-}
-
-px_void PainterEngine_DesignerInstallDefault()
-{
-	if (App.object_designer)
-	{
-		PX_Object_Designer* pDesc = PX_ObjectGetDesc(PX_Object_Designer, App.object_designer);
-		PX_Object_DesignerDefaultInstall(&pDesc->ObjectDesc);
-	}
-}
 
 px_bool PX_ApplicationInitialize(PX_Application *pApp,px_int screen_width,px_int screen_height)
 {
@@ -322,20 +288,12 @@ px_bool PX_ApplicationInitialize(PX_Application *pApp,px_int screen_width,px_int
 px_void PX_ApplicationUpdate(PX_Application *pApp,px_dword elapsed)
 {
 	PX_ObjectUpdate(pApp->object_root, elapsed);
-	if (pApp->world.mp)
-	{
-		PX_WorldUpdate(&pApp->world, elapsed);
-	}
 }
 
 px_void PX_ApplicationRender(PX_Application *pApp,px_dword elapsed)
 {
 	px_surface *pRenderSurface=&pApp->runtime.RenderSurface;
 	PX_RuntimeRenderClear(&pApp->runtime,pApp->backgroundColor);
-	if (pApp->world.mp)
-	{
-		PX_WorldRender(pRenderSurface, &pApp->world, elapsed);
-	}
 
 	PX_ObjectRender(pRenderSurface, pApp->object_root,elapsed);
 }
@@ -343,9 +301,5 @@ px_void PX_ApplicationRender(PX_Application *pApp,px_dword elapsed)
 px_void PX_ApplicationPostEvent(PX_Application *pApp,PX_Object_Event e)
 {
 	PX_ObjectPostEvent(pApp->object_root,e);
-	if (pApp->world.mp)
-	{
-		PX_WorldPostEvent(&pApp->world, e);
-	}
 }
 

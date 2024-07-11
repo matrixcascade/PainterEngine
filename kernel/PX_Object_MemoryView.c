@@ -13,7 +13,7 @@ static px_int PX_Object_MemoryViewGetCursorMapIndex(PX_Object *pObject,px_float 
 	px_int columnoffset;
 	px_int rel_address_offset;
 	px_int xIndex,yIndex,Index;
-	pdesc=PX_ObjectGetDesc(PX_Object_MemoryView,pObject);
+	pdesc=(PX_Object_MemoryView *)PX_ObjectGetDescByType(pObject,PX_OBJECT_TYPE_MEMORYVIEW);
 	PX_ObjectGetInheritXY(pObject,&inheritX,&inheritY);
 	x=(px_int)(pObject->x+inheritX);
 	y=(px_int)(pObject->y+inheritY);
@@ -59,7 +59,7 @@ static px_int PX_Object_MemoryViewGetCursorMapIndex(PX_Object *pObject,px_float 
 }
 
 
-px_void PX_Object_MemoryViewRender(px_surface *prendersurface,PX_Object *pObject,px_dword elapsed)
+PX_OBJECT_RENDER_FUNCTION(PX_Object_MemoryViewRender)
 {
 	px_int row,column,i,j;
 	px_int rel_address_offset;
@@ -116,11 +116,11 @@ px_void PX_Object_MemoryViewRender(px_surface *prendersurface,PX_Object *pObject
 
 	//////////////////////////////////////////////////////////////////////////
 	//render background
-	PX_GeoDrawRect(prendersurface,x,y,x+w,y+h,pdesc->backgroundcolor);
+	PX_GeoDrawRect(psurface,x,y,x+w,y+h,pdesc->backgroundcolor);
 
 	/////////////////////////////////////////////////////////////////////////
 	//render border
-	PX_GeoDrawBorder(prendersurface, x, y, x + w, y + h, 1,pdesc->bordercolor);
+	PX_GeoDrawBorder(psurface, x, y, x + w, y + h, 1,pdesc->bordercolor);
 
 	rel_address_offset=row*columnoffset;
 
@@ -139,17 +139,17 @@ px_void PX_Object_MemoryViewRender(px_surface *prendersurface,PX_Object *pObject
 		
 		drawx=x;
 		//0x
-		PX_FontDrawChar(prendersurface,drawx,drawy,'0',pdesc->fontcolor);
+		PX_FontDrawChar(psurface,drawx,drawy,'0',pdesc->fontcolor);
 		drawx+=8;
 
-		PX_FontDrawChar(prendersurface,drawx,drawy,'x',pdesc->fontcolor);
+		PX_FontDrawChar(psurface,drawx,drawy,'x',pdesc->fontcolor);
 		drawx+=8;
 
 		
 		PX_itoa(addr, _addrhex,9,16);
 		PX_memset(addrhex, '0', 8);
 		PX_memcpy(addrhex+ 8-PX_strlen(_addrhex), _addrhex,PX_strlen(_addrhex));
-		PX_FontDrawText(prendersurface,drawx,drawy,PX_ALIGN_LEFTTOP,addrhex,pdesc->fontcolor);
+		PX_FontDrawText(psurface,drawx,drawy,PX_ALIGN_LEFTTOP,addrhex,pdesc->fontcolor);
 		drawx+=8*8;
 
 		drawx+=16;
@@ -169,47 +169,47 @@ px_void PX_Object_MemoryViewRender(px_surface *prendersurface,PX_Object *pObject
 
 			if (rel_address_offset*2>=mst&&rel_address_offset*2<=med)
 			{
-				PX_GeoDrawRect(prendersurface,drawx,drawy,drawx+7,drawy+15,pdesc->selectcolor);
+				PX_GeoDrawRect(psurface,drawx,drawy,drawx+7,drawy+15,pdesc->selectcolor);
 			}
 
 			if ((rel_address_offset*2>=mst&&rel_address_offset*2<=med)||(rel_address_offset*2+1>=mst&&rel_address_offset*2+1<=med))
 			{
-				PX_GeoDrawRect(prendersurface,x+96+row*24+8*i,drawy,x+96+row*24+8*i+7,drawy+15,pdesc->selectcolor);
+				PX_GeoDrawRect(psurface,x+96+row*24+8*i,drawy,x+96+row*24+8*i+7,drawy+15,pdesc->selectcolor);
 			}
 
 			if (rel_address_offset*2==pdesc->cursor)
 			{
 				if ((pdesc->cursor_elapsed/200)&1)
 				{
-					PX_GeoDrawRect(prendersurface,drawx,drawy,drawx+7,drawy+15,pdesc->cursorcolor);
+					PX_GeoDrawRect(psurface,drawx,drawy,drawx+7,drawy+15,pdesc->cursorcolor);
 				}
 			}
 			if (rel_address_offset*2==pdesc->cursor||rel_address_offset*2+1==pdesc->cursor)
 			{
-				PX_GeoDrawRect(prendersurface, x + 96+row*24+8*i,drawy, x + 96+row*24+8*i+7,drawy+15,pdesc->selectcolor);
+				PX_GeoDrawRect(psurface, x + 96+row*24+8*i,drawy, x + 96+row*24+8*i+7,drawy+15,pdesc->selectcolor);
 			}
 			
 
-			PX_FontDrawChar(prendersurface,drawx,drawy,hex[0],pdesc->fontcolor);
+			PX_FontDrawChar(psurface,drawx,drawy,hex[0],pdesc->fontcolor);
 			if (b>=32&&b<=126)
 			{
-				PX_FontDrawChar(prendersurface, x + 96+row*24+8*i,drawy,b,pdesc->fontcolor);
+				PX_FontDrawChar(psurface, x + 96+row*24+8*i,drawy,b,pdesc->fontcolor);
 			}
 
 			drawx+=8;
 			if (rel_address_offset*2+1>=mst&&rel_address_offset*2+1<=med)
 			{
-				PX_GeoDrawRect(prendersurface,drawx,drawy,drawx+7,drawy+15,pdesc->selectcolor);
+				PX_GeoDrawRect(psurface,drawx,drawy,drawx+7,drawy+15,pdesc->selectcolor);
 			}
 
 			if (rel_address_offset*2+1==pdesc->cursor)
 			{
 				if ((pdesc->cursor_elapsed/200)&1)
 				{
-					PX_GeoDrawRect(prendersurface,drawx,drawy,drawx+7,drawy+15,pdesc->cursorcolor);
+					PX_GeoDrawRect(psurface,drawx,drawy,drawx+7,drawy+15,pdesc->cursorcolor);
 				}
 			}
-			PX_FontDrawChar(prendersurface,drawx,drawy,hex[1],pdesc->fontcolor);
+			PX_FontDrawChar(psurface,drawx,drawy,hex[1],pdesc->fontcolor);
 			drawx+=16;
 			rel_address_offset++;
 		}
@@ -221,7 +221,7 @@ px_void PX_Object_MemoryViewRender(px_surface *prendersurface,PX_Object *pObject
 
 }
 
-px_void PX_Object_MemoryViewOnCursorClick(PX_Object *pObject,PX_Object_Event e,px_void *ptr)
+PX_OBJECT_EVENT_FUNCTION(PX_Object_MemoryViewOnCursorClick)
 {
 	px_float x,y;
 	PX_Object_MemoryView *pdesc;
@@ -231,7 +231,7 @@ px_void PX_Object_MemoryViewOnCursorClick(PX_Object *pObject,PX_Object_Event e,p
 		return;
 	}
 
-	pdesc=PX_ObjectGetDesc(PX_Object_MemoryView,pObject);
+	pdesc= (PX_Object_MemoryView*)PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_MEMORYVIEW);
 	
 	pdesc->mark_end_cursor=-1;
 	pdesc->mark_start_cursor=-1;
@@ -251,7 +251,7 @@ px_void PX_Object_MemoryViewOnCursorDrag(PX_Object *pObject,PX_Object_Event e,px
 		return;
 	}
 
-	pdesc=PX_ObjectGetDesc(PX_Object_MemoryView,pObject);
+	pdesc= (PX_Object_MemoryView*)PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_MEMORYVIEW);
 	x=PX_Object_Event_GetCursorX(e);
 	y=PX_Object_Event_GetCursorY(e);
 
@@ -269,7 +269,7 @@ px_void PX_Object_MemoryViewOnCursorDown(PX_Object *pObject,PX_Object_Event e,px
 		return;
 	}
 
-	pdesc=PX_ObjectGetDesc(PX_Object_MemoryView,pObject);
+	pdesc= (PX_Object_MemoryView*)PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_MEMORYVIEW);
 	pdesc->mark_end_cursor=-1;
 	pdesc->mark_start_cursor=-1;
 	pdesc->cursor=-1;
@@ -281,7 +281,7 @@ px_void PX_Object_MemoryViewOnCursorDown(PX_Object *pObject,PX_Object_Event e,px
 
 px_void PX_Object_MemoryViewOnKeyDown(PX_Object *pObject,PX_Object_Event e,px_void *ptr)
 {
-	PX_Object_MemoryView *pdesc=PX_ObjectGetDesc(PX_Object_MemoryView,pObject);
+	PX_Object_MemoryView *pdesc= (PX_Object_MemoryView*)PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_MEMORYVIEW);
 	PX_Object_Event ne;
 	px_char key=PX_Object_Event_GetKeyDown(e);
 
@@ -330,54 +330,69 @@ px_void PX_Object_MemoryViewOnKeyDown(PX_Object *pObject,PX_Object_Event e,px_vo
 	
 }
 
+PX_Object* PX_Object_MemoryViewAttachObject(px_memorypool* mp, PX_Object* pObject,px_int attachIndex, px_int x, px_int y, px_int Width, px_int Height)
+{
+	PX_Object_MemoryView desc = {0}, * pdesc;
 
+	desc.backgroundcolor = PX_OBJECT_UI_DEFAULT_BACKGROUNDCOLOR;
+	desc.cursor = -1;
+	desc.mark_end_cursor = -1;
+	desc.mark_start_cursor = -1;
+	desc.cursorcolor = PX_COLOR(64, 255, 255, 255);
+	desc.fontcolor = PX_OBJECT_UI_DEFAULT_FONTCOLOR;
+	desc.selectcolor = PX_COLOR(64, 255, 255, 255);
+	desc.bordercolor = PX_OBJECT_UI_DEFAULT_BORDERCOLOR;
+	
+	PX_ASSERTIF(pObject == PX_NULL);
+	PX_ASSERTIF(attachIndex < 0 || attachIndex >= PX_COUNTOF(pObject->pObjectDesc));
+	PX_ASSERTIF(pObject->pObjectDesc[attachIndex] != PX_NULL);
+	pdesc = (PX_Object_MemoryView*)PX_ObjectCreateDesc(pObject, attachIndex, PX_OBJECT_TYPE_MEMORYVIEW, 0, PX_Object_MemoryViewRender, 0, &desc, sizeof(PX_Object_MemoryView));
+	PX_ASSERTIF(pdesc == PX_NULL);
+
+
+	pdesc->scrollbar = PX_Object_SliderBarCreate(mp, pObject, 0, 0, 10, 10, PX_OBJECT_SLIDERBAR_TYPE_VERTICAL, PX_OBJECT_SLIDERBAR_STYLE_BOX);
+	pdesc->scrollbar->Visible = PX_FALSE;
+
+	PX_ObjectRegisterEvent(pObject, PX_OBJECT_EVENT_CURSORCLICK, PX_Object_MemoryViewOnCursorClick, PX_NULL);
+	PX_ObjectRegisterEvent(pObject, PX_OBJECT_EVENT_CURSORDOWN, PX_Object_MemoryViewOnCursorDown, PX_NULL);
+	PX_ObjectRegisterEvent(pObject, PX_OBJECT_EVENT_CURSORDRAG, PX_Object_MemoryViewOnCursorDrag, PX_NULL);
+	PX_ObjectRegisterEvent(pObject, PX_OBJECT_EVENT_KEYDOWN, PX_Object_MemoryViewOnKeyDown, PX_NULL);
+	return pObject;
+}
 PX_Object * PX_Object_MemoryViewCreate(px_memorypool *mp,PX_Object *pParent,px_int x,px_int y,px_int Width,px_int Height)
 {
-	PX_Object_MemoryView desc,*pdesc;
 	PX_Object *pObject;
-	PX_memset(&desc,0,sizeof(desc));
-	desc.backgroundcolor=PX_OBJECT_UI_DEFAULT_BACKGROUNDCOLOR;
-	desc.cursor=-1;
-	desc.mark_end_cursor=-1;
-	desc.mark_start_cursor=-1;
-	desc.cursorcolor=PX_COLOR(64,255,255,255);
-	desc.fontcolor=PX_OBJECT_UI_DEFAULT_FONTCOLOR;
-	desc.selectcolor=PX_COLOR(64,255,255,255);
-	desc.bordercolor = PX_OBJECT_UI_DEFAULT_BORDERCOLOR;
-	pObject=PX_ObjectCreateEx(mp,pParent,(px_float)x,(px_float)y,0,(px_float)Width,(px_float)Height,0,PX_OBJECT_TYPE_MEMORYVIEW,PX_NULL,PX_Object_MemoryViewRender,PX_NULL,&desc,sizeof(desc));
-	pdesc=PX_ObjectGetDesc(PX_Object_MemoryView,pObject);
-	pdesc->scrollbar=PX_Object_SliderBarCreate(mp,pObject,0,0,10,10,PX_OBJECT_SLIDERBAR_TYPE_VERTICAL,PX_OBJECT_SLIDERBAR_STYLE_BOX);
-	pdesc->scrollbar->Visible=PX_FALSE;
+	pObject=PX_ObjectCreate(mp,pParent,(px_float)x,(px_float)y,0,(px_float)Width,(px_float)Height,0);
+	if (pObject==PX_NULL)
+	{
+		return PX_NULL;
+	}
+	if (!PX_Object_MemoryViewAttachObject(mp,pObject,0,x,y,Width,Height))
+	{
+		PX_ObjectDelete(pObject);
+		return PX_NULL;
+	}
 
-	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_CURSORCLICK,PX_Object_MemoryViewOnCursorClick,PX_NULL);
-	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_CURSORDOWN,PX_Object_MemoryViewOnCursorDown,PX_NULL);
-	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_CURSORDRAG,PX_Object_MemoryViewOnCursorDrag,PX_NULL);
-	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_KEYDOWN,PX_Object_MemoryViewOnKeyDown,PX_NULL);
 	return pObject;
 }
 
 PX_Object_MemoryView * PX_Object_GetMemoryView(PX_Object *pObject)
 {
-	if (pObject->Type!=PX_OBJECT_TYPE_MEMORYVIEW)
-	{
-		PX_ASSERT();
-		return PX_NULL;
-	}
-	return PX_ObjectGetDesc(PX_Object_MemoryView,pObject);
+	PX_Object_MemoryView *pDesc=(PX_Object_MemoryView *)PX_ObjectGetDescByType(pObject,PX_OBJECT_TYPE_MEMORYVIEW);
+	PX_ASSERTIF(pDesc==PX_NULL);
+	return pDesc;
 }
 
 px_void PX_Object_MemoryViewSetFontColor(PX_Object *pObject,px_color Color)
 {
 	PX_Object_MemoryView *pdesc=PX_Object_GetMemoryView(pObject);
-	if(pdesc)
 	pdesc->fontcolor=Color;
 }
 
 px_void PX_Object_MemoryViewSetBackgroundColor(PX_Object *pObject,px_color Color)
 {
 	PX_Object_MemoryView *pdesc=PX_Object_GetMemoryView(pObject);
-	if(pdesc)
-		pdesc->backgroundcolor=Color;
+	pdesc->backgroundcolor=Color;
 }
 
 px_void PX_Object_MemoryViewSetData(PX_Object *pObject,px_void *pdata,px_dword size)

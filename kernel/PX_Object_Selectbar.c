@@ -2,7 +2,7 @@
 
 //////////////////////////////////////////////////////////////////////////
 //
-px_void PX_Object_SelectBarSliderOnChanged(PX_Object* pObject, PX_Object_Event e, px_void* ptr)
+PX_OBJECT_EVENT_FUNCTION(PX_Object_SelectBarSliderOnChanged)
 {
 	PX_Object_SelectBar* pSelectbar = (PX_Object_SelectBar*)ptr;
 	pSelectbar->currentDisplayOffsetIndex = PX_Object_SliderBarGetValue(pObject);
@@ -10,11 +10,10 @@ px_void PX_Object_SelectBarSliderOnChanged(PX_Object* pObject, PX_Object_Event e
 
 PX_Object_SelectBar *PX_Object_GetSelectBar(PX_Object *pSelecrBar)
 {
-	if (pSelecrBar->Type==PX_OBJECT_TYPE_SELECTBAR)
-	{
-		return PX_ObjectGetDesc(PX_Object_SelectBar,pSelecrBar);
-	}
-	return PX_NULL;
+	PX_Object_SelectBar *pdesc= (PX_Object_SelectBar *)PX_ObjectGetDescByType(pSelecrBar,PX_OBJECT_TYPE_SELECTBAR);
+	PX_ASSERTIF(pdesc==PX_NULL);
+	return pdesc;
+	
 }
 static px_void PX_SelecrbarClearCurrentCursor(PX_Object_SelectBar *pSelectbar)
 {
@@ -181,25 +180,25 @@ static px_void PX_SelectbarOnCursorWheel(PX_Object *pObject,px_float z)
 		}
 	}
 }
-static px_void PX_SelectbarOnCursorEvent(PX_Object *pSelectBarObject,PX_Object_Event e,px_void *ptr)
+static PX_OBJECT_EVENT_FUNCTION(PX_SelectbarOnCursorEvent)
 {
 	switch(e.Event)
 	{
 	case PX_OBJECT_EVENT_CURSORMOVE:
 	case PX_OBJECT_EVENT_CURSORDRAG:
 		{
-			PX_SelectbarOnCursorMove(pSelectBarObject,PX_Object_Event_GetCursorX(e),PX_Object_Event_GetCursorY(e));
+			PX_SelectbarOnCursorMove(pObject,PX_Object_Event_GetCursorX(e),PX_Object_Event_GetCursorY(e));
 		}
 		break;
 	case PX_OBJECT_EVENT_CURSORDOWN:
 		{
-			PX_SelectbarOnCursorDown(pSelectBarObject,PX_Object_Event_GetCursorX(e),PX_Object_Event_GetCursorY(e));
+			PX_SelectbarOnCursorDown(pObject,PX_Object_Event_GetCursorX(e),PX_Object_Event_GetCursorY(e));
 		}
 		break;
 	case PX_OBJECT_EVENT_CURSORWHEEL:
 		{
-		PX_Object_SelectBar* pDesc = PX_ObjectGetDesc(PX_Object_SelectBar, pSelectBarObject);
-			PX_SelectbarOnCursorWheel(pSelectBarObject,PX_Object_Event_GetCursorZ(e));
+			PX_Object_SelectBar* pDesc = PX_Object_GetSelectBar(pObject);
+			PX_SelectbarOnCursorWheel(pObject,PX_Object_Event_GetCursorZ(e));
 			PX_Object_SelectBarSliderOnChanged(pDesc->sliderBar, PX_OBJECT_BUILD_EVENT(PX_OBJECT_EVENT_VALUECHANGED), pDesc);
 		}
 		break;
@@ -207,13 +206,13 @@ static px_void PX_SelectbarOnCursorEvent(PX_Object *pSelectBarObject,PX_Object_E
 		break;
 	}
 }
-static px_void PX_SelectbarFree(PX_Object *pObject)
+static PX_OBJECT_FREE_FUNCTION(PX_SelectbarFree)
 {
 	PX_VectorFree(&PX_Object_GetSelectBar(pObject)->Items);
 }
-static px_void PX_SelectbarRender(px_surface *pRenderSurface,PX_Object *pObject,px_dword elpase)
+static PX_OBJECT_RENDER_FUNCTION(PX_SelectbarRender)
 {
-	PX_Object_SelectBar *pSelectBar=PX_Object_GetSelectBar(pObject);
+	PX_Object_SelectBar *pSelectBar=PX_ObjectGetDesc(PX_Object_SelectBar,pObject);
 	px_float objx,objy,objWidth,objHeight;
 	px_float inheritX,inheritY;
 
@@ -233,28 +232,28 @@ static px_void PX_SelectbarRender(px_surface *pRenderSurface,PX_Object *pObject,
 		//background
 		if (pSelectBar->onCursor)
 		{
-			PX_GeoDrawRect(pRenderSurface,(px_int)objx,(px_int)objy,(px_int)(objx+objWidth-1),(px_int)(objy+objHeight-1),pSelectBar->cursorColor);
+			PX_GeoDrawRect(psurface,(px_int)objx,(px_int)objy,(px_int)(objx+objWidth-1),(px_int)(objy+objHeight-1),pSelectBar->cursorColor);
 		}
 		else
 		{
-			PX_GeoDrawRect(pRenderSurface,(px_int)objx,(px_int)objy,(px_int)(objx+objWidth-1),(px_int)(objy+objHeight-1),pSelectBar->backgroundColor);
+			PX_GeoDrawRect(psurface,(px_int)objx,(px_int)objy,(px_int)(objx+objWidth-1),(px_int)(objy+objHeight-1),pSelectBar->backgroundColor);
 		}
 
-		PX_GeoDrawBorder(pRenderSurface,(px_int)objx,(px_int)objy,(px_int)(objx+objWidth-1),(px_int)(objy+objHeight-1),1,pSelectBar->borderColor);
+		PX_GeoDrawBorder(psurface,(px_int)objx,(px_int)objy,(px_int)(objx+objWidth-1),(px_int)(objy+objHeight-1),1,pSelectBar->borderColor);
 
 	}
 	else if (pSelectBar->style==PX_OBJECT_SELECTBAR_STYLE_ROUNDRECT)
 	{
 		if (pSelectBar->onCursor)
 		{
-			PX_GeoDrawSolidRoundRect(pRenderSurface,(px_int)objx,(px_int)objy,(px_int)(objx+objWidth-1),(px_int)(objy+objHeight-1),objHeight/2,pSelectBar->cursorColor);
+			PX_GeoDrawSolidRoundRect(psurface,(px_int)objx,(px_int)objy,(px_int)(objx+objWidth-1),(px_int)(objy+objHeight-1),objHeight/2,pSelectBar->cursorColor);
 		}
 		else
 		{
-			PX_GeoDrawSolidRoundRect(pRenderSurface,(px_int)objx,(px_int)objy,(px_int)(objx+objWidth-1),(px_int)(objy+objHeight-1),objHeight/2,pSelectBar->backgroundColor);
+			PX_GeoDrawSolidRoundRect(psurface,(px_int)objx,(px_int)objy,(px_int)(objx+objWidth-1),(px_int)(objy+objHeight-1),objHeight/2,pSelectBar->backgroundColor);
 		}
 
-		PX_GeoDrawRoundRect(pRenderSurface,(px_int)objx,(px_int)objy,(px_int)(objx+objWidth-1),(px_int)(objy+objHeight-1),objHeight/2,1,pSelectBar->borderColor);
+		PX_GeoDrawRoundRect(psurface,(px_int)objx,(px_int)objy,(px_int)(objx+objWidth-1),(px_int)(objy+objHeight-1),objHeight/2,1,pSelectBar->borderColor);
 	}
 
 	//font
@@ -263,12 +262,12 @@ static px_void PX_SelectbarRender(px_surface *pRenderSurface,PX_Object *pObject,
 		if (pSelectBar->selectIndex>=0&&pSelectBar->selectIndex<pSelectBar->Items.size)
 		{
 			PX_Object_SelectBar_Item *pItem=PX_VECTORAT(PX_Object_SelectBar_Item,&pSelectBar->Items,pSelectBar->selectIndex);
-			PX_FontModuleDrawText(pRenderSurface,pSelectBar->fontmodule,(px_int)(objx+objHeight/2+1),(px_int)(objy+objHeight/2),PX_ALIGN_LEFTMID,pItem->Text,pSelectBar->fontColor);
+			PX_FontModuleDrawText(psurface,pSelectBar->fontmodule,(px_int)(objx+objHeight/2+1),(px_int)(objy+objHeight/2),PX_ALIGN_LEFTMID,pItem->Text,pSelectBar->fontColor);
 		}
 	} while (0);
 
 	//triangle
-	PX_GeoDrawTriangle(pRenderSurface,
+	PX_GeoDrawTriangle(psurface,
 		PX_POINT2D(objx+objWidth-16,objy+objHeight/2-3),
 		PX_POINT2D(objx+objWidth-4,objy+objHeight/2-3),
 		PX_POINT2D(objx+objWidth-10,objy+objHeight/2+3),
@@ -286,7 +285,7 @@ static px_void PX_SelectbarRender(px_surface *pRenderSurface,PX_Object *pObject,
 
 			if (pItem->onCursor)
 			{
-				PX_GeoDrawRect(pRenderSurface,
+				PX_GeoDrawRect(psurface,
 					(px_int)(objx),
 					(px_int)(objy+objHeight+i*pSelectBar->ItemHeight),
 					(px_int)(objx+objWidth),
@@ -296,7 +295,7 @@ static px_void PX_SelectbarRender(px_surface *pRenderSurface,PX_Object *pObject,
 			}
 			else
 			{
-				PX_GeoDrawRect(pRenderSurface,
+				PX_GeoDrawRect(psurface,
 					(px_int)(objx),
 					(px_int)(objy+objHeight+i*pSelectBar->ItemHeight),
 					(px_int)(objx+objWidth),
@@ -305,14 +304,14 @@ static px_void PX_SelectbarRender(px_surface *pRenderSurface,PX_Object *pObject,
 					);
 			}
 
-			PX_FontModuleDrawText(pRenderSurface,pSelectBar->fontmodule,(px_int)(objx+objHeight/2+1),
+			PX_FontModuleDrawText(psurface,pSelectBar->fontmodule,(px_int)(objx+objHeight/2+1),
 				(px_int)(objy+objHeight+(i*pSelectBar->ItemHeight)+pSelectBar->ItemHeight/2),
 				PX_ALIGN_LEFTMID,
 				pItem->Text,
 				pSelectBar->fontColor
 				);
 		}
-		PX_GeoDrawBorder(pRenderSurface,
+		PX_GeoDrawBorder(psurface,
 			(px_int)objx,
 			(px_int)(objy+objHeight),
 			(px_int)(objx+objWidth-1),
@@ -345,60 +344,78 @@ static px_void PX_SelectbarRender(px_surface *pRenderSurface,PX_Object *pObject,
 
 }
 
-
-
-PX_Object * PX_Object_SelectBarCreate(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y,px_int width,px_int height,PX_FontModule *fontmodule)
+PX_Object* PX_Object_SelectBarAttachObject(PX_Object* pObject,px_int attachIndex, px_int x, px_int y, px_int width, px_int height, PX_FontModule* fontmodule)
 {
-	PX_Object *pObject;
-	PX_Object_SelectBar *pSelectbar;
-	pObject=PX_ObjectCreateEx(mp,Parent,(px_float)x,(px_float)y,0,(px_float)width,(px_float)height,0,PX_OBJECT_TYPE_SELECTBAR,PX_NULL,PX_SelectbarRender,PX_SelectbarFree,PX_NULL,sizeof(PX_Object_SelectBar));
-	if (pObject ==PX_NULL)
-	{
-		return PX_NULL;
-	}
+	px_memorypool* mp=pObject->mp;
+
+	PX_Object_SelectBar* pSelectbar;
+	
+	PX_ASSERTIF(pObject == PX_NULL);
+	PX_ASSERTIF(attachIndex < 0 || attachIndex >= PX_COUNTOF(pObject->pObjectDesc));
+	PX_ASSERTIF(pObject->pObjectDesc[attachIndex] != PX_NULL);
+	pSelectbar = (PX_Object_SelectBar*)PX_ObjectCreateDesc(pObject, attachIndex, PX_OBJECT_TYPE_SELECTBAR, 0, PX_SelectbarRender, PX_SelectbarFree, 0, sizeof(PX_Object_SelectBar));
+	PX_ASSERTIF(pSelectbar == PX_NULL);
+
 	pObject->OnLostFocusReleaseEvent = PX_TRUE;
-	pSelectbar=PX_ObjectGetDesc(PX_Object_SelectBar,pObject);
-	pSelectbar->fontmodule=fontmodule;
-	pSelectbar->mp=mp;
-	pSelectbar->activating=PX_FALSE;
-	pSelectbar->currentDisplayOffsetIndex=0;
+	pSelectbar->fontmodule = fontmodule;
+	pSelectbar->mp = mp;
+	pSelectbar->activating = PX_FALSE;
+	pSelectbar->currentDisplayOffsetIndex = 0;
 	if (fontmodule)
 	{
-		pSelectbar->ItemHeight=fontmodule->max_Height+6;
+		pSelectbar->ItemHeight = fontmodule->max_Height + 6;
 	}
 	else
 	{
-		pSelectbar->ItemHeight=__PX_FONT_HEIGHT;
+		pSelectbar->ItemHeight = __PX_FONT_HEIGHT;
 	}
 
-	pSelectbar->maxDisplayCount=16;
-	pSelectbar->backgroundColor= PX_OBJECT_UI_DEFAULT_BACKGROUNDCOLOR;
-	pSelectbar->cursorColor= PX_OBJECT_UI_DEFAULT_CURSORCOLOR;
-	pSelectbar->fontColor=PX_OBJECT_UI_DEFAULT_FONTCOLOR;
-	pSelectbar->borderColor= PX_OBJECT_UI_DEFAULT_BORDERCOLOR;
-	pSelectbar->activating=PX_FALSE;
-	pSelectbar->style=PX_OBJECT_SELECTBAR_STYLE_RECT;
-	PX_VectorInitialize(mp,&pSelectbar->Items,sizeof(PX_Object_SelectBar_Item),16);
+	pSelectbar->maxDisplayCount = 16;
+	pSelectbar->backgroundColor = PX_OBJECT_UI_DEFAULT_BACKGROUNDCOLOR;
+	pSelectbar->cursorColor = PX_OBJECT_UI_DEFAULT_CURSORCOLOR;
+	pSelectbar->fontColor = PX_OBJECT_UI_DEFAULT_FONTCOLOR;
+	pSelectbar->borderColor = PX_OBJECT_UI_DEFAULT_BORDERCOLOR;
+	pSelectbar->activating = PX_FALSE;
+	pSelectbar->style = PX_OBJECT_SELECTBAR_STYLE_RECT;
+	PX_VectorInitialize(mp, &pSelectbar->Items, sizeof(PX_Object_SelectBar_Item), 16);
 
-	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_CURSORDOWN,PX_SelectbarOnCursorEvent,PX_NULL);
-	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_CURSORMOVE,PX_SelectbarOnCursorEvent,PX_NULL);
-	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_CURSORDRAG,PX_SelectbarOnCursorEvent,PX_NULL);
-	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_CURSORWHEEL,PX_SelectbarOnCursorEvent,PX_NULL);
+	PX_ObjectRegisterEventEx(pObject, PX_OBJECT_EVENT_CURSORDOWN, PX_OBJECT_TYPE_SELECTBAR, PX_SelectbarOnCursorEvent, PX_NULL);
+	PX_ObjectRegisterEventEx(pObject, PX_OBJECT_EVENT_CURSORMOVE, PX_OBJECT_TYPE_SELECTBAR, PX_SelectbarOnCursorEvent, PX_NULL);
+	PX_ObjectRegisterEventEx(pObject, PX_OBJECT_EVENT_CURSORDRAG, PX_OBJECT_TYPE_SELECTBAR, PX_SelectbarOnCursorEvent, PX_NULL);
+	PX_ObjectRegisterEventEx(pObject, PX_OBJECT_EVENT_CURSORWHEEL, PX_OBJECT_TYPE_SELECTBAR, PX_SelectbarOnCursorEvent, PX_NULL);
 
-	pSelectbar->sliderBar=PX_Object_SliderBarCreate(mp,pObject,0,0,0,0,PX_OBJECT_SLIDERBAR_TYPE_VERTICAL,PX_OBJECT_SLIDERBAR_STYLE_BOX);
+	pSelectbar->sliderBar = PX_Object_SliderBarCreate(mp, pObject, 0, 0, 0, 0, PX_OBJECT_SLIDERBAR_TYPE_VERTICAL, PX_OBJECT_SLIDERBAR_STYLE_BOX);
 
 	if (!pSelectbar->sliderBar)
 	{
 		PX_ObjectDelete(pObject);
 		return PX_NULL;
 	}
-	PX_ObjectRegisterEvent(pSelectbar->sliderBar,PX_OBJECT_EVENT_VALUECHANGED,PX_Object_SelectBarSliderOnChanged,pSelectbar);
+	PX_ObjectRegisterEvent(pSelectbar->sliderBar, PX_OBJECT_EVENT_VALUECHANGED, PX_Object_SelectBarSliderOnChanged, pSelectbar);
 	return pObject;
 }
 
-px_int PX_Object_SelectBarAddItem(PX_Object *pSelectBarObject,const px_char Text[])
+
+PX_Object * PX_Object_SelectBarCreate(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y,px_int width,px_int height,PX_FontModule *fontmodule)
 {
-	PX_Object_SelectBar *pSelectBar=PX_Object_GetSelectBar(pSelectBarObject);
+	PX_Object *pObject;
+
+	pObject=PX_ObjectCreate(mp,Parent,(px_float)x,(px_float)y,0,(px_float)width,(px_float)height,0);
+	if (pObject ==PX_NULL)
+	{
+		return PX_NULL;
+	}
+	if (!PX_Object_SelectBarAttachObject(pObject,0,x,y,width,height,fontmodule))
+	{
+		PX_ObjectDelete(pObject);
+		return PX_NULL;
+	}
+	return pObject;
+}
+
+px_int PX_Object_SelectBarAddItem(PX_Object *pObject,const px_char Text[])
+{
+	PX_Object_SelectBar *pSelectBar=PX_Object_GetSelectBar(pObject);
 	PX_Object_SelectBar_Item item;
 	PX_strcpy(item.Text,Text,sizeof(item.Text));
 	item.onCursor=PX_FALSE;
@@ -408,9 +425,9 @@ px_int PX_Object_SelectBarAddItem(PX_Object *pSelectBarObject,const px_char Text
 		return -1;
 }
 
-px_void PX_Object_SelectBarClear(PX_Object* pSelectBarObject)
+px_void PX_Object_SelectBarClear(PX_Object* pObject)
 {
-	PX_Object_SelectBar* pSelectBar = PX_Object_GetSelectBar(pSelectBarObject);
+	PX_Object_SelectBar* pSelectBar = PX_Object_GetSelectBar(pObject);
 	PX_VectorClear(&pSelectBar->Items);
 }
 
@@ -565,104 +582,3 @@ px_void PX_Object_SelectBarSetMaxDisplayCount(PX_Object* pObject, px_int i)
 		pSelectBar->maxDisplayCount = i;
 	}
 }
-
-//////////////////////////////////////////////////////////////////////////
-//SelectBar
-//////////////////////////////////////////////////////////////////////////
-
-PX_Object* PX_Designer_SelectBarCreate(px_memorypool* mp, PX_Object* pparent, px_float x, px_float y, px_float width, px_float height, px_abi* pabi)
-{
-	PX_FontModule* fm;
-	if (!PX_AbiRead_ptr(pabi, "fontmodule", (px_void**)&fm))
-	{
-		fm = PX_NULL;
-	}
-
-	return PX_Object_SelectBarCreate(mp, pparent, (px_int)x, (px_int)y, 96, 24, fm);
-}
-
-px_void PX_Designer_SelectBarSetText(PX_Object* pobject, const px_char text[])
-{
-	px_char content[64];
-	px_int _strlen;
-	px_int i, j;
-	PX_Object_SelectBarClear(pobject);
-	i = 0;
-	_strlen = PX_strlen(text);
-	while (i < _strlen)
-	{
-		j = 0;
-		while (text[i] != '\n' && text[i] != '\0')
-		{
-			if (j >= PX_COUNTOF(content) - 1)
-			{
-				return;
-			}
-			content[j++] = text[i++];
-		}
-		content[j] = '\0';
-		if (text[i] == '\n')
-		{
-			i++;
-		}
-		PX_Object_SelectBarAddItem(pobject, content);
-	}
-}
-
-
-px_bool PX_Designer_SelectBarGetText(PX_Object* pobject, px_string* str)
-{
-	px_int i;
-	PX_Object_SelectBar* pdesc = PX_ObjectGetDesc(PX_Object_SelectBar, pobject);
-	for (i = 0; i < pdesc->Items.size; i++)
-	{
-		PX_StringCat(str, PX_Object_SelectBarGetItemText(pobject, i));
-		PX_StringCat(str, "\n");
-	}
-	PX_StringBackspace(str);
-	return PX_TRUE;
-}
-
-PX_Designer_ObjectDesc PX_Object_SelectBarDesignerInstall()
-{
-	PX_Designer_ObjectDesc selectbar;
-	px_int i = 0;
-	PX_memset(&selectbar, 0, sizeof(selectbar));
-	PX_strcat(selectbar.Name, "selectbar");
-
-	selectbar.createfunc = PX_Designer_SelectBarCreate;
-	selectbar.type = PX_DESIGNER_OBJECT_TYPE_UI;
-
-	PX_strcat(selectbar.properties[i].Name, "id");
-	selectbar.properties[i].getstring = PX_Designer_GetID;
-	selectbar.properties[i].setstring = PX_Designer_SetID;
-	i++;
-
-	PX_strcat(selectbar.properties[i].Name, "x");
-	selectbar.properties[i].getfloat = PX_Designer_GetX;
-	selectbar.properties[i].setfloat = PX_Designer_SetX;
-	i++;
-
-	PX_strcat(selectbar.properties[i].Name, "y");
-	selectbar.properties[i].getfloat = PX_Designer_GetY;
-	selectbar.properties[i].setfloat = PX_Designer_SetY;
-	i++;
-
-	PX_strcat(selectbar.properties[i].Name, "width");
-	selectbar.properties[i].getfloat = PX_Designer_GetWidth;
-	selectbar.properties[i].setfloat = PX_Designer_SetWidth;
-	i++;
-
-	PX_strcat(selectbar.properties[i].Name, "height");
-	selectbar.properties[i].getfloat = PX_Designer_GetHeight;
-	selectbar.properties[i].setfloat = PX_Designer_SetHeight;
-	i++;
-
-	PX_strcat(selectbar.properties[i].Name, "list");
-	selectbar.properties[i].setstring = PX_Designer_SelectBarSetText;
-	selectbar.properties[i].getstring = PX_Designer_SelectBarGetText;
-	i++;
-	return selectbar;
-}
-
-

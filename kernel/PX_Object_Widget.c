@@ -1,7 +1,7 @@
 #include "PX_Object_Widget.h"
 
 
-px_void PX_Object_WidgetFree(PX_Object *pObject)
+PX_OBJECT_FREE_FUNCTION(PX_Object_WidgetFree)
 {
 	PX_Object_Widget *pWidget=PX_Object_GetWidget(pObject);
 	if (pWidget)
@@ -46,7 +46,7 @@ px_void PX_Object_WidgetShowHideCloseButton(PX_Object *pObject,px_bool show)
 	}
 }
 
-static px_void PX_Object_WidgetOnButtonClose(PX_Object *pObject,PX_Object_Event e,px_void *ptr)
+static PX_OBJECT_EVENT_FUNCTION(PX_Object_WidgetOnButtonClose)
 {
 	PX_Object *pWidgetObject=(PX_Object *)ptr;
 	PX_ObjectExecuteEvent(pWidgetObject, PX_OBJECT_BUILD_EVENT(PX_OBJECT_EVENT_CLOSE));
@@ -54,7 +54,7 @@ static px_void PX_Object_WidgetOnButtonClose(PX_Object *pObject,PX_Object_Event 
 	
 }
 
-px_void PX_Object_Widget_EventDispatcher(PX_Object *pObject,PX_Object_Event e,px_void *ptr)
+PX_OBJECT_EVENT_FUNCTION(PX_Object_Widget_EventDispatcher)
 {
 	PX_Object_Event oe;
 	PX_Object_Widget *pwidget=PX_Object_GetWidget(pObject);
@@ -139,7 +139,7 @@ px_void PX_Object_Widget_EventDispatcher(PX_Object *pObject,PX_Object_Event e,px
 	PX_ObjectPostEvent(pwidget->root,oe);
 }
 
-px_void PX_Object_WidgetRender(px_surface *psurface, PX_Object *pObject,px_uint elapsed)
+PX_OBJECT_RENDER_FUNCTION(PX_Object_WidgetRender)
 {
 	PX_Object_Widget *pwidget=PX_Object_GetWidget(pObject);
 	px_float objx,objy,objWidth,objHeight;
@@ -205,18 +205,21 @@ px_void PX_Object_WidgetRender(px_surface *psurface, PX_Object *pObject,px_uint 
 }
 
 
-PX_Object * PX_Object_WidgetCreate(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y,px_int width,px_int height,const px_char title[],PX_FontModule *fontmodule)
+PX_Object * PX_Object_WidgetAttachObject(PX_Object *pObject,px_int attachIndex,px_int x,px_int y,px_int width,px_int height,const px_char title[],PX_FontModule *fontmodule)
 {
-	PX_Object *pObject;
-	PX_Object_Widget *pWidget;
+	px_memorypool* mp=pObject->mp;
+	PX_Object_Widget *pWidget,*pdesc;
+
 	if (width <= 0) width = 1;
 	if (height <= PX_OBJECT_WIDGET_BAR_SIZE)height = PX_OBJECT_WIDGET_BAR_SIZE + 1;
 
-	pObject=PX_ObjectCreateEx(mp,Parent,(px_float)x,(px_float)y,0,(px_float)width,(px_float)height,0,PX_OBJECT_TYPE_WIDGET,PX_NULL,PX_Object_WidgetRender,PX_Object_WidgetFree,PX_NULL,sizeof(PX_Object_Widget));
-	if (pObject==PX_NULL)
-	{
-		return PX_NULL;
-	}
+	PX_ASSERTIF(pObject == PX_NULL);
+	PX_ASSERTIF(attachIndex < 0 || attachIndex >= PX_COUNTOF(pObject->pObjectDesc));
+	PX_ASSERTIF(pObject->pObjectDesc[attachIndex] != PX_NULL);
+	pdesc = (PX_Object_Widget*)PX_ObjectCreateDesc(pObject, attachIndex, PX_OBJECT_TYPE_WIDGET, 0, PX_Object_WidgetRender, PX_Object_WidgetFree, PX_NULL, sizeof(PX_Object_Widget));
+	PX_ASSERTIF(pdesc == PX_NULL);
+
+	
 	pWidget=PX_Object_GetWidget(pObject);
 	
 	if (pWidget==PX_NULL)
@@ -230,7 +233,8 @@ PX_Object * PX_Object_WidgetCreate(px_memorypool *mp,PX_Object *Parent,px_int x,
 		PX_strcpy(pWidget->title,title,sizeof(pWidget->title));
 	}
 
-	if(!PX_TextureCreate(mp,&pWidget->renderTarget,width,height-PX_OBJECT_WIDGET_BAR_SIZE))return PX_FALSE;
+	
+	if (!PX_TextureCreate(mp, &pWidget->renderTarget, width, height - PX_OBJECT_WIDGET_BAR_SIZE))return PX_FALSE;
 
 	pWidget->root=PX_ObjectCreate(mp,PX_NULL,0,0,0,0,0,0);
 	pWidget->btn_close=PX_Object_PushButtonCreate(mp,pObject,width-PX_OBJECT_WIDGET_BAR_SIZE,3,PX_OBJECT_WIDGET_BAR_SIZE-6,PX_OBJECT_WIDGET_BAR_SIZE-6,"-",PX_NULL);
@@ -247,8 +251,8 @@ PX_Object * PX_Object_WidgetCreate(px_memorypool *mp,PX_Object *Parent,px_int x,
 	pWidget->fontcolor=PX_OBJECT_UI_DEFAULT_FONTCOLOR;
 	pWidget->showShader = PX_TRUE;
 	pWidget->focusWidget = PX_TRUE;
-	PX_ObjectRegisterEvent(pWidget->btn_close,PX_OBJECT_EVENT_EXECUTE,PX_Object_WidgetOnButtonClose,pObject);
-	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_ANY,PX_Object_Widget_EventDispatcher,PX_NULL);
+	PX_ObjectRegisterEventEx(pWidget->btn_close,PX_OBJECT_EVENT_EXECUTE, PX_OBJECT_TYPE_WIDGET, PX_Object_WidgetOnButtonClose,pObject);
+	PX_ObjectRegisterEventEx(pObject,PX_OBJECT_EVENT_ANY, PX_OBJECT_TYPE_WIDGET, PX_Object_Widget_EventDispatcher,PX_NULL);
 
 	pObject->Func_ObjectLinkChild=PX_Object_WidgetLinkChild;
 	return pObject;
@@ -256,62 +260,66 @@ _ERROR:
 	return PX_NULL;
 }
 
+PX_Object* PX_Object_WidgetCreate(px_memorypool* mp, PX_Object* Parent, px_int x, px_int y, px_int width, px_int height, const px_char title[], PX_FontModule* fontmodule)
+{
+	PX_Object* pObject;
+	pObject = PX_ObjectCreate(mp, Parent, (px_float)x, (px_float)y, 0, (px_float)width, (px_float)height, 0);
+	if (pObject == PX_NULL)
+	{
+		return PX_NULL;
+	}
+	if (!PX_Object_WidgetAttachObject(pObject, 0, x, y, width, height, title, fontmodule))
+	{
+		PX_ObjectDelete(pObject);
+		return PX_NULL;
+	}
+	return pObject;
+}
 PX_Object_Widget * PX_Object_GetWidget(PX_Object *pObject)
 {
-	if (pObject->Type==PX_OBJECT_TYPE_WIDGET)
-	{
-		return PX_ObjectGetDesc(PX_Object_Widget,pObject);
-	}
-	return PX_NULL;
+	PX_Object_Widget *pdesc=(PX_Object_Widget *)PX_ObjectGetDescByType(pObject,PX_OBJECT_TYPE_WIDGET);
+	PX_ASSERTIF(pdesc==PX_NULL);
+	return pdesc;
 }
 
 px_void PX_Object_WidgetSetModel(PX_Object *pObject,px_bool model)
 {
 	PX_Object_Widget *pWidget=PX_Object_GetWidget(pObject);
-	if (pWidget)
-	{
-		pWidget->bmodel=model;
-	}
+	
+	pWidget->bmodel=model;
 }
 
 PX_Object * PX_Object_WidgetGetRoot(PX_Object *pObject)
 {
 	PX_Object_Widget *pWidget=PX_Object_GetWidget(pObject);
-	if (pWidget)
-	{
-		return pWidget->root;
-	}
-	return PX_NULL;
+	
+	return pWidget->root;
+
 }
 
 px_int PX_Object_WidgetGetRenderTargetHeight(PX_Object *pObject)
 {
 	PX_Object_Widget *pWidget=PX_Object_GetWidget(pObject);
-	if (pWidget)
-	{
-		return pWidget->renderTarget.height;
-	}
+	
+	return pWidget->renderTarget.height;
+	
 	return 0;
 }
 
 px_int PX_Object_WidgetGetRenderTargetWidth(PX_Object *pObject)
 {
 	PX_Object_Widget *pWidget=PX_Object_GetWidget(pObject);
-	if (pWidget)
-	{
-		return pWidget->renderTarget.width;
-	}
-	return 0;
+
+	return pWidget->renderTarget.width;
+	
 }
 
 px_surface* PX_Object_WidgetGetRenderTarget(PX_Object* pObject)
 {
 	PX_Object_Widget* pWidget = PX_Object_GetWidget(pObject);
-	if (pWidget)
-	{
-		return &pWidget->renderTarget;
-	}
-	return 0;
+
+	return &pWidget->renderTarget;
+
 }
 
 px_void PX_Object_WidgetReleaseFocus(PX_Object* pObject)
@@ -327,72 +335,64 @@ px_bool PX_Object_WidgetIsOnFocus(PX_Object* pObject)
 px_void PX_Object_WidgetSetBorderColor(PX_Object *pObject,px_color clr)
 {
 	PX_Object_Widget *pWidget=PX_Object_GetWidget(pObject);
-	if (pWidget)
-	{
-		pWidget->borderColor=clr;
-	}
+	
+	pWidget->borderColor=clr;
+	
 }
 
 
 px_void PX_Object_WidgetSetBarColor(PX_Object *pObject,px_color clr)
 {
 	PX_Object_Widget *pWidget=PX_Object_GetWidget(pObject);
-	if (pWidget)
-	{
-		pWidget->barColor=clr;
-	}
+
+	pWidget->barColor=clr;
+	
 }
 
 px_void PX_Object_WidgetSetBackgroundColor(PX_Object *pObject,px_color clr)
 {
 	PX_Object_Widget *pWidget=PX_Object_GetWidget(pObject);
-	if (pWidget)
-	{
-		pWidget->backgroundcolor=clr;
-	}
+
+	pWidget->backgroundcolor=clr;
+	
 }
 
 px_void PX_Object_WidgetSetFocusColor(PX_Object *pObject,px_color clr)
 {
 	PX_Object_Widget *pWidget=PX_Object_GetWidget(pObject);
-	if (pWidget)
-	{
-		pWidget->focusColor=clr;
-	}
+
+	pWidget->focusColor=clr;
+	
 }
 
 px_void PX_Object_WidgetSetFontColor(PX_Object *pObject,px_color clr)
 {
 	PX_Object_Widget *pWidget=PX_Object_GetWidget(pObject);
-	if (pWidget)
-	{
-		pWidget->fontcolor=clr;
-	}
+
+	pWidget->fontcolor=clr;
+	
 }
 
 px_void PX_Object_WidgetSetTitle(PX_Object *pObject,const px_char title[])
 {
 	PX_Object_Widget *pWidget=PX_Object_GetWidget(pObject);
-	if (pWidget)
-	{
-		PX_strcpy(pWidget->title,title,sizeof(pWidget->title));
-	}
+
+	PX_strcpy(pWidget->title,title,sizeof(pWidget->title));
+	
 }
 
 px_void PX_Object_WidgetShowShader(PX_Object* pObject, px_bool show)
 {
 	PX_Object_Widget* pWidget = PX_Object_GetWidget(pObject);
-	if (pWidget)
-	{
+
 		pWidget->showShader = show;
-	}
+	
 }
 
 px_void PX_Object_WidgetSetFocusWidget(PX_Object* pObject, px_bool bf)
 {
 	PX_Object_Widget* pWidget = PX_Object_GetWidget(pObject);
-	if (pWidget)
-	{
-		pWidget->focusWidget = bf;
-	}
+
+	pWidget->focusWidget = bf;
+
 }

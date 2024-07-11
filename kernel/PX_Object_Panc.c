@@ -1,7 +1,13 @@
 #include "PX_Object_Panc.h"
-#include "PX_Object_Panc.h"
 
-px_void PX_Object_PancRender(px_surface *pSurface,PX_Object *pObject,px_dword elapsed)
+PX_Object_Panc* PX_Object_GetPanc(PX_Object* pObject)
+{
+	PX_Object_Panc* pDesc = (PX_Object_Panc*)PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_PANC);
+	PX_ASSERTIF(pDesc == PX_NULL);
+	return pDesc;
+}
+
+PX_OBJECT_RENDER_FUNCTION(PX_Object_PancRender)
 {
 	PX_Object_Panc *pDesc=PX_ObjectGetDesc(PX_Object_Panc,pObject);
 	px_int i;
@@ -29,14 +35,14 @@ px_void PX_Object_PancRender(px_surface *pSurface,PX_Object *pObject,px_dword el
 	step=step/4;
 	for (i=0;i<5;i++)
 	{
-		PX_GeoDrawLine(pSurface,(px_int)(objx+step*i), (px_int)objy,(px_int)(objx+step*i),(px_int)(objy+objHeight),1,renderColor);
+		PX_GeoDrawLine(psurface,(px_int)(objx+step*i), (px_int)objy,(px_int)(objx+step*i),(px_int)(objy+objHeight),1,renderColor);
 	}
 
 	step=objx+objWidth-pDesc->sourceX;
 	step=step/4;
 	for (i=0;i<5;i++)
 	{
-		PX_GeoDrawLine(pSurface,(px_int)(pDesc->sourceX+step*i), (px_int)objy,(px_int)(pDesc->sourceX+step*i),(px_int)(objy+objHeight),1,renderColor);
+		PX_GeoDrawLine(psurface,(px_int)(pDesc->sourceX+step*i), (px_int)objy,(px_int)(pDesc->sourceX+step*i),(px_int)(objy+objHeight),1,renderColor);
 	}
 
 	//y
@@ -44,14 +50,14 @@ px_void PX_Object_PancRender(px_surface *pSurface,PX_Object *pObject,px_dword el
 	step=step/4;
 	for (i=0;i<5;i++)
 	{
-		PX_GeoDrawLine(pSurface,(px_int)objx,(px_int)(objy+step*i),(px_int)(objx+objWidth),(px_int)(objy+step*i),1,renderColor);
+		PX_GeoDrawLine(psurface,(px_int)objx,(px_int)(objy+step*i),(px_int)(objx+objWidth),(px_int)(objy+step*i),1,renderColor);
 	}
 
 	step=objy+objHeight-pDesc->sourceY;
 	step=step/4;
 	for (i=0;i<5;i++)
 	{
-		PX_GeoDrawLine(pSurface, (px_int)objx,(px_int)(pDesc->sourceY+step*i),(px_int)(objx+objWidth),(px_int)(pDesc->sourceY+step*i),1,renderColor);
+		PX_GeoDrawLine(psurface, (px_int)objx,(px_int)(pDesc->sourceY+step*i),(px_int)(objx+objWidth),(px_int)(pDesc->sourceY+step*i),1,renderColor);
 	}
 
 
@@ -65,14 +71,14 @@ px_void PX_Object_PancRender(px_surface *pSurface,PX_Object *pObject,px_dword el
 	step=step/4;
 	for (i=0;i<5;i++)
 	{
-		PX_GeoDrawLine(pSurface,(px_int)(objx+step*i), (px_int)objy,(px_int)(objx+step*i),(px_int)(objy+objHeight),1,renderColor);
+		PX_GeoDrawLine(psurface,(px_int)(objx+step*i), (px_int)objy,(px_int)(objx+step*i),(px_int)(objy+objHeight),1,renderColor);
 	}
 
 	step=objx+objWidth-pDesc->currentX;
 	step=step/4;
 	for (i=0;i<5;i++)
 	{
-		PX_GeoDrawLine(pSurface,(px_int)(pDesc->currentX+step*i), (px_int)objy,(px_int)(pDesc->currentX+step*i),(px_int)(objy+objHeight),1,renderColor);
+		PX_GeoDrawLine(psurface,(px_int)(pDesc->currentX+step*i), (px_int)objy,(px_int)(pDesc->currentX+step*i),(px_int)(objy+objHeight),1,renderColor);
 	}
 
 	//y
@@ -80,37 +86,37 @@ px_void PX_Object_PancRender(px_surface *pSurface,PX_Object *pObject,px_dword el
 	step=step/4;
 	for (i=0;i<5;i++)
 	{
-		PX_GeoDrawLine(pSurface, (px_int)objx,(px_int)(objy+step*i),(px_int)(objx+objWidth),(px_int)(objy+step*i),1,renderColor);
+		PX_GeoDrawLine(psurface, (px_int)objx,(px_int)(objy+step*i),(px_int)(objx+objWidth),(px_int)(objy+step*i),1,renderColor);
 	}
 
 	step=objy+objHeight-pDesc->currentY;
 	step=step/4;
 	for (i=0;i<5;i++)
 	{
-		PX_GeoDrawLine(pSurface, (px_int)objx,(px_int)(pDesc->currentY+step*i),(px_int)(objx+objWidth),(px_int)(pDesc->currentY+step*i),1,renderColor);
+		PX_GeoDrawLine(psurface, (px_int)objx,(px_int)(pDesc->currentY+step*i),(px_int)(objx+objWidth),(px_int)(pDesc->currentY+step*i),1,renderColor);
 	}
 
 	//////////////////////////////////////////////////////////////////////////
 	//controller point
 	renderColor=pDesc->borderColor;
 	renderColor._argb.a/=6;
-	PX_GeoDrawSolidCircle(pSurface,(px_int)pDesc->currentX,(px_int)pDesc->currentY,8,renderColor);
+	PX_GeoDrawSolidCircle(psurface,(px_int)pDesc->currentX,(px_int)pDesc->currentY,8,renderColor);
 
-	PX_GeoDrawSolidCircle(pSurface,(px_int)(objx),(px_int)(objy),5,renderColor);
-	PX_GeoDrawSolidCircle(pSurface,(px_int)(objx+objWidth),(px_int)(objy),5,renderColor);
-	PX_GeoDrawSolidCircle(pSurface,(px_int)(objx),(px_int)(objy+objHeight),5,renderColor);
-	PX_GeoDrawSolidCircle(pSurface,(px_int)(objx+objWidth),(px_int)(objy+objHeight),5,renderColor);
+	PX_GeoDrawSolidCircle(psurface,(px_int)(objx),(px_int)(objy),5,renderColor);
+	PX_GeoDrawSolidCircle(psurface,(px_int)(objx+objWidth),(px_int)(objy),5,renderColor);
+	PX_GeoDrawSolidCircle(psurface,(px_int)(objx),(px_int)(objy+objHeight),5,renderColor);
+	PX_GeoDrawSolidCircle(psurface,(px_int)(objx+objWidth),(px_int)(objy+objHeight),5,renderColor);
 
-	PX_GeoDrawBorder(pSurface,(px_int)objx,(px_int)objy,(px_int)(objx+objWidth),(px_int)(objy+objHeight),3,pDesc->borderColor);
+	PX_GeoDrawBorder(psurface,(px_int)objx,(px_int)objy,(px_int)(objx+objWidth),(px_int)(objy+objHeight),3,pDesc->borderColor);
 
 }
 
-px_void PX_Object_PancOnCursorDown(PX_Object *pObject,PX_Object_Event e,px_void *ptr)
+PX_OBJECT_EVENT_FUNCTION(PX_Object_PancOnCursorDown)
 {
 	px_float x,y;
 	px_float objx,objy,objWidth,objHeight;
 	px_float inheritX,inheritY;
-	PX_Object_Panc *pDesc=PX_ObjectGetDesc(PX_Object_Panc,pObject);
+	PX_Object_Panc *pDesc= PX_Object_GetPanc(pObject);
 	PX_ObjectGetInheritXY(pObject,&inheritX,&inheritY);
 
 	objx=(pObject->x+inheritX);
@@ -156,10 +162,10 @@ px_void PX_Object_PancOnCursorDown(PX_Object *pObject,PX_Object_Event e,px_void 
 	
 }
 
-px_void PX_Object_PancOnCursorRDown(PX_Object* pObject, PX_Object_Event e, px_void* ptr)
+PX_OBJECT_EVENT_FUNCTION(PX_Object_PancOnCursorRDown)
 {
 	px_float x, y;
-	PX_Object_Panc* pDesc = PX_ObjectGetDesc(PX_Object_Panc, pObject);
+	PX_Object_Panc* pDesc = PX_Object_GetPanc(pObject);
 	px_float objx, objy, objWidth, objHeight;
 	px_float inheritX, inheritY;
 	PX_ObjectGetInheritXY(pObject, &inheritX, &inheritY);
@@ -200,10 +206,10 @@ px_void PX_Object_PancOnCursorRDown(PX_Object* pObject, PX_Object_Event e, px_vo
 	pDesc->currentY = pDesc->sourceY;
 }
 
-px_void PX_Object_PancOnCursorDrag(PX_Object *pObject,PX_Object_Event e,px_void *ptr)
+PX_OBJECT_EVENT_FUNCTION(PX_Object_PancOnCursorDrag)
 {
 	px_float x,y;
-	PX_Object_Panc *pDesc=PX_ObjectGetDesc(PX_Object_Panc,pObject);
+	PX_Object_Panc *pDesc= PX_Object_GetPanc(pObject);
 	px_float objx, objy, objWidth, objHeight;
 	px_float inheritX, inheritY;
 	PX_ObjectGetInheritXY(pObject, &inheritX, &inheritY);
@@ -370,20 +376,26 @@ px_void PX_Object_PancOnCursorDrag(PX_Object *pObject,PX_Object_Event e,px_void 
 	
 }
 
-PX_Object * PX_Object_PancCreate(px_memorypool *mp,PX_Object *Parent,px_float x,px_float y,px_float widht,px_float height)
+
+PX_Object* PX_Object_PancAttachObject( PX_Object* pObject,px_int attachIndex, px_float x, px_float y, px_float widht, px_float height)
 {
-	PX_Object_Panc panc;
-	PX_Object *pObject;
-	PX_memset(&panc, 0, sizeof(panc));
-	panc.sourceX=x+widht/2;
-	panc.sourceY=y+height/2;
+	px_memorypool* mp=pObject->mp;
+	PX_Object_Panc panc = {0}, * pdesc;
 
-	panc.currentX=x+widht/2;
-	panc.currentY=y+height/2;
+	panc.sourceX = x + widht / 2;
+	panc.sourceY = y + height / 2;
 
-	panc.borderColor=PX_OBJECT_UI_DEFAULT_FONTCOLOR;
+	panc.currentX = x + widht / 2;
+	panc.currentY = y + height / 2;
 
-	pObject=PX_ObjectCreateEx(mp,Parent,x,y,0,widht,height,0,PX_OBJECT_TYPE_PANC,PX_NULL,PX_Object_PancRender,PX_NULL,&panc,sizeof(panc));
+	panc.borderColor = PX_OBJECT_UI_DEFAULT_FONTCOLOR;
+
+	PX_ASSERTIF(pObject == PX_NULL);
+	PX_ASSERTIF(attachIndex < 0 || attachIndex >= PX_COUNTOF(pObject->pObjectDesc));
+	PX_ASSERTIF(pObject->pObjectDesc[attachIndex] != PX_NULL);
+	pdesc = (PX_Object_Panc*)PX_ObjectCreateDesc(pObject, attachIndex, PX_OBJECT_TYPE_PANC, 0, PX_Object_PancRender, 0, &panc, sizeof(PX_Object_Panc));
+	PX_ASSERTIF(pdesc == PX_NULL);
+
 	PX_ObjectRegisterEvent(pObject, PX_OBJECT_EVENT_CURSORDOWN, PX_Object_PancOnCursorDown, PX_NULL);
 	PX_ObjectRegisterEvent(pObject, PX_OBJECT_EVENT_CURSORDRAG, PX_Object_PancOnCursorDrag, PX_NULL);
 	PX_ObjectRegisterEvent(pObject, PX_OBJECT_EVENT_CURSORRDOWN, PX_Object_PancOnCursorRDown, PX_NULL);
@@ -391,14 +403,30 @@ PX_Object * PX_Object_PancCreate(px_memorypool *mp,PX_Object *Parent,px_float x,
 
 }
 
-PX_Object_Panc * PX_Object_GetPanc(PX_Object *pObject)
+PX_Object * PX_Object_PancCreate(px_memorypool *mp,PX_Object *Parent,px_float x,px_float y,px_float widht,px_float height)
 {
-	return PX_ObjectGetDesc(PX_Object_Panc, pObject);
+	PX_Object *pObject;
+
+	pObject=PX_ObjectCreate(mp,Parent,x,y,0,widht,height,0);
+	if (!pObject)
+	{
+		return PX_NULL;
+	}
+	if (!PX_Object_PancAttachObject(pObject,0,x,y,widht,height))
+	{
+		PX_ObjectDelete(pObject);
+		return PX_NULL;
+	}
+
+	return pObject;
+
 }
+
+
 
 px_void PX_Object_PancReset(PX_Object* pObject, px_float x, px_float y, px_float width, px_float height)
 {
-	PX_Object_Panc* pDesc = PX_ObjectGetDesc(PX_Object_Panc, pObject);
+	PX_Object_Panc* pDesc = PX_Object_GetPanc(pObject);
 	pObject->x = x;
 	pObject->y = y;
 	pObject->Width = width;
@@ -413,7 +441,7 @@ px_void PX_Object_PancReset(PX_Object* pObject, px_float x, px_float y, px_float
 
 PX_PancMatrix PX_Object_PancGetMatrix(PX_Object* pObject)
 {
-	PX_Object_Panc* pDesc = PX_ObjectGetDesc(PX_Object_Panc, pObject);
+	PX_Object_Panc* pDesc = PX_Object_GetPanc(pObject);
 	PX_PancMatrix mat;
 	mat.x = pObject->x;
 	mat.y = pObject->y;

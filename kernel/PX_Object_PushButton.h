@@ -40,6 +40,7 @@ typedef struct
 	PX_Object_PUSHBUTTON_STATE state;
 }PX_Object_PushButton;
 
+PX_Object* PX_Object_PushButtonAttachObject(PX_Object* pObject, px_int attachIndex, const px_char* Text, PX_FontModule* fontmodule);
 PX_Object *PX_Object_PushButtonCreate(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y,px_int Width,px_int Height,const px_char *Text,PX_FontModule *fontmodule);
 PX_Object* PX_Object_CircleButtonCreate(px_memorypool* mp, PX_Object* Parent, px_int x, px_int y, px_int Radius, const px_char* Text, PX_FontModule* fontmodule);
 PX_Object_PushButton * PX_Object_GetPushButton( PX_Object *pObject );
@@ -52,15 +53,14 @@ px_void PX_Object_PushButtonSetStyle(PX_Object *pObject,PX_OBJECT_PUSHBUTTON_STY
 px_void PX_Object_PushButtonSetPushColor( PX_Object *pObject,px_color Color );
 px_void PX_Object_PushButtonSetBorderColor( PX_Object *pObject,px_color Color );
 px_void PX_Object_PushButtonSetBorder( PX_Object *pObject,px_bool Border );
-px_void PX_Object_PushButtonRender(px_surface *psurface, PX_Object *pObject,px_uint elapsed);
 px_void PX_Object_PushButtonSetTextColor( PX_Object *pObject,px_color Color );
 px_void PX_Object_PushButtonSetTexture(PX_Object *pObject,px_texture *texture);
 px_void PX_Object_PushButtonSetShape(PX_Object *pObject,px_shape *pshape);
 px_void PX_Object_PushButtonSetGif(PX_Object* pObject, px_gif* gif);
-px_void PX_Object_PushButtonFree( PX_Object *pObject );
+
 
 px_void PX_Object_PushButtonSetRoundRadius(PX_Object* pObject, px_float RoundRadius);
-PX_Designer_ObjectDesc PX_Object_PushButtonDesignerInstall();
+
 
 #endif
 

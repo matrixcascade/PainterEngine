@@ -1,28 +1,19 @@
 #include "PX_Object_List.h"
 PX_Object_List  * PX_Object_GetList( PX_Object *pObject )
 {
-	if(pObject->Type==PX_OBJECT_TYPE_LIST)
-		return PX_ObjectGetDesc(PX_Object_List, pObject);
-	else
-		return PX_NULL;
+	return (PX_Object_List *)PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_LIST);
 }
 
 PX_Object_ListItem  * PX_Object_GetListItem( PX_Object *pObject )
 {
-	if(pObject->Type==PX_OBJECT_TYPE_LISTITEM)
-		return PX_ObjectGetDesc(PX_Object_ListItem, pObject);
-	else
-		return PX_NULL;
+	return (PX_Object_ListItem*)PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_LISTITEM);
 }
 
-px_void PX_Object_ListOnCursorMove(PX_Object *pObject,PX_Object_Event e,px_void *ptr)
+PX_OBJECT_EVENT_FUNCTION(PX_Object_ListOnCursorMove)
 {
-
 	PX_Object_List *pList= PX_Object_GetList(pObject);
 	px_float objx,objy,objWidth,objHeight;
 	px_float inheritX,inheritY;
-
-
 	PX_ObjectGetInheritXY(pObject,&inheritX,&inheritY);
 
 	objx=(pObject->x+inheritX);
@@ -75,7 +66,7 @@ px_void PX_Object_ListOnCursorMove(PX_Object *pObject,PX_Object_Event e,px_void 
 	
 }
 
-px_void PX_Object_ListOnCursorDown(PX_Object *pObject,PX_Object_Event e,px_void *ptr)
+PX_OBJECT_EVENT_FUNCTION(PX_Object_ListOnCursorDown)
 {
 	PX_Object_List *pList= PX_Object_GetList(pObject);
 	px_float objx,objy,objWidth,objHeight;
@@ -160,7 +151,7 @@ px_void PX_Object_ListOnCursorDown(PX_Object *pObject,PX_Object_Event e,px_void 
 	}
 }
 
-px_void PX_Object_ListOnCursorRDown(PX_Object *pObject,PX_Object_Event e,px_void *ptr)
+PX_OBJECT_EVENT_FUNCTION(PX_Object_ListOnCursorRDown)
 {
 	PX_Object_List *pList= PX_Object_GetList(pObject);
 	if (!PX_ObjectIsCursorInRegion(pObject,e))
@@ -178,7 +169,7 @@ px_void PX_Object_ListOnCursorRDown(PX_Object *pObject,PX_Object_Event e,px_void
 	
 }
 
-px_void PX_Object_ListOnWheel(PX_Object *pObject,PX_Object_Event e,px_void *ptr)
+PX_OBJECT_EVENT_FUNCTION(PX_Object_ListOnWheel)
 {
 	PX_Object_List *pList= PX_Object_GetList(pObject);
 	px_float objx,objy,objWidth,objHeight;
@@ -246,14 +237,13 @@ px_void PX_Object_ListMoveToBottom(PX_Object* pObject)
 	
 }
 
-
-px_void PX_Object_ListRender(px_surface *psurface, PX_Object *pObject,px_uint elapsed)
+PX_OBJECT_RENDER_FUNCTION(PX_Object_ListRender)
 {
 	PX_Object *pItemObject;
 	px_int offsetX=0,drawXCenter=0;
 	px_int i;
 	px_int iy;
-	PX_Object_List *pList= PX_Object_GetList(pObject);
+	PX_Object_List *pList=PX_ObjectGetDesc(PX_Object_List,pObject);
 	PX_Object_ListItem *pItem;
 	px_float objx,objy,objWidth,objHeight;
 	px_float inheritX,inheritY;
@@ -284,7 +274,7 @@ px_void PX_Object_ListRender(px_surface *psurface, PX_Object *pObject,px_uint el
 			Item.pList = pObject;
 			Item.pdata = PX_NULL;
 			pItemObject = PX_ObjectCreateEx(pList->mp, 0, 0, 0, 0, (px_float)pObject->Width, (px_float)pList->ItemHeight, 0, PX_OBJECT_TYPE_LISTITEM, PX_NULL, PX_NULL, PX_NULL, &Item, sizeof(PX_Object_ListItem));
-			if (!pList->CreateFunctions(pList->mp, pItemObject, pList->userptr)) return;
+			if (!pList->CreateFunctions(pList->mp, pItemObject,pList->userptr)) return;
 			if (!PX_VectorPushback(&pList->Items, &pItemObject))return;
 		}
 	}
@@ -401,7 +391,6 @@ px_void PX_Object_ListRender(px_surface *psurface, PX_Object *pObject,px_uint el
 px_void PX_Object_ListClear(PX_Object *pListObj)
 {
 	PX_Object_List  *pList=PX_Object_GetList(pListObj);
-
 	if (pList)
 	{
 		PX_VectorClear(&pList->pData);
@@ -459,17 +448,17 @@ px_int PX_Object_ListAdd(PX_Object *pListObj,px_void *ptr)
 	return -1;
 }
 
-px_void PX_Object_ListFree(PX_Object *pListObj)
+PX_OBJECT_FREE_FUNCTION(PX_Object_ListFree)
 {
 	px_int i;
-	PX_Object_List *pList=PX_Object_GetList(pListObj);
+	PX_Object_List *pList=PX_Object_GetList(pObject);
 	if (!pList)
 	{
 		PX_ASSERT();
 		return;
 	}
 	
-	PX_Object_ListClear(pListObj);
+	PX_Object_ListClear(pObject);
 	PX_SurfaceFree(&pList->renderSurface);
 	for (i = 0; i < pList->Items.size; i++)
 	{
@@ -480,14 +469,14 @@ px_void PX_Object_ListFree(PX_Object *pListObj)
 	PX_VectorFree(&pList->pData);
 }
 
-px_void PX_Object_ListOnSliderValueChanged(PX_Object  *pObject,PX_Object_Event e,px_void *ptr)
+PX_OBJECT_EVENT_FUNCTION(PX_Object_ListOnSliderValueChanged)
 {
 	px_int value=PX_Object_SliderBarGetValue(pObject);
 	PX_Object_List *pList=PX_Object_GetList((PX_Object *)ptr);
 	pList->offsety=value;
 }
 
-px_void PX_Object_ListOnEvent(PX_Object  *pObject,PX_Object_Event e,px_void *ptr)
+PX_OBJECT_EVENT_FUNCTION(PX_Object_ListOnEvent)
 {
 	px_int i;
 	PX_Object_List  *pList=PX_Object_GetList(pObject);
@@ -523,52 +512,70 @@ px_void PX_Object_ListOnEvent(PX_Object  *pObject,PX_Object_Event e,px_void *ptr
 	}
 }
 
-PX_Object * PX_Object_ListCreate(px_memorypool *mp, PX_Object *Parent,px_int x,px_int y,px_int Width,px_int Height,px_int ItemHeight,PX_Object_ListItemOnCreate _CreateFunc,px_void *userptr)
+PX_Object* PX_Object_ListAttachObject(PX_Object* pObject,px_int attachIndex, px_int x, px_int y, px_int Width, px_int Height, px_int ItemHeight, PX_Object_ListItemOnCreate _CreateFunc, px_void* userptr)
 {
-	PX_Object_List List,*pList;
+	px_memorypool* mp=pObject->mp;
+	PX_Object_List List = {0}, * pList;
+	List.mp = mp;
+	List.ItemWidth = Width - PX_OBJECT_LIST_SLIDERBAR_WIDTH;
+	List.ItemHeight = ItemHeight;
+	List.CreateFunctions = _CreateFunc;
 
-	PX_Object *pListObject;
-	PX_memset(&List,0,sizeof(List));
-	List.mp=mp;
-	List.ItemWidth=Width- PX_OBJECT_LIST_SLIDERBAR_WIDTH;
-	List.ItemHeight=ItemHeight;
-	List.CreateFunctions=_CreateFunc;
+	List.BorderColor = PX_OBJECT_UI_DEFAULT_BORDERCOLOR;
+	List.BackgroundColor = PX_OBJECT_UI_DEFAULT_BACKGROUNDCOLOR;
+	List.CursorColor = PX_OBJECT_UI_DEFAULT_CURSORCOLOR;
+	List.SelectColor = PX_COLOR_FORCECOLOR;
 
-	List.BorderColor=PX_OBJECT_UI_DEFAULT_BORDERCOLOR;
-	List.BackgroundColor=PX_OBJECT_UI_DEFAULT_BACKGROUNDCOLOR;
-	List.CursorColor=PX_OBJECT_UI_DEFAULT_CURSORCOLOR;
-	List.SelectColor= PX_COLOR_FORCECOLOR;
-
-	List.offsetx=0;
-	List.currentSelectedIndex=-1;
-	List.currentCursorIndex=-1;
-	List.offsety=0;
-	List.showCursor=PX_TRUE;
+	List.offsetx = 0;
+	List.currentSelectedIndex = -1;
+	List.currentCursorIndex = -1;
+	List.offsety = 0;
+	List.showCursor = PX_TRUE;
 	List.userptr = userptr;
 
-	PX_VectorInitialize(mp,&List.Items,sizeof(PX_Object *),64);
-	PX_VectorInitialize(mp,&List.pData,sizeof(px_void *),32);
-	if(!PX_SurfaceCreate(mp,Width,Height,&List.renderSurface)) return PX_NULL;
-	if(!(pListObject=PX_ObjectCreateEx(mp,Parent,(px_float)x,(px_float)y,0,(px_float)Width,(px_float)Height,0,PX_OBJECT_TYPE_LIST,PX_NULL,PX_Object_ListRender,PX_Object_ListFree,&List,sizeof(PX_Object_List)))) return PX_NULL;
+	PX_VectorInitialize(mp, &List.Items, sizeof(PX_Object*), 64);
+	PX_VectorInitialize(mp, &List.pData, sizeof(px_void*), 32);
+	if (!PX_SurfaceCreate(mp, Width, Height, &List.renderSurface)) return PX_NULL;
 
-	pList=PX_Object_GetList(pListObject);
-	pList->SliderBar=PX_Object_SliderBarCreate(mp,pListObject,(px_int)pListObject->Width- PX_OBJECT_LIST_SLIDERBAR_WIDTH,0, PX_OBJECT_LIST_SLIDERBAR_WIDTH,(px_int)pListObject->Height,PX_OBJECT_SLIDERBAR_TYPE_VERTICAL,PX_OBJECT_SLIDERBAR_STYLE_BOX);
+	PX_ASSERTIF(pObject == PX_NULL);
+	PX_ASSERTIF(attachIndex < 0 || attachIndex >= PX_COUNTOF(pObject->pObjectDesc));
+	PX_ASSERTIF(pObject->pObjectDesc[attachIndex] != PX_NULL);
+	pList = (PX_Object_List*)PX_ObjectCreateDesc(pObject, attachIndex, PX_OBJECT_TYPE_LIST, 0, PX_Object_ListRender, PX_Object_ListFree, &List, sizeof(PX_Object_List));
+	PX_ASSERTIF(pList == PX_NULL);
 
-	PX_ObjectRegisterEvent(pListObject,PX_OBJECT_EVENT_CURSORWHEEL,PX_Object_ListOnWheel,pListObject);
-	PX_ObjectRegisterEvent(pListObject,PX_OBJECT_EVENT_CURSORDOWN,PX_Object_ListOnCursorDown,pListObject);
-	PX_ObjectRegisterEvent(pListObject,PX_OBJECT_EVENT_CURSORRDOWN,PX_Object_ListOnCursorRDown,pListObject);
-	PX_ObjectRegisterEvent(pListObject,PX_OBJECT_EVENT_CURSORMOVE,PX_Object_ListOnCursorMove,pListObject);
-	PX_ObjectRegisterEvent(pList->SliderBar,PX_OBJECT_EVENT_VALUECHANGED,PX_Object_ListOnSliderValueChanged,pListObject);
-	PX_ObjectRegisterEvent(pListObject,PX_OBJECT_EVENT_ANY,PX_Object_ListOnEvent,pListObject);
-	return pListObject;
+	pList->SliderBar = PX_Object_SliderBarCreate(mp, pObject, (px_int)pObject->Width - PX_OBJECT_LIST_SLIDERBAR_WIDTH, 0, PX_OBJECT_LIST_SLIDERBAR_WIDTH, (px_int)pObject->Height, PX_OBJECT_SLIDERBAR_TYPE_VERTICAL, PX_OBJECT_SLIDERBAR_STYLE_BOX);
+
+	PX_ObjectRegisterEventEx(pObject, PX_OBJECT_EVENT_CURSORWHEEL, PX_OBJECT_TYPE_LIST,PX_Object_ListOnWheel, pObject);
+	PX_ObjectRegisterEventEx(pObject, PX_OBJECT_EVENT_CURSORDOWN, PX_OBJECT_TYPE_LIST, PX_Object_ListOnCursorDown, pObject);
+	PX_ObjectRegisterEventEx(pObject, PX_OBJECT_EVENT_CURSORRDOWN, PX_OBJECT_TYPE_LIST, PX_Object_ListOnCursorRDown, pObject);
+	PX_ObjectRegisterEventEx(pObject, PX_OBJECT_EVENT_CURSORMOVE, PX_OBJECT_TYPE_LIST, PX_Object_ListOnCursorMove, pObject);
+	PX_ObjectRegisterEventEx(pList->SliderBar, PX_OBJECT_EVENT_VALUECHANGED, PX_OBJECT_TYPE_LIST, PX_Object_ListOnSliderValueChanged, pObject);
+	PX_ObjectRegisterEventEx(pObject, PX_OBJECT_EVENT_ANY, PX_OBJECT_TYPE_LIST, PX_Object_ListOnEvent, pObject);
+
+	return pObject;
 }
 
-static px_void PX_Object_ListContentItemOnRender(px_surface* psurface, PX_Object* pObject, px_dword elapsed)
+PX_Object * PX_Object_ListCreate(px_memorypool *mp, PX_Object *Parent,px_int x,px_int y,px_int Width,px_int Height,px_int ItemHeight,PX_Object_ListItemOnCreate _CreateFunc,px_void *userptr)
+{
+	
+	PX_Object *pObject;
+	pObject = PX_ObjectCreate(mp, Parent, (px_float)x, (px_float)y, 0, (px_float)Width, (px_float)Height, 0);
+	if(!pObject)
+	  return PX_NULL;
+	if(!PX_Object_ListAttachObject(pObject,0,0,0,Width,Height,ItemHeight,_CreateFunc,userptr))
+	{
+		PX_ObjectDelete(pObject);
+		return PX_NULL;
+	}
+	return pObject;
+}
+
+static PX_OBJECT_RENDER_FUNCTION(PX_Object_ListContentItemOnRender)
 {
 	PX_Object_ListItem* pListItem;
 	px_float objx, objy, objWidth, objHeight;
 	px_float inheritX, inheritY;
-	pListItem = PX_Object_GetListItem(pObject);
+	pListItem = PX_ObjectGetDesc(PX_Object_ListItem,pObject);
 
 	PX_ObjectGetInheritXY(pObject, &inheritX, &inheritY);
 	objx = (pObject->x + inheritX);
@@ -582,7 +589,7 @@ static px_void PX_Object_ListContentItemOnRender(px_surface* psurface, PX_Object
 
 px_bool PX_Designer_ListContentItemOnCreate(px_memorypool* mp, PX_Object* ItemObject, px_void* userptr)
 {
-	PX_ObjectAddRenderFunction(ItemObject, PX_Object_ListContentItemOnRender);
+	PX_ObjectSetRenderFunction(ItemObject, PX_Object_ListContentItemOnRender,0);
 	return PX_TRUE;
 }
 
@@ -595,7 +602,8 @@ PX_Object* PX_Object_ListContentCreate(px_memorypool* mp, PX_Object* Parent, px_
 		pObject=PX_Object_ListCreate(mp, Parent, x, y, Width, Height, fm->max_Height + 6, PX_Designer_ListContentItemOnCreate, PX_NULL);
 		if (pObject)
 		{
-			PX_Object_List* pList = PX_ObjectGetDesc(PX_Object_List,pObject);
+			PX_Object_List* pList = PX_Object_GetList(pObject);
+			PX_ASSERTIF(pList);
 			pList->fm = fm;
 		}
 	}
@@ -609,27 +617,22 @@ PX_Object* PX_Object_ListContentCreate(px_memorypool* mp, PX_Object* Parent, px_
 
 px_bool PX_Object_ListItemIsOnDisplayPresent(PX_Object* pObject, px_int index)
 {
-	if (pObject->Type==PX_OBJECT_TYPE_LIST)
-	{
-		PX_Object_List* pList = PX_ObjectGetDesc(PX_Object_List, pObject);
-		PX_Object* pItemObject = *PX_VECTORAT(PX_Object*, &pList->Items, index);
-		PX_Object_ListItem* pItem = PX_Object_GetListItem(pItemObject);
-		if (pItemObject->y + pItemObject->Height > 0 && pItemObject->y < pObject->Height && pItem->pdata)
-		{
-			return PX_TRUE;
-		}
-	}
 
+	PX_Object_List* pList = PX_Object_GetList(pObject);
+	PX_Object* pItemObject = *PX_VECTORAT(PX_Object*, &pList->Items, index);
+	PX_Object_ListItem* pItem = PX_Object_GetListItem(pItemObject);
+	if (pItemObject->y + pItemObject->Height > 0 && pItemObject->y < pObject->Height && pItem->pdata)
+	{
+		return PX_TRUE;
+	}
 	return PX_FALSE;
 }
 
 px_int PX_Object_ListItemGetIndex(PX_Object* pObject)
 {
-	if (pObject->Type == PX_OBJECT_TYPE_LISTITEM)
-	{
-		return PX_ObjectGetDesc(PX_Object_ListItem, pObject)->index;
-	}
-	return -1;
+	PX_Object_ListItem *pItem=PX_Object_GetListItem(pObject);
+	PX_ASSERTIF(!pItem);
+	return pItem->index;
 }
 
 px_void PX_Object_ListSetBackgroundColor(PX_Object *pListObject,px_color color)
@@ -722,20 +725,21 @@ px_void * PX_Object_ListGetItemData(PX_Object *pListObject,px_int index)
 px_int PX_Object_ListGetItemCount(PX_Object* pListObject)
 {
 	PX_Object_List* pList = PX_Object_GetList(pListObject);
-	if(pList)
+	PX_ASSERTIF(!pList);
 	return pList->pData.size;
-	return 0;
 }
 
 px_void* PX_Object_ListItemGetData(PX_Object* pItemObject)
 {
-	PX_Object_ListItem* pItem=PX_ObjectGetDesc(PX_Object_ListItem,pItemObject);
+	PX_Object_ListItem* pItem=PX_Object_GetListItem(pItemObject);
+	PX_ASSERTIF(!pItem);
 	return pItem->pdata;
 }
 
 px_void PX_Object_ListRemoveItem(PX_Object *pListObject,px_int index)
 {
 	PX_Object_List *pList=PX_Object_GetList(pListObject);
+	PX_ASSERTIF(!pList);
 	if (index>=0&&index<pList->pData.size)
 	{
 		PX_VectorErase(&pList->pData,index);
@@ -744,8 +748,7 @@ px_void PX_Object_ListRemoveItem(PX_Object *pListObject,px_int index)
 }
 
 
-
-px_void PX_Object_ListArrayRender(px_surface* psurface, PX_Object* pObject, px_uint elapsed)
+PX_OBJECT_RENDER_FUNCTION(PX_Object_ListArrayRender)
 {
 	PX_Object* pItemObject;
 	px_int offsetX = 0, drawXCenter = 0;
@@ -892,12 +895,14 @@ px_void PX_Object_ListArrayRender(px_surface* psurface, PX_Object* pObject, px_u
 
 px_bool PX_Designer_ListArrayItemOnCreate(px_memorypool* mp, PX_Object* ItemObject, px_void* userptr)
 {
-	PX_Object_ListItem* pItem = PX_ObjectGetDesc(PX_Object_ListItem, ItemObject);
-	PX_Object_List* pList =PX_ObjectGetDesc(PX_Object_List, pItem->pList);
+	PX_Object_ListItem* pItem = PX_Object_GetListItem(ItemObject);
+	PX_Object_List* pList =PX_Object_GetList(pItem->pList);
 
 	PX_ObjectSetRenderFunction(ItemObject, pList->ArrayRender,0);
 	return PX_TRUE;
 }
+
+
 PX_Object* PX_Object_ListArrayCreate(px_memorypool* mp, PX_Object* Parent, px_int x, px_int y, px_int Width, px_int Height, px_int ItemHeight, Function_ObjectRender render, px_void* userptr)
 {
 	PX_Object* pObject;
@@ -905,7 +910,7 @@ PX_Object* PX_Object_ListArrayCreate(px_memorypool* mp, PX_Object* Parent, px_in
 	pObject = PX_Object_ListCreate(mp, Parent, x, y, Width, Height, ItemHeight, PX_Designer_ListArrayItemOnCreate, PX_NULL);
 	if (pObject)
 	{
-		PX_Object_List* pList = PX_ObjectGetDesc(PX_Object_List, pObject);
+		PX_Object_List* pList = PX_Object_GetList(pObject);
 		pList->ArrayRender = render;
 		PX_ObjectSetRenderFunction(pObject, PX_Object_ListArrayRender, 0);
 		return pObject;
@@ -915,74 +920,18 @@ PX_Object* PX_Object_ListArrayCreate(px_memorypool* mp, PX_Object* Parent, px_in
 
 px_void PX_Object_ListArraySetData(PX_Object* pListObject, px_void* ArrayData, px_int ArrayDataCount)
 {
-	if (pListObject->Type == PX_OBJECT_TYPE_LIST)
-	{
-		PX_Object_List* pList = PX_ObjectGetDesc(PX_Object_List, pListObject);
-		pList->ArrayDataCount = ArrayDataCount;
-		pList->pArrayData = ArrayData;
-	}
+
+	PX_Object_List* pList = PX_Object_GetList(pListObject);
+	pList->ArrayDataCount = ArrayDataCount;
+	pList->pArrayData = ArrayData;
+
 }
 
 px_void *PX_Object_ListArrayItemGetData(PX_Object* pListItemObject)
 {
-	if (pListItemObject->Type == PX_OBJECT_TYPE_LISTITEM)
-	{
-		PX_Object_ListItem* pItem = PX_ObjectGetDesc(PX_Object_ListItem, pListItemObject);
-		return pItem->pdata;
-	}
-	return PX_NULL;
-}
 
-//////////////////////////////////////////////////////////////////////////
-//list
-//////////////////////////////////////////////////////////////////////////
+	PX_Object_ListItem* pItem = PX_Object_GetListItem( pListItemObject);
+	return pItem->pdata;
 
-PX_Object* PX_Designer_ListCreate(px_memorypool* mp, PX_Object* pparent, px_float x, px_float y, px_float width, px_float height, px_abi* pabi)
-{
-	PX_FontModule* fm;
-	if (!PX_AbiRead_ptr(pabi, "fontmodule", (px_void**)&fm))
-	{
-		fm = PX_NULL;
-	}
-
-	return PX_Object_ListContentCreate(mp, pparent, (px_int)x, (px_int)y, 256, 128, fm);
-}
-
-PX_Designer_ObjectDesc PX_Object_ListDesignerInstall()
-{
-	PX_Designer_ObjectDesc list;
-	px_int i = 0;
-	PX_memset(&list, 0, sizeof(list));
-	PX_strcat(list.Name, "list");
-
-	list.createfunc = PX_Designer_ListCreate;
-	list.type = PX_DESIGNER_OBJECT_TYPE_UI;
-
-	PX_strcat(list.properties[i].Name, "id");
-	list.properties[i].getstring = PX_Designer_GetID;
-	list.properties[i].setstring = PX_Designer_SetID;
-	i++;
-
-	PX_strcat(list.properties[i].Name, "x");
-	list.properties[i].getfloat = PX_Designer_GetX;
-	list.properties[i].setfloat = PX_Designer_SetX;
-	i++;
-
-	PX_strcat(list.properties[i].Name, "y");
-	list.properties[i].getfloat = PX_Designer_GetY;
-	list.properties[i].setfloat = PX_Designer_SetY;
-	i++;
-
-	PX_strcat(list.properties[i].Name, "width");
-	list.properties[i].getfloat = PX_Designer_GetWidth;
-	list.properties[i].setfloat = PX_Designer_SetWidth;
-	i++;
-
-	PX_strcat(list.properties[i].Name, "height");
-	list.properties[i].getfloat = PX_Designer_GetHeight;
-	list.properties[i].setfloat = PX_Designer_SetHeight;
-	i++;
-
-	return list;
 }
 

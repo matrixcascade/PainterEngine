@@ -293,7 +293,7 @@ px_bool PX_CDA_ObjectVM_GetObjectPosition(PX_VM* Ins, px_void* userptr)
 px_bool PX_CDA_ObjectVM_GetCDASize(PX_VM* Ins, px_void* userptr)
 {
 	PX_Object* handler = (PX_Object*)userptr;
-	PX_CDA_Object* pDesc = PX_ObjectGetDesc(PX_CDA_Object, handler);
+	PX_CDA_Object* pDesc = PX_Object_GetCDAObject(handler);
 	PX_CDA* pCDA = (PX_CDA*)pDesc->pCDA;
 
 	px_int x, y;
@@ -564,7 +564,7 @@ px_bool PX_CDA_ObjectVM_GetPortFloat(PX_VM* Ins, px_void* userptr)
 px_bool PX_CDA_ObjectVM_GetPortString(PX_VM* Ins, px_void* userptr)
 {
 	PX_Object* handler = (PX_Object*)userptr;
-	PX_CDA_Object* pDesc = PX_ObjectGetDesc(PX_CDA_Object, handler);
+	PX_CDA_Object* pDesc = PX_Object_GetCDAObject(handler);
 	PX_CDA* pCDA = (PX_CDA*)pDesc->pCDA;
 	px_variable* pvar;
 	if (PX_VM_STACK(Ins, 0).type != PX_VM_VARIABLE_TYPE_INT)
@@ -587,7 +587,7 @@ px_bool PX_CDA_ObjectVM_GetPortString(PX_VM* Ins, px_void* userptr)
 px_bool PX_CDA_ObjectVM_GetPortMemory(PX_VM* Ins, px_void* userptr)
 {
 	PX_Object* handler = (PX_Object*)userptr;
-	PX_CDA_Object* pDesc = PX_ObjectGetDesc(PX_CDA_Object, handler);
+	PX_CDA_Object* pDesc = PX_Object_GetCDAObject(handler);
 	PX_CDA* pCDA = (PX_CDA*)pDesc->pCDA;
 	px_variable* pvar;
 	if (PX_VM_STACK(Ins, 0).type != PX_VM_VARIABLE_TYPE_INT)

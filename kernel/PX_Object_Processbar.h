@@ -21,6 +21,5 @@ px_int		PX_Object_ProcessBarGetMax(PX_Object* pProcessBar);
 px_int		PX_Object_ProcessBarGetValue(PX_Object* pProcessBar);
 px_void		PX_Object_ProcessBarSetTextColor(PX_Object* pProcessBar, px_color Color);
 
-PX_Designer_ObjectDesc PX_Object_ProcessBarDesignerInstall();
 #endif
 

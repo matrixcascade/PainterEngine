@@ -14,6 +14,7 @@ typedef struct
 	px_point2D scale_pt[4];
 	px_color linecolor,regioncolor;
 }PX_Object_ScaleBox;
+PX_Object* PX_Object_ScaleBoxAttachObject(PX_Object* pObject, px_int attachIndex);
 PX_Object * PX_Object_ScaleBoxCreate(px_memorypool *mp,PX_Object *Parent);
 PX_Object_ScaleBox * PX_Object_GetScaleBox( PX_Object *pObject );
 px_point2D *PX_Object_ScaleBoxGetPoints(PX_Object *pObject);

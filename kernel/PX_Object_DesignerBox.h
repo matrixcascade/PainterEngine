@@ -21,6 +21,8 @@ typedef struct
 	PX_Object_DesignerBox_bselect bselect;
 }PX_Object_DesignerBox;
 
+PX_Object* PX_Object_DesignerBoxAttachObject(PX_Object* pObject, px_int attachIndex);
+
 PX_Object * PX_Object_DesignerBoxCreate(px_memorypool *mp,PX_Object *Parent,px_float x,px_float y,px_float width,px_float height);
 PX_Object_DesignerBox* PX_Object_GetDesignerBox(PX_Object *pObject );
 px_void PX_Object_DesignerBoxReset(PX_Object* pObject, px_float x, px_float y, px_float widht, px_float height);

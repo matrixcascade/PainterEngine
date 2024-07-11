@@ -1,7 +1,7 @@
 #include "PX_Object_Typer.h"
 
 
-px_void PX_Object_TyperRender(px_surface* psurface, PX_Object* pObject, px_uint elapsed)
+PX_OBJECT_RENDER_FUNCTION(PX_Object_TyperRender)
 {
 	px_int x_draw_oft, y_draw_oft, fsize;
 	PX_Object_Typer* pDesc = PX_ObjectGetDesc(PX_Object_Typer, pObject);
@@ -243,7 +243,7 @@ px_void PX_Object_TyperRender(px_surface* psurface, PX_Object* pObject, px_uint 
 	pObject->Height = h;
 }
 
-px_void PX_Object_TyperFree(PX_Object* pObject)
+PX_OBJECT_FREE_FUNCTION(PX_Object_TyperFree)
 {
 	PX_Object_Typer * pDesc = PX_Object_GetTyper(pObject);
 	if (!pDesc)
@@ -257,32 +257,56 @@ px_void PX_Object_TyperFree(PX_Object* pObject)
 
 PX_Object_Typer* PX_Object_GetTyper(PX_Object* pObject)
 {
-	if (pObject->Type == PX_OBJECT_TYPE_TYPER)
-		return PX_ObjectGetDesc(PX_Object_Typer, pObject);
-	else
+	PX_Object_Typer* pDesc = PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_TYPER);
+	PX_ASSERTIF(pDesc == PX_NULL);
+	return pDesc;
+}
+
+
+PX_Object* PX_Object_TyperAttachObject( PX_Object* pObject,px_int attachIndex, px_int x, px_int y, px_int limit_width, PX_FontModule* fm)
+{
+	px_memorypool* mp=pObject->mp;
+	PX_Object_Typer* pDesc;
+	if (limit_width < 0)
+	{
+		PX_ASSERT();
 		return PX_NULL;
+	}
+	
+	PX_ASSERTIF(pObject == PX_NULL);
+	PX_ASSERTIF(attachIndex < 0 || attachIndex >= PX_COUNTOF(pObject->pObjectDesc));
+	PX_ASSERTIF(pObject->pObjectDesc[attachIndex] != PX_NULL);
+	pDesc = (PX_Object_Typer*)PX_ObjectCreateDesc(pObject, attachIndex, PX_OBJECT_TYPE_TYPER, 0, PX_Object_TyperRender, PX_Object_TyperFree, 0, sizeof(PX_Object_Typer));
+	PX_ASSERTIF(pDesc == PX_NULL);
+
+	pDesc->fontModule = fm;
+	pDesc->reg_color = PX_COLOR_FONTCOLOR;
+	pDesc->reg_speed = 1.0;
+	pDesc->reg_delay = 100;
+	PX_MemoryInitialize(mp, &pDesc->payload);
+	return pObject;
 }
 
 PX_Object* PX_Object_TyperCreate(px_memorypool* mp, PX_Object* Parent, px_int x, px_int y, px_int limit_width, PX_FontModule* fm)
 {
-	PX_Object_Typer *pDesc;
 	PX_Object *pObject;
 	if (limit_width < 0)
 	{
 		PX_ASSERT();
 		return PX_NULL;
 	}
-	pObject = PX_ObjectCreateEx(mp, Parent,  x*1.0f, y*1.0f,0, limit_width*1.0f, 0, 0, PX_OBJECT_TYPE_TYPER,PX_NULL, PX_Object_TyperRender, PX_Object_TyperFree,0, sizeof(PX_Object_Typer));
+	pObject = PX_ObjectCreate(mp, Parent,  x*1.0f, y*1.0f,0, limit_width*1.0f, 0, 0);
 	if (pObject == PX_NULL)
 	{
 		return PX_NULL;
 	}
-	pDesc =PX_ObjectGetDesc(PX_Object_Typer, pObject);
-	pDesc->fontModule = fm;
-	pDesc->reg_color = PX_COLOR_FONTCOLOR;
-	pDesc->reg_speed = 1.0;
-	pDesc->reg_delay = 100;
-	PX_MemoryInitialize(mp, &pDesc->payload);
+
+	if (!PX_Object_TyperAttachObject(pObject, 0, x, y, limit_width, fm))
+	{
+		PX_ObjectDelete(pObject);
+		return PX_NULL;
+	}
+	
     return pObject;
 }
 

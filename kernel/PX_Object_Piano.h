@@ -72,5 +72,4 @@ px_void PX_Object_PianoSetKeyFocus(PX_Object* pObject, px_int index);
 px_void PX_Object_PianoSetKeyDown(PX_Object* pObject, px_int index, px_bool bdown);
 px_void PX_Object_PianoClearKeyState(PX_Object* pObject);
 
-PX_Designer_ObjectDesc PX_Object_PianoDesignerInstall();
 #endif

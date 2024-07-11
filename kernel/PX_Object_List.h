@@ -4,9 +4,8 @@
 #define PX_OBJECT_LIST_SLIDERBAR_WIDTH 18
 
 #define PX_OBJECT_LIST_ITEM_CREATE_FUNCTION(name) px_bool name(px_memorypool *mp,PX_Object *ItemObject,px_void *userptr)
+typedef px_bool(*PX_Object_ListItemOnCreate)(px_memorypool* mp, PX_Object* ItemObject, px_void* userptr);
 
-typedef px_bool (*PX_Object_ListItemOnCreate)(px_memorypool *mp,PX_Object *ItemObject,px_void *userptr);
-typedef px_void (*PX_Object_ListArrayItemOnRender)(px_surface* psurface, PX_Object* ItemObject,px_dword elapsed,px_byte *pdata,px_int index,px_void* userptr);
 
 typedef struct
 {
@@ -71,7 +70,5 @@ PX_Object* PX_Object_ListArrayCreate(px_memorypool* mp, PX_Object* Parent, px_in
 px_void  PX_Object_ListArraySetData(PX_Object* pListObject, px_void *ArrayData,px_int ArrayDataCount);
 px_void* PX_Object_ListArrayItemGetData(PX_Object* pListItemObject);
 
-
-PX_Designer_ObjectDesc PX_Object_ListDesignerInstall();
 #endif
 

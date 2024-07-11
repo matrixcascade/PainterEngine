@@ -50,70 +50,40 @@ static px_int PX_Object_OscilloscopeDichotomy(px_double *p,px_int Size,px_double
 
 }
 
-
-
-
 PX_Object_Oscilloscope *PX_Object_GetOscilloscope(PX_Object *pObject)
 {
-	if (pObject->Type==PX_OBJECT_TYPE_OSCILLOSCOPE)
-	{
-		return PX_ObjectGetDesc(PX_Object_Oscilloscope, pObject);
-	}
-	return PX_NULL;
+	PX_Object_Oscilloscope*pdesc=(PX_Object_Oscilloscope*)PX_ObjectGetDescByType(pObject,PX_OBJECT_TYPE_OSCILLOSCOPE);
+	PX_ASSERTIF(pdesc==PX_NULL);
+	return pdesc;
 }
 
 px_void PX_Object_OscilloscopeSetMinVerticalPixelDividing(PX_Object *pObj,px_int val)
 {
 	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObj);
-	if (!pcd)
-	{
-		PX_ASSERT();
-		return;
-	}
 	pcd->MinVerticalPixelDividing=val;
 }
 
 px_void PX_Object_OscilloscopeSetMinHorizontalPixelDividing(PX_Object *pObj,px_int val)
 {
 	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObj);
-	if (!pcd)
-	{
-		PX_ASSERT();
-		return;
-	}
 	pcd->MinHorizontalPixelDividing=val;
 }
 
 px_void PX_Object_OscilloscopeSetHorizontalDividing(PX_Object *pObj,px_int Count)
 {
 	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObj);
-	if (!pcd)
-	{
-		PX_ASSERT();
-		return;
-	}
 	pcd->HorizontalDividing=Count;
 }
 
 px_void PX_Object_OscilloscopeSetLeftVerticalDividing(PX_Object *pObj,px_int Count)
 {
 	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObj);
-	if (!pcd)
-	{
-		PX_ASSERT();
-		return;
-	}
 	pcd->LeftVerticalDividing=Count;
 }
 
 px_void PX_Object_OscilloscopeSetRightVerticalDividing(PX_Object *pObj,px_int Count)
 {
 	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObj);
-	if (!pcd)
-	{
-		PX_ASSERT();
-		return;
-	}
 	pcd->RightVerticalDividing=Count;
 }
 
@@ -122,11 +92,7 @@ px_void PX_Object_OscilloscopeSetRightVerticalDividing(PX_Object *pObj,px_int Co
 px_void PX_Object_OscilloscopeSetLineMode(PX_Object *pObj,PX_OBJECT_OSCILLOSCOPE_LINEMODE mode,px_float width)
 {
 	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObj);
-	if (!pcd)
-	{
-		PX_ASSERT();
-		return;
-	}
+
 	pcd->LineMode=mode;
 	switch (pcd->LineMode)
 	{
@@ -146,33 +112,19 @@ px_void PX_Object_OscilloscopeSetLineMode(PX_Object *pObj,PX_OBJECT_OSCILLOSCOPE
 px_void PX_Object_OscilloscopeSetScaleEnabled(PX_Object *pObject,px_bool Enabled)
 {
 	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
-	if (!pcd)
-	{
-		PX_ASSERT();
-		return;
-	}
+	
 	pcd->ScaleEnabled=Enabled;
 }
 
 px_void PX_Object_OscilloscopeSetGuidesVisible(PX_Object *pObject,px_bool Visible)
 {
 	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
-	if (!pcd)
-	{
-		PX_ASSERT();
-		return;
-	}
 	pcd->ShowGuides=Visible;
 }
 
 px_void PX_Object_OscilloscopeSetGuidesShowMode(PX_Object *pObject,PX_OBJECT_OSCILLOSCOPE_GUIDESSHOWMODE mode)
 {
 	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
-	if (!pcd)
-	{
-		PX_ASSERT();
-		return;
-	}
 	pcd->guidesShowMode=mode;
 }
 
@@ -180,22 +132,12 @@ px_void PX_Object_OscilloscopeSetGuidesShowMode(PX_Object *pObject,PX_OBJECT_OSC
 px_void PX_Object_OscilloscopeShowHelpLine(PX_Object *pObject,px_bool show)
 {
 	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
-	if (!pcd)
-	{
-		PX_ASSERT();
-		return;
-	}
 	pcd->ShowHelpLine=show;
 }
 
 px_void PX_Object_OscilloscopeSetDataLineWidth(PX_Object *pObject,px_float linewidth)
 {
 	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
-	if (!pcd)
-	{
-		PX_ASSERT();
-		return;
-	}
 	pcd->DataLineWidth=linewidth;
 }
 
@@ -203,11 +145,6 @@ void PX_Object_OscilloscopeSetDataShow(PX_Object *pObject,px_int index,px_bool s
 {
 	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
 	PX_Object_OscilloscopeData *pData;
-	if (!pcd)
-	{
-		PX_ASSERT();
-		return;
-	}
 	if (index>=pcd->vData.size)
 	{
 		return;
@@ -219,263 +156,166 @@ void PX_Object_OscilloscopeSetDataShow(PX_Object *pObject,px_int index,px_bool s
 px_void PX_Object_OscilloscopeSetGuidesLineWidth(PX_Object *pObject,px_float linewidth)
 {
 	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
-	if (!pcd)
-	{
-		PX_ASSERT();
-		return;
-	}
+
 	pcd->GuidesLineWidth=linewidth;
 }
 
 px_void PX_Object_OscilloscopeSetGuidesLineColor(PX_Object *pObject,px_color clr)
 {
 	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
-	if (!pcd)
-	{
-		PX_ASSERT();
-		return;
-	}
+
 	pcd->helpLineColor=clr;
 }
 
 px_void PX_Object_OscilloscopeSetTitleFontSize(PX_Object *pObject,px_int size)
 {
 	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
-	if (!pcd)
-	{
-		PX_ASSERT();
-		return;
-	}
+
 	pcd->FontSize=size;
 }
 
 px_void PX_Object_OscilloscopeSetTitleFontColor(PX_Object *pObject,px_color clr)
 {
 	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
-	if (!pcd)
-	{
-		PX_ASSERT();
-		return;
-	}
+
 	pcd->FontColor=clr;
 }
 
 px_void PX_Object_OscilloscopeSetDashLineColor(PX_Object *pObject,px_color clr)
 {
 	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
-	if (!pcd)
-	{
-		PX_ASSERT();
-		return;
-	}
+
 	pcd->DashColor=clr;
 }
 
 px_void PX_Object_OscilloscopeSetLeftTextShow(PX_Object *pObject,px_bool bshow)
 {
 	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
-	if (!pcd)
-	{
-		PX_ASSERT();
-		return;
-	}
+
 	pcd->LeftTextShow=bshow;
 }
 
 px_void PX_Object_OscilloscopeSetRightTextShow(PX_Object *pObject,px_bool bshow)
 {
 	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
-	if (!pcd)
-	{
-		PX_ASSERT();
-		return;
-	}
+
 	pcd->RightTextShow=bshow;
 }
 
 px_void PX_Object_OscilloscopeSetHorizontalTextShow(PX_Object *pObject,px_bool bshow)
 {
 	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
-	if (!pcd)
-	{
-		PX_ASSERT();
-		return;
-	}
+
 	pcd->HorizontalTextShow=bshow;
 }
 
 px_void PX_Object_OscilloscopeSetFloatFlagFormatHorizontal(PX_Object *pObject,const px_char *fmt)
 {
 	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
-	if (!pcd)
-	{
-		PX_ASSERT();
-		return;
-	}
+
 	pcd->FloatFlagFormat_H=fmt;
 }
 
 px_void PX_Object_OscilloscopeSetIntFlagFormatHorizontal(PX_Object *pObject,const px_char *fmt)
 {
 	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
-	if (!pcd)
-	{
-		PX_ASSERT();
-		return;
-	}
+
 	pcd->IntFlagFormat_H=fmt;
 }
 
 px_void PX_Object_OscilloscopeSetFloatFlagFormatVerticalLeft(PX_Object *pObject,const px_char *fmt)
 {
 	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
-	if (!pcd)
-	{
-		PX_ASSERT();
-		return;
-	}
+
 	pcd->FloatFlagFormat_L=fmt;
 }
 
 px_void PX_Object_OscilloscopeSetIntFlagFormatVerticalLeft(PX_Object *pObject,const px_char *fmt)
 {
 	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
-	if (!pcd)
-	{
-		PX_ASSERT();
-		return;
-	}
+
 	pcd->IntFlagFormat_L=fmt;
 }
 
 px_void PX_Object_OscilloscopeSetFloatFlagFormatVerticalRight(PX_Object *pObject,const px_char *fmt)
 {
 	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
-	if (!pcd)
-	{
-		PX_ASSERT();
-		return;
-	}
 	pcd->FloatFlagFormat_R=fmt;
 }
 
 px_void PX_Object_OscilloscopeSetIntFlagFormatVericalRight(PX_Object *pObject,const px_char *fmt)
 {
 	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
-	if (!pcd)
-	{
-		PX_ASSERT();
-		return;
-	}
+
 	pcd->IntFlagFormat_R=fmt;
 }
 
 px_void PX_Object_OscilloscopeSetLeftTextMode(PX_Object *pObject,PX_OBJECT_OSCILLOSCOPE_TEXT_DISPLAYMODE mode)
 {
 	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
-	if (!pcd)
-	{
-		PX_ASSERT();
-		return;
-	}
+
 	pcd->leftTextDisplayMode=mode;
 }
 
 px_void PX_Object_OscilloscopeSetRightTextMode(PX_Object *pObject,PX_OBJECT_OSCILLOSCOPE_TEXT_DISPLAYMODE mode)
 {
 	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
-	if (!pcd)
-	{
-		PX_ASSERT();
-		return;
-	}
+
 	pcd->RightTextDisplayMode=mode;
 }
 
 px_void PX_Object_OscilloscopeSetHorizontalMin(PX_Object *pObject,px_double Min)
 {
 	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
-	if (!pcd)
-	{
-		PX_ASSERT();
-		return;
-	}
+
 	pcd->HorizontalRangeMin=Min;
 }
 
 px_void PX_Object_OscilloscopeSetHorizontalMax(PX_Object *pObject,px_double Max)
 {
 	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
-	if (!pcd)
-	{
-		PX_ASSERT();
-		return;
-	}
+
 	pcd->HorizontalRangeMax=Max;
 }
 
 px_void PX_Object_OscilloscopeSetLeftVerticalMin(PX_Object *pObject,px_double Min)
 {
 	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
-	if (!pcd)
-	{
-		PX_ASSERT();
-		return;
-	}
+
 	pcd->LeftVerticalRangeMin=Min;
 }
 
 px_void PX_Object_OscilloscopeSetLeftVerticalMax(PX_Object *pObject,px_double Max)
 {
 	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
-	if (!pcd)
-	{
-		PX_ASSERT();
-		return;
-	}
+
 	pcd->LeftVerticalRangeMax=Max;
 }
 
 px_void PX_Object_OscilloscopeSetRightVerticalMax(PX_Object *pObject,px_double Max)
 {
 	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
-	if (!pcd)
-	{
-		PX_ASSERT();
-		return;
-	}
+
 	pcd->RightVerticalRangeMax=Max;
 }
 
 px_void PX_Object_OscilloscopeSetRightVerticalMin(PX_Object *pObject,px_double Min)
 {
 	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
-	if (!pcd)
-	{
-		PX_ASSERT();
-		return;
-	}
+
 	pcd->RightVerticalRangeMin=Min;
 }
 
 px_void PX_Object_OscilloscopeSetRenderMode(PX_Object* pObject, PX_OBJECT_OSCILLOSCOPE_RENDER_MODE mode)
 {
 	PX_Object_Oscilloscope* pcd = PX_Object_GetOscilloscope(pObject);
-	if (!pcd)
-	{
-		PX_ASSERT();
-		return;
-	}
 	pcd->rendermode = mode;
 }
 
 px_void PX_Object_OscilloscopeSetBorderColor(PX_Object *pObject,px_color clr)
 {
 	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
-	if (pcd)
-	{
-		pcd->borderColor=clr;
-	}
+	pcd->borderColor=clr;
 }
 
 PX_Object_OscilloscopeData * PX_Object_OscilloscopeGetOscilloscopeData(PX_Object *pObject,px_int index)
@@ -505,19 +345,15 @@ px_int PX_Object_OscilloscopeGetOscilloscopeHeight(PX_Object *pObject)
 void PX_Object_OscilloscopeSetTitleTop(PX_Object *pObject,const px_char * title)
 {
 	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
-	if (pcd)
-	{
-		pcd->TopTitle=title;
-	}
+	pcd->TopTitle=title;
+	
 }
 
 void PX_Object_OscilloscopeSetTitleBottom(PX_Object *pObject,const px_char * title)
 {
 	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
-	if (pcd)
-	{
-		pcd->BottomTitle=title;
-	}
+	pcd->BottomTitle=title;
+	
 }
 
 void PX_Object_OscilloscopeSetMarkValueEnabled(PX_Object *pObject,px_bool Enabled)
@@ -529,10 +365,7 @@ void PX_Object_OscilloscopeSetMarkValueEnabled(PX_Object *pObject,px_bool Enable
 void PX_Object_OscilloscopeSetFontColor(PX_Object *pObject,px_color clr)
 {
 	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
-	if (pcd)
-	{
-		pcd->FontColor=clr;
-	}
+	pcd->FontColor=clr;
 }
 
 void PX_Object_OscilloscopeClearContext(PX_Object *pObject)
@@ -637,11 +470,6 @@ px_double  PX_Object_OscilloscopeMapPixelValueToVertical(PX_Object *pObject,px_i
 	return 0;
 }
 
-
-px_void PX_Object_OscilloscopeUpdate(PX_Object *pObject,px_uint elapsed)
-{
-
-}
 
 
 static px_void PX_Object_OscilloscopeDrawFrameLine(px_surface *psurface,PX_Object *pObject)
@@ -1563,17 +1391,9 @@ px_void PX_Object_OscilloscopeScaleOscilloscope(PX_Object *pObject)
 }
 
 
-px_void PX_Object_OscilloscopeRender(px_surface *psurface, PX_Object *pObject,px_uint elapsed)
+PX_OBJECT_RENDER_FUNCTION(PX_Object_OscilloscopeRender)
 {
-	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
-	if (!pcd)
-	{
-		PX_ASSERT();
-		return;
-	}
-
-	// 
-	// 	PX_Object_OscilloscopeDrawMarkLine(psurface,pObject);
+	PX_Object_Oscilloscope *pcd=PX_ObjectGetDesc(PX_Object_Oscilloscope,pObject);
 
 	if(pcd->ShowGuides)
 		PX_Object_OscilloscopeDrawDashed(psurface,pObject);
@@ -1594,14 +1414,14 @@ px_void PX_Object_OscilloscopeRender(px_surface *psurface, PX_Object *pObject,px
 	PX_Object_OscilloscopeDrawFlagLine(psurface,pObject);
 }
 
-px_void PX_Object_OscilloscopeFree(PX_Object *pObject)
+PX_OBJECT_FREE_FUNCTION(PX_Object_OscilloscopeFree)
 {
-	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
+	PX_Object_Oscilloscope *pcd=PX_ObjectGetDesc(PX_Object_Oscilloscope,pObject);
 	PX_VectorFree(&pcd->vData);
 	PX_VectorFree(&pcd->vFlagLine);
 }
 
-px_void PX_Object_OscilloscopeCursorPressEvent(PX_Object *pObject, PX_Object_Event e,px_void *ptr)
+PX_OBJECT_EVENT_FUNCTION(PX_Object_OscilloscopeCursorPressEvent)
 {
 	px_float x;
 	px_float y;
@@ -1648,7 +1468,7 @@ px_void PX_Object_OscilloscopeCursorPressEvent(PX_Object *pObject, PX_Object_Eve
 	pcd->bScaleDrag=PX_TRUE;
 }
 
-px_void PX_Object_OscilloscopeCursorReleaseEvent( PX_Object *pObject, PX_Object_Event e,px_void *ptr )
+PX_OBJECT_EVENT_FUNCTION(PX_Object_OscilloscopeCursorReleaseEvent)
 {
 
 	px_float x=PX_Object_Event_GetCursorX(e);
@@ -1686,7 +1506,7 @@ px_void PX_Object_OscilloscopeCursorReleaseEvent( PX_Object *pObject, PX_Object_
 
 }
 
-px_void PX_Object_OscilloscopeCursorDragEvent(PX_Object *pObject, PX_Object_Event e,px_void *ptr )
+PX_OBJECT_EVENT_FUNCTION(PX_Object_OscilloscopeCursorDragEvent)
 {
 	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
 	px_float objx,objy,objWidth,objHeight;
@@ -1733,7 +1553,7 @@ px_void PX_Object_OscilloscopeCursorDragEvent(PX_Object *pObject, PX_Object_Even
 
 }
 
-px_void PX_Object_OscilloscopeCursorMoveEvent(PX_Object *pObject, PX_Object_Event e,px_void *ptr )
+PX_OBJECT_EVENT_FUNCTION(PX_Object_OscilloscopeCursorMoveEvent)
 {
 	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
 	px_float objx,objy,objWidth,objHeight;
@@ -1788,11 +1608,12 @@ px_void PX_Object_OscilloscopeCursorMoveEvent(PX_Object *pObject, PX_Object_Even
 
 
 
-PX_Object *PX_Object_OscilloscopeCreate(px_memorypool *mp, PX_Object *Parent,px_int x,px_int y,px_int Width,px_int Height,PX_FontModule *fontmodule)
+PX_Object *PX_Object_OscilloscopeAttachObject( PX_Object *pObject,px_int attachIndex,px_int x,px_int y,px_int Width,px_int Height,PX_FontModule *fontmodule)
 {
-	PX_Object *pObject;
-	PX_Object_Oscilloscope Oscilloscope;
-	PX_memset(&Oscilloscope,0,sizeof(Oscilloscope));
+	px_memorypool* mp=pObject->mp;
+
+	PX_Object_Oscilloscope Oscilloscope,*pdesc;
+	
 	Oscilloscope.mp=mp;
 	Oscilloscope.MinHorizontalPixelDividing=PX_OBJECT_OSCILLOSCOPE_DEFAULE_MINHORIZONTALPIXELDIVIDING;
 	Oscilloscope.MinVerticalPixelDividing=PX_OBJECT_OSCILLOSCOPE_DEFAULE_MINVERTICALPIXELDIVIDING;
@@ -1862,68 +1683,39 @@ PX_Object *PX_Object_OscilloscopeCreate(px_memorypool *mp, PX_Object *Parent,px_
 	PX_VectorInitialize(mp,&Oscilloscope.vData,sizeof(PX_Object_OscilloscopeData),16);
 	PX_VectorInitialize(mp,&Oscilloscope.vFlagLine,sizeof(PX_Object_OscilloscopeFlagLine),16);
 
-	pObject=PX_ObjectCreateEx(mp,Parent,(px_float)x,(px_float)y,0,(px_float)Width,(px_float)Height,0,PX_OBJECT_TYPE_OSCILLOSCOPE,PX_Object_OscilloscopeUpdate,PX_Object_OscilloscopeRender,PX_Object_OscilloscopeFree,&Oscilloscope,sizeof(PX_Object_Oscilloscope));
+	PX_ASSERTIF(pObject == PX_NULL);
+	PX_ASSERTIF(attachIndex < 0 || attachIndex >= PX_COUNTOF(pObject->pObjectDesc));
+	PX_ASSERTIF(pObject->pObjectDesc[attachIndex] != PX_NULL);
+	pdesc = (PX_Object_Oscilloscope*)PX_ObjectCreateDesc(pObject, attachIndex, PX_OBJECT_TYPE_OSCILLOSCOPE, 0, PX_Object_OscilloscopeRender, PX_Object_OscilloscopeFree, &Oscilloscope, sizeof(PX_Object_Oscilloscope));
+	PX_ASSERTIF(pdesc == PX_NULL);
 
+	
 	//PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_CURSORMOVE,PX_Object_OscilloscopeCursorMoveEvent,PX_NULL);
-	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_CURSORMOVE,PX_Object_OscilloscopeCursorMoveEvent,PX_NULL);
-	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_CURSORDRAG,PX_Object_OscilloscopeCursorDragEvent,PX_NULL);
-	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_CURSORDOWN,PX_Object_OscilloscopeCursorPressEvent,PX_NULL);
-	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_CURSORUP,PX_Object_OscilloscopeCursorReleaseEvent,PX_NULL);
+	PX_ObjectRegisterEventEx(pObject,PX_OBJECT_EVENT_CURSORMOVE, PX_OBJECT_TYPE_OSCILLOSCOPE,PX_Object_OscilloscopeCursorMoveEvent,PX_NULL);
+	PX_ObjectRegisterEventEx(pObject,PX_OBJECT_EVENT_CURSORDRAG, PX_OBJECT_TYPE_OSCILLOSCOPE, PX_Object_OscilloscopeCursorDragEvent,PX_NULL);
+	PX_ObjectRegisterEventEx(pObject,PX_OBJECT_EVENT_CURSORDOWN, PX_OBJECT_TYPE_OSCILLOSCOPE, PX_Object_OscilloscopeCursorPressEvent,PX_NULL);
+	PX_ObjectRegisterEventEx(pObject,PX_OBJECT_EVENT_CURSORUP, PX_OBJECT_TYPE_OSCILLOSCOPE, PX_Object_OscilloscopeCursorReleaseEvent,PX_NULL);
 
 	return pObject;
 }
 
-
-PX_Object* PX_Designer_OscilloscopeCreate(px_memorypool* mp, PX_Object* pparent, px_float x, px_float y, px_float width, px_float height, px_abi* ptr)
+PX_Object* PX_Object_OscilloscopeCreate(px_memorypool* mp, PX_Object* Parent, px_int x, px_int y, px_int Width, px_int Height, PX_FontModule* fontmodule)
 {
-	PX_FontModule* fm = (PX_FontModule*)ptr;
-	return PX_Object_OscilloscopeCreate(mp, pparent, (px_int)x, (px_int)y, 256, 256, fm);
+	PX_Object *pObject = PX_ObjectCreate(mp, Parent, (px_float)x, (px_float)y, 0, (px_float)Width, (px_float)Height, 0);
+	if (pObject == PX_NULL)
+	{
+		return PX_NULL;
+	}
+	return PX_Object_OscilloscopeAttachObject(pObject, 0, x, y, Width, Height, fontmodule);
 }
 
-PX_Designer_ObjectDesc PX_Object_OscilloscopeDesignerInstall()
-{
-	PX_Designer_ObjectDesc desc;
-	px_int i = 0;
-	PX_memset(&desc, 0, sizeof(desc));
-	PX_strcat(desc.Name, "oscilloscope");
-	desc.createfunc = PX_Designer_OscilloscopeCreate;
-	desc.type = PX_DESIGNER_OBJECT_TYPE_UI;
-
-	PX_strcat(desc.properties[i].Name, "id");
-	desc.properties[i].getstring = PX_Designer_GetID;
-	desc.properties[i].setstring = PX_Designer_SetID;
-	i++;
-
-	PX_strcat(desc.properties[i].Name, "x");
-	desc.properties[i].getfloat = PX_Designer_GetX;
-	desc.properties[i].setfloat = PX_Designer_SetX;
-	i++;
-
-	PX_strcat(desc.properties[i].Name, "y");
-	desc.properties[i].getfloat = PX_Designer_GetY;
-	desc.properties[i].setfloat = PX_Designer_SetY;
-	i++;
-
-	PX_strcat(desc.properties[i].Name, "width");
-	desc.properties[i].getfloat = PX_Designer_GetWidth;
-	desc.properties[i].setfloat = PX_Designer_SetWidth;
-	i++;
-
-	PX_strcat(desc.properties[i].Name, "height");
-	desc.properties[i].getfloat = PX_Designer_GetHeight;
-	desc.properties[i].setfloat = PX_Designer_SetHeight;
-	i++;
-
-	return desc;
-}
 
 PX_Object_FilterEditor * PX_Object_GetFilterEditor(PX_Object *pObject)
 {
-	if (pObject->Type==PX_OBJECT_TYPE_FILTEREDITOR)
-	{
-		return PX_ObjectGetDesc(PX_Object_FilterEditor, pObject);
-	}
-	return PX_NULL;
+	PX_Object_FilterEditor*pdesc=(PX_Object_FilterEditor*)PX_ObjectGetDescByType(pObject,PX_OBJECT_TYPE_FILTEREDITOR);
+	PX_ASSERTIF(pdesc==PX_NULL);
+	return pdesc;
+	
 }
 
 static px_void PX_Object_FilterEditorDrawFrameLine(px_surface *psurface,PX_Object *pObject)
@@ -2092,7 +1884,7 @@ static px_void PX_Object_FilterEditorDrawHelpLine(px_surface *psurface,PX_Object
 
 }
 
-px_void PX_Object_FilterEditorCursorReleaseEvent( PX_Object *pObject, PX_Object_Event e,px_void *ptr )
+PX_OBJECT_EVENT_FUNCTION(PX_Object_FilterEditorCursorReleaseEvent)
 {
 	PX_Object_FilterEditor *pfe=PX_Object_GetFilterEditor(pObject);
 
@@ -2101,7 +1893,7 @@ px_void PX_Object_FilterEditorCursorReleaseEvent( PX_Object *pObject, PX_Object_
 }
 
 
-px_void PX_Object_FilterEditorRender(px_surface *psurface, PX_Object *pObject,px_uint elapsed)
+PX_OBJECT_RENDER_FUNCTION(PX_Object_FilterEditorRender)
 {
 	PX_Object_FilterEditorDrawFrameLine(psurface,pObject);
 	PX_Object_FilterEditorDrawHelpLine(psurface,pObject);
@@ -2109,7 +1901,7 @@ px_void PX_Object_FilterEditorRender(px_surface *psurface, PX_Object *pObject,px
 	PX_Object_FilterEditorDrawSelectDraging(psurface,pObject);
 }
 
-px_void PX_Object_FilterEditorCursorPressEvent(PX_Object *pObject, PX_Object_Event e,px_void *ptr)
+PX_OBJECT_EVENT_FUNCTION(PX_Object_FilterEditorCursorPressEvent)
 {
 	px_int i,j;
 	px_bool bSelectlge1=PX_FALSE;
@@ -2174,7 +1966,7 @@ px_void PX_Object_FilterEditorCursorPressEvent(PX_Object *pObject, PX_Object_Eve
 
 }
 
-px_void PX_Object_FilterEditorCursorMoveEvent(PX_Object *pObject, PX_Object_Event e,px_void *ptr )
+PX_OBJECT_EVENT_FUNCTION(PX_Object_FilterEditorCursorMoveEvent)
 {
 	PX_Object_FilterEditor *pfe=PX_Object_GetFilterEditor(pObject);
 	px_int i;
@@ -2213,7 +2005,7 @@ px_void PX_Object_FilterEditorCursorMoveEvent(PX_Object *pObject, PX_Object_Even
 }
 
 
-px_void PX_Object_FilterEditorCursorDragEvent(PX_Object *pObject, PX_Object_Event e,px_void *ptr )
+PX_OBJECT_EVENT_FUNCTION(PX_Object_FilterEditorCursorDragEvent)
 {
 	px_int i;
 	PX_Object_FilterEditor *pfe=PX_Object_GetFilterEditor(pObject);
@@ -2317,19 +2109,13 @@ px_void PX_Object_FilterEditorSetOperateCount(PX_Object *pObject,px_int count)
 px_void PX_Object_FilterEditorSetType(PX_Object *pObject,PX_OBJECT_FILTER_TYPE type)
 {
 	PX_Object_FilterEditor *pfe=PX_Object_GetFilterEditor(pObject);
-	if (pfe)
-	{
-		pfe->FilterType=type;
-	}
+	pfe->FilterType=type;
 }
 
 px_void PX_Object_FilterEditorSetHorizontalShow(PX_Object *pObject,px_bool HorizontalShow)
 {
 	PX_Object_FilterEditor *pfe=PX_Object_GetFilterEditor(pObject);
-	if (pfe)
-	{
-		pfe->showHorizontal=HorizontalShow;
-	}
+	pfe->showHorizontal=HorizontalShow;
 }
 
 px_void PX_Object_FilterEditorReset(PX_Object *pObject)
@@ -2347,64 +2133,43 @@ px_void PX_Object_FilterEditorSetRange(PX_Object *pObject,px_double range)
 {
 
 	PX_Object_FilterEditor *pfe=PX_Object_GetFilterEditor(pObject);
-	if (pfe)
-	{
-		pfe->rangedb=range;
-	}
+	pfe->rangedb=range;
 }
 
 px_void PX_Object_FilterEditorSetFontColor(PX_Object *pObject,px_color clr)
 {
 	PX_Object_FilterEditor *pfe=PX_Object_GetFilterEditor(pObject);
-	if (pfe)
-	{
-		pfe->FontColor=clr;
-	}
+	pfe->FontColor=clr;
 }
 
 px_void PX_Object_FilterEditorSetBorderColor(PX_Object *pObject,px_color clr)
 {
 	PX_Object_FilterEditor *pfe=PX_Object_GetFilterEditor(pObject);
-	if (pfe)
-	{
-		pfe->borderColor=clr;
-	}
+	pfe->borderColor=clr;
 }
 
 px_void PX_Object_FilterEditorSethelpLineColor(PX_Object *pObject,px_color clr)
 {
 	PX_Object_FilterEditor *pfe=PX_Object_GetFilterEditor(pObject);
-	if (pfe)
-	{
-		pfe->helpLineColor=clr;
-	}
+	pfe->helpLineColor=clr;
 }
 
 px_void PX_Object_FilterEditorSetFontSize(PX_Object *pObject,px_int size)
 {
 	PX_Object_FilterEditor *pfe=PX_Object_GetFilterEditor(pObject);
-	if (pfe)
-	{
-		pfe->FontSize=size;
-	}
+	pfe->FontSize=size;
 }
 
 px_void PX_Object_FilterEditorSetHorizontalDividing(PX_Object *pObject,px_int div)
 {
 	PX_Object_FilterEditor *pfe=PX_Object_GetFilterEditor(pObject);
-	if (pfe)
-	{
-		pfe->HorizontalDividing=div;
-	}
+	pfe->HorizontalDividing=div;
 }
 
 px_void PX_Object_FilterEditorSetVerticalDividing(PX_Object *pObject,px_int div)
 {
 	PX_Object_FilterEditor *pfe=PX_Object_GetFilterEditor(pObject);
-	if (pfe)
-	{
-		pfe->VerticalDividing=div;
-	}
+	pfe->VerticalDividing=div;
 }
 
 px_void PX_Object_FilterEditorMapData(PX_Object *pObject,px_double data[],px_int size)
@@ -2507,10 +2272,10 @@ PX_Object * PX_Object_FilterEditorCreate(px_memorypool *mp, PX_Object *Parent,px
 	pObject=PX_ObjectCreateEx(mp,Parent,(px_float)x,(px_float)y,0,(px_float)Width,(px_float)Height,0,PX_OBJECT_TYPE_FILTEREDITOR,PX_NULL,PX_Object_FilterEditorRender,PX_NULL,&FilterEditor,sizeof(PX_Object_FilterEditor));
 	PX_Object_FilterEditorSetOperateCount(pObject,8);
 
-	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_CURSORMOVE,PX_Object_FilterEditorCursorMoveEvent,PX_NULL);
-	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_CURSORDRAG,PX_Object_FilterEditorCursorDragEvent,PX_NULL);
-	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_CURSORDOWN,PX_Object_FilterEditorCursorPressEvent,PX_NULL);
-	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_CURSORUP,PX_Object_FilterEditorCursorReleaseEvent,PX_NULL);
+	PX_ObjectRegisterEventEx(pObject,PX_OBJECT_EVENT_CURSORMOVE, PX_OBJECT_TYPE_FILTEREDITOR,PX_Object_FilterEditorCursorMoveEvent,PX_NULL);
+	PX_ObjectRegisterEventEx(pObject,PX_OBJECT_EVENT_CURSORDRAG, PX_OBJECT_TYPE_FILTEREDITOR, PX_Object_FilterEditorCursorDragEvent,PX_NULL);
+	PX_ObjectRegisterEventEx(pObject,PX_OBJECT_EVENT_CURSORDOWN, PX_OBJECT_TYPE_FILTEREDITOR, PX_Object_FilterEditorCursorPressEvent,PX_NULL);
+	PX_ObjectRegisterEventEx(pObject,PX_OBJECT_EVENT_CURSORUP, PX_OBJECT_TYPE_FILTEREDITOR, PX_Object_FilterEditorCursorReleaseEvent,PX_NULL);
 	return pObject;
 }
 

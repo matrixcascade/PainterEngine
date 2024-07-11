@@ -4,7 +4,8 @@
 px_void PX_ASSERT(void)
 {
 #ifdef PX_DEBUG_MODE
-	while(1) *(char *)(0)=1;
+	volatile px_int i = 0;
+	i =i / i;
 	//return;
 #endif
 }

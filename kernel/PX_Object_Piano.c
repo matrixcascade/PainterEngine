@@ -1,11 +1,18 @@
 #include "PX_Object_Piano.h"
 
-px_void PX_Object_PianoRender(px_surface* psurface, PX_Object* pObject, px_dword elapsed)
+PX_Object_Piano* PX_Object_GetPiano(PX_Object* pObject)
+{
+	PX_Object_Piano *pDesc = (PX_Object_Piano*)PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_PIANO);
+	PX_ASSERTIF(pDesc == PX_NULL);
+	return pDesc;
+}
+
+PX_OBJECT_RENDER_FUNCTION(PX_Object_PianoRender)
 {
 	px_int step=0, i,j=2;
 	px_float x,white_key_w,keyw, keyh;
 
-	PX_Object_Piano* pPiano = PX_ObjectGetDesc(PX_Object_Piano, pObject);
+	PX_Object_Piano* pPiano = PX_Object_GetPiano(pObject);
 	const px_char* note_content[] = { "A","#A","B", "C","#C","D","#D","E","F","#F","G","#G", };
 	px_float objx, objy, objWidth, objHeight;
 	px_float inheritX, inheritY;
@@ -76,7 +83,7 @@ px_int PX_Object_PianoCursorInkeyIndex(PX_Object* pObject, px_float cursorx, px_
 	px_int step = 0, x,i, j = 2;
 	px_float  white_key_w, keyw, keyh;
 	px_int lastIndex = -1;
-	PX_Object_Piano* pPiano = PX_ObjectGetDesc(PX_Object_Piano, pObject);
+	PX_Object_Piano* pPiano = PX_Object_GetPiano(pObject);
 	const px_char* note_content[] = { "A","#A","B", "C","#C","D","#D","E","F","#F","G","#G", };
 	px_float objx, objy, objWidth, objHeight;
 	px_float inheritX, inheritY;
@@ -123,11 +130,11 @@ px_int PX_Object_PianoCursorInkeyIndex(PX_Object* pObject, px_float cursorx, px_
 	return lastIndex;
 }
 
-px_void PX_Object_PianoOnCursorMove(PX_Object* pObject, PX_Object_Event e, px_void* ptr)
+PX_OBJECT_EVENT_FUNCTION(PX_Object_PianoOnCursorMove)
 {
 	px_int i;
 	px_int index;
-	PX_Object_Piano* pPiano = PX_ObjectGetDesc(PX_Object_Piano, pObject);
+	PX_Object_Piano* pPiano = PX_Object_GetPiano(pObject);
 
 	for (i = 0; i < 88; i++)
 	{
@@ -143,11 +150,11 @@ px_void PX_Object_PianoOnCursorMove(PX_Object* pObject, PX_Object_Event e, px_vo
 
 }
 
-px_void PX_Object_PianoOnCursorUp(PX_Object* pObject, PX_Object_Event e, px_void* ptr)
+PX_OBJECT_EVENT_FUNCTION(PX_Object_PianoOnCursorUp)
 {
 	px_int i;
 	px_int index;
-	PX_Object_Piano* pPiano = PX_ObjectGetDesc(PX_Object_Piano, pObject);
+	PX_Object_Piano* pPiano = PX_Object_GetPiano(pObject);
 
 	for (i = 0; i < 88; i++)
 	{
@@ -163,10 +170,10 @@ px_void PX_Object_PianoOnCursorUp(PX_Object* pObject, PX_Object_Event e, px_void
 
 }
 
-px_void PX_Object_PianoOnCursorDown(PX_Object* pObject, PX_Object_Event e, px_void* ptr)
+PX_OBJECT_EVENT_FUNCTION(PX_Object_PianoOnCursorDown)
 {
 	px_int index;
-	PX_Object_Piano* pPiano = PX_ObjectGetDesc(PX_Object_Piano, pObject);
+	PX_Object_Piano* pPiano = PX_Object_GetPiano(pObject);
 	if (!PX_ObjectIsCursorInRegion(pObject, e))
 	{
 		return;
@@ -192,11 +199,11 @@ px_void PX_Object_PianoOnCursorDown(PX_Object* pObject, PX_Object_Event e, px_vo
 	}
 }
 
-px_void PX_Object_PianoOnCursorDrag(PX_Object* pObject, PX_Object_Event e, px_void* ptr)
+PX_OBJECT_EVENT_FUNCTION(PX_Object_PianoOnCursorDrag)
 {
 	px_int i;
 	px_int index;
-	PX_Object_Piano* pPiano = PX_ObjectGetDesc(PX_Object_Piano, pObject);
+	PX_Object_Piano* pPiano = PX_Object_GetPiano(pObject);
 	for (i = 0; i < 88; i++)
 	{
 		if (pPiano->keyState[i] != PX_OBJECT_PIANO_KEYSTATE_ONFOCUS)
@@ -216,12 +223,17 @@ px_void PX_Object_PianoOnCursorDrag(PX_Object* pObject, PX_Object_Event e, px_vo
 	}
 }
 
-PX_Object *PX_Object_PianoCreate(px_memorypool* mp, PX_Object* Parent, px_float x, px_float y, px_float width, px_float height)
+PX_Object* PX_Object_PianoAttachObject( PX_Object* pObject,px_int attachIndex, px_float x, px_float y, px_float width, px_float height)
 {
-	PX_Object_Piano Piano;
-	PX_Object* pObject;
-	PX_zeromemory(&Piano, sizeof(Piano));
-	pObject=PX_ObjectCreateEx(mp, Parent, x, y, 0, width, height, 0, PX_OBJECT_TYPE_PIANO, PX_NULL, PX_Object_PianoRender, PX_NULL, &Piano, sizeof(Piano));
+	px_memorypool* mp=pObject->mp;
+	PX_Object_Piano Piano = {0}, * pdesc;
+
+	PX_ASSERTIF(pObject == PX_NULL);
+	PX_ASSERTIF(attachIndex < 0 || attachIndex >= PX_COUNTOF(pObject->pObjectDesc));
+	PX_ASSERTIF(pObject->pObjectDesc[attachIndex] != PX_NULL);
+	pdesc = (PX_Object_Piano*)PX_ObjectCreateDesc(pObject, attachIndex, PX_OBJECT_TYPE_PIANO, 0, PX_Object_PianoRender, 0, &Piano, sizeof(Piano));
+	PX_ASSERTIF(pdesc == PX_NULL);
+
 	PX_ObjectRegisterEvent(pObject, PX_OBJECT_EVENT_CURSORMOVE, PX_Object_PianoOnCursorMove, PX_NULL);
 	PX_ObjectRegisterEvent(pObject, PX_OBJECT_EVENT_CURSORDOWN, PX_Object_PianoOnCursorDown, PX_NULL);
 	PX_ObjectRegisterEvent(pObject, PX_OBJECT_EVENT_CURSORDRAG, PX_Object_PianoOnCursorDrag, PX_NULL);
@@ -229,58 +241,66 @@ PX_Object *PX_Object_PianoCreate(px_memorypool* mp, PX_Object* Parent, px_float 
 	return pObject;
 }
 
+
+PX_Object *PX_Object_PianoCreate(px_memorypool* mp, PX_Object* Parent, px_float x, px_float y, px_float width, px_float height)
+{
+	PX_Object* pObject;
+	pObject=PX_ObjectCreate(mp, Parent, x, y, 0, width, height, 0);
+	if (!pObject)
+	{
+		return PX_NULL;
+	}
+	if (!PX_Object_PianoAttachObject(pObject, 0, x, y, width, height))
+	{
+		PX_ObjectDelete(pObject);
+		return PX_NULL;
+	}
+
+	return pObject;
+}
+
 px_void PX_Object_PianoLinkPiano(PX_Object* pObject, PX_Piano* pPiano)
 {
-	PX_Object_Piano* pObjectPiano = PX_ObjectGetDesc(PX_Object_Piano, pObject);
+	PX_Object_Piano* pObjectPiano = PX_Object_GetPiano(pObject);
 	pObjectPiano->pPiano = pPiano;
 
 }
 
 px_void PX_Object_PianoLinkPianoModel(PX_Object* pObject, PX_PianoModel* pPianoModel)
 {
-	PX_Object_Piano* pObjectPiano = PX_ObjectGetDesc(PX_Object_Piano, pObject);
+	PX_Object_Piano* pObjectPiano = PX_Object_GetPiano(pObject);
 	pObjectPiano->pPianoModel = pPianoModel;
 }
 
 px_void PX_Object_PianoSetKeyFocus(PX_Object* pObject, px_int index)
 {
-	if (pObject->Type==PX_OBJECT_TYPE_PIANO)
+	PX_Object_Piano* pPiano = PX_Object_GetPiano(pObject);
+	if (index >= 0 && index < 88)
 	{
-		PX_Object_Piano* pPiano = PX_ObjectGetDesc(PX_Object_Piano, pObject);
-		if (index>=0&&index<88)
-		{
-			pPiano->keyState[index] = PX_OBJECT_PIANO_KEYSTATE_ONFOCUS;
-		}
+		pPiano->keyState[index] = PX_OBJECT_PIANO_KEYSTATE_ONFOCUS;
 	}
-	
 }
 
 px_void PX_Object_PianoSetKeyDown(PX_Object* pObject, px_int index,px_bool bdown)
 {
-	if (pObject->Type == PX_OBJECT_TYPE_PIANO)
-	{
-		PX_Object_Piano* pPiano = PX_ObjectGetDesc(PX_Object_Piano, pObject);
-		if(bdown)
-			pPiano->keyState[index] = PX_OBJECT_PIANO_KEYSTATE_DOWN;
-		else
-			pPiano->keyState[index] = PX_OBJECT_PIANO_KEYSTATE_STANDBY;
-	}
+	PX_Object_Piano* pPiano = PX_Object_GetPiano(pObject);
+	if (bdown)
+		pPiano->keyState[index] = PX_OBJECT_PIANO_KEYSTATE_DOWN;
+	else
+		pPiano->keyState[index] = PX_OBJECT_PIANO_KEYSTATE_STANDBY;
 }
 
 px_void PX_Object_PianoClearKeyState(PX_Object* pObject)
 {
-	if (pObject->Type == PX_OBJECT_TYPE_PIANO)
+	px_int i;
+	PX_Object_Piano* pPiano = PX_Object_GetPiano(pObject);
+	for (i = 0; i < 88; i++)
 	{
-		px_int i;
-		PX_Object_Piano* pPiano = PX_ObjectGetDesc(PX_Object_Piano, pObject);
-		for(i=0;i<88;i++)
-		{
-			pPiano->keyState[i] = PX_OBJECT_PIANO_KEYSTATE_STANDBY;
-		}
+		pPiano->keyState[i] = PX_OBJECT_PIANO_KEYSTATE_STANDBY;
 	}
 }
 
-px_void PX_Object_PianoTuneOnRender(px_surface* psurface, PX_Object* pObject, px_dword elapsed)
+PX_OBJECT_RENDER_FUNCTION(PX_Object_PianoTuneOnRender)
 {
 	px_float step,oftx,ofty;
 	PX_Object_PianoTune* pTune=PX_ObjectGetDesc(PX_Object_PianoTune, pObject);
@@ -632,7 +652,7 @@ px_void PX_Object_PianoTune_LocalToUI(PX_Object* pObject)
 {
 	px_int ivalue;
 	px_char content[64];
-	PX_Object_PianoTune* pTune = PX_ObjectGetDesc(PX_Object_PianoTune, pObject);
+	PX_Object_PianoTune* pTune = (PX_Object_PianoTune *)PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_PIANOTUNE);
 
 	ivalue = (px_int)(pTune->key_param.f * 100);
 	PX_Object_SliderBarSetValue(pTune->sliderbar_f, ivalue);
@@ -785,130 +805,130 @@ px_void PX_Object_PianoTune_LocalToUI(PX_Object* pObject)
 }
 
 
-px_void PX_Object_PianoTune_fOnChanged(PX_Object* pObject,PX_Object_Event e,px_void *ptr)
+PX_OBJECT_EVENT_FUNCTION(PX_Object_PianoTune_fOnChanged)
 {
 	px_float fvalue;
-	PX_Object_PianoTune* pTune = PX_ObjectGetDesc(PX_Object_PianoTune, (PX_Object*)ptr);
+	PX_Object_PianoTune* pTune = (PX_Object_PianoTune*)PX_ObjectGetDescByType((PX_Object*)ptr, PX_OBJECT_TYPE_PIANOTUNE);
 	fvalue = PX_Object_SliderBarGetValue(pObject) / 100.f;
 	pTune->key_param.f = fvalue;
 	PX_Object_PianoTune_LocalToUI((PX_Object*)ptr);
 	PX_ObjectExecuteEvent((PX_Object*)ptr, PX_OBJECT_BUILD_EVENT(PX_OBJECT_EVENT_VALUECHANGED));
 }
 
-px_void PX_Object_PianoTune_weightOnChanged(PX_Object* pObject, PX_Object_Event e, px_void* ptr)
+PX_OBJECT_EVENT_FUNCTION(PX_Object_PianoTune_weightOnChanged)
 {
 	px_float fvalue;
-	PX_Object_PianoTune* pTune = PX_ObjectGetDesc(PX_Object_PianoTune, (PX_Object*)ptr);
+	PX_Object_PianoTune* pTune = (PX_Object_PianoTune*)PX_ObjectGetDescByType((PX_Object*)ptr, PX_OBJECT_TYPE_PIANOTUNE);
 	fvalue = PX_Object_SliderBarGetValue(pObject) / 100.f;
 	pTune->key_param.weight = fvalue;
 	PX_Object_PianoTune_LocalToUI((PX_Object*)ptr);
 	PX_ObjectExecuteEvent((PX_Object*)ptr, PX_OBJECT_BUILD_EVENT(PX_OBJECT_EVENT_VALUECHANGED));
 }
 
-px_void PX_Object_PianoTune_minrOnChanged(PX_Object* pObject, PX_Object_Event e, px_void* ptr)
+PX_OBJECT_EVENT_FUNCTION(PX_Object_PianoTune_minrOnChanged)
 {
 	px_float fvalue;
-	PX_Object_PianoTune* pTune = PX_ObjectGetDesc(PX_Object_PianoTune, (PX_Object*)ptr);
+	PX_Object_PianoTune* pTune = (PX_Object_PianoTune*)PX_ObjectGetDescByType((PX_Object*)ptr, PX_OBJECT_TYPE_PIANOTUNE);
 	fvalue = PX_Object_SliderBarGetValue(pObject) / 1000.f;
 	pTune->key_param.minr = fvalue;
 	PX_Object_PianoTune_LocalToUI((PX_Object*)ptr);
 	PX_ObjectExecuteEvent((PX_Object*)ptr, PX_OBJECT_BUILD_EVENT(PX_OBJECT_EVENT_VALUECHANGED));
 }
 
-px_void PX_Object_PianoTune_maxrOnChanged(PX_Object* pObject, PX_Object_Event e, px_void* ptr)
+PX_OBJECT_EVENT_FUNCTION(PX_Object_PianoTune_maxrOnChanged)
 {
 	px_float fvalue;
-	PX_Object_PianoTune* pTune = PX_ObjectGetDesc(PX_Object_PianoTune, (PX_Object*)ptr);
+	PX_Object_PianoTune* pTune = (PX_Object_PianoTune*)PX_ObjectGetDescByType((PX_Object*)ptr, PX_OBJECT_TYPE_PIANOTUNE);
 	fvalue = PX_Object_SliderBarGetValue(pObject) / 100.f;
 	pTune->key_param.maxr = fvalue;
 	PX_Object_PianoTune_LocalToUI((PX_Object*)ptr);
 	PX_ObjectExecuteEvent((PX_Object*)ptr, PX_OBJECT_BUILD_EVENT(PX_OBJECT_EVENT_VALUECHANGED));
 }
 
-px_void PX_Object_PianoTune_amprlOnChanged(PX_Object* pObject, PX_Object_Event e, px_void* ptr)
+PX_OBJECT_EVENT_FUNCTION(PX_Object_PianoTune_amprlOnChanged)
 {
 	px_float fvalue;
-	PX_Object_PianoTune* pTune = PX_ObjectGetDesc(PX_Object_PianoTune, (PX_Object*)ptr);
+	PX_Object_PianoTune* pTune = (PX_Object_PianoTune*)PX_ObjectGetDescByType((PX_Object*)ptr, PX_OBJECT_TYPE_PIANOTUNE);
 	fvalue = PX_Object_SliderBarGetValue(pObject) / 100.f;
 	pTune->key_param.amprl = fvalue;
 	PX_Object_PianoTune_LocalToUI((PX_Object*)ptr);
 	PX_ObjectExecuteEvent((PX_Object*)ptr, PX_OBJECT_BUILD_EVENT(PX_OBJECT_EVENT_VALUECHANGED));
 }
 
-px_void PX_Object_PianoTune_amprrOnChanged(PX_Object* pObject, PX_Object_Event e, px_void* ptr)
+PX_OBJECT_EVENT_FUNCTION(PX_Object_PianoTune_amprrOnChanged)
 {
 	px_float fvalue;
-	PX_Object_PianoTune* pTune = PX_ObjectGetDesc(PX_Object_PianoTune, (PX_Object*)ptr);
+	PX_Object_PianoTune* pTune = (PX_Object_PianoTune*)PX_ObjectGetDescByType((PX_Object*)ptr, PX_OBJECT_TYPE_PIANOTUNE);
 	fvalue = PX_Object_SliderBarGetValue(pObject) / 100.f;
 	pTune->key_param.amprr = fvalue;
 	PX_Object_PianoTune_LocalToUI((PX_Object*)ptr);
 	PX_ObjectExecuteEvent((PX_Object*)ptr, PX_OBJECT_BUILD_EVENT(PX_OBJECT_EVENT_VALUECHANGED));
 }
 
-px_void PX_Object_PianoTune_mult_radius_core_stringOnChanged(PX_Object* pObject, PX_Object_Event e, px_void* ptr)
+PX_OBJECT_EVENT_FUNCTION(PX_Object_PianoTune_mult_radius_core_stringOnChanged)
 {
 	px_float fvalue;
-	PX_Object_PianoTune* pTune = PX_ObjectGetDesc(PX_Object_PianoTune, (PX_Object*)ptr);
+	PX_Object_PianoTune* pTune = (PX_Object_PianoTune*)PX_ObjectGetDescByType((PX_Object*)ptr, PX_OBJECT_TYPE_PIANOTUNE);
 	fvalue = PX_Object_SliderBarGetValue(pObject) / 1000.f;
 	pTune->key_param.mult_radius_core_string = fvalue;
 	PX_Object_PianoTune_LocalToUI((PX_Object*)ptr);
 	PX_ObjectExecuteEvent((PX_Object*)ptr, PX_OBJECT_BUILD_EVENT(PX_OBJECT_EVENT_VALUECHANGED));
 }
 
-px_void PX_Object_PianoTune_minLOnChanged(PX_Object* pObject, PX_Object_Event e, px_void* ptr)
+PX_OBJECT_EVENT_FUNCTION(PX_Object_PianoTune_minLOnChanged)
 {
 	px_float fvalue;
-	PX_Object_PianoTune* pTune = PX_ObjectGetDesc(PX_Object_PianoTune, (PX_Object*)ptr);
+	PX_Object_PianoTune* pTune = (PX_Object_PianoTune*)PX_ObjectGetDescByType((PX_Object*)ptr, PX_OBJECT_TYPE_PIANOTUNE);
 	fvalue = PX_Object_SliderBarGetValue(pObject) / 100.f;
 	pTune->key_param.minL = fvalue;
 	PX_Object_PianoTune_LocalToUI((PX_Object*)ptr);
 	PX_ObjectExecuteEvent((PX_Object*)ptr, PX_OBJECT_BUILD_EVENT(PX_OBJECT_EVENT_VALUECHANGED));
 }
 
-px_void PX_Object_PianoTune_maxLOnChanged(PX_Object* pObject, PX_Object_Event e, px_void* ptr)
+PX_OBJECT_EVENT_FUNCTION(PX_Object_PianoTune_maxLOnChanged)
 {
 	px_float fvalue;
-	PX_Object_PianoTune* pTune = PX_ObjectGetDesc(PX_Object_PianoTune, (PX_Object*)ptr);
+	PX_Object_PianoTune* pTune = (PX_Object_PianoTune*)PX_ObjectGetDescByType((PX_Object*)ptr, PX_OBJECT_TYPE_PIANOTUNE);
 	fvalue = PX_Object_SliderBarGetValue(pObject) / 100.f;
 	pTune->key_param.maxL = fvalue;
 	PX_Object_PianoTune_LocalToUI((PX_Object*)ptr);
 	PX_ObjectExecuteEvent((PX_Object*)ptr, PX_OBJECT_BUILD_EVENT(PX_OBJECT_EVENT_VALUECHANGED));
 }
 
-px_void PX_Object_PianoTune_ampLlOnChanged(PX_Object* pObject, PX_Object_Event e, px_void* ptr)
+PX_OBJECT_EVENT_FUNCTION(PX_Object_PianoTune_ampLlOnChanged)
 {
 	px_float fvalue;
-	PX_Object_PianoTune* pTune = PX_ObjectGetDesc(PX_Object_PianoTune, (PX_Object*)ptr);
+	PX_Object_PianoTune* pTune = (PX_Object_PianoTune*)PX_ObjectGetDescByType((PX_Object*)ptr, PX_OBJECT_TYPE_PIANOTUNE);
 	fvalue = -PX_Object_SliderBarGetValue(pObject) / 100.f;
 	pTune->key_param.ampLl = fvalue;
 	PX_Object_PianoTune_LocalToUI((PX_Object*)ptr);
 	PX_ObjectExecuteEvent((PX_Object*)ptr, PX_OBJECT_BUILD_EVENT(PX_OBJECT_EVENT_VALUECHANGED));
 }
 
-px_void PX_Object_PianoTune_ampLrOnChanged(PX_Object* pObject, PX_Object_Event e, px_void* ptr)
+PX_OBJECT_EVENT_FUNCTION(PX_Object_PianoTune_ampLrOnChanged)
 {
 	px_float fvalue;
-	PX_Object_PianoTune* pTune = PX_ObjectGetDesc(PX_Object_PianoTune, (PX_Object*)ptr);
+	PX_Object_PianoTune* pTune = (PX_Object_PianoTune*)PX_ObjectGetDescByType((PX_Object*)ptr, PX_OBJECT_TYPE_PIANOTUNE);
 	fvalue = PX_Object_SliderBarGetValue(pObject) / 100.f;
 	pTune->key_param.ampLr = fvalue;
 	PX_Object_PianoTune_LocalToUI((PX_Object*)ptr);
 	PX_ObjectExecuteEvent((PX_Object*)ptr, PX_OBJECT_BUILD_EVENT(PX_OBJECT_EVENT_VALUECHANGED));
 }
 
-px_void PX_Object_PianoTune_mult_density_stringOnChanged(PX_Object* pObject, PX_Object_Event e, px_void* ptr)
+PX_OBJECT_EVENT_FUNCTION(PX_Object_PianoTune_mult_density_stringOnChanged)
 {
 	px_float fvalue;
-	PX_Object_PianoTune* pTune = PX_ObjectGetDesc(PX_Object_PianoTune, (PX_Object*)ptr);
+	PX_Object_PianoTune* pTune = (PX_Object_PianoTune*)PX_ObjectGetDescByType((PX_Object*)ptr, PX_OBJECT_TYPE_PIANOTUNE);
 	fvalue = PX_Object_SliderBarGetValue(pObject) / 100.f;
 	pTune->key_param.mult_density_string = fvalue;
 	PX_Object_PianoTune_LocalToUI((PX_Object*)ptr);
 	PX_ObjectExecuteEvent((PX_Object*)ptr, PX_OBJECT_BUILD_EVENT(PX_OBJECT_EVENT_VALUECHANGED));
 }
 
-px_void PX_Object_PianoTune_mult_modulus_stringOnChanged(PX_Object* pObject, PX_Object_Event e, px_void* ptr)
+PX_OBJECT_EVENT_FUNCTION(PX_Object_PianoTune_mult_modulus_stringOnChanged)
 {
 	px_float fvalue;
-	PX_Object_PianoTune* pTune = PX_ObjectGetDesc(PX_Object_PianoTune, (PX_Object*)ptr);
+	PX_Object_PianoTune* pTune = (PX_Object_PianoTune*)PX_ObjectGetDescByType((PX_Object*)ptr, PX_OBJECT_TYPE_PIANOTUNE);
 	fvalue = PX_Object_SliderBarGetValue(pObject) / 100.f;
 	pTune->key_param.mult_modulus_string = fvalue;
 	PX_Object_PianoTune_LocalToUI((PX_Object*)ptr);
@@ -916,60 +936,60 @@ px_void PX_Object_PianoTune_mult_modulus_stringOnChanged(PX_Object* pObject, PX_
 }
 
 
-px_void PX_Object_PianoTune_mult_impedance_bridgeOnChanged(PX_Object* pObject, PX_Object_Event e, px_void* ptr)
+PX_OBJECT_EVENT_FUNCTION(PX_Object_PianoTune_mult_impedance_bridgeOnChanged)
 {
 	px_float fvalue;
-	PX_Object_PianoTune* pTune = PX_ObjectGetDesc(PX_Object_PianoTune, (PX_Object*)ptr);
+	PX_Object_PianoTune* pTune = (PX_Object_PianoTune*)PX_ObjectGetDescByType((PX_Object*)ptr, PX_OBJECT_TYPE_PIANOTUNE);
 	fvalue = PX_Object_SliderBarGetValue(pObject) / 100.f;
 	pTune->key_param.mult_impedance_bridge = fvalue;
 	PX_Object_PianoTune_LocalToUI((PX_Object*)ptr);
 	PX_ObjectExecuteEvent((PX_Object*)ptr, PX_OBJECT_BUILD_EVENT(PX_OBJECT_EVENT_VALUECHANGED));
 }
 
-px_void PX_Object_PianoTune_mult_impedance_hammerOnChanged(PX_Object* pObject, PX_Object_Event e, px_void* ptr)
+PX_OBJECT_EVENT_FUNCTION(PX_Object_PianoTune_mult_impedance_hammerOnChanged)
 {
 	px_float fvalue;
-	PX_Object_PianoTune* pTune = PX_ObjectGetDesc(PX_Object_PianoTune, (PX_Object*)ptr);
+	PX_Object_PianoTune* pTune = (PX_Object_PianoTune*)PX_ObjectGetDescByType((PX_Object*)ptr, PX_OBJECT_TYPE_PIANOTUNE);
 	fvalue = PX_Object_SliderBarGetValue(pObject) / 100.f;
 	pTune->key_param.mult_impedance_hammer = fvalue;
 	PX_Object_PianoTune_LocalToUI((PX_Object*)ptr);
 	PX_ObjectExecuteEvent((PX_Object*)ptr, PX_OBJECT_BUILD_EVENT(PX_OBJECT_EVENT_VALUECHANGED));
 }
 
-px_void PX_Object_PianoTune_mult_mass_hammerOnChanged(PX_Object* pObject, PX_Object_Event e, px_void* ptr)
+PX_OBJECT_EVENT_FUNCTION(PX_Object_PianoTune_mult_mass_hammerOnChanged)
 {
 	px_float fvalue;
-	PX_Object_PianoTune* pTune = PX_ObjectGetDesc(PX_Object_PianoTune, (PX_Object*)ptr);
+	PX_Object_PianoTune* pTune = (PX_Object_PianoTune*)PX_ObjectGetDescByType((PX_Object*)ptr, PX_OBJECT_TYPE_PIANOTUNE);
 	fvalue = PX_Object_SliderBarGetValue(pObject) / 100.f;
 	pTune->key_param.mult_mass_hammer = fvalue;
 	PX_Object_PianoTune_LocalToUI((PX_Object*)ptr);
 	PX_ObjectExecuteEvent((PX_Object*)ptr, PX_OBJECT_BUILD_EVENT(PX_OBJECT_EVENT_VALUECHANGED));
 }
 
-px_void PX_Object_PianoTune_mult_force_hammerOnChanged(PX_Object* pObject, PX_Object_Event e, px_void* ptr)
+PX_OBJECT_EVENT_FUNCTION(PX_Object_PianoTune_mult_force_hammerOnChanged)
 {
 	px_float fvalue;
-	PX_Object_PianoTune* pTune = PX_ObjectGetDesc(PX_Object_PianoTune, (PX_Object*)ptr);
+	PX_Object_PianoTune* pTune = (PX_Object_PianoTune*)PX_ObjectGetDescByType((PX_Object*)ptr, PX_OBJECT_TYPE_PIANOTUNE);
 	fvalue = PX_Object_SliderBarGetValue(pObject) / 100.f;
 	pTune->key_param.mult_force_hammer = fvalue;
 	PX_Object_PianoTune_LocalToUI((PX_Object*)ptr);
 	PX_ObjectExecuteEvent((PX_Object*)ptr, PX_OBJECT_BUILD_EVENT(PX_OBJECT_EVENT_VALUECHANGED));
 }
 
-px_void PX_Object_PianoTune_mult_hysteresis_hammerOnChanged(PX_Object* pObject, PX_Object_Event e, px_void* ptr)
+PX_OBJECT_EVENT_FUNCTION(PX_Object_PianoTune_mult_hysteresis_hammerOnChanged)
 {
 	px_float fvalue;
-	PX_Object_PianoTune* pTune = PX_ObjectGetDesc(PX_Object_PianoTune, (PX_Object*)ptr);
+	PX_Object_PianoTune* pTune = (PX_Object_PianoTune*)PX_ObjectGetDescByType((PX_Object*)ptr, PX_OBJECT_TYPE_PIANOTUNE);
 	fvalue = PX_Object_SliderBarGetValue(pObject) / 100.f;
 	pTune->key_param.mult_hysteresis_hammer = fvalue;
 	PX_Object_PianoTune_LocalToUI((PX_Object*)ptr);
 	PX_ObjectExecuteEvent((PX_Object*)ptr, PX_OBJECT_BUILD_EVENT(PX_OBJECT_EVENT_VALUECHANGED));
 }
 
-px_void PX_Object_PianoTune_mult_stiffness_exponent_hammerOnChanged(PX_Object* pObject, PX_Object_Event e, px_void* ptr)
+PX_OBJECT_EVENT_FUNCTION(PX_Object_PianoTune_mult_stiffness_exponent_hammerOnChanged)
 {
 	px_float fvalue;
-	PX_Object_PianoTune* pTune = PX_ObjectGetDesc(PX_Object_PianoTune, (PX_Object*)ptr);
+	PX_Object_PianoTune* pTune = (PX_Object_PianoTune*)PX_ObjectGetDescByType((PX_Object*)ptr, PX_OBJECT_TYPE_PIANOTUNE);
 	fvalue = PX_Object_SliderBarGetValue(pObject) / 100.f;
 	pTune->key_param.mult_stiffness_exponent_hammer = fvalue;
 	PX_Object_PianoTune_LocalToUI((PX_Object*)ptr);
@@ -977,103 +997,107 @@ px_void PX_Object_PianoTune_mult_stiffness_exponent_hammerOnChanged(PX_Object* p
 }
 
 
-px_void PX_Object_PianoTune_position_hammerOnChanged(PX_Object* pObject, PX_Object_Event e, px_void* ptr)
+PX_OBJECT_EVENT_FUNCTION(PX_Object_PianoTune_position_hammerOnChanged)
 {
 	px_float fvalue;
-	PX_Object_PianoTune* pTune = PX_ObjectGetDesc(PX_Object_PianoTune, (PX_Object*)ptr);
+	PX_Object_PianoTune* pTune = (PX_Object_PianoTune*)PX_ObjectGetDescByType((PX_Object*)ptr, PX_OBJECT_TYPE_PIANOTUNE);
 	fvalue = PX_Object_SliderBarGetValue(pObject) / 1000.f;
 	pTune->key_param.position_hammer = fvalue;
 	PX_Object_PianoTune_LocalToUI((PX_Object*)ptr);
 	PX_ObjectExecuteEvent((PX_Object*)ptr, PX_OBJECT_BUILD_EVENT(PX_OBJECT_EVENT_VALUECHANGED));
 }
 
-px_void PX_Object_PianoTune_mult_loss_filterOnChanged(PX_Object* pObject, PX_Object_Event e, px_void* ptr)
+PX_OBJECT_EVENT_FUNCTION(PX_Object_PianoTune_mult_loss_filterOnChanged)
 {
 	px_float fvalue;
-	PX_Object_PianoTune* pTune = PX_ObjectGetDesc(PX_Object_PianoTune, (PX_Object*)ptr);
+	PX_Object_PianoTune* pTune = (PX_Object_PianoTune*)PX_ObjectGetDescByType((PX_Object*)ptr, PX_OBJECT_TYPE_PIANOTUNE);
 	fvalue = PX_Object_SliderBarGetValue(pObject) / 100.f;
 	pTune->key_param.mult_loss_filter = fvalue;
 	PX_Object_PianoTune_LocalToUI((PX_Object*)ptr);
 	PX_ObjectExecuteEvent((PX_Object*)ptr, PX_OBJECT_BUILD_EVENT(PX_OBJECT_EVENT_VALUECHANGED));
 }
 
-px_void PX_Object_PianoTune_detuneOnChanged(PX_Object* pObject, PX_Object_Event e, px_void* ptr)
+PX_OBJECT_EVENT_FUNCTION(PX_Object_PianoTune_detuneOnChanged)
 {
 	px_float fvalue;
-	PX_Object_PianoTune* pTune = PX_ObjectGetDesc(PX_Object_PianoTune, (PX_Object*)ptr);
+	PX_Object_PianoTune* pTune = (PX_Object_PianoTune*)PX_ObjectGetDescByType((PX_Object*)ptr, PX_OBJECT_TYPE_PIANOTUNE);
 	fvalue = PX_Object_SliderBarGetValue(pObject) / 1000000.f;
 	pTune->key_param.detune = fvalue;
 	PX_Object_PianoTune_LocalToUI((PX_Object*)ptr);
 	PX_ObjectExecuteEvent((PX_Object*)ptr, PX_OBJECT_BUILD_EVENT(PX_OBJECT_EVENT_VALUECHANGED));
 }
 
-px_void PX_Object_PianoTune_hammer_typeOnChanged(PX_Object* pObject, PX_Object_Event e, px_void* ptr)
+PX_OBJECT_EVENT_FUNCTION(PX_Object_PianoTune_hammer_typeOnChanged)
 {
 	
-	PX_Object_PianoTune* pTune = PX_ObjectGetDesc(PX_Object_PianoTune, (PX_Object*)ptr);
+	PX_Object_PianoTune* pTune = (PX_Object_PianoTune*)PX_ObjectGetDescByType((PX_Object*)ptr, PX_OBJECT_TYPE_PIANOTUNE);
 	pTune->key_param.hammer_type = PX_Object_SelectBarGetCurrentIndex(pObject);
 	PX_Object_PianoTune_LocalToUI((PX_Object*)ptr);
 	PX_ObjectExecuteEvent((PX_Object*)ptr, PX_OBJECT_BUILD_EVENT(PX_OBJECT_EVENT_VALUECHANGED));
 }
 
-px_void PX_Object_PianoTune_eq1OnChanged(PX_Object* pObject, PX_Object_Event e, px_void* ptr)
+PX_OBJECT_EVENT_FUNCTION(PX_Object_PianoTune_eq1OnChanged)
 {
 	px_float fvalue;
-	PX_Object_PianoTune* pTune = PX_ObjectGetDesc(PX_Object_PianoTune, (PX_Object*)ptr);
+	PX_Object_PianoTune* pTune = (PX_Object_PianoTune*)PX_ObjectGetDescByType((PX_Object*)ptr, PX_OBJECT_TYPE_PIANOTUNE);
 	fvalue = (px_float)PX_Object_SliderBarGetValue(pObject) ;
 	pTune->soundboard_param.eq1 = fvalue;
 	PX_Object_PianoTune_LocalToUI((PX_Object*)ptr);
 	PX_ObjectExecuteEvent((PX_Object*)ptr, PX_OBJECT_BUILD_EVENT(PX_OBJECT_EVENT_VALUECHANGED));
 }
 
-px_void PX_Object_PianoTune_eq2OnChanged(PX_Object* pObject, PX_Object_Event e, px_void* ptr)
+PX_OBJECT_EVENT_FUNCTION(PX_Object_PianoTune_eq2OnChanged)
 {
 	px_float fvalue;
-	PX_Object_PianoTune* pTune = PX_ObjectGetDesc(PX_Object_PianoTune, (PX_Object*)ptr);
+	PX_Object_PianoTune* pTune = (PX_Object_PianoTune*)PX_ObjectGetDescByType((PX_Object*)ptr, PX_OBJECT_TYPE_PIANOTUNE);
 	fvalue = (px_float)PX_Object_SliderBarGetValue(pObject);
 	pTune->soundboard_param.eq2 = fvalue;
 	PX_Object_PianoTune_LocalToUI((PX_Object*)ptr);
 	PX_ObjectExecuteEvent((PX_Object*)ptr, PX_OBJECT_BUILD_EVENT(PX_OBJECT_EVENT_VALUECHANGED));
 }
 
-px_void PX_Object_PianoTune_eq3OnChanged(PX_Object* pObject, PX_Object_Event e, px_void* ptr)
+PX_OBJECT_EVENT_FUNCTION(PX_Object_PianoTune_eq3OnChanged)
 {
 	px_float fvalue;
-	PX_Object_PianoTune* pTune = PX_ObjectGetDesc(PX_Object_PianoTune, (PX_Object*)ptr);
+	PX_Object_PianoTune* pTune = (PX_Object_PianoTune*)PX_ObjectGetDescByType((PX_Object*)ptr, PX_OBJECT_TYPE_PIANOTUNE);
 	fvalue = (px_float)PX_Object_SliderBarGetValue(pObject);
 	pTune->soundboard_param.eq3 = fvalue;
 	PX_Object_PianoTune_LocalToUI((PX_Object*)ptr);
 	PX_ObjectExecuteEvent((PX_Object*)ptr, PX_OBJECT_BUILD_EVENT(PX_OBJECT_EVENT_VALUECHANGED));
 }
 
-px_void PX_Object_PianoTune_c1OnChanged(PX_Object* pObject, PX_Object_Event e, px_void* ptr)
+PX_OBJECT_EVENT_FUNCTION(PX_Object_PianoTune_c1OnChanged)
 {
 	px_float fvalue;
-	PX_Object_PianoTune* pTune = PX_ObjectGetDesc(PX_Object_PianoTune, (PX_Object*)ptr);
+	PX_Object_PianoTune* pTune = (PX_Object_PianoTune*)PX_ObjectGetDescByType((PX_Object*)ptr, PX_OBJECT_TYPE_PIANOTUNE);
 	fvalue = (px_float)PX_Object_SliderBarGetValue(pObject);
 	pTune->soundboard_param.c1 = fvalue;
 	PX_Object_PianoTune_LocalToUI((PX_Object*)ptr);
 	PX_ObjectExecuteEvent((PX_Object*)ptr, PX_OBJECT_BUILD_EVENT(PX_OBJECT_EVENT_VALUECHANGED));
 }
 
-px_void PX_Object_PianoTune_c3OnChanged(PX_Object* pObject, PX_Object_Event e, px_void* ptr)
+PX_OBJECT_EVENT_FUNCTION(PX_Object_PianoTune_c3OnChanged)
 {
 	px_float fvalue;
-	PX_Object_PianoTune* pTune = PX_ObjectGetDesc(PX_Object_PianoTune, (PX_Object*)ptr);
+	PX_Object_PianoTune* pTune = (PX_Object_PianoTune*)PX_ObjectGetDescByType((PX_Object*)ptr, PX_OBJECT_TYPE_PIANOTUNE);
 	fvalue = (px_float)PX_Object_SliderBarGetValue(pObject);
 	pTune->soundboard_param.c3 = fvalue;
 	PX_Object_PianoTune_LocalToUI((PX_Object*)ptr);
 	PX_ObjectExecuteEvent((PX_Object*)ptr, PX_OBJECT_BUILD_EVENT(PX_OBJECT_EVENT_VALUECHANGED));
 }
 
-PX_Object* PX_Object_PianoTuneCreate(px_memorypool* mp, PX_Object* Parent, px_float x, px_float y, px_float _width, px_float height)
+PX_Object* PX_Object_PianoTuneAttachObject(PX_Object* pObject,px_int attachIndex, px_float x, px_float y, px_float _width, px_float height)
 {
-	PX_Object_PianoTune Tune,*pTune;
-	PX_Object* pObject;
+	px_memorypool* mp=pObject->mp;
+	PX_Object_PianoTune *pTune;
+
 	px_int width = (px_int)_width;
-	PX_memset(&Tune, 0, sizeof(Tune));
-	pObject = PX_ObjectCreateEx(mp, Parent, x, y ,0, _width, height, 0, PX_OBJECT_TYPE_PIANOTUNE,PX_NULL, PX_Object_PianoTuneOnRender,PX_NULL,&Tune,sizeof(Tune));
-	pTune = PX_ObjectGetDesc(PX_Object_PianoTune, pObject);
+
+	PX_ASSERTIF(pObject == PX_NULL);
+	PX_ASSERTIF(attachIndex < 0 || attachIndex >= PX_COUNTOF(pObject->pObjectDesc));
+	PX_ASSERTIF(pObject->pObjectDesc[attachIndex] != PX_NULL);
+	pTune = (PX_Object_PianoTune*)PX_ObjectCreateDesc(pObject, attachIndex, PX_OBJECT_TYPE_PIANOTUNE, 0, PX_Object_PianoTuneOnRender, 0, 0, sizeof(PX_Object_PianoTune));
+	PX_ASSERTIF(pTune == PX_NULL);
 
 	pTune->scrollArea = PX_Object_ScrollAreaCreate(mp, pObject, 0, 0, (px_int)width, (px_int)height);
 
@@ -1221,10 +1245,21 @@ PX_Object* PX_Object_PianoTuneCreate(px_memorypool* mp, PX_Object* Parent, px_fl
 	return pObject;
 }
 
+PX_Object* PX_Object_PianoTuneCreate(px_memorypool* mp, PX_Object* Parent, px_float x, px_float y, px_float _width, px_float height)
+{
+	PX_Object* pObject;
+	pObject=PX_ObjectCreate(mp, Parent, x, y, x + _width, y + height, 0,0);
+	if (!pObject)
+	{
+		return PX_NULL;
+	}
+	return PX_Object_PianoTuneAttachObject(pObject, 0, x, y, _width, height);
+}
 
 px_void PX_Object_PianoTuneSetParametersEx(PX_Object* pObject,PX_PianoKey_Parameters param,PX_PianoSoundboard_Parameters sParam)
 {
-	PX_Object_PianoTune *pTune = PX_ObjectGetDesc(PX_Object_PianoTune, pObject);
+	PX_Object_PianoTune *pTune = (PX_Object_PianoTune*)PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_PIANOTUNE);
+	PX_ASSERTIF(pTune==PX_NULL);
 	pTune->key_param = param;
 	pTune->soundboard_param = sParam;
 	PX_Object_PianoTune_LocalToUI(pObject);
@@ -1234,49 +1269,3 @@ px_void PX_Object_PianoTuneSetParameters(PX_Object* pObject, PX_Piano*pPiano,px_
 {
 	PX_Object_PianoTuneSetParametersEx(pObject, pPiano->keys[keyIndex].param,pPiano->soundboard.param);
 }
-
-/////////////////////////////////////////////////////////
-//Piano
-/////////////////////////////////////////////////////////
-PX_Object* PX_Designer_PianoCreate(px_memorypool* mp, PX_Object* pparent, px_float x, px_float y, px_float width, px_float height, px_abi* pabi)
-{
-	return PX_Object_PianoCreate(mp, pparent, x, y, 88 * 6, 48);
-}
-
-PX_Designer_ObjectDesc PX_Object_PianoDesignerInstall()
-{
-	PX_Designer_ObjectDesc piano;
-	px_int i = 0;
-	PX_memset(&piano, 0, sizeof(piano));
-	PX_strcat(piano.Name, "piano");
-
-	piano.createfunc = PX_Designer_PianoCreate;
-	piano.type = PX_DESIGNER_OBJECT_TYPE_UI;
-
-	PX_strcat(piano.properties[i].Name, "id");
-	piano.properties[i].getstring = PX_Designer_GetID;
-	piano.properties[i].setstring = PX_Designer_SetID;
-	i++;
-
-	PX_strcat(piano.properties[i].Name, "x");
-	piano.properties[i].getfloat = PX_Designer_GetX;
-	piano.properties[i].setfloat = PX_Designer_SetX;
-	i++;
-
-	PX_strcat(piano.properties[i].Name, "y");
-	piano.properties[i].getfloat = PX_Designer_GetY;
-	piano.properties[i].setfloat = PX_Designer_SetY;
-	i++;
-
-	PX_strcat(piano.properties[i].Name, "width");
-	piano.properties[i].getfloat = PX_Designer_GetWidth;
-	piano.properties[i].setfloat = PX_Designer_SetWidth;
-	i++;
-
-	PX_strcat(piano.properties[i].Name, "height");
-	piano.properties[i].getfloat = PX_Designer_GetHeight;
-	piano.properties[i].setfloat = PX_Designer_SetHeight;
-	i++;
-	return piano;
-}
-

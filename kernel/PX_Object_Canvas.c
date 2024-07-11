@@ -1,6 +1,6 @@
 #include "PX_Object_Canvas.h"
 
-px_void PX_Object_CanvasOnRender(px_surface* psurface, PX_Object* pObject, px_dword elapsed)
+PX_OBJECT_RENDER_FUNCTION(PX_Object_CanvasOnRender)
 {
 	px_float x, y, w, h;
 	PX_Object_Canvas* pdesc = PX_ObjectGetDesc(PX_Object_Canvas, pObject);
@@ -16,7 +16,7 @@ px_void PX_Object_CanvasOnRender(px_surface* psurface, PX_Object* pObject, px_dw
 
 px_void PX_Object_CanvasUpdateSliderBar(PX_Object* pObject)
 {
-	PX_Object_Canvas* pdesc = PX_ObjectGetDesc(PX_Object_Canvas, pObject);
+	PX_Object_Canvas* pdesc = (PX_Object_Canvas *)PX_ObjectGetDescByType(pObject,PX_OBJECT_TYPE_CANVAS);
 	px_float w = pdesc->pCanvasVM->cache_surface.width*1.f;
 	px_float h = pdesc->pCanvasVM->cache_surface.height * 1.f;
 	px_float vw = pdesc->pCanvasVM->view_surface.width / pdesc->pCanvasVM->scale;
@@ -52,12 +52,12 @@ px_void PX_Object_CanvasUpdateSliderBar(PX_Object* pObject)
 }
 
 
-px_void PX_Object_CanvasOnCursorWheeling(PX_Object* pObject, PX_Object_Event e, px_void* ptr)
+PX_OBJECT_EVENT_FUNCTION(PX_Object_CanvasOnCursorWheeling)
 {
-	PX_Object_Canvas* pdesc = PX_ObjectGetDesc(PX_Object_Canvas, pObject);
+	PX_Object_Canvas* pdesc = (PX_Object_Canvas *)PX_ObjectGetDescByType(pObject,PX_OBJECT_TYPE_CANVAS);
 	px_float cx, cy, cz;
 	px_float x, y,w,h;
-
+	PX_ASSERTIF(!pdesc);
 	PX_OBJECT_INHERIT_CODE(pObject, x, y, w, h);
 	if (PX_ObjectIsCursorInRegion(pObject,e))
 	{
@@ -87,25 +87,26 @@ px_void PX_Object_CanvasOnCursorWheeling(PX_Object* pObject, PX_Object_Event e, 
 	
 }
 
-px_void PX_Object_CanvasOnHSliderBarChanged(PX_Object* pObject, PX_Object_Event  e, px_void* ptr)
+PX_OBJECT_EVENT_FUNCTION(PX_Object_CanvasOnHSliderBarChanged)
 {
-	PX_Object_Canvas* pdesc = PX_ObjectGetDesc(PX_Object_Canvas, (PX_Object*)ptr);
-
+	PX_Object_Canvas* pdesc = (PX_Object_Canvas*)PX_ObjectGetDescByType((PX_Object*)ptr, PX_OBJECT_TYPE_CANVAS);
+	PX_ASSERTIF(!pdesc);
 	PX_CanvasVMSetViewPosition(pdesc->pCanvasVM, PX_Object_SliderBarGetValue(pObject) * 1.f, pdesc->pCanvasVM->view_y);
 	
 }
 
-px_void PX_Object_CanvasOnVSliderBarChanged(PX_Object* pObject, PX_Object_Event  e, px_void* ptr)
+PX_OBJECT_EVENT_FUNCTION(PX_Object_CanvasOnVSliderBarChanged)
 {
-	PX_Object_Canvas* pdesc = PX_ObjectGetDesc(PX_Object_Canvas, (PX_Object*)ptr);
+	PX_Object_Canvas* pdesc = (PX_Object_Canvas*)PX_ObjectGetDescByType((PX_Object*)ptr, PX_OBJECT_TYPE_CANVAS);
+	PX_ASSERTIF(!pdesc);
 	PX_CanvasVMSetViewPosition(pdesc->pCanvasVM, pdesc->pCanvasVM->view_x, PX_Object_SliderBarGetValue(pObject) * 1.f);
 }
 
 px_void PX_Object_CanvasEnterEdit(PX_Object* pObject,px_float x,px_float y,px_float z)
 {
-	PX_Object_Canvas* pdesc = PX_ObjectGetDesc(PX_Object_Canvas, pObject);
+	PX_Object_Canvas* pdesc = (PX_Object_Canvas*)PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_CANVAS);
 	px_point2D canvaspos;
-	
+	PX_ASSERTIF(!pdesc);
 	PX_CanvasVMOnBegin(pdesc->pCanvasVM);
 	if (pdesc->pCanvasVM->reg_state==PX_CanvasVM_State_Painting)
 	{
@@ -116,10 +117,11 @@ px_void PX_Object_CanvasEnterEdit(PX_Object* pObject,px_float x,px_float y,px_fl
 }
 
 
-px_void PX_Object_CanvasOnCursorDown(PX_Object* pObject, PX_Object_Event  e, px_void* ptr)
+PX_OBJECT_EVENT_FUNCTION(PX_Object_CanvasOnCursorDown)
 {
 	px_float x, y, w, h;
-	PX_Object_Canvas* pdesc = PX_ObjectGetDesc(PX_Object_Canvas, pObject);
+	PX_Object_Canvas* pdesc = (PX_Object_Canvas*)PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_CANVAS);
+	PX_ASSERTIF(!pdesc);
 	PX_OBJECT_INHERIT_CODE(pObject, x, y, w, h);
 
 	if (PX_ObjectIsCursorInRegion(pObject,e))
@@ -138,20 +140,22 @@ px_void PX_Object_CanvasOnCursorDown(PX_Object* pObject, PX_Object_Event  e, px_
 }
 
 
-px_void PX_Object_CanvasOnCursorRDown(PX_Object* pObject, PX_Object_Event  e, px_void* ptr)
+PX_OBJECT_EVENT_FUNCTION(PX_Object_CanvasOnCursorRDown)
 {
 	px_float x, y, w, h;
-	PX_Object_Canvas* pdesc = PX_ObjectGetDesc(PX_Object_Canvas, pObject);
+	PX_Object_Canvas* pdesc = (PX_Object_Canvas*)PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_CANVAS);
+	PX_ASSERTIF(!pdesc);
 	PX_OBJECT_INHERIT_CODE(pObject, x, y, w, h);
 
 	PX_CanvasVMMoveBack(pdesc->pCanvasVM);
 }
 
 
-px_void PX_Object_CanvasOnCursorMove(PX_Object* pObject, PX_Object_Event  e, px_void* ptr)
+PX_OBJECT_EVENT_FUNCTION(PX_Object_CanvasOnCursorMove)
 {
 	px_float x, y, w, h;
-	PX_Object_Canvas* pdesc = PX_ObjectGetDesc(PX_Object_Canvas, pObject);
+	PX_Object_Canvas* pdesc = (PX_Object_Canvas*)PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_CANVAS);
+	PX_ASSERTIF(!pdesc);
 	PX_OBJECT_INHERIT_CODE(pObject, x, y, w, h);
 	if (PX_ObjectIsCursorInRegion(pObject, e))
 	{
@@ -168,10 +172,11 @@ px_void PX_Object_CanvasOnCursorMove(PX_Object* pObject, PX_Object_Event  e, px_
 
 }
 
-px_void PX_Object_CanvasOnCursorDrag(PX_Object* pObject, PX_Object_Event  e, px_void* ptr)
+PX_OBJECT_EVENT_FUNCTION(PX_Object_CanvasOnCursorDrag)
 {
 	px_float x, y, w, h;
-	PX_Object_Canvas* pdesc = PX_ObjectGetDesc(PX_Object_Canvas, pObject);
+	PX_Object_Canvas* pdesc = (PX_Object_Canvas*)PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_CANVAS);
+	PX_ASSERTIF(!pdesc);
 	//px_surface* prender = PX_Object_CanvasGetCurrentEditingSurface(pObject);
 	
 	PX_OBJECT_INHERIT_CODE(pObject, x, y, w, h);
@@ -217,10 +222,11 @@ px_void PX_Object_CanvasOnCursorDrag(PX_Object* pObject, PX_Object_Event  e, px_
 	
 }
 
-px_void PX_Object_CanvasOnCursorUp(PX_Object* pObject, PX_Object_Event  e, px_void* ptr)
+PX_OBJECT_EVENT_FUNCTION(PX_Object_CanvasOnCursorUp)
 {
 	px_float x, y, w, h;
-	PX_Object_Canvas* pdesc = PX_ObjectGetDesc(PX_Object_Canvas, pObject);
+	PX_Object_Canvas* pdesc = (PX_Object_Canvas*)PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_CANVAS);
+	PX_ASSERTIF(!pdesc);
 	PX_OBJECT_INHERIT_CODE(pObject, x, y, w, h);
 
 	if (PX_ObjectIsCursorInRegion(pObject, e))
@@ -237,26 +243,25 @@ px_void PX_Object_CanvasOnCursorUp(PX_Object* pObject, PX_Object_Event  e, px_vo
 	}
 	
 }
-
-
-
-PX_Object* PX_Object_CanvasCreate(px_memorypool* mp, PX_Object* Parent, px_int x, px_int y,  PX_CanvasVM* pCanvasVM)
+PX_Object* PX_Object_CanvasAttachObject(PX_Object* pObject, px_int attachIndex, px_int x, px_int y, PX_CanvasVM* pCanvasVM)
 {
-	PX_Object_Canvas desc = { 0 }, * pdesc;
-	PX_Object* pObject;
+	px_memorypool* mp=pObject->mp;
+	PX_Object_Canvas* pdesc;
+	PX_ASSERTIF(pObject == PX_NULL);
+	PX_ASSERTIF(attachIndex < 0 || attachIndex >= PX_COUNTOF(pObject->pObjectDesc));
+	PX_ASSERTIF(pObject->pObjectDesc[attachIndex] != PX_NULL);
+	pdesc = (PX_Object_Canvas*)PX_ObjectCreateDesc(pObject, attachIndex, PX_OBJECT_TYPE_CANVAS, 0, PX_Object_CanvasOnRender, 0, 0, sizeof(PX_Object_Canvas));
+	if (pdesc==PX_NULL)
+		return PX_NULL;
 
-
-	pObject = PX_ObjectCreateEx(mp, Parent, (px_float)x, (px_float)y, 0, (px_float)pCanvasVM->view_surface.width+24, (px_float)pCanvasVM->view_surface.height+24, 0, PX_OBJECT_TYPE_CANVAS, 0, PX_Object_CanvasOnRender, PX_NULL, &desc, sizeof(desc));
-	pdesc = PX_ObjectGetDesc(PX_Object_Canvas, pObject);
 	pdesc->mp = mp;
 	pdesc->pCanvasVM = pCanvasVM;
 
 	pdesc->pHSliderBar = PX_Object_SliderBarCreate(mp, pObject, 0, pCanvasVM->view_surface.height, pCanvasVM->view_surface.width, 24, PX_OBJECT_SLIDERBAR_TYPE_HORIZONTAL, PX_OBJECT_SLIDERBAR_STYLE_BOX);
 	pdesc->pVSliderBar = PX_Object_SliderBarCreate(mp, pObject, pCanvasVM->view_surface.width, 0, 24, pCanvasVM->view_surface.height, PX_OBJECT_SLIDERBAR_TYPE_VERTICAL, PX_OBJECT_SLIDERBAR_STYLE_BOX);
-
 	PX_Object_SliderBarSetBackgroundColor(pdesc->pHSliderBar, PX_COLOR_WHITE);
 	PX_Object_SliderBarSetColor(pdesc->pHSliderBar, PX_COLOR_BLACK);
-	
+
 	PX_Object_SliderBarSetBackgroundColor(pdesc->pVSliderBar, PX_COLOR_WHITE);
 	PX_Object_SliderBarSetColor(pdesc->pVSliderBar, PX_COLOR_BLACK);
 
@@ -268,21 +273,29 @@ PX_Object* PX_Object_CanvasCreate(px_memorypool* mp, PX_Object* Parent, px_int x
 	PX_ObjectRegisterEvent(pObject, PX_OBJECT_EVENT_CURSORMOVE, PX_Object_CanvasOnCursorMove, 0);
 	PX_ObjectRegisterEvent(pObject, PX_OBJECT_EVENT_CURSORDRAG, PX_Object_CanvasOnCursorDrag, 0);
 	PX_ObjectRegisterEvent(pObject, PX_OBJECT_EVENT_CURSORMUP, PX_Object_CanvasOnCursorUp, 0);
-	
+
 	PX_ObjectRegisterEvent(pdesc->pHSliderBar, PX_OBJECT_EVENT_VALUECHANGED, PX_Object_CanvasOnHSliderBarChanged, pObject);
 	PX_ObjectRegisterEvent(pdesc->pVSliderBar, PX_OBJECT_EVENT_VALUECHANGED, PX_Object_CanvasOnVSliderBarChanged, pObject);
+	return pObject;
 
+}
 
+PX_Object* PX_Object_CanvasCreate(px_memorypool* mp, PX_Object* Parent, px_int x, px_int y,  PX_CanvasVM* pCanvasVM)
+{
+
+	PX_Object* pObject;
+	pObject = PX_ObjectCreate(mp, Parent, (px_float)x, (px_float)y, 0, (px_float)pCanvasVM->view_surface.width+24, (px_float)pCanvasVM->view_surface.height+24, 0);
+	if (!PX_Object_CanvasAttachObject(pObject, 0, x, y, pCanvasVM))
+	{
+		PX_ObjectDelete(pObject);
+		return PX_NULL;
+	}
 	return pObject;
 }
 
 PX_Object_Canvas* PX_Object_GetCanvas(PX_Object* pObject)
 {
-	if (pObject->Type==PX_OBJECT_TYPE_CANVAS)
-	{
-		return PX_ObjectGetDesc(PX_Object_Canvas, pObject);
-	}
-	return PX_NULL;
+	return (PX_Object_Canvas*)PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_CANVAS);
 }
 
 

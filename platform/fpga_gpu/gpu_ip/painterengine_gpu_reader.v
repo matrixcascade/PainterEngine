@@ -1,36 +1,27 @@
 `timescale 1 ns / 1 ns
 
-`define DATA_WIDTH 32
-`define ADDRESS_WIDTH 32
-`define ADDRESS_ALIGN 64
 
-
-
-module painterengine_gpu_dma_reader #
-		(
-		parameter integer PARAM_DATA_ALIGN	= `ADDRESS_ALIGN,
-		parameter integer PARAM_ADDRESS_WIDTH	= `ADDRESS_WIDTH,
-		parameter integer PARAM_DATA_WIDTH	= `DATA_WIDTH
-		)
+module painterengine_gpu_dma_reader
 		(
 		//input clk
 		input wire   									i_wire_clock,
 		input wire   									i_wire_resetn,
 		output wire 									o_wire_done,
 
-		input wire [PARAM_ADDRESS_WIDTH-1:0] 			i_wire_address,
-		input wire [31:0] 								i_wire_length,
+		input wire  [4*32-1:0] 							i_wire_address,
+		input wire  [4*32-1:0] 							i_wire_length,
 		
-		output wire [PARAM_DATA_WIDTH-1:0]              o_wire_data,
-		output wire 									o_wire_data_valid,
-		input wire 										i_wire_data_next,
-		output wire 									o_wire_error,
+		input wire  [3:0] 								i_wire_router,
+		output reg  [4*32-1:0]         					o_wire_data,
+		output reg  [3:0]							    o_wire_data_valid,
+		input  wire [3:0]								i_wire_data_next,
+		output wire  									o_wire_error,
 
 		///////////////////////////////////////////////////////////////////////////////////////////
 		//AXI full ports
 		///////////////////////////////////////////////////////////////////////////////////////////
 		output wire 									o_wire_M_AXI_ARID,
-		output wire [PARAM_ADDRESS_WIDTH-1:0]			o_wire_M_AXI_ARADDR,
+		output wire [31:0]								o_wire_M_AXI_ARADDR,
 		output wire [7 : 0] 							o_wire_M_AXI_ARLEN,
 		output wire [2 : 0] 							o_wire_M_AXI_ARSIZE,
 		output wire [1 : 0] 							o_wire_M_AXI_ARBURST,
@@ -42,7 +33,7 @@ module painterengine_gpu_dma_reader #
 		input wire   									i_wire_M_AXI_ARREADY,
 
 		input wire  									i_wire_M_AXI_RID,
-		input wire [PARAM_DATA_WIDTH-1 : 0] 			i_wire_M_AXI_RDATA,
+		input wire [31 : 0] 							i_wire_M_AXI_RDATA,
 		input wire [1 : 0] 								i_wire_M_AXI_RRESP,
 		input wire  									i_wire_M_AXI_RLAST,
 		input wire  									i_wire_M_AXI_RVALID,
@@ -59,23 +50,23 @@ module painterengine_gpu_dma_reader #
 		
 
 
-		reg [PARAM_ADDRESS_WIDTH-1 : 0] 				reg_address=0;
-		reg [31:0] 										reg_length;
+		reg [4*32-1 : 0] 								reg_address;
+		reg [4*32-1:0] 									reg_length;
 		reg [31:0] 										reg_offset;
 		reg [7:0] 										reg_burst_counter;
 		reg [15:0] 										reg_timeout_error;
-		reg [2:0]										reg_state=0;
-
-		reg [PARAM_ADDRESS_WIDTH-1 : 0] 				reg_axi_araddr;
+		reg [2:0]										reg_state;
+		reg [31 : 0] 									reg_axi_araddr;
 		reg  											reg_axi_arvalid;
 		reg [7:0] 										reg_axi_burstlen;
 
+		wire [2:0] wire_router_index=i_wire_router==8?3:(i_wire_router>>1);
 	
 		//Read Address (AR)
 		assign o_wire_M_AXI_ARADDR	= reg_axi_araddr;
 		assign o_wire_M_AXI_ARLEN	= reg_axi_burstlen - 1;
 		assign o_wire_M_AXI_ARVALID	= reg_axi_arvalid;
-		assign o_wire_M_AXI_RREADY	= i_wire_data_next;
+		assign o_wire_M_AXI_RREADY	= i_wire_data_next[wire_router_index];
 
 		assign o_wire_M_AXI_ARID	= 'b0;
 		assign o_wire_M_AXI_ARSIZE	= 3'b10;
@@ -87,14 +78,14 @@ module painterengine_gpu_dma_reader #
 		
 
 
-
+		
 		wire [15:0] wire_first_burst_aligned_len;
-		assign wire_first_burst_aligned_len = PARAM_DATA_ALIGN-((i_wire_address>>2)&(PARAM_DATA_ALIGN-1));
+		assign wire_first_burst_aligned_len = 32-((i_wire_address[wire_router_index*32+:32]>>2)&(32-1));
 
 		task task_idle;
 	    if(i_wire_resetn)
 		begin
-			if((i_wire_address%4)||i_wire_length==0)
+			if((i_wire_address[wire_router_index*32+:32]%4)||i_wire_length[wire_router_index*32+:32]==0)
 			begin
 				reg_timeout_error<=0;
 				reg_offset<=0;
@@ -107,14 +98,14 @@ module painterengine_gpu_dma_reader #
 			else
 			begin
 				reg_timeout_error<=0;
-				reg_address<=i_wire_address;
-				reg_length<=i_wire_length;
+				reg_address<=i_wire_address[wire_router_index*32+:32];
+				reg_length<=i_wire_length[wire_router_index*32+:32];
 				reg_offset<=0;
 				reg_burst_counter<=0;
 				reg_state<=`fsm_state_address_write;
 				//first axi address
-				reg_axi_araddr<=i_wire_address;
-				reg_axi_burstlen<=wire_first_burst_aligned_len>i_wire_length?i_wire_length:wire_first_burst_aligned_len;
+				reg_axi_araddr<=i_wire_address[wire_router_index*32+:32];
+				reg_axi_burstlen<=wire_first_burst_aligned_len>i_wire_length[wire_router_index*32+:32]?i_wire_length[wire_router_index*32+:32]:wire_first_burst_aligned_len;
 				reg_axi_arvalid<=1;
 			end
 		end
@@ -139,8 +130,8 @@ module painterengine_gpu_dma_reader #
 		wire  [15:0] wire_burst_aligned_len2;
 		assign wire_reserved_len = reg_length-reg_offset;
 		assign wire_reserved_len2 = reg_length-reg_offset-reg_axi_burstlen;
-		assign wire_burst_aligned_len = PARAM_DATA_ALIGN-(((reg_address>>2)+reg_offset)&(PARAM_DATA_ALIGN-1));
-		assign wire_burst_aligned_len2 = PARAM_DATA_ALIGN-(((reg_address>>2)+reg_offset+reg_axi_burstlen)&(PARAM_DATA_ALIGN-1));
+		assign wire_burst_aligned_len = 32-(((reg_address>>2)+reg_offset)&(32-1));
+		assign wire_burst_aligned_len2 = 32-(((reg_address>>2)+reg_offset+reg_axi_burstlen)&(32-1));
 		task task_write_address;
 			if(reg_axi_arvalid&&i_wire_M_AXI_ARREADY)
 			begin
@@ -158,7 +149,7 @@ module painterengine_gpu_dma_reader #
 			else
 			begin
 				//next axi address
-				reg_axi_araddr<=reg_address+reg_offset*(PARAM_DATA_WIDTH>>3);
+				reg_axi_araddr<=reg_address+reg_offset*(32>>3);
 				reg_axi_arvalid<=1;
 				reg_axi_burstlen<=wire_burst_aligned_len>wire_reserved_len?wire_reserved_len:wire_burst_aligned_len;
 				reg_burst_counter<=0;
@@ -188,7 +179,7 @@ module painterengine_gpu_dma_reader #
 						reg_offset<=reg_offset+reg_axi_burstlen;
 						reg_state<=`fsm_state_address_write;
 						//first axi address
-						reg_axi_araddr<=reg_address+(reg_offset+reg_axi_burstlen)*(PARAM_DATA_WIDTH/8);
+						reg_axi_araddr<=reg_address+(reg_offset+reg_axi_burstlen)*(32/8);
 						reg_axi_arvalid<=1;
 						reg_axi_burstlen<=wire_burst_aligned_len2>wire_reserved_len2?wire_reserved_len2:wire_burst_aligned_len2;
 						reg_burst_counter<=0;
@@ -304,7 +295,67 @@ module painterengine_gpu_dma_reader #
 				end
 			end
 		end
-		assign 											o_wire_data=i_wire_M_AXI_RDATA;
-		assign 											o_wire_data_valid=i_wire_M_AXI_RVALID;
-		assign 											o_wire_error=reg_state==`fsm_state_error;
+		always @(*) 
+		begin
+			case(i_wire_router)
+			1:
+			begin
+				o_wire_data[0*32+:32]=i_wire_M_AXI_RDATA;
+				o_wire_data_valid[0*1+:1]=i_wire_M_AXI_RVALID;
+				o_wire_data[1*32+:32]=0;
+				o_wire_data_valid[1*1+:1]=0;
+				o_wire_data[2*32+:32]=0;
+				o_wire_data_valid[2*1+:1]=0;
+				o_wire_data[3*32+:32]=0;
+				o_wire_data_valid[3*1+:1]=0;
+			end
+			2:
+			begin
+				
+				o_wire_data[0*32+:32]<=0;
+				o_wire_data_valid[0*1+:1]<=0;
+				o_wire_data[1*32+:32]<=i_wire_M_AXI_RDATA;
+				o_wire_data_valid[1*1+:1]<=i_wire_M_AXI_RVALID;
+				o_wire_data[2*32+:32]<=0;
+				o_wire_data_valid[2*1+:1]<=0;
+				o_wire_data[3*32+:32]<=0;
+				o_wire_data_valid[3*1+:1]<=0;
+			end
+			4:
+			begin
+				o_wire_data[2*32+:32]<=i_wire_M_AXI_RDATA;
+				o_wire_data_valid[2*1+:1]<=i_wire_M_AXI_RVALID;
+				o_wire_data[0*32+:32]<=0;
+				o_wire_data_valid[0*1+:1]<=0;
+				o_wire_data[1*32+:32]<=0;
+				o_wire_data_valid[1*1+:1]<=0;
+				o_wire_data[3*32+:32]<=0;
+				o_wire_data_valid[3*1+:1]<=0;
+			end
+			8:
+			begin
+				o_wire_data[3*32+:32]<=i_wire_M_AXI_RDATA;
+				o_wire_data_valid[3*1+:1]<=i_wire_M_AXI_RVALID;
+				o_wire_data[0*32+:32]<=0;
+				o_wire_data_valid[0*1+:1]<=0;
+				o_wire_data[1*32+:32]<=0;
+				o_wire_data_valid[1*1+:1]<=0;
+				o_wire_data[2*32+:32]<=0;
+				o_wire_data_valid[2*1+:1]<=0;
+			end
+			default:
+			begin
+				o_wire_data[0*32+:32]<=0;
+				o_wire_data_valid[0*1+:1]<=0;
+				o_wire_data[1*32+:32]<=0;
+				o_wire_data_valid[1*1+:1]<=0;
+				o_wire_data[2*32+:32]<=0;
+				o_wire_data_valid[2*1+:1]<=0;
+				o_wire_data[3*32+:32]<=0;
+				o_wire_data_valid[3*1+:1]<=0;
+			end
+			endcase
+		end
+
+		assign 		o_wire_error=reg_state==`fsm_state_error;
 	endmodule

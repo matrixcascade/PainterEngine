@@ -8,6 +8,7 @@ typedef struct
 	PX_Live live;
 }PX_Object_Live2D;
 
+PX_Object* PX_Object_Live2DAttachObject(PX_Object* pObject, px_int attachIndex, px_int x, px_int y, PX_LiveFramework* pLiveFramework);
 PX_Object* PX_Object_Live2DCreate(px_memorypool* mp, PX_Object* Parent, px_int x, px_int y, PX_LiveFramework *pLiveFramework);
 px_void PX_Object_Live2DPlayAnimation(PX_Object *pObject,px_char *name);
 px_void PX_Object_Live2DPlayAnimationRandom(PX_Object* pObject);

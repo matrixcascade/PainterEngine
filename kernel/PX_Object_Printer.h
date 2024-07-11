@@ -42,7 +42,7 @@ px_int	   PX_Object_PrinterGetLastCreateId(PX_Object* pObject);
 px_void		PX_Object_PrinterSetBackgroundColor(PX_Object* pObject, px_color color);
 px_void		PX_Object_PrinterSetFontColor(PX_Object* pObject, px_color color);
 PX_Object* PX_Object_PrinterPrintSpace(PX_Object* pObject, px_int height);
-PX_Designer_ObjectDesc PX_Object_PrinterDesignerInstall();
+
 PX_Object* PX_Object_PrinterPrintProcessBar(PX_Object* pObject);
 PX_Object* PX_Object_PrinterLastProcessBarValue(PX_Object* pObject, const px_int value);
 #endif

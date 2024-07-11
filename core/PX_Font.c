@@ -2582,6 +2582,13 @@ px_bool PX_FontModuleInitialize(px_memorypool *mp,PX_FontModule *module)
 	return PX_MapInitialize(mp,&module->characters_map);
 }
 
+px_void PX_FontModuleSetSize(PX_FontModule* module, px_int size)
+{
+	module->max_Height = size;
+	module->max_Width = size;
+	module->max_BearingY = size;
+}
+
 px_void PX_FontModuleSetCodepage(PX_FontModule* module, PX_FONTMODULE_CODEPAGE codePage)
 {
 	module->codePage = codePage;

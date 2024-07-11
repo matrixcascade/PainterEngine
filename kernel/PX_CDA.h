@@ -42,11 +42,11 @@ typedef enum
 
 typedef struct _PX_CDA PX_CDA;
 typedef struct _PX_CDA_Object PX_CDA_Object;
-typedef PX_Object* (*__px_cda_createobject_callback)(PX_CDA* pCDA, PX_CDA_Object *pCDA_Desc, px_float grid_x, px_float grid_y);
-#define PX_CDA_CREATE_OBJECT_CALLBACK_FUNCTION(name) PX_Object * name(PX_CDA* pCDA, PX_CDA_Object *pCDA_Desc, px_float grid_x, px_float grid_y)
+typedef PX_Object* (*__px_cda_createobject_callback)(PX_Object *pObject);
+#define PX_CDA_CREATE_OBJECT_CALLBACK_FUNCTION(name) PX_Object * name(PX_Object *pObject)
 typedef px_void (*__px_cda_object_property_change_callback)(PX_Object* pObject, px_int index);
 #define PX_CDA_OBJECT_PROPERTY_CHANGE_CALLBACK_FUNCTION(name) px_void name(PX_Object* pObject, px_int index)
-#define    PX_ObjectGetCDADesc(type,pobject) ((type *)((pobject)->pObjectDesc[1]))
+
 typedef enum
 {
 	PX_CDA_OBJECT_PROPERTY_TYPE_STRING,
@@ -193,6 +193,7 @@ typedef struct _PX_CDA_Object
 typedef struct _PX_CDA
 {
 	px_memorypool* mp;
+	px_memorypool* mp_static;
 	//view
 	px_float   camera_x, camera_y;
 	px_float   camera_scale;
@@ -233,6 +234,7 @@ typedef struct _PX_CDA
 	//lib
 	PX_FontModule* fontmodule;
 	PX_ResourceLibrary *presourceLibrary;
+	PX_SoundPlay *soundplay;
 	PX_VM_DebuggerMap debugmap;
 	PX_VM  vm;
 	px_uint64 rand_seed;
@@ -240,8 +242,12 @@ typedef struct _PX_CDA
 
 	//last 
 	PX_CDA_ObjectClass *pLastCreatedObjectClass;
+	px_bool last_opcode_is_set_property;
+	px_int	last_set_property_object_index;
+	px_int	last_set_property_index;
 }PX_CDA;
 
+PX_CDA_Object* PX_Object_GetCDAObject(PX_Object* pObject);
 
 px_bool PX_CDA_AddObjectClass(PX_CDA* pCDA, PX_CDA_ObjectClass* pclass);
 
@@ -252,8 +258,6 @@ px_void PX_CDA_Object_ID_PropertyChangedCallback(PX_Object* pObject, px_int inde
 px_bool PX_CDA_AddObject(PX_CDA* pCDA, PX_Object* pObject);
 
 PX_Object* PX_CDA_CreateClassObject(PX_CDA* pCDA, px_char classname[], px_float grid_x, px_float grid_y);
-
-px_void PX_CDA_AttachCDADescToObject(PX_Object* pObject,PX_CDA_Object *pdesc);
 
 px_void PX_CDA_RemoveObject(PX_CDA* pCDA, PX_Object* pObject);
 
@@ -323,11 +327,6 @@ const px_char *PX_CDA_ObjectGetPropertyValue(PX_Object* pCDAObject, px_char name
 
 const px_char* PX_CDA_ObjectGetPropertyValueIndex  (PX_Object* pCDAObject, px_int index);
 
-px_bool PX_CDA_ObjectSetPropertyValue(PX_Object* pCDAObject, px_char name[], px_char value[]);
-
-px_bool PX_CDA_ObjectSetPropertyValueIndex(PX_Object* pCDAObject, px_int index,const px_char value[]);
-
-
 px_dword PX_CDA_ObjectGetPortTimeStamp(PX_Object* pCDAObject, px_int port);
 
 PX_CDA_Grid *PX_CDA_ObjectGetPortGrid(PX_Object* pCDAObject, px_int port);
@@ -340,7 +339,7 @@ px_void PX_CDA_SetLastCreatedObjectClassPropertyCallback(PX_CDA* pCDA, px_char n
 
 px_bool PX_CDA_ObjectClassSetCreateCallback(PX_CDA* pCDA,px_char name[],__px_cda_createobject_callback callback,px_void* ptr);
 
-px_bool	PX_CDA_Initialize(px_memorypool* mp, PX_CDA* pCDA, px_int grid_x_count, px_int grid_y_count, px_int view_width, px_int view_height, PX_FontModule* fm, PX_ResourceLibrary* plib);
+px_bool	PX_CDA_Initialize(px_memorypool* mp, px_memorypool* mp_static, PX_CDA* pCDA, px_int grid_x_count, px_int grid_y_count, px_int view_width, px_int view_height, PX_FontModule* fm, PX_ResourceLibrary* plib,PX_SoundPlay *soundplay);
 
 px_void PX_CDA_Update(PX_CDA* pCDA, px_uint elapsed);
 
@@ -351,6 +350,8 @@ px_void PX_CDA_Free(PX_CDA* pCDA);
 px_void PX_CDA_PostEvent(PX_CDA* pCDA, PX_Object_Event e);
 
 const px_char *PX_CDA_QueryGridPortDescription(PX_CDA* pCDA, px_float gridx, px_float gridy);
+
+PX_Object* PX_CDA_GetCDAObjectByIndex(PX_CDA* CDA, px_int index);
 #endif
 
 

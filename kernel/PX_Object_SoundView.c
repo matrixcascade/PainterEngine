@@ -57,12 +57,36 @@ PX_OBJECT_RENDER_FUNCTION(PX_Object_SoundViewRender)
 	PX_SurfaceSetLimitInfo(psurface, linfo);
 
 }
+PX_Object* PX_Object_SoundViewAttachObject( PX_Object* pObject,px_int attachIndex, px_float x, px_float y, px_float width, px_float height, PX_SoundPlay* pSoundPlay)
+{
+	px_memorypool* mp = pObject->mp;
+	PX_Object_SoundView* pDesc;
+	
+	PX_ASSERTIF(pObject == PX_NULL);
+	PX_ASSERTIF(attachIndex < 0 || attachIndex >= PX_COUNTOF(pObject->pObjectDesc));
+	PX_ASSERTIF(pObject->pObjectDesc[attachIndex] != PX_NULL);
+	pDesc = (PX_Object_SoundView*)PX_ObjectCreateDesc(pObject, attachIndex, PX_OBJECT_TYPE_SOUNDVIEW, 0, PX_Object_SoundViewRender, 0, 0, sizeof(PX_Object_SoundView));
+	PX_ASSERTIF(pDesc == PX_NULL);
+
+	pDesc->pSoundPlay = pSoundPlay;
+	return pObject;
+}
+
+
 PX_Object* PX_Object_SoundViewCreate(px_memorypool* mp, PX_Object* Parent, px_float x, px_float y, px_float width, px_float height, PX_SoundPlay* pSoundPlay)
 {
 	PX_Object* pObject;
-	PX_Object_SoundView* pDesc;
-	pObject = PX_ObjectCreateEx(mp, Parent, x, y,0, width, height, 0, PX_OBJECT_TYPE_SOUNDVIEW, 0, PX_Object_SoundViewRender, PX_NULL, 0, sizeof(PX_Object_SoundView));
-pDesc = PX_ObjectGetDesc(PX_Object_SoundView, pObject);
-	pDesc->pSoundPlay = pSoundPlay;
+
+	pObject = PX_ObjectCreate(mp, Parent, x, y,0, width, height, 0);
+	if (!pObject)
+	{
+		return PX_NULL;
+	}
+	if (!PX_Object_SoundViewAttachObject(pObject, 0, x, y, width, height, pSoundPlay))
+	{
+		PX_ObjectDelete(pObject);
+		return PX_NULL;
+	}
+
 	return pObject;
 }

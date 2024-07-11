@@ -1,6 +1,6 @@
 #include "PX_Object_AsmDebugger.h"
 
-px_void PX_Object_AsmDebuggerMonitorOnRender(px_surface* psurface, PX_Object* pObject, px_dword elapsed)
+PX_OBJECT_RENDER_FUNCTION(PX_Object_AsmDebuggerMonitorOnRender)
 {
 	PX_Object_AsmDebugger_VarMonitor *pvar = (PX_Object_AsmDebugger_VarMonitor *)PX_Object_ListItemGetData(pObject);
 	PX_Object* pDescObject = (PX_Object*)pObject->User_ptr;
@@ -9,9 +9,9 @@ px_void PX_Object_AsmDebuggerMonitorOnRender(px_surface* psurface, PX_Object* pO
 	PX_FontModuleDrawText(psurface, pDesc->fm, (px_int)pObject->x + 8, (px_int)pObject->y + (px_int)(pObject->Height / 2), PX_ALIGN_LEFTMID, pvar->name, PX_COLOR(255,255,255,0));
 }
 
-px_bool PX_Object_AsmDebuggerMonitorOnCreate(px_memorypool* mp, PX_Object* ItemObject, px_void* userptr)
+PX_OBJECT_LIST_ITEM_CREATE_FUNCTION(PX_Object_AsmDebuggerMonitorOnCreate)
 {
-	PX_ObjectAddRenderFunction(ItemObject, PX_Object_AsmDebuggerMonitorOnRender);
+	PX_ObjectSetRenderFunction(ItemObject, PX_Object_AsmDebuggerMonitorOnRender,0);
 	ItemObject->User_ptr = userptr;
 	return PX_TRUE;
 }
@@ -55,7 +55,7 @@ px_void PX_Object_AsmDebuggerPrintVar(PX_Object_AsmDebugger* pAsm, px_variable* 
 }
 
 
-px_void PX_Object_AsmDebuggerSourceOnRender(px_surface *psurface,PX_Object *pObject,px_dword elapsed)
+PX_OBJECT_RENDER_FUNCTION(PX_Object_AsmDebuggerSourceOnRender)
 {
 	PX_Object_AsmDebugger_Line* pline = (PX_Object_AsmDebugger_Line *)PX_Object_ListItemGetData(pObject);
 	PX_Object* pDescObject = (PX_Object*)pObject->User_ptr;
@@ -103,11 +103,12 @@ px_void PX_Object_AsmDebuggerSourceOnRender(px_surface *psurface,PX_Object *pObj
 
 px_bool PX_Object_AsmDebuggerSourceOnCreate(px_memorypool* mp, PX_Object* ItemObject, px_void* userptr)
 {
-	PX_ObjectAddRenderFunction(ItemObject, PX_Object_AsmDebuggerSourceOnRender);
+	PX_ObjectSetRenderFunction(ItemObject, PX_Object_AsmDebuggerSourceOnRender,0);
 	ItemObject->User_ptr = userptr;
 	return PX_TRUE;
 }
-px_void PX_Object_AsmDebuggerRender(px_surface* prendersurface, PX_Object* pObject, px_dword elapsed)
+
+PX_OBJECT_RENDER_FUNCTION(PX_Object_AsmDebuggerRender)
 {
 	PX_Object_AsmDebugger* pDesc = PX_ObjectGetDesc(PX_Object_AsmDebugger, pObject);
 	if (pObject->Width<30||pObject->Height<30)
@@ -256,7 +257,7 @@ px_void PX_Object_AsmDebuggerRender(px_surface* prendersurface, PX_Object* pObje
 	} 
 }
 
-px_void PX_Object_AsmDebuggerFree(PX_Object* pObject)
+PX_OBJECT_FREE_FUNCTION(PX_Object_AsmDebuggerFree)
 {
 	px_int i;
 	PX_Object_AsmDebugger *pDesc = PX_ObjectGetDesc(PX_Object_AsmDebugger, pObject);
@@ -272,11 +273,12 @@ px_void PX_Object_AsmDebuggerFree(PX_Object* pObject)
 }
 
 
-px_void PX_Object_AsmDebuggerOnMonitorChanged(PX_Object* pObject,PX_Object_Event e,px_void *ptr)
+PX_OBJECT_EVENT_FUNCTION(PX_Object_AsmDebuggerOnMonitorChanged)
 {
 	px_int index = PX_Object_ListGetCurrentSelectIndex(pObject);
 	PX_Object* pAsmObject=(PX_Object *)ptr;
-	PX_Object_AsmDebugger* pAsm = PX_ObjectGetDesc(PX_Object_AsmDebugger, pAsmObject);
+	PX_Object_AsmDebugger* pAsm = (PX_Object_AsmDebugger *)PX_ObjectGetDescByType(pAsmObject, PX_OBJECT_TYPE_ASMDEBUGGER);
+	PX_ASSERTIF(pAsm == PX_NULL);
 	if (!pAsm->vm || !pAsm->map)
 	{
 		return;
@@ -288,16 +290,17 @@ px_void PX_Object_AsmDebuggerOnMonitorChanged(PX_Object* pObject,PX_Object_Event
 	}
 }
 
-px_void PX_Object_AsmDebuggerOnSourceChanged(PX_Object* pObject, PX_Object_Event e, px_void* ptr)
+PX_OBJECT_EVENT_FUNCTION(PX_Object_AsmDebuggerOnSourceChanged)
 {
 	px_int index = PX_Object_ListGetCurrentSelectIndex(pObject);
 	PX_Object* pAsmObject = (PX_Object*)ptr;
-	PX_Object_AsmDebugger* pAsm = PX_ObjectGetDesc(PX_Object_AsmDebugger, pAsmObject);
+	PX_Object_AsmDebugger* pAsm = (PX_Object_AsmDebugger*)PX_ObjectGetDescByType(pAsmObject, PX_OBJECT_TYPE_ASMDEBUGGER);
 	px_char opcode, opcode_name[16];
 	px_int paramcount;
 	px_char optype[3];
 	px_int param[3];
 	px_int i,ip;
+	PX_ASSERTIF(pAsm == PX_NULL);
 	if (!pAsm->vm || !pAsm->map)
 	{
 		return;
@@ -342,10 +345,11 @@ px_void PX_Object_AsmDebuggerOnSourceChanged(PX_Object* pObject, PX_Object_Event
 }
 
 
-px_void PX_Object_AsmDebuggerOnButtonRun(PX_Object* pObject, PX_Object_Event e, px_void* ptr)
+PX_OBJECT_EVENT_FUNCTION(PX_Object_AsmDebuggerOnButtonRun)
 {
 	PX_Object* pAsmObject = (PX_Object*)ptr;
-	PX_Object_AsmDebugger* pAsm = PX_ObjectGetDesc(PX_Object_AsmDebugger, pAsmObject);
+	PX_Object_AsmDebugger* pAsm = (PX_Object_AsmDebugger*)PX_ObjectGetDescByType(pAsmObject, PX_OBJECT_TYPE_ASMDEBUGGER);
+	PX_ASSERTIF(pAsm == PX_NULL);
 	if (pAsm->vm && pAsm->map)
 	{
 		PX_VMDebugContinue(pAsm->vm);
@@ -355,7 +359,8 @@ px_void PX_Object_AsmDebuggerOnButtonRun(PX_Object* pObject, PX_Object_Event e, 
 px_void PX_Object_AsmDebuggerOnButtonPause(PX_Object* pObject, PX_Object_Event e, px_void* ptr)
 {
 	PX_Object* pAsmObject = (PX_Object*)ptr;
-	PX_Object_AsmDebugger* pAsm = PX_ObjectGetDesc(PX_Object_AsmDebugger, pAsmObject);
+	PX_Object_AsmDebugger* pAsm = (PX_Object_AsmDebugger*)PX_ObjectGetDescByType(pAsmObject, PX_OBJECT_TYPE_ASMDEBUGGER);
+	PX_ASSERTIF(pAsm == PX_NULL);
 	if (pAsm->vm && pAsm->map)
 	{
 		PX_VMSuspend(pAsm->vm);
@@ -365,9 +370,11 @@ px_void PX_Object_AsmDebuggerOnButtonPause(PX_Object* pObject, PX_Object_Event e
 px_void PX_Object_AsmDebuggerOnButtonBreak(PX_Object* pObject, PX_Object_Event e, px_void* ptr)
 {
 	PX_Object* pAsmObject = (PX_Object*)ptr;
-	PX_Object_AsmDebugger* pAsm = PX_ObjectGetDesc(PX_Object_AsmDebugger, pAsmObject);
+	PX_Object_AsmDebugger* pAsm = (PX_Object_AsmDebugger*)PX_ObjectGetDescByType(pAsmObject, PX_OBJECT_TYPE_ASMDEBUGGER);
+	
 	px_int index = PX_Object_ListGetCurrentSelectIndex(pAsm->list_source);
 	px_int ip;
+	PX_ASSERTIF(pAsm == PX_NULL);
 	if (pAsm->vm && pAsm->map)
 	{
 		if ((ip = PX_VMDebuggerMapLineToIp(pAsm->map, index)) != -1)
@@ -380,7 +387,8 @@ px_void PX_Object_AsmDebuggerOnButtonBreak(PX_Object* pObject, PX_Object_Event e
 px_void PX_Object_AsmDebuggerOnButtonStep(PX_Object* pObject, PX_Object_Event e, px_void* ptr)
 {
 	PX_Object* pAsmObject = (PX_Object*)ptr;
-	PX_Object_AsmDebugger* pAsm = PX_ObjectGetDesc(PX_Object_AsmDebugger, pAsmObject);
+	PX_Object_AsmDebugger* pAsm = (PX_Object_AsmDebugger*)PX_ObjectGetDescByType(pAsmObject, PX_OBJECT_TYPE_ASMDEBUGGER);
+	PX_ASSERTIF(pAsm == PX_NULL);
 	if (pAsm->vm && pAsm->map)
 	{
 		PX_VMDebugContinue(pAsm->vm);
@@ -393,7 +401,8 @@ px_void PX_Object_AsmDebuggerOnButtonReset(PX_Object* pObject, PX_Object_Event e
 {
 	
 	PX_Object* pAsmObject = (PX_Object*)ptr;
-	PX_Object_AsmDebugger* pAsm = PX_ObjectGetDesc(PX_Object_AsmDebugger, pAsmObject);
+	PX_Object_AsmDebugger* pAsm = (PX_Object_AsmDebugger*)PX_ObjectGetDescByType(pAsmObject, PX_OBJECT_TYPE_ASMDEBUGGER);
+	PX_ASSERTIF(pAsm == PX_NULL);
 	if (pAsm->vm&&pAsm->map)
 	{
 		PX_VMReset(pAsm->vm);
@@ -406,27 +415,27 @@ px_void PX_Object_AsmDebuggerOnButtonReset(PX_Object* pObject, PX_Object_Event e
 px_void PX_Object_AsmDebuggerDetach(PX_Object* pObject)
 {
 	px_int i;
-	if (pObject->Type==PX_OBJECT_TYPE_ASMDEBUGGER)
+	
+	PX_Object_AsmDebugger* pDesc = (PX_Object_AsmDebugger*)PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_ASMDEBUGGER);
+	PX_ASSERTIF(pDesc == PX_NULL);
+	for (i=0;i<pDesc->lines.size;i++)
 	{
-		PX_Object_AsmDebugger* pDesc = PX_ObjectGetDesc(PX_Object_AsmDebugger, pObject);
-		for (i=0;i<pDesc->lines.size;i++)
-		{
-			PX_Object_AsmDebugger_Line* pLine = PX_VECTORAT(PX_Object_AsmDebugger_Line,&pDesc->lines, i);
-			PX_StringFree(&pLine->source);
-		}
-		PX_VectorClear(&pDesc->lines);
-		PX_Object_ListClear(pDesc->list_source);
-		pDesc->vm = 0;
-		pDesc->map = 0;
-		pDesc->lastip = -1;
+		PX_Object_AsmDebugger_Line* pLine = PX_VECTORAT(PX_Object_AsmDebugger_Line,&pDesc->lines, i);
+		PX_StringFree(&pLine->source);
 	}
+	PX_VectorClear(&pDesc->lines);
+	PX_Object_ListClear(pDesc->list_source);
+	pDesc->vm = 0;
+	pDesc->map = 0;
+	pDesc->lastip = -1;
+	
 }
 
 px_bool PX_Object_AsmDebuggerAttach(PX_Object *pObject,PX_VM_DebuggerMap* map,PX_VM* vm)
 {
-	PX_Object_AsmDebugger* pDesc = PX_ObjectGetDesc(PX_Object_AsmDebugger, pObject);
+	PX_Object_AsmDebugger* pDesc = (PX_Object_AsmDebugger*)PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_ASMDEBUGGER);
 	px_int i, offset=0;
-
+	PX_ASSERTIF(pDesc == PX_NULL);
 	if (pDesc->map)
 	{
 		PX_Object_AsmDebuggerDetach(pObject);
@@ -470,17 +479,22 @@ px_bool PX_Object_AsmDebuggerAttach(PX_Object *pObject,PX_VM_DebuggerMap* map,PX
 
 }
 
-PX_Object* PX_Object_AsmDebuggerCreate(px_memorypool* mp, PX_Object* Parent, px_int x, px_int y, px_int width, px_int height, PX_FontModule* fm)
+PX_Object* PX_Object_AsmDebuggerAttachObject( PX_Object* pObject, px_int attachIndex, px_int x, px_int y, px_int width, px_int height, PX_FontModule* fm)
 {
-	PX_Object_AsmDebugger Desc, * pDesc;
-	PX_Object* pObject;
-	PX_memset(&Desc, 0, sizeof(Desc));
-	Desc.vm = 0;
-	Desc.fm = fm;
-	Desc.map = 0;
-	Desc.lastip = -1;
-	pObject = PX_ObjectCreateEx(mp, Parent,(px_float) x, (px_float)y, 0, (px_float)width, (px_float)height, 0, PX_OBJECT_TYPE_ASMDEBUGGER, 0, PX_Object_AsmDebuggerRender, PX_Object_AsmDebuggerFree, &Desc, sizeof(Desc));
-	pDesc = PX_ObjectGetDesc(PX_Object_AsmDebugger, pObject);
+	px_memorypool* mp=	pObject->mp;
+	PX_Object_AsmDebugger* pDesc;
+	PX_ASSERTIF(pObject == PX_NULL);
+	PX_ASSERTIF(attachIndex < 0 || attachIndex >= PX_COUNTOF(pObject->pObjectDesc));
+	PX_ASSERTIF(pObject->pObjectDesc[attachIndex] != PX_NULL);
+	pDesc = (PX_Object_AsmDebugger*)PX_ObjectCreateDesc(pObject, attachIndex, PX_OBJECT_TYPE_ASMDEBUGGER, 0, PX_Object_AsmDebuggerRender, PX_Object_AsmDebuggerFree, 0, sizeof(PX_Object_AsmDebugger));
+	if (!pDesc)
+	{
+		return PX_NULL;
+	}
+	pDesc->vm = 0;
+	pDesc->fm = fm;
+	pDesc->map = 0;
+	pDesc->lastip = -1;
 	pDesc->button_break = PX_Object_PushButtonCreate(mp, pObject, 0, 0, 48, 24, "break", PX_NULL);
 	PX_Object_PushButtonSetTextColor(pDesc->button_break, PX_COLOR(255, 255, 255, 0));
 	pDesc->button_step = PX_Object_PushButtonCreate(mp, pObject, 0, 0, 48, 24, "step", PX_NULL);
@@ -499,15 +513,27 @@ PX_Object* PX_Object_AsmDebuggerCreate(px_memorypool* mp, PX_Object* Parent, px_
 	PX_ObjectRegisterEvent(pDesc->button_reset, PX_OBJECT_EVENT_EXECUTE, PX_Object_AsmDebuggerOnButtonReset, pObject);
 	pDesc->list_source = PX_Object_ListCreate(mp, pObject, 0, 0, 10, 10, 18, PX_Object_AsmDebuggerSourceOnCreate, pObject);
 	pDesc->autotext_data = PX_Object_AutoTextCreate(mp, pObject, 0, 0, 10, fm);
-	pDesc->list_monitor= PX_Object_ListCreate(mp, pObject, 0, 0, 10, 10, 18, PX_Object_AsmDebuggerMonitorOnCreate, pObject);
+	pDesc->list_monitor = PX_Object_ListCreate(mp, pObject, 0, 0, 10, 10, 18, PX_Object_AsmDebuggerMonitorOnCreate, pObject);
 	PX_ObjectRegisterEvent(pDesc->list_monitor, PX_OBJECT_EVENT_VALUECHANGED, PX_Object_AsmDebuggerOnMonitorChanged, pObject);
 	PX_ObjectRegisterEvent(pDesc->list_source, PX_OBJECT_EVENT_VALUECHANGED, PX_Object_AsmDebuggerOnSourceChanged, pObject);
 	pDesc->label_name = PX_Object_LabelCreate(mp, pObject, 0, 0, 128, 24, "", PX_NULL, PX_COLOR(255, 64, 255, 64));
-	pDesc->autotext_data = PX_Object_AutoTextCreate(mp, pObject, 0, 0, 128,fm);
+	pDesc->autotext_data = PX_Object_AutoTextCreate(mp, pObject, 0, 0, 128, fm);
 
 	PX_VectorInitialize(mp, &pDesc->lines, sizeof(PX_Object_AsmDebugger_Line), 1024);
 	PX_VectorInitialize(mp, &pDesc->monitor, sizeof(PX_Object_AsmDebugger_VarMonitor), PX_OBJECT_ASMDEBUGGER_VARMONITOR_MAX_COUNT);
 
 	pObject->Visible = PX_FALSE;
+	return pObject;
+}
+
+PX_Object* PX_Object_AsmDebuggerCreate(px_memorypool* mp, PX_Object* Parent, px_int x, px_int y, px_int width, px_int height, PX_FontModule* fm)
+{
+	PX_Object* pObject;
+	pObject = PX_ObjectCreate(mp, Parent,(px_float) x, (px_float)y, 0, (px_float)width, (px_float)height, 0);
+	if (!PX_Object_AsmDebuggerAttachObject( pObject, 0, x, y, width, height, fm))
+	{
+		PX_ObjectDelete(pObject);
+		return PX_NULL;
+	}
 	return pObject;
 }

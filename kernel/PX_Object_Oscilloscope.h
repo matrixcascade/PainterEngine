@@ -216,7 +216,7 @@ px_void PX_Object_OscilloscopeSetMargin(PX_Object *pObject,px_int Left,px_int Ri
 px_void PX_Object_OscilloscopeRestoreOscilloscope(PX_Object *pObject);
 PX_Object *PX_Object_OscilloscopeCreate(px_memorypool *mp, PX_Object *Parent,px_int x,px_int y,px_int Width,px_int Height,PX_FontModule *fontmodule);
 
-PX_Designer_ObjectDesc PX_Object_OscilloscopeDesignerInstall();
+
 #define PX_OBJECT_FILTER_EDITOR_MAX_PT 256
 #define PX_OBJECT_FILTER_EDITOR_DEFAULT_RADIUS 6
 

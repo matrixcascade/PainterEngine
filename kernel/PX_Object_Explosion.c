@@ -1,5 +1,6 @@
 #include "PX_Object_Explosion.h"
-px_void PX_Object_ExplosionRender(px_surface* psurface, PX_Object *pObject, px_dword elapsed)
+
+PX_OBJECT_RENDER_FUNCTION(PX_Object_ExplosionRender)
 {
 	PX_Object_Explosion* pDesc = PX_ObjectGetDesc(PX_Object_Explosion, pObject);
 	px_float objx, objy, objWidth, objHeight;
@@ -22,12 +23,9 @@ px_void PX_Object_ExplosionRender(px_surface* psurface, PX_Object *pObject, px_d
 		pDesc->launcher.LauncherInfo.position = PX_POINT(objx, objy, 0);
 		PX_ParticalLauncherRender(psurface, &pDesc->launcher, elapsed);
 	}
-	
 }
 
-
-
-px_void PX_Object_ExplosionFree(PX_Object *pObject)
+PX_OBJECT_FREE_FUNCTION(PX_Object_ExplosionFree)
 {
 	PX_Object_Explosion* pDesc = PX_ObjectGetDesc(PX_Object_Explosion, pObject);
 	PX_ParticalLauncherFree(&pDesc->launcher);
@@ -69,12 +67,18 @@ PX_Object* PX_Object_Explosion01Create(px_memorypool* mp,PX_Object *parent, px_f
 	info.atomsize = size;
 
 	PX_ParticalLauncherInitialize(&desc.launcher,mp, info);
-	pObject= PX_ObjectCreateEx(mp, parent, x, y, 0, 0, 0, 0, PX_OBJECT_TYPE_EXPLOSIONX, 0, PX_Object_ExplosionRender, PX_Object_ExplosionFree, &desc, sizeof(desc));
-	return pObject;
+	pObject= PX_ObjectCreate(mp, parent, x, y, 0, 0, 0, 0);
+	if(PX_ObjectCreateDesc(pObject, 0, PX_OBJECT_TYPE_EXPLOSIONX, 0, PX_Object_ExplosionRender, PX_Object_ExplosionFree, &desc, sizeof(PX_Object_Explosion)))
+		return pObject;
+	else
+	{
+		PX_ParticalLauncherFree(&desc.launcher);
+		return PX_NULL;
+	}
 }
 
 
-px_void PX_Object_Explosion02Render(px_surface* psurface, PX_Object* pObject, px_dword elapsed)
+PX_OBJECT_RENDER_FUNCTION(PX_Object_Explosion02Render)
 {
 	PX_Object_Explosion02* pDesc = PX_ObjectGetDesc(PX_Object_Explosion02, pObject);
 	px_float a;
@@ -103,8 +107,7 @@ px_void PX_Object_Explosion02Render(px_surface* psurface, PX_Object* pObject, px
 	
 }
 
-
-px_void PX_Object_Explosion02Free(PX_Object* pObject)
+PX_OBJECT_FREE_FUNCTION(PX_Object_Explosion02Free)
 {
 	PX_Object_Explosion02* pDesc = PX_ObjectGetDesc(PX_Object_Explosion02, pObject);
 	PX_ParticalLauncherFree(&pDesc->launcher);
@@ -113,12 +116,17 @@ px_void PX_Object_Explosion02Free(PX_Object* pObject)
 
 PX_Object* PX_Object_Explosion02Create(px_memorypool *mp,PX_Object *parent, px_float x, px_float y,px_color color)
 {
-	PX_Object_Explosion02 Desc,*pDesc;
+	PX_Object_Explosion02 *pDesc;
 	PX_Object* pObject;
 	PX_ParticalLauncher_InitializeInfo info;
-	PX_memset(&Desc, 0, sizeof(Desc));
-	pObject = PX_ObjectCreateEx(mp, parent, x, y, 0, 0, 0, 0, 0, 0, PX_Object_Explosion02Render, PX_Object_Explosion02Free, &Desc, sizeof(Desc));
-	pDesc = PX_ObjectGetDesc(PX_Object_Explosion02, pObject);
+
+	pObject = PX_ObjectCreate(mp, parent, x, y, 0, 0, 0, 0);
+	pDesc = (PX_Object_Explosion02*)PX_ObjectCreateDesc(pObject, 0, PX_OBJECT_TYPE_EXPLOSIONX, 0, PX_Object_Explosion02Render, PX_Object_Explosion02Free, 0, sizeof(PX_Object_Explosion02));
+	if (!pDesc)
+	{
+		PX_ObjectDelete(pObject);
+		return PX_NULL;
+	}
 
 	pDesc->elapsed = 0;
 	pDesc->mp = mp;
@@ -149,7 +157,7 @@ PX_Object* PX_Object_Explosion02Create(px_memorypool *mp,PX_Object *parent, px_f
 }
 
 
-void PX_Object_Explosion03Update(PX_Object *pObject, px_dword elapsed)
+PX_OBJECT_UPDATE_FUNCTION(PX_Object_Explosion03Update)
 {
 	px_int i;
 	px_dword update_atom;
@@ -208,14 +216,14 @@ void PX_Object_Explosion03Update(PX_Object *pObject, px_dword elapsed)
 	}
 }
 
-px_void PX_Object_Explosion03Render(px_surface* psurface, PX_Object* pObject,  px_dword elapsed)
+PX_OBJECT_RENDER_FUNCTION(PX_Object_Explosion03Render)
 {
 	px_int i;
 	px_float scale;
 	px_color color;
 	PX_Object_Explosion03* pdesc = PX_ObjectGetDesc(PX_Object_Explosion03, pObject);
 
-	PX_Object_Explosion03Update(pObject, elapsed);
+	PX_Object_Explosion03Update(pObject,0, elapsed);
 
 	if (pdesc->elapsed>pdesc->alive)
 	{
@@ -243,8 +251,6 @@ PX_Object* PX_Object_Explosion03Create(px_memorypool* mp, PX_Object* parent, px_
 {
 	PX_Object_Explosion03 Desc,*pDesc;
 	PX_Object* pObject;
-
-
 	px_int i;
 	PX_memset(&Desc, 0, sizeof(Desc));
 	Desc.clr = color;
@@ -255,9 +261,16 @@ PX_Object* PX_Object_Explosion03Create(px_memorypool* mp, PX_Object* parent, px_
 	Desc.switch_duration = switch_duration;
 	Desc.switch_elapsed = switch_duration;
 	Desc.alive = alive;
-	pObject = PX_ObjectCreateEx(mp, parent, x, y, 0, 0, 0, 0, 0, 0, PX_Object_Explosion03Render, 0, &Desc, sizeof(Desc));
 
-	pDesc = PX_ObjectGetDesc(PX_Object_Explosion03, pObject);
+	pObject = PX_ObjectCreate(mp, parent, x, y, 0, 0, 0, 0);
+	pDesc = (PX_Object_Explosion03*)PX_ObjectCreateDesc(pObject, 0, PX_OBJECT_TYPE_EXPLOSIONX, PX_Object_Explosion03Update, PX_Object_Explosion03Render, 0, &Desc, sizeof(PX_Object_Explosion03));
+	if (!pDesc)
+	{
+		PX_ObjectDelete(pObject);
+		return PX_NULL;
+	}
+
+	pDesc = PX_ObjectGetDescIndex(PX_Object_Explosion03, pObject,0);
 	for (i = 0; i < PX_COUNTOF(pDesc->array); i++)
 	{
 		pDesc->array[i] = PX_POINT(x, y, 0);
@@ -267,7 +280,7 @@ PX_Object* PX_Object_Explosion03Create(px_memorypool* mp, PX_Object* parent, px_
 	return pObject;
 }
 
-px_void PX_Object_Explosion04Render(px_surface* psurface, PX_Object* pObject, px_dword elpased)
+PX_OBJECT_RENDER_FUNCTION(PX_Object_Explosion04Render)
 {
 	PX_Object_Explosion04* pDesc =PX_ObjectGetDesc(PX_Object_Explosion04, pObject);
 	px_float fr;
@@ -280,7 +293,7 @@ px_void PX_Object_Explosion04Render(px_surface* psurface, PX_Object* pObject, px
 	objWidth = pObject->Width;
 	objHeight = pObject->Height;
 
-	pDesc->elapsed += elpased;
+	pDesc->elapsed += elapsed;
 	if (pDesc->elapsed > pDesc->alive)
 	{
 		PX_ObjectDelayDelete(pObject);
@@ -294,12 +307,110 @@ PX_Object* PX_Object_Explosion04Create(px_memorypool* mp, PX_Object* parent, px_
 {
 	PX_Object_Explosion04 * pDesc;
 	PX_Object* pObject;
-	pObject = PX_ObjectCreateEx(mp, parent, x, y, 0, 0, 0, 0, 0, PX_NULL, PX_Object_Explosion04Render, 0, PX_NULL, sizeof(PX_Object_Explosion04));
-	pDesc=PX_ObjectGetDesc(PX_Object_Explosion04, pObject);
+	pObject = PX_ObjectCreate(mp, parent, x, y, 0, 0, 0, 0);
+	pDesc = (PX_Object_Explosion04*)PX_ObjectCreateDesc(pObject, 0, PX_OBJECT_TYPE_EXPLOSIONX, 0, PX_Object_Explosion04Render, 0, 0, sizeof(PX_Object_Explosion04));
+	if (!pDesc)
+	{
+		PX_ObjectDelete(pObject);
+		return PX_NULL;
+	}
 	pDesc->color = color;
 	pDesc->range = range;
 	pDesc->elapsed = 0;
 	pDesc->alive = alive;
+	return pObject;
+}
+
+PX_OBJECT_FREE_FUNCTION(PX_Object_FireExplosionFree)
+{
+	PX_Object_FireExplosion* pFire = (PX_Object_FireExplosion*)PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_UNKNOW);
+	PX_ParticalLauncherFree(&pFire->launcher);
+	PX_TextureFree(&pFire->particaltex);
+}
+
+PX_OBJECT_UPDATE_FUNCTION(PX_Object_FireExplosionUpdate)
+{
+	PX_Object_FireExplosion* pFire = PX_ObjectGetDesc(PX_Object_FireExplosion, pObject);
+	if (elapsed > 0)
+	{
+		if (elapsed > pFire->alive)
+		{
+			pFire->alive = 0;
+		}
+		else
+		{
+			pFire->alive -= elapsed;
+		}
+	}
+
+	if (pFire->alive == 0)
+	{
+		PX_ObjectDelayDelete(pObject);
+	}
+}
+
+PX_OBJECT_RENDER_FUNCTION(PX_Object_FireExplosionRender)
+{
+	PX_Object_FireExplosion* pfe = PX_ObjectGetDesc(PX_Object_FireExplosion, pObject);
+
+	if (pfe->ring)
+	{
+		px_float size = pfe->range * 2;
+		px_float fr = (PX_OBJECT_FIREEXPLOSION_DEFAULT_TIME - pfe->alive) * 1.0f / PX_OBJECT_FIREEXPLOSION_DEFAULT_TIME;
+		PX_GeoDrawCircle(psurface, (px_int)pObject->x, (px_int)pObject->y, (px_int)(PX_sqrt(fr) * size * 4), (px_int)(fr * size * 0.25f), PX_COLOR((px_uchar)(255 * (1 - fr)), 255, (px_uchar)(255 * (1 - fr)), 0));
+	}
+
+	pfe->launcher.InitInfo.position = PX_POINT(pObject->x, pObject->y, pObject->z);
+	PX_ParticalLauncherRender(psurface, &pfe->launcher, elapsed);
+}
+
+
+PX_Object* PX_Object_Explosion05Create(px_memorypool* mp, PX_Object* Parent, px_float x, px_float y, px_float power, px_bool ring)
+{
+
+	PX_ParticalLauncher_InitializeInfo info = { 0 };
+	PX_Object_FireExplosion* pFireExplosion;
+	PX_Object* pObject;
+
+
+	pObject = PX_ObjectCreateEx(mp, Parent, x, y, 0, 1, 1, 0, 0, PX_Object_FireExplosionUpdate, PX_Object_FireExplosionRender, PX_Object_FireExplosionFree, 0, sizeof(PX_Object_FireExplosion));
+	pFireExplosion = PX_ObjectGetDescIndex(PX_Object_FireExplosion, pObject, 0);
+
+	pFireExplosion->alive = PX_OBJECT_FIREEXPLOSION_DEFAULT_TIME;
+	pFireExplosion->range = power;
+	pFireExplosion->launcher.InitInfo.position = PX_POINT(0, 0, 0);
+	pFireExplosion->ring = ring;
+	pFireExplosion->launcher.InitInfo.userptr = pFireExplosion;
+	PX_TextureCreate(mp, &pFireExplosion->particaltex, 8, 8);
+	PX_SurfaceClearAll(&pFireExplosion->particaltex, PX_COLOR_WHITE);
+
+	PX_memset(&info, 0, sizeof(PX_ParticalLauncher_InitializeInfo));
+
+	PX_ParticalLauncherInitializeDefaultInfo(&info);
+	info.velocity = power * 80;
+	info.deviation_velocity_max = 0;
+	info.deviation_velocity_min = -60 * power;
+	info.direction = PX_POINT(0, -1, 0);
+	info.ak = 0.65f;
+	info.alpha = 1;
+	info.launchCount = 32;
+	info.generateDuration = 0;
+	info.maxCount = 32;
+	info.alphaincrease = -1.0f / (PX_OBJECT_FIREEXPLOSION_DEFAULT_TIME / 1000.f);
+	info.alive = PX_OBJECT_FIREEXPLOSION_DEFAULT_TIME;
+	info.sizeincrease = -0.25f;
+	info.rotation = 180;
+	info.deviation_rotation = 90;
+	info.deviation_atomsize_max = 0;
+	info.deviation_atomsize_min = -0.8f;
+	info.deviation_rangAngle = 360;
+	info.deviation_position_distanceRange = 0;
+	info.position = PX_POINT(x, y, 0);
+	info.tex = &pFireExplosion->particaltex;
+	info.atomsize = power / 50 + 1;
+
+	PX_ParticalLauncherInitialize(&pFireExplosion->launcher, mp, info);
+
 	return pObject;
 }
 

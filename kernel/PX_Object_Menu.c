@@ -1,11 +1,10 @@
 #include "PX_Object_Menu.h"
 static PX_Object_Menu *PX_Object_GetMenu(PX_Object *pMenuObject)
 {
-	if (pMenuObject->Type==PX_OBJECT_TYPE_MENU)
-	{
-		return PX_ObjectGetDesc(PX_Object_Menu,pMenuObject);
-	}
-	return PX_NULL;
+	PX_Object_Menu *pMenu=(PX_Object_Menu *)PX_ObjectGetDescByType(pMenuObject,PX_OBJECT_TYPE_MENU);
+	PX_ASSERTIF(pMenu==PX_NULL);
+	return pMenu;
+
 }
 static px_void PX_MenuSubMenuUpdateEx(PX_Object_Menu *pMenu,PX_Object_Menu_Item *pItem,px_int startX,px_int startY)
 {
@@ -415,17 +414,17 @@ PX_Object_Menu_Item * PX_Object_MenuAddItem(PX_Object *pObject,PX_Object_Menu_It
 	return ret;
 }
 
-px_void PX_Object_MenuFree(PX_Object *pObject)
+PX_OBJECT_FREE_FUNCTION(PX_Object_MenuFree)
 {
 	PX_Object_MenuFreeEx(PX_Object_GetMenu(pObject));
 }
 
-px_void PX_Object_MenuRender(px_surface *psurface, PX_Object *pObject,px_uint elapsed)
+PX_OBJECT_RENDER_FUNCTION(PX_Object_MenuRender)
 {
 	PX_Object_MenuRenderEx(psurface,PX_Object_GetMenu(pObject),elapsed);
 }
 
-px_void PX_Object_MenuOnCursorEvent(PX_Object *pObject,PX_Object_Event e,px_void *ptr)
+PX_OBJECT_EVENT_FUNCTION(PX_Object_MenuOnCursorEvent)
 {
 	PX_Object_MenuOnCursorEventEx(pObject,e);
 }
@@ -440,7 +439,7 @@ PX_Object * PX_Object_MenuCreate(px_memorypool *mp,PX_Object *Parent,px_int x,px
 	{
 		return PX_NULL;
 	}
-	pMenu=PX_ObjectGetDesc(PX_Object_Menu,pObject);
+	pMenu=PX_ObjectGetDescIndex(PX_Object_Menu,pObject,0);
 	if (!PX_Object_MenuInitialize(mp,pMenu,x,y,width,fontmodule))
 	{
 		return PX_NULL;

@@ -443,7 +443,7 @@ px_bool PX_Object_MatrixEffectCreate(px_memorypool* mp, PX_Object* parent, px_su
 	PX_Object* pObject;
 
 	pObject=PX_ObjectCreateEx(mp, parent, 0, 0, 0, pMapsurface->width*1.0f, pMapsurface->height*1.0f, 0, PX_OBJECT_TYPE_MATRIXEFFECT, 0, PX_Object_MatrixEffectRender, PX_NULL, PX_NULL, sizeof(PX_Object_MatrixEffect));
-	pDesc=PX_ObjectGetDesc(PX_Object_MatrixEffect, pObject);
+	pDesc=PX_ObjectGetDescIndex(PX_Object_MatrixEffect, pObject,0);
 
 	pDesc->mp = mp;
 

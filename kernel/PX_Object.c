@@ -154,6 +154,8 @@ px_void PX_ObjectClearFocus(PX_Object *pObject)
 	PX_ObjectClearFocusEx(pClearObject);
 }
 
+
+
 px_void PX_ObjectSetFocus(PX_Object *pObject)
 {
 	PX_Object *pClearObject=pObject;
@@ -396,9 +398,72 @@ px_void PX_Object_Event_SetIndex(PX_Object_Event *e,px_int index)
 	e->Param_int[0]=index;
 }
 
+px_int PX_ObjectGetFreeDescIndex(PX_Object* pObject)
+{
+	px_int i;
+	for (i = 0; i < PX_OBJECT_MAX_DESC_COUNT; i++)
+	{
+		if (pObject->pObjectDesc[i] == PX_NULL)
+		{
+			return i;
+		}
+	}
+	return -1;
+}
+
+px_bool PX_ObjectCheckType(PX_Object* pObject, px_int type)
+{
+	px_int i;
+	for (i = 0; i < PX_OBJECT_MAX_DESC_COUNT; i++)
+	{
+		if (pObject->Type[i] == type)
+		{
+			return PX_TRUE;
+		}
+	}
+	return PX_FALSE;
+	
+}
+
+px_int PX_ObjectGetTypeIndex(PX_Object* pObject, px_int type)
+{
+	px_int i;
+	for (i = 0; i < PX_OBJECT_MAX_DESC_COUNT; i++)
+	{
+		if (pObject->Type[i] == type)
+		{
+			return i;
+		}
+	}
+	return -1;
+	
+}
+
+px_int PX_ObjectGetDescIndexByType(PX_Object* pObject, px_int type)
+{
+	px_int i;
+	PX_ASSERTIF(pObject == PX_NULL);
+	for (i = 0; i < PX_OBJECT_MAX_DESC_COUNT; i++)
+	{
+		if (pObject->Type[i] == type)
+		{
+			return i;
+		}
+	}
+	return -1;
+}
+
+px_void* PX_ObjectGetDescByType(PX_Object* pObject, px_int type)
+{
+	px_int i=PX_ObjectGetDescIndexByType(pObject, type);
+	if(i!=-1)
+		return pObject->pObjectDesc[i];
+	return PX_NULL;
+	
+}
+
 PX_Object * PX_ObjectCreate(px_memorypool *mp,PX_Object *Parent,px_float x,px_float y,px_float z,px_float Width,px_float Height,px_float Lenght)
 {
-	
 	PX_Object *pObject=(PX_Object *)MP_Malloc(mp,sizeof(PX_Object));
 	if (pObject==PX_NULL)
 	{
@@ -415,101 +480,86 @@ PX_Object* PX_ObjectCreateRoot(px_memorypool* mp)
 	return PX_ObjectCreate(mp, PX_NULL, 0, 0, 0, 0, 0, 0);
 }
 
-PX_Object * PX_ObjectCreateExN(px_memorypool *mp,PX_Object *Parent,px_float x,px_float y,px_float z,px_float Width,px_float Height,px_float Lenght,px_int type,Function_ObjectUpdate Func_ObjectUpdate,Function_ObjectRender Func_ObjectRender,Function_ObjectFree Func_ObjectFree,px_void *desc,px_int index,px_int size)
+PX_Object* PX_ObjectCreateEx(px_memorypool* mp, PX_Object* Parent, px_float x, px_float y, px_float z, px_float Width, px_float Height, px_float Lenght, px_int type, Function_ObjectUpdate Func_ObjectUpdate, Function_ObjectRender Func_ObjectRender, Function_ObjectFree Func_ObjectFree, px_void* desc, px_int size)
 {
-	PX_Object *pObject=PX_ObjectCreate(mp,Parent,x,y,z,Width,Height,Lenght);
+	PX_Object* pObject = PX_ObjectCreate(mp, Parent, x, y, z, Width, Height, Lenght);
 	if (pObject)
 	{
 		if (size)
 		{
-			if (PX_ObjectCreateDesc(pObject,index,desc,size)==-1)
+			if(PX_ObjectCreateDesc(pObject, 0, type, Func_ObjectUpdate, Func_ObjectRender, Func_ObjectFree, desc, size))
+				return pObject;
+			else
 			{
-				MP_Free(mp, pObject);
+				PX_ObjectDelete(pObject);
 				return PX_NULL;
 			}
 		}
-		pObject->Type=type;
-		PX_ObjectAddFreeFunction(pObject, Func_ObjectFree);
-		PX_ObjectAddRenderFunction(pObject, Func_ObjectRender);
-		PX_ObjectAddUpdateFunction(pObject, Func_ObjectUpdate);
 	}
-	return pObject;
-}
-PX_Object* PX_ObjectCreateEx(px_memorypool* mp, PX_Object* Parent, px_float x, px_float y, px_float z, px_float Width, px_float Height, px_float Lenght, px_int type, Function_ObjectUpdate Func_ObjectUpdate, Function_ObjectRender Func_ObjectRender, Function_ObjectFree Func_ObjectFree, px_void* desc, px_int size)
-{
-		return PX_ObjectCreateExN(mp, Parent, x, y, z, Width, Height, Lenght, type, Func_ObjectUpdate, Func_ObjectRender, Func_ObjectFree, desc, 0, size);
+	return PX_NULL;
 }
 
-PX_Object* PX_ObjectCreateEx1(px_memorypool* mp, PX_Object* Parent, px_float x, px_float y, px_float z, px_float Width, px_float Height, px_float Lenght, px_int type, Function_ObjectUpdate Func_ObjectUpdate, Function_ObjectRender Func_ObjectRender, Function_ObjectFree Func_ObjectFree, px_void* desc, px_int size)
-{
-		return PX_ObjectCreateExN(mp, Parent, x, y, z, Width, Height, Lenght, type, Func_ObjectUpdate, Func_ObjectRender, Func_ObjectFree, desc, 1, size);
-}
-
-PX_Object* PX_ObjectCreateEx2(px_memorypool* mp, PX_Object* Parent, px_float x, px_float y, px_float z, px_float Width, px_float Height, px_float Lenght, px_int type, Function_ObjectUpdate Func_ObjectUpdate, Function_ObjectRender Func_ObjectRender, Function_ObjectFree Func_ObjectFree, px_void* desc, px_int size)
-{
-		return PX_ObjectCreateExN(mp, Parent, x, y, z, Width, Height, Lenght, type, Func_ObjectUpdate, Func_ObjectRender, Func_ObjectFree, desc, 2, size);
-}
-
-PX_Object* PX_ObjectCreateEx3(px_memorypool* mp, PX_Object* Parent, px_float x, px_float y, px_float z, px_float Width, px_float Height, px_float Lenght, px_int type, Function_ObjectUpdate Func_ObjectUpdate, Function_ObjectRender Func_ObjectRender, Function_ObjectFree Func_ObjectFree, px_void* desc, px_int size)
-{
-		return PX_ObjectCreateExN(mp, Parent, x, y, z, Width, Height, Lenght, type, Func_ObjectUpdate, Func_ObjectRender, Func_ObjectFree, desc, 3, size);
-}
-
-
-px_int PX_ObjectCreateDesc(PX_Object* pObject, px_int index, px_void* pDesc, px_int descSize)
-{
-	PX_ASSERTIF(index < 0 || index >= PX_OBJECT_MAX_DESC_COUNT|| pObject->pObjectDesc[index] != PX_NULL);
-	if (index >= 0 && index < PX_OBJECT_MAX_DESC_COUNT&& pObject->pObjectDesc[index] == PX_NULL)
-	{
-		pObject->pObjectDesc[index] = MP_Malloc(pObject->mp, descSize);
-		if (!pObject->pObjectDesc[index])
-		{
-			return -1;
-		}
-		if(pDesc)
-			PX_memcpy(pObject->pObjectDesc[index], pDesc, descSize);
-		else
-			PX_memset(pObject->pObjectDesc[index], 0, descSize);
-		return index;
-	}
-	return -1;
-}
-
-px_int PX_ObjectAddRenderFunction(PX_Object* pObject, Function_ObjectRender Func_ObjectRender)
+px_void PX_ObjectDetach(PX_Object* pObject, px_int type)
 {
 	px_int i;
+	PX_OBJECT_EventAction* pPre, * pCur;
 	for (i = 0; i < PX_OBJECT_MAX_DESC_COUNT; i++)
 	{
-		if (pObject->Func_ObjectRender[i] == PX_NULL)
+		if (pObject->Type[i] == type)
 		{
-			pObject->Func_ObjectRender[i] = Func_ObjectRender;
-			return i;
+			if (pObject->Func_ObjectFree[i])
+			{
+				pObject->Func_ObjectFree[i](pObject, i);
+			}
+			pObject->Type[i] = 0;
+			if (pObject->pObjectDesc[i])
+			{
+				MP_Free(pObject->mp, pObject->pObjectDesc[i]);
+				pObject->pObjectDesc[i] = PX_NULL;
+			}
+			pObject->Func_ObjectUpdate[i] = PX_NULL;
+			pObject->Func_ObjectRender[i] = PX_NULL;
+			pObject->Func_ObjectFree[i] = PX_NULL;
 		}
 	}
-	PX_ASSERTIF(i == PX_OBJECT_MAX_DESC_COUNT);
-	return -1;
+	//release event
+	
+	//PX_Object_Free Events linker
+	pPre = PX_NULL;
+	pCur = pObject->pEventActions;
+	while (pCur)
+	{
+		if (pCur->owner == type)
+		{
+			if (pPre == PX_NULL)
+			{
+				pObject->pEventActions = pCur->pNext;
+				MP_Free(pObject->mp, pCur);
+				pCur = pObject->pEventActions;
+				pPre = PX_NULL;
+			}
+			else
+			{
+				pPre->pNext = pCur->pNext;
+				MP_Free(pObject->mp, pCur);
+				pCur = pPre->pNext;
+			}
+		}
+		else
+		{
+			pPre = pCur;
+			pCur = pCur->pNext;
+		}
+	}
 }
 
-px_int PX_ObjectSetRenderFunction(PX_Object* pObject, Function_ObjectRender Func_ObjectRender,px_int index)
+
+px_int PX_ObjectSetRenderFunction(PX_Object* pObject, Function_ObjectRender Func_ObjectRender, px_int index)
 {
 	pObject->Func_ObjectRender[index] = Func_ObjectRender;
 	return index;
 }
 
-px_int PX_ObjectAddUpdateFunction(PX_Object* pObject, Function_ObjectUpdate Func_ObjectUpdate)
-{
-	px_int i;
-	for (i = 0; i < PX_OBJECT_MAX_DESC_COUNT; i++)
-	{
-		if (pObject->Func_ObjectUpdate[i] == PX_NULL)
-		{
-			pObject->Func_ObjectUpdate[i] = Func_ObjectUpdate;
-			return i;
-		}
-	}
-	PX_ASSERTIF(i == PX_OBJECT_MAX_DESC_COUNT);
-	return -1;
-}
 
 px_int PX_ObjectSetUpdateFunction(PX_Object* pObject, Function_ObjectUpdate Func_ObjectUpdate, px_int index)
 {
@@ -517,20 +567,6 @@ px_int PX_ObjectSetUpdateFunction(PX_Object* pObject, Function_ObjectUpdate Func
 	return index;
 }
 
-px_int PX_ObjectAddFreeFunction(PX_Object* pObject, Function_ObjectFree Func_ObjectFree)
-{
-	px_int i;
-	for (i = 0; i < PX_OBJECT_MAX_DESC_COUNT; i++)
-	{
-		if (pObject->Func_ObjectFree[i] == PX_NULL)
-		{
-			pObject->Func_ObjectFree[i] = Func_ObjectFree;
-			return i;
-		}
-	}
-	PX_ASSERTIF(i == PX_OBJECT_MAX_DESC_COUNT);
-	return -1;
-}
 
 px_int PX_ObjectSetFreeFunction(PX_Object* pObject, Function_ObjectFree Func_ObjectFree, px_int index)
 {
@@ -538,18 +574,51 @@ px_int PX_ObjectSetFreeFunction(PX_Object* pObject, Function_ObjectFree Func_Obj
 	return index;
 }
 
-PX_Object* PX_ObjectCreateFunction(px_memorypool* mp, PX_Object* Parent,Function_ObjectUpdate Func_ObjectUpdate, Function_ObjectRender Func_ObjectRender, Function_ObjectFree Func_ObjectFree)
+
+px_void* PX_ObjectCreateDesc(PX_Object* pObject, px_int idesc, px_int type, Function_ObjectUpdate Func_ObjectUpdate, Function_ObjectRender Func_ObjectRender, Function_ObjectFree Func_ObjectFree, px_void* pDesc, px_int descSize)
 {
-	return PX_ObjectCreateEx(mp,Parent,0,0,0,0,0,0,0,Func_ObjectUpdate,Func_ObjectRender,Func_ObjectFree,PX_NULL,0);
+	PX_ASSERTIF(idesc < 0 || idesc >= PX_OBJECT_MAX_DESC_COUNT || pObject->pObjectDesc[idesc] != PX_NULL);
+	if (idesc >= 0 && idesc < PX_OBJECT_MAX_DESC_COUNT && pObject->pObjectDesc[idesc] == PX_NULL)
+	{
+		if (descSize)
+		{
+			pObject->pObjectDesc[idesc] = MP_Malloc(pObject->mp, descSize);
+			if (!pObject->pObjectDesc[idesc])
+			{
+				return PX_NULL;
+			}
+			if (pDesc)
+				PX_memcpy(pObject->pObjectDesc[idesc], pDesc, descSize);
+			else
+				PX_memset(pObject->pObjectDesc[idesc], 0, descSize);
+		}
+		else
+		{
+			pObject->pObjectDesc[idesc] = PX_NULL;
+		}
+		
+		PX_ObjectSetRenderFunction(pObject, Func_ObjectRender, idesc);
+		PX_ObjectSetUpdateFunction(pObject, Func_ObjectUpdate, idesc);
+		PX_ObjectSetFreeFunction(pObject, Func_ObjectFree, idesc);
+		pObject->Type[idesc]=type;
+		return (px_void *)pObject->pObjectDesc[idesc];
+	}
+	return PX_NULL;
 }
 
-px_void PX_ObjectAttachDesc(PX_Object* pObject, Function_ObjectUpdate Func_ObjectUpdate, Function_ObjectRender Func_ObjectRender, Function_ObjectFree Func_ObjectFree, px_int index, px_void* pDesc, px_int descSize)
+
+PX_Object* PX_ObjectCreateFunction(px_memorypool* mp, PX_Object* Parent,Function_ObjectUpdate Func_ObjectUpdate, Function_ObjectRender Func_ObjectRender, Function_ObjectFree Func_ObjectFree)
 {
-	PX_ObjectCreateDesc(pObject, index, pDesc, descSize);
-	PX_ObjectAddRenderFunction(pObject, Func_ObjectRender);
-	PX_ObjectAddUpdateFunction(pObject, Func_ObjectUpdate);
-	PX_ObjectAddFreeFunction(pObject, Func_ObjectFree);
+	PX_Object *pObject= PX_ObjectCreate(mp,Parent,0,0,0,0,0,0);
+	if (pObject)
+	{
+		PX_ObjectSetRenderFunction(pObject, Func_ObjectRender, 0);
+		PX_ObjectSetUpdateFunction(pObject, Func_ObjectUpdate, 0);
+		PX_ObjectSetFreeFunction(pObject, Func_ObjectFree, 0);
+	}
+	return pObject;
 }
+
 
 px_void PX_ObjectGetInheritXY(PX_Object *pObject,px_float *x,px_float *y)
 {
@@ -590,7 +659,7 @@ static px_void PX_Object_ObjectFree( PX_Object *pObject )
 	{
 		if (pObject->Func_ObjectFree[i])
 		{
-			pObject->Func_ObjectFree[i](pObject);
+			pObject->Func_ObjectFree[i](pObject,i);
 		}
 	}
 
@@ -708,7 +777,7 @@ px_void PX_Object_ObjectLinkerUpdate( PX_Object *pObject,px_uint elapsed)
 		{
 			if (pObject->Func_ObjectUpdate[i])
 			{
-				pObject->Func_ObjectUpdate[i](pObject, elapsed);
+				pObject->Func_ObjectUpdate[i](pObject,i, elapsed);
 			}
 		}
 		if (!pObject->delay_delete)
@@ -819,7 +888,7 @@ px_void PX_ObjectUpdate(PX_Object *pObject,px_uint elapsed )
 	{
 		if (pObject->Func_ObjectUpdate[i] != 0)
 		{
-			pObject->Func_ObjectUpdate[i](pObject, elapsed);
+			pObject->Func_ObjectUpdate[i](pObject,i, elapsed);
 		}
 	}
 	
@@ -860,7 +929,7 @@ static px_void PX_ObjectRenderEx(px_surface *pSurface, PX_Object *pObject,px_uin
 				{
 					if (pObject->Func_ObjectRender[i] != 0)
 					{
-						pObject->Func_ObjectRender[i](pSurface, pObject, elapsed);
+						pObject->Func_ObjectRender[i](pSurface, pObject,i, elapsed);
 					}
 				}
 			}
@@ -880,7 +949,7 @@ static px_void PX_ObjectRenderEx(px_surface *pSurface, PX_Object *pObject,px_uin
 				{
 					if (pObject->Func_ObjectRender[i] != 0)
 					{
-						pObject->Func_ObjectRender[i](pSurface, pObject, elapsed);
+						pObject->Func_ObjectRender[i](pSurface, pObject,i, elapsed);
 					}
 				}
 			}
@@ -907,7 +976,7 @@ px_void PX_ObjectRender(px_surface *pSurface, PX_Object *pObject,px_uint elapsed
 			{
 				if (pObject->Func_ObjectRender[i] != 0)
 				{
-					pObject->Func_ObjectRender[i](pSurface, pObject, elapsed);
+					pObject->Func_ObjectRender[i](pSurface, pObject,i, elapsed);
 				}
 			}
 			if (!pObject->delay_delete)
@@ -925,7 +994,7 @@ px_void PX_ObjectRender(px_surface *pSurface, PX_Object *pObject,px_uint elapsed
 			{
 				if (pObject->Func_ObjectRender[i] != 0)
 				{
-					pObject->Func_ObjectRender[i](pSurface, pObject, elapsed);
+					pObject->Func_ObjectRender[i](pSurface, pObject,i, elapsed);
 				}
 			}
 			if (!pObject->delay_delete)
@@ -1011,21 +1080,8 @@ px_void PX_ObjectInitialize(px_memorypool *mp,PX_Object *pObject,PX_Object *Pare
 
 	pObject->Enabled=PX_TRUE;
 	pObject->Visible=PX_TRUE;
-	pObject->pChilds=PX_NULL;
-	pObject->pNextBrother=PX_NULL;
-	pObject->pPreBrother=PX_NULL;
-	pObject->Type=PX_OBJECT_TYPE_NULL;
 	pObject->ReceiveEvents=PX_TRUE;
-	pObject->impact_target_type=0;
-	pObject->impact_object_type=0;
-	pObject->pEventActions=PX_NULL;
-	pObject->world_index=-1;
-	pObject->User_int=0;
-	pObject->diameter=0;
-	pObject->User_ptr=PX_NULL;
-	pObject->OnFocus=PX_FALSE;
 	pObject->mp=mp;
-	pObject->Func_ObjectLinkChild=PX_NULL;
 
 	if (Parent!=PX_NULL)
 	{
@@ -1075,34 +1131,94 @@ px_void PX_ObjectDisable(PX_Object *pObject)
 	pObject->Enabled=PX_FALSE;
 }
 
-px_int PX_ObjectRegisterEvent( PX_Object *pObject,px_uint Event,px_void (*ProcessFunc)(PX_Object *,PX_Object_Event e,px_void *user_ptr),px_void *user)
+px_void PX_ObjectEnableEventAction(PX_Object* pObject, px_int ownerType)
 {
-	PX_OBJECT_EventAction *pPoint;
-	PX_OBJECT_EventAction *pAction=(PX_OBJECT_EventAction *)MP_Malloc(pObject->mp,sizeof(PX_OBJECT_EventAction));
-	if (pAction==PX_NULL)
+		PX_OBJECT_EventAction* pPoint;
+		pPoint = pObject->pEventActions;
+		while (pPoint)
+		{
+			if (pPoint->owner == ownerType)
+			{
+				pPoint->enable = PX_TRUE;
+			}
+			pPoint = pPoint->pNext;
+		}
+}
+px_void PX_ObjectDisableEventAction(PX_Object* pObject, px_int ownerType)
+{
+	PX_OBJECT_EventAction* pPoint;
+	pPoint = pObject->pEventActions;
+	while (pPoint)
+	{
+		if (pPoint->owner == ownerType)
+		{
+			pPoint->enable = PX_FALSE;
+		}
+		pPoint = pPoint->pNext;
+	}
+}
+px_void PX_ObjectEnableNoTheEventAction(PX_Object* pObject, px_int ownerType)
+{
+	PX_OBJECT_EventAction* pPoint;
+	pPoint = pObject->pEventActions;
+	while (pPoint)
+	{
+		if (pPoint->owner != ownerType)
+		{
+			pPoint->enable = PX_TRUE;
+		}
+		pPoint = pPoint->pNext;
+	}
+}
+px_void PX_ObjectDisableNoTheEventAction(PX_Object* pObject, px_int ownerType)
+{
+	PX_OBJECT_EventAction* pPoint;
+	pPoint = pObject->pEventActions;
+	while (pPoint)
+	{
+		if (pPoint->owner != ownerType)
+		{
+			pPoint->enable = PX_FALSE;
+		}
+		pPoint = pPoint->pNext;
+	}
+}
+
+px_bool PX_ObjectRegisterEvent( PX_Object *pObject,px_uint Event,px_void (*ProcessFunc)(PX_Object *,PX_Object_Event e,px_void *user_ptr),px_void *user)
+{
+	return PX_ObjectRegisterEventEx(pObject, Event, pObject->Type[0], ProcessFunc, user);
+}
+
+px_bool PX_ObjectRegisterEventEx(PX_Object* pObject, px_uint Event,px_int owner, px_void(*ProcessFunc)(PX_Object*, PX_Object_Event e, px_void* user_ptr), px_void* user)
+{
+	PX_OBJECT_EventAction* pPoint;
+	PX_OBJECT_EventAction* pAction = (PX_OBJECT_EventAction*)MP_Malloc(pObject->mp, sizeof(PX_OBJECT_EventAction));
+	if (pAction == PX_NULL)
 	{
 		return PX_FALSE;
 	}
-	pAction->pNext=PX_NULL;
-	pAction->pPre=PX_NULL;
-	pAction->EventAction=Event;
-	pAction->EventActionFunc=ProcessFunc;
-	
-	pAction->user_ptr=user;
+	pAction->enable = PX_TRUE;
+	pAction->owner= owner;
+	pAction->pNext = PX_NULL;
+	pAction->pPre = PX_NULL;
+	pAction->EventAction = Event;
+	pAction->EventActionFunc = ProcessFunc;
 
-	pPoint=pObject->pEventActions;
-	if (pPoint==PX_NULL)
+	pAction->user_ptr = user;
+
+	pPoint = pObject->pEventActions;
+	if (pPoint == PX_NULL)
 	{
-		pObject->pEventActions=pAction;
+		pObject->pEventActions = pAction;
 		return PX_TRUE;
 	}
 
-	while(pPoint->pNext)
+	while (pPoint->pNext)
 	{
-		pPoint=pPoint->pNext;
+		pPoint = pPoint->pNext;
 	}
-	pAction->pPre=pPoint;
-	pPoint->pNext=pAction;
+	pAction->pPre = pPoint;
+	pPoint->pNext = pAction;
 
 	return PX_TRUE;
 }
@@ -1153,10 +1269,211 @@ px_void PX_ObjectExecuteEvent(PX_Object *pPost,PX_Object_Event Event)
 	{
 		if (EventAction->EventAction==PX_OBJECT_EVENT_ANY||EventAction->EventAction==Event.Event)
 		{
-			EventAction->EventActionFunc(pPost,Event,EventAction->user_ptr);
+			if(EventAction->enable)
+				EventAction->EventActionFunc(pPost,Event,EventAction->user_ptr);
 		}
 		EventAction=EventAction->pNext;
 	}
+}
+
+px_int PX_ObjectSearchRegion(PX_Object_CollisionTest* ptest, px_float x, px_float y, px_float raduis, PX_Object* pObject[], px_int MaxSearchCount, px_dword impact_test_type)
+{
+	px_int b;
+	px_int m = 0;
+	for (b = 0; b < sizeof(impact_test_type) * 8; b++)
+	{
+		if ((impact_test_type & (1 << b)))
+		{
+			px_int im_i;
+			PX_Quadtree_UserData userData;
+			userData.ptr = PX_NULL;
+			PX_QuadtreeResetTest(&ptest->Impact_Test_array[b]);
+			PX_QuadtreeTestNode(&ptest->Impact_Test_array[b], x, y, raduis * 2, raduis * 2, userData);
+
+			for (im_i = 0; im_i < ptest->Impact_Test_array[b].Impacts.size; im_i++)
+			{
+				PX_Quadtree_UserData* puData = PX_VECTORAT(PX_Quadtree_UserData, &ptest->Impact_Test_array[b].Impacts, im_i);
+				PX_Object* pimpactWo = (PX_Object*)puData->ptr;
+				PX_Object* pObj2 = ((PX_Object*)(puData->ptr));
+
+				if (pObj2->diameter)
+				{
+					if (!PX_isCircleCrossCircle(PX_POINT(x, y, 0), raduis, PX_POINT(pObj2->x, pObj2->y, 0), pObj2->diameter / 2))
+						continue;
+				}
+				else
+				{
+					if (!PX_isRectCrossCircle(PX_RECT(pObj2->x - pObj2->Width / 2, pObj2->y - pObj2->Height / 2, pObj2->Width, pObj2->Height), PX_POINT(x, y, 0), raduis))
+					{
+						continue;
+					}
+				}
+
+				
+				if (m < MaxSearchCount)
+				{
+					pObject[m] = pObj2;
+					m++;
+				}
+			}
+
+		}
+	}
+	return m;
+}
+
+px_void PX_ObjectCollisionTestFree(PX_Object_CollisionTest* ptest)
+{
+	MP_Free(ptest->mp, ptest->calc_mp.StartAddr);
+}
+
+px_bool PX_ObjectCollisionTestCreate(px_memorypool* mp, PX_Object_CollisionTest* ptest,px_int width,px_int height, px_vector* pObjects)
+{
+	px_int allocSize = 1024 * 1024;
+	px_byte* cache = MP_Malloc(mp, allocSize);
+	px_memorypool testcalc;
+	px_int i;
+	if (cache)
+	{
+		px_int impact_count[32] = { 0 };
+		PX_memset(&testcalc, 0, sizeof(testcalc));
+		ptest->mp = mp;
+		ptest->calc_mp = MP_Create(cache, allocSize);
+
+		for (i = 0; i < pObjects->size; i++)
+		{
+			PX_Object *pTestObject = *PX_VECTORAT(PX_Object*, pObjects, i);
+			if (!pTestObject->delay_delete)
+			{
+				continue;
+			}
+			if (pTestObject->impact_object_type)
+			{
+				px_dword j = 0;
+				while (!(pTestObject->impact_object_type & (1 << j)))
+					j++;
+				impact_count[j]++;
+			}
+		}
+
+		for (i = 0; i < sizeof(px_dword) * 8; i++)
+		{
+			if (impact_count[i])
+			{
+				if(impact_count[i]<=64)
+					PX_QuadtreeCreate(&ptest->calc_mp, &ptest->Impact_Test_array[i], 0, 0, (px_float)width, (px_float)height, impact_count[i], 1);
+				else if(impact_count[i] <= 256)
+					PX_QuadtreeCreate(&ptest->calc_mp, &ptest->Impact_Test_array[i], 0, 0, (px_float)width, (px_float)height, impact_count[i], 2);
+				else
+					PX_QuadtreeCreate(&ptest->calc_mp, &ptest->Impact_Test_array[i], 0, 0, (px_float)width, (px_float)height, impact_count[i], 3);
+			}
+			else
+			{
+				PX_QuadtreeCreate(&ptest->calc_mp, &ptest->Impact_Test_array[i], 0, 0, (px_float)width, (px_float)height, impact_count[i], 0);
+			}
+		}
+
+		for (i = 0; i < pObjects->size; i++)
+		{
+			PX_Object* pTestObject = *PX_VECTORAT(PX_Object*, pObjects, i);
+
+			if (!pTestObject->delay_delete)
+			{
+				continue;
+			}
+			if (pTestObject->impact_object_type)
+			{
+				px_int b;
+				for (b = 0; b < sizeof(px_dword) * 8; b++)
+				{
+					if ((pTestObject->impact_object_type & (1 << b)))
+					{
+						PX_Quadtree_UserData userData;
+						userData.ptr = pTestObject;
+						if ((px_float)pTestObject->diameter)
+						{
+							PX_QuadtreeAddNode(&ptest->Impact_Test_array[b], (px_float)pTestObject->x, (px_float)pTestObject->y, (px_float)pTestObject->diameter, (px_float)pTestObject->diameter, userData);
+						}
+						else
+						{
+							PX_QuadtreeAddNode(&ptest->Impact_Test_array[b], (px_float)pTestObject->x, (px_float)pTestObject->y, (px_float)pTestObject->Width, (px_float)pTestObject->Height, userData);
+						}
+
+					}
+				}
+			}
+		}
+
+		for (i = 0; i < pObjects->size; i++)
+		{
+			PX_Object* pTestObject = *PX_VECTORAT(PX_Object*, pObjects, i);
+			if (!pTestObject->delay_delete)
+			{
+				continue;
+			}
+
+			if (pTestObject->impact_target_type)
+			{
+				px_int b;
+				for (b = 0; b < sizeof(pTestObject->impact_target_type) * 8; b++)
+				{
+					if ((pTestObject->impact_target_type & (1 << b)))
+					{
+						px_int im_i;
+						PX_Quadtree_UserData userData;
+						userData.ptr = pTestObject;
+						PX_QuadtreeResetTest(&ptest->Impact_Test_array[b]);
+						if (pTestObject->diameter)
+						{
+							PX_QuadtreeTestNode(&ptest->Impact_Test_array[b], (px_float)pTestObject->x, (px_float)pTestObject->y, (px_float)pTestObject->diameter, (px_float)pTestObject->diameter, userData);
+						}
+						else
+						{
+							PX_QuadtreeTestNode(&ptest->Impact_Test_array[b], (px_float)pTestObject->x, (px_float)pTestObject->y, (px_float)pTestObject->Width, (px_float)pTestObject->Height, userData);
+						}
+
+						for (im_i = 0; im_i < ptest->Impact_Test_array[b].Impacts.size; im_i++)
+						{
+							PX_Quadtree_UserData* puData = PX_VECTORAT(PX_Quadtree_UserData, &ptest->Impact_Test_array[b].Impacts, im_i);
+							PX_Object* pObj1 = pTestObject;
+							PX_Object* pObj2 = (PX_Object*)puData->ptr;
+
+							if (pObj1->diameter && pObj2->diameter)
+							{
+								if (!PX_isCircleCrossCircle(PX_POINT(pObj1->x, pObj1->y, 0), pObj1->diameter / 2, PX_POINT(pObj2->x, pObj2->y, 0), pObj2->diameter / 2))
+									continue;
+							}
+							else if (pObj1->diameter == 0 && pObj2->diameter)
+							{
+								if (!PX_isRectCrossCircle(PX_RECT(pObj1->x - pObj1->Width / 2, pObj1->y - pObj1->Height / 2, pObj1->Width, pObj1->Height), PX_POINT(pObj2->x, pObj2->y, 0), pObj2->diameter / 2))
+								{
+									continue;
+								}
+							}
+							else if (pObj1->diameter && pObj2->diameter == 0)
+							{
+								if (!PX_isRectCrossCircle(PX_RECT(pObj2->x - pObj2->Width / 2, pObj2->y - pObj2->Height / 2, pObj2->Width, pObj2->Height), PX_POINT(pObj1->x, pObj1->y, 0), pObj1->diameter / 2))
+								{
+									continue;
+								}
+							}
+							do
+							{
+								PX_Object_Event e = {0};
+								e.Event = PX_OBJECT_EVENT_IMPACT;
+								PX_Object_Event_SetImpactTargetObject(&e, pObj2);
+								PX_ObjectExecuteEvent(pObj1, e);
+							} while (0);
+						}
+
+					}
+				}
+			}
+		}
+
+		return PX_TRUE;
+	}
+	return PX_FALSE;
 }
 
 
@@ -1344,66 +1661,4 @@ px_void PX_ObjectSetParent(PX_Object* pObject, PX_Object* pParent)
 	else {
 		PX_ObjectAddChild(pParent, pObject);
 	}
-}
-
-//////////////////////////////////////////////////////////////////////////
-px_bool PX_Designer_GetID(PX_Object* pObject, px_string* str)
-{
-	PX_StringSet(str, pObject->id);
-	return PX_TRUE;
-}
-
-px_void PX_Designer_SetID(PX_Object* pObject, const px_char id[])
-{
-	PX_ObjectSetId(pObject, id);
-}
-
-px_float PX_Designer_GetX(PX_Object* pObject)
-{
-	return pObject->x;
-}
-
-px_float PX_Designer_GetY(PX_Object* pObject)
-{
-	return pObject->y;
-}
-
-px_float PX_Designer_GetWidth(PX_Object* pObject)
-{
-	return pObject->Width;
-}
-
-px_float PX_Designer_GetHeight(PX_Object* pObject)
-{
-	return pObject->Height;
-}
-
-px_bool PX_Designer_GetEnable(PX_Object* pObject)
-{
-	return pObject->Enabled;
-}
-
-px_void PX_Designer_SetX(PX_Object* pObject, px_float v)
-{
-	pObject->x = v;
-}
-
-px_void PX_Designer_SetY(PX_Object* pObject, px_float v)
-{
-	pObject->y = v;
-}
-
-px_void PX_Designer_SetWidth(PX_Object* pObject, px_float v)
-{
-	pObject->Width = v;
-}
-
-px_void PX_Designer_SetEnable(PX_Object* pObject, px_bool v)
-{
-	pObject->Enabled = v;
-}
-
-px_void PX_Designer_SetHeight(PX_Object* pObject, px_float v)
-{
-	pObject->Height = v;
 }

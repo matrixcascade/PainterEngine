@@ -46,7 +46,6 @@ typedef struct
 	px_surface EditSurface;
 	PX_FontModule *fontModule;
 	px_char Limit[128];
-	px_bool lastChange;
 	PX_OBJECT_EDIT_INPUT_MODE inputmode;
 	PX_OBJECT_EDIT_STATE state;
 	PX_OBJECT_EDIT_STYLE style;
@@ -67,8 +66,6 @@ px_void PX_Object_EditSetTextColor( PX_Object *pObject,px_color Color );
 px_void PX_Object_EditSetLimit(PX_Object *pObject,const px_char *Limit);
 px_void PX_Object_EditSetStyle(PX_Object *pObject,PX_OBJECT_EDIT_STYLE style);
 px_void PX_Object_EditSetBorder( PX_Object *pObj,px_bool Border );
-px_void PX_Object_EditRender(px_surface *psurface, PX_Object *pObject,px_uint elapsed);
-px_void PX_Object_EditFree( PX_Object *pObject );
 px_void PX_Object_EditAddString(PX_Object *pObject,px_char *Text);
 px_void PX_Object_EditBackspace(PX_Object *pObject);
 px_void PX_Object_EditBackward(PX_Object *pObject);
@@ -78,6 +75,5 @@ px_void PX_Object_EditSetOffset(PX_Object *pObject,px_int TopOffset,px_int LeftO
 px_void PX_Object_EditSetXYOffset(PX_Object* pObject, px_int XOffset, px_int YOffset);
 px_void PX_Object_EditSetInputMode(PX_Object* pObject, PX_OBJECT_EDIT_INPUT_MODE mode);
 px_void PX_Object_EditSetMultiLines(PX_Object* pObject, px_bool b);
-PX_Designer_ObjectDesc PX_Object_EditDesignerInstall();
 #endif
 

@@ -2,45 +2,43 @@
 
 PX_Object_MessageBox *PX_Object_GetMessageBox(PX_Object *pObject)
 {
-	if (pObject->Type==PX_OBJECT_TYPE_MESSAGEBOX)
-	{
-		return PX_ObjectGetDesc(PX_Object_MessageBox,pObject);
-	}
-	return PX_NULL;
+	PX_Object_MessageBox*pDesc=(PX_Object_MessageBox*)PX_ObjectGetDescByType(pObject,PX_OBJECT_TYPE_MESSAGEBOX);
+	PX_ASSERTIF(pDesc==PX_NULL);
+	return pDesc;
 }
 
-static px_void PX_Object_MessageBox_BtnYesClick(PX_Object *pObject,PX_Object_Event e,px_void *user)
+static PX_OBJECT_EVENT_FUNCTION(PX_Object_MessageBox_BtnYesClick)
 {
-	PX_Object_MessageBox *pm=PX_Object_GetMessageBox((PX_Object *)user);
-	PX_Object_MessageBoxClose((PX_Object *)user);
+	PX_Object_MessageBox *pm=PX_Object_GetMessageBox((PX_Object *)ptr);
+	PX_Object_MessageBoxClose((PX_Object *)ptr);
 	if (pm->function_yes)
 	{
-		pm->function_yes((PX_Object *)user,PX_OBJECT_BUILD_EVENT(PX_OBJECT_EVENT_EXECUTE),pm->function_yes_ptr);
+		pm->function_yes((PX_Object *)ptr,PX_OBJECT_BUILD_EVENT(PX_OBJECT_EVENT_EXECUTE),pm->function_yes_ptr);
 	}
 
 }
 
-static px_void PX_Object_MessageBox_BtnNoClick(PX_Object *pObject,PX_Object_Event e,px_void *user)
+static PX_OBJECT_EVENT_FUNCTION(PX_Object_MessageBox_BtnNoClick)
 {
-	PX_Object_MessageBox *pm=PX_Object_GetMessageBox((PX_Object *)user);
-	PX_Object_MessageBoxClose((PX_Object *)user);
+	PX_Object_MessageBox *pm=PX_Object_GetMessageBox((PX_Object *)ptr);
+	PX_Object_MessageBoxClose((PX_Object *)ptr);
 	if (pm->function_no)
 	{
-		pm->function_no((PX_Object *)user,PX_OBJECT_BUILD_EVENT(PX_OBJECT_EVENT_EXECUTE),pm->function_yes_ptr);
+		pm->function_no((PX_Object *)ptr,PX_OBJECT_BUILD_EVENT(PX_OBJECT_EVENT_EXECUTE),pm->function_yes_ptr);
 	}
 }
 
-static px_void PX_Object_MessageBox_EditOnEnter(PX_Object *pObject,PX_Object_Event e,px_void *user)
+static PX_OBJECT_EVENT_FUNCTION(PX_Object_MessageBox_EditOnEnter)
 {
 	if (e.Event==PX_OBJECT_EVENT_KEYDOWN)
 	{
 		if (PX_Object_Event_GetKeyDown(e)=='\r')
 		{
-			PX_Object_MessageBox *pm=PX_Object_GetMessageBox((PX_Object *)user);
-			PX_Object_MessageBoxClose((PX_Object *)user);
+			PX_Object_MessageBox *pm=PX_Object_GetMessageBox((PX_Object *)ptr);
+			PX_Object_MessageBoxClose((PX_Object *)ptr);
 			if (pm->function_yes)
 			{
-				pm->function_yes((PX_Object *)user,PX_OBJECT_BUILD_EVENT(PX_OBJECT_EVENT_EXECUTE),pm->function_yes_ptr);
+				pm->function_yes((PX_Object *)ptr,PX_OBJECT_BUILD_EVENT(PX_OBJECT_EVENT_EXECUTE),pm->function_yes_ptr);
 			}
 			return;
 		}
@@ -81,11 +79,11 @@ px_void PX_Object_MessageBoxSetFillColor(PX_Object *pObject, px_color color)
 	}
 }
 
-static px_void PX_Object_MessageBoxRender(px_surface *pSurface,PX_Object *pObject,px_dword elapsed)
+static PX_OBJECT_RENDER_FUNCTION(PX_Object_MessageBoxRender)
 {
 	px_float x, y, w, h;
 	px_color backGroundColor,frontColor;
-	PX_Object_MessageBox *pm=PX_Object_GetMessageBox(pObject);
+	PX_Object_MessageBox *pm=PX_ObjectGetDesc(PX_Object_MessageBox,pObject);
 	if (elapsed>2000)
 	{
 		return;
@@ -93,34 +91,34 @@ static px_void PX_Object_MessageBoxRender(px_surface *pSurface,PX_Object *pObjec
 
 	if (pm->fillbackgroundcolor._argb.a)
 	{
-		PX_SurfaceClear(pSurface,0,0,pSurface->width-1,pSurface->height-1,pm->fillbackgroundcolor);
+		PX_SurfaceClear(psurface,0,0,psurface->width-1,psurface->height-1,pm->fillbackgroundcolor);
 	}
 
 	PX_OBJECT_INHERIT_CODE(pm->btn_Ok, x, y, w, h);
 
-	pm->btn_Ok->x=pSurface->width/2+200.0f-(x- pm->btn_Ok->x);
-	pm->btn_Ok->y=pSurface->height/2+150.0f-(y - pm->btn_Ok->y);
+	pm->btn_Ok->x=psurface->width/2+200.0f-(x- pm->btn_Ok->x);
+	pm->btn_Ok->y=psurface->height/2+150.0f-(y - pm->btn_Ok->y);
 
 	PX_OBJECT_INHERIT_CODE(pm->btn_Ok, x, y, w, h);
-	pm->btn_Cancel->x=pSurface->width/2+300.0f - (x - pm->btn_Ok->x);
-	pm->btn_Cancel->y=pSurface->height/2+150.0f - (y - pm->btn_Ok->y);
+	pm->btn_Cancel->x=psurface->width/2+300.0f - (x - pm->btn_Ok->x);
+	pm->btn_Cancel->y=psurface->height/2+150.0f - (y - pm->btn_Ok->y);
 
 
-	if (pm->btn_Ok->x > pSurface->width - pm->btn_Ok->Width - 100)
-		pm->btn_Ok->x = pSurface->width - pm->btn_Ok->Width - 100;
+	if (pm->btn_Ok->x > psurface->width - pm->btn_Ok->Width - 100)
+		pm->btn_Ok->x = psurface->width - pm->btn_Ok->Width - 100;
 
-	if (pm->btn_Ok->y > pSurface->height - pm->btn_Ok->Height - 1)
-		pm->btn_Ok->y = pSurface->height - pm->btn_Ok->Height - 1;
+	if (pm->btn_Ok->y > psurface->height - pm->btn_Ok->Height - 1)
+		pm->btn_Ok->y = psurface->height - pm->btn_Ok->Height - 1;
 
-	if (pm->btn_Cancel->x > pSurface->width - pm->btn_Cancel->Width - 30)
-		pm->btn_Cancel->x = pSurface->width - pm->btn_Cancel->Width - 30;
+	if (pm->btn_Cancel->x > psurface->width - pm->btn_Cancel->Width - 30)
+		pm->btn_Cancel->x = psurface->width - pm->btn_Cancel->Width - 30;
 
-	if (pm->btn_Cancel->y > pSurface->height - pm->btn_Cancel->Height - 1)
-		pm->btn_Cancel->y = pSurface->height - pm->btn_Cancel->Height - 1;
+	if (pm->btn_Cancel->y > psurface->height - pm->btn_Cancel->Height - 1)
+		pm->btn_Cancel->y = psurface->height - pm->btn_Cancel->Height - 1;
 
 
-	pm->edit_inputbox->x=pSurface->width/2-100.0f;
-	pm->edit_inputbox->y=pSurface->height/2-12.0f;
+	pm->edit_inputbox->x=psurface->width/2-100.0f;
+	pm->edit_inputbox->y=psurface->height/2-12.0f;
 
 	if (pm->edit_inputbox->Visible)
 	{
@@ -171,28 +169,28 @@ static px_void PX_Object_MessageBoxRender(px_surface *pSurface,PX_Object *pObjec
 
 	if (pm->schedule<PX_OBJECT_MESSAGEBOX_DEFAULT_STAGE_1_TIME)
 	{
-		px_int width=pSurface->width*pm->schedule*pm->schedule/(PX_OBJECT_MESSAGEBOX_DEFAULT_STAGE_1_TIME*PX_OBJECT_MESSAGEBOX_DEFAULT_STAGE_1_TIME);
-		PX_GeoDrawRect(pSurface,(pSurface->width-width)/2,(pSurface->height-pm->PX_MESSAGEBOX_STAGE_1_HEIGHT)/2,(pSurface->width+width)/2,(pSurface->height+pm->PX_MESSAGEBOX_STAGE_1_HEIGHT)/2,backGroundColor);
+		px_int width=psurface->width*pm->schedule*pm->schedule/(PX_OBJECT_MESSAGEBOX_DEFAULT_STAGE_1_TIME*PX_OBJECT_MESSAGEBOX_DEFAULT_STAGE_1_TIME);
+		PX_GeoDrawRect(psurface,(psurface->width-width)/2,(psurface->height-pm->PX_MESSAGEBOX_STAGE_1_HEIGHT)/2,(psurface->width+width)/2,(psurface->height+pm->PX_MESSAGEBOX_STAGE_1_HEIGHT)/2,backGroundColor);
 	}
 	else if(pm->schedule<PX_OBJECT_MESSAGEBOX_DEFAULT_STAGE_2_TIME)
 	{
 		px_int height=PX_OBJECT_MESSAGEBOX_DEFAULT_STAGE_2_HEIGHT*pm->schedule*pm->schedule/(PX_OBJECT_MESSAGEBOX_DEFAULT_STAGE_2_TIME*PX_OBJECT_MESSAGEBOX_DEFAULT_STAGE_2_TIME);
-		PX_GeoDrawRect(pSurface,0,(pSurface->height-height)/2,pSurface->width-1,(pSurface->height+height)/2,backGroundColor);
+		PX_GeoDrawRect(psurface,0,(psurface->height-height)/2,psurface->width-1,(psurface->height+height)/2,backGroundColor);
 	}
 	else
 	{
-		PX_GeoDrawRect(pSurface,0,(pSurface->height-pm->PX_MESSAGEBOX_STAGE_2_HEIGHT)/2,pSurface->width-1,(pSurface->height+pm->PX_MESSAGEBOX_STAGE_2_HEIGHT)/2,backGroundColor);
-		PX_GeoDrawRect(pSurface,0,(pSurface->height-pm->PX_MESSAGEBOX_STAGE_2_HEIGHT)/2-30,pSurface->width-1,(pSurface->height-pm->PX_MESSAGEBOX_STAGE_2_HEIGHT)/2-10,backGroundColor);
-		PX_GeoDrawRect(pSurface,0,(pSurface->height+pm->PX_MESSAGEBOX_STAGE_2_HEIGHT)/2+10,pSurface->width-1,(pSurface->height+pm->PX_MESSAGEBOX_STAGE_2_HEIGHT)/2+30,backGroundColor);
+		PX_GeoDrawRect(psurface,0,(psurface->height-pm->PX_MESSAGEBOX_STAGE_2_HEIGHT)/2,psurface->width-1,(psurface->height+pm->PX_MESSAGEBOX_STAGE_2_HEIGHT)/2,backGroundColor);
+		PX_GeoDrawRect(psurface,0,(psurface->height-pm->PX_MESSAGEBOX_STAGE_2_HEIGHT)/2-30,psurface->width-1,(psurface->height-pm->PX_MESSAGEBOX_STAGE_2_HEIGHT)/2-10,backGroundColor);
+		PX_GeoDrawRect(psurface,0,(psurface->height+pm->PX_MESSAGEBOX_STAGE_2_HEIGHT)/2+10,psurface->width-1,(psurface->height+pm->PX_MESSAGEBOX_STAGE_2_HEIGHT)/2+30,backGroundColor);
 
 		if (pm->edit_inputbox->Visible)
 		{
 			//inputbox mode
-			PX_FontModuleDrawText(pSurface,pm->fontmodule,pSurface->width/2-108,pSurface->height/2,PX_ALIGN_RIGHTMID,pm->Message,frontColor);
+			PX_FontModuleDrawText(psurface,pm->fontmodule,psurface->width/2-108,psurface->height/2,PX_ALIGN_RIGHTMID,pm->Message,frontColor);
 		}
 		else
 		{
-			PX_FontModuleDrawText(pSurface,pm->fontmodule,pSurface->width/2,pSurface->height/2,PX_ALIGN_CENTER,pm->Message,frontColor);
+			PX_FontModuleDrawText(psurface,pm->fontmodule,psurface->width/2,psurface->height/2,PX_ALIGN_CENTER,pm->Message,frontColor);
 		}
 	}
 
@@ -287,7 +285,7 @@ px_char * PX_Object_MessageBoxGetInput(PX_Object *pObject)
 	return PX_Object_EditGetText(pm->edit_inputbox);
 }
 
-px_void PX_Object_MessageBoxFree(PX_Object *pObject)
+PX_OBJECT_FREE_FUNCTION(PX_Object_MessageBoxFree)
 {
 	
 }

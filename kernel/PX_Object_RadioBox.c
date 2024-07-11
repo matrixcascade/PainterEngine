@@ -3,16 +3,13 @@
 
 PX_Object_RadioBox * PX_Object_GetRadioBox(PX_Object *pObject)
 {
-	PX_Object_RadioBox *pcb=PX_ObjectGetDesc(PX_Object_RadioBox,pObject);
-	if (pObject->Type==PX_OBJECT_TYPE_RADIOBOX)
-	{
-		return pcb;
-	}
-	return PX_NULL;
+	PX_Object_RadioBox*pdesc=(PX_Object_RadioBox*)PX_ObjectGetDescByType(pObject,PX_OBJECT_TYPE_RADIOBOX);
+	PX_ASSERTIF(pdesc==PX_NULL);
+	return pdesc;
 }
 
 
-px_void PX_Object_RadioBoxOnMouseMove(PX_Object *pObject,PX_Object_Event e,px_void *user_ptr)
+PX_OBJECT_EVENT_FUNCTION(PX_Object_RadioBoxOnMouseMove)
 {
 	PX_Object_RadioBox *pcb=PX_Object_GetRadioBox(pObject);
 
@@ -78,7 +75,8 @@ px_void PX_Object_RadioBoxClearOtherCheck(PX_Object *pObject)
 		pPreBrotherObject = pPreBrotherObject->pNextBrother;
 	}
 }
-px_void PX_Object_RadioBoxOnMouseLButtonDown(PX_Object *pObject,PX_Object_Event e,px_void *user_ptr)
+
+PX_OBJECT_EVENT_FUNCTION(PX_Object_RadioBoxOnMouseLButtonDown)
 {
 	PX_Object_RadioBox *pcb=PX_Object_GetRadioBox(pObject);
 	px_float x=(PX_Object_Event_GetCursorX(e));
@@ -115,7 +113,7 @@ px_void PX_Object_RadioBoxOnMouseLButtonDown(PX_Object *pObject,PX_Object_Event 
 	}
 }
 
-px_void PX_Object_RadioBoxOnMouseLButtonUp(PX_Object *pObject,PX_Object_Event e,px_void *user_ptr)
+PX_OBJECT_EVENT_FUNCTION(PX_Object_RadioBoxOnMouseLButtonUp)
 {
 	PX_Object_RadioBox *pcb=PX_Object_GetRadioBox(pObject);
 
@@ -134,7 +132,7 @@ px_void PX_Object_RadioBoxOnMouseLButtonUp(PX_Object *pObject,PX_Object_Event e,
 	}
 }
 
-px_void PX_Object_RadioBoxRender(px_surface *psurface, PX_Object *pObject,px_uint elapsed)
+PX_OBJECT_RENDER_FUNCTION(PX_Object_RadioBoxRender)
 {
 
 	PX_Object_RadioBox *pcb=PX_Object_GetRadioBox(pObject);
@@ -190,29 +188,48 @@ px_void PX_Object_RadioBoxRender(px_surface *psurface, PX_Object *pObject,px_uin
 
 }
 
+PX_Object* PX_Object_RadioBoxAttachObject(px_memorypool* mp, PX_Object* pObject,px_int attachIndex, px_int x, px_int y, px_int Width, px_int Height, const char text[], PX_FontModule* fm)
+{
+
+	PX_Object_RadioBox cbx,*pdesc;
+	cbx.Align = PX_ALIGN_LEFTMID;
+	cbx.BackgroundColor = PX_COLOR(0, 0, 0, 0);
+	cbx.bCheck = PX_FALSE;
+	cbx.Border = PX_FALSE;
+	cbx.BorderColor = PX_OBJECT_UI_DEFAULT_FONTCOLOR;
+	cbx.CursorColor = PX_COLOR(0, 0, 0, 0);
+	cbx.PushColor = PX_COLOR(0, 0, 0, 0);
+	cbx.fm = fm;
+	cbx.state = PX_OBJECT_RADIOBOX_STATE_NORMAL;
+	PX_strset(cbx.Text, text);
+	cbx.TextColor = PX_OBJECT_UI_DEFAULT_FONTCOLOR;
+	
+	PX_ASSERTIF(pObject == PX_NULL);
+	PX_ASSERTIF(attachIndex < 0 || attachIndex >= PX_COUNTOF(pObject->pObjectDesc));
+	PX_ASSERTIF(pObject->pObjectDesc[attachIndex] != PX_NULL);
+	pdesc = (PX_Object_RadioBox*)PX_ObjectCreateDesc(pObject, attachIndex, PX_OBJECT_TYPE_RADIOBOX, 0, PX_Object_RadioBoxRender, 0, &cbx, sizeof(cbx));
+	PX_ASSERTIF(pdesc == PX_NULL);
+
+	PX_ObjectRegisterEventEx(pObject, PX_OBJECT_EVENT_CURSORMOVE, PX_OBJECT_TYPE_RADIOBOX, PX_Object_RadioBoxOnMouseMove, PX_NULL);
+	PX_ObjectRegisterEventEx(pObject, PX_OBJECT_EVENT_CURSORDOWN, PX_OBJECT_TYPE_RADIOBOX, PX_Object_RadioBoxOnMouseLButtonDown, PX_NULL);
+	PX_ObjectRegisterEventEx(pObject, PX_OBJECT_EVENT_CURSORUP, PX_OBJECT_TYPE_RADIOBOX, PX_Object_RadioBoxOnMouseLButtonUp, PX_NULL);
+	return pObject;
+}
+
 PX_Object * PX_Object_RadioBoxCreate(px_memorypool *mp, PX_Object *Parent,px_int x,px_int y,px_int Width,px_int Height,const char text[],PX_FontModule *fm)
 {
 	PX_Object *pObject;
-	PX_Object_RadioBox cbx;
-	cbx.Align=PX_ALIGN_LEFTMID;
-	cbx.BackgroundColor=PX_COLOR(0,0,0,0);
-	cbx.bCheck=PX_FALSE;
-	cbx.Border=PX_FALSE;
-	cbx.BorderColor=PX_OBJECT_UI_DEFAULT_FONTCOLOR;
-	cbx.CursorColor=PX_COLOR(0,0,0,0);
-	cbx.PushColor=PX_COLOR(0,0,0,0);
-	cbx.fm=fm;
-	cbx.state=PX_OBJECT_RADIOBOX_STATE_NORMAL;
-	PX_strset(cbx.Text,text);
-	cbx.TextColor= PX_OBJECT_UI_DEFAULT_FONTCOLOR;
-	pObject=PX_ObjectCreateEx(mp,Parent,(px_float)x,(px_float)y,0,(px_float)Width,(px_float)Height,0,PX_OBJECT_TYPE_RADIOBOX,PX_NULL,PX_Object_RadioBoxRender,PX_NULL,&cbx,sizeof(cbx));
-	if (!pObject)
+	pObject=PX_ObjectCreate(mp,Parent,(px_float)x,(px_float)y,0,(px_float)Width,(px_float)Height,0);
+	if (pObject==PX_NULL)
 	{
 		return PX_NULL;
 	}
-	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_CURSORMOVE,PX_Object_RadioBoxOnMouseMove,PX_NULL);
-	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_CURSORDOWN,PX_Object_RadioBoxOnMouseLButtonDown,PX_NULL);
-	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_CURSORUP,PX_Object_RadioBoxOnMouseLButtonUp,PX_NULL);
+	if (!PX_Object_RadioBoxAttachObject(mp,pObject,0,x,y,Width,Height,text,fm))
+	{
+		PX_ObjectDelete(pObject);
+		return PX_NULL;
+	}
+	
 	return pObject;
 }
 
@@ -249,109 +266,19 @@ px_void PX_Object_RadioBoxSetText(PX_Object *pObject,const px_char text[])
 const px_char *PX_Object_RadioBoxGetText(PX_Object *pObject)
 {
 	PX_Object_RadioBox *pDesc=PX_Object_GetRadioBox(pObject);
-	if (pDesc)
-	{
-		return pDesc->Text;
-	}
-	PX_ASSERT();
-	return PX_NULL;
+	return pDesc->Text;
+
 }
 
 px_void PX_Object_RadioBoxSetTextColor(PX_Object *pObject,px_color clr)
 {
 	PX_Object_RadioBox *pDesc=PX_Object_GetRadioBox(pObject);
-	if (pDesc)
-	{
-		pDesc->TextColor=clr;
-	}
-	else
-	PX_ASSERT();
+	pDesc->TextColor=clr;
+
 }
 
 px_void PX_Object_RadioBoxSetCheck(PX_Object *pObject,px_bool check)
 {
 	PX_Object_GetRadioBox(pObject)->bCheck=check;
-}
-
-
-//////////////////////////////////////////////////////////////////////////
-//radiobox
-//////////////////////////////////////////////////////////////////////////
-PX_Object* PX_Designer_RadioBoxCreate(px_memorypool* mp, PX_Object* pparent, px_float x, px_float y, px_float width, px_float height, px_abi* pabi)
-{
-	PX_FontModule* fm;
-	if (!PX_AbiRead_ptr(pabi, "fontmodule", (px_void**)&fm))
-	{
-		fm = PX_NULL;
-	}
-
-	return PX_Object_RadioBoxCreate(mp, pparent, (px_int)x, (px_int)y, 108, 28, "RadioButton", fm);
-}
-
-px_void PX_Designer_RadioBoxSetText(PX_Object* pobject, const px_char text[])
-{
-	PX_Object_RadioBoxSetText(pobject, text);
-}
-
-px_bool PX_Designer_RadioBoxGetText(PX_Object* pobject, px_string* str)
-{
-	return PX_StringSet(str, PX_Object_RadioBoxGetText(pobject));
-}
-
-px_void PX_Designer_RadioBoxSetCheck(PX_Object* pobject, px_bool b)
-{
-	PX_Object_RadioBoxSetCheck(pobject, b);
-}
-
-px_bool PX_Designer_RadioBoxGetCheck(PX_Object* pobject)
-{
-	return PX_Object_RadioBoxGetCheck(pobject);
-}
-
-PX_Designer_ObjectDesc PX_Object_RadioBoxDesignerInstall()
-{
-	PX_Designer_ObjectDesc sradiobutton;
-	px_int i = 0;
-	PX_memset(&sradiobutton, 0, sizeof(sradiobutton));
-	PX_strcat(sradiobutton.Name, "radiobutton");
-
-	sradiobutton.createfunc = PX_Designer_RadioBoxCreate;
-	sradiobutton.type = PX_DESIGNER_OBJECT_TYPE_UI;
-
-	PX_strcat(sradiobutton.properties[i].Name, "id");
-	sradiobutton.properties[i].getstring = PX_Designer_GetID;
-	sradiobutton.properties[i].setstring = PX_Designer_SetID;
-	i++;
-
-	PX_strcat(sradiobutton.properties[i].Name, "x");
-	sradiobutton.properties[i].getfloat = PX_Designer_GetX;
-	sradiobutton.properties[i].setfloat = PX_Designer_SetX;
-	i++;
-
-	PX_strcat(sradiobutton.properties[i].Name, "y");
-	sradiobutton.properties[i].getfloat = PX_Designer_GetY;
-	sradiobutton.properties[i].setfloat = PX_Designer_SetY;
-	i++;
-
-	PX_strcat(sradiobutton.properties[i].Name, "width");
-	sradiobutton.properties[i].getfloat = PX_Designer_GetWidth;
-	sradiobutton.properties[i].setfloat = PX_Designer_SetWidth;
-	i++;
-
-	PX_strcat(sradiobutton.properties[i].Name, "height");
-	sradiobutton.properties[i].getfloat = PX_Designer_GetHeight;
-	sradiobutton.properties[i].setfloat = PX_Designer_SetHeight;
-	i++;
-
-	PX_strcat(sradiobutton.properties[i].Name, "text");
-	sradiobutton.properties[i].setstring = PX_Designer_RadioBoxSetText;
-	sradiobutton.properties[i].getstring = PX_Designer_RadioBoxGetText;
-	i++;
-
-	PX_strcat(sradiobutton.properties[i].Name, "check");
-	sradiobutton.properties[i].setbool = PX_Designer_RadioBoxSetCheck;
-	sradiobutton.properties[i].getbool = PX_Designer_RadioBoxGetCheck;
-	i++;
-	return sradiobutton;
 }
 

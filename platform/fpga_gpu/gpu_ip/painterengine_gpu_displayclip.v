@@ -7,6 +7,8 @@
 	`define VIDEO_DISPLAY_MODE_800_600    3'b100
 	`define VIDEO_DISPLAY_MODE_1024_768   3'b101
 	`define VIDEO_DISPLAY_MODE_1920_1080  3'b110
+	`define VIDEO_DISPLAY_MODE_128_64  	  3'b111
+
 	module painterengine_gpu_displayclip
 		(
 		input wire[2:0]             								i_wire_display_mode,  
@@ -57,6 +59,11 @@
 			begin
 				reg_clip_width=i_wire_image_width>1920?1920:i_wire_image_width;
 				reg_clip_height=i_wire_image_height>1080?1080:i_wire_image_height;
+			end
+			`VIDEO_DISPLAY_MODE_128_64:
+			begin
+				reg_clip_width=i_wire_image_width>128?128:i_wire_image_width;
+				reg_clip_height=i_wire_image_height>64?64:i_wire_image_height;
 			end
 			default:
 			begin

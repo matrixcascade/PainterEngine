@@ -4,7 +4,7 @@
 
 
 
-px_bool	PX_CDA_Initialize(px_memorypool* mp, PX_CDA* pCDA, px_int grid_x_count, px_int grid_y_count, px_int view_width, px_int view_height,PX_FontModule *fm,PX_ResourceLibrary *plib)
+px_bool PX_CDA_Initialize(px_memorypool* mp, px_memorypool* mp_static, PX_CDA* pCDA, px_int grid_x_count, px_int grid_y_count, px_int view_width, px_int view_height, PX_FontModule* fm, PX_ResourceLibrary* plib, PX_SoundPlay* soundplay)
 {
 	px_string *pscript;
 	PX_memset(pCDA, 0, sizeof(PX_CDA));
@@ -16,6 +16,8 @@ px_bool	PX_CDA_Initialize(px_memorypool* mp, PX_CDA* pCDA, px_int grid_x_count, 
 	}
 
 	pCDA->mp = mp;
+	pCDA->mp_static = mp_static;
+
 	//Initialize camera
 	pCDA->grid_size = PX_CDA_GRID_DEFAULE_SIZE;
 	pCDA->camera_x = (grid_x_count *  pCDA->grid_size) / 2.f;
@@ -37,6 +39,7 @@ px_bool	PX_CDA_Initialize(px_memorypool* mp, PX_CDA* pCDA, px_int grid_x_count, 
 	{
 		return PX_FALSE;
 	}
+	pCDA->soundplay=soundplay;
 	pCDA->presourceLibrary=plib;
 	pCDA->fontmodule = fm;
 	pCDA->psource_background_texture = PX_ResourceLibraryGetTexture(plib,"cda_background");
@@ -103,7 +106,7 @@ px_void PX_CDA_ShowGridLine(PX_CDA *pCDA,px_bool bline)
 	pCDA->show_grid_line =bline;
 }
 
-PX_Object* PX_CDA_GetCDAObject(PX_CDA* CDA, px_int index)
+PX_Object* PX_CDA_GetCDAObjectByIndex(PX_CDA* CDA, px_int index)
 {
 	PX_Object* pObject;
 	PX_ASSERTIF(index < 0);
@@ -112,7 +115,7 @@ PX_Object* PX_CDA_GetCDAObject(PX_CDA* CDA, px_int index)
 	{
 		return PX_NULL;
 	}
-	pObject = PX_VECTORAT(PX_Object, &CDA->pObjects, index);
+	pObject = *PX_VECTORAT(PX_Object *, &CDA->pObjects, index);
 	return pObject;
 }
 
@@ -121,7 +124,7 @@ PX_Object* PX_CDA_GetCDAObjectByID(PX_CDA* CDA, const px_char id[])
 	px_int i;
 	for (i = 0; i < CDA->pObjects.size; i++)
 	{
-		PX_Object* pObject = PX_VECTORAT(PX_Object, &CDA->pObjects, i);
+		PX_Object* pObject = *PX_VECTORAT(PX_Object *, &CDA->pObjects, i);
 		if (PX_strequ(pObject->id, id))
 		{
 			return pObject;
@@ -130,6 +133,7 @@ PX_Object* PX_CDA_GetCDAObjectByID(PX_CDA* CDA, const px_char id[])
 	return PX_NULL;
 	
 }
+
 px_int PX_CDA_GetObjectCount(PX_CDA *CDA)
 {
 	return CDA->pObjects.size;
@@ -141,7 +145,8 @@ px_int PX_CDA_GetAliveCount(PX_CDA* CDA)
 	px_int count=0;
 	for (i = 0; i < CDA->pObjects.size; i++)
 	{
-		if (PX_CDA_GetCDAObject(CDA, i)->delay_delete)
+		PX_Object* pObject = *PX_VECTORAT(PX_Object *, &CDA->pObjects, i);
+		if (!pObject->delay_delete)
 			count++;
 	}
 	return count;
@@ -251,7 +256,7 @@ px_void PX_CDA_Free(PX_CDA* pCDA)
 px_void PX_CDA_RemoveObject(PX_CDA* CDA, PX_Object* pObject)
 {
 	PX_Object* pEnumObject;
-	PX_CDA_Object* pDesc = PX_ObjectGetDescIndex(PX_CDA_Object, pObject, 1);
+	PX_CDA_Object* pDesc = PX_Object_GetCDAObject(pObject);
 	if (pDesc->cda_index != -1 && pDesc->cda_index < CDA->pObjects.size)
 	{
 		pEnumObject = PX_VECTORAT(PX_Object, &CDA->pObjects, pDesc->cda_index);
@@ -287,7 +292,7 @@ static px_void PX_CDA_UpdateCDAObjects(PX_CDA* pCDA,px_dword elapsed)
 	for (i = 0; i < pCDA->pObjects.size; i++)
 	{
 		PX_Object* pObject = *PX_VECTORAT(PX_Object*, &pCDA->pObjects, i);
-		PX_CDA_Object *pDesc= PX_ObjectGetDescIndex(PX_CDA_Object, pObject, 1);
+		PX_CDA_Object *pDesc= PX_Object_GetCDAObject(pObject);
 
 		PX_ObjectUpdate(pObject, elapsed);
 
@@ -312,7 +317,6 @@ static px_void PX_CDA_UpdateRemovedObjects(PX_CDA* pCDA, px_dword elapsed)
 		}
 	}
 }
-
 
 static px_void PX_CDA_UpdateRouteSignal(PX_CDA* pCDA, PX_CDA_Route* proute, px_dword elapsed)
 {
@@ -363,7 +367,6 @@ static px_void PX_CDA_UpdateRouteSignal(PX_CDA* pCDA, PX_CDA_Route* proute, px_d
 		}
 	}
 }
-
 
 static px_void PX_CDA_UpdateRoutes(PX_CDA* pCDA, px_dword elapsed)
 {
@@ -1052,7 +1055,7 @@ px_void PX_CDA_RenderObjects(px_surface* psurface, PX_CDA* pCDA,px_dword elapsed
 	for (i = 0; i < pCDA->pObjects.size; i++)
 	{
 		PX_Object* pObject = *PX_VECTORAT(PX_Object*, &pCDA->pObjects, i);
-		PX_CDA_Object* pDesc = PX_ObjectGetDescIndex(PX_CDA_Object, pObject, 1);
+		PX_CDA_Object* pDesc = PX_Object_GetCDAObject(pObject);
 
 		pObject->x = pDesc->grid_x * pCDA->grid_size- offset_x*1.f- pDesc->grid_width * pCDA->grid_size / 2;
 		pObject->y = pDesc->grid_y * pCDA->grid_size- offset_y*1.f- pDesc->grid_height * pCDA->grid_size / 2;
@@ -1535,7 +1538,7 @@ px_void PX_CDA_MoveObject(PX_CDA* pCDA, px_int index, px_float grid_x, px_float 
 	if (index>=0&&index<pCDA->pObjects.size)
 	{
 		PX_Object* pObject = *PX_VECTORAT(PX_Object*, &pCDA->pObjects, index);
-		PX_CDA_Object* pDesc = PX_ObjectGetDescIndex(PX_CDA_Object, pObject, 1);
+		PX_CDA_Object* pDesc = PX_Object_GetCDAObject( pObject);
 		pDesc->grid_x = grid_x;
 		pDesc->grid_y = grid_y;
 	}
@@ -1547,7 +1550,7 @@ px_void PX_CDA_MoveSelectObject(PX_CDA* pCDA, px_float grid_x, px_float grid_y)
 	for (i = 0; i < pCDA->pObjects.size; i++)
 	{
 		PX_Object* pObject = *PX_VECTORAT(PX_Object*, &pCDA->pObjects, i);
-		PX_CDA_Object* pDesc = PX_ObjectGetDescIndex(PX_CDA_Object, pObject, 1);
+		PX_CDA_Object* pDesc = PX_Object_GetCDAObject( pObject);
 		if (pDesc->mode == PX_CDA_OBJECT_MODE_SELECT)
 		{
 			PX_CDA_MoveObject(pCDA, i, grid_x, grid_y);
@@ -1633,7 +1636,7 @@ const px_char* PX_CDA_QueryGridPortDescription(PX_CDA* pCDA, px_float gridx, px_
 	for ( i = 0; i < pCDA->pObjects.size; i++)
 	{
 		PX_Object* pObject = *PX_VECTORAT(PX_Object*, &pCDA->pObjects, i);
-		PX_CDA_Object* pDesc = PX_ObjectGetDescIndex(PX_CDA_Object, pObject, 1);
+		PX_CDA_Object* pDesc = PX_Object_GetCDAObject( pObject);
 		px_int xgrid_offset = (px_int)(gridx - (pDesc->grid_x - pDesc->grid_width / 2.f));
 		px_int ygrid_offset = (px_int)(gridy - (pDesc->grid_y - pDesc->grid_height / 2.f));
 		if(gridx>=0&&gridx<pCDA->grid_x_count&&gridy>=0&&gridy< pCDA->grid_y_count)
@@ -1644,6 +1647,14 @@ const px_char* PX_CDA_QueryGridPortDescription(PX_CDA* pCDA, px_float gridx, px_
 		}
 	}
 	return PX_NULL;
+}
+
+PX_CDA_Object *PX_Object_GetCDAObject(PX_Object* pObject)
+{
+	PX_CDA_Object*pdesc=(PX_CDA_Object*)PX_ObjectGetDescByType(pObject,PX_OBJECT_TYPE_CDA_OBJECT);
+	PX_ASSERTIF(pdesc==PX_NULL);
+	return pdesc;
+	
 }
 
 px_bool PX_CDA_AddObjectClass(PX_CDA* pCDA, PX_CDA_ObjectClass *pclass)
@@ -1717,7 +1728,7 @@ px_bool PX_CDA_AddRouteClass(PX_CDA* pCDA, PX_CDA_RouteClass* pclass)
 
 PX_OBJECT_RENDER_FUNCTION(PX_CDA_Object_Render)
 {
-	PX_CDA_Object *pCDADesc= PX_ObjectGetDescIndex(PX_CDA_Object, pObject, 1);
+	PX_CDA_Object *pCDADesc= PX_Object_GetCDAObject(pObject);
 	
 	px_float scale = 1;
 	px_float angle = 0;
@@ -1783,7 +1794,7 @@ PX_OBJECT_RENDER_FUNCTION(PX_CDA_Object_Render)
 PX_OBJECT_UPDATE_FUNCTION(PX_CDA_Object_Update)
 {
 	px_int i;
-	PX_CDA_Object* pCDADesc = PX_ObjectGetDescIndex(PX_CDA_Object, pObject, 1);
+	PX_CDA_Object* pCDADesc = PX_Object_GetCDAObject( pObject);
 	
 	for ( i = 0; i < pCDADesc->pObjectClass->grid_width* pCDADesc->pObjectClass->grid_height; i++)
 	{
@@ -1793,6 +1804,7 @@ PX_OBJECT_UPDATE_FUNCTION(PX_CDA_Object_Update)
 		{
 			if (gird_timestamp != pCDADesc->grid_lasttimestamp[i])
 			{
+				PX_Object_Event e = {0};
 				px_char callname[24];
 				px_variable var, * pgridvar;
 				pCDADesc->grid_lasttimestamp[i] = gird_timestamp;
@@ -1800,6 +1812,9 @@ PX_OBJECT_UPDATE_FUNCTION(PX_CDA_Object_Update)
 				pgridvar = PX_CDA_ObjectGetPortVariable(pObject, i);
 				var = *pgridvar;
 				PX_VMBeginThreadFunction(&pCDADesc->vm, 0, callname, &var, 1);
+				e.Event = PX_OBJECT_EVENT_EXECUTE;
+				PX_Object_Event_SetIndex(&e, i);
+				PX_ObjectExecuteEvent(pObject, e);
 			}
 		}
 	}
@@ -1810,7 +1825,7 @@ PX_OBJECT_UPDATE_FUNCTION(PX_CDA_Object_Update)
 
 PX_OBJECT_FREE_FUNCTION(PX_CDA_Object_Free)
 {
-	PX_CDA_Object* pCDADesc = PX_ObjectGetDescIndex(PX_CDA_Object, pObject, 1);
+	PX_CDA_Object* pCDADesc = PX_Object_GetCDAObject(pObject);
 	
 	switch (pCDADesc->pObjectClass->display_type)
 	{
@@ -1850,7 +1865,7 @@ PX_OBJECT_FREE_FUNCTION(PX_CDA_Object_Free)
 
 px_void PX_CDA_Object_ID_PropertyChangedCallback(PX_Object* pObject, px_int index)
 {
-	PX_CDA_Object* pCDADesc = PX_ObjectGetDescIndex(PX_CDA_Object, pObject, 1);
+	PX_CDA_Object* pCDADesc = PX_Object_GetCDAObject(pObject);
 	const px_char *pvalue = PX_CDA_ObjectGetPropertyValue(pObject, "id");
 	PX_strcpy(pObject->id, pvalue, sizeof(pObject->id));
 }
@@ -1935,18 +1950,11 @@ PX_Object* PX_CDA_CreateClassObjectEx(PX_CDA* pCDA, px_char classname[], px_floa
 			break;
 		}
 
-		if (pObjectClass->createObjectCallback)
-		{
-			pObject =pObjectClass->createObjectCallback(pCDA,&Desc,grid_x,grid_y);
-			if (!pObject)return PX_NULL;
-			
-		}
-		else
-		{
-			pObject=PX_ObjectCreateEx1(pCDA->mp, 0, 0, 0, 0, 0, 0, 0, 0, PX_CDA_Object_Update, PX_CDA_Object_Render, PX_CDA_Object_Free, &Desc, sizeof(PX_CDA_Object));
-			if (!pObject)return PX_NULL;
-		}
-		pDesc=PX_ObjectGetDescIndex(PX_CDA_Object, pObject, 1);
+		pObject = PX_ObjectCreateEx(pCDA->mp, 0, 0, 0, 0, 0, 0, 0, PX_OBJECT_TYPE_CDA_OBJECT, PX_CDA_Object_Update, PX_CDA_Object_Render, PX_CDA_Object_Free, &Desc, sizeof(PX_CDA_Object));
+		if (!pObject)return PX_NULL;
+
+		
+		pDesc= PX_Object_GetCDAObject(pObject);
 
 		PX_sprintf2(pObject->id, sizeof(pObject->id), "%1%2", PX_STRINGFORMAT_STRING(pObjectClass->name), PX_STRINGFORMAT_INT(pObjectClass->alloc_id++));
 		
@@ -2005,6 +2013,11 @@ PX_Object* PX_CDA_CreateClassObjectEx(PX_CDA* pCDA, px_char classname[], px_floa
 				PX_VMRegistHostFunction(&pDesc->vm, "playanimation", PX_CDA_ObjectVM_PlayAnimation, pObject);//getportpoint
 				PX_VMRunFunction(&pDesc->vm, 0, "main", 0, 0);
 			}
+		}
+		if (pObjectClass->createObjectCallback)
+		{
+			pObject = pObjectClass->createObjectCallback(pObject);
+			if (!pObject)return PX_NULL;
 		}
 		PX_CDA_AddObject(pCDA, pObject);
 		return pObject;
@@ -2198,6 +2211,42 @@ px_bool PX_CDA_ExecutePayload_DeleteRoute(PX_CDA* pcda, PX_Json* pjson)
 	return PX_TRUE;
 }
 
+
+static px_bool PX_CDA_ObjectSetPropertyValue(PX_Object* pCDAObject, px_char name[], px_char value[])
+{
+	PX_CDA_Object* pDesc = PX_Object_GetCDAObject(pCDAObject);
+	px_int i;
+	for (i = 0; i < PX_CDA_PROPERTIES_MAX_COUNT; i++)
+	{
+		if (PX_strequ(pDesc->properties[i].name, name))
+		{
+			PX_strcpy(pDesc->properties[i].value, value, sizeof(pDesc->properties[i].value));
+			return PX_TRUE;
+		}
+	}
+	for (i = 0; i < PX_CDA_PROPERTIES_MAX_COUNT; i++)
+	{
+		if (!pDesc->properties[i].name[0])
+		{
+			PX_strcpy(pDesc->properties[i].name, name, sizeof(pDesc->properties[i].name));
+			PX_strcpy(pDesc->properties[i].value, value, sizeof(pDesc->properties[i].value));
+			return PX_TRUE;
+		}
+	}
+	return PX_FALSE;
+}
+
+static px_bool PX_CDA_ObjectSetPropertyValueIndex(PX_Object* pCDAObject, px_int index, const px_char value[])
+{
+	PX_CDA_Object* pDesc = PX_Object_GetCDAObject(pCDAObject);
+	if (index >= 0 && index < PX_CDA_PROPERTIES_MAX_COUNT)
+	{
+		PX_strcpy(pDesc->properties[index].value, value, sizeof(pDesc->properties[index].value));
+		return PX_TRUE;
+	}
+	return PX_FALSE;
+}
+
 px_bool PX_CDA_ExecutePayload_SetProperty(PX_CDA* pcda, PX_Json* pjson)
 {
 	px_int index;
@@ -2209,7 +2258,7 @@ px_bool PX_CDA_ExecutePayload_SetProperty(PX_CDA* pcda, PX_Json* pjson)
 		return PX_FALSE;
 	}
 	index = PX_atoi(cindex);
-	pCDAObject=PX_CDA_GetCDAObject(pcda, index);
+	pCDAObject=PX_CDA_GetCDAObjectByIndex(pcda, index);
 	property = PX_JsonGetString(pjson, "propertyindex");
 	if (!property)
 	{
@@ -2235,11 +2284,11 @@ px_bool PX_CDA_ExecutePayload(PX_CDA* pcda,px_bool ClearForward)
 		mp = MP_Create(cache, sizeof(cache));
 		PX_JsonInitialize( &mp, &json);
 
-		if (!PX_JsonParse(&json, pcda->payload.buffer + pcda->ip))
+		if (!PX_JsonParse(&json, (const px_char *)(pcda->payload.buffer + pcda->ip)))
 		{
 			PX_ASSERT();
 		}
-		pcda->ip += PX_strlen(pcda->payload.buffer + pcda->ip) + 1;
+		pcda->ip += PX_strlen((const px_char*)(pcda->payload.buffer + pcda->ip)) + 1;
 		if (ClearForward)
 		{
 			pcda->payload.usedsize = pcda->ip;
@@ -2249,26 +2298,32 @@ px_bool PX_CDA_ExecutePayload(PX_CDA* pcda,px_bool ClearForward)
 		opcode = PX_JsonGetString(&json, "opcode");
 		if (PX_strequ(opcode, "createobject"))
 		{
+			pcda->last_opcode_is_set_property = PX_FALSE;
 			return PX_CDA_ExecutePayload_CreateObject(pcda,&json);
 		}
 		else if (PX_strequ(opcode, "deleteobject"))
 		{
+			pcda->last_opcode_is_set_property = PX_FALSE;
 			return PX_CDA_ExecutePayload_DeleteObject(pcda, &json);
 		}
 		else if (PX_strequ(opcode, "moveobject"))
 		{
+			pcda->last_opcode_is_set_property = PX_FALSE;
 			return PX_CDA_ExecutePayload_MoveObject(pcda, &json);
 		}
 		else if (PX_strequ(opcode, "createroute"))
 		{
+			pcda->last_opcode_is_set_property = PX_FALSE;
 			return PX_CDA_ExecutePayload_CreateRoute(pcda, &json);
 		}
 		else if (PX_strequ(opcode, "deleteroute"))
 		{
+			pcda->last_opcode_is_set_property = PX_FALSE;
 			return PX_CDA_ExecutePayload_DeleteRoute(pcda, &json);
 		}
 		else if (PX_strequ(opcode, "setproperty"))
 		{
+			pcda->last_opcode_is_set_property = PX_TRUE;
 			return PX_CDA_ExecutePayload_SetProperty(pcda, &json);
 		}
 		else
@@ -2311,10 +2366,6 @@ PX_Object* PX_CDA_CreateClassObject(PX_CDA* pCDA, px_char classname[], px_float 
 		return PX_NULL;
 }
 
-px_void PX_CDA_AttachCDADescToObject(PX_Object* pObject, PX_CDA_Object* pdesc)
-{
-	PX_ObjectAttachDesc(pObject, PX_CDA_Object_Update, PX_CDA_Object_Render, PX_CDA_Object_Free ,1,pdesc, sizeof(PX_CDA_Object));
-}
 
 px_void  PX_CDA_DeleteSelectObject(PX_CDA* pCDA)
 {
@@ -2326,7 +2377,7 @@ px_void  PX_CDA_DeleteSelectObject(PX_CDA* pCDA)
 		PX_Object** ppObject = PX_VECTORAT(PX_Object*, &pCDA->pObjects, i);
 		PX_ASSERTIF(ppObject == PX_NULL);
 		PX_Object* pCDAObject = *ppObject;
-		PX_CDA_Object* pDesc = PX_ObjectGetDescIndex(PX_CDA_Object, pCDAObject, 1);
+		PX_CDA_Object* pDesc = PX_Object_GetCDAObject(pCDAObject);
 		if (pDesc->mode == PX_CDA_OBJECT_MODE_SELECT)
 		{
 			break;
@@ -2355,7 +2406,7 @@ px_void PX_CDA_MoveSelectObjectLast(PX_CDA* pCDA, px_float grid_x, px_float grid
 	for (i = 0; i < pCDA->pObjects.size; i++)
 	{
 		PX_Object* pObject = *PX_VECTORAT(PX_Object*, &pCDA->pObjects, i);
-		PX_CDA_Object* pDesc = PX_ObjectGetDescIndex(PX_CDA_Object, pObject, 1);
+		PX_CDA_Object* pDesc = PX_Object_GetCDAObject(pObject);
 		if (pDesc->mode == PX_CDA_OBJECT_MODE_SELECT)
 		{
 			break;
@@ -2511,6 +2562,29 @@ px_void PX_CDA_SetPropertyIndex(PX_CDA* pCDA,px_int index,px_int propertyIndex,c
 {
 	//build payload
 	px_char content[32] = { 0 };
+	if (pCDA->last_opcode_is_set_property&&pCDA->last_set_property_index== propertyIndex&&pCDA->last_set_property_object_index== index)
+	{
+		px_int ip;
+		if (pCDA->ip == 0)
+		{
+			return;
+		}
+		ip = pCDA->ip - 2;
+		while (ip)
+		{
+			ip--;
+			if (pCDA->payload.buffer[ip] == '\0')
+			{
+				ip++;
+				break;
+			}
+		}
+		pCDA->ip = ip;
+	}
+	pCDA->last_opcode_is_set_property = PX_TRUE;
+	pCDA->last_set_property_index = propertyIndex;
+	pCDA->last_set_property_object_index = index;
+	//build payload
 	PX_CDA_ClearForwardInstuctions(pCDA);
 	PX_MemoryCatString(&pCDA->payload, "{\n");
 	PX_MemoryCatString(&pCDA->payload, "\"opcode\":\"setproperty\",");
@@ -2539,14 +2613,14 @@ px_void PX_CDA_SelectClear(PX_CDA* pCDA)
 		PX_Object** ppObject = PX_VECTORAT(PX_Object*, &pCDA->pObjects, i);
 		PX_ASSERTIF(ppObject == PX_NULL);
 		PX_Object* pCDAObject = *ppObject;
-		PX_CDA_Object* pDesc = PX_ObjectGetDescIndex(PX_CDA_Object, pCDAObject, 1);
+		PX_CDA_Object* pDesc = PX_Object_GetCDAObject(pCDAObject);
 		pDesc->mode = PX_CDA_OBJECT_MODE_NORMAL;
 	}
 	//clear routes
 	for (i = 0; i < pCDA->routes.size; i++)
 	{
 		PX_CDA_Route* proute = PX_VECTORAT(PX_CDA_Route, &pCDA->routes, i);
-		proute->mode = PX_CDA_OBJECT_MODE_NORMAL;
+		proute->mode = PX_CDA_ROUTE_MODE_NORMAL;
 	}
 }
 
@@ -2557,7 +2631,7 @@ px_bool PX_CDA_SelectObject(PX_CDA* pCDA, px_float grid_x, px_float grid_y)
 	for (i = 0; i < pCDA->pObjects.size; i++)
 	{
 		PX_Object* pObject = *PX_VECTORAT(PX_Object*, &pCDA->pObjects, i);
-		PX_CDA_Object* pDesc = PX_ObjectGetDescIndex(PX_CDA_Object, pObject,1);
+		PX_CDA_Object* pDesc = PX_Object_GetCDAObject(pObject);
 		if (grid_x > pDesc->grid_x- pDesc->grid_width/2.f && grid_x < pDesc->grid_x + pDesc->grid_width/2.f&&
 			grid_y > pDesc->grid_y- pDesc->grid_height/2.f && grid_y < pDesc->grid_y + pDesc->grid_height/2.f)
 		{
@@ -2646,7 +2720,7 @@ px_bool PX_CDA_SelectRoute(PX_CDA* pCDA, px_float grid_x, px_float grid_y)
 		PX_ASSERTIF(proute == PX_NULL);
 		if (PX_CDA_isPositionSelectRoute(pCDA, proute, grid_x, grid_y))
 		{
-			proute->mode = PX_CDA_OBJECT_MODE_SELECT;
+			proute->mode = PX_CDA_ROUTE_MODE_SELECT;
 			return PX_TRUE;
 		}
 	}
@@ -2673,7 +2747,7 @@ px_bool PX_CDA_HasSelectingObject(PX_CDA* pCDA)
 	for (i = 0; i < pCDA->pObjects.size; i++)
 	{
 		PX_Object* pObject = *PX_VECTORAT(PX_Object*, &pCDA->pObjects, i);
-		PX_CDA_Object* pDesc = PX_ObjectGetDescIndex(PX_CDA_Object, pObject, 1);
+		PX_CDA_Object* pDesc = PX_Object_GetCDAObject(pObject);
 		if (pDesc->mode == PX_CDA_OBJECT_MODE_SELECT)
 		{
 			return PX_TRUE;
@@ -2688,7 +2762,7 @@ PX_Object* PX_CDA_GetSelectObject(PX_CDA* pCDA)
 	for (i = 0; i < pCDA->pObjects.size; i++)
 	{
 		PX_Object* pObject = *PX_VECTORAT(PX_Object*, &pCDA->pObjects, i);
-		PX_CDA_Object* pDesc = PX_ObjectGetDescIndex(PX_CDA_Object, pObject,1);
+		PX_CDA_Object* pDesc = PX_Object_GetCDAObject(pObject);
 		if (pDesc->mode == PX_CDA_OBJECT_MODE_SELECT)
 		{
 			return pObject;
@@ -2736,7 +2810,7 @@ px_void PX_CDA_ClearForwardInstuctions(PX_CDA* pCDA)
 
 px_void PX_CDA_ObjectSetPortVariable(PX_Object* pCDAObject, px_int port, px_variable* pvar)
 {
-	PX_CDA_Object * pDesc = PX_ObjectGetDescIndex(PX_CDA_Object, pCDAObject,1);
+	PX_CDA_Object * pDesc = PX_Object_GetCDAObject(pCDAObject);
 	PX_CDA* pCDA=(PX_CDA *)pDesc->pCDA;
 	if (port >= 0 && port < pDesc->grid_width*pDesc->grid_height)
 	{
@@ -2777,7 +2851,7 @@ px_variable* PX_CDA_ObjectGetPortVariable(PX_Object* pCDAObject, px_int port)
 
 const px_char* PX_CDA_ObjectGetPropertyValue(PX_Object* pCDAObject, px_char name[])
 {
-	PX_CDA_Object* pDesc = PX_ObjectGetDescIndex(PX_CDA_Object, pCDAObject, 1);
+	PX_CDA_Object* pDesc = PX_Object_GetCDAObject(pCDAObject);
 	px_int i;
 	for (i = 0; i < PX_CDA_PROPERTIES_MAX_COUNT; i++)
 	{
@@ -2792,7 +2866,7 @@ const px_char* PX_CDA_ObjectGetPropertyValue(PX_Object* pCDAObject, px_char name
 
 const px_char* PX_CDA_ObjectGetPropertyValueIndex(PX_Object* pCDAObject, px_int index)
 {
-	PX_CDA_Object* pDesc = PX_ObjectGetDescIndex(PX_CDA_Object, pCDAObject, 1);
+	PX_CDA_Object* pDesc = PX_Object_GetCDAObject(pCDAObject);
 	if (index>=0&&index< PX_CDA_PROPERTIES_MAX_COUNT&&pDesc->properties[index].name[0])
 	{
 		return pDesc->properties[index].value;
@@ -2800,40 +2874,6 @@ const px_char* PX_CDA_ObjectGetPropertyValueIndex(PX_Object* pCDAObject, px_int 
 	return PX_NULL;
 }
 
-px_bool PX_CDA_ObjectSetPropertyValue(PX_Object* pCDAObject, px_char name[], px_char value[])
-{
-	PX_CDA_Object* pDesc = PX_ObjectGetDescIndex(PX_CDA_Object, pCDAObject, 1);
-	px_int i;
-	for (i = 0; i < PX_CDA_PROPERTIES_MAX_COUNT; i++)
-	{
-		if (PX_strequ(pDesc->properties[i].name, name))
-		{
-			PX_strcpy(pDesc->properties[i].value, value, sizeof(pDesc->properties[i].value));
-			return PX_TRUE;
-		}
-	}
-	for (i = 0; i < PX_CDA_PROPERTIES_MAX_COUNT; i++)
-	{
-		if (!pDesc->properties[i].name[0])
-		{
-			PX_strcpy(pDesc->properties[i].name, name, sizeof(pDesc->properties[i].name));
-			PX_strcpy(pDesc->properties[i].value, value, sizeof(pDesc->properties[i].value));
-			return PX_TRUE;
-		}
-	}
-	return PX_FALSE;
-}
-
-px_bool PX_CDA_ObjectSetPropertyValueIndex(PX_Object* pCDAObject, px_int index,const px_char value[])
-{
-	PX_CDA_Object* pDesc = PX_ObjectGetDescIndex(PX_CDA_Object, pCDAObject, 1);
-	if (index >= 0 && index < PX_CDA_PROPERTIES_MAX_COUNT)
-	{
-		PX_strcpy(pDesc->properties[index].value, value, sizeof(pDesc->properties[index].value));
-		return PX_TRUE;
-	}
-	return PX_FALSE;
-}
 
 px_dword PX_CDA_ObjectGetPortTimeStamp(PX_Object* pCDAObject, px_int port)
 {
@@ -2848,7 +2888,7 @@ px_dword PX_CDA_ObjectGetPortTimeStamp(PX_Object* pCDAObject, px_int port)
 
 PX_CDA_Grid* PX_CDA_ObjectGetPortGrid(PX_Object* pCDAObject, px_int port)
 {
-	PX_CDA_Object* pDesc = PX_ObjectGetDescIndex(PX_CDA_Object, pCDAObject, 1);
+	PX_CDA_Object* pDesc = PX_Object_GetCDAObject(pCDAObject);
 	PX_CDA* pCDA = (PX_CDA*)pDesc->pCDA;
 	if (port >= 0 && port < pDesc->grid_width * pDesc->grid_height)
 	{
@@ -2907,5 +2947,7 @@ px_bool PX_CDA_ObjectClassSetCreateCallback(PX_CDA* pCDA, px_char name[], __px_c
 	return PX_FALSE;
 	
 }
+
+
 
 
