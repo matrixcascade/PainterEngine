@@ -104,7 +104,7 @@ You can now use your IDE to compile PainterEngine with these steps. PainterEngin
 | UI框架                 | button/radio/image/edit/label/list....                       | UI框架实现                                                                        |
 | 协议                   | MQTT/MODBUS/Game-network-synchronization                     | 常用的通讯协议                                                                    |
 | 游戏引擎               |                                                              | 集成一个游戏世界框架                                                               |
-| FPGA-GPU               |2D accelerator                                               | 实现了基于FPGA的GPU图形加速器,能够为PainterEngine提供不低于50Mpps的2D Blender加速,支持HDMI输出|
+| FPGA-GPU               |2D accelerator                                               | 实现了基于FPGA的GPU图形加速器,能够为PainterEngine提供不低于50Mpps的2D Blender加速,支持HDMI输出,目前已在zynq7000系列Soc上完成验证|
 
 还有更多探索...
 
@@ -130,7 +130,7 @@ You can now use your IDE to compile PainterEngine with these steps. PainterEngin
 | UI                    | button/radio/image/edit/label/list....                       | Implementation of common UI controls.                                             |
 | protocals             | MQTT/MODBUS/Game-network-synchronization                     | Common communication protocols.                                                   |
 | Game framework.       |                                                              | PainterEngine Game Framework                                                      |
-| FPGA-GPU               |2D accelerator                                               | Implemented an FPGA-based GPU graphics accelerator that provides at least 50 million pixels per second (Mpps) 2D Blender acceleration for PainterEngine and supports HDMI output.|
+| FPGA-GPU               |2D accelerator                                               | Implemented an FPGA-based GPU graphics accelerator that provides at least 50 million pixels per second (Mpps) 2D Blender acceleration for PainterEngine and supports HDMI output.validation has been completed on the Zynq-7000 series SoC.|
 
 Many more to explore....
 
