@@ -3,17 +3,14 @@
 	module painterengine_gpu
 		(
 			/////////////////////////////////////////////////////////////
-			//debug
-			/////////////////////////////////////////////////////////////
-			output wire [31:0] o_wire_debug,
-			output wire [31:0] o_wire_debug_version,
-			
-			/////////////////////////////////////////////////////////////
 			//clock
 			/////////////////////////////////////////////////////////////
 			
 			//input clk
 			input wire          i_wire_clock,
+			input wire          S_AXI_ACLK,
+			input wire          i_wire_display_serial_clock,
+			//pixel clock
 
 			/////////////////////////////////////////////////////////////
 			//clock
@@ -97,10 +94,14 @@
 			input wire  m00_axi_rlast,
 			input wire  m00_axi_rvalid,
 			output wire  m00_axi_rready
+
+			//output wire o_wire_dma_reader_done,
+			//output wire [31:0] o_wire_reader_offset,
+			//output wire[7:0] reader_counter,
+			//output wire [2:0] reader_state,
+			//output wire[3:0] reader_router
 		);
 
-		//debug version
-		assign o_wire_debug_version = 32'h24061409;
 
 		//////////////////////////////////////////////////////////////////////////////
 		//controller
@@ -122,8 +123,7 @@
 		wire [31 : 0] controller_o_wire_display_src_width;
 		wire [31 : 0] controller_o_wire_display_src_height;
 		wire [31 : 0] controller_o_wire_display_modes;
-		wire controller_i_wire_display_error;
-		wire controller_i_wire_display_done;
+		wire [31 : 0] controller_i_wire_display_state;
 
 		wire controller_o_wire_renderer_resetn;
 		wire [31 : 0] controller_o_wire_renderer_src_address;
@@ -140,7 +140,7 @@
 
 		painterengine_gpu_controller gpu_controller(
 			//axi4lite signals
-			.S_AXI_ACLK(i_wire_clock),
+			.S_AXI_ACLK(S_AXI_ACLK),
 		    .S_AXI_ARESETN(i_wire_resetn),
 		    .S_AXI_AWADDR(S_AXI_AWADDR),
 			.S_AXI_AWPROT(S_AXI_AWPROT),
@@ -181,8 +181,7 @@
 			.o_wire_display_src_width(controller_o_wire_display_src_width),
 			.o_wire_display_src_height(controller_o_wire_display_src_height),
 			.o_wire_display_modes(controller_o_wire_display_modes),
-			.i_wire_display_done(controller_i_wire_display_done),
-			.i_wire_display_error(controller_i_wire_display_error),
+			.i_wire_display_state(controller_i_wire_display_state),
 
 			//renderer
 			.o_wire_renderer_resetn(controller_o_wire_renderer_resetn),
@@ -234,7 +233,7 @@
 
 		//pixel clock
 		painterengine_gpu_pixel_clock gpu_pixel_clock0(
-			.i_wire_5x_pixel_clock(i_wire_clock),
+			.i_wire_5x_pixel_clock(i_wire_display_serial_clock),
 			.i_wire_resetn(pixel_clock_i_wire_resetn),
 			.o_wire_pixel_clock(pixel_clock_o_wire_pixel_clock)
 		);
@@ -250,17 +249,24 @@
 		wire [15:0]											display_i_wire_image_height;
 		wire [2:0]											display_i_wire_display_mode; 
 		wire [2:0]											display_i_wire_color_mode;
-		wire												display_o_wire_done;
-		wire 												display_o_wire_error;
+		wire [31:0]											display_o_wire_state;
+
 
 		wire [31:0]											display_o_wire_dma_reader_address;
 		wire [31:0]											display_o_wire_dma_reader_length;
-		wire [31:0]											display_o_wire_dma_reader_resetn;
+		wire 												display_o_wire_dma_reader_resetn;
 		wire 												display_i_wire_dma_reader_done;
 		wire 												display_i_wire_dma_reader_error;
 		wire [31:0]											display_i_wire_dma_reader_data;
 		wire												display_i_wire_dma_reader_data_valid;	
 		wire 												display_o_wire_dma_reader_data_next;
+
+		wire 												o_wire_hs;
+		wire 												o_wire_vs;
+		wire 												o_wire_de;
+		wire [23:0]											display_o_wire_rgb;
+
+
 
 		painterengine_gpu_display gpu_display(
 		.i_wire_clock(i_wire_clock),
@@ -274,8 +280,7 @@
 
 		.i_wire_display_mode(display_i_wire_display_mode), 
 		.i_wire_color_mode(display_i_wire_color_mode),
-		.o_wire_done(display_o_wire_done),
-		.o_wire_error(display_o_wire_error),
+		.o_wire_state(display_o_wire_state),
 		
 		//DMA reader
 		.o_wire_reader_address(display_o_wire_dma_reader_address),
@@ -291,29 +296,28 @@
 		.o_wire_hs(o_wire_hs),            //horizontal synchronization
 		.o_wire_vs(o_wire_vs),            //vertical synchronization
 		.o_wire_de(o_wire_de),            //video valid
-		.o_wire_rgb(o_wire_rgb)
+		.o_wire_rgb(display_o_wire_rgb)
 		);
 
 	
 		assign display_i_wire_resetn=controller_o_wire_display_resetn;
 		assign display_i_wire_image_address=controller_o_wire_display_src_address;
-		assign display_i_wire_image_width=controller_o_wire_display_src_width;
-		assign display_i_wire_image_height=controller_o_wire_display_src_height;
+		assign display_i_wire_image_width=controller_o_wire_display_src_width[15:0];
+		assign display_i_wire_image_height=controller_o_wire_display_src_height[15:0];
 		assign display_i_wire_display_mode=controller_o_wire_display_modes[2:0];
 		assign display_i_wire_color_mode=controller_o_wire_display_modes[6:4];
-		assign controller_i_wire_display_done=display_o_wire_done;
-		assign controller_i_wire_display_error=display_o_wire_error;
+		assign controller_i_wire_display_state=display_o_wire_state;
 
 		rgb2dvi_0 dvi_out
 		(
         .aRst_n(1'b1),
-        .SerialClk(i_wire_clock),
+        .SerialClk(i_wire_display_serial_clock),
         .PixelClk(pixel_clock_o_wire_pixel_clock),
         .TMDS_Clk_p(TMDS_CLK_p),
         .TMDS_Clk_n(TMDS_CLK_n),
         .TMDS_Data_p(TMDS_DATA_p),
         .TMDS_Data_n(TMDS_DATA_n),
-        .vid_pData(o_wire_rgb),  
+        .vid_pData(display_o_wire_rgb),  
         .vid_pHSync(o_wire_hs),
         .vid_pVSync(o_wire_vs),
         .vid_pVDE(o_wire_de)
@@ -329,7 +333,7 @@
 		wire [31:0] memcpy_i_wire_dest_address;
 		wire [31:0] memcpy_i_wire_length;//bytes count
 
-		wire memcpy_o_wire_fifo_reader_resetn;
+		wire memcpy_o_wire_fifo_resetn;
 
 		wire memcpy_o_wire_dma_reader_resetn;
 		wire [31:0] memcpy_o_wire_dma_reader_address;
@@ -357,7 +361,7 @@
 			//length
 			.i_wire_length(memcpy_i_wire_length),
 			//fifo
-			.o_wire_fifo_resetn(memcpy_o_wire_fifo_reader_resetn),
+			.o_wire_fifo_resetn(memcpy_o_wire_fifo_resetn),
 			//reader
 			.o_wire_dma_reader_resetn(memcpy_o_wire_dma_reader_resetn),
 			.o_wire_dma_reader_address(memcpy_o_wire_dma_reader_address),
@@ -385,7 +389,7 @@
 		///////////////////////////////////////////////////////////////////////////////
 		//renderer
 		///////////////////////////////////////////////////////////////////////////////
-    	wire[31:0] 	renderer_i_wire_resetn;
+    	wire 		renderer_i_wire_resetn;
     	wire[31:0] 	renderer_i_wire_src_frame_buffer_address;
     	wire[31:0] 	renderer_i_wire_dst_frame_buffer_address;
     	wire[31:0] 	renderer_i_wire_src_frame_buffer_width;
@@ -400,12 +404,13 @@
     	wire 		renderer_i_wire_dma_reader_error;
     	wire[31:0] 	renderer_o_wire_dma_writer_address;
     	wire[31:0] 	renderer_o_wire_dma_writer_length;
-    	wire[31:0] 	renderer_o_wire_writer_resetn;
+    	wire 		renderer_o_wire_writer_resetn;
     	wire 		renderer_i_wire_dma_writer_done;
     	wire 		renderer_i_wire_writer_error;
     	wire 		renderer_o_wire_fifo1_resetn;
     	wire 		renderer_o_wire_fifo2_resetn;
     	wire[31:0] 	renderer_o_wire_state;
+
 
        painterengine_gpu_renderer gpu_renderer(
     		.i_wire_clock(i_wire_clock),
@@ -489,6 +494,7 @@
 		wire dma_reader_i_wire_data_next3;
 
 		wire dma_reader_o_wire_error;
+		wire[2:0] dma_reader_o_wire_error_type;
 
 
 		painterengine_gpu_dma_reader dma_reader(
@@ -505,6 +511,7 @@
 		.i_wire_data_next({dma_reader_i_wire_data_next3,dma_reader_i_wire_data_next2,dma_reader_i_wire_data_next1,dma_reader_i_wire_data_next0}),
 
 		.o_wire_error(dma_reader_o_wire_error),
+		.o_wire_error_type(dma_reader_o_wire_error_type),
 
 		//AXI full ports
 		.o_wire_M_AXI_ARID(m00_axi_arid),
@@ -552,7 +559,12 @@
 		assign display_i_wire_dma_reader_data=dma_reader_o_wire_data0;
 		assign display_i_wire_dma_reader_data_valid=dma_reader_o_wire_data_valid0;
 		assign dma_reader_i_wire_data_next0=display_o_wire_dma_reader_data_next;
-		
+
+		//assign o_wire_dma_reader_done=dma_reader_o_wire_done;
+		//assign o_wire_reader_offset=dma_reader.reg_offset;
+		//assign reader_state=dma_reader.reg_state;
+		//assign reader_router={dma_reader_i_wire_router3,dma_reader_i_wire_router2,dma_reader_i_wire_router1,dma_reader_i_wire_router0};
+		//assign reader_counter=dma_reader.reg_burst_counter;
 
 		
 		///////////////////////////////////////////////////////////////////////////////
@@ -588,10 +600,12 @@
 			.o_wire_full(fifo_memcpy_o_wire_full),
 			
 			.o_wire_almost_empty(fifo_memcpy_o_wire_almost_empty),
-			.o_wire_empty(fifo_memcpy_o_wire_empty)
+			.o_wire_empty(fifo_memcpy_o_wire_empty),
+			.o_wire_data_count(),
+			.o_wire_empty_count()
 		);
 
-		assign fifo_memcpy_i_wire_resetn=memcpy_o_wire_dma_reader_resetn;
+		assign fifo_memcpy_i_wire_resetn=memcpy_o_wire_fifo_resetn;
 		assign fifo_memcpy_i_wire_write=dma_reader_o_wire_data_valid1;
 		assign fifo_memcpy_i_wire_data_in=dma_reader_o_wire_data1;
 		assign dma_reader_i_wire_data_next1=!fifo_memcpy_o_wire_full;
@@ -628,7 +642,9 @@
 			.o_wire_full(fifo_render1_o_wire_full),
 			
 			.o_wire_almost_empty(fifo_render1_o_wire_almost_empty),
-			.o_wire_empty(fifo_render1_o_wire_empty)
+			.o_wire_empty(fifo_render1_o_wire_empty),
+			.o_wire_data_count(),
+			.o_wire_empty_count()
 		);
 		
 		assign fifo_render1_i_wire_resetn=renderer_o_wire_fifo1_resetn;
@@ -665,7 +681,9 @@
 			.o_wire_full(fifo_render2_o_wire_full),
 			
 			.o_wire_almost_empty(fifo_render2_o_wire_almost_empty),
-			.o_wire_empty(fifo_render2_o_wire_empty)
+			.o_wire_empty(fifo_render2_o_wire_empty),
+			.o_wire_data_count(),
+			.o_wire_empty_count()
 		);
 		assign fifo_render2_i_wire_resetn=renderer_o_wire_fifo2_resetn;
 		assign fifo_render2_i_wire_write=dma_reader_o_wire_data_valid3;
@@ -738,7 +756,9 @@
 			.o_wire_full(fifo_render3_o_wire_full),
 			
 			.o_wire_almost_empty(fifo_render3_o_wire_almost_empty),
-			.o_wire_empty(fifo_render3_o_wire_empty)
+			.o_wire_empty(fifo_render3_o_wire_empty),
+			.o_wire_data_count(),
+			.o_wire_empty_count()
 		);
 		assign fifo_render3_i_wire_resetn=renderer_o_wire_fifo2_resetn&&renderer_o_wire_fifo1_resetn;
 		assign fifo_render3_i_wire_write=blender_o_wire_data_valid;
@@ -777,6 +797,7 @@
 		
 
 		wire dma_writer_o_wire_error;
+		wire[2:0] dma_writer_o_wire_error_type;
 
 
 		painterengine_gpu_dma_writer dma_writer(
@@ -793,6 +814,7 @@
 
 			.o_wire_data_next(dma_writer_o_wire_data_next),
 			.o_wire_error(dma_writer_o_wire_error),
+			.o_wire_error_type(dma_writer_o_wire_error_type),
 			//axi full ports
 			.o_wire_M_AXI_AWID(m00_axi_awid),
 			.o_wire_M_AXI_AWADDR(m00_axi_awaddr),
@@ -810,13 +832,13 @@
 			.o_wire_M_AXI_WLAST(m00_axi_wlast),
 			.o_wire_M_AXI_WVALID(m00_axi_wvalid),
 			.i_wire_M_AXI_WREADY(m00_axi_wready),
-			.i_wire_M_AXI_BID(m00_axi_bid),
+			.i_wire_M_AXI_BID(1'b0),
 			.i_wire_M_AXI_BRESP(m00_axi_bresp),
 			.i_wire_M_AXI_BVALID(m00_axi_bvalid),
 			.o_wire_M_AXI_BREADY(m00_axi_bready)
 		);
 
-		assign dma_writer_i_wire_router0=memcpy_o_wire_dma_reader_resetn;
+		assign dma_writer_i_wire_router0=memcpy_o_wire_dma_writer_resetn;
 		assign dma_writer_i_wire_router1=renderer_o_wire_writer_resetn;
 
 		assign memcpy_i_wire_dma_writer_done=dma_writer_o_wire_done;

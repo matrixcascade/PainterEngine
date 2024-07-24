@@ -3,7 +3,7 @@
 	module painterengine_gpu_registers #
 	(
 		parameter integer C_S_AXI_DATA_WIDTH	= 32,
-		parameter integer C_S_AXI_ADDR_WIDTH	= 7
+		parameter integer C_S_AXI_ADDR_WIDTH	= 32
 	)
 	(
 		//export signals

@@ -7,7 +7,7 @@
     module painterengine_gpu_fifo #
 		(
 			parameter integer PARAM_DATA_WIDTH	= 32,
-			parameter integer PARAM_FIFO_DEPTH	= 256 
+			parameter integer PARAM_FIFO_DEPTH	= 64
 
 		)
 		(
@@ -25,7 +25,9 @@
 			output wire   									o_wire_full,
 			
 			output wire   									o_wire_almost_empty,
-			output wire   									o_wire_empty
+			output wire   									o_wire_empty,
+			output wire [7:0]								o_wire_data_count,
+			output wire [7:0] 								o_wire_empty_count
 		);
 
 		function integer clogb2 (input integer bit_depth);              
@@ -36,46 +38,46 @@
 		endfunction  
 		//fifo
 		reg [PARAM_DATA_WIDTH-1:0] 						reg_fifo[PARAM_FIFO_DEPTH-1:0];
+		reg [PARAM_DATA_WIDTH-1:0] 						reg_fifo_data_out;
 
-		reg [clogb2(PARAM_FIFO_DEPTH):0]				reg_fifo_write_index;
-		reg [clogb2(PARAM_FIFO_DEPTH):0]				reg_fifo_read_index;
-		wire [clogb2(PARAM_FIFO_DEPTH):0]				wire_fifo_data_count;
-		wire [clogb2(PARAM_FIFO_DEPTH)-1:0]				wire_fifo_true_read_index;
-		wire [clogb2(PARAM_FIFO_DEPTH)-1:0]				wire_fifo_true_write_index;
+		reg [clogb2(PARAM_FIFO_DEPTH)-1:0]				reg_fifo_write_index;
+		reg [clogb2(PARAM_FIFO_DEPTH)-1:0]				reg_fifo_read_index;
+		wire [clogb2(PARAM_FIFO_DEPTH)-1:0]				wire_fifo_data_count;
+		wire [clogb2(PARAM_FIFO_DEPTH)-2:0]				wire_fifo_true_read_index;
+		wire [clogb2(PARAM_FIFO_DEPTH)-2:0]				wire_fifo_true_read_index_next;
+		wire [clogb2(PARAM_FIFO_DEPTH)-2:0]				wire_fifo_true_write_index;
 
-		assign wire_fifo_data_count=reg_fifo_write_index>=reg_fifo_read_index?reg_fifo_write_index-reg_fifo_read_index:(PARAM_FIFO_DEPTH*2)-reg_fifo_read_index+reg_fifo_write_index;
+		assign wire_fifo_data_count=reg_fifo_write_index-reg_fifo_read_index;
 		assign o_wire_full=(wire_fifo_data_count==PARAM_FIFO_DEPTH);
 		assign o_wire_almost_full=(wire_fifo_data_count==PARAM_FIFO_DEPTH-1);
 		assign o_wire_empty=(wire_fifo_data_count==0);
 		assign o_wire_almost_empty=(wire_fifo_data_count==1);
 		assign wire_fifo_true_read_index=reg_fifo_read_index[clogb2(PARAM_FIFO_DEPTH)-2:0];
 		assign wire_fifo_true_write_index=reg_fifo_write_index[clogb2(PARAM_FIFO_DEPTH)-2:0];
+		assign wire_fifo_true_read_index_next=reg_fifo_read_index+1'b1;
 
-		assign o_wire_data_out=reg_fifo[wire_fifo_true_read_index];
+		assign o_wire_data_out=reg_fifo_data_out;
+		assign o_wire_data_count=wire_fifo_data_count;
+		assign o_wire_empty_count=PARAM_FIFO_DEPTH-wire_fifo_data_count;
+
 
 		integer i;
-		always @(posedge i_wire_write_clock or negedge i_wire_resetn)
+		always @(posedge i_wire_write_clock)
 		begin
-			if (!i_wire_resetn)
+			if(i_wire_write)
 			begin
-				for(i=0;i<PARAM_FIFO_DEPTH;i=i+1)
+				if(wire_fifo_data_count<PARAM_FIFO_DEPTH)
 				begin
-					reg_fifo[i]<=0;
-				end
-			end
-			else
-			begin
-				if(i_wire_write)
-				begin
-					if(wire_fifo_data_count<PARAM_FIFO_DEPTH)
-					begin
-						reg_fifo[wire_fifo_true_write_index]<=i_wire_data_in;
-					end
+					reg_fifo[wire_fifo_true_write_index]<=i_wire_data_in;
 				end
 				else
 				begin
 					reg_fifo[wire_fifo_true_write_index]<=reg_fifo[wire_fifo_true_write_index];
 				end
+			end
+			else
+			begin
+				reg_fifo[wire_fifo_true_write_index]<=reg_fifo[wire_fifo_true_write_index];
 			end
 		end
 
@@ -89,7 +91,7 @@
 			begin
 				if(i_wire_write&&wire_fifo_data_count<PARAM_FIFO_DEPTH)
 				begin
-					reg_fifo_write_index<=(reg_fifo_write_index+1)&(PARAM_FIFO_DEPTH*2-1);
+					reg_fifo_write_index<=reg_fifo_write_index+1'b1;
 				end
 				else
 				begin
@@ -103,17 +105,24 @@
 			if (!i_wire_resetn)
 			begin
 				reg_fifo_read_index<=0;
+				reg_fifo_data_out<=0;
 			end
 			else
 			begin
 				if(i_wire_read&&wire_fifo_data_count>0)
 				begin
-					reg_fifo_read_index<=(reg_fifo_read_index+1)&(PARAM_FIFO_DEPTH*2-1);
+					reg_fifo_read_index<=reg_fifo_read_index+1'b1;
+					reg_fifo_data_out<=reg_fifo[wire_fifo_true_read_index_next];
 				end
 				else
 				begin
 					reg_fifo_read_index<=reg_fifo_read_index;
+					if(wire_fifo_data_count>0)
+						reg_fifo_data_out<=reg_fifo[wire_fifo_true_read_index];
+					else
+						reg_fifo_data_out<=0;
 				end
 			end
 		end
+
 	endmodule

@@ -43,31 +43,46 @@
     `define GPUINFO_STATE_DONE          32'h00000003
 
 	//memcpy
-	`define GPU_MEMCPY_STATE_INIT						32'h00000000
-	`define GPU_MEMCPY_STATE_PUSH_PARAM					32'h00000001
-	`define GPU_MEMCPY_STATE_CALC_PROCESS				32'h00000002
-	`define GPU_MEMCPY_STATE_RUN						32'h00000003
-	`define GPU_MEMCPY_STATE_WAIT						32'h00000004
-	`define GPU_MEMCPY_STATE_CHECKSIZE					32'h00000005
-	`define GPU_MEMCPY_STATE_DONE						32'h00000006
-	`define GPU_MEMCPY_STATE_LENGTH_ERROR				32'h00000007
-	`define GPU_MEMCPY_STATE_DMA_READER_ERROR			32'h00000008
-	`define GPU_MEMCPY_STATE_DMA_WRITER_ERROR			32'h00000009
+	`define GPU_MEMCPY_STATE_INIT						8'h00
+	`define GPU_MEMCPY_STATE_PUSH_PARAM					8'h01
+	`define GPU_MEMCPY_STATE_CALC_PROCESS				8'h02
+	`define GPU_MEMCPY_STATE_READ						8'h03
+	`define GPU_MEMCPY_STATE_READ_WAIT					8'h04
+	`define GPU_MEMCPY_STATE_WRITE						8'h05
+	`define GPU_MEMCPY_STATE_WRITE_WAIT					8'h06
+	`define GPU_MEMCPY_STATE_CHECKSIZE					8'h07
+	`define GPU_MEMCPY_STATE_DONE						8'h08
+	`define GPU_MEMCPY_STATE_LENGTH_ERROR				8'h09
+	`define GPU_MEMCPY_STATE_DMA_READER_ERROR			8'h0A
+	`define GPU_MEMCPY_STATE_DMA_WRITER_ERROR			8'h0B
 
 	//renderer
-	`define GPU_RENDERER_STATE_INIT 					32'h00000000
-	`define GPU_RENDERER_STATE_CALC 					32'h00000001
-	`define GPU_RENDERER_STATE_1_READING 				32'h00000002
-	`define GPU_RENDERER_STATE_2_READING 				32'h00000003
-	`define GPU_RENDERER_STATE_WRITING 					32'h00000004
-	`define GPU_RENDERER_STATE_DONE 					32'h00000005
-	`define GPU_RENDERER_STATE_ERROR 					32'h00000006
+	`define GPU_RENDERER_STATE_INIT 8'h00
+	`define GPU_RENDERER_STATE_CALC 8'h01
+	`define GPU_RENDERER_STATE_CALC2 8'h02
+	`define GPU_RENDERER_STATE_1_READING 8'h03
+	`define GPU_RENDERER_STATE_2_READING 8'h04
+	`define GPU_RENDERER_STATE_WRITING 8'h05
+	`define GPU_RENDERER_STATE_DONE 8'h06
+	`define GPU_RENDERER_STATE_READER1_ERROR 8'h07
+	`define GPU_RENDERER_STATE_READER2_ERROR 8'h08
+	`define GPU_RENDERER_STATE_WRITER_ERROR 8'h09
+	`define GPU_RENDERER_BLOCK_PIXELS_COUNT 32'd64
+
+	//display
+	`define DISPLAY_STATE_INIT 			  3'b000
+	`define DISPLAY_STATE_CALC1 		  3'b001
+	`define DISPLAY_STATE_CALC2 		  3'b010
+	`define DISPLAY_STATE_STREAMING 	  3'b011
+	`define DISPLAY_STATE_CHECK		 	  3'b100
+	`define DISPLAY_STATE_DONE 			  3'b011
+	`define DISPLAY_STATE_ERROR 		  3'b111
 
 
 	module painterengine_gpu_controller #
 	(
 		parameter integer C_S_AXI_DATA_WIDTH	= 32,
-		parameter integer C_S_AXI_ADDR_WIDTH	= 7
+		parameter integer C_S_AXI_ADDR_WIDTH	= 32
 	)
 	(
 		//axi4lite signals
@@ -114,8 +129,7 @@
 		output wire[31:0] o_wire_display_src_height,
 
 		output wire[31:0] o_wire_display_modes,
-		input  wire       i_wire_display_done,
-		input  wire       i_wire_display_error,
+		input  wire[31:0] i_wire_display_state,
 
 		//renderer
 		output wire 	  o_wire_renderer_resetn,
@@ -151,7 +165,6 @@
 		reg [31:0] reg_display_src_width;
 		reg [31:0] reg_display_src_height;
 		reg [31:0] reg_display_mode;
-		reg [31:0] reg_display_rgba_mode;
 
 		//renderer
 		reg reg_renderer_resetn;
@@ -409,9 +422,8 @@
 			endcase
 		endtask
 
-	
 		task GPU_TASK_MEMCPY_PROCESSING;
-			case(i_wire_memcpy_state)
+			case(i_wire_memcpy_state[7:0])
 			   `GPU_MEMCPY_STATE_DONE:
 			   begin
 				reg_controller_state<=`GPU_CONTROLLER_STATE_DONE;
@@ -433,11 +445,11 @@
 
 		task GPU_TASK_DISPLAY_PROCESSING;
 		begin
-			if(i_wire_display_error)
+			if(i_wire_display_state[2:0]==`DISPLAY_STATE_ERROR)
 			begin
 				reg_controller_state<=`GPU_CONTROLLER_STATE_ERROR;
 			end
-			else if(i_wire_display_done)
+			else if(i_wire_display_state[2:0]==`DISPLAY_STATE_DONE)
 			begin
 				reg_controller_state<=`GPU_CONTROLLER_STATE_DONE;
 			end
@@ -451,7 +463,15 @@
 		task GPU_TASK_RENDERER_PROCESSING;
 		begin
 			case(i_wire_renderer_state)
-			`GPU_RENDERER_STATE_ERROR:
+			`GPU_RENDERER_STATE_READER1_ERROR:
+			begin
+				reg_controller_state<=`GPU_CONTROLLER_STATE_ERROR;
+			end
+			`GPU_RENDERER_STATE_READER2_ERROR:
+			begin
+				reg_controller_state<=`GPU_CONTROLLER_STATE_ERROR;
+			end
+			`GPU_RENDERER_STATE_WRITER_ERROR:
 			begin
 				reg_controller_state<=`GPU_CONTROLLER_STATE_ERROR;
 			end
@@ -471,26 +491,26 @@
 		task GPU_TASK_ERROR;
 		begin
 			reg_controller_state<=reg_controller_state;
-			reg_display_resetn<=0;
-			reg_display_src_address<=0;
-			reg_display_src_width<=0;
-			reg_display_src_height<=0;
-			reg_display_mode<=0;
-			reg_renderer_resetn<=0;
-			reg_renderer_src_address<=0;
-			reg_renderer_src_width<=0;
-			reg_renderer_src_x_count<=0;
-			reg_renderer_src_y_count<=0;
-			reg_renderer_dst_address<=0;
-			reg_renderer_dst_width<=0;
-			reg_renderer_color_format<=0;
-			reg_renderer_blend<=0;
-			reg_memcpy_resetn<=0;
-			reg_memcpy_src_address<=0;
-			reg_memcpy_dst_address<=0;
-			reg_memcpy_data_length<=0;
-			reg_gpuinfo_resetn<=0;
-			reg_gpuinfo_opcode<=0;
+			reg_display_resetn<=reg_display_resetn;
+			reg_display_src_address<=reg_display_src_address;
+			reg_display_src_width<=reg_display_src_width;
+			reg_display_src_height<=reg_display_src_height;
+			reg_display_mode<=reg_display_mode;
+			reg_renderer_resetn<=reg_renderer_resetn;
+			reg_renderer_src_address<=reg_renderer_src_address;
+			reg_renderer_src_width<=reg_renderer_src_width;
+			reg_renderer_src_x_count<=reg_renderer_src_x_count;
+			reg_renderer_src_y_count<=reg_renderer_src_y_count;
+			reg_renderer_dst_address<=reg_renderer_dst_address;
+			reg_renderer_dst_width<=reg_renderer_dst_width;
+			reg_renderer_color_format<=reg_renderer_color_format;
+			reg_renderer_blend<=reg_renderer_blend;
+			reg_memcpy_resetn<=reg_memcpy_resetn;
+			reg_memcpy_src_address<=reg_memcpy_src_address;
+			reg_memcpy_dst_address<=reg_memcpy_dst_address;
+			reg_memcpy_data_length<=reg_memcpy_data_length;
+			reg_gpuinfo_resetn<=reg_gpuinfo_resetn;
+			reg_gpuinfo_opcode<=reg_gpuinfo_opcode;
 		end
 		endtask
 
@@ -596,7 +616,7 @@
 			end
 			else
 			begin
-				out_parameter0<=32'h31415926;
+				out_parameter0<=32'h31415929;
 				out_parameter1[7:0]<=reg_controller_state;
 				out_parameter1[8]<=reg_gpuinfo_resetn;
 				out_parameter1[9]<=reg_memcpy_resetn;
@@ -607,7 +627,7 @@
 				out_parameter2<=i_wire_gpuinfo_return;
 				out_parameter3<=i_wire_gpuinfo_state;
 				out_parameter4<=i_wire_memcpy_state;
-				out_parameter5<={30'd0,i_wire_display_done,i_wire_display_error};
+				out_parameter5<=i_wire_display_state;
 				out_parameter6<=i_wire_renderer_state;
 			end
 

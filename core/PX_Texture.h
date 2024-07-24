@@ -7,6 +7,7 @@
 #include "PX_TRaw.h"
 #include "PX_Png.h"
 #include "PX_jpg.h"
+#include "PX_GPU.h"
 typedef px_surface px_texture;
 
 

@@ -4,14 +4,15 @@ cmake_minimum_required(VERSION 3.16)
 
 #################################################################
 #PainterEngine Directory
-set(PAINTERENGINE_DIR c:/working/PainterEngine)
+set(PAINTERENGINE_DIR D:/working/PainterEngine)
 #################################################################
 
 include_directories(${PAINTERENGINE_DIR})
 include_directories(${PAINTERENGINE_DIR}/runtime)
-#include_directories(${PAINTERENGINE_PROJECT_DIR})
-#aux_source_directory(${PAINTERENGINE_PROJECT_DIR} PROJECT_DIR_SRC)
-#add_library(PainterEngineForAndroid SHARED ${PROJECT_DIR_SRC})
+
+aux_source_directory(${CMAKE_SOURCE_DIR} _sources)
+aux_source_directory(${PAINTERENGINE_DIR}/core _sources)
+aux_source_directory(${PAINTERENGINE_DIR}/kernel _sources)
 
 
 include(${CMAKE_SOURCE_DIR}/Empty_applicationExample.cmake)
@@ -27,11 +28,6 @@ collect(PROJECT_LIB_DEPS xiltimer)
 collect(PROJECT_LIB_DEPS gcc)
 collect(PROJECT_LIB_DEPS c)
 
-aux_source_directory(${CMAKE_SOURCE_DIR} _sources)
-#aux_source_directory(${PAINTERENGINE_DIR}/platform/android PAINTERENGINE_PLATFORM_ANDROID_SOURCES)
-aux_source_directory(${PAINTERENGINE_DIR}/core _sources)
-aux_source_directory(${PAINTERENGINE_DIR}/kernel _sources)
-#aux_source_directory(${PAINTERENGINE_DIR}/runtime PAINTERENGINE_ARCH_SOURCES)
 
 foreach (source ${_sources})
     get_filename_component(ext ${source} EXT)

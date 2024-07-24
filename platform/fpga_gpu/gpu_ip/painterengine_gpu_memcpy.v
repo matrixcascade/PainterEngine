@@ -1,13 +1,17 @@
-	    `define GPU_MEMCPY_STATE_INIT						32'h00000000
-		`define GPU_MEMCPY_STATE_PUSH_PARAM					32'h00000001
-		`define GPU_MEMCPY_STATE_CALC_PROCESS				32'h00000002
-		`define GPU_MEMCPY_STATE_RUN						32'h00000003
-		`define GPU_MEMCPY_STATE_WAIT						32'h00000004
-		`define GPU_MEMCPY_STATE_CHECKSIZE					32'h00000005
-		`define GPU_MEMCPY_STATE_DONE						32'h00000006
-		`define GPU_MEMCPY_STATE_LENGTH_ERROR				32'h00000007
-		`define GPU_MEMCPY_STATE_DMA_READER_ERROR			32'h00000008
-		`define GPU_MEMCPY_STATE_DMA_WRITER_ERROR			32'h00000009
+	    `define GPU_MEMCPY_STATE_INIT						8'h00
+		`define GPU_MEMCPY_STATE_PUSH_PARAM					8'h01
+		`define GPU_MEMCPY_STATE_CALC_PROCESS				8'h02
+		`define GPU_MEMCPY_STATE_READ						8'h03
+		`define GPU_MEMCPY_STATE_READ_WAIT					8'h04
+		`define GPU_MEMCPY_STATE_WRITE						8'h05
+		`define GPU_MEMCPY_STATE_WRITE_WAIT					8'h06
+		`define GPU_MEMCPY_STATE_CHECKSIZE					8'h07
+		`define GPU_MEMCPY_STATE_DONE						8'h08
+		`define GPU_MEMCPY_STATE_LENGTH_ERROR				8'h09
+		`define GPU_MEMCPY_STATE_DMA_READER_ERROR			8'h0A
+		`define GPU_MEMCPY_STATE_DMA_WRITER_ERROR			8'h0B
+
+		`define GPU_MEMCPY_BLOCK_SIZE 32
 
 		module painterengine_gpu_memcpy
 		(
@@ -42,7 +46,7 @@
 
 
 
-		reg [31:0] 	reg_state;
+		reg [7:0] 	reg_state;
 		reg			reg_dma_writer_resetn;
 		reg			reg_dma_reader_resetn;
 		reg			reg_fifo_resetn;
@@ -54,7 +58,7 @@
 		
 		wire [31:0] wire_reserved_size;
 		assign wire_reserved_size=reg_task_memcpy_lenght-reg_task_memcpy_offset;
-		assign o_wire_state=reg_state;
+		assign o_wire_state={24'd0,reg_state};
 		assign o_wire_dma_reader_resetn=reg_dma_reader_resetn;
 		assign o_wire_fifo_resetn=reg_fifo_resetn;
 		assign o_wire_dma_reader_address=reg_task_memcpy_s_address;
@@ -114,15 +118,15 @@
 
 				if (wire_reserved_size)
 				begin
-					if (wire_reserved_size>256)
+					if (wire_reserved_size>`GPU_MEMCPY_BLOCK_SIZE)
 					begin
-						reg_task_memcpy_block_size<=256;
-						reg_state<=`GPU_MEMCPY_STATE_RUN;
+						reg_task_memcpy_block_size<=`GPU_MEMCPY_BLOCK_SIZE;
+						reg_state<=`GPU_MEMCPY_STATE_READ;
 					end
 					else
 					begin
 						reg_task_memcpy_block_size<=wire_reserved_size;
-						reg_state<=`GPU_MEMCPY_STATE_RUN;
+						reg_state<=`GPU_MEMCPY_STATE_READ;
 					end
 				end
 				else
@@ -130,14 +134,40 @@
 					reg_state<=`GPU_MEMCPY_STATE_DONE;
 				end
 			end
-			`GPU_MEMCPY_STATE_RUN:
+			`GPU_MEMCPY_STATE_READ:
+			begin
+				reg_fifo_resetn<=1'b1;
+				reg_dma_writer_resetn<=1'b0;
+				reg_dma_reader_resetn<=1'b1;
+				reg_state<=`GPU_MEMCPY_STATE_READ_WAIT;
+			end
+
+			`GPU_MEMCPY_STATE_READ_WAIT:
+			begin
+				reg_fifo_resetn<=reg_fifo_resetn;
+				reg_dma_writer_resetn<=reg_dma_writer_resetn;
+				reg_dma_reader_resetn<=reg_dma_reader_resetn;
+				if(i_wire_dma_reader_error)
+				begin
+					reg_state<=`GPU_MEMCPY_STATE_DMA_READER_ERROR;
+				end
+				else if(i_wire_dma_reader_done)
+				begin
+					reg_state<=`GPU_MEMCPY_STATE_WRITE;
+				end
+				else
+				begin
+					reg_state<=reg_state;//continue
+				end
+			end
+			`GPU_MEMCPY_STATE_WRITE:
 			begin
 				reg_fifo_resetn<=1'b1;
 				reg_dma_writer_resetn<=1'b1;
-				reg_dma_reader_resetn<=1'b1;
-				reg_state<=`GPU_MEMCPY_STATE_WAIT;
+				reg_dma_reader_resetn<=1'b0;
+				reg_state<=`GPU_MEMCPY_STATE_WRITE_WAIT;
 			end
-			`GPU_MEMCPY_STATE_WAIT:
+			`GPU_MEMCPY_STATE_WRITE_WAIT:
 			begin
 				//wait done
 				reg_fifo_resetn<=reg_fifo_resetn;
@@ -148,28 +178,21 @@
 				begin
 					reg_state<=`GPU_MEMCPY_STATE_DMA_WRITER_ERROR;
 				end
-				else if(i_wire_dma_reader_error)
+				else if(i_wire_dma_writer_done)
 				begin
-					reg_state<=`GPU_MEMCPY_STATE_DMA_READER_ERROR;
+					reg_state<=`GPU_MEMCPY_STATE_PUSH_PARAM;
+					reg_task_memcpy_offset<=reg_task_memcpy_offset+reg_task_memcpy_block_size;
 				end
 				else
 				begin
-					if(i_wire_dma_writer_done)
-					begin
-						reg_state<=`GPU_MEMCPY_STATE_PUSH_PARAM;
-						reg_task_memcpy_offset<=reg_task_memcpy_offset+reg_task_memcpy_block_size;
-					end
-					else
-					begin
-						reg_state<=reg_state;
-					end
+					reg_state<=reg_state;//continue
 				end
 			end
 			default:
 			begin
-				reg_fifo_resetn<=1'b0;
-				reg_dma_writer_resetn<=1'b0;
-				reg_dma_reader_resetn<=1'b0;
+				reg_fifo_resetn<=reg_fifo_resetn;
+				reg_dma_writer_resetn<=reg_dma_writer_resetn;
+				reg_dma_reader_resetn<=reg_dma_reader_resetn;
 				reg_state<=reg_state;
 			end
 			endcase
