@@ -1,10 +1,10 @@
 <p align="center"><a href="https://painterengine.com" target="_blank" rel="noopener noreferrer"><img src="images/title.png" alt="PainterEngine Title"></a></p>
 
 PainterEngine是一个由C语言编写的跨平台图形引擎,支持windows/linux/ios/android/webassembly甚至无操作系统的裸嵌入式平台,它基于组件化的设计模式,即使是C语言初学者,也可以在几分钟内掌握它的使用,[PainterEngine Make](https://www.painterengine.com/)允许您一键将您的PainterEngine项目编译到多个平台.
-它涵盖了基础数据结构、图形学、声学、数字信号处理、编译原理、虚拟机系统、密码学、人机交互、游戏引擎等多个领域，你既可以用它制作微应用，也可以将它作为学习项目。
+它涵盖了基础数据结构、图形学、声学、数字信号处理、编译原理、虚拟机系统、密码学、人机交互、游戏引擎、FPGA-GPU图形IP设计等多个领域，你既可以用它制作微应用，也可以将它作为学习项目。
 
 PainterEngine is a cross-platform graphics engine written in C language, with support for Windows, Linux, iOS, Android, WebAssembly, and even bare-metal embedded platforms without OS. It is built on a component-based design pattern, making it accessible to even C language beginners . [PainterEngine Make](https://www.painterengine.com/) enables you to compile your PainterEngine project for multiple platforms with just one click.
-It covers various fields including basic data structures, graphics, acoustics, digital signal processing, compiler design, virtual machine systems, cryptography, human-computer interaction, game engines, and more. You can use it to create mini-applications or as a learning project for acquiring knowledge.
+It covers various fields including basic data structures, graphics, acoustics, digital signal processing, compiler design, virtual machine systems, cryptography, human-computer interaction, game engines,FPGA-GPU graphics acceleration， and more. You can use it to create mini-applications or as a learning project for acquiring knowledge.
 
 ## 30秒快速入门PainterEngine
 
