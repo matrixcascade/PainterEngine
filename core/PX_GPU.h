@@ -21,11 +21,13 @@ typedef enum
 	DVI_RGB_MODE_BGRA = 3,
 }DVI_RGB_MODE;
 
+#define BLENDER_ARGB_MODE_AXXX  0
+#define BLENDER_ARGB_MODE_XXXA  1
 
 px_dword PX_GPU_CheckEnable();
 px_void PX_GPU_Reset();
 px_dword PX_GPU_GetDebug();
-px_bool PX_GPU_mempcy(px_void* src, px_void* dst, px_int size);
+px_bool PX_GPU_mempcy(px_void* src, px_void* dst, px_int _4_byte_count);
 px_bool PX_GPU_Render(px_void* texture_src_addr, px_dword width, px_dword x_count, px_dword y_count, px_void* texture_dst_addr, px_dword dst_width, px_dword color_format, px_dword blend);
 px_bool PX_GPU_Present(px_void* texture_addr, px_dword width, px_dword height, VIDEO_DISPLAY_MODE display_mode, DVI_RGB_MODE dvi_rgb_mode);
 

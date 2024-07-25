@@ -86,7 +86,7 @@
 		assign o_wire_error=(reg_state==`writer_fsm_state_error);
 		assign o_wire_error_type=reg_error_type;
 		
-		reg[31:0] reg_axi_araddr;
+	
 		reg reg_axi_arvalid;
 		//write address (AW)
 		assign o_wire_M_AXI_AWADDR	= reg_axi_awaddr;
@@ -185,8 +185,8 @@
 				reg_address<=reg_address;
 				reg_length<=reg_length;
 				reg_state<=`writer_fsm_state_calc_address;
-				reg_axi_araddr<=0;
-				reg_axi_arvalid<=0;
+				reg_axi_awaddr<=0;
+				reg_axi_awvalid<=0;
 				reg_axi_burstlen<=0;
 			end
 		endtask
@@ -398,6 +398,8 @@
 				reg_router_index<=0;
 				reg_timeout_error<=0;
 				reg_error_type<=`writer_error_ok;
+				reg_router_bit_index<=0;
+				reg_burst_aligned_len<=0;
 			end
 			else
 			begin

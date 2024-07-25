@@ -206,8 +206,10 @@ module painterengine_gpu_dma_reader
 			end
 		endtask
 
-		//read data fsm
-		task task_read_one_data;
+
+		task task_read_data;
+			if(i_wire_M_AXI_RVALID&&i_wire_data_next[reg_router_index])
+			begin
 				if(reg_burst_counter>=reg_axi_burstlen-1)
 				begin
 					if (i_wire_M_AXI_RLAST) 
@@ -239,14 +241,7 @@ module painterengine_gpu_dma_reader
 					reg_burst_counter<=reg_burst_counter+1;
 					reg_timeout_error<=0;
 					reg_state<=reg_state;
-				end
-		endtask
-
-
-		task task_read_data;
-			if(i_wire_M_AXI_RVALID&&i_wire_data_next[reg_router_index])
-			begin
-				task_read_one_data;
+				end;
 			end
 			else
 			begin

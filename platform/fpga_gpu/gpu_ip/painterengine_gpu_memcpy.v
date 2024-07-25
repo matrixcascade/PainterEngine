@@ -54,7 +54,7 @@
 		reg [31:0] 	reg_task_memcpy_d_address;
 		reg [31:0] 	reg_task_memcpy_offset;
 		reg [31:0] 	reg_task_memcpy_lenght;
-		reg [31:0] 	reg_task_memcpy_block_size;
+		reg [7:0] 	reg_task_memcpy_block_size;
 		
 		wire [31:0] wire_reserved_size;
 		assign wire_reserved_size=reg_task_memcpy_lenght-reg_task_memcpy_offset;
@@ -62,10 +62,10 @@
 		assign o_wire_dma_reader_resetn=reg_dma_reader_resetn;
 		assign o_wire_fifo_resetn=reg_fifo_resetn;
 		assign o_wire_dma_reader_address=reg_task_memcpy_s_address;
-		assign o_wire_dma_reader_length=reg_task_memcpy_block_size;
+		assign o_wire_dma_reader_length={24'd0,reg_task_memcpy_block_size};
 		assign o_wire_dma_writer_resetn=reg_dma_writer_resetn;
 		assign o_wire_dma_writer_address=reg_task_memcpy_d_address;
-		assign o_wire_dma_writer_length=reg_task_memcpy_block_size;
+		assign o_wire_dma_writer_length={24'd0,reg_task_memcpy_block_size};
 
 		task GPU_TASK_RESET;
 		begin
@@ -77,7 +77,7 @@
 			reg_task_memcpy_d_address<=0;
 			reg_task_memcpy_offset<=0;
 			reg_task_memcpy_lenght<=0;
-			reg_task_memcpy_block_size<=0;
+			reg_task_memcpy_block_size<=8'd0;
 		end
 		endtask
 
@@ -92,7 +92,7 @@
 				reg_dma_reader_resetn<=0;
 				reg_fifo_resetn<=0;
 				//init
-				if(reg_task_memcpy_lenght&2'b11!=0)
+				if(reg_task_memcpy_lenght[1:0]!=0)
 				begin
 					reg_state<=`GPU_MEMCPY_STATE_LENGTH_ERROR;
 				end
@@ -113,8 +113,8 @@
 				reg_dma_writer_resetn<=1'b0;
 				reg_dma_reader_resetn<=1'b0;
 
-				reg_task_memcpy_s_address<=i_wire_source_address+reg_task_memcpy_offset;
-				reg_task_memcpy_d_address<=i_wire_dest_address+reg_task_memcpy_offset;
+				reg_task_memcpy_s_address<=i_wire_source_address+reg_task_memcpy_offset*4;
+				reg_task_memcpy_d_address<=i_wire_dest_address+reg_task_memcpy_offset*4;
 
 				if (wire_reserved_size)
 				begin
@@ -125,7 +125,7 @@
 					end
 					else
 					begin
-						reg_task_memcpy_block_size<=wire_reserved_size;
+						reg_task_memcpy_block_size<=wire_reserved_size[7:0];
 						reg_state<=`GPU_MEMCPY_STATE_READ;
 					end
 				end

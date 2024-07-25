@@ -165,9 +165,9 @@ begin
         wa4<=({8'd0,reg_a1_3}*reg_ba2)>>7;
         wa5<=({8'd0,reg_a1_3}*reg_ba2)>>7;
         wa6<=({8'd0,reg_a1_3}*reg_ba3)>>7;
-        wr<=({8'd0,r1}*reg_br)>>7;
-        wg<=({8'd0,g1}*reg_bg)>>7;
-        wb<=({8'd0,b1}*reg_bb)>>7;
+        wr<=({8'd0,reg_r1}*reg_br)>>7;
+        wg<=({8'd0,reg_g1}*reg_bg)>>7;
+        wb<=({8'd0,reg_b1}*reg_bb)>>7;
         reg_valid_d1 <= 1'b1;
     end
 end

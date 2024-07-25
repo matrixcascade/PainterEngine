@@ -3,6 +3,7 @@
     `define GPUINFO_OPCODE_RESET 	    32'h00000000
     `define GPUINFO_OPCODE_GETVERSION 	32'h00000001
     `define GPUINFO_OPCODE_GETDEBUG 	32'h00000002
+    `define GPUINFO_OPCODE_GETTICK 	    32'h00000003
 
     `define GPUINFO_STATE_IDLE   		32'h00000000
     `define GPUINFO_STATE_PROCESSING	32'h00000001
@@ -15,14 +16,41 @@
                 input wire          i_wire_clock,
                 //enable
                 input wire   		i_wire_resetn,
+                input wire          i_wire_tick_resetn,
 
                 input wire [31 : 0]  i_wire_opcode,
                 output wire [31 : 0] o_wire_state,
                 output wire [31 : 0] o_wire_return
         );
+        reg[6 : 0] reg_tick_div100;
+        reg[31 : 0] reg_tick_us;
+
+        always @(posedge i_wire_clock or negedge i_wire_tick_resetn)
+        begin
+            if(!i_wire_tick_resetn)
+            begin
+                reg_tick_div100<=7'd0;
+                reg_tick_us<=0;
+            end
+            else
+            begin
+                if(reg_tick_div100==7'd100)
+                begin
+                    reg_tick_div100<=7'd0;
+                    reg_tick_us<=reg_tick_us+1;
+                end
+                else
+                begin
+                    reg_tick_div100<=reg_tick_div100+1;
+                end
+            end
+        end
+
         reg[31 : 0] reg_opcode;
         reg[31 : 0] reg_state;
         reg[31 : 0] reg_return;
+
+        
 
         assign o_wire_state=reg_state;
         assign o_wire_return=reg_return;
@@ -60,6 +88,11 @@
             begin
                 reg_state<=`GPUINFO_STATE_DONE;
                 reg_return<=32'h20240612;
+            end
+            `GPUINFO_OPCODE_GETTICK:
+            begin
+                reg_state<=`GPUINFO_STATE_DONE;
+                reg_return<=reg_tick_us;
             end
             default:
             begin

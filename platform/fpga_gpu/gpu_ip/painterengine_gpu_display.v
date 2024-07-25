@@ -1,8 +1,5 @@
 `timescale 1 ns / 1 ns
 
-    `define RW_CACHE_SIZE 64
-
-
 	`define VIDEO_DISPLAY_MODE_1280_720   3'b000
 	`define VIDEO_DISPLAY_MODE_480_272    3'b001
 	`define VIDEO_DISPLAY_MODE_640_480    3'b010
@@ -17,10 +14,12 @@
 	`define DISPLAY_STATE_CALC2 		  3'b010
 	`define DISPLAY_STATE_STREAMING 	  3'b011
 	`define DISPLAY_STATE_CHECK		 	  3'b100
-	`define DISPLAY_STATE_DONE 			  3'b011
+	`define DISPLAY_STATE_DONE 			  3'b101
 	`define DISPLAY_STATE_ERROR 		  3'b111
 
-	`define DISPLAY_READER_BLOCK_SIZE     32
+	`define DISPLAY_FIFO_SIZE 			  128
+	`define DISPLAY_READER_LAUNCH_SIZE    48
+	`define DISPLAY_READER_BLOCK_SIZE     64
 
     module painterengine_gpu_display
 		(
@@ -57,6 +56,8 @@
 
 		wire[15:0] wire_clip_width;
 		wire[15:0] wire_clip_height;
+		reg[15:0]  reg_clip_width;
+		reg[15:0]  reg_clip_height;
 		wire       wire_clip_valid;
 
 		//clip
@@ -99,8 +100,10 @@
 		wire [7:0] wire_fifo_data_count;
 		wire [7:0] wire_fifo_empty_count;
 		wire wire_div_done;
+		wire [31:0] wire_dvi_pixel_counter;
 		//fifo
-		painterengine_gpu_fifo dvi_fifo(
+		painterengine_gpu_fifo #(32,128) dvi_fifo
+		(
 			.i_wire_write_clock(i_wire_clock),
 			.i_wire_read_clock(i_wire_pixel_clock),
 			.i_wire_resetn(reg_fifo_resetn),
@@ -129,7 +132,8 @@
 			.o_wire_vs(o_wire_vs),
 			.o_wire_de(o_wire_de),
 			.o_wire_rgb(o_wire_rgb),
-			.o_wire_done(wire_div_done)
+			.o_wire_done(wire_div_done),
+			.o_wire_pixel_counter(wire_dvi_pixel_counter)
 		);
 
 		assign o_wire_state={28'd0,wire_div_done,reg_display_state};
@@ -151,6 +155,8 @@
 				reg_display_state<=`DISPLAY_STATE_INIT;
 				reg_streaming_y_mul_4_img_width<=0;
 				reg_streaming_adr_x_mul_4<=0;
+				reg_clip_width<=0;
+				reg_clip_height<=0;
 			end
 			else
 			begin
@@ -164,9 +170,15 @@
 					reg_reader_resetn<=0;
 					if(wire_clip_valid)
 					    if(wire_clip_width==0||wire_clip_height==0)
+						begin
 							reg_display_state<=`DISPLAY_STATE_DONE;
+						end
 						else
+						begin
+							reg_clip_width<=wire_clip_width;
+							reg_clip_height<=wire_clip_height;
 							reg_display_state<=`DISPLAY_STATE_CALC1;
+						end
 					else
 					begin
 						reg_display_state<=`DISPLAY_STATE_INIT;
@@ -185,9 +197,9 @@
 					reg_streaming_x<=reg_streaming_x;
 					reg_streaming_y<=reg_streaming_y;
 					reg_reader_address<=reg_streaming_adr_x_mul_4+reg_streaming_y_mul_4_img_width;
-					reg_reader_length<=wire_clip_width-reg_streaming_x>`DISPLAY_READER_BLOCK_SIZE?`DISPLAY_READER_BLOCK_SIZE:wire_clip_width-reg_streaming_x;
+					reg_reader_length<=reg_clip_width-reg_streaming_x>`DISPLAY_READER_BLOCK_SIZE?`DISPLAY_READER_BLOCK_SIZE:reg_clip_width-reg_streaming_x;
 					reg_reader_resetn<=0;//close reader
-					if(wire_fifo_empty_count>=`DISPLAY_READER_BLOCK_SIZE)
+					if(wire_fifo_empty_count>=`DISPLAY_READER_LAUNCH_SIZE)
 						reg_display_state<=`DISPLAY_STATE_STREAMING;
 					else
 						reg_display_state<=reg_display_state;//hold on
@@ -224,7 +236,7 @@
 				end
 				`DISPLAY_STATE_CHECK:
 				begin
-					if (reg_streaming_x==wire_clip_width) 
+					if (reg_streaming_x==reg_clip_width) 
 					begin
 						reg_streaming_y<=reg_streaming_y+1;
 						reg_streaming_x<=0;
@@ -232,7 +244,7 @@
 					end
 					else
 					begin
-						if (reg_streaming_y==wire_clip_height)
+						if (reg_streaming_y==reg_clip_height)
 						begin
 							reg_display_state<=`DISPLAY_STATE_DONE;
 						end

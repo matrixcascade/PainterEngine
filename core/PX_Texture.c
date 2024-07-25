@@ -295,24 +295,52 @@ px_void PX_TextureRenderClipMirror(px_surface* psurface, px_texture* tex, px_int
 		switch (mirrorMode)
 		{
 		case PX_TEXTURERENDER_MIRRROR_MODE_NONE:
-			for (j = 0; j < cliph; j++)
+		{
+#ifdef PX_COLOR_FORMAT_RGBA
+#define PX_COLOR_FORMAT BLENDER_ARGB_MODE_XXXA
+#endif
+
+#ifdef PX_COLOR_FORMAT_BGRA
+#define PX_COLOR_FORMAT BLENDER_ARGB_MODE_XXXA
+#endif
+
+#ifdef PX_COLOR_FORMAT_ARGB
+#define PX_COLOR_FORMAT BLENDER_ARGB_MODE_AXXX
+#endif
+
+#ifdef PX_COLOR_FORMAT_ABGR
+#define PX_COLOR_FORMAT BLENDER_ARGB_MODE_AXXX
+#endif
+
+#ifdef PX_GPU_ENABLE
+			px_dword blend;
+			Ab &= 0xff;
+			Rb &= 0xff;
+			Gb &= 0xff;
+			Bb &= 0xff;
+			blend = (Ab << 24) + (Rb << 16) + (Gb << 8) + Bb;
+			PX_GPU_Render(pdata + clipy * tex->width + clipx, tex->width, clipw, cliph, psurface->surfaceBuffer + y * psurface->width + x, psurface->width, PX_COLOR_FORMAT, blend);
+#else
+		for (j = 0; j < cliph; j++)
+		{
+			for (i = 0; i < clipw; i++)
 			{
-				for (i = 0; i < clipw; i++)
-				{
-					clr = pdata[(clipy + j) * tex->width + (clipx + i)];
-					bA = (px_int)(clr._argb.a * Ab) >> 7;
-					bR = (px_int)(clr._argb.r * Rb) >> 7;
-					bG = (px_int)(clr._argb.g * Gb) >> 7;
-					bB = (px_int)(clr._argb.b * Bb) >> 7;
+				clr = pdata[(clipy + j) * tex->width + (clipx + i)];
+				bA = (px_int)(clr._argb.a * Ab) >> 7;
+				bR = (px_int)(clr._argb.r * Rb) >> 7;
+				bG = (px_int)(clr._argb.g * Gb) >> 7;
+				bB = (px_int)(clr._argb.b * Bb) >> 7;
 
-					clr._argb.a = (px_uchar)bA;
-					clr._argb.r = (px_uchar)bR;
-					clr._argb.g = (px_uchar)bG;
-					clr._argb.b = (px_uchar)bB;
+				clr._argb.a = (px_uchar)bA;
+				clr._argb.r = (px_uchar)bR;
+				clr._argb.g = (px_uchar)bG;
+				clr._argb.b = (px_uchar)bB;
 
-					PX_SurfaceDrawPixelWithoutLimit(psurface, x + i, y + j, clr);
-				}
+				PX_SurfaceDrawPixelWithoutLimit(psurface, x + i, y + j, clr);
 			}
+		}
+#endif
+		}
 			break;
 		case PX_TEXTURERENDER_MIRRROR_MODE_H:
 			for (j = 0; j < cliph; j++)

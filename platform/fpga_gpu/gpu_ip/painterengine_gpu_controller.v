@@ -36,6 +36,7 @@
     `define GPUINFO_OPCODE_RESET 	    32'h00000000
     `define GPUINFO_OPCODE_GETVERSION 	32'h00000001
     `define GPUINFO_OPCODE_GETDEBUG 	32'h00000002
+    `define GPUINFO_OPCODE_GETTICK 	    32'h00000003
 
     `define GPUINFO_STATE_IDLE   		32'h00000000
     `define GPUINFO_STATE_PROCESSING	32'h00000001
@@ -75,7 +76,7 @@
 	`define DISPLAY_STATE_CALC2 		  3'b010
 	`define DISPLAY_STATE_STREAMING 	  3'b011
 	`define DISPLAY_STATE_CHECK		 	  3'b100
-	`define DISPLAY_STATE_DONE 			  3'b011
+	`define DISPLAY_STATE_DONE 			  3'b101
 	`define DISPLAY_STATE_ERROR 		  3'b111
 
 
@@ -616,7 +617,7 @@
 			end
 			else
 			begin
-				out_parameter0<=32'h31415929;
+				out_parameter0<=32'h31415930;
 				out_parameter1[7:0]<=reg_controller_state;
 				out_parameter1[8]<=reg_gpuinfo_resetn;
 				out_parameter1[9]<=reg_memcpy_resetn;

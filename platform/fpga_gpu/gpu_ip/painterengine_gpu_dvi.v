@@ -123,7 +123,8 @@
 		output  wire             									o_wire_vs,            //vertical synchronization
 		output  wire              									o_wire_de,            //video valid
 		output  wire [23:0]           								o_wire_rgb,
-		output	wire												o_wire_done
+		output	wire												o_wire_done,
+		output  wire [31:0]                                         o_wire_pixel_counter						
 		);
 		
 		//dvi registers
@@ -286,6 +287,7 @@
 		assign 		o_wire_hs = hs_reg_d0;
 		assign 		o_wire_vs = vs_reg_d0;
 		assign 		o_wire_de = video_active_d0;
+		assign      o_wire_pixel_counter=reg_pixel_cnt;
 
 		always@(posedge i_wire_pixel_clock or negedge i_wire_resetn)
 		begin

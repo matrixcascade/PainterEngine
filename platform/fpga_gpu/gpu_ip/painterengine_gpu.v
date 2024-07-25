@@ -94,12 +94,6 @@
 			input wire  m00_axi_rlast,
 			input wire  m00_axi_rvalid,
 			output wire  m00_axi_rready
-
-			//output wire o_wire_dma_reader_done,
-			//output wire [31:0] o_wire_reader_offset,
-			//output wire[7:0] reader_counter,
-			//output wire [2:0] reader_state,
-			//output wire[3:0] reader_router
 		);
 
 
@@ -210,6 +204,8 @@
 			.i_wire_clock(i_wire_clock),
 			//resetn
 			.i_wire_resetn(gpuinfo_i_wire_resetn),
+			//tick resetn
+			.i_wire_tick_resetn(i_wire_resetn),
 			//opcode
 			.i_wire_opcode(gpuinfo_i_wire_opcode),
 			//state
@@ -560,11 +556,6 @@
 		assign display_i_wire_dma_reader_data_valid=dma_reader_o_wire_data_valid0;
 		assign dma_reader_i_wire_data_next0=display_o_wire_dma_reader_data_next;
 
-		//assign o_wire_dma_reader_done=dma_reader_o_wire_done;
-		//assign o_wire_reader_offset=dma_reader.reg_offset;
-		//assign reader_state=dma_reader.reg_state;
-		//assign reader_router={dma_reader_i_wire_router3,dma_reader_i_wire_router2,dma_reader_i_wire_router1,dma_reader_i_wire_router0};
-		//assign reader_counter=dma_reader.reg_burst_counter;
 
 		
 		///////////////////////////////////////////////////////////////////////////////

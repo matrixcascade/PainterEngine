@@ -15,61 +15,10 @@
 #define PX_GPU_DISPLAY_STATE PX_GPU_REGISTER(16+5)
 #define PX_GPU_RENDERER_STATE PX_GPU_REGISTER(16+6)
 
-/*
-
-
-	//gpu controller
-	`define GPU_CONTROLLER_OPCODE_RESET 		32'h00000000
-	`define GPU_CONTROLLER_OPCODE_GPUINFO  		32'h00000001
-	`define GPU_CONTROLLER_OPCODE_MEMCPY   		32'h00000002
-	`define GPU_CONTROLLER_OPCODE_DISPLAY  		32'h00000003
-	`define GPU_CONTROLLER_OPCODE_RENDERER 		32'h00000004
-
-	`define GPU_CONTROLLER_STATE_IDLE   				32'h00000000
-	`define GPU_CONTROLLER_STATE_GPUINFO_PROCESSING		32'h00000001
-	`define GPU_CONTROLLER_STATE_MEMCPY_PROCESSING		32'h00000002
-	`define GPU_CONTROLLER_STATE_DISPLAY_PROCESSING		32'h00000003
-	`define GPU_CONTROLLER_STATE_RENDERER_PROCESSING	32'h00000004
-
-	`define GPU_CONTROLLER_STATE_ERROR    		32'h00000005
-	`define GPU_CONTROLLER_STATE_DONE    		32'h00000006
-
-	//gpuinfo
-
-	//gpuinfo opcodes
-	`define GPUINFO_OPCODE_GETVERSION 	32'h00000001
-	`define GPUINFO_OPCODE_GETDEBUG 	32'h00000002
-
-	`define GPUINFO_STATE_IDLE   		32'h00000000
-	`define GPUINFO_STATE_PROCESSING	32'h00000001
-	`define GPUINFO_STATE_ERROR    		32'h00000002
-	`define GPUINFO_STATE_DONE          32'h00000003
-
-	//memcpy
-	`define GPU_MEMCPY_STATE_INIT						32'h00000000
-	`define GPU_MEMCPY_STATE_PUSH_PARAM					32'h00000001
-	`define GPU_MEMCPY_STATE_CALC_PROCESS				32'h00000002
-	`define GPU_MEMCPY_STATE_RUN						32'h00000003
-	`define GPU_MEMCPY_STATE_WAIT						32'h00000004
-	`define GPU_MEMCPY_STATE_CHECKSIZE					32'h00000005
-	`define GPU_MEMCPY_STATE_DONE						32'h00000006
-	`define GPU_MEMCPY_STATE_LENGTH_ERROR				32'h00000007
-	`define GPU_MEMCPY_STATE_DMA_READER_ERROR			32'h00000008
-	`define GPU_MEMCPY_STATE_DMA_WRITER_ERROR			32'h00000009
-
-	//renderer
-	`define GPU_RENDERER_STATE_INIT 					32'h00000000
-	`define GPU_RENDERER_STATE_CALC 					32'h00000001
-	`define GPU_RENDERER_STATE_1_READING 				32'h00000002
-	`define GPU_RENDERER_STATE_2_READING 				32'h00000003
-	`define GPU_RENDERER_STATE_WRITING 					32'h00000004
-	`define GPU_RENDERER_STATE_DONE 					32'h00000005
-	`define GPU_RENDERER_STATE_ERROR 					32'h00000006
-*/
 
 px_void PX_GPU_Reset()
 {
-	if (PX_GPU_VERSION != 0x31415928)
+	if (PX_GPU_VERSION != 0x31415930)
 		return;
 
 	PX_GPU_OPCODE = 0;
@@ -79,7 +28,7 @@ px_void PX_GPU_Reset()
 px_dword PX_GPU_CheckEnable()
 {
 	volatile px_dword state;
-	if (PX_GPU_VERSION != 0x31415928)
+	if (PX_GPU_VERSION != 0x31415930)
 		return PX_FALSE;
 
 	PX_GPU_Reset();
@@ -123,9 +72,23 @@ px_dword PX_GPU_GetDebug()
 	return 0;
 }
 
+#define GPU_MEMCPY_STATE_INIT						0x00
+#define GPU_MEMCPY_STATE_PUSH_PARAM					0x01
+#define GPU_MEMCPY_STATE_CALC_PROCESS				0x02
+#define GPU_MEMCPY_STATE_READ						0x03
+#define GPU_MEMCPY_STATE_READ_WAIT					0x04
+#define GPU_MEMCPY_STATE_WRITE						0x05
+#define GPU_MEMCPY_STATE_WRITE_WAIT					0x06
+#define GPU_MEMCPY_STATE_CHECKSIZE					0x07
+#define GPU_MEMCPY_STATE_DONE						0x08
+#define GPU_MEMCPY_STATE_LENGTH_ERROR				0x09
+#define GPU_MEMCPY_STATE_DMA_READER_ERROR			0x0A
+#define GPU_MEMCPY_STATE_DMA_WRITER_ERROR			0x0B
+        
 px_bool PX_GPU_mempcy(px_void* src, px_void* dst, px_int _4_byte_count)
 {
 	volatile px_dword state;
+	Xil_DCacheDisable();
 	PX_GPU_Reset();
 	PX_GPU_PARAM(0) = (px_dword)(src);
 	PX_GPU_PARAM(1) = (px_dword)(dst);
@@ -135,31 +98,39 @@ px_bool PX_GPU_mempcy(px_void* src, px_void* dst, px_int _4_byte_count)
 	while (PX_TRUE)
 	{
 		state = PX_GPU_MEMCPY_STATE;
-		if (state == 7)
+		if (state == GPU_MEMCPY_STATE_LENGTH_ERROR)
 		{
 			PX_LOG("gpu memcpy length error");
 			return PX_FALSE;
 		}
-		if (state == 8)
+		if (state == GPU_MEMCPY_STATE_DMA_READER_ERROR)
 		{
 			PX_LOG("gpu dma reader error");
 			return PX_FALSE;
 		}
 
-		if (state == 9)
+		if (state == GPU_MEMCPY_STATE_DMA_WRITER_ERROR)
 		{
 			PX_LOG("gpu dma writer error");
 			return PX_FALSE;
+		}
+
+		if(state==GPU_MEMCPY_STATE_DONE)
+		{
+			Xil_DCacheDisable();
+			return PX_TRUE;
 		}
 	}
 	return 0;
 }
 
-#define DISPLAY_STATE_CONFIG 		0
-#define DISPLAY_STATE_STREAMING 	1
-#define DISPLAY_STATE_CHECK		 	2
-#define DISPLAY_STATE_DONE 			3
-#define DISPLAY_STATE_ERROR 		4
+#define DISPLAY_STATE_INIT 			  0
+#define DISPLAY_STATE_CALC1 		  1
+#define DISPLAY_STATE_CALC2 		  2
+#define DISPLAY_STATE_STREAMING 	  3
+#define DISPLAY_STATE_CHECK		 	  4
+#define DISPLAY_STATE_DONE 			  5
+#define DISPLAY_STATE_ERROR 		  6
 
 px_bool PX_GPU_Present(px_void* texture_addr, px_dword width, px_dword height, VIDEO_DISPLAY_MODE display_mode, DVI_RGB_MODE dvi_rgb_mode)
 {
@@ -170,12 +141,12 @@ px_bool PX_GPU_Present(px_void* texture_addr, px_dword width, px_dword height, V
 	PX_GPU_PARAM(2) = (px_dword)height;
 	PX_GPU_PARAM(3) = (px_dword)(display_mode)+((px_dword)dvi_rgb_mode<<4);//[2:0]bit displaymode 4-6 argb color mode 
 	PX_GPU_OPCODE = 3;
-
+   
 	while (PX_TRUE)
 	{
 		px_dword state = PX_GPU_DISPLAY_STATE;
         px_dword gpu_state=PX_GPU_STATE;
-		switch (state&0x3)
+		switch (state&0x7)
 		{
 		case DISPLAY_STATE_DONE:
 			return PX_TRUE;
@@ -187,15 +158,18 @@ px_bool PX_GPU_Present(px_void* texture_addr, px_dword width, px_dword height, V
 	}
 	return PX_FALSE;
 }
-#define GPU_RENDERER_STATE_INIT 0x00
-#define GPU_RENDERER_STATE_CALC 0x01
-#define GPU_RENDERER_STATE_1_READING 0x02
-#define GPU_RENDERER_STATE_2_READING 0x03
-#define GPU_RENDERER_STATE_WRITING 0x04
-#define GPU_RENDERER_STATE_DONE 0x05
-#define GPU_RENDERER_STATE_READER1_ERROR 0x06
-#define GPU_RENDERER_STATE_READER2_ERROR 0x07
-#define GPU_RENDERER_STATE_WRITER_ERROR 0x08
+
+#define GPU_RENDERER_STATE_INIT 			0x00
+#define GPU_RENDERER_STATE_CALC 			0x01
+#define GPU_RENDERER_STATE_CALC2 			0x02
+#define GPU_RENDERER_STATE_1_READING 		0x03
+#define GPU_RENDERER_STATE_2_READING 		0x04
+#define GPU_RENDERER_STATE_WRITING 			0x05
+#define GPU_RENDERER_STATE_DONE 			0x06
+#define GPU_RENDERER_STATE_READER1_ERROR 	0x07
+#define GPU_RENDERER_STATE_READER2_ERROR 	0x08
+#define GPU_RENDERER_STATE_WRITER_ERROR 	0x09
+
 
 px_bool PX_GPU_Render(px_void* texture_src_addr, px_dword width, px_dword x_count, px_dword y_count, px_void* texture_dst_addr, px_dword dst_width,px_dword color_format, px_dword blend)
 {
