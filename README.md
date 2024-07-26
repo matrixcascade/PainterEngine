@@ -139,6 +139,8 @@ Many more to explore....
 
 提供一个基于FPGA的GPU IP核,已在Zynq7020上完成功能验证,提供不低于50Mpps的2D Blender图形渲染加速,支持HDMI输出,目前已在zynq7000系列Soc上完成验证
 
+A GPU IP core based on FPGA has been developed and functionally verified on the Zynq 7020 platform. It provides 2D Blender graphics rendering acceleration with a performance of no less than 50Mpps (Million pixels per second) and supports HDMI output. This solution has been successfully validated on the Zynq 7000 series SoC.
+
 <p align="center"><img src="images/gpu_block_design.png" alt="PainterEngine designer"></p>
 
 <p align="center"><img src="images/gpu_demo.png" alt="PainterEngine designer"></p>
