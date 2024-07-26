@@ -133,6 +133,15 @@ You can now use your IDE to compile PainterEngine with these steps. PainterEngin
 | FPGA-GPU               |2D accelerator                                               | Implemented an FPGA-based GPU graphics accelerator that provides at least 50 million pixels per second (Mpps) 2D Blender acceleration for PainterEngine and supports HDMI output.validation has been completed on the Zynq-7000 series SoC.|
 
 Many more to explore....
+## FPGA-GPU 嵌入式图形加速方案
+
+## The FPGA-GPU Graphics Acceleration Solution
+
+提供一个基于FPGA的GPU IP核,已在Zynq7020上完成功能验证,提供不低于50Mpps的2D Blender图形渲染加速,支持HDMI输出,目前已在zynq7000系列Soc上完成验证
+
+<p align="center"><img src="images/gpu_block_design.png" alt="PainterEngine designer"></p>
+
+<p align="center"><img src="images/gpu_demo.png" alt="PainterEngine designer"></p>
 
 ## 组件化开发,支持设计器模式,简单的不能再简单
 
