@@ -1,31 +1,17 @@
 `timescale 1 ns / 1 ns
 
-
-	`define VIDEO_DISPLAY_MODE_1280_720   3'b000
-	`define VIDEO_DISPLAY_MODE_480_272    3'b001
-	`define VIDEO_DISPLAY_MODE_640_480    3'b010
-	`define VIDEO_DISPLAY_MODE_800_480    3'b011
-	`define VIDEO_DISPLAY_MODE_800_600    3'b100
-	`define VIDEO_DISPLAY_MODE_1024_768   3'b101
-	`define VIDEO_DISPLAY_MODE_1920_1080  3'b110
-
-	`define DVI_RGB_MODE_ARGB 3'b00
-	`define DVI_RGB_MODE_RGBA 3'b01
-	`define DVI_RGB_MODE_ABGR 3'b10
-	`define DVI_RGB_MODE_BGRA 3'b11
-
 	//gpu controller
 	`define GPU_CONTROLLER_OPCODE_RESET 		32'h00000000
 	`define GPU_CONTROLLER_OPCODE_GPUINFO  		32'h00000001
 	`define GPU_CONTROLLER_OPCODE_MEMCPY   		32'h00000002
-	`define GPU_CONTROLLER_OPCODE_DISPLAY  		32'h00000003
-	`define GPU_CONTROLLER_OPCODE_RENDERER 		32'h00000004
+	`define GPU_CONTROLLER_OPCODE_RENDERER 		32'h00000003
+	`define GPU_CONTROLLER_OPCODE_CONVERT 		32'h00000004
 
 	`define GPU_CONTROLLER_STATE_IDLE   				32'h00000000
 	`define GPU_CONTROLLER_STATE_GPUINFO_PROCESSING		32'h00000001
 	`define GPU_CONTROLLER_STATE_MEMCPY_PROCESSING		32'h00000002
-	`define GPU_CONTROLLER_STATE_DISPLAY_PROCESSING		32'h00000003
-	`define GPU_CONTROLLER_STATE_RENDERER_PROCESSING	32'h00000004
+	`define GPU_CONTROLLER_STATE_RENDERER_PROCESSING	32'h00000003
+	`define GPU_CONTROLLER_STATE_COLORCONVERT_PROCESSING	32'h00000004
 
 	`define GPU_CONTROLLER_STATE_ERROR    		32'h00000005
 	`define GPU_CONTROLLER_STATE_DONE    		32'h00000006
@@ -59,26 +45,34 @@
 
 	//renderer
 	`define GPU_RENDERER_STATE_INIT 8'h00
-	`define GPU_RENDERER_STATE_CALC 8'h01
-	`define GPU_RENDERER_STATE_CALC2 8'h02
-	`define GPU_RENDERER_STATE_1_READING 8'h03
-	`define GPU_RENDERER_STATE_2_READING 8'h04
-	`define GPU_RENDERER_STATE_WRITING 8'h05
-	`define GPU_RENDERER_STATE_DONE 8'h06
-	`define GPU_RENDERER_STATE_READER1_ERROR 8'h07
-	`define GPU_RENDERER_STATE_READER2_ERROR 8'h08
-	`define GPU_RENDERER_STATE_WRITER_ERROR 8'h09
+	`define GPU_RENDERER_STATE_CHECKX 8'h01
+	`define GPU_RENDERER_STATE_CHECKY 8'h02
+	`define GPU_RENDERER_STATE_CALC 8'h03
+	`define GPU_RENDERER_STATE_CALC2 8'h04
+	`define GPU_RENDERER_STATE_CALC3 8'h05
+	`define GPU_RENDERER_STATE_CALC_ADDRESS 8'h06
+	`define GPU_RENDERER_STATE_1_READING 8'h07
+	`define GPU_RENDERER_STATE_2_READING 8'h08
+	`define GPU_RENDERER_STATE_WRITING 8'h09
+	`define GPU_RENDERER_STATE_INC 8'h0A
+	`define GPU_RENDERER_STATE_DONE 8'h0B
+	`define GPU_RENDERER_STATE_READER1_ERROR 8'h0C
+	`define GPU_RENDERER_STATE_READER2_ERROR 8'h0D
+	`define GPU_RENDERER_STATE_WRITER_ERROR 8'h0E
 	`define GPU_RENDERER_BLOCK_PIXELS_COUNT 32'd64
 
-	//display
-	`define DISPLAY_STATE_INIT 			  3'b000
-	`define DISPLAY_STATE_CALC1 		  3'b001
-	`define DISPLAY_STATE_CALC2 		  3'b010
-	`define DISPLAY_STATE_STREAMING 	  3'b011
-	`define DISPLAY_STATE_CHECK		 	  3'b100
-	`define DISPLAY_STATE_DONE 			  3'b101
-	`define DISPLAY_STATE_ERROR 		  3'b111
-
+	`define GPU_COLORCONVERT_STATE_INIT						8'h00
+	`define GPU_COLORCONVERT_STATE_PUSH_PARAM				8'h01
+	`define GPU_COLORCONVERT_STATE_CALC_PROCESS				8'h02
+	`define GPU_COLORCONVERT_STATE_READ						8'h03
+	`define GPU_COLORCONVERT_STATE_READ_WAIT				8'h04
+	`define GPU_COLORCONVERT_STATE_WRITE					8'h05
+	`define GPU_COLORCONVERT_STATE_WRITE_WAIT				8'h06
+	`define GPU_COLORCONVERT_STATE_CHECKSIZE				8'h07
+	`define GPU_COLORCONVERT_STATE_DONE						8'h08
+	`define GPU_COLORCONVERT_STATE_LENGTH_ERROR				8'h09
+	`define GPU_COLORCONVERT_STATE_DMA_READER_ERROR			8'h0A
+	`define GPU_COLORCONVERT_STATE_DMA_WRITER_ERROR			8'h0B
 
 	module painterengine_gpu_controller #
 	(
@@ -123,15 +117,6 @@
 		output wire[31:0] o_wire_memcpy_data_length,
 		input  wire[31:0] i_wire_memcpy_state,
 
-		//display
-		output wire o_wire_display_resetn,
-		output wire[31:0] o_wire_display_src_address,
-		output wire[31:0] o_wire_display_src_width,
-		output wire[31:0] o_wire_display_src_height,
-
-		output wire[31:0] o_wire_display_modes,
-		input  wire[31:0] i_wire_display_state,
-
 		//renderer
 		output wire 	  o_wire_renderer_resetn,
 		output wire[31:0] o_wire_renderer_src_address,
@@ -144,7 +129,15 @@
 		
 		output wire[31:0] o_wire_renderer_color_format,
 		output wire[31:0] o_wire_renderer_blend,
-		input  wire[31:0] i_wire_renderer_state
+		input  wire[31:0] i_wire_renderer_state,
+
+		//color convert
+		output wire o_wire_colorconvert_resetn,
+		output wire[31:0] o_wire_colorconvert_src_address,
+		output wire[31:0] o_wire_colorconvert_dst_address,
+		output wire[31:0] o_wire_colorconvert_data_length,
+		output wire[31:0] o_wire_colorconvert_data_iomode,
+		input  wire[31:0] i_wire_colorconvert_state
 	);
 		reg [7:0] reg_controller_state;
 
@@ -159,14 +152,12 @@
 		reg [31:0] reg_memcpy_dst_address;
 		reg [31:0] reg_memcpy_data_length;
 
-
-		//display
-		reg  reg_display_resetn;
-		reg [31:0] reg_display_src_address;
-		reg [31:0] reg_display_src_width;
-		reg [31:0] reg_display_src_height;
-		reg [31:0] reg_display_mode;
-
+		//memcpy
+		reg reg_colorconvert_resetn;
+		reg [31:0] reg_colorconvert_src_address;
+		reg [31:0] reg_colorconvert_dst_address;
+		reg [31:0] reg_colorconvert_data_length;
+		reg [31:0] reg_colorconvert_iomode;
 		//renderer
 		reg reg_renderer_resetn;
 		reg [31:0] reg_renderer_src_address;
@@ -186,11 +177,11 @@
 		assign o_wire_memcpy_dst_address=reg_memcpy_dst_address;
 		assign o_wire_memcpy_data_length=reg_memcpy_data_length;
 
-		assign o_wire_display_resetn=reg_display_resetn;
-		assign o_wire_display_src_address=reg_display_src_address;
-		assign o_wire_display_src_width=reg_display_src_width;
-		assign o_wire_display_src_height=reg_display_src_height;
-		assign o_wire_display_modes=reg_display_mode;
+		assign o_wire_colorconvert_resetn=reg_colorconvert_resetn;
+		assign o_wire_colorconvert_src_address=reg_colorconvert_src_address;
+		assign o_wire_colorconvert_dst_address=reg_colorconvert_dst_address;
+		assign o_wire_colorconvert_data_length=reg_colorconvert_data_length;
+		assign o_wire_colorconvert_data_iomode=reg_colorconvert_iomode;
 
 		assign o_wire_renderer_resetn=reg_renderer_resetn;
 		assign o_wire_renderer_src_address=reg_renderer_src_address;
@@ -321,11 +312,11 @@
 			reg_memcpy_dst_address<=0;
 			reg_memcpy_data_length<=0;
 
-			reg_display_resetn<=0;
-			reg_display_src_address<=0;
-			reg_display_src_width<=0;
-			reg_display_src_height<=0;
-			reg_display_mode<=0;
+			reg_colorconvert_resetn<=0;
+			reg_colorconvert_src_address<=0;
+			reg_colorconvert_dst_address<=0;
+			reg_colorconvert_data_length<=0;
+			reg_colorconvert_iomode<=0;
 
 			reg_renderer_resetn<=0;
 			reg_renderer_src_address<=0;
@@ -365,15 +356,15 @@
 
 					reg_controller_state<=`GPU_CONTROLLER_STATE_MEMCPY_PROCESSING;
 				end
-				`GPU_CONTROLLER_OPCODE_DISPLAY:
+				`GPU_CONTROLLER_OPCODE_CONVERT:
 				begin
-					reg_display_resetn<=1;
-					reg_display_src_address<=r_wire_parameter1;
-					reg_display_src_width<=r_wire_parameter2;
-					reg_display_src_height<=r_wire_parameter3;
-					reg_display_mode<=r_wire_parameter4;
+					reg_colorconvert_resetn<=1;
+					reg_colorconvert_src_address<=r_wire_parameter1;
+					reg_colorconvert_dst_address<=r_wire_parameter2;
+					reg_colorconvert_data_length<=r_wire_parameter3;
+					reg_colorconvert_iomode<=r_wire_parameter4;
 
-					reg_controller_state<=`GPU_CONTROLLER_STATE_DISPLAY_PROCESSING;
+					reg_controller_state<=`GPU_CONTROLLER_STATE_COLORCONVERT_PROCESSING;
 				end
 				`GPU_CONTROLLER_OPCODE_RENDERER:
 				begin
@@ -444,21 +435,25 @@
 			endcase
 		endtask
 
-		task GPU_TASK_DISPLAY_PROCESSING;
-		begin
-			if(i_wire_display_state[2:0]==`DISPLAY_STATE_ERROR)
-			begin
-				reg_controller_state<=`GPU_CONTROLLER_STATE_ERROR;
-			end
-			else if(i_wire_display_state[2:0]==`DISPLAY_STATE_DONE)
-			begin
+		task GPU_TASK_COLORCONVERT_PROCESSING;
+			case(i_wire_colorconvert_state)
+			   `GPU_COLORCONVERT_STATE_DONE:
+			   begin
 				reg_controller_state<=`GPU_CONTROLLER_STATE_DONE;
-			end
-			else
-			begin
+			   end
+			   `GPU_COLORCONVERT_STATE_DMA_READER_ERROR:
+			   begin
+				reg_controller_state<=`GPU_CONTROLLER_STATE_ERROR;
+			   end
+			   `GPU_COLORCONVERT_STATE_DMA_WRITER_ERROR:
+			   begin
+				reg_controller_state<=`GPU_CONTROLLER_STATE_ERROR;
+			   end
+			   default:
+			   begin
 				reg_controller_state<=reg_controller_state;
-			end
-		end
+			   end
+			endcase
 		endtask
 
 		task GPU_TASK_RENDERER_PROCESSING;
@@ -492,11 +487,6 @@
 		task GPU_TASK_ERROR;
 		begin
 			reg_controller_state<=reg_controller_state;
-			reg_display_resetn<=reg_display_resetn;
-			reg_display_src_address<=reg_display_src_address;
-			reg_display_src_width<=reg_display_src_width;
-			reg_display_src_height<=reg_display_src_height;
-			reg_display_mode<=reg_display_mode;
 			reg_renderer_resetn<=reg_renderer_resetn;
 			reg_renderer_src_address<=reg_renderer_src_address;
 			reg_renderer_src_width<=reg_renderer_src_width;
@@ -506,10 +496,18 @@
 			reg_renderer_dst_width<=reg_renderer_dst_width;
 			reg_renderer_color_format<=reg_renderer_color_format;
 			reg_renderer_blend<=reg_renderer_blend;
+
 			reg_memcpy_resetn<=reg_memcpy_resetn;
 			reg_memcpy_src_address<=reg_memcpy_src_address;
 			reg_memcpy_dst_address<=reg_memcpy_dst_address;
 			reg_memcpy_data_length<=reg_memcpy_data_length;
+
+			reg_colorconvert_resetn<=reg_colorconvert_resetn;
+			reg_colorconvert_src_address<=reg_colorconvert_src_address;
+			reg_colorconvert_dst_address<=reg_colorconvert_dst_address;
+			reg_colorconvert_data_length<=reg_colorconvert_data_length;
+			reg_colorconvert_iomode<=reg_colorconvert_iomode;
+
 			reg_gpuinfo_resetn<=reg_gpuinfo_resetn;
 			reg_gpuinfo_opcode<=reg_gpuinfo_opcode;
 		end
@@ -518,11 +516,6 @@
 		task GPU_TASK_DONE;
 		begin
 			reg_controller_state<=reg_controller_state;
-			reg_display_resetn<=reg_display_resetn;
-			reg_display_src_address<=reg_display_src_address;
-			reg_display_src_width<=reg_display_src_width;
-			reg_display_src_height<=reg_display_src_height;
-			reg_display_mode<=reg_display_mode;
 			reg_renderer_resetn<=reg_renderer_resetn;
 			reg_renderer_src_address<=reg_renderer_src_address;
 			reg_renderer_src_width<=reg_renderer_src_width;
@@ -536,6 +529,12 @@
 			reg_memcpy_src_address<=reg_memcpy_src_address;
 			reg_memcpy_dst_address<=reg_memcpy_dst_address;
 			reg_memcpy_data_length<=reg_memcpy_data_length;
+			reg_colorconvert_resetn<=reg_colorconvert_resetn;
+			reg_colorconvert_src_address<=reg_colorconvert_src_address;
+			reg_colorconvert_dst_address<=reg_colorconvert_dst_address;
+			reg_colorconvert_data_length<=reg_colorconvert_data_length;
+			reg_colorconvert_iomode<=reg_colorconvert_iomode;
+
 			reg_gpuinfo_resetn<=reg_gpuinfo_resetn;
 			reg_gpuinfo_opcode<=reg_gpuinfo_opcode;
 		end
@@ -570,13 +569,13 @@
 					begin
 						GPU_TASK_MEMCPY_PROCESSING;
 					end
-					`GPU_CONTROLLER_STATE_DISPLAY_PROCESSING:
-					begin
-						GPU_TASK_DISPLAY_PROCESSING;
-					end
 					`GPU_CONTROLLER_STATE_RENDERER_PROCESSING:
 					begin
 						GPU_TASK_RENDERER_PROCESSING;
+					end
+					`GPU_CONTROLLER_STATE_COLORCONVERT_PROCESSING:
+					begin
+						GPU_TASK_COLORCONVERT_PROCESSING;
 					end
 					`GPU_CONTROLLER_STATE_ERROR:
 					begin
@@ -621,15 +620,15 @@
 				out_parameter1[7:0]<=reg_controller_state;
 				out_parameter1[8]<=reg_gpuinfo_resetn;
 				out_parameter1[9]<=reg_memcpy_resetn;
-				out_parameter1[10]<=reg_display_resetn;
-				out_parameter1[11]<=reg_renderer_resetn;
+				out_parameter1[10]<=reg_renderer_resetn;
+				out_parameter1[11]<=reg_colorconvert_resetn;
 				out_parameter1[31:12]<=0;
 
 				out_parameter2<=i_wire_gpuinfo_return;
 				out_parameter3<=i_wire_gpuinfo_state;
 				out_parameter4<=i_wire_memcpy_state;
-				out_parameter5<=i_wire_display_state;
-				out_parameter6<=i_wire_renderer_state;
+				out_parameter5<=i_wire_renderer_state;
+				out_parameter6<=i_wire_colorconvert_state;
 			end
 
 		end

@@ -19,15 +19,15 @@
 			input wire   									i_wire_read,
 
 			input wire [PARAM_DATA_WIDTH-1:0] 				i_wire_data_in,
-			output wire [PARAM_DATA_WIDTH-1:0] 				o_wire_data_out,
+			output reg [PARAM_DATA_WIDTH-1:0] 				o_wire_data_out,
 
 			output wire   									o_wire_almost_full,
 			output wire   									o_wire_full,
 			
 			output wire   									o_wire_almost_empty,
 			output wire   									o_wire_empty,
-			output wire [7:0]								o_wire_data_count,
-			output wire [7:0] 								o_wire_empty_count
+			output wire [8:0]								o_wire_data_count,
+			output wire [8:0] 								o_wire_empty_count
 		);
 
 		function integer clogb2 (input integer bit_depth);              
@@ -38,7 +38,6 @@
 		endfunction  
 		//fifo
 		reg [PARAM_DATA_WIDTH-1:0] 						reg_fifo[PARAM_FIFO_DEPTH-1:0];
-		reg [PARAM_DATA_WIDTH-1:0] 						reg_fifo_data_out;
 
 		reg [clogb2(PARAM_FIFO_DEPTH)-1:0]				reg_fifo_write_index;
 		reg [clogb2(PARAM_FIFO_DEPTH)-1:0]				reg_fifo_read_index;
@@ -56,9 +55,13 @@
 		assign wire_fifo_true_write_index=reg_fifo_write_index[clogb2(PARAM_FIFO_DEPTH)-2:0];
 		assign wire_fifo_true_read_index_next=reg_fifo_read_index+1'b1;
 
-		assign o_wire_data_out=reg_fifo_data_out;
 		assign o_wire_data_count=wire_fifo_data_count;
 		assign o_wire_empty_count=PARAM_FIFO_DEPTH-wire_fifo_data_count;
+
+		always @(*)
+		begin
+			o_wire_data_out=reg_fifo[wire_fifo_true_read_index];
+		end
 
 
 		integer i;
@@ -105,22 +108,16 @@
 			if (!i_wire_resetn)
 			begin
 				reg_fifo_read_index<=0;
-				reg_fifo_data_out<=0;
 			end
 			else
 			begin
 				if(i_wire_read&&wire_fifo_data_count>0)
 				begin
 					reg_fifo_read_index<=reg_fifo_read_index+1'b1;
-					reg_fifo_data_out<=reg_fifo[wire_fifo_true_read_index_next];
 				end
 				else
 				begin
 					reg_fifo_read_index<=reg_fifo_read_index;
-					if(wire_fifo_data_count>0)
-						reg_fifo_data_out<=reg_fifo[wire_fifo_true_read_index];
-					else
-						reg_fifo_data_out<=0;
 				end
 			end
 		end

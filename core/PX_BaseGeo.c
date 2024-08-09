@@ -1819,16 +1819,18 @@ px_void PX_GeoDrawBall(px_surface* psurface, px_float x, px_float y, px_float Ra
 	{
 		for (j = left; j <= right; j++)
 		{
+
 			d = PX_sqrt((px_float)((i - y) * (i - y) + (j - x) * (j - x)));
 
-			if (d < Radius)
+			if (d <= Radius)
 			{
-				if (d > Radius -2)
+				if (d >= Radius -2)
 				{
 					if ((px_float)Radius - d < 1.414f)
 					{
 						clr = color;
 						clr._argb.a = (px_uchar)(clr._argb.a * ((px_float)Radius - d) / 1.414f);
+						
 						PX_SurfaceDrawPixelWithoutLimit(psurface, j, i, clr);
 					}
 					else
@@ -1839,12 +1841,14 @@ px_void PX_GeoDrawBall(px_surface* psurface, px_float x, px_float y, px_float Ra
 					px_float a =  0.2f+0.8f*(d- Radius*0.6f) / (Radius-2- Radius * 0.6f);
 					clr = color;
 					clr._argb.a = (px_uchar)(clr._argb.a * a);
+					
 					PX_SurfaceDrawPixelWithoutLimit(psurface, j, i, clr);
 				}
 				else
 				{
 					clr = color;
 					clr._argb.a /=5;
+					
 					PX_SurfaceDrawPixelWithoutLimit(psurface, j, i, clr);
 				}
 				

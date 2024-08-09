@@ -8,6 +8,7 @@ px_void PX_ASSERT(void)
 	i =i / i;
 	//return;
 #endif
+	while (1);
 }
 
 px_void PX_ERROR(const px_char fmt[])
