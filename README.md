@@ -145,6 +145,8 @@ A GPU IP core based on FPGA has been developed and functionally verified on the 
 
 <p align="center"><img src="images/gpu_demo.png" alt="PainterEngine designer"></p>
 
+<p align="center"><img src="images/gpu_demo2.png" alt="PainterEngine designer"></p>
+
 ## 组件化开发,支持设计器模式,简单的不能再简单
 
 ## Component-based development with support for a designer mode, making it as simple as it gets
