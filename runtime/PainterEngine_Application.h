@@ -55,6 +55,7 @@
 	px_void PainterEngine_DrawRect(px_int x, px_int y, px_int width, px_int height, px_int linewidth, px_color color);
 	px_void PainterEngine_DrawCircle(px_int x, px_int y, px_int radius, px_int linewidth, px_color color);
 	px_void PainterEngine_DrawSolidCircle(px_int x, px_int y, px_int radius, px_color color);
+	px_void PainterEngine_DrawPixel(px_int x, px_int y, px_color color);
 
 	px_bool PX_ApplicationInitialize(PX_Application* App, px_int screen_Width, px_int screen_Height);
 	px_void PX_ApplicationUpdate(PX_Application* App, px_dword elapsed);

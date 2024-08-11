@@ -92,21 +92,6 @@ typedef struct
 	PX_TEXTURERENDER_BLEND *blend;
 }PX_TEXTURERENDER_PARALLEL_DATA;
 
-#ifdef PX_COLOR_FORMAT_RGBA
-#define PX_COLOR_FORMAT BLENDER_ARGB_MODE_XXXA
-#endif
-
-#ifdef PX_COLOR_FORMAT_BGRA
-#define PX_COLOR_FORMAT BLENDER_ARGB_MODE_XXXA
-#endif
-
-#ifdef PX_COLOR_FORMAT_ARGB
-#define PX_COLOR_FORMAT BLENDER_ARGB_MODE_AXXX
-#endif
-
-#ifdef PX_COLOR_FORMAT_ABGR
-#define PX_COLOR_FORMAT BLENDER_ARGB_MODE_AXXX
-#endif
 
 px_void PX_TextureRenderClipMirror(px_surface* psurface, px_texture* tex, px_int x, px_int y, px_int clipx, px_int clipy, px_int clipw, px_int cliph, PX_ALIGN refPoint, PX_TEXTURERENDER_BLEND* blend, PX_TEXTURERENDER_MIRRROR_MODE mirrorMode)
 {
@@ -327,7 +312,7 @@ px_void PX_TextureRenderClipMirror(px_surface* psurface, px_texture* tex, px_int
 				Bb &= 0xff;
 				blend = (Ab << 24) + (Rb << 16) + (Gb << 8) + Bb;
 				
-				PX_GPU_Render(pdata + clipy * tex->width + clipx, tex->width, clipw, cliph, psurface->surfaceBuffer + y * psurface->width + x, psurface->width, 1, blend);
+				PX_GPU_Render(pdata + clipy * tex->width + clipx, tex->width, clipw, cliph, psurface->surfaceBuffer + y * psurface->width + x, psurface->width, PX_COLOR_FORMAT, blend);
 			}
 			else
 			{
@@ -445,7 +430,7 @@ px_void PX_TextureRenderClipMirror(px_surface* psurface, px_texture* tex, px_int
 #ifdef PX_GPU_ENABLE
 			if (PX_GPU_isEnable())
 			{
-				PX_GPU_Render(pdata + clipy * tex->width + clipx, tex->width, clipw, cliph, psurface->surfaceBuffer + y * psurface->width + x, psurface->width, 1, 0x80808080);
+				PX_GPU_Render(pdata + clipy * tex->width + clipx, tex->width, clipw, cliph, psurface->surfaceBuffer + y * psurface->width + x, psurface->width, PX_COLOR_FORMAT, 0x80808080);
 			}
 			else
 			{

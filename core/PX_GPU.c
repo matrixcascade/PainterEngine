@@ -377,6 +377,12 @@ px_bool PX_GPU_Render(px_void* texture_src_addr, px_dword width, px_dword x_coun
 	PX_GPU_PARAM(5) = (px_dword)dst_width;
 	PX_GPU_PARAM(6) = (px_dword)color_format;
 	PX_GPU_PARAM(7) = (px_dword)blend;
+	PX_GPU_PARAM(8) = (px_dword)0;//mode
+	PX_GPU_PARAM(9) = (px_dword)0;//pt1
+	PX_GPU_PARAM(10) = (px_dword)0;//pt2
+	PX_GPU_PARAM(11) = (px_dword)0;//pt3
+	PX_GPU_PARAM(12) = (px_dword)0;//yes color
+	PX_GPU_PARAM(13) = (px_dword)0;//no color
 	PX_GPU_OPCODE = 3;
 
 	while (PX_TRUE)
@@ -389,6 +395,57 @@ px_bool PX_GPU_Render(px_void* texture_src_addr, px_dword width, px_dword x_coun
             Xil_DCacheInvalidate();
 			PX_LOG("renderer done");
             return PX_TRUE;
+			break;
+		case GPU_RENDERER_STATE_READER1_ERROR:
+			PX_LOG("Reader1 error");
+			return PX_FALSE;
+			break;
+		case GPU_RENDERER_STATE_READER2_ERROR:
+			PX_LOG("Reader2 error");
+			return PX_FALSE;
+			break;
+		case GPU_RENDERER_STATE_WRITER_ERROR:
+			PX_LOG("Writer error");
+			return PX_FALSE;
+			break;
+		default:
+			continue;
+		}
+	}
+	return 0;
+}
+
+px_bool PX_GPU_RenderTriangleRasterizer(px_void* texture_src_addr, px_dword width, px_dword x_count, px_dword y_count, px_void* texture_dst_addr, px_dword dst_width, px_dword color_format, px_dword blend,\
+	px_int x1, px_int y1, px_int x2, px_int y2, px_int x3, px_int y3, px_color poscolor, px_color negcolor)
+{
+	Xil_DCacheFlush();
+	PX_GPU_Reset();
+	PX_GPU_PARAM(0) = (px_dword)texture_src_addr;
+	PX_GPU_PARAM(1) = (px_dword)width;
+	PX_GPU_PARAM(2) = (px_dword)x_count;
+	PX_GPU_PARAM(3) = (px_dword)y_count;
+	PX_GPU_PARAM(4) = (px_dword)texture_dst_addr;
+	PX_GPU_PARAM(5) = (px_dword)dst_width;
+	PX_GPU_PARAM(6) = (px_dword)color_format;
+	PX_GPU_PARAM(7) = (px_dword)blend;
+	PX_GPU_PARAM(8) = (px_dword)1;//mode
+	PX_GPU_PARAM(9) = (px_dword)(x1+(y1<<16));//pt1
+	PX_GPU_PARAM(10) = (px_dword)(x2 + (y2 << 16));//pt2
+	PX_GPU_PARAM(11) = (px_dword)(x3 + (y3 << 16));//pt3
+	PX_GPU_PARAM(12) = (px_dword)poscolor._argb.ucolor;//yes color
+	PX_GPU_PARAM(13) = (px_dword)negcolor._argb.ucolor;//no color
+	PX_GPU_OPCODE = 3;
+
+	while (PX_TRUE)
+	{
+		px_dword state = PX_GPU_RENDERER_STATE;
+
+		switch (state)
+		{
+		case GPU_RENDERER_STATE_DONE:
+			Xil_DCacheInvalidate();
+			PX_LOG("renderer done");
+			return PX_TRUE;
 			break;
 		case GPU_RENDERER_STATE_READER1_ERROR:
 			PX_LOG("Reader1 error");

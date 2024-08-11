@@ -16,6 +16,11 @@ px_variable PX_Variable_handle(px_void* _ptr)
 	return var;
 }
 
+px_variable PX_Variable_ptr(px_void* _ptr)
+{
+	return PX_Variable_handle(_ptr);
+}
+
 px_variable PX_Variable_float(px_float _float)
 {
 	px_variable var;

@@ -3558,6 +3558,70 @@ px_void PX_GeoDrawTriangle(px_surface *psurface,px_point2D p0,px_point2D p1,px_p
 	
 }
 
+px_void PX_GeoRasterizeTriangle(px_surface* psurface,px_int x1, px_int y1, px_int x2, px_int y2, px_int x3, px_int y3,px_color color)
+{
+	px_int minX = (x1 < x2) ? ((x1 < x3) ? x1 : x3) : ((x2 < x3) ? x2 : x3), maxX = (x1 > x2) ? ((x1 > x3) ? x1 : x3) : ((x2 > x3) ? x2 : x3);
+	px_int minY = (y1 < y2) ? ((y1 < y3) ? y1 : y3) : ((y2 < y3) ? y2 : y3), maxY = (y1 > y2) ? ((y1 > y3) ? y1 : y3) : ((y2 > y3) ? y2 : y3);
+	px_int xcount, ycount;
+	px_int gpu_x1, gpu_y1, gpu_x2, gpu_y2, gpu_x3, gpu_y3;
+	px_int x, y;
+	
+	gpu_x1 = x1 - minX;
+	gpu_y1 = y1 - minY;
+	gpu_x2 = x2 - minX;
+	gpu_y2 = y2 - minY;
+	gpu_x3 = x3 - minX;
+	gpu_y3 = y3 - minY;
+
+	if (minX < 0)
+		minX = 0;
+
+	if (minX >= psurface->width)
+		return;
+	
+	if (maxX < 0)
+		return;
+
+	if(maxX>=psurface->width)
+		maxX=psurface->width-1;
+	
+	
+	if(minY<0)
+		minY=0;
+
+	if (minY >= psurface->height)
+		return;
+
+	if(maxY>=psurface->height)
+		maxY=psurface->height-1;
+
+	if (maxY < 0)
+		return;
+
+	xcount = maxX - minX + 1;
+	ycount = maxY - minY + 1;
+
+	if (xcount > 0 && ycount > 0)
+	{
+		
+#ifdef PX_GPU_ENABLE
+		px_color *pGPU_dst_addr= psurface->surfaceBuffer+minY*psurface->width+minX;
+		PX_GPU_RenderTriangleRasterizer(psurface->surfaceBuffer, xcount,xcount,ycount, pGPU_dst_addr, psurface->width, PX_COLOR_FORMAT,0x80808080, gpu_x1,gpu_y1,gpu_x2,gpu_y2,gpu_x3,gpu_y3, color,PX_COLOR(0,0,0,0));
+#else
+		for (y = minY; y <= maxY; y++) for (x = minX; x <= maxX; x++)
+		{
+			px_int area1 = (x2 - x1) * (y - y1) - (y2 - y1) * (x - x1);
+			px_int area2 = (x3 - x2) * (y - y2) - (y3 - y2) * (x - x2);
+			px_int area3 = (x1 - x3) * (y - y3) - (y1 - y3) * (x - x3);
+			if ((area1 >= 0 && area2 >= 0 && area3 >= 0) || (area1 <= 0 && area2 <= 0 && area3 <= 0))
+			{
+				PX_SurfaceDrawPixel(psurface,x, y, color);
+			}
+		}
+#endif
+	}
+
+}
 px_void PX_GeoDrawArrow(px_surface *psurface,px_point2D p0,px_point2D p1,px_float size,px_color color)
 {
 	px_point2D p0_5,v,vn;

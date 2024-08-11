@@ -38,6 +38,7 @@ typedef struct __PX_VM_VARIABLE
 px_variable PX_Variable_int(px_int _int);
 px_void PX_VariableFree(px_variable* var);
 px_variable PX_Variable_handle(px_void* _ptr);
+px_variable PX_Variable_ptr(px_void* _ptr);
 px_variable PX_Variable_float(px_float _float);
 px_variable PX_Variable_string(px_string _ref_string);
 px_variable PX_Variable_build_string(px_memorypool* mp, const px_char* buffer);

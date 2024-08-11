@@ -83,7 +83,17 @@
 			input wire [1 : 0] m00_axi_rresp,
 			input wire  m00_axi_rlast,
 			input wire  m00_axi_rvalid,
-			output wire  m00_axi_rready
+			output wire  m00_axi_rready,
+
+			output wire[31:0] o_wire_rasterizer_i_wire_test_point,
+    		output wire       o_wire_rasterizer_i_wire_valid,
+    		output wire[31:0] o_wire_rasterizer_i_wire_point1,
+    		output wire[31:0] o_wire_rasterizer_i_wire_point2,
+    		output wire[31:0] o_wire_rasterizer_i_wire_point3,
+    		output wire[31:0] o_wire_rasterizer_i_wire_yes_color,
+    		output wire[31:0] o_wire_rasterizer_i_wire_no_color,
+    		output wire       o_wire_rasterizer_o_wire_valid,
+    		output wire[31:0] o_wire_rasterizer_o_wire_color
 		);
 
 
@@ -115,12 +125,21 @@
 		wire [31 : 0] controller_o_wire_renderer_blend;
 		wire [31 : 0] controller_i_wire_renderer_state;
 
+		wire[31:0] controller_o_wire_renderer_mode;
+		wire[31:0] controller_o_wire_renderer_point1;
+    	wire[31:0] controller_o_wire_renderer_point2;
+    	wire[31:0] controller_o_wire_renderer_point3;
+    	wire[31:0] controller_o_wire_renderer_yes_color;
+    	wire[31:0] controller_o_wire_renderer_no_color;
+
 		wire 	   controller_o_wire_colorconvert_resetn;
 		wire[31:0] controller_o_wire_colorconvert_src_address;
 		wire[31:0] controller_o_wire_colorconvert_dst_address;
 		wire[31:0] controller_o_wire_colorconvert_data_length;
 		wire[31:0] controller_o_wire_colorconvert_data_iomode;
 		wire[31:0] controller_i_wire_colorconvert_state;
+
+
 
 		painterengine_gpu_controller gpu_controller(
 			//axi4lite signals
@@ -170,6 +189,12 @@
 			.o_wire_renderer_color_format(controller_o_wire_color_format),
 			.o_wire_renderer_blend(controller_o_wire_renderer_blend),
 			.i_wire_renderer_state(controller_i_wire_renderer_state),
+			.o_wire_renderer_mode(controller_o_wire_renderer_mode),
+			.o_wire_renderer_point1(controller_o_wire_renderer_point1),
+    		.o_wire_renderer_point2(controller_o_wire_renderer_point2),
+    		.o_wire_renderer_point3(controller_o_wire_renderer_point3),
+    		.o_wire_renderer_yes_color(controller_o_wire_renderer_yes_color),
+    		.o_wire_renderer_no_color(controller_o_wire_renderer_no_color),
 
 			.o_wire_colorconvert_resetn(controller_o_wire_colorconvert_resetn),
 			.o_wire_colorconvert_src_address(controller_o_wire_colorconvert_src_address),
@@ -361,6 +386,12 @@
     	wire 		renderer_o_wire_fifo2_resetn;
     	wire[31:0] 	renderer_o_wire_state;
 
+		wire       renderer_i_wire_rasterizer_mode;
+    	wire       renderer_o_wire_rasterizer_resetn;
+    	wire[31:0] renderer_o_wire_rasterizer_xy;
+    	wire       renderer_o_wire_rasterizer_valid;
+
+
 
        painterengine_gpu_renderer gpu_renderer(
     		.i_wire_clock(i_wire_clock),
@@ -392,6 +423,12 @@
     		.o_wire_fifo1_resetn(renderer_o_wire_fifo1_resetn),
     		.o_wire_fifo2_resetn(renderer_o_wire_fifo2_resetn),
 
+			//rasterize
+			.i_wire_rasterizer_mode(renderer_i_wire_rasterizer_mode),
+			.o_wire_rasterizer_resetn(renderer_o_wire_rasterizer_resetn),
+			.o_wire_rasterizer_xy(renderer_o_wire_rasterizer_xy),
+			.o_wire_rasterizer_valid(renderer_o_wire_rasterizer_valid),
+
     		//state
     		.o_wire_state(renderer_o_wire_state)
 			);
@@ -404,6 +441,11 @@
 		assign renderer_i_wire_render_frame_buffer_xcount=controller_o_wire_renderer_src_x_count;
 		assign renderer_i_wire_render_frame_buffer_ycount=controller_o_wire_renderer_src_y_count;
 		assign controller_i_wire_renderer_state=renderer_o_wire_state;
+
+		assign renderer_i_wire_rasterizer_mode=controller_o_wire_renderer_mode[0];
+
+		
+
 		
 		///////////////////////////////////////////////////////////////////////////////
 		//dma reader
@@ -620,6 +662,53 @@
 		assign fifo_colorconvert_i_wire_data_in=argb2rgb_o_wire_rgb;
 
 		///////////////////////////////////////////////////////////////////////////////
+		//painterengine_gpu_rasterizer
+		///////////////////////////////////////////////////////////////////////////////
+		wire       rasterizer_i_wire_clock;
+    	wire       rasterizer_i_wire_resetn;
+    	wire[31:0] rasterizer_i_wire_test_point;
+    	wire       rasterizer_i_wire_valid;
+    	wire[31:0] rasterizer_i_wire_point1;
+    	wire[31:0] rasterizer_i_wire_point2;
+    	wire[31:0] rasterizer_i_wire_point3;
+    	wire[31:0] rasterizer_i_wire_yes_color;
+    	wire[31:0] rasterizer_i_wire_no_color;
+    	wire       rasterizer_o_wire_valid;
+    	wire[31:0] rasterizer_o_wire_color;
+
+		painterengine_gpu_rasterizer gpu_rasterizer(
+			.i_wire_clock(i_wire_clock),
+    		.i_wire_resetn(rasterizer_i_wire_resetn),
+    		.i_wire_test_point(rasterizer_i_wire_test_point),
+    		.i_wire_valid(rasterizer_i_wire_valid),
+    		.i_wire_point1(rasterizer_i_wire_point1),
+    		.i_wire_point2(rasterizer_i_wire_point2),
+    		.i_wire_point3(rasterizer_i_wire_point3),
+    		.i_wire_yes_color(rasterizer_i_wire_yes_color),
+    		.i_wire_no_color(rasterizer_i_wire_no_color),
+    		.o_wire_valid(rasterizer_o_wire_valid),
+    		.o_wire_color(rasterizer_o_wire_color)
+		);
+		assign rasterizer_i_wire_resetn=renderer_o_wire_rasterizer_resetn;
+		assign rasterizer_i_wire_test_point=renderer_o_wire_rasterizer_xy;
+		assign rasterizer_i_wire_valid=renderer_o_wire_rasterizer_valid;
+		assign rasterizer_i_wire_point1=controller_o_wire_renderer_point1;
+		assign rasterizer_i_wire_point2=controller_o_wire_renderer_point2;
+		assign rasterizer_i_wire_point3=controller_o_wire_renderer_point3;
+		assign rasterizer_i_wire_yes_color=controller_o_wire_renderer_yes_color;
+		assign rasterizer_i_wire_no_color=controller_o_wire_renderer_no_color;
+
+		assign o_wire_rasterizer_i_wire_test_point=renderer_o_wire_rasterizer_xy;
+    	assign o_wire_rasterizer_i_wire_valid=renderer_o_wire_rasterizer_valid;
+    	assign o_wire_rasterizer_i_wire_point1=controller_o_wire_renderer_point1;
+    	assign o_wire_rasterizer_i_wire_point2=controller_o_wire_renderer_point2;
+    	assign o_wire_rasterizer_i_wire_point3=controller_o_wire_renderer_point3;
+    	assign o_wire_rasterizer_i_wire_yes_color=controller_o_wire_renderer_yes_color;
+    	assign o_wire_rasterizer_i_wire_no_color=controller_o_wire_renderer_no_color;
+    	assign o_wire_rasterizer_o_wire_valid=rasterizer_o_wire_valid;
+    	assign o_wire_rasterizer_o_wire_color=rasterizer_o_wire_color;
+
+		///////////////////////////////////////////////////////////////////////////////
 		//fifo_render1 2
 		///////////////////////////////////////////////////////////////////////////////
 		wire fifo_render1_i_wire_resetn;
@@ -656,8 +745,8 @@
 		);
 		
 		assign fifo_render1_i_wire_resetn=renderer_o_wire_fifo1_resetn;
-		assign fifo_render1_i_wire_write=dma_reader_o_wire_data_valid2;
-		assign fifo_render1_i_wire_data_in=dma_reader_o_wire_data2;
+		assign fifo_render1_i_wire_write=controller_o_wire_renderer_mode[0]?rasterizer_o_wire_valid:dma_reader_o_wire_data_valid2;
+		assign fifo_render1_i_wire_data_in=controller_o_wire_renderer_mode[0]?rasterizer_o_wire_color:dma_reader_o_wire_data2;
 		assign dma_reader_i_wire_data_next2=!fifo_render1_o_wire_full;
 
 

@@ -2,6 +2,7 @@
 #define PIXELSES_BASEGEO
 
 #include "PX_Surface.h"
+#include "PX_GPU.h"
 
 px_void PX_GeoDrawLine(px_surface *psurface, px_int x0, px_int y0, px_int x1, px_int y1 ,px_int lineWidth, px_color color);
 px_void PX_GeoDrawPenSamplesLine(px_surface* psurface, px_point _samples[], px_int samplescount, px_float radius, px_color color, px_float v, px_float filter_factor);
@@ -31,5 +32,6 @@ px_void PX_GeoDrawBresenhamLine(px_surface* psurface, px_int x0, px_int y0, px_i
 px_void PX_GeoDrawTriangle(px_surface *psurface,px_point2D p0,px_point2D p1,px_point2D p2,px_color color);
 px_void PX_GeoDrawArrow(px_surface *psurface,px_point2D p0,px_point2D p1,px_float size,px_color color);
 px_void PX_GeoBSpline3(px_point2D controlPoints[4], px_point2D _samples[], px_int samplescount);
+px_void PX_GeoRasterizeTriangle(px_surface* psurface, px_int x1, px_int y1, px_int x2, px_int y2, px_int x3, px_int y3, px_color color);
 
 #endif

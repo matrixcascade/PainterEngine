@@ -131,6 +131,13 @@
 		output wire[31:0] o_wire_renderer_blend,
 		input  wire[31:0] i_wire_renderer_state,
 
+		output wire[31:0] o_wire_renderer_mode,
+		output wire[31:0] o_wire_renderer_point1,
+    	output wire[31:0] o_wire_renderer_point2,
+    	output wire[31:0] o_wire_renderer_point3,
+    	output wire[31:0] o_wire_renderer_yes_color,
+    	output wire[31:0] o_wire_renderer_no_color,
+
 		//color convert
 		output wire o_wire_colorconvert_resetn,
 		output wire[31:0] o_wire_colorconvert_src_address,
@@ -169,6 +176,13 @@
 		reg [31:0] reg_renderer_color_format;
 		reg [31:0] reg_renderer_blend;
 
+		reg[31:0] 	reg_renderer_mode;
+		reg[31:0] 	reg_renderer_point1;
+    	reg[31:0] 	reg_renderer_point2;
+    	reg[31:0] 	reg_renderer_point3;
+    	reg[31:0] 	reg_renderer_yes_color;
+    	reg[31:0] 	reg_renderer_no_color;
+
 		assign o_wire_gpuinfo_resetn=reg_gpuinfo_resetn;
 		assign o_wire_gpuinfo_opcode=reg_gpuinfo_opcode;
 
@@ -192,6 +206,14 @@
 		assign o_wire_renderer_dst_width=reg_renderer_dst_width;
 		assign o_wire_renderer_color_format=reg_renderer_color_format;
 		assign o_wire_renderer_blend=reg_renderer_blend;
+
+		assign o_wire_renderer_mode=reg_renderer_mode;
+		assign o_wire_renderer_point1=reg_renderer_point1;
+		assign o_wire_renderer_point2=reg_renderer_point2;
+		assign o_wire_renderer_point3=reg_renderer_point3;
+		assign o_wire_renderer_yes_color=reg_renderer_yes_color;
+		assign o_wire_renderer_no_color=reg_renderer_no_color;
+
 
 
 		/////////////////////////////////////////////////////
@@ -329,6 +351,14 @@
 
 			reg_renderer_color_format<=0;
 			reg_renderer_blend<=0;
+
+			reg_renderer_mode<=0;
+			reg_renderer_point1<=0;
+			reg_renderer_point2<=0;
+			reg_renderer_point3<=0;
+			reg_renderer_yes_color<=0;
+			reg_renderer_no_color<=0;
+			
 			
 		end
 		endtask
@@ -377,6 +407,13 @@
 					reg_renderer_dst_width<=r_wire_parameter6;
 					reg_renderer_color_format<=r_wire_parameter7;
 					reg_renderer_blend<=r_wire_parameter8;
+					reg_renderer_mode<=r_wire_parameter9;
+					reg_renderer_point1<=r_wire_parameter10;
+					reg_renderer_point2<=r_wire_parameter11;
+					reg_renderer_point3<=r_wire_parameter12;
+					reg_renderer_yes_color<=r_wire_parameter13;
+					reg_renderer_no_color<=r_wire_parameter14;
+					
 
 			
 					reg_controller_state<=`GPU_CONTROLLER_STATE_RENDERER_PROCESSING;

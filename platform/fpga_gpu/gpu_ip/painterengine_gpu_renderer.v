@@ -15,6 +15,8 @@
 `define GPU_RENDERER_STATE_READER1_ERROR 8'h0C
 `define GPU_RENDERER_STATE_READER2_ERROR 8'h0D
 `define GPU_RENDERER_STATE_WRITER_ERROR 8'h0E
+`define GPU_RENDERER_STATE_2_GENERATE0 8'h10
+`define GPU_RENDERER_STATE_2_GENERATE1 8'h11
 `define GPU_RENDERER_BLOCK_PIXELS_COUNT 32'd64
 
 
@@ -47,9 +49,18 @@ module painterengine_gpu_renderer(
     output wire o_wire_fifo1_resetn,
     output wire o_wire_fifo2_resetn,
 
+    //rasterizer mode
+    input wire       i_wire_rasterizer_mode,
+    output wire      o_wire_rasterizer_resetn,
+    output wire[31:0] o_wire_rasterizer_xy,
+    output wire      o_wire_rasterizer_valid,
+
+
     //state
     output wire [31:0] o_wire_state
 );
+
+reg reg_rasterizer_mode;
 reg [31:0] reg_state;
 reg [15:0] reg_x;
 reg [15:0] reg_y;
@@ -89,6 +100,12 @@ reg  [31:0] reg_dst_address_op3;
 reg  [31:0] reg_src_reader_address;
 reg  [31:0] reg_dst_rw_address;
 
+
+reg reg_rasterizer_resetn;
+reg reg_rasterizer_valid;
+reg [31:0] reg_rasterizer_xy;
+reg [15:0] reg_rasterizer_oftx;
+
 assign o_wire_reader_address = reg_reader_address;
 assign o_wire_reader_length = reg_reader_size;
 assign o_wire_reader1_resetn = reg_reader1_resetn;
@@ -99,6 +116,11 @@ assign o_wire_writer_length = reg_writer_size;
 assign o_wire_writer_resetn = reg_writer_resetn;
 assign o_wire_fifo1_resetn = reg_fifo1_resetn;
 assign o_wire_fifo2_resetn = reg_fifo2_resetn;
+
+assign o_wire_rasterizer_resetn = reg_rasterizer_resetn;
+assign o_wire_rasterizer_xy = reg_rasterizer_xy;
+assign o_wire_rasterizer_valid = reg_rasterizer_valid;
+
 
 
 
@@ -146,6 +168,13 @@ begin
         reg_src_reader_address <= 32'h00000000;
         reg_dst_rw_address <= 32'h00000000;
 
+        reg_rasterizer_valid <= 1'b0;
+        reg_rasterizer_xy <= 32'h00000000;
+        reg_rasterizer_oftx <= 9'h0;
+
+        reg_rasterizer_mode <= 1'b0;
+        reg_rasterizer_resetn <= 1'b0;
+
     end
     else
     begin
@@ -162,6 +191,7 @@ begin
                 reg_render_frame_buffer_ycount <= i_wire_render_frame_buffer_ycount[15:0];
                 reg_x<=0;
                 reg_y<=0;
+                reg_rasterizer_mode<=i_wire_rasterizer_mode;
                 reg_state <= `GPU_RENDERER_STATE_CHECKX;
             end
         `GPU_RENDERER_STATE_CHECKX:
@@ -228,8 +258,34 @@ begin
             reg_reader_size <= reg_current_size;
             reg_dst_rw_address <= reg_dst_frame_buffer_address+reg_dst_address_op3;
             reg_writer_size <= reg_current_size;
-            reg_state <= `GPU_RENDERER_STATE_1_READING;
+            if(reg_rasterizer_mode)
+                reg_state <= `GPU_RENDERER_STATE_2_GENERATE0;
+            else
+                reg_state <= `GPU_RENDERER_STATE_1_READING;
         end
+         `GPU_RENDERER_STATE_2_GENERATE0:
+        begin
+            reg_rasterizer_resetn <= 1'b1;
+            reg_rasterizer_valid <= 1'b0;
+            reg_rasterizer_oftx <= 16'h0000;
+            reg_state <= `GPU_RENDERER_STATE_2_GENERATE1;
+        end
+        `GPU_RENDERER_STATE_2_GENERATE1:
+            begin
+                if (reg_rasterizer_oftx<reg_current_size) 
+                begin
+                    reg_rasterizer_valid <= 1'b1;
+                    reg_rasterizer_xy <= {reg_y,reg_x+reg_rasterizer_oftx};
+                    reg_rasterizer_oftx <= reg_rasterizer_oftx+1;
+                    reg_state <= reg_state;
+                end
+                else
+                begin
+                    reg_rasterizer_valid <= 1'b0;
+                    reg_state <= `GPU_RENDERER_STATE_2_READING;
+                end
+            end
+
         `GPU_RENDERER_STATE_1_READING:
             begin
                 if (i_wire_reader_error)

@@ -67,6 +67,15 @@ px_void PainterEngine_PrintImage(const px_char path[])
 	}
 }
 
+px_void PainterEngine_DrawPixel( px_int x, px_int y, px_color color)
+{
+	if (App.object_printer->Visible == PX_FALSE)
+	{
+		PX_ObjectSetVisible(App.object_printer, PX_TRUE);
+	}
+	PX_SurfaceDrawPixel(PX_Object_PanelGetSurface(App.object_printer),  x, y, color);
+}
+
 px_void PainterEngine_DrawTexture(px_texture *ptexture,px_int x,px_int y,PX_ALIGN align)
 {
 	if (App.object_printer->Visible == PX_FALSE)

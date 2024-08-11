@@ -104,7 +104,7 @@ You can now use your IDE to compile PainterEngine with these steps. PainterEngin
 | UI框架                 | button/radio/image/edit/label/list....                       | UI框架实现                                                                        |
 | 协议                   | MQTT/MODBUS/Game-network-synchronization                     | 常用的通讯协议                                                                    |
 | 游戏引擎               |                                                              | 集成一个游戏世界框架                                                               |
-| FPGA-GPU               |2D accelerator                                               | 实现了基于FPGA的GPU图形加速器,能够为PainterEngine提供不低于50Mpps的2D Blender加速,支持HDMI输出,目前已在zynq7000系列Soc上完成验证|
+| FPGA-GPU               |2D accelerator                                               | 实现了基于FPGA的GPU图形加速器,能够为PainterEngine提供不低于50Mpps的2D Blender及图元光栅化加速,支持HDMI输出,目前已在zynq7000系列Soc上完成验证|
 
 还有更多探索...
 

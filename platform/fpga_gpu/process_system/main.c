@@ -113,7 +113,19 @@ int main()
   px_float avgFPS=0;
   px_dword FPStime=0;  
   px_char content[16];
-  
+  px_point p1,p2,p3;
+  px_point _p1,_p2,_p3;  
+  px_float rot=0;
+  px_byte gclr=0;
+  p1.x=0;
+  p1.y=-150;
+  p1.z=0;
+  p2.x=-150;
+  p2.y=150;
+  p2.z=0;
+  p3.x=150;
+  p3.y=150;
+  p3.z=0;
   while(1)
   {
     px_dword now=PX_GPU_TimeGetTime_us();
@@ -128,19 +140,35 @@ int main()
        FPS=0;
        FPStime-=3000;
     }
-
-      
-      if (switcher<60)
+    
+      if (switcher<360)
       {
-          PX_SurfaceClearAll(&surface, PX_COLOR_WHITE);
-          PX_Object_3DModelSetWorld(p3DObject, 0, 0, 1.f, 0, routeY+=2, 0, 1);
-          PX_ObjectRender(&surface, p3DObject, 0);
+          PX_SurfaceClearAll(&surface, PX_COLOR(255,255,255,255));
+          _p1=PX_PointRotate(p1, rot);
+          _p2=PX_PointRotate(p2, rot);
+          _p3=PX_PointRotate(p3, rot);
+          _p1.x+=400;
+          _p1.y+=240;
+          _p2.x+=400;
+          _p2.y+=240;
+          _p3.x+=400;
+          _p3.y+=240;
+          rot++;
+          PX_GeoRasterizeTriangle(&surface, (px_int)_p1.x, (px_int)_p1.y, (px_int)_p2.x, (px_int)_p2.y,\
+           (px_int)_p3.x, (px_int)_p3.y, PX_COLOR(128,255-gclr,gclr++,64));
+         
       }
-      else if(switcher<180)
+      else if(switcher<480)
       {
           PX_SurfaceClearAll(&surface, PX_COLOR_BLACK);
           PX_ObjectUpdate(particalRoot,elapsed);
           PX_ObjectRender(&surface,particalRoot,elapsed);
+      }
+      else if(switcher<600)
+      {
+           PX_SurfaceClearAll(&surface, PX_COLOR_WHITE);
+          PX_Object_3DModelSetWorld(p3DObject, 0, 0, 1.f, 0, routeY+=2, 0, 1);
+          PX_ObjectRender(&surface, p3DObject, 0);
       }
       else
       {
