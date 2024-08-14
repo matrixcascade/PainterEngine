@@ -1,6 +1,5 @@
 #include "PX_GPU.h"
 
-
 #ifdef PX_GPU_ENABLE
 
 
@@ -165,8 +164,6 @@ px_bool PX_GPU_Present(px_void* texture_addr, px_int width, px_int height)
 #endif
 			}
 	}
-
-
 	Xil_DCacheFlush();
 	PX_GPU_Out32((PX_GPU_VDMA_BASE_ADDRESS + 0x028), PARK_PTR_REG);
 }
@@ -366,7 +363,6 @@ px_dword PX_GPU_GetDebug()
 
 px_bool PX_GPU_Render(px_void* texture_src_addr, px_dword width, px_dword x_count, px_dword y_count, px_void* texture_dst_addr, px_dword dst_width,px_dword color_format, px_dword blend)
 {
-
     Xil_DCacheFlush();
 	PX_GPU_Reset();
 	PX_GPU_PARAM(0) = (px_dword)texture_src_addr;
@@ -384,7 +380,6 @@ px_bool PX_GPU_Render(px_void* texture_src_addr, px_dword width, px_dword x_coun
 	PX_GPU_PARAM(12) = (px_dword)0;//yes color
 	PX_GPU_PARAM(13) = (px_dword)0;//no color
 	PX_GPU_OPCODE = 3;
-
 	while (PX_TRUE)
 	{
 		px_dword state = PX_GPU_RENDERER_STATE;

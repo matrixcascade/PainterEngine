@@ -1,0 +1,37 @@
+ {
+    "tasks": [
+      {
+        "type": "shell",
+        "label": "PainterEngine Debug",
+        "command": "cd %PainterEnginePath%\\platform\\windows\r\ncd $env:PainterEnginePath\\platform\\windows\r\nmake clean -f makefile_vscdebug -e project_path=${workspaceFolder}\r\nmake -f makefile_vscdebug -e project_path=${workspaceFolder}",
+        "args": [],
+        "options": {
+          "cwd": ""
+        },
+        "problemMatcher": ["$gcc"],
+
+        "group": {
+          "kind": "build",
+          "isDefault": true
+        },
+        "detail": "PainterEngine Debug task"
+      },
+      {
+        "type": "shell",
+        "label": "PainterEngine Release",
+        "command": "cd %PainterEnginePath%\\platform\\windows\r\ncd $env:PainterEnginePath\\platform\\windows\r\nmake clean -f makefile_vscrelease -e project_path=${workspaceFolder}\r\nmake -f makefile_vscrelease -e project_path=${workspaceFolder}",
+        "args": [],
+        "options": {
+          "cwd": ""
+        },
+        "problemMatcher": ["$gcc"],
+
+        "group": {
+          "kind": "build",
+          "isDefault": true
+        },
+        "detail": "PainterEngine release task"
+      }
+    ],
+    "version": "2.0.0"
+  }

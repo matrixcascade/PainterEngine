@@ -3606,21 +3606,24 @@ px_void PX_GeoRasterizeTriangle(px_surface* psurface,px_int x1, px_int y1, px_in
 		
 #ifdef PX_GPU_ENABLE
 		px_color *pGPU_dst_addr= psurface->surfaceBuffer+minY*psurface->width+minX;
-		PX_GPU_RenderTriangleRasterizer(psurface->surfaceBuffer, xcount,xcount,ycount, pGPU_dst_addr, psurface->width, PX_COLOR_FORMAT,0x80808080, gpu_x1,gpu_y1,gpu_x2,gpu_y2,gpu_x3,gpu_y3, color,PX_COLOR(0,0,0,0));
+		PX_GPU_RenderTriangleRasterizer(psurface->surfaceBuffer, xcount,xcount,ycount, pGPU_dst_addr, psurface->width, PX_COLOR_FORMAT,0x80808080, gpu_x1,gpu_y1,gpu_x2,gpu_y2,gpu_x3,gpu_y3, color,PX_COLOR(0,255,255,255));
 #else
 		for (y = minY; y <= maxY; y++) for (x = minX; x <= maxX; x++)
 		{
 			px_int area1 = (x2 - x1) * (y - y1) - (y2 - y1) * (x - x1);
 			px_int area2 = (x3 - x2) * (y - y2) - (y3 - y2) * (x - x2);
 			px_int area3 = (x1 - x3) * (y - y3) - (y1 - y3) * (x - x3);
-			if ((area1 >= 0 && area2 >= 0 && area3 >= 0) || (area1 <= 0 && area2 <= 0 && area3 <= 0))
+			px_byte area1_32, area2_32, area3_32;
+			area1_32 = (area1 & 0x80000000)?1:0;
+			area2_32 = (area2 & 0x80000000) ? 1 : 0;
+			area3_32 = (area3 & 0x80000000) ? 1 : 0;
+			if (area1_32== area2_32&& area2_32== area3_32)
 			{
 				PX_SurfaceDrawPixel(psurface,x, y, color);
 			}
 		}
 #endif
 	}
-
 }
 px_void PX_GeoDrawArrow(px_surface *psurface,px_point2D p0,px_point2D p1,px_float size,px_color color)
 {

@@ -1,0 +1,14 @@
+{
+    "files.associations": {
+        "painterengine.h": "c",
+        "painterengine_application.h": "c",
+        "painterengine_runtime.h": "c",
+        "px_kernel.h": "c",
+        "px_script_interpreter.h": "c",
+        "px_scriptcore.h": "c",
+        "px_core.h": "c",
+        "px_texture.h": "c",
+        "px_font.h": "c",
+        "px_basegeo.h": "c"
+    }
+}

@@ -199,13 +199,13 @@ begin
     end
     else
     begin
-    if(area1[31]^area2[31]^area3[31]==0)
+    if(area1[31]==area2[31]&&area1[31]==area3[31])
     begin
-        reg_color<=reg_no_color_d3;
+        reg_color<=reg_yes_color_d3;
     end
     else
     begin
-        reg_color<=reg_yes_color_d3;
+         reg_color<=reg_no_color_d3;
     end
     reg_valid_d4<=reg_valid_d3;
     end

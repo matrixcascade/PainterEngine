@@ -932,17 +932,42 @@ px_void PX_3D_Present(px_surface *psurface, PX_3D_RenderList *list,PX_3D_Camera 
 				continue;
 			}
 
+
+
 			if (!(pface->state&PX_3D_FACESTATE_BACKFACE||pface->state&PX_3D_FACESTATE_CLIPPED))
 			{
-				if (list->PX_3D_PRESENTMODE&PX_3D_PRESENTMODE_PURE)
+
+				if (1)
 				{
-					PX_3D_RenderListRasterization(psurface,list,pface->transform_vertex[0],pface->transform_vertex[1],pface->transform_vertex[2],list->ptexture,clr,(px_int)camera->viewport_width,(px_int)camera->viewport_height,camera->zbuffer,(px_int)camera->viewport_width);
+					px_int x0, y0, x1, y1, x2, y2;
+					px_float alpha;
+					px_float cosv = PX_Point4DDot(PX_Point4DUnit(pface->transform_vertex[0].normal), PX_POINT4D(0, 0, 1));
+					x0 = (px_int)pface->transform_vertex[0].position.x;
+					y0 = (px_int)pface->transform_vertex[0].position.y;
+					x1 = (px_int)pface->transform_vertex[1].position.x;
+					y1 = (px_int)pface->transform_vertex[1].position.y;
+					x2 = (px_int)pface->transform_vertex[2].position.x;
+					y2 = (px_int)pface->transform_vertex[2].position.y;
+					
+					cosv = -cosv;
+					if (cosv > 0)
+					{
+						alpha = (1 - cosv) * 128;
+						PX_GeoRasterizeTriangle(psurface,x0,y0,x1,y1,x2,y2,  PX_COLOR(255, (px_uchar)(128 + alpha), (px_uchar)(128 + alpha), (px_uchar)(128 + alpha)));
+					}
+
 				}
 				else
 				{
-					PX_3D_RenderListRasterization(psurface,list,pface->transform_vertex[0],pface->transform_vertex[1],pface->transform_vertex[2],ptex,PX_COLOR(0,0,0,0),(px_int)camera->viewport_width,(px_int)camera->viewport_height,camera->zbuffer,(px_int)camera->viewport_width);
+					if (list->PX_3D_PRESENTMODE & PX_3D_PRESENTMODE_PURE)
+					{
+						PX_3D_RenderListRasterization(psurface, list, pface->transform_vertex[0], pface->transform_vertex[1], pface->transform_vertex[2], list->ptexture, clr, (px_int)camera->viewport_width, (px_int)camera->viewport_height, camera->zbuffer, (px_int)camera->viewport_width);
+					}
+					else
+					{
+						PX_3D_RenderListRasterization(psurface, list, pface->transform_vertex[0], pface->transform_vertex[1], pface->transform_vertex[2], ptex, PX_COLOR(0, 0, 0, 0), (px_int)camera->viewport_width, (px_int)camera->viewport_height, camera->zbuffer, (px_int)camera->viewport_width);
+					}
 				}
-
 			}
 
 		}
