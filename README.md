@@ -166,5 +166,40 @@ A GPU IP core based on FPGA has been developed and functionally verified on the 
 <p align="center"><img width="600" src="images/l2d.png" alt="PainterEngine market"></p>
 
 ### 现在,访问PainterEngine.com,参与建设
+<p align="center">
+<img src="platform/fox/mini/1.png" alt="logo">
+<img src="platform/fox/mini/2.png" alt="logo">
+<img src="platform/fox/mini/3.png" alt="logo">
+<img src="platform/fox/mini/4.png" alt="logo">
+<img src="platform/fox/mini/5.png" alt="logo">
+<img src="platform/fox/mini/6.png" alt="logo">
+</p>
+
+<p align="center">
+<img src="platform/fox/mini/7.png" alt="logo">
+<img src="platform/fox/mini/8.png" alt="logo">
+<img src="platform/fox/mini/9.png" alt="logo">
+<img src="platform/fox/mini/10.png" alt="logo">
+<img src="platform/fox/mini/11.png" alt="logo">
+<img src="platform/fox/mini/12.png" alt="logo">
+</p>
+
+<p align="center">
+<img src="platform/fox/mini/13.png" alt="logo">
+<img src="platform/fox/mini/14.png" alt="logo">
+<img src="platform/fox/mini/15.png" alt="logo">
+<img src="platform/fox/mini/16.png" alt="logo">
+<img src="platform/fox/mini/17.png" alt="logo">
+<img src="platform/fox/mini/18.png" alt="logo">
+</p>
+
+<p align="center">
+<img src="platform/fox/mini/19.png" alt="logo">
+<img src="platform/fox/mini/20.png" alt="logo">
+<img src="platform/fox/mini/21.png" alt="logo">
+<img src="platform/fox/mini/22.png" alt="logo">
+<img src="platform/fox/mini/23.png" alt="logo">
+<img src="platform/fox/mini/24.png" alt="logo">
+</p>
 
 ### Now, join the PainterEngine.com contribute to its development.
