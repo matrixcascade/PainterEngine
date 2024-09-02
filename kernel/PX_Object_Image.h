@@ -11,6 +11,7 @@ typedef struct
 	px_texture *pmask;
 	px_gif* pgif;
 	px_texture texture;
+	px_float gif_speed;
 	px_gif gif;
 }PX_Object_Image;
 
@@ -26,6 +27,7 @@ px_bool	   PX_Object_ImageLoadTexture(PX_Object* pObject, px_void *buffer,px_int
 px_bool	   PX_Object_ImageLoadGif(PX_Object* pObject, px_void *buffer,px_int size);
 px_void	   PX_Object_ImageFreeWithTexture(PX_Object *pObject);
 px_void    PX_Object_ImageSetAlpha(PX_Object *pObject,px_float alpha);
+px_void    PX_Object_ImageSetGifSpeed(PX_Object *pObject,px_float _1x);
 
 
 

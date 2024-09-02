@@ -178,6 +178,21 @@ PX_Object*  PainterEngine_PrintGetArea()
 	return PX_Object_PrinterGetArea(App.object_printer);
 }
 
+const px_char* PainterEngine_Language(const px_char tr[])
+{
+	if (App.language.mp)
+	{
+		const px_char *ptr=PX_JsonGetString(&App.language, tr);
+		if (!ptr[0])
+			ptr = tr;
+		return ptr;
+	}
+	else
+	{
+		return tr;
+	}
+}
+
 px_void PainterEngine_PrintSetCodepage(PX_FONTMODULE_CODEPAGE codepage)
 {
 	if(App.pfontmodule)
@@ -194,6 +209,19 @@ px_bool PainterEngine_Initialize(px_int _screen_width,px_int _screen_height)
 	if(PX_LoadFontModuleFromTTF(&runtime->mp_static, &App.fontmodule, "assets/font.ttf",PX_FONTMODULE_CODEPAGE_UTF8,18))
 	{
 		App.pfontmodule=&App.fontmodule;
+	}
+	else
+	{
+		App.pfontmodule=PX_NULL;
+	}
+	if(!PX_JsonInitialize(&runtime->mp_static, &App.language))
+	{
+		return PX_FALSE;
+	}
+	if (!PX_LoadJsonFromFile(&App.language, "assets/language.json"))
+	{
+		PX_JsonFree(&App.language);
+		PX_memset(&App.language, 0, sizeof(App.language));
 	}
 #endif
 

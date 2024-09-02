@@ -72,6 +72,12 @@ PX_Object* PX_Object_VariousAttachObject( PX_Object* pObject,px_int attachIndex,
 		PX_ObjectRegisterEvent(pdesc->various, PX_OBJECT_EVENT_VALUECHANGED, PX_Object_VariousOnEditChange, pObject);
 	}
 	break;
+	case PX_OBJECT_VARIOUS_TYPE_SLIDERBAR:
+	{
+		pdesc->various = PX_Object_SliderBarCreate(mp, pObject, 0, 0, 1, 1, PX_OBJECT_SLIDERBAR_STYLE_BOX, PX_OBJECT_SLIDERBAR_TYPE_HORIZONTAL);
+		PX_Object_SliderBarSetShowValue(pdesc->various, PX_TRUE,PX_COLOR_FONTCOLOR);
+		PX_ObjectRegisterEvent(pdesc->various, PX_OBJECT_EVENT_VALUECHANGED, PX_Object_VariousOnEditChange, pObject);
+	}
 	default:
 		break;
 	}
@@ -150,6 +156,10 @@ const px_char* PX_Object_VariousGetText(PX_Object* pObject)
 	{
 		return PX_Object_SelectBarGetCurrentText(PX_Object_GetVarious(pObject)->various);
 	}
+	case PX_OBJECT_VARIOUS_TYPE_SLIDERBAR:
+	{
+		return "";
+	}
 	default:
 		break;
 	}
@@ -217,6 +227,25 @@ px_int PX_Object_VariousSelectBarGetCurrentIndex(PX_Object* pObject)
 	return 0;
 	
 }
+px_int PX_Object_VariousSliderBarGetValue(PX_Object* pObject)
+{
+	PX_Object_Various* pDesc = PX_Object_GetVarious(pObject);
+	if (pDesc->type == PX_OBJECT_VARIOUS_TYPE_SLIDERBAR)
+	{
+		return PX_Object_SliderBarGetValue(pDesc->various);
+	}
+	return 0;
+}
+
+px_void PX_Object_VariousSliderBarSetRange(PX_Object* pObject,px_int min,px_int max)
+{
+	PX_Object_Various* pDesc = PX_Object_GetVarious(pObject);
+	if (pDesc->type == PX_OBJECT_VARIOUS_TYPE_SLIDERBAR)
+	{
+		PX_Object_SliderBarSetRange(pDesc->various, min, max);
+	}
+}
+
 
 px_void PX_Object_VariousSetLabelText(PX_Object* pObject, const px_char* Text)
 {
@@ -250,6 +279,12 @@ px_void PX_Object_VariousSetBackgroundColor(PX_Object* pObject, px_color Color)
 	{
 		PX_Object_LabelSetBackgroundColor(PX_Object_GetVarious(pObject)->label, Color);
 		PX_Object_SelectBarSetBackgroundColor(PX_Object_GetVarious(pObject)->various, Color);
+	}
+	break;
+	case PX_OBJECT_VARIOUS_TYPE_SLIDERBAR:
+	{
+		PX_Object_LabelSetBackgroundColor(PX_Object_GetVarious(pObject)->label, Color);
+		PX_Object_SliderBarSetBackgroundColor(PX_Object_GetVarious(pObject)->various, Color);
 	}
 	break;
 	default:

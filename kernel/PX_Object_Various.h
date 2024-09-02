@@ -16,6 +16,7 @@ typedef enum
 	PX_OBJECT_VARIOUS_TYPE_LABEL,
 	PX_OBJECT_VARIOUS_TYPE_EDIT,
 	PX_OBJECT_VARIOUS_TYPE_SELECTBAR,
+	PX_OBJECT_VARIOUS_TYPE_SLIDERBAR,
 }PX_OBJECT_VARIOUS_TYPE;
 
 typedef struct 
@@ -35,6 +36,8 @@ px_void PX_Object_VariousSetEditStyle(PX_Object* pObject, PX_OBJECT_VARIOUS_EIDT
 const px_char* PX_Object_VariousGetText(PX_Object* pObject);
 const px_char* PX_Object_VariousGetLabelText(PX_Object* pObject);
 px_int PX_Object_VariousSelectBarGetCurrentIndex(PX_Object* pObject);
+px_int PX_Object_VariousSliderBarGetValue(PX_Object* pObject);
+px_void PX_Object_VariousSliderBarSetRange(PX_Object* pObject, px_int min, px_int max);
 px_void	 PX_Object_VariousSetText(PX_Object* pObject, const px_char* Text);
 px_void	 PX_Object_VariousAddItem(PX_Object* pObject, const px_char* ItemText);
 

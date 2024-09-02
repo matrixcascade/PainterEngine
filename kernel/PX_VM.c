@@ -72,14 +72,14 @@ px_bool PX_VMInitialize(PX_VM *Ins,px_memorypool *mp,const px_byte *code,px_int 
 		for (j=0;j<PX_VM_REG_COUNT;j++)
 		{
 			PX_memset(&Ins->pThread[i].R[j],0,sizeof(px_variable));
-			Ins->pThread[i].R[j].type=PX_VM_VARIABLE_TYPE_INT;
+			Ins->pThread[i].R[j].type=PX_VARIABLE_TYPE_INT;
 		}
 	}
 
 	for (i=0;i<Ins->VM_memsize;i++)
 	{
 		PX_memset(&Ins->_mem[i],0,sizeof(px_variable));
-		Ins->_mem[i].type=PX_VM_VARIABLE_TYPE_INT;
+		Ins->_mem[i].type=PX_VARIABLE_TYPE_INT;
 	}
 
 
@@ -189,11 +189,11 @@ px_variable PX_VariableCopy(px_memorypool *mp,px_variable *pvar,px_bool *bOutOfM
 	if(bOutOfMemory)
 		*bOutOfMemory=PX_FALSE;
 
-	if (pvar->type==PX_VM_VARIABLE_TYPE_STRING)
+	if (pvar->type==PX_VARIABLE_TYPE_STRING)
 	{
 		if(!PX_StringInitialize(mp,&cpyVar._string)) 
 		{
-			cpyVar.type=PX_VM_VARIABLE_TYPE_INT;
+			cpyVar.type=PX_VARIABLE_TYPE_INT;
 			if (bOutOfMemory)
 				*bOutOfMemory=PX_TRUE;
 		}
@@ -201,18 +201,18 @@ px_variable PX_VariableCopy(px_memorypool *mp,px_variable *pvar,px_bool *bOutOfM
 		{
 			if(!PX_StringCopy(&cpyVar._string,&pvar->_string))
 			{
-				cpyVar.type=PX_VM_VARIABLE_TYPE_INT;
+				cpyVar.type=PX_VARIABLE_TYPE_INT;
 				if (bOutOfMemory)
 					*bOutOfMemory=PX_TRUE;
 			}
 		}
 	}
-	else if (pvar->type==PX_VM_VARIABLE_TYPE_MEMORY)
+	else if (pvar->type==PX_VARIABLE_TYPE_MEMORY)
 	{
 		PX_MemoryInitialize(mp,&cpyVar._memory);
 		if(!PX_MemoryCat(&cpyVar._memory, pvar->_memory.buffer, pvar->_memory.usedsize))
 		{
-			cpyVar.type=PX_VM_VARIABLE_TYPE_INT;
+			cpyVar.type=PX_VARIABLE_TYPE_INT;
 			if (bOutOfMemory)
 				*bOutOfMemory=PX_TRUE;
 		}
@@ -226,13 +226,13 @@ static px_variable  PX_VM_GetParamConst(PX_VM *Ins,px_char optype,px_int param,p
 	px_variable rVar,ret;
 	PX_VM_Thread *pT=&Ins->pThread[Ins->T];
 	*bOutofMemory=PX_FALSE;
-	ret.type=PX_VM_VARIABLE_TYPE_INT;
+	ret.type=PX_VARIABLE_TYPE_INT;
 	ret._int=0;
 	switch (optype)
 	{
 	case PX_SCRIPT_ASM_OPTYPE_IP:
 		{
-			ret.type=PX_VM_VARIABLE_TYPE_INT;
+			ret.type=PX_VARIABLE_TYPE_INT;
 			ret._int=pT->IP;
 			return ret;
 		}
@@ -240,7 +240,7 @@ static px_variable  PX_VM_GetParamConst(PX_VM *Ins,px_char optype,px_int param,p
 
 	case PX_SCRIPT_ASM_OPTYPE_SP:
 		{
-			ret.type=PX_VM_VARIABLE_TYPE_INT;
+			ret.type=PX_VARIABLE_TYPE_INT;
 			ret._int=pT->SP;
 			return ret;
 		}
@@ -248,7 +248,7 @@ static px_variable  PX_VM_GetParamConst(PX_VM *Ins,px_char optype,px_int param,p
 
 	case PX_SCRIPT_ASM_OPTYPE_BP:
 		{
-			ret.type=PX_VM_VARIABLE_TYPE_INT;
+			ret.type=PX_VARIABLE_TYPE_INT;
 			ret._int=pT->BP;
 			return ret;
 		}
@@ -256,14 +256,14 @@ static px_variable  PX_VM_GetParamConst(PX_VM *Ins,px_char optype,px_int param,p
 	case PX_SCRIPT_ASM_OPTYPE_HOST:
 	case PX_SCRIPT_ASM_OPTYPE_INT:
 		{
-			ret.type=PX_VM_VARIABLE_TYPE_INT;
+			ret.type=PX_VARIABLE_TYPE_INT;
 			ret._int=param;
 			return ret;
 		}
 		break;
 	case PX_SCRIPT_ASM_OPTYPE_HANDLE:
 		{
-			ret.type = PX_VM_VARIABLE_TYPE_HANDLE;
+			ret.type = PX_VARIABLE_TYPE_HANDLE;
 			ret._int = param;
 			return ret;
 		}
@@ -271,14 +271,14 @@ static px_variable  PX_VM_GetParamConst(PX_VM *Ins,px_char optype,px_int param,p
 	case PX_SCRIPT_ASM_OPTYPE_FLOAT:
 		{
 			//Must be IEEE 754 format
-			ret.type=PX_VM_VARIABLE_TYPE_FLOAT;
+			ret.type=PX_VARIABLE_TYPE_FLOAT;
 			ret._int=param;
 			return ret;
 		}
 		break;
 	case PX_SCRIPT_ASM_OPTYPE_STRING:
 		{
-			ret.type=PX_VM_VARIABLE_TYPE_STRING;
+			ret.type=PX_VARIABLE_TYPE_STRING;
 			ret._string.buffer=Ins->_string+param;
 			ret._string.bufferlen=0; 
 			ret._string.mp=PX_NULL;
@@ -288,7 +288,7 @@ static px_variable  PX_VM_GetParamConst(PX_VM *Ins,px_char optype,px_int param,p
 
 	case PX_SCRIPT_ASM_OPTYPE_MEMORY:
 		{
-			ret.type=PX_VM_VARIABLE_TYPE_MEMORY;
+			ret.type=PX_VARIABLE_TYPE_MEMORY;
 			ret._memory.buffer=Ins->_memory+param+4;
 			ret._memory.allocsize=0;
 			ret._memory.usedsize=*(px_int *)(Ins->_memory+param);
@@ -322,7 +322,7 @@ static px_variable  PX_VM_GetParamConst(PX_VM *Ins,px_char optype,px_int param,p
 			if (param<PX_VM_REG_COUNT)
 			{
 				rVar=pT->R[param];
-				if (rVar.type==PX_VM_VARIABLE_TYPE_INT)
+				if (rVar.type==PX_VARIABLE_TYPE_INT)
 				{
 					if (pT->BP-rVar._int>=0&&pT->BP-rVar._int<Ins->VM_memsize)
 					{
@@ -350,7 +350,7 @@ static px_variable  PX_VM_GetParamConst(PX_VM *Ins,px_char optype,px_int param,p
 			if (param>=0&&param<Ins->VM_memsize)
 			{
 				rVar=Ins->_mem[param];
-				if (rVar.type==PX_VM_VARIABLE_TYPE_INT)
+				if (rVar.type==PX_VARIABLE_TYPE_INT)
 				{
 					if (pT->BP-rVar._int>=0&&pT->BP-rVar._int<Ins->VM_memsize)
 					{
@@ -377,7 +377,7 @@ static px_variable  PX_VM_GetParamConst(PX_VM *Ins,px_char optype,px_int param,p
 			if (pT->BP-param>=0&&pT->BP-param<Ins->VM_memsize)
 			{
 				rVar=Ins->_mem[pT->BP-param];
-				if (rVar.type==PX_VM_VARIABLE_TYPE_INT)
+				if (rVar.type==PX_VARIABLE_TYPE_INT)
 				{
 					if (pT->BP-rVar._int>=0&&pT->BP-rVar._int<Ins->VM_memsize)
 					{
@@ -420,7 +420,7 @@ static px_variable  PX_VM_GetParamConst(PX_VM *Ins,px_char optype,px_int param,p
 			if (param<PX_VM_REG_COUNT)
 			{
 				rVar=pT->R[param];
-				if (rVar.type==PX_VM_VARIABLE_TYPE_INT)
+				if (rVar.type==PX_VARIABLE_TYPE_INT)
 				{
 					if (rVar._int>=0&&rVar._int<Ins->VM_memsize)
 					{
@@ -447,7 +447,7 @@ static px_variable  PX_VM_GetParamConst(PX_VM *Ins,px_char optype,px_int param,p
 			if (param>=0&&param<Ins->VM_memsize)
 			{
 				rVar=Ins->_mem[param];
-				if (rVar.type==PX_VM_VARIABLE_TYPE_INT)
+				if (rVar.type==PX_VARIABLE_TYPE_INT)
 				{
 					if (rVar._int>=0&&rVar._int<Ins->VM_memsize)
 					{
@@ -474,7 +474,7 @@ static px_variable  PX_VM_GetParamConst(PX_VM *Ins,px_char optype,px_int param,p
 			if (pT->BP-param>0&&pT->BP-param<Ins->VM_memsize)
 			{
 				rVar=Ins->_mem[pT->BP-param];
-				if (rVar.type==PX_VM_VARIABLE_TYPE_INT)
+				if (rVar.type==PX_VARIABLE_TYPE_INT)
 				{
 					if (rVar._int>=0&&rVar._int<Ins->VM_memsize)
 					{
@@ -539,7 +539,7 @@ px_variable * PX_VMGetVariablePointer(PX_VM *Ins,px_char optype,px_int param)
 			if (param<PX_VM_REG_COUNT)
 			{
 				rVar=pT->R[param];
-				if (rVar.type==PX_VM_VARIABLE_TYPE_INT)
+				if (rVar.type==PX_VARIABLE_TYPE_INT)
 				{
 					if (pT->BP-rVar._int>=0&&pT->BP-rVar._int<Ins->VM_memsize)
 					{
@@ -567,7 +567,7 @@ px_variable * PX_VMGetVariablePointer(PX_VM *Ins,px_char optype,px_int param)
 			if (param>=0&&param<Ins->VM_memsize)
 			{
 				rVar=Ins->_mem[param];
-				if (rVar.type==PX_VM_VARIABLE_TYPE_INT)
+				if (rVar.type==PX_VARIABLE_TYPE_INT)
 				{
 					if (pT->BP-rVar._int>=0&&pT->BP-rVar._int<Ins->VM_memsize)
 					{
@@ -594,7 +594,7 @@ px_variable * PX_VMGetVariablePointer(PX_VM *Ins,px_char optype,px_int param)
 			if (pT->BP-param>=0&&pT->BP-param<Ins->VM_memsize)
 			{
 				rVar=Ins->_mem[pT->BP-param];
-				if (rVar.type==PX_VM_VARIABLE_TYPE_INT)
+				if (rVar.type==PX_VARIABLE_TYPE_INT)
 				{
 					if (pT->BP-rVar._int>=0&&pT->BP-rVar._int<Ins->VM_memsize)
 					{
@@ -639,7 +639,7 @@ px_variable * PX_VMGetVariablePointer(PX_VM *Ins,px_char optype,px_int param)
 			if (param<PX_VM_REG_COUNT)
 			{
 				rVar=pT->R[param];
-				if (rVar.type==PX_VM_VARIABLE_TYPE_INT)
+				if (rVar.type==PX_VARIABLE_TYPE_INT)
 				{
 					if (rVar._int>=0&&rVar._int<Ins->VM_memsize)
 					{
@@ -666,7 +666,7 @@ px_variable * PX_VMGetVariablePointer(PX_VM *Ins,px_char optype,px_int param)
 			if (param>=0&&param<Ins->VM_memsize)
 			{
 				rVar=Ins->_mem[param];
-				if (rVar.type==PX_VM_VARIABLE_TYPE_INT)
+				if (rVar.type==PX_VARIABLE_TYPE_INT)
 				{
 					if (rVar._int>=0&&rVar._int<Ins->VM_memsize)
 					{
@@ -693,7 +693,7 @@ px_variable * PX_VMGetVariablePointer(PX_VM *Ins,px_char optype,px_int param)
 			if (pT->BP-param>=0&&pT->BP-param<Ins->VM_memsize)
 			{
 				rVar=Ins->_mem[pT->BP-param];
-				if (rVar.type==PX_VM_VARIABLE_TYPE_INT)
+				if (rVar.type==PX_VARIABLE_TYPE_INT)
 				{
 					if (rVar._int>=0&&rVar._int<Ins->VM_memsize)
 					{
@@ -803,9 +803,9 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 
 
 		pVar=PX_NULL;
-		cVar.type=PX_VM_VARIABLE_TYPE_INT;
-		sVar.type=PX_VM_VARIABLE_TYPE_INT;
-		tVar.type=PX_VM_VARIABLE_TYPE_INT;
+		cVar.type=PX_VARIABLE_TYPE_INT;
+		sVar.type=PX_VARIABLE_TYPE_INT;
+		tVar.type=PX_VARIABLE_TYPE_INT;
 		cVar._int=-1;
 		sVar._int=-1;
 		tVar._int=-1;
@@ -851,7 +851,7 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 			}
 			if (opType[0]==PX_SCRIPT_ASM_OPTYPE_IP)
 			{
-				if (cVar.type!=PX_VM_VARIABLE_TYPE_INT)
+				if (cVar.type!=PX_VARIABLE_TYPE_INT)
 				{
 					PX_VM_Error(Ins,"MOV IP is not a integer.");
 					goto _ERROR;
@@ -863,7 +863,7 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 			if (opType[0]==PX_SCRIPT_ASM_OPTYPE_SP)
 			{
 
-				if (cVar.type!=PX_VM_VARIABLE_TYPE_INT)
+				if (cVar.type!=PX_VARIABLE_TYPE_INT)
 				{
 					PX_VM_Error(Ins,"MOV SP is not a integer.");
 					goto _ERROR;
@@ -875,7 +875,7 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 
 			if (opType[0]==PX_SCRIPT_ASM_OPTYPE_BP)
 			{
-				if (cVar.type!=PX_VM_VARIABLE_TYPE_INT)
+				if (cVar.type!=PX_VARIABLE_TYPE_INT)
 				{
 					PX_VM_Error(Ins,"MOV BP is not a integer.");
 					goto _ERROR;
@@ -893,7 +893,7 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 			}
 			PX_VariableFree(pVar);
 			
-			if (cVar.type==PX_VM_VARIABLE_TYPE_STRING)
+			if (cVar.type==PX_VARIABLE_TYPE_STRING)
 			{
 				if(!PX_StringInitialize(Ins->mp,&pVar->_string)) 
 				{
@@ -907,7 +907,7 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 				}
 				pVar->type=cVar.type;
 			}
-			else if (cVar.type==PX_VM_VARIABLE_TYPE_MEMORY)
+			else if (cVar.type==PX_VARIABLE_TYPE_MEMORY)
 			{
 				PX_MemoryInitialize(Ins->mp,&pVar->_memory);
 				if(!PX_MemoryAlloc(&pVar->_memory,cVar._memory.usedsize)) 
@@ -940,7 +940,7 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 			}
 			if (opType[0]==PX_SCRIPT_ASM_OPTYPE_IP)
 			{
-				if (cVar.type!=PX_VM_VARIABLE_TYPE_INT)
+				if (cVar.type!=PX_VARIABLE_TYPE_INT)
 				{
 					PX_VM_Error(Ins,"ADD IP is not a integer.");
 					goto _ERROR;
@@ -951,7 +951,7 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 
 			if (opType[0]==PX_SCRIPT_ASM_OPTYPE_SP)
 			{
-				if (cVar.type!=PX_VM_VARIABLE_TYPE_INT)
+				if (cVar.type!=PX_VARIABLE_TYPE_INT)
 				{
 					PX_VM_Error(Ins,"ADD SP is not a integer.");
 					goto _ERROR;
@@ -963,7 +963,7 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 
 			if (opType[0]==PX_SCRIPT_ASM_OPTYPE_BP)
 			{
-				if (cVar.type!=PX_VM_VARIABLE_TYPE_INT)
+				if (cVar.type!=PX_VARIABLE_TYPE_INT)
 				{
 					PX_VM_Error(Ins,"ADD BP is not a integer.");
 					goto _ERROR;
@@ -974,26 +974,26 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 			}
 			pVar=PX_VMGetVariablePointer(Ins,opType[0],PX_SCRIPT_VM_PARAM(0));
 
-			if (pVar->type==PX_VM_VARIABLE_TYPE_INT&&cVar.type==PX_VM_VARIABLE_TYPE_INT)
+			if (pVar->type==PX_VARIABLE_TYPE_INT&&cVar.type==PX_VARIABLE_TYPE_INT)
 			{
 				pVar->_int+=cVar._int;
 				pT->IP+=(4+2*4);
 				break;
 			}
-			if (pVar->type==PX_VM_VARIABLE_TYPE_INT&&cVar.type==PX_VM_VARIABLE_TYPE_FLOAT)
+			if (pVar->type==PX_VARIABLE_TYPE_INT&&cVar.type==PX_VARIABLE_TYPE_FLOAT)
 			{
 				pVar->_float=pVar->_int+cVar._float;
-				pVar->type=PX_VM_VARIABLE_TYPE_FLOAT;
+				pVar->type=PX_VARIABLE_TYPE_FLOAT;
 				pT->IP+=(4+2*4);
 				break;
 			}
-			if (pVar->type==PX_VM_VARIABLE_TYPE_FLOAT&&cVar.type==PX_VM_VARIABLE_TYPE_FLOAT)
+			if (pVar->type==PX_VARIABLE_TYPE_FLOAT&&cVar.type==PX_VARIABLE_TYPE_FLOAT)
 			{
 				pVar->_float=pVar->_float+cVar._float;
 				pT->IP+=(4+2*4);
 				break;
 			}
-			if (pVar->type==PX_VM_VARIABLE_TYPE_FLOAT&&cVar.type==PX_VM_VARIABLE_TYPE_INT)
+			if (pVar->type==PX_VARIABLE_TYPE_FLOAT&&cVar.type==PX_VARIABLE_TYPE_INT)
 			{
 				pVar->_float=pVar->_float+cVar._int;
 				pT->IP+=(4+2*4);
@@ -1013,7 +1013,7 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 			}
 			if (opType[0]==PX_SCRIPT_ASM_OPTYPE_IP)
 			{
-				if (cVar.type!=PX_VM_VARIABLE_TYPE_INT)
+				if (cVar.type!=PX_VARIABLE_TYPE_INT)
 				{
 					PX_VM_Error(Ins,"SUB IP is not a integer.");
 					goto _ERROR;
@@ -1024,7 +1024,7 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 
 			if (opType[0]==PX_SCRIPT_ASM_OPTYPE_SP)
 			{
-				if (cVar.type!=PX_VM_VARIABLE_TYPE_INT)
+				if (cVar.type!=PX_VARIABLE_TYPE_INT)
 				{
 					PX_VM_Error(Ins,"SUB SP is not a integer.");
 					goto _ERROR;
@@ -1041,7 +1041,7 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 
 			if (opType[0]==PX_SCRIPT_ASM_OPTYPE_BP)
 			{
-				if (cVar.type!=PX_VM_VARIABLE_TYPE_INT)
+				if (cVar.type!=PX_VARIABLE_TYPE_INT)
 				{
 					PX_VM_Error(Ins,"SUB BP is not a integer.");
 					goto _ERROR;
@@ -1051,30 +1051,30 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 				break;
 			}
 			pVar=PX_VMGetVariablePointer(Ins,opType[0],PX_SCRIPT_VM_PARAM(0));
-			if (pVar->type!=PX_VM_VARIABLE_TYPE_INT&&pVar->type!=PX_VM_VARIABLE_TYPE_FLOAT)
+			if (pVar->type!=PX_VARIABLE_TYPE_INT&&pVar->type!=PX_VARIABLE_TYPE_FLOAT)
 			{
 				PX_VM_Error(Ins,"SUB parameters error.");
 				goto _ERROR;
 			}
-			if (cVar.type!=PX_VM_VARIABLE_TYPE_INT&&cVar.type!=PX_VM_VARIABLE_TYPE_FLOAT)
+			if (cVar.type!=PX_VARIABLE_TYPE_INT&&cVar.type!=PX_VARIABLE_TYPE_FLOAT)
 			{
 				PX_VM_Error(Ins,"SUB parameters error.");
 				goto _ERROR;
 			}
-			if (pVar->type==PX_VM_VARIABLE_TYPE_INT&&cVar.type==PX_VM_VARIABLE_TYPE_INT)
+			if (pVar->type==PX_VARIABLE_TYPE_INT&&cVar.type==PX_VARIABLE_TYPE_INT)
 			{
 				pVar->_int-=cVar._int;
 			}
-			else if (pVar->type==PX_VM_VARIABLE_TYPE_INT&&cVar.type==PX_VM_VARIABLE_TYPE_FLOAT)
+			else if (pVar->type==PX_VARIABLE_TYPE_INT&&cVar.type==PX_VARIABLE_TYPE_FLOAT)
 			{
 				pVar->_float=pVar->_int-cVar._float;
-				pVar->type=PX_VM_VARIABLE_TYPE_FLOAT;
+				pVar->type=PX_VARIABLE_TYPE_FLOAT;
 			}
-			else if (pVar->type==PX_VM_VARIABLE_TYPE_FLOAT&&cVar.type==PX_VM_VARIABLE_TYPE_FLOAT)
+			else if (pVar->type==PX_VARIABLE_TYPE_FLOAT&&cVar.type==PX_VARIABLE_TYPE_FLOAT)
 			{
 				pVar->_float=pVar->_float-cVar._float;
 			}
-			else if (pVar->type==PX_VM_VARIABLE_TYPE_FLOAT&&cVar.type==PX_VM_VARIABLE_TYPE_INT)
+			else if (pVar->type==PX_VARIABLE_TYPE_FLOAT&&cVar.type==PX_VARIABLE_TYPE_INT)
 			{
 				pVar->_float=pVar->_float-cVar._int;
 			}
@@ -1091,30 +1091,30 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 				PX_VM_Error(Ins,"Divide by zero error");
 				goto _ERROR;
 			}
-			if (pVar->type!=PX_VM_VARIABLE_TYPE_INT&&pVar->type!=PX_VM_VARIABLE_TYPE_FLOAT)
+			if (pVar->type!=PX_VARIABLE_TYPE_INT&&pVar->type!=PX_VARIABLE_TYPE_FLOAT)
 			{
 				PX_VM_Error(Ins,"DIV parameters error.");
 				goto _ERROR;
 			}
-			if (cVar.type!=PX_VM_VARIABLE_TYPE_INT&&cVar.type!=PX_VM_VARIABLE_TYPE_FLOAT)
+			if (cVar.type!=PX_VARIABLE_TYPE_INT&&cVar.type!=PX_VARIABLE_TYPE_FLOAT)
 			{
 				PX_VM_Error(Ins,"DIV parameters error.");
 				goto _ERROR;
 			}
-			if (pVar->type==PX_VM_VARIABLE_TYPE_INT&&cVar.type==PX_VM_VARIABLE_TYPE_INT)
+			if (pVar->type==PX_VARIABLE_TYPE_INT&&cVar.type==PX_VARIABLE_TYPE_INT)
 			{
 				pVar->_int/=cVar._int;
 			}
-			else if (pVar->type==PX_VM_VARIABLE_TYPE_INT&&cVar.type==PX_VM_VARIABLE_TYPE_FLOAT)
+			else if (pVar->type==PX_VARIABLE_TYPE_INT&&cVar.type==PX_VARIABLE_TYPE_FLOAT)
 			{
 				pVar->_float=pVar->_int/cVar._float;
-				pVar->type=PX_VM_VARIABLE_TYPE_FLOAT;
+				pVar->type=PX_VARIABLE_TYPE_FLOAT;
 			}
-			else if (pVar->type==PX_VM_VARIABLE_TYPE_FLOAT&&cVar.type==PX_VM_VARIABLE_TYPE_FLOAT)
+			else if (pVar->type==PX_VARIABLE_TYPE_FLOAT&&cVar.type==PX_VARIABLE_TYPE_FLOAT)
 			{
 				pVar->_float=pVar->_float/cVar._float;
 			}
-			else if (pVar->type==PX_VM_VARIABLE_TYPE_FLOAT&&cVar.type==PX_VM_VARIABLE_TYPE_INT)
+			else if (pVar->type==PX_VARIABLE_TYPE_FLOAT&&cVar.type==PX_VARIABLE_TYPE_INT)
 			{
 				pVar->_float=pVar->_float/cVar._int;
 			}
@@ -1126,30 +1126,30 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 			pVar=PX_VMGetVariablePointer(Ins,opType[0],PX_SCRIPT_VM_PARAM(0));
 			cVar=PX_VM_GetParamConst(Ins,opType[1],PX_SCRIPT_VM_PARAM(1),&bOutofMemory);
 			if(bOutofMemory) goto _ERROR;
-			if (pVar->type!=PX_VM_VARIABLE_TYPE_INT&&pVar->type!=PX_VM_VARIABLE_TYPE_FLOAT)
+			if (pVar->type!=PX_VARIABLE_TYPE_INT&&pVar->type!=PX_VARIABLE_TYPE_FLOAT)
 			{
 				PX_VM_Error(Ins,"MUL parameters error.");
 				goto _ERROR;
 			}
-			if (cVar.type!=PX_VM_VARIABLE_TYPE_INT&&cVar.type!=PX_VM_VARIABLE_TYPE_FLOAT)
+			if (cVar.type!=PX_VARIABLE_TYPE_INT&&cVar.type!=PX_VARIABLE_TYPE_FLOAT)
 			{
 				PX_VM_Error(Ins,"MUL parameters error.");
 				goto _ERROR;
 			}
-			if (pVar->type==PX_VM_VARIABLE_TYPE_INT&&cVar.type==PX_VM_VARIABLE_TYPE_INT)
+			if (pVar->type==PX_VARIABLE_TYPE_INT&&cVar.type==PX_VARIABLE_TYPE_INT)
 			{
 				pVar->_int*=cVar._int;
 			}
-			else if (pVar->type==PX_VM_VARIABLE_TYPE_INT&&cVar.type==PX_VM_VARIABLE_TYPE_FLOAT)
+			else if (pVar->type==PX_VARIABLE_TYPE_INT&&cVar.type==PX_VARIABLE_TYPE_FLOAT)
 			{
 				pVar->_float=pVar->_int*cVar._float;
-				pVar->type=PX_VM_VARIABLE_TYPE_FLOAT;
+				pVar->type=PX_VARIABLE_TYPE_FLOAT;
 			}
-			else if (pVar->type==PX_VM_VARIABLE_TYPE_FLOAT&&cVar.type==PX_VM_VARIABLE_TYPE_FLOAT)
+			else if (pVar->type==PX_VARIABLE_TYPE_FLOAT&&cVar.type==PX_VARIABLE_TYPE_FLOAT)
 			{
 				pVar->_float=pVar->_float*cVar._float;
 			}
-			else if (pVar->type==PX_VM_VARIABLE_TYPE_FLOAT&&cVar.type==PX_VM_VARIABLE_TYPE_INT)
+			else if (pVar->type==PX_VARIABLE_TYPE_FLOAT&&cVar.type==PX_VARIABLE_TYPE_INT)
 			{
 				pVar->_float=pVar->_float*cVar._int;
 			}
@@ -1161,7 +1161,7 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 			pVar=PX_VMGetVariablePointer(Ins,opType[0],PX_SCRIPT_VM_PARAM(0));
 			cVar=PX_VM_GetParamConst(Ins,opType[1],PX_SCRIPT_VM_PARAM(1),&bOutofMemory);
 			if(bOutofMemory) goto _ERROR;
-			if (pVar->type!=PX_VM_VARIABLE_TYPE_INT&&cVar.type!=PX_VM_VARIABLE_TYPE_INT)
+			if (pVar->type!=PX_VARIABLE_TYPE_INT&&cVar.type!=PX_VARIABLE_TYPE_INT)
 			{
 				PX_VM_Error(Ins,"MOD parameters error.");
 				goto _ERROR;
@@ -1183,7 +1183,7 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 			pVar=PX_VMGetVariablePointer(Ins,opType[0],PX_SCRIPT_VM_PARAM(0));
 			cVar=PX_VM_GetParamConst(Ins,opType[1],PX_SCRIPT_VM_PARAM(1),&bOutofMemory);
 			if(bOutofMemory) goto _ERROR;
-			if (pVar->type!=PX_VM_VARIABLE_TYPE_INT&&cVar.type!=PX_VM_VARIABLE_TYPE_INT)
+			if (pVar->type!=PX_VARIABLE_TYPE_INT&&cVar.type!=PX_VARIABLE_TYPE_INT)
 			{
 				PX_VM_Error(Ins,"SHL parameters error.");
 				goto _ERROR;
@@ -1197,7 +1197,7 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 			pVar=PX_VMGetVariablePointer(Ins,opType[0],PX_SCRIPT_VM_PARAM(0));
 			cVar=PX_VM_GetParamConst(Ins,opType[1],PX_SCRIPT_VM_PARAM(1),&bOutofMemory);
 			if(bOutofMemory) goto _ERROR;
-			if (pVar->type!=PX_VM_VARIABLE_TYPE_INT&&cVar.type!=PX_VM_VARIABLE_TYPE_INT)
+			if (pVar->type!=PX_VARIABLE_TYPE_INT&&cVar.type!=PX_VARIABLE_TYPE_INT)
 			{
 				PX_VM_Error(Ins,"SHR parameters error.");
 				goto _ERROR;
@@ -1211,7 +1211,7 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 			pVar=PX_VMGetVariablePointer(Ins,opType[0],PX_SCRIPT_VM_PARAM(0));
 			cVar=PX_VM_GetParamConst(Ins,opType[1],PX_SCRIPT_VM_PARAM(1),&bOutofMemory);
 			if(bOutofMemory) goto _ERROR;
-			if (pVar->type!=PX_VM_VARIABLE_TYPE_INT&&cVar.type!=PX_VM_VARIABLE_TYPE_INT)
+			if (pVar->type!=PX_VARIABLE_TYPE_INT&&cVar.type!=PX_VARIABLE_TYPE_INT)
 			{
 				PX_VM_Error(Ins,"AND parameters error.");
 				goto _ERROR;
@@ -1225,17 +1225,17 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 			pVar=PX_VMGetVariablePointer(Ins,opType[0],PX_SCRIPT_VM_PARAM(0));
 			cVar=PX_VM_GetParamConst(Ins,opType[1],PX_SCRIPT_VM_PARAM(1),&bOutofMemory);
 			if(bOutofMemory) goto _ERROR;
-			if (pVar->type!=PX_VM_VARIABLE_TYPE_INT&&pVar->type!=PX_VM_VARIABLE_TYPE_FLOAT)
+			if (pVar->type!=PX_VARIABLE_TYPE_INT&&pVar->type!=PX_VARIABLE_TYPE_FLOAT)
 			{
 				PX_VM_Error(Ins,"ANDL parameters error.");
 				goto _ERROR;
 			}
-			if (cVar.type!=PX_VM_VARIABLE_TYPE_INT&&cVar.type!=PX_VM_VARIABLE_TYPE_FLOAT)
+			if (cVar.type!=PX_VARIABLE_TYPE_INT&&cVar.type!=PX_VARIABLE_TYPE_FLOAT)
 			{
 				PX_VM_Error(Ins,"ANDL parameters error.");
 				goto _ERROR;
 			}
-			pVar->type=PX_VM_VARIABLE_TYPE_INT;
+			pVar->type=PX_VARIABLE_TYPE_INT;
 			pVar->_int=(pVar->_int&&cVar._int);
 			pT->IP+=(4+2*4);
 		}
@@ -1245,17 +1245,17 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 			pVar=PX_VMGetVariablePointer(Ins,opType[0],PX_SCRIPT_VM_PARAM(0));
 			cVar=PX_VM_GetParamConst(Ins,opType[1],PX_SCRIPT_VM_PARAM(1),&bOutofMemory);
 			if(bOutofMemory) goto _ERROR;
-			if (pVar->type!=PX_VM_VARIABLE_TYPE_INT&&pVar->type!=PX_VM_VARIABLE_TYPE_FLOAT)
+			if (pVar->type!=PX_VARIABLE_TYPE_INT&&pVar->type!=PX_VARIABLE_TYPE_FLOAT)
 			{
 				PX_VM_Error(Ins,"ORL parameters error.");
 				goto _ERROR;
 			}
-			if (cVar.type!=PX_VM_VARIABLE_TYPE_INT&&cVar.type!=PX_VM_VARIABLE_TYPE_FLOAT)
+			if (cVar.type!=PX_VARIABLE_TYPE_INT&&cVar.type!=PX_VARIABLE_TYPE_FLOAT)
 			{
 				PX_VM_Error(Ins,"ORL parameters error.");
 				goto _ERROR;
 			}
-			pVar->type=PX_VM_VARIABLE_TYPE_INT;
+			pVar->type=PX_VARIABLE_TYPE_INT;
 			pVar->_int=(pVar->_int||cVar._int);
 			pT->IP+=(4+2*4);
 		}
@@ -1266,18 +1266,18 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 			pVar=PX_VMGetVariablePointer(Ins,opType[0],PX_SCRIPT_VM_PARAM(0));
 			cVar=PX_VM_GetParamConst(Ins,opType[1],PX_SCRIPT_VM_PARAM(1),&bOutofMemory);
 			if(bOutofMemory) goto _ERROR;
-			if (pVar->type!=PX_VM_VARIABLE_TYPE_INT&&pVar->type!=PX_VM_VARIABLE_TYPE_FLOAT)
+			if (pVar->type!=PX_VARIABLE_TYPE_INT&&pVar->type!=PX_VARIABLE_TYPE_FLOAT)
 			{
 				PX_VM_Error(Ins,"OR parameters error.");
 				goto _ERROR;
 			}
-			if (cVar.type!=PX_VM_VARIABLE_TYPE_INT&&cVar.type!=PX_VM_VARIABLE_TYPE_FLOAT)
+			if (cVar.type!=PX_VARIABLE_TYPE_INT&&cVar.type!=PX_VARIABLE_TYPE_FLOAT)
 			{
 				PX_VM_Error(Ins,"OR parameters error.");
 				goto _ERROR;
 			}
 			pVar->_int|=cVar._int;
-			pVar->type=PX_VM_VARIABLE_TYPE_INT;
+			pVar->type=PX_VARIABLE_TYPE_INT;
 			pT->IP+=(4+2*4);
 		}
 		break;
@@ -1286,18 +1286,18 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 			pVar=PX_VMGetVariablePointer(Ins,opType[0],PX_SCRIPT_VM_PARAM(0));
 			cVar=PX_VM_GetParamConst(Ins,opType[1],PX_SCRIPT_VM_PARAM(1),&bOutofMemory);
 			if(bOutofMemory) goto _ERROR;
-			if (pVar->type!=PX_VM_VARIABLE_TYPE_INT&&pVar->type!=PX_VM_VARIABLE_TYPE_FLOAT)
+			if (pVar->type!=PX_VARIABLE_TYPE_INT&&pVar->type!=PX_VARIABLE_TYPE_FLOAT)
 			{
 				PX_VM_Error(Ins,"XOR parameters error.");
 				goto _ERROR;
 			}
-			if (cVar.type!=PX_VM_VARIABLE_TYPE_INT&&cVar.type!=PX_VM_VARIABLE_TYPE_FLOAT)
+			if (cVar.type!=PX_VARIABLE_TYPE_INT&&cVar.type!=PX_VARIABLE_TYPE_FLOAT)
 			{
 				PX_VM_Error(Ins,"XOR parameters error.");
 				goto _ERROR;
 			}
 			pVar->_int^=cVar._int;
-			pVar->type=PX_VM_VARIABLE_TYPE_INT;
+			pVar->type=PX_VARIABLE_TYPE_INT;
 			pT->IP+=(4+2*4);
 		}
 		break;
@@ -1306,31 +1306,31 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 			pVar=PX_VMGetVariablePointer(Ins,opType[0],PX_SCRIPT_VM_PARAM(0));
 			cVar=PX_VM_GetParamConst(Ins,opType[1],PX_SCRIPT_VM_PARAM(1),&bOutofMemory);
 			if(bOutofMemory) goto _ERROR;
-			if (pVar->type!=PX_VM_VARIABLE_TYPE_INT&&pVar->type!=PX_VM_VARIABLE_TYPE_FLOAT)
+			if (pVar->type!=PX_VARIABLE_TYPE_INT&&pVar->type!=PX_VARIABLE_TYPE_FLOAT)
 			{
 				PX_VM_Error(Ins,"POW parameters error.");
 				goto _ERROR;
 			}
-			if (cVar.type!=PX_VM_VARIABLE_TYPE_INT&&cVar.type!=PX_VM_VARIABLE_TYPE_FLOAT)
+			if (cVar.type!=PX_VARIABLE_TYPE_INT&&cVar.type!=PX_VARIABLE_TYPE_FLOAT)
 			{
 				PX_VM_Error(Ins,"POW parameters error.");
 				goto _ERROR;
 			}
 
-			if (pVar->type==PX_VM_VARIABLE_TYPE_INT&&cVar.type==PX_VM_VARIABLE_TYPE_INT)
+			if (pVar->type==PX_VARIABLE_TYPE_INT&&cVar.type==PX_VARIABLE_TYPE_INT)
 			{
 				pVar->_int=PX_pow_ii(pVar->_int,cVar._int);
 			}
-			else if (pVar->type==PX_VM_VARIABLE_TYPE_INT&&cVar.type==PX_VM_VARIABLE_TYPE_FLOAT)
+			else if (pVar->type==PX_VARIABLE_TYPE_INT&&cVar.type==PX_VARIABLE_TYPE_FLOAT)
 			{
 				pVar->_float=(px_float)PX_pow(pVar->_int,cVar._float);
-				pVar->type=PX_VM_VARIABLE_TYPE_FLOAT;
+				pVar->type=PX_VARIABLE_TYPE_FLOAT;
 			}
-			else if (pVar->type==PX_VM_VARIABLE_TYPE_FLOAT&&cVar.type==PX_VM_VARIABLE_TYPE_FLOAT)
+			else if (pVar->type==PX_VARIABLE_TYPE_FLOAT&&cVar.type==PX_VARIABLE_TYPE_FLOAT)
 			{
 				pVar->_float=(px_float)PX_pow(pVar->_float,cVar._float);
 			}
-			else if (pVar->type==PX_VM_VARIABLE_TYPE_FLOAT&&cVar.type==PX_VM_VARIABLE_TYPE_INT)
+			else if (pVar->type==PX_VARIABLE_TYPE_FLOAT&&cVar.type==PX_VARIABLE_TYPE_INT)
 			{
 				pVar->_float=(px_float)PX_pow(pVar->_float,cVar._int);
 			}
@@ -1342,27 +1342,27 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 			pVar=PX_VMGetVariablePointer(Ins,opType[0],PX_SCRIPT_VM_PARAM(0));
 			cVar=PX_VM_GetParamConst(Ins,opType[1],PX_SCRIPT_VM_PARAM(1),&bOutofMemory);
 			if(bOutofMemory) goto _ERROR;
-			if (cVar.type!=PX_VM_VARIABLE_TYPE_FLOAT&&cVar.type!=PX_VM_VARIABLE_TYPE_INT)
+			if (cVar.type!=PX_VARIABLE_TYPE_FLOAT&&cVar.type!=PX_VARIABLE_TYPE_INT)
 			{
 				goto _ERROR;
 			}
 			
-			if (pVar->type==PX_VM_VARIABLE_TYPE_STRING)
+			if (pVar->type==PX_VARIABLE_TYPE_STRING)
 			{
 				PX_StringFree(&pVar->_string);
 			}
 
-			if (pVar->type==PX_VM_VARIABLE_TYPE_MEMORY)
+			if (pVar->type==PX_VARIABLE_TYPE_MEMORY)
 			{
 				PX_MemoryFree(&pVar->_memory);
 			}
 
-			pVar->type=PX_VM_VARIABLE_TYPE_FLOAT;
-			if (cVar.type==PX_VM_VARIABLE_TYPE_FLOAT)
+			pVar->type=PX_VARIABLE_TYPE_FLOAT;
+			if (cVar.type==PX_VARIABLE_TYPE_FLOAT)
 			{
 				pVar->_float=PX_sin_angle(cVar._float);
 			}
-			if (cVar.type==PX_VM_VARIABLE_TYPE_INT)
+			if (cVar.type==PX_VARIABLE_TYPE_INT)
 			{
 				pVar->_float=PX_sin_angle((px_float)cVar._int);
 			}
@@ -1374,26 +1374,26 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 			pVar=PX_VMGetVariablePointer(Ins,opType[0],PX_SCRIPT_VM_PARAM(0));
 			cVar=PX_VM_GetParamConst(Ins,opType[1],PX_SCRIPT_VM_PARAM(1),&bOutofMemory);
 			if(bOutofMemory) goto _ERROR;
-			if (cVar.type!=PX_VM_VARIABLE_TYPE_FLOAT&&cVar.type!=PX_VM_VARIABLE_TYPE_INT)
+			if (cVar.type!=PX_VARIABLE_TYPE_FLOAT&&cVar.type!=PX_VARIABLE_TYPE_INT)
 			{
 				goto _ERROR;
 			}
 
-			if (pVar->type==PX_VM_VARIABLE_TYPE_STRING)
+			if (pVar->type==PX_VARIABLE_TYPE_STRING)
 			{
 				PX_StringFree(&pVar->_string);
 			}
 
-			if (pVar->type==PX_VM_VARIABLE_TYPE_MEMORY)
+			if (pVar->type==PX_VARIABLE_TYPE_MEMORY)
 			{
 				PX_MemoryFree(&pVar->_memory);
 			}
-			pVar->type=PX_VM_VARIABLE_TYPE_FLOAT;
-			if (cVar.type==PX_VM_VARIABLE_TYPE_FLOAT)
+			pVar->type=PX_VARIABLE_TYPE_FLOAT;
+			if (cVar.type==PX_VARIABLE_TYPE_FLOAT)
 			{
 				pVar->_float=PX_cos_angle(cVar._float);
 			}
-			if (cVar.type==PX_VM_VARIABLE_TYPE_INT)
+			if (cVar.type==PX_VARIABLE_TYPE_INT)
 			{
 				pVar->_float=PX_cos_angle((px_float)cVar._int);
 			}
@@ -1403,16 +1403,16 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 	case PX_SCRIPT_ASM_INSTR_OPCODE_INT:
 		{
 			pVar=PX_VMGetVariablePointer(Ins,opType[0],PX_SCRIPT_VM_PARAM(0));
-			if (pVar->type!=PX_VM_VARIABLE_TYPE_FLOAT&&pVar->type!=PX_VM_VARIABLE_TYPE_INT)
+			if (pVar->type!=PX_VARIABLE_TYPE_FLOAT&&pVar->type!=PX_VARIABLE_TYPE_INT)
 			{
 				PX_VM_Error(Ins,"INT transform error.");
 				goto _ERROR;
 			}
 		
-			if (pVar->type==PX_VM_VARIABLE_TYPE_FLOAT)
+			if (pVar->type==PX_VARIABLE_TYPE_FLOAT)
 			{
 				pVar->_int=(px_int)(pVar->_float);
-				pVar->type=PX_VM_VARIABLE_TYPE_INT;
+				pVar->type=PX_VARIABLE_TYPE_INT;
 			}
 			
 			pT->IP+=(4+1*4);
@@ -1421,16 +1421,16 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 	case PX_SCRIPT_ASM_INSTR_OPCODE_FLT:
 		{
 			pVar=PX_VMGetVariablePointer(Ins,opType[0],PX_SCRIPT_VM_PARAM(0));
-			if (pVar->type!=PX_VM_VARIABLE_TYPE_FLOAT&&pVar->type!=PX_VM_VARIABLE_TYPE_INT)
+			if (pVar->type!=PX_VARIABLE_TYPE_FLOAT&&pVar->type!=PX_VARIABLE_TYPE_INT)
 			{
 				PX_VM_Error(Ins,"FLT transform error.");
 				goto _ERROR;
 			}
 
-			if (pVar->type==PX_VM_VARIABLE_TYPE_INT)
+			if (pVar->type==PX_VARIABLE_TYPE_INT)
 			{
 				pVar->_float=(px_float)(pVar->_int);
-				pVar->type=PX_VM_VARIABLE_TYPE_FLOAT;
+				pVar->type=PX_VARIABLE_TYPE_FLOAT;
 			}
 
 			pT->IP+=(4+1*4);
@@ -1441,13 +1441,13 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 			pVar=PX_VMGetVariablePointer(Ins,opType[0],PX_SCRIPT_VM_PARAM(0));
 			cVar=PX_VM_GetParamConst(Ins,opType[1],PX_SCRIPT_VM_PARAM(1),&bOutofMemory);
 			if(bOutofMemory) goto _ERROR;
-			if (cVar.type!=PX_VM_VARIABLE_TYPE_STRING)
+			if (cVar.type!=PX_VARIABLE_TYPE_STRING)
 			{
 				PX_VM_Error(Ins,"strlen parameters error.");
 				goto _ERROR;
 			}
 			PX_VariableFree(pVar);
-			pVar->type=PX_VM_VARIABLE_TYPE_INT;
+			pVar->type=PX_VARIABLE_TYPE_INT;
 			pVar->_int=PX_strlen(cVar._string.buffer);
 			pT->IP+=(4+2*4);
 		}
@@ -1457,16 +1457,16 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 			pVar=PX_VMGetVariablePointer(Ins,opType[0],PX_SCRIPT_VM_PARAM(0));
 			cVar=PX_VM_GetParamConst(Ins,opType[1],PX_SCRIPT_VM_PARAM(1),&bOutofMemory);
 			if(bOutofMemory) goto _ERROR;
-			if (pVar->type!=PX_VM_VARIABLE_TYPE_STRING)
+			if (pVar->type!=PX_VARIABLE_TYPE_STRING)
 			{
 				PX_VM_Error(Ins,"strcat parameters error.");
 				goto _ERROR;
 			}
-			if (cVar.type==PX_VM_VARIABLE_TYPE_STRING)
+			if (cVar.type==PX_VARIABLE_TYPE_STRING)
 			{
 				if(!PX_StringCat(&pVar->_string,cVar._string.buffer)) goto _ERROR;
 			}
-			else if (cVar.type==PX_VM_VARIABLE_TYPE_INT)
+			else if (cVar.type==PX_VARIABLE_TYPE_INT)
 			{
 				if(!PX_StringCatChar(&pVar->_string,(px_char)cVar._int)) goto _ERROR;
 			}
@@ -1484,17 +1484,17 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 			if(bOutofMemory) goto _ERROR;
 			sVar=PX_VM_GetParamConst(Ins,opType[2],PX_SCRIPT_VM_PARAM(2),&bOutofMemory);
 			if(bOutofMemory) goto _ERROR;
-			if (pVar->type!=PX_VM_VARIABLE_TYPE_STRING)
+			if (pVar->type!=PX_VARIABLE_TYPE_STRING)
 			{
 				PX_VM_Error(Ins,"strrep parameters error.");
 				goto _ERROR;
 			}
-			if (cVar.type!=PX_VM_VARIABLE_TYPE_STRING)
+			if (cVar.type!=PX_VARIABLE_TYPE_STRING)
 			{
 				PX_VM_Error(Ins,"strrep parameters error.");
 				goto _ERROR;
 			}
-			if (sVar.type!=PX_VM_VARIABLE_TYPE_STRING)
+			if (sVar.type!=PX_VARIABLE_TYPE_STRING)
 			{
 				PX_VM_Error(Ins,"strrep parameters error.");
 				goto _ERROR;
@@ -1512,18 +1512,18 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 			if(bOutofMemory) goto _ERROR;
 			PX_VariableFree(pVar);
 
-			if (cVar.type!=PX_VM_VARIABLE_TYPE_STRING)
+			if (cVar.type!=PX_VARIABLE_TYPE_STRING)
 			{
 				PX_VM_Error(Ins,"strchr parameters error.");
 				goto _ERROR;
 			}
-			if (sVar.type!=PX_VM_VARIABLE_TYPE_INT)
+			if (sVar.type!=PX_VARIABLE_TYPE_INT)
 			{
 				PX_VM_Error(Ins,"strchr parameters error.");
 				goto _ERROR;
 			}
 
-			pVar->type=PX_VM_VARIABLE_TYPE_INT;
+			pVar->type=PX_VARIABLE_TYPE_INT;
 
 			if(sVar._int<PX_strlen(cVar._string.buffer))
 				pVar->_int=(px_uchar)cVar._string.buffer[sVar._int];
@@ -1538,13 +1538,13 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 			if(bOutofMemory) goto _ERROR;
 			PX_VariableFree(pVar);
 
-			if (cVar.type!=PX_VM_VARIABLE_TYPE_STRING)
+			if (cVar.type!=PX_VARIABLE_TYPE_STRING)
 			{
 				PX_VM_Error(Ins,"strtoi parameters error.");
 				goto _ERROR;
 			}
 
-			pVar->type=PX_VM_VARIABLE_TYPE_INT;
+			pVar->type=PX_VARIABLE_TYPE_INT;
 			pVar->_int=PX_atoi(cVar._string.buffer);
 			pT->IP+=(4+2*4);
 		}
@@ -1556,13 +1556,13 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 			if(bOutofMemory) goto _ERROR;
 			PX_VariableFree(pVar);
 
-			if (cVar.type!=PX_VM_VARIABLE_TYPE_STRING)
+			if (cVar.type!=PX_VARIABLE_TYPE_STRING)
 			{
 				PX_VM_Error(Ins,"strtof parameters error.");
 				goto _ERROR;
 			}
 
-			pVar->type=PX_VM_VARIABLE_TYPE_FLOAT;
+			pVar->type=PX_VARIABLE_TYPE_FLOAT;
 			pVar->_int=(px_int)PX_atof(cVar._string.buffer);
 			pT->IP+=(4+2*4);
 		}
@@ -1574,15 +1574,15 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 			cVar=PX_VM_GetParamConst(Ins,opType[1],PX_SCRIPT_VM_PARAM(1),&bOutofMemory);
 			if(bOutofMemory) goto _ERROR;
 			PX_VariableFree(pVar);
-			if (cVar.type!=PX_VM_VARIABLE_TYPE_INT&&cVar.type!=PX_VM_VARIABLE_TYPE_FLOAT)
+			if (cVar.type!=PX_VARIABLE_TYPE_INT&&cVar.type!=PX_VARIABLE_TYPE_FLOAT)
 			{
 				PX_VM_Error(Ins,"strfri parameters error.");
 				goto _ERROR;
 			}
 
-			pVar->type=PX_VM_VARIABLE_TYPE_STRING;
+			pVar->type=PX_VARIABLE_TYPE_STRING;
 			PX_StringInitialize(Ins->mp,&pVar->_string);
-			if(cVar.type==PX_VM_VARIABLE_TYPE_INT)
+			if(cVar.type==PX_VARIABLE_TYPE_INT)
 			PX_itoa(cVar._int,numOut,sizeof(numOut),10);
 			else
 			PX_itoa((px_int)cVar._float,numOut,sizeof(numOut),10);
@@ -1599,16 +1599,16 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 			if(bOutofMemory) goto _ERROR;
 			PX_VariableFree(pVar);
 
-			if (cVar.type!=PX_VM_VARIABLE_TYPE_INT&&cVar.type!=PX_VM_VARIABLE_TYPE_FLOAT)
+			if (cVar.type!=PX_VARIABLE_TYPE_INT&&cVar.type!=PX_VARIABLE_TYPE_FLOAT)
 			{
 				PX_VM_Error(Ins,"strfrf parameters error.");
 				goto _ERROR;
 			}
 
-			pVar->type=PX_VM_VARIABLE_TYPE_STRING;
+			pVar->type=PX_VARIABLE_TYPE_STRING;
 			PX_StringInitialize(Ins->mp,&pVar->_string);
 			numOut[0]=0;
-			if(cVar.type==PX_VM_VARIABLE_TYPE_INT)
+			if(cVar.type==PX_VARIABLE_TYPE_INT)
 				PX_ftoa((px_float)cVar._int,numOut,sizeof(numOut),PX_VM_DEFALUT_FLOAT_PRECCISION);
 			else
 				PX_ftoa(cVar._float,numOut,sizeof(numOut),PX_VM_DEFALUT_FLOAT_PRECCISION);
@@ -1620,12 +1620,12 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 	case PX_SCRIPT_ASM_INSTR_OPCODE_STRTMEM:
 		{
 			pVar=PX_VMGetVariablePointer(Ins,opType[0],PX_SCRIPT_VM_PARAM(0));
-			if (pVar->type==PX_VM_VARIABLE_TYPE_STRING)
+			if (pVar->type==PX_VARIABLE_TYPE_STRING)
 			{
 				PX_MemoryInitialize(Ins->mp,&cVar._memory);
 				if(!PX_MemoryCat(&cVar._memory,pVar->_string.buffer,pVar->_string.bufferlen)) goto _ERROR;
 				PX_StringFree(&pVar->_string);
-				pVar->type=PX_VM_VARIABLE_TYPE_MEMORY;
+				pVar->type=PX_VARIABLE_TYPE_MEMORY;
 				pVar->_memory=cVar._memory;
 			}
 			else
@@ -1644,22 +1644,22 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 			if(bOutofMemory) goto _ERROR;
 			tVar=PX_VM_GetParamConst(Ins,opType[2],PX_SCRIPT_VM_PARAM(2),&bOutofMemory);
 			if(bOutofMemory) goto _ERROR;
-			if (pVar->type!=PX_VM_VARIABLE_TYPE_STRING)
+			if (pVar->type!=PX_VARIABLE_TYPE_STRING)
 			{
-					if(pVar->type!=PX_VM_VARIABLE_TYPE_INT)
+					if(pVar->type!=PX_VARIABLE_TYPE_INT)
 					{
 						PX_VM_Error(Ins,"strset parameters error.");
 						goto _ERROR;
 					}
 					else
 					{
-						pVar->type=PX_VM_VARIABLE_TYPE_STRING;
+						pVar->type=PX_VARIABLE_TYPE_STRING;
 						PX_StringInitialize(Ins->mp,&pVar->_string);
 					}
 			}
 
 
-			if (sVar.type!=PX_VM_VARIABLE_TYPE_INT||(tVar.type!=PX_VM_VARIABLE_TYPE_INT))
+			if (sVar.type!=PX_VARIABLE_TYPE_INT||(tVar.type!=PX_VARIABLE_TYPE_INT))
 			{
 				goto _ERROR;
 			}
@@ -1679,7 +1679,7 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 				pVar->_string=newString;
 			}
 
-			if(tVar.type==PX_VM_VARIABLE_TYPE_INT)
+			if(tVar.type==PX_VARIABLE_TYPE_INT)
 				pVar->_string.buffer[sVar._int]=(px_char)tVar._int;
 			else 
 				goto _ERROR;
@@ -1696,7 +1696,7 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 			tVar=PX_VM_GetParamConst(Ins,opType[2],PX_SCRIPT_VM_PARAM(2),&bOutofMemory);
 			if(bOutofMemory) goto _ERROR;
 			PX_VariableFree(pVar);
-			if (sVar.type!=PX_VM_VARIABLE_TYPE_STRING||tVar.type!=PX_VM_VARIABLE_TYPE_STRING)
+			if (sVar.type!=PX_VARIABLE_TYPE_STRING||tVar.type!=PX_VARIABLE_TYPE_STRING)
 			{
 				PX_VM_Error(Ins,"strfind parameters error.");
 				goto _ERROR;
@@ -1719,7 +1719,7 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 		tVar = PX_VM_GetParamConst(Ins, opType[2], PX_SCRIPT_VM_PARAM(2), &bOutofMemory);
 		if (bOutofMemory) goto _ERROR;
 	
-		if (pVar->type!= PX_VM_VARIABLE_TYPE_STRING||sVar.type != PX_VM_VARIABLE_TYPE_INT || tVar.type != PX_VM_VARIABLE_TYPE_INT)
+		if (pVar->type!= PX_VARIABLE_TYPE_STRING||sVar.type != PX_VARIABLE_TYPE_INT || tVar.type != PX_VARIABLE_TYPE_INT)
 		{
 			PX_VM_Error(Ins, "strcut parameters error.");
 			goto _ERROR;
@@ -1737,13 +1737,13 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 			cVar=PX_VM_GetParamConst(Ins,opType[1],PX_SCRIPT_VM_PARAM(1),&bOutofMemory);
 			if(bOutofMemory) goto _ERROR;
 			PX_VariableFree(pVar);
-			if (cVar.type!=PX_VM_VARIABLE_TYPE_STRING)
+			if (cVar.type!=PX_VARIABLE_TYPE_STRING)
 			{
 				PX_VM_Error(Ins,"asc parameters error.");
 				goto _ERROR;
 			}
 
-			pVar->type=PX_VM_VARIABLE_TYPE_INT;
+			pVar->type=PX_VARIABLE_TYPE_INT;
 			pVar->_int=cVar._string.buffer[0];
 			pT->IP+=(4+2*4);
 		}
@@ -1758,12 +1758,12 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 			if(bOutofMemory) goto _ERROR;
 			PX_VariableFree(pVar);
 
-			if (sVar.type!=PX_VM_VARIABLE_TYPE_MEMORY||tVar.type!=PX_VM_VARIABLE_TYPE_INT)
+			if (sVar.type!=PX_VARIABLE_TYPE_MEMORY||tVar.type!=PX_VARIABLE_TYPE_INT)
 			{
 				PX_VM_Error(Ins,"membyte parameters error.");
 				goto _ERROR;
 			}
-			pVar->type=PX_VM_VARIABLE_TYPE_INT;
+			pVar->type=PX_VARIABLE_TYPE_INT;
 			if (tVar._int<sVar._memory.usedsize)
 			{
 				pVar->_int=sVar._memory.buffer[tVar._int];
@@ -1786,22 +1786,22 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 			tVar=PX_VM_GetParamConst(Ins,opType[2],PX_SCRIPT_VM_PARAM(2),&bOutofMemory);
 			if(bOutofMemory) goto _ERROR;
 			
-			if (pVar->type!=PX_VM_VARIABLE_TYPE_MEMORY)
+			if (pVar->type!=PX_VARIABLE_TYPE_MEMORY)
 			{
-				if(pVar->type!=PX_VM_VARIABLE_TYPE_INT)
+				if(pVar->type!=PX_VARIABLE_TYPE_INT)
 				{
 					PX_VM_Error(Ins,"memset parameters error.");
 					goto _ERROR;
 				}
 				else
 				{
-					pVar->type=PX_VM_VARIABLE_TYPE_MEMORY;
+					pVar->type=PX_VARIABLE_TYPE_MEMORY;
 					PX_MemoryInitialize(Ins->mp,&pVar->_memory);
 				}
 			}
 
 
-			if (sVar.type!=PX_VM_VARIABLE_TYPE_INT||tVar.type!=PX_VM_VARIABLE_TYPE_INT)
+			if (sVar.type!=PX_VARIABLE_TYPE_INT||tVar.type!=PX_VARIABLE_TYPE_INT)
 			{
 				goto _ERROR;
 			}
@@ -1837,14 +1837,14 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 			tVar=PX_VM_GetParamConst(Ins,opType[2],PX_SCRIPT_VM_PARAM(2),&bOutofMemory);
 			if(bOutofMemory) goto _ERROR;
 
-			if (pVar->type!=PX_VM_VARIABLE_TYPE_MEMORY)
+			if (pVar->type!=PX_VARIABLE_TYPE_MEMORY)
 			{
 				PX_VM_Error(Ins,"memtrm parameters error.");
 				goto _ERROR;
 			}
 
 
-			if (sVar.type!=PX_VM_VARIABLE_TYPE_INT||tVar.type!=PX_VM_VARIABLE_TYPE_INT)
+			if (sVar.type!=PX_VARIABLE_TYPE_INT||tVar.type!=PX_VARIABLE_TYPE_INT)
 			{
 				PX_VM_Error(Ins,"memtrm parameters error.");
 				goto _ERROR;
@@ -1875,7 +1875,7 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 			tVar=PX_VM_GetParamConst(Ins,opType[2],PX_SCRIPT_VM_PARAM(2),&bOutofMemory);
 			if(bOutofMemory) goto _ERROR;
 			PX_VariableFree(pVar);
-			if (sVar.type!=PX_VM_VARIABLE_TYPE_MEMORY||tVar.type!=PX_VM_VARIABLE_TYPE_MEMORY)
+			if (sVar.type!=PX_VARIABLE_TYPE_MEMORY||tVar.type!=PX_VARIABLE_TYPE_MEMORY)
 			{
 				PX_VM_Error(Ins,"memfind parameters error.");
 				goto _ERROR;
@@ -1886,7 +1886,7 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 				if (PX_memequ(sVar._memory.buffer+i,tVar._memory.buffer,tVar._memory.usedsize))
 				{
 					pVar->_int=i;
-					pVar->type=PX_VM_VARIABLE_TYPE_INT;
+					pVar->type=PX_VARIABLE_TYPE_INT;
 					break;
 				}
 			}
@@ -1900,7 +1900,7 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 			sVar=PX_VM_GetParamConst(Ins,opType[1],PX_SCRIPT_VM_PARAM(1),&bOutofMemory);
 			if(bOutofMemory) goto _ERROR;
 			PX_VariableFree(pVar);
-			pVar->type=PX_VM_VARIABLE_TYPE_INT;
+			pVar->type=PX_VARIABLE_TYPE_INT;
 			pVar->_int=sVar._memory.usedsize;
 			
 			pT->IP+=(4+2*4);
@@ -1912,9 +1912,9 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 			pVar=PX_VMGetVariablePointer(Ins,opType[0],PX_SCRIPT_VM_PARAM(0));
 			sVar=PX_VM_GetParamConst(Ins,opType[1],PX_SCRIPT_VM_PARAM(1),&bOutofMemory);
 			if(bOutofMemory) goto _ERROR;
-			if (pVar->type!=PX_VM_VARIABLE_TYPE_MEMORY||sVar.type!=PX_VM_VARIABLE_TYPE_MEMORY)
+			if (pVar->type!=PX_VARIABLE_TYPE_MEMORY||sVar.type!=PX_VARIABLE_TYPE_MEMORY)
 			{
-				if (pVar->type!=PX_VM_VARIABLE_TYPE_MEMORY||sVar.type!=PX_VM_VARIABLE_TYPE_INT)
+				if (pVar->type!=PX_VARIABLE_TYPE_MEMORY||sVar.type!=PX_VARIABLE_TYPE_INT)
 				{
 					PX_VM_Error(Ins,"memcat crash.");
 					goto _ERROR;
@@ -1935,13 +1935,13 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 	case PX_SCRIPT_ASM_INSTR_OPCODE_MEMTSTR:
 		{
 			pVar=PX_VMGetVariablePointer(Ins,opType[0],PX_SCRIPT_VM_PARAM(0));
-			if (pVar->type==PX_VM_VARIABLE_TYPE_MEMORY)
+			if (pVar->type==PX_VARIABLE_TYPE_MEMORY)
 			{
 				if (pVar->_memory.usedsize==0)
 				{
 					PX_StringInitialize(Ins->mp,&cVar._string);
 					PX_MemoryFree(&pVar->_memory);
-					pVar->type=PX_VM_VARIABLE_TYPE_STRING;
+					pVar->type=PX_VARIABLE_TYPE_STRING;
 					pVar->_string=cVar._string;
 				}
 				else
@@ -1960,7 +1960,7 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 					PX_StringCatChar(&cVar._string,lastchar);
 
 					PX_MemoryFree(&pVar->_memory);
-					pVar->type=PX_VM_VARIABLE_TYPE_STRING;
+					pVar->type=PX_VARIABLE_TYPE_STRING;
 					pVar->_string=cVar._string;
 				}
 				
@@ -1981,7 +1981,7 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 			tVar=PX_VM_GetParamConst(Ins,opType[2],PX_SCRIPT_VM_PARAM(2),&bOutofMemory);
 			if(bOutofMemory) goto _ERROR;
 
-			if (cVar.type!=PX_VM_VARIABLE_TYPE_INT||sVar.type!=PX_VM_VARIABLE_TYPE_INT||tVar.type!=PX_VM_VARIABLE_TYPE_INT)
+			if (cVar.type!=PX_VARIABLE_TYPE_INT||sVar.type!=PX_VARIABLE_TYPE_INT||tVar.type!=PX_VARIABLE_TYPE_INT)
 			{
 				PX_VM_Error(Ins,"datacpy parameters error");
 				goto _ERROR;
@@ -2000,11 +2000,11 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 		{
 			pVar=PX_VMGetVariablePointer(Ins,opType[0],PX_SCRIPT_VM_PARAM(0));
 
-			if (pVar->type==PX_VM_VARIABLE_TYPE_INT)
+			if (pVar->type==PX_VARIABLE_TYPE_INT)
 			{
 				pVar->_int=-pVar->_int;
 			}
-			else if(pVar->type==PX_VM_VARIABLE_TYPE_FLOAT)
+			else if(pVar->type==PX_VARIABLE_TYPE_FLOAT)
 			{
 				pVar->_float=-pVar->_float;
 			}
@@ -2021,7 +2021,7 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 		{
 			pVar=PX_VMGetVariablePointer(Ins,opType[0],PX_SCRIPT_VM_PARAM(0));
 
-			if (pVar->type!=PX_VM_VARIABLE_TYPE_INT)
+			if (pVar->type!=PX_VARIABLE_TYPE_INT)
 			{
 				PX_VM_Error(Ins,"inv parameters error");
 				goto _ERROR;
@@ -2037,7 +2037,7 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 		{
 			pVar=PX_VMGetVariablePointer(Ins,opType[0],PX_SCRIPT_VM_PARAM(0));
 
-			if (pVar->type!=PX_VM_VARIABLE_TYPE_INT)
+			if (pVar->type!=PX_VARIABLE_TYPE_INT)
 			{
 				PX_VM_Error(Ins,"not parameters error");
 				goto _ERROR;
@@ -2053,7 +2053,7 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 		{
 			cVar=PX_VM_GetParamConst(Ins,opType[0],PX_SCRIPT_VM_PARAM(0),&bOutofMemory);
 			if(bOutofMemory) goto _ERROR;
-			if (cVar.type!=PX_VM_VARIABLE_TYPE_INT)
+			if (cVar.type!=PX_VARIABLE_TYPE_INT)
 			{
 				PX_VM_Error(Ins,"JMP parameters error");
 				goto _ERROR;
@@ -2078,14 +2078,14 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 			tVar=PX_VM_GetParamConst(Ins,opType[2],PX_SCRIPT_VM_PARAM(2),&bOutofMemory);
 			if(bOutofMemory) goto _ERROR;
 
-			if (tVar.type!=PX_VM_VARIABLE_TYPE_INT)
+			if (tVar.type!=PX_VARIABLE_TYPE_INT)
 			{
 				goto _ERROR;
 			}
 
 			if (cVar.type==sVar.type)
 			{
-				if (cVar.type!=PX_VM_VARIABLE_TYPE_STRING&&cVar.type!=PX_VM_VARIABLE_TYPE_MEMORY)
+				if (cVar.type!=PX_VARIABLE_TYPE_STRING&&cVar.type!=PX_VARIABLE_TYPE_MEMORY)
 				{
 					if (cVar._int==sVar._int)
 					{
@@ -2100,7 +2100,7 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 				}
 				else
 				{
-					if(cVar.type==PX_VM_VARIABLE_TYPE_STRING)
+					if(cVar.type==PX_VARIABLE_TYPE_STRING)
 						if (PX_strequ(cVar._string.buffer,sVar._string.buffer))
 						{
 							if (tVar._int<0||tVar._int>Ins->binsize)
@@ -2112,7 +2112,7 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 							break;
 						}
 
-					if(cVar.type==PX_VM_VARIABLE_TYPE_MEMORY)
+					if(cVar.type==PX_VARIABLE_TYPE_MEMORY)
 						if (PX_memequ(cVar._memory.buffer,sVar._memory.buffer,cVar._memory.usedsize))
 						{
 							if (tVar._int<0||tVar._int>Ins->binsize)
@@ -2137,14 +2137,14 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 			if(bOutofMemory) goto _ERROR;
 			tVar=PX_VM_GetParamConst(Ins,opType[2],PX_SCRIPT_VM_PARAM(2),&bOutofMemory);
 			if(bOutofMemory) goto _ERROR;
-			if (tVar.type!=PX_VM_VARIABLE_TYPE_INT)
+			if (tVar.type!=PX_VARIABLE_TYPE_INT)
 			{
 				goto _ERROR;
 			}
 
 			if (cVar.type==sVar.type)
 			{
-				if (cVar.type!=PX_VM_VARIABLE_TYPE_STRING&&cVar.type!=PX_VM_VARIABLE_TYPE_MEMORY)
+				if (cVar.type!=PX_VARIABLE_TYPE_STRING&&cVar.type!=PX_VARIABLE_TYPE_MEMORY)
 				{
 					if (cVar._int!=sVar._int)
 					{
@@ -2159,7 +2159,7 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 				}
 				else
 				{
-						if(cVar.type==PX_VM_VARIABLE_TYPE_STRING)
+						if(cVar.type==PX_VARIABLE_TYPE_STRING)
 							if (!PX_strequ(cVar._string.buffer,sVar._string.buffer))
 							{
 								if (tVar._int<0||tVar._int>Ins->binsize)
@@ -2171,7 +2171,7 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 								break;
 							}
 
-						if(cVar.type==PX_VM_VARIABLE_TYPE_MEMORY)
+						if(cVar.type==PX_VARIABLE_TYPE_MEMORY)
 							if (!PX_memequ(cVar._memory.buffer,sVar._memory.buffer,cVar._memory.usedsize))
 							{
 								if (tVar._int<0||tVar._int>Ins->binsize)
@@ -2199,34 +2199,34 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 			tVar=PX_VM_GetParamConst(Ins,opType[2],PX_SCRIPT_VM_PARAM(2),&bOutofMemory);
 			if(bOutofMemory) goto _ERROR;
 
-			if (tVar.type!=PX_VM_VARIABLE_TYPE_INT)
+			if (tVar.type!=PX_VARIABLE_TYPE_INT)
 			{
 				PX_VM_Error(Ins,"JL parameters error");
 				goto _ERROR;
 			}
-			if (cVar.type==PX_VM_VARIABLE_TYPE_STRING||sVar.type==PX_VM_VARIABLE_TYPE_STRING)
+			if (cVar.type==PX_VARIABLE_TYPE_STRING||sVar.type==PX_VARIABLE_TYPE_STRING)
 			{
 				PX_VM_Error(Ins,"JL parameters error");
 				goto _ERROR;
 			}
-			if (cVar.type==PX_VM_VARIABLE_TYPE_MEMORY||sVar.type==PX_VM_VARIABLE_TYPE_MEMORY)
+			if (cVar.type==PX_VARIABLE_TYPE_MEMORY||sVar.type==PX_VARIABLE_TYPE_MEMORY)
 			{
 				PX_VM_Error(Ins,"JL parameters error");
 				goto _ERROR;
 			}
-			if (cVar.type==PX_VM_VARIABLE_TYPE_INT)
+			if (cVar.type==PX_VARIABLE_TYPE_INT)
 			{
 				p1=(px_float)cVar._int;
 			}
-			if (cVar.type==PX_VM_VARIABLE_TYPE_FLOAT)
+			if (cVar.type==PX_VARIABLE_TYPE_FLOAT)
 			{
 				p1=cVar._float;
 			}
-			if (sVar.type==PX_VM_VARIABLE_TYPE_INT)
+			if (sVar.type==PX_VARIABLE_TYPE_INT)
 			{
 				p2=(px_float)sVar._int;
 			}
-			if (sVar.type==PX_VM_VARIABLE_TYPE_FLOAT)
+			if (sVar.type==PX_VARIABLE_TYPE_FLOAT)
 			{
 				p2=sVar._float;
 			}
@@ -2257,34 +2257,34 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 			tVar=PX_VM_GetParamConst(Ins,opType[2],PX_SCRIPT_VM_PARAM(2),&bOutofMemory);
 			if(bOutofMemory) goto _ERROR;
 
-			if (tVar.type!=PX_VM_VARIABLE_TYPE_INT)
+			if (tVar.type!=PX_VARIABLE_TYPE_INT)
 			{
 				PX_VM_Error(Ins,"JLE parameters error");
 				goto _ERROR;
 			}
-			if (cVar.type==PX_VM_VARIABLE_TYPE_STRING||sVar.type==PX_VM_VARIABLE_TYPE_STRING)
+			if (cVar.type==PX_VARIABLE_TYPE_STRING||sVar.type==PX_VARIABLE_TYPE_STRING)
 			{
 				PX_VM_Error(Ins,"JLE parameters error");
 				goto _ERROR;
 			}
-			if (cVar.type==PX_VM_VARIABLE_TYPE_MEMORY||sVar.type==PX_VM_VARIABLE_TYPE_MEMORY)
+			if (cVar.type==PX_VARIABLE_TYPE_MEMORY||sVar.type==PX_VARIABLE_TYPE_MEMORY)
 			{
 				PX_VM_Error(Ins,"JLE parameters error");
 				goto _ERROR;
 			}
-			if (cVar.type==PX_VM_VARIABLE_TYPE_INT)
+			if (cVar.type==PX_VARIABLE_TYPE_INT)
 			{
 				p1=(px_float)cVar._int;
 			}
-			if (cVar.type==PX_VM_VARIABLE_TYPE_FLOAT)
+			if (cVar.type==PX_VARIABLE_TYPE_FLOAT)
 			{
 				p1=cVar._float;
 			}
-			if (sVar.type==PX_VM_VARIABLE_TYPE_INT)
+			if (sVar.type==PX_VARIABLE_TYPE_INT)
 			{
 				p2=(px_float)sVar._int;
 			}
-			if (sVar.type==PX_VM_VARIABLE_TYPE_FLOAT)
+			if (sVar.type==PX_VARIABLE_TYPE_FLOAT)
 			{
 				p2=sVar._float;
 			}
@@ -2315,34 +2315,34 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 			tVar=PX_VM_GetParamConst(Ins,opType[2],PX_SCRIPT_VM_PARAM(2),&bOutofMemory);
 			if(bOutofMemory) goto _ERROR;
 
-			if (tVar.type!=PX_VM_VARIABLE_TYPE_INT)
+			if (tVar.type!=PX_VARIABLE_TYPE_INT)
 			{
 				PX_VM_Error(Ins,"JG parameters error");
 				goto _ERROR;
 			}
-			if (cVar.type==PX_VM_VARIABLE_TYPE_STRING||sVar.type==PX_VM_VARIABLE_TYPE_STRING)
+			if (cVar.type==PX_VARIABLE_TYPE_STRING||sVar.type==PX_VARIABLE_TYPE_STRING)
 			{
 				PX_VM_Error(Ins,"JG parameters error");
 				goto _ERROR;
 			}
-			if (cVar.type==PX_VM_VARIABLE_TYPE_MEMORY||sVar.type==PX_VM_VARIABLE_TYPE_MEMORY)
+			if (cVar.type==PX_VARIABLE_TYPE_MEMORY||sVar.type==PX_VARIABLE_TYPE_MEMORY)
 			{
 				PX_VM_Error(Ins,"JG parameters error");
 				goto _ERROR;
 			}
-			if (cVar.type==PX_VM_VARIABLE_TYPE_INT)
+			if (cVar.type==PX_VARIABLE_TYPE_INT)
 			{
 				p1=(px_float)cVar._int;
 			}
-			if (cVar.type==PX_VM_VARIABLE_TYPE_FLOAT)
+			if (cVar.type==PX_VARIABLE_TYPE_FLOAT)
 			{
 				p1=cVar._float;
 			}
-			if (sVar.type==PX_VM_VARIABLE_TYPE_INT)
+			if (sVar.type==PX_VARIABLE_TYPE_INT)
 			{
 				p2=(px_float)sVar._int;
 			}
-			if (sVar.type==PX_VM_VARIABLE_TYPE_FLOAT)
+			if (sVar.type==PX_VARIABLE_TYPE_FLOAT)
 			{
 				p2=sVar._float;
 			}
@@ -2373,34 +2373,34 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 			tVar=PX_VM_GetParamConst(Ins,opType[2],PX_SCRIPT_VM_PARAM(2),&bOutofMemory);
 			if(bOutofMemory) goto _ERROR;
 
-			if (tVar.type!=PX_VM_VARIABLE_TYPE_INT)
+			if (tVar.type!=PX_VARIABLE_TYPE_INT)
 			{
 				PX_VM_Error(Ins,"JGE parameters error");
 				goto _ERROR;
 			}
-			if (cVar.type==PX_VM_VARIABLE_TYPE_STRING||sVar.type==PX_VM_VARIABLE_TYPE_STRING)
+			if (cVar.type==PX_VARIABLE_TYPE_STRING||sVar.type==PX_VARIABLE_TYPE_STRING)
 			{
 				PX_VM_Error(Ins,"JGE parameters error");
 				goto _ERROR;
 			}
-			if (cVar.type==PX_VM_VARIABLE_TYPE_MEMORY||sVar.type==PX_VM_VARIABLE_TYPE_MEMORY)
+			if (cVar.type==PX_VARIABLE_TYPE_MEMORY||sVar.type==PX_VARIABLE_TYPE_MEMORY)
 			{
 				PX_VM_Error(Ins,"JGE parameters error");
 				goto _ERROR;
 			}
-			if (cVar.type==PX_VM_VARIABLE_TYPE_INT)
+			if (cVar.type==PX_VARIABLE_TYPE_INT)
 			{
 				p1=(px_float)cVar._int;
 			}
-			if (cVar.type==PX_VM_VARIABLE_TYPE_FLOAT)
+			if (cVar.type==PX_VARIABLE_TYPE_FLOAT)
 			{
 				p1=cVar._float;
 			}
-			if (sVar.type==PX_VM_VARIABLE_TYPE_INT)
+			if (sVar.type==PX_VARIABLE_TYPE_INT)
 			{
 				p2=(px_float)sVar._int;
 			}
-			if (sVar.type==PX_VM_VARIABLE_TYPE_FLOAT)
+			if (sVar.type==PX_VARIABLE_TYPE_FLOAT)
 			{
 				p2=sVar._float;
 			}
@@ -2429,12 +2429,12 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 			tVar=PX_VM_GetParamConst(Ins,opType[2],PX_SCRIPT_VM_PARAM(2),&bOutofMemory);
 			if(bOutofMemory) goto _ERROR;
 			PX_VariableFree(pVar);
-			pVar->type=PX_VM_VARIABLE_TYPE_INT;
+			pVar->type=PX_VARIABLE_TYPE_INT;
 			pVar->_int=0;
 			
 			if (sVar.type==tVar.type)
 			{
-				if (sVar.type!=PX_VM_VARIABLE_TYPE_STRING&&sVar.type!=PX_VM_VARIABLE_TYPE_MEMORY)
+				if (sVar.type!=PX_VARIABLE_TYPE_STRING&&sVar.type!=PX_VARIABLE_TYPE_MEMORY)
 				{
 					if (sVar._int==tVar._int)
 					{
@@ -2445,7 +2445,7 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 				}
 				else
 				{
-					if(sVar.type==PX_VM_VARIABLE_TYPE_STRING)
+					if(sVar.type==PX_VARIABLE_TYPE_STRING)
 						if (PX_strequ(sVar._string.buffer,tVar._string.buffer))
 						{
 							pVar->_int=1;
@@ -2454,7 +2454,7 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 						}
 
 
-					if(sVar.type==PX_VM_VARIABLE_TYPE_MEMORY)
+					if(sVar.type==PX_VARIABLE_TYPE_MEMORY)
 						if ((sVar._memory.usedsize==tVar._memory.usedsize)&&PX_memequ(sVar._memory.buffer,tVar._memory.buffer,sVar._memory.usedsize))
 						{
 							pVar->_int=1;
@@ -2465,7 +2465,7 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 			}
 			else
 			{
-				if (sVar.type == PX_VM_VARIABLE_TYPE_INT && tVar.type == PX_VM_VARIABLE_TYPE_FLOAT)
+				if (sVar.type == PX_VARIABLE_TYPE_INT && tVar.type == PX_VARIABLE_TYPE_FLOAT)
 				{
 					if (sVar._int == tVar._float)
 					{
@@ -2475,7 +2475,7 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 					}
 				}
 
-				if (sVar.type == PX_VM_VARIABLE_TYPE_FLOAT && tVar.type == PX_VM_VARIABLE_TYPE_INT)
+				if (sVar.type == PX_VARIABLE_TYPE_FLOAT && tVar.type == PX_VARIABLE_TYPE_INT)
 				{
 					if (sVar._float == tVar._int)
 					{
@@ -2497,12 +2497,12 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 			tVar=PX_VM_GetParamConst(Ins,opType[2],PX_SCRIPT_VM_PARAM(2),&bOutofMemory);
 			if(bOutofMemory) goto _ERROR;
 			PX_VariableFree(pVar);
-			pVar->type=PX_VM_VARIABLE_TYPE_INT;
+			pVar->type=PX_VARIABLE_TYPE_INT;
 			pVar->_int=1;
 
 			if (sVar.type==tVar.type)
 			{
-				if (sVar.type!=PX_VM_VARIABLE_TYPE_STRING&&sVar.type!=PX_VM_VARIABLE_TYPE_MEMORY)
+				if (sVar.type!=PX_VARIABLE_TYPE_STRING&&sVar.type!=PX_VARIABLE_TYPE_MEMORY)
 				{
 					if (sVar._int==tVar._int)
 					{
@@ -2513,7 +2513,7 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 				}
 				else
 				{
-					if(sVar.type==PX_VM_VARIABLE_TYPE_STRING)
+					if(sVar.type==PX_VARIABLE_TYPE_STRING)
 						if (PX_strequ(sVar._string.buffer,tVar._string.buffer))
 						{
 							pVar->_int=0;
@@ -2522,7 +2522,7 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 						}
 
 
-						if(cVar.type==PX_VM_VARIABLE_TYPE_MEMORY)
+						if(cVar.type==PX_VARIABLE_TYPE_MEMORY)
 							if ((sVar._memory.usedsize==tVar._memory.usedsize)&&PX_memequ(sVar._memory.buffer,tVar._memory.buffer,sVar._memory.usedsize))
 							{
 								pVar->_int=0;
@@ -2533,7 +2533,7 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 			}
 			else
 			{
-				if (sVar.type== PX_VM_VARIABLE_TYPE_INT&&tVar.type== PX_VM_VARIABLE_TYPE_FLOAT)
+				if (sVar.type== PX_VARIABLE_TYPE_INT&&tVar.type== PX_VARIABLE_TYPE_FLOAT)
 				{
 					if (sVar._int == tVar._float)
 					{
@@ -2543,7 +2543,7 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 					}
 				}
 
-				if (sVar.type == PX_VM_VARIABLE_TYPE_FLOAT && tVar.type == PX_VM_VARIABLE_TYPE_INT)
+				if (sVar.type == PX_VARIABLE_TYPE_FLOAT && tVar.type == PX_VARIABLE_TYPE_INT)
 				{
 					if (sVar._float == tVar._int)
 					{
@@ -2561,7 +2561,7 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 		{
 			pVar=PX_VMGetVariablePointer(Ins,opType[0],PX_SCRIPT_VM_PARAM(0));
 
-			if (pVar->type!=PX_VM_VARIABLE_TYPE_INT&&pVar->type!=PX_VM_VARIABLE_TYPE_FLOAT)
+			if (pVar->type!=PX_VARIABLE_TYPE_INT&&pVar->type!=PX_VARIABLE_TYPE_FLOAT)
 			{
 				PX_VM_Error(Ins,"LGZ parameters error");
 				goto _ERROR;
@@ -2569,12 +2569,12 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 
 			if (pVar->_int==0)
 			{
-				pVar->type=PX_VM_VARIABLE_TYPE_INT;
+				pVar->type=PX_VARIABLE_TYPE_INT;
 				pVar->_int=1;
 			}
 			else
 			{
-				pVar->type=PX_VM_VARIABLE_TYPE_INT;
+				pVar->type=PX_VARIABLE_TYPE_INT;
 				pVar->_int=0;
 			}
 			pT->IP+=(4+1*4);
@@ -2586,7 +2586,7 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 		{
 			pVar=PX_VMGetVariablePointer(Ins,opType[0],PX_SCRIPT_VM_PARAM(0));
 
-			if (pVar->type!=PX_VM_VARIABLE_TYPE_INT&&pVar->type!=PX_VM_VARIABLE_TYPE_FLOAT)
+			if (pVar->type!=PX_VARIABLE_TYPE_INT&&pVar->type!=PX_VARIABLE_TYPE_FLOAT)
 			{
 				PX_VM_Error(Ins,"LGGZ parameters error");
 				goto _ERROR;
@@ -2594,12 +2594,12 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 
 			if (pVar->_int>0)
 			{
-				pVar->type=PX_VM_VARIABLE_TYPE_INT;
+				pVar->type=PX_VARIABLE_TYPE_INT;
 				pVar->_int=1;
 			}
 			else
 			{
-				pVar->type=PX_VM_VARIABLE_TYPE_INT;
+				pVar->type=PX_VARIABLE_TYPE_INT;
 				pVar->_int=0;
 			}
 			pT->IP+=(4+1*4);
@@ -2610,7 +2610,7 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 		{
 			pVar=PX_VMGetVariablePointer(Ins,opType[0],PX_SCRIPT_VM_PARAM(0));
 
-			if (pVar->type!=PX_VM_VARIABLE_TYPE_INT&&pVar->type!=PX_VM_VARIABLE_TYPE_FLOAT)
+			if (pVar->type!=PX_VARIABLE_TYPE_INT&&pVar->type!=PX_VARIABLE_TYPE_FLOAT)
 			{
 				PX_VM_Error(Ins,"LGGEZ parameters error");
 				goto _ERROR;
@@ -2618,12 +2618,12 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 
 			if (pVar->_int>=0)
 			{
-				pVar->type=PX_VM_VARIABLE_TYPE_INT;
+				pVar->type=PX_VARIABLE_TYPE_INT;
 				pVar->_int=1;
 			}
 			else
 			{
-				pVar->type=PX_VM_VARIABLE_TYPE_INT;
+				pVar->type=PX_VARIABLE_TYPE_INT;
 				pVar->_int=0;
 			}
 			pT->IP+=(4+1*4);
@@ -2634,7 +2634,7 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 		{
 			pVar=PX_VMGetVariablePointer(Ins,opType[0],PX_SCRIPT_VM_PARAM(0));
 
-			if (pVar->type!=PX_VM_VARIABLE_TYPE_INT&&pVar->type!=PX_VM_VARIABLE_TYPE_FLOAT)
+			if (pVar->type!=PX_VARIABLE_TYPE_INT&&pVar->type!=PX_VARIABLE_TYPE_FLOAT)
 			{
 				PX_VM_Error(Ins,"LGLZ parameters error");
 				goto _ERROR;
@@ -2642,12 +2642,12 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 
 			if (pVar->_int<0)
 			{
-				pVar->type=PX_VM_VARIABLE_TYPE_INT;
+				pVar->type=PX_VARIABLE_TYPE_INT;
 				pVar->_int=1;
 			}
 			else
 			{
-				pVar->type=PX_VM_VARIABLE_TYPE_INT;
+				pVar->type=PX_VARIABLE_TYPE_INT;
 				pVar->_int=0;
 			}
 			pT->IP+=(4+1*4);
@@ -2658,7 +2658,7 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 		{
 			pVar=PX_VMGetVariablePointer(Ins,opType[0],PX_SCRIPT_VM_PARAM(0));
 
-			if (pVar->type!=PX_VM_VARIABLE_TYPE_INT&&pVar->type!=PX_VM_VARIABLE_TYPE_FLOAT)
+			if (pVar->type!=PX_VARIABLE_TYPE_INT&&pVar->type!=PX_VARIABLE_TYPE_FLOAT)
 			{
 				PX_VM_Error(Ins,"LGLEZ parameters error");
 				goto _ERROR;
@@ -2666,12 +2666,12 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 
 			if (pVar->_int<=0)
 			{
-				pVar->type=PX_VM_VARIABLE_TYPE_INT;
+				pVar->type=PX_VARIABLE_TYPE_INT;
 				pVar->_int=1;
 			}
 			else
 			{
-				pVar->type=PX_VM_VARIABLE_TYPE_INT;
+				pVar->type=PX_VARIABLE_TYPE_INT;
 				pVar->_int=0;
 			}
 			pT->IP+=(4+1*4);
@@ -2684,7 +2684,7 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 		{
 			cVar=PX_VM_GetParamConst(Ins,opType[0],PX_SCRIPT_VM_PARAM(0),&bOutofMemory);
 			if(bOutofMemory) goto _ERROR;
-			if (cVar.type!=PX_VM_VARIABLE_TYPE_INT)
+			if (cVar.type!=PX_VARIABLE_TYPE_INT)
 			{
 				PX_VM_Error(Ins,"CALL parameters error");
 				goto _ERROR;
@@ -2737,17 +2737,17 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 				
 
 				pVar=&Ins->_mem[pT->SP];
-				if (pVar->type==PX_VM_VARIABLE_TYPE_STRING)
+				if (pVar->type==PX_VARIABLE_TYPE_STRING)
 				{
 					PX_StringFree(&pVar->_string);
 				}
 
-				if (pVar->type==PX_VM_VARIABLE_TYPE_MEMORY)
+				if (pVar->type==PX_VARIABLE_TYPE_MEMORY)
 				{
 					PX_MemoryFree(&pVar->_memory);
 				}
 				
-				Ins->_mem[pT->SP].type=PX_VM_VARIABLE_TYPE_INT;
+				Ins->_mem[pT->SP].type=PX_VARIABLE_TYPE_INT;
 				Ins->_mem[pT->SP]._int=pT->IP+8;
 				pT->IP=cVar._int;
 			}
@@ -2768,23 +2768,23 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 			}
 			pVar=&Ins->_mem[pT->SP];
 
-			if (pVar->type==PX_VM_VARIABLE_TYPE_STRING)
+			if (pVar->type==PX_VARIABLE_TYPE_STRING)
 			{
 				PX_StringFree(&pVar->_string);
 			}
 
-			if (pVar->type==PX_VM_VARIABLE_TYPE_MEMORY)
+			if (pVar->type==PX_VARIABLE_TYPE_MEMORY)
 			{
 				PX_MemoryFree(&pVar->_memory);
 			}
 
-			if (cVar.type==PX_VM_VARIABLE_TYPE_STRING)
+			if (cVar.type==PX_VARIABLE_TYPE_STRING)
 			{
 				if(!PX_StringInitialize(Ins->mp,&pVar->_string)) goto _ERROR;
 				if(!PX_StringCat(&pVar->_string,cVar._string.buffer)) goto _ERROR;
 				pVar->type=cVar.type;
 			}
-			else if (cVar.type==PX_VM_VARIABLE_TYPE_MEMORY)
+			else if (cVar.type==PX_VARIABLE_TYPE_MEMORY)
 			{
 				PX_MemoryInitialize(Ins->mp,&pVar->_memory);
 				if(!PX_MemoryAlloc(&pVar->_memory,cVar._memory.usedsize)) goto _ERROR;
@@ -2804,7 +2804,7 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 		{
 			if (opType[0]==PX_SCRIPT_ASM_OPTYPE_IP)
 			{
-				if(Ins->_mem[pT->SP].type==PX_VM_VARIABLE_TYPE_INT)
+				if(Ins->_mem[pT->SP].type==PX_VARIABLE_TYPE_INT)
 				{
 					pT->IP=Ins->_mem[pT->SP]._int;
 					pT->SP+=1;
@@ -2822,7 +2822,7 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 			}
 			else if (opType[0]==PX_SCRIPT_ASM_OPTYPE_BP)
 			{
-				if(Ins->_mem[pT->SP].type==PX_VM_VARIABLE_TYPE_INT)
+				if(Ins->_mem[pT->SP].type==PX_VARIABLE_TYPE_INT)
 				{
 					pT->BP=Ins->_mem[pT->SP]._int;
 					pT->SP+=1;
@@ -2838,18 +2838,18 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 			{
 				pVar=PX_VMGetVariablePointer(Ins,opType[0],PX_SCRIPT_VM_PARAM(0));
 
-				if (pVar->type==PX_VM_VARIABLE_TYPE_STRING)
+				if (pVar->type==PX_VARIABLE_TYPE_STRING)
 				{
 					PX_StringFree(&pVar->_string);
 				}
 
-				if (pVar->type==PX_VM_VARIABLE_TYPE_MEMORY)
+				if (pVar->type==PX_VARIABLE_TYPE_MEMORY)
 				{
 					PX_MemoryFree(&pVar->_memory);
 				}
 				*pVar=Ins->_mem[pT->SP];
 
-				Ins->_mem[pT->SP].type=PX_VM_VARIABLE_TYPE_INT;
+				Ins->_mem[pT->SP].type=PX_VARIABLE_TYPE_INT;
 				Ins->_mem[pT->SP]._int=0;
 
 				pT->SP+=1;
@@ -2863,7 +2863,7 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 		{
 			cVar=PX_VM_GetParamConst(Ins,opType[0],PX_SCRIPT_VM_PARAM(0),&bOutofMemory);
 			if(bOutofMemory) goto _ERROR;
-			if (cVar.type!=PX_VM_VARIABLE_TYPE_INT)
+			if (cVar.type!=PX_VARIABLE_TYPE_INT)
 			{
 				PX_VM_Error(Ins,"POPN error");
 				goto _ERROR;
@@ -2872,17 +2872,17 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 			{
 				pVar=&Ins->_mem[pT->SP+i];
 
-				if (pVar->type==PX_VM_VARIABLE_TYPE_STRING)
+				if (pVar->type==PX_VARIABLE_TYPE_STRING)
 				{
 					PX_StringFree(&pVar->_string);
 				}
 
-				if (pVar->type==PX_VM_VARIABLE_TYPE_MEMORY)
+				if (pVar->type==PX_VARIABLE_TYPE_MEMORY)
 				{
 					PX_MemoryFree(&pVar->_memory);
 				}
 
-				Ins->_mem[pT->SP+i].type=PX_VM_VARIABLE_TYPE_INT;
+				Ins->_mem[pT->SP+i].type=PX_VARIABLE_TYPE_INT;
 				Ins->_mem[pT->SP+i]._int=0;
 			}
 			pT->SP+=cVar._int;
@@ -2902,7 +2902,7 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 				pVar->_int=pT->BP-PX_SCRIPT_VM_PARAM(1);
 				break;
 			case PX_SCRIPT_ASM_OPTYPE_GLOBAL_REGREF:
-				if (pT->R[PX_SCRIPT_VM_PARAM(1)].type!=PX_VM_VARIABLE_TYPE_INT)
+				if (pT->R[PX_SCRIPT_VM_PARAM(1)].type!=PX_VARIABLE_TYPE_INT)
 				{
 					PX_VM_Error(Ins,"ADR error");
 					goto _ERROR;
@@ -2910,7 +2910,7 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 				pVar->_int=pT->R[PX_SCRIPT_VM_PARAM(1)]._int;
 				break;
 			case PX_SCRIPT_ASM_OPTYPE_GLOBAL_GLOBALREF:
-				if (Ins->_mem[PX_SCRIPT_VM_PARAM(1)].type!=PX_VM_VARIABLE_TYPE_INT)
+				if (Ins->_mem[PX_SCRIPT_VM_PARAM(1)].type!=PX_VARIABLE_TYPE_INT)
 				{
 					PX_VM_Error(Ins,"ADR error");
 					goto _ERROR;
@@ -2918,7 +2918,7 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 				pVar->_int=Ins->_mem[PX_SCRIPT_VM_PARAM(1)]._int;
 				break;
 			case PX_SCRIPT_ASM_OPTYPE_GLOBAL_LOCALREF:
-				if (Ins->_mem[pT->BP-PX_SCRIPT_VM_PARAM(1)].type!=PX_VM_VARIABLE_TYPE_INT)
+				if (Ins->_mem[pT->BP-PX_SCRIPT_VM_PARAM(1)].type!=PX_VARIABLE_TYPE_INT)
 				{
 					PX_VM_Error(Ins,"ADR error");
 					goto _ERROR;
@@ -2926,7 +2926,7 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 				pVar->_int=Ins->_mem[pT->BP-PX_SCRIPT_VM_PARAM(1)]._int;
 				break;
 			case PX_SCRIPT_ASM_OPTYPE_LOCAL_REGREF:
-				if (Ins->_mem[PX_SCRIPT_VM_PARAM(1)].type!=PX_VM_VARIABLE_TYPE_INT)
+				if (Ins->_mem[PX_SCRIPT_VM_PARAM(1)].type!=PX_VARIABLE_TYPE_INT)
 				{
 					PX_VM_Error(Ins,"ADR error");
 					goto _ERROR;
@@ -2934,7 +2934,7 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 				pVar->_int=pT->BP-pT->R[PX_SCRIPT_VM_PARAM(1)]._int;
 				break;
 			case PX_SCRIPT_ASM_OPTYPE_LOCAL_GLOBALREF:
-				if (Ins->_mem[PX_SCRIPT_VM_PARAM(1)].type!=PX_VM_VARIABLE_TYPE_INT)
+				if (Ins->_mem[PX_SCRIPT_VM_PARAM(1)].type!=PX_VARIABLE_TYPE_INT)
 				{
 					PX_VM_Error(Ins,"ADR error");
 					goto _ERROR;
@@ -2942,7 +2942,7 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 				pVar->_int=pT->BP-Ins->_mem[PX_SCRIPT_VM_PARAM(1)]._int;
 				break;
 			case PX_SCRIPT_ASM_OPTYPE_LOCAL_LOCALREF:
-				if (Ins->_mem[pT->BP-PX_SCRIPT_VM_PARAM(1)].type!=PX_VM_VARIABLE_TYPE_INT)
+				if (Ins->_mem[pT->BP-PX_SCRIPT_VM_PARAM(1)].type!=PX_VARIABLE_TYPE_INT)
 				{
 					PX_VM_Error(Ins,"ADR error");
 					goto _ERROR;
@@ -2969,7 +2969,7 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 			else
 			{
 				cVar=Ins->_mem[pT->SP];
-				if (cVar.type!=PX_VM_VARIABLE_TYPE_INT)
+				if (cVar.type!=PX_VARIABLE_TYPE_INT)
 				{
 					PX_VM_Error(Ins,"RET error");
 					goto _ERROR;
@@ -3010,7 +3010,7 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 		{
 			cVar=PX_VM_GetParamConst(Ins,opType[0],PX_SCRIPT_VM_PARAM(0),&bOutofMemory);
 			if(bOutofMemory) goto _ERROR;
-			if (cVar.type!=PX_VM_VARIABLE_TYPE_INT)
+			if (cVar.type!=PX_VARIABLE_TYPE_INT)
 			{
 				PX_VM_Error(Ins,"WAIT index error");
 				goto _ERROR;
@@ -3038,7 +3038,7 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 			if(bOutofMemory) goto _ERROR;
 			sVar=PX_VM_GetParamConst(Ins,opType[1],PX_SCRIPT_VM_PARAM(1),&bOutofMemory);
 			if(bOutofMemory) goto _ERROR;
-			if (cVar.type!=PX_VM_VARIABLE_TYPE_INT||sVar.type!=PX_VM_VARIABLE_TYPE_INT)
+			if (cVar.type!=PX_VARIABLE_TYPE_INT||sVar.type!=PX_VARIABLE_TYPE_INT)
 			{
 				PX_ERROR("SIGNAL ERROR");
 				goto _ERROR;
@@ -3399,11 +3399,11 @@ px_bool PX_VMFree(PX_VM *Ins)
 	px_int i,j;
 	for (i=0;i<Ins->VM_memsize;i++)
 	{
-		if (Ins->_mem[i].type==PX_VM_VARIABLE_TYPE_STRING)
+		if (Ins->_mem[i].type==PX_VARIABLE_TYPE_STRING)
 		{
 			PX_StringFree(&Ins->_mem[i]._string);
 		}
-		if (Ins->_mem[i].type==PX_VM_VARIABLE_TYPE_MEMORY)
+		if (Ins->_mem[i].type==PX_VARIABLE_TYPE_MEMORY)
 		{
 			PX_MemoryFree(&Ins->_mem[i]._memory);
 		}
@@ -3417,11 +3417,11 @@ px_bool PX_VMFree(PX_VM *Ins)
 		{
 				for (j=0;j<PX_VM_REG_COUNT;j++)
 				{
-					if (Ins->pThread[i].R[j].type==PX_VM_VARIABLE_TYPE_STRING)
+					if (Ins->pThread[i].R[j].type==PX_VARIABLE_TYPE_STRING)
 					{
 						PX_StringFree(&Ins->pThread[i].R[j]._string);
 					}
-					if (Ins->pThread[i].R[j].type==PX_VM_VARIABLE_TYPE_MEMORY)
+					if (Ins->pThread[i].R[j].type==PX_VARIABLE_TYPE_MEMORY)
 					{
 						PX_MemoryFree(&Ins->pThread[i].R[j]._memory);
 					}
@@ -3484,13 +3484,13 @@ px_void PX_VM_RET(PX_VM *Ins,px_variable cVar)
 
 	PX_VariableFree(pVar);
 	
-	if (cVar.type==PX_VM_VARIABLE_TYPE_STRING)
+	if (cVar.type==PX_VARIABLE_TYPE_STRING)
 	{
 		PX_StringInitialize(Ins->mp,&pVar->_string);
 		PX_StringCat(&pVar->_string,cVar._string.buffer);
 		pVar->type=cVar.type;
 	}
-	else if (cVar.type==PX_VM_VARIABLE_TYPE_MEMORY)
+	else if (cVar.type==PX_VARIABLE_TYPE_MEMORY)
 	{
 		PX_MemoryInitialize(Ins->mp,&pVar->_memory);
 		PX_MemoryAlloc(&pVar->_memory,cVar._memory.usedsize);
@@ -3508,7 +3508,7 @@ px_void PX_VM_RET_String(PX_VM* Ins, const px_char* pstr)
 	px_variable* pVar;
 	pVar = &Ins->pThread[Ins->T].R[1];
 	PX_VariableFree( pVar);
-	pVar->type = PX_VM_VARIABLE_TYPE_STRING;
+	pVar->type = PX_VARIABLE_TYPE_STRING;
 
 	PX_StringInitialize(Ins->mp, &pVar->_string);
 	PX_StringCat(&pVar->_string, pstr);
@@ -3519,7 +3519,7 @@ px_void PX_VM_RET_int(PX_VM* Ins, px_int _int)
 	px_variable* pVar;
 	pVar = &Ins->pThread[Ins->T].R[1];
 	PX_VariableFree( pVar);
-	pVar->type = PX_VM_VARIABLE_TYPE_INT;
+	pVar->type = PX_VARIABLE_TYPE_INT;
 	pVar->_int = _int;
 }
 
@@ -3528,7 +3528,7 @@ px_void PX_VM_RET_ptr(PX_VM* Ins, px_void *ptr)
 	px_variable* pVar;
 	pVar = &Ins->pThread[Ins->T].R[1];
 	PX_VariableFree( pVar);
-	pVar->type = PX_VM_VARIABLE_TYPE_INT;
+	pVar->type = PX_VARIABLE_TYPE_INT;
 	pVar->_userptr = ptr;
 }
 
@@ -3537,7 +3537,7 @@ px_void PX_VM_RET_float(PX_VM* Ins, px_float _float)
 	px_variable* pVar;
 	pVar = &Ins->pThread[Ins->T].R[1];
 	PX_VariableFree( pVar);
-	pVar->type = PX_VM_VARIABLE_TYPE_FLOAT;
+	pVar->type = PX_VARIABLE_TYPE_FLOAT;
 	pVar->_float = _float;
 }
 
@@ -3547,7 +3547,7 @@ px_void PX_VM_RET_memory(PX_VM* Ins, const px_byte* data,px_int size)
 	pVar = &Ins->pThread[Ins->T].R[1];
 
 	PX_VariableFree( pVar);
-	pVar->type = PX_VM_VARIABLE_TYPE_MEMORY;
+	pVar->type = PX_VARIABLE_TYPE_MEMORY;
 
 	PX_MemoryInitialize(Ins->mp, &pVar->_memory);
 	PX_MemoryAlloc(&pVar->_memory, size);
@@ -3567,24 +3567,24 @@ px_void PX_VM_PUSH(PX_VM *Ins,px_variable cVar)
 	
 	pVar=&Ins->_mem[pT->SP];
 
-	if (pVar->type==PX_VM_VARIABLE_TYPE_STRING)
+	if (pVar->type==PX_VARIABLE_TYPE_STRING)
 	{
 		PX_StringFree(&pVar->_string);
 	}
 
-	if (pVar->type==PX_VM_VARIABLE_TYPE_MEMORY)
+	if (pVar->type==PX_VARIABLE_TYPE_MEMORY)
 	{
 		PX_MemoryFree(&pVar->_memory);
 	}
 
 
-	if (cVar.type==PX_VM_VARIABLE_TYPE_STRING)
+	if (cVar.type==PX_VARIABLE_TYPE_STRING)
 	{
 		PX_StringInitialize(Ins->mp,&pVar->_string);
 		PX_StringCat(&pVar->_string,cVar._string.buffer);
 		pVar->type=cVar.type;
 	}
-	else if (cVar.type==PX_VM_VARIABLE_TYPE_MEMORY)
+	else if (cVar.type==PX_VARIABLE_TYPE_MEMORY)
 	{
 		PX_MemoryInitialize(Ins->mp,&pVar->_memory);
 		PX_MemoryAlloc(&pVar->_memory,cVar._memory.usedsize);
@@ -3621,17 +3621,17 @@ px_void PX_VM_POPN(PX_VM *Ins,px_int T,px_int n)
 	{
 		pVar=&Ins->_mem[pT->SP+i];
 
-		if (pVar->type==PX_VM_VARIABLE_TYPE_STRING)
+		if (pVar->type==PX_VARIABLE_TYPE_STRING)
 		{
 			PX_StringFree(&pVar->_string);
 		}
 
-		if (pVar->type==PX_VM_VARIABLE_TYPE_MEMORY)
+		if (pVar->type==PX_VARIABLE_TYPE_MEMORY)
 		{
 			PX_MemoryFree(&pVar->_memory);
 		}
 
-		Ins->_mem[pT->SP+i].type=PX_VM_VARIABLE_TYPE_INT;
+		Ins->_mem[pT->SP+i].type=PX_VARIABLE_TYPE_INT;
 		Ins->_mem[pT->SP+i]._int=0;
 	}
 	pT->SP+=n;
@@ -3696,15 +3696,15 @@ px_bool PX_VMLocalAlloc(PX_VM *Ins,px_int size,PX_VM_MEMORY_PTR *mem_ptr)
 	pT->SP-=size;
 	for (i=pT->SP;i<pT->SP+size;i++)
 	{
-		if (Ins->_mem[i].type==PX_VM_VARIABLE_TYPE_MEMORY)
+		if (Ins->_mem[i].type==PX_VARIABLE_TYPE_MEMORY)
 		{
 			PX_MemoryFree(&Ins->_mem[i]._memory);
 		}
-		if (Ins->_mem[i].type==PX_VM_VARIABLE_TYPE_STRING)
+		if (Ins->_mem[i].type==PX_VARIABLE_TYPE_STRING)
 		{
 			PX_StringFree(&Ins->_mem[i]._string);
 		}
-		Ins->_mem[i].type=PX_VM_VARIABLE_TYPE_INT;
+		Ins->_mem[i].type=PX_VARIABLE_TYPE_INT;
 	}
 	mem_ptr->ptr= pT->SP;
 	mem_ptr->size=size;
@@ -3722,15 +3722,15 @@ px_bool PX_VMLocalFree(PX_VM *Ins,PX_VM_MEMORY_PTR *mem_ptr)
 	}
 	for (i=pT->SP;i<pT->SP+mem_ptr->size;i++)
 	{
-		if (Ins->_mem[i].type==PX_VM_VARIABLE_TYPE_MEMORY)
+		if (Ins->_mem[i].type==PX_VARIABLE_TYPE_MEMORY)
 		{
 			PX_MemoryFree(&Ins->_mem[i]._memory);
 		}
-		if (Ins->_mem[i].type==PX_VM_VARIABLE_TYPE_STRING)
+		if (Ins->_mem[i].type==PX_VARIABLE_TYPE_STRING)
 		{
 			PX_StringFree(&Ins->_mem[i]._string);
 		}
-		Ins->_mem[i].type=PX_VM_VARIABLE_TYPE_INT;
+		Ins->_mem[i].type=PX_VARIABLE_TYPE_INT;
 	}
 	pT->SP+=mem_ptr->size;
 	return PX_TRUE;

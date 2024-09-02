@@ -29,7 +29,7 @@ px_bool PX_CDA_VM_Sleep(PX_VM* Ins, px_void* userptr)
 {
 	PX_CDA* pCDA = (PX_CDA*)userptr;
 
-	if (PX_VM_STACK(Ins, 0).type != PX_VM_VARIABLE_TYPE_INT)
+	if (PX_VM_STACK(Ins, 0).type != PX_VARIABLE_TYPE_INT)
 	{
 		PX_VM_RET(Ins, PX_Variable_int(0));
 		return PX_FALSE;
@@ -50,7 +50,7 @@ px_bool PX_CDA_VM_Rand(PX_VM* Ins, px_void* userptr)
 
 px_bool PX_CDA_VM_Sin(PX_VM* Ins, px_void* userptr)
 {
-	if (PX_VM_STACK(Ins, 0).type != PX_VM_VARIABLE_TYPE_FLOAT)
+	if (PX_VM_STACK(Ins, 0).type != PX_VARIABLE_TYPE_FLOAT)
 	{
 		PX_VM_RET(Ins, PX_Variable_int(0));
 		return PX_FALSE;
@@ -61,7 +61,7 @@ px_bool PX_CDA_VM_Sin(PX_VM* Ins, px_void* userptr)
 
 px_bool PX_CDA_VM_Cos(PX_VM* Ins, px_void* userptr)
 {
-	if (PX_VM_STACK(Ins, 0).type != PX_VM_VARIABLE_TYPE_FLOAT)
+	if (PX_VM_STACK(Ins, 0).type != PX_VARIABLE_TYPE_FLOAT)
 	{
 		PX_VM_RET(Ins, PX_Variable_int(0));
 		return PX_FALSE;
@@ -72,7 +72,7 @@ px_bool PX_CDA_VM_Cos(PX_VM* Ins, px_void* userptr)
 
 px_bool PX_CDA_VM_Sqrt(PX_VM* Ins, px_void* userptr)
 {
-	if (PX_VM_STACK(Ins, 0).type != PX_VM_VARIABLE_TYPE_FLOAT)
+	if (PX_VM_STACK(Ins, 0).type != PX_VARIABLE_TYPE_FLOAT)
 	{
 		PX_VM_RET(Ins, PX_Variable_int(0));
 		return PX_FALSE;
@@ -86,26 +86,26 @@ px_bool PX_CDA_VM_SetObjectVelocity(PX_VM* Ins, px_void* userptr)
 	PX_CDA* pCDA = (PX_CDA*)userptr;
 	PX_Object* handler;
 	px_float x, y, z;
-	if (PX_VM_STACK(Ins, 0).type != PX_VM_VARIABLE_TYPE_HANDLE)
+	if (PX_VM_STACK(Ins, 0).type != PX_VARIABLE_TYPE_HANDLE)
 	{
 		PX_VM_RET(Ins, PX_Variable_int(0));
 		return PX_FALSE;
 	}
 	handler = (PX_Object*)PX_VM_STACK(Ins, 0)._userptr;
 
-	if (PX_VM_STACK(Ins, 1).type != PX_VM_VARIABLE_TYPE_FLOAT)
+	if (PX_VM_STACK(Ins, 1).type != PX_VARIABLE_TYPE_FLOAT)
 	{
 		PX_VM_RET(Ins, PX_Variable_int(0));
 		return PX_FALSE;
 	}
 	x = PX_VM_STACK(Ins, 1)._float;
-	if (PX_VM_STACK(Ins, 2).type != PX_VM_VARIABLE_TYPE_FLOAT)
+	if (PX_VM_STACK(Ins, 2).type != PX_VARIABLE_TYPE_FLOAT)
 	{
 		PX_VM_RET(Ins, PX_Variable_int(0));
 		return PX_FALSE;
 	}
 	y = PX_VM_STACK(Ins, 2)._float;
-	if (PX_VM_STACK(Ins, 3).type != PX_VM_VARIABLE_TYPE_FLOAT)
+	if (PX_VM_STACK(Ins, 3).type != PX_VARIABLE_TYPE_FLOAT)
 	{
 		PX_VM_RET(Ins, PX_Variable_int(0));
 		return PX_FALSE;
@@ -120,14 +120,14 @@ px_bool PX_CDA_VM_SetObjectName(PX_VM* Ins, px_void* userptr)
 {
 	PX_Object* handler;
 	const px_char* x;
-	if (PX_VM_STACK(Ins, 0).type != PX_VM_VARIABLE_TYPE_HANDLE)
+	if (PX_VM_STACK(Ins, 0).type != PX_VARIABLE_TYPE_HANDLE)
 	{
 		PX_VM_RET(Ins, PX_Variable_int(0));
 		return PX_FALSE;
 	}
 	handler = (PX_Object*)PX_VM_STACK(Ins, 0)._userptr;
 
-	if (PX_VM_STACK(Ins, 1).type != PX_VM_VARIABLE_TYPE_STRING)
+	if (PX_VM_STACK(Ins, 1).type != PX_VARIABLE_TYPE_STRING)
 	{
 		PX_VM_RET(Ins, PX_Variable_int(0));
 		return PX_FALSE;
@@ -141,7 +141,7 @@ px_bool PX_CDA_VM_SetObjectName(PX_VM* Ins, px_void* userptr)
 px_bool PX_CDA_VM_GetObjectName(PX_VM* Ins, px_void* userptr)
 {
 	PX_Object* handler;
-	if (PX_VM_STACK(Ins, 0).type != PX_VM_VARIABLE_TYPE_HANDLE)
+	if (PX_VM_STACK(Ins, 0).type != PX_VARIABLE_TYPE_HANDLE)
 	{
 		PX_VM_RET(Ins, PX_Variable_int(0));
 		return PX_FALSE;
@@ -156,14 +156,14 @@ px_bool PX_CDA_VM_SetObjectImpact(PX_VM* Ins, px_void* userptr)
 {
 	PX_Object* handler;
 	px_int x;
-	if (PX_VM_STACK(Ins, 0).type != PX_VM_VARIABLE_TYPE_HANDLE)
+	if (PX_VM_STACK(Ins, 0).type != PX_VARIABLE_TYPE_HANDLE)
 	{
 		PX_VM_RET(Ins, PX_Variable_int(0));
 		return PX_FALSE;
 	}
 	handler = (PX_Object*)PX_VM_STACK(Ins, 0)._userptr;
 
-	if (PX_VM_STACK(Ins, 1).type != PX_VM_VARIABLE_TYPE_INT)
+	if (PX_VM_STACK(Ins, 1).type != PX_VARIABLE_TYPE_INT)
 	{
 		PX_VM_RET(Ins, PX_Variable_int(0));
 		return PX_FALSE;
@@ -178,14 +178,14 @@ px_bool PX_CDA_VM_SetObjectPosition(PX_VM* Ins, px_void* userptr)
 	PX_Object* handler;
 	PX_CDA_Object *pDesc;
 	px_float x, y;
-	if (PX_VM_STACK(Ins, 0).type != PX_VM_VARIABLE_TYPE_HANDLE)
+	if (PX_VM_STACK(Ins, 0).type != PX_VARIABLE_TYPE_HANDLE)
 	{
 		PX_VM_RET(Ins, PX_Variable_int(0));
 		return PX_FALSE;
 	}
 	handler = (PX_Object*)PX_VM_STACK(Ins, 0)._userptr;
 
-	if (PX_VM_STACK(Ins, 1).type != PX_VM_VARIABLE_TYPE_FLOAT)
+	if (PX_VM_STACK(Ins, 1).type != PX_VARIABLE_TYPE_FLOAT)
 	{
 		PX_VM_RET(Ins, PX_Variable_int(0));
 		return PX_FALSE;
@@ -193,7 +193,7 @@ px_bool PX_CDA_VM_SetObjectPosition(PX_VM* Ins, px_void* userptr)
 	x = PX_VM_STACK(Ins, 1)._float;
 
 
-	if (PX_VM_STACK(Ins, 2).type != PX_VM_VARIABLE_TYPE_FLOAT)
+	if (PX_VM_STACK(Ins, 2).type != PX_VARIABLE_TYPE_FLOAT)
 	{
 		PX_VM_RET(Ins, PX_Variable_int(0));
 		return PX_FALSE;
@@ -212,7 +212,7 @@ px_bool PX_CDA_VM_GetObjectPosition(PX_VM* Ins, px_void* userptr)
 	PX_Object* handler;
 	PX_CDA_Object* pDesc;
 	px_int x,y;
-	if (PX_VM_STACK(Ins, 0).type != PX_VM_VARIABLE_TYPE_HANDLE)
+	if (PX_VM_STACK(Ins, 0).type != PX_VARIABLE_TYPE_HANDLE)
 	{
 		PX_VM_RET(Ins, PX_Variable_int(0));
 		return PX_FALSE;
@@ -220,7 +220,7 @@ px_bool PX_CDA_VM_GetObjectPosition(PX_VM* Ins, px_void* userptr)
 	handler = (PX_Object*)PX_VM_STACK(Ins, 0)._userptr;
 
 
-	if (PX_VM_STACK(Ins, 1).type != PX_VM_VARIABLE_TYPE_PTR)
+	if (PX_VM_STACK(Ins, 1).type != PX_VARIABLE_TYPE_PTR)
 	{
 		PX_VM_RET(Ins, PX_Variable_int(0));
 		return PX_TRUE;
@@ -228,14 +228,14 @@ px_bool PX_CDA_VM_GetObjectPosition(PX_VM* Ins, px_void* userptr)
 	x = PX_VM_STACK(Ins, 1)._int;
 
 
-	if (PX_VM_STACK(Ins, 2).type != PX_VM_VARIABLE_TYPE_PTR)
+	if (PX_VM_STACK(Ins, 2).type != PX_VARIABLE_TYPE_PTR)
 	{
 		PX_VM_RET(Ins, PX_Variable_int(0));
 		return PX_TRUE;
 	}
 	y = PX_VM_STACK(Ins, 2)._int;
 
-	if (PX_VM_GLOBAL(Ins, x).type != PX_VM_VARIABLE_TYPE_FLOAT || PX_VM_GLOBAL(Ins, y).type != PX_VM_VARIABLE_TYPE_FLOAT)
+	if (PX_VM_GLOBAL(Ins, x).type != PX_VARIABLE_TYPE_FLOAT || PX_VM_GLOBAL(Ins, y).type != PX_VARIABLE_TYPE_FLOAT)
 	{
 		PX_VM_RET(Ins, PX_Variable_int(0));
 		return PX_TRUE;
@@ -253,7 +253,7 @@ px_bool PX_CDA_VM_GetCDASize(PX_VM* Ins, px_void* userptr)
 	PX_CDA* pCDA = (PX_CDA*)userptr;
 
 	px_int x, y;
-	if (PX_VM_STACK(Ins, 0).type != PX_VM_VARIABLE_TYPE_PTR)
+	if (PX_VM_STACK(Ins, 0).type != PX_VARIABLE_TYPE_PTR)
 	{
 		PX_VM_RET(Ins, PX_Variable_int(0));
 		return PX_FALSE;
@@ -261,14 +261,14 @@ px_bool PX_CDA_VM_GetCDASize(PX_VM* Ins, px_void* userptr)
 	x = PX_VM_STACK(Ins, 0)._int;
 
 
-	if (PX_VM_STACK(Ins, 1).type != PX_VM_VARIABLE_TYPE_PTR)
+	if (PX_VM_STACK(Ins, 1).type != PX_VARIABLE_TYPE_PTR)
 	{
 		PX_VM_RET(Ins, PX_Variable_int(0));
 		return PX_FALSE;
 	}
 	y = PX_VM_STACK(Ins, 1)._int;
 
-	if (PX_VM_GLOBAL(Ins, x).type != PX_VM_VARIABLE_TYPE_INT || PX_VM_GLOBAL(Ins, y).type != PX_VM_VARIABLE_TYPE_INT)
+	if (PX_VM_GLOBAL(Ins, x).type != PX_VARIABLE_TYPE_INT || PX_VM_GLOBAL(Ins, y).type != PX_VARIABLE_TYPE_INT)
 	{
 		PX_VM_RET(Ins, PX_Variable_int(0));
 		return PX_FALSE;
@@ -282,23 +282,23 @@ px_bool PX_CDA_VM_GetCDASize(PX_VM* Ins, px_void* userptr)
 px_bool PX_CDA_VM_Abi_int(PX_VM* Ins, px_void* userptr)
 {
 	px_int ptr;
-	if (PX_VM_STACK(Ins, 0).type != PX_VM_VARIABLE_TYPE_PTR)
+	if (PX_VM_STACK(Ins, 0).type != PX_VARIABLE_TYPE_PTR)
 	{
 		PX_VM_RET(Ins, PX_Variable_int(0));
 		return PX_FALSE;
 	}
-	if (PX_VM_STACK(Ins, 1).type != PX_VM_VARIABLE_TYPE_STRING)
+	if (PX_VM_STACK(Ins, 1).type != PX_VARIABLE_TYPE_STRING)
 	{
 		PX_VM_RET(Ins, PX_Variable_int(0));
 		return PX_FALSE;
 	}
-	if (PX_VM_STACK(Ins, 2).type != PX_VM_VARIABLE_TYPE_INT)
+	if (PX_VM_STACK(Ins, 2).type != PX_VARIABLE_TYPE_INT)
 	{
 		PX_VM_RET(Ins, PX_Variable_int(0));
 		return PX_FALSE;
 	}
 	ptr = PX_VM_STACK(Ins, 0)._int;
-	if (PX_VM_GLOBAL(Ins, ptr).type != PX_VM_VARIABLE_TYPE_MEMORY)
+	if (PX_VM_GLOBAL(Ins, ptr).type != PX_VARIABLE_TYPE_MEMORY)
 	{
 		return PX_FALSE;
 	}
@@ -309,23 +309,23 @@ px_bool PX_CDA_VM_Abi_int(PX_VM* Ins, px_void* userptr)
 px_bool PX_CDA_VM_Abi_float(PX_VM* Ins, px_void* userptr)
 {
 	px_int ptr;
-	if (PX_VM_STACK(Ins, 0).type != PX_VM_VARIABLE_TYPE_PTR)
+	if (PX_VM_STACK(Ins, 0).type != PX_VARIABLE_TYPE_PTR)
 	{
 		PX_VM_RET(Ins, PX_Variable_int(0));
 		return PX_FALSE;
 	}
-	if (PX_VM_STACK(Ins, 1).type != PX_VM_VARIABLE_TYPE_STRING)
+	if (PX_VM_STACK(Ins, 1).type != PX_VARIABLE_TYPE_STRING)
 	{
 		PX_VM_RET(Ins, PX_Variable_int(0));
 		return PX_FALSE;
 	}
-	if (PX_VM_STACK(Ins, 2).type != PX_VM_VARIABLE_TYPE_FLOAT)
+	if (PX_VM_STACK(Ins, 2).type != PX_VARIABLE_TYPE_FLOAT)
 	{
 		PX_VM_RET(Ins, PX_Variable_int(0));
 		return PX_FALSE;
 	}
 	ptr = PX_VM_STACK(Ins, 0)._int;
-	if (PX_VM_GLOBAL(Ins, ptr).type != PX_VM_VARIABLE_TYPE_MEMORY)
+	if (PX_VM_GLOBAL(Ins, ptr).type != PX_VARIABLE_TYPE_MEMORY)
 	{
 		return PX_FALSE;
 	}
@@ -337,23 +337,23 @@ px_bool PX_CDA_VM_Abi_float(PX_VM* Ins, px_void* userptr)
 px_bool PX_CDA_VM_Abi_string(PX_VM* Ins, px_void* userptr)
 {
 	px_int ptr;
-	if (PX_VM_STACK(Ins, 0).type != PX_VM_VARIABLE_TYPE_PTR)
+	if (PX_VM_STACK(Ins, 0).type != PX_VARIABLE_TYPE_PTR)
 	{
 		PX_VM_RET(Ins, PX_Variable_int(0));
 		return PX_FALSE;
 	}
-	if (PX_VM_STACK(Ins, 1).type != PX_VM_VARIABLE_TYPE_STRING)
+	if (PX_VM_STACK(Ins, 1).type != PX_VARIABLE_TYPE_STRING)
 	{
 		PX_VM_RET(Ins, PX_Variable_int(0));
 		return PX_FALSE;
 	}
-	if (PX_VM_STACK(Ins, 2).type != PX_VM_VARIABLE_TYPE_STRING)
+	if (PX_VM_STACK(Ins, 2).type != PX_VARIABLE_TYPE_STRING)
 	{
 		PX_VM_RET(Ins, PX_Variable_int(0));
 		return PX_FALSE;
 	}
 	ptr = PX_VM_STACK(Ins, 0)._int;
-	if (PX_VM_GLOBAL(Ins, ptr).type != PX_VM_VARIABLE_TYPE_MEMORY)
+	if (PX_VM_GLOBAL(Ins, ptr).type != PX_VARIABLE_TYPE_MEMORY)
 	{
 		return PX_FALSE;
 	}
@@ -366,27 +366,27 @@ px_bool PX_CDA_VM_Abi_point(PX_VM* Ins, px_void* userptr)
 
 	px_int ptr;
 	px_float x, y, z;
-	if (PX_VM_STACK(Ins, 0).type != PX_VM_VARIABLE_TYPE_PTR)
+	if (PX_VM_STACK(Ins, 0).type != PX_VARIABLE_TYPE_PTR)
 	{
 		PX_VM_RET(Ins, PX_Variable_int(0));
 		return PX_FALSE;
 	}
-	if (PX_VM_STACK(Ins, 1).type != PX_VM_VARIABLE_TYPE_STRING)
+	if (PX_VM_STACK(Ins, 1).type != PX_VARIABLE_TYPE_STRING)
 	{
 		PX_VM_RET(Ins, PX_Variable_int(0));
 		return PX_FALSE;
 	}
-	if (PX_VM_STACK(Ins, 2).type != PX_VM_VARIABLE_TYPE_FLOAT)
+	if (PX_VM_STACK(Ins, 2).type != PX_VARIABLE_TYPE_FLOAT)
 	{
 		PX_VM_RET(Ins, PX_Variable_int(0));
 		return PX_FALSE;
 	}
-	if (PX_VM_STACK(Ins, 3).type != PX_VM_VARIABLE_TYPE_FLOAT)
+	if (PX_VM_STACK(Ins, 3).type != PX_VARIABLE_TYPE_FLOAT)
 	{
 		PX_VM_RET(Ins, PX_Variable_int(0));
 		return PX_FALSE;
 	}
-	if (PX_VM_STACK(Ins, 4).type != PX_VM_VARIABLE_TYPE_FLOAT)
+	if (PX_VM_STACK(Ins, 4).type != PX_VARIABLE_TYPE_FLOAT)
 	{
 		PX_VM_RET(Ins, PX_Variable_int(0));
 		return PX_FALSE;
@@ -395,7 +395,7 @@ px_bool PX_CDA_VM_Abi_point(PX_VM* Ins, px_void* userptr)
 	x = PX_VM_STACK(Ins, 2)._float;
 	y = PX_VM_STACK(Ins, 3)._float;
 	z = PX_VM_STACK(Ins, 4)._float;
-	if (PX_VM_GLOBAL(Ins, ptr).type != PX_VM_VARIABLE_TYPE_MEMORY)
+	if (PX_VM_GLOBAL(Ins, ptr).type != PX_VARIABLE_TYPE_MEMORY)
 	{
 		return PX_FALSE;
 	}
@@ -408,32 +408,32 @@ px_bool PX_CDA_VM_Abi_color(PX_VM* Ins, px_void* userptr)
 
 	px_int ptr;
 	px_float x, y, z, w;
-	if (PX_VM_STACK(Ins, 0).type != PX_VM_VARIABLE_TYPE_PTR)
+	if (PX_VM_STACK(Ins, 0).type != PX_VARIABLE_TYPE_PTR)
 	{
 		PX_VM_RET(Ins, PX_Variable_int(0));
 		return PX_FALSE;
 	}
-	if (PX_VM_STACK(Ins, 1).type != PX_VM_VARIABLE_TYPE_STRING)
+	if (PX_VM_STACK(Ins, 1).type != PX_VARIABLE_TYPE_STRING)
 	{
 		PX_VM_RET(Ins, PX_Variable_int(0));
 		return PX_FALSE;
 	}
-	if (PX_VM_STACK(Ins, 2).type != PX_VM_VARIABLE_TYPE_FLOAT)
+	if (PX_VM_STACK(Ins, 2).type != PX_VARIABLE_TYPE_FLOAT)
 	{
 		PX_VM_RET(Ins, PX_Variable_int(0));
 		return PX_FALSE;
 	}
-	if (PX_VM_STACK(Ins, 3).type != PX_VM_VARIABLE_TYPE_FLOAT)
+	if (PX_VM_STACK(Ins, 3).type != PX_VARIABLE_TYPE_FLOAT)
 	{
 		PX_VM_RET(Ins, PX_Variable_int(0));
 		return PX_FALSE;
 	}
-	if (PX_VM_STACK(Ins, 4).type != PX_VM_VARIABLE_TYPE_FLOAT)
+	if (PX_VM_STACK(Ins, 4).type != PX_VARIABLE_TYPE_FLOAT)
 	{
 		PX_VM_RET(Ins, PX_Variable_int(0));
 		return PX_FALSE;
 	}
-	if (PX_VM_STACK(Ins, 5).type != PX_VM_VARIABLE_TYPE_FLOAT)
+	if (PX_VM_STACK(Ins, 5).type != PX_VARIABLE_TYPE_FLOAT)
 	{
 		PX_VM_RET(Ins, PX_Variable_int(0));
 		return PX_FALSE;
@@ -443,7 +443,7 @@ px_bool PX_CDA_VM_Abi_color(PX_VM* Ins, px_void* userptr)
 	y = PX_VM_STACK(Ins, 3)._float;
 	z = PX_VM_STACK(Ins, 4)._float;
 	w = PX_VM_STACK(Ins, 5)._float;
-	if (PX_VM_GLOBAL(Ins, ptr).type != PX_VM_VARIABLE_TYPE_MEMORY)
+	if (PX_VM_GLOBAL(Ins, ptr).type != PX_VARIABLE_TYPE_MEMORY)
 	{
 		return PX_FALSE;
 	}
@@ -456,7 +456,7 @@ px_bool PX_CDA_VM_CreateThread(PX_VM* Ins, px_void* userptr)
 	PX_CDA* pDesc = (PX_CDA*)userptr;
 
 
-	if (PX_VM_STACK(Ins, 0).type != PX_VM_VARIABLE_TYPE_STRING)
+	if (PX_VM_STACK(Ins, 0).type != PX_VARIABLE_TYPE_STRING)
 	{
 		PX_VM_RET(Ins, PX_Variable_int(0));
 		return PX_TRUE;

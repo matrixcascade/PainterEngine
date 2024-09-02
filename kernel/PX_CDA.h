@@ -13,7 +13,6 @@ typedef enum
 	PX_CDA_GRID_STATE_CURSOR,
 }PX_CDA_GRID_STATE;
 
-#define PX_CDA_GRID_CONTAIN_OBJECT_MAX 16
 #define PX_CDA_GRID_DEFAULE_SIZE 16
 #define PX_CDA_PROPERTIES_MAX_COUNT 32
 
@@ -195,6 +194,7 @@ typedef struct _PX_CDA
 	px_memorypool* mp;
 	px_memorypool* mp_static;
 	//view
+	px_float   cursor_grid_x, cursor_grid_y;
 	px_float   camera_x, camera_y;
 	px_float   camera_scale;
 	px_int	   view_width,view_height;
@@ -205,6 +205,7 @@ typedef struct _PX_CDA
 	px_bool    show_controller_size;
 	px_bool    show_id_text;
 	px_bool    show_objects;
+	px_bool    show_grid_info;
 
 
 	//grid
@@ -346,6 +347,8 @@ px_void PX_CDA_Update(PX_CDA* pCDA, px_uint elapsed);
 px_void PX_CDA_Render(px_surface* psurface, PX_CDA* pCDA, px_dword elapsed);
 
 px_void PX_CDA_Free(PX_CDA* pCDA);
+
+px_void PX_CDA_OnViewZoomScale(PX_CDA* pCDA, px_bool large);
 
 px_void PX_CDA_PostEvent(PX_CDA* pCDA, PX_Object_Event e);
 

@@ -15,7 +15,7 @@ PX_OBJECT_RENDER_FUNCTION(PX_Object_ImageRender)
 
 	if (pImage->pgif)
 	{
-		PX_GifUpdate(pImage->pgif, elapsed);
+		PX_GifUpdate(pImage->pgif, (px_dword)(elapsed*pImage->gif_speed));
 		prenderTexture=PX_GifGetTexture(pImage->pgif);
 	}
 
@@ -183,6 +183,7 @@ PX_Object* PX_Object_ImageAttachObject( PX_Object* pObject,px_int attachIndex, p
 	pImage->pmask = PX_NULL;
 	pImage->Align = PX_ALIGN_CENTER;
 	pImage->alpha = 1.0f;
+	pImage->gif_speed = 1.0f;
 	return pObject;
 }
 
@@ -316,6 +317,15 @@ px_void PX_Object_ImageSetAlpha(PX_Object* pObject, px_float alpha)
 	if (pImg)
 	{
 		pImg->alpha = alpha;
+	}
+}
+
+px_void PX_Object_ImageSetGifSpeed(PX_Object* pObject, px_float _1x)
+{
+	PX_Object_Image* pImg = PX_Object_GetImage(pObject);
+	if (pImg)
+	{
+		pImg->gif_speed = _1x;
 	}
 }
 

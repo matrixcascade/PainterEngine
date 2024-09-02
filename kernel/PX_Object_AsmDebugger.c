@@ -21,29 +21,29 @@ px_void PX_Object_AsmDebuggerPrintVar(PX_Object_AsmDebugger* pAsm, px_variable* 
 	px_char content[64];
 	switch (pvar->type)
 	{
-	case PX_VM_VARIABLE_TYPE_INT:
+	case PX_VARIABLE_TYPE_INT:
 		PX_sprintf1(content, sizeof(content), "%1(int)", PX_STRINGFORMAT_STRING(name));
 		PX_Object_LabelSetText(pAsm->label_name, content);
 		PX_sprintf1(content, sizeof(content), "%1", PX_STRINGFORMAT_INT(pvar->_int));
 		PX_Object_AutoTextSetText(pAsm->autotext_data, content);
 		break;
-	case PX_VM_VARIABLE_TYPE_FLOAT:
+	case PX_VARIABLE_TYPE_FLOAT:
 		PX_sprintf1(content, sizeof(content), "%1:float", PX_STRINGFORMAT_STRING(name));
 		PX_Object_LabelSetText(pAsm->label_name, content);
 		PX_sprintf1(content, sizeof(content), "%1", PX_STRINGFORMAT_FLOAT(pvar->_float));
 		PX_Object_AutoTextSetText(pAsm->autotext_data, content);
 		break;
-	case PX_VM_VARIABLE_TYPE_MEMORY:
+	case PX_VARIABLE_TYPE_MEMORY:
 		PX_sprintf1(content, sizeof(content), "%1:memory", PX_STRINGFORMAT_STRING(name));
 		PX_Object_LabelSetText(pAsm->label_name, content);
 		PX_Object_AutoTextSetText(pAsm->autotext_data, "");
 		break;
-	case PX_VM_VARIABLE_TYPE_STRING:
+	case PX_VARIABLE_TYPE_STRING:
 		PX_sprintf1(content, sizeof(content), "%1:string", PX_STRINGFORMAT_STRING(name));
 		PX_Object_LabelSetText(pAsm->label_name, content);
 		PX_Object_AutoTextSetText(pAsm->autotext_data, pvar->_string.buffer);
 		break;
-	case PX_VM_VARIABLE_TYPE_HANDLE:
+	case PX_VARIABLE_TYPE_HANDLE:
 		PX_sprintf1(content, sizeof(content), "%1(handle)", PX_STRINGFORMAT_STRING(name));
 		PX_Object_LabelSetText(pAsm->label_name, content);
 		PX_sprintf1(content, sizeof(content), "%1", PX_STRINGFORMAT_INT((px_int)(pvar->_uint)));

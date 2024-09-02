@@ -30,7 +30,7 @@ px_bool PX_CDA_Initialize(px_memorypool* mp, px_memorypool* mp_static, PX_CDA* p
 	pCDA->show_grid_line=PX_TRUE;
 	pCDA->show_controller_size=PX_TRUE;
 	pCDA->show_id_text=PX_TRUE;
-
+	pCDA->show_grid_info = PX_TRUE;
 	//grid
 	pCDA->grid_x_count = grid_x_count;
 	pCDA->grid_y_count = grid_y_count;
@@ -43,6 +43,7 @@ px_bool PX_CDA_Initialize(px_memorypool* mp, px_memorypool* mp_static, PX_CDA* p
 	pCDA->presourceLibrary=plib;
 	pCDA->fontmodule = fm;
 	pCDA->psource_background_texture = PX_ResourceLibraryGetTexture(plib,"cda_background");
+	
 
 	if (!PX_MapInitialize(mp, &pCDA->objectClasses))
 	{
@@ -1094,7 +1095,7 @@ px_void PX_CDA_RenderObjects(px_surface* psurface, PX_CDA* pCDA,px_dword elapsed
 
 		if (pCDA->show_id_text)
 		{
-			PX_FontModuleDrawText(psurface, pCDA->fontmodule, (px_int)(pObject->x + pObject->Width/2), (px_int)(pObject->y + pObject->Height/2), PX_ALIGN_CENTER, pObject->id, PX_COLOR(255, 255, 0, 0));
+			PX_FontModuleDrawText(psurface, pCDA->fontmodule, (px_int)(pObject->x + pObject->Width/2), (px_int)(pObject->y -2), PX_ALIGN_MIDBOTTOM, pObject->id, PX_COLOR(255, 255, 0, 0));
 		}
 
 		
@@ -1117,6 +1118,57 @@ px_void PX_CDA_RenderObjects(px_surface* psurface, PX_CDA* pCDA,px_dword elapsed
 	}
 }
 
+px_void PX_CDA_RenderGridInfos(px_surface* psurface, PX_CDA* pCDA, px_dword elapsed)
+{
+	if (pCDA->show_grid_info)
+	{
+		if(pCDA->cursor_grid_x>=0&& pCDA->cursor_grid_x<pCDA->grid_x_count)
+		{
+			if (pCDA->cursor_grid_y >= 0 && pCDA->cursor_grid_y < pCDA->grid_y_count)
+			{
+				px_int index = (px_int)pCDA->cursor_grid_x + (px_int)(pCDA->cursor_grid_y)*pCDA->grid_x_count;
+				px_int x, y,w,h;
+				px_int gridx, gridy;
+				px_char text[64];
+				PX_CDA_GetGridRenderXY(pCDA, index, &x, &y);
+				w = pCDA->grid_size;
+				h = pCDA->grid_size;
+				gridx = (px_int)pCDA->cursor_grid_x;
+				gridy = (px_int)pCDA->cursor_grid_y;
+				PX_GeoDrawBorder(psurface, x, y, x + w, y + h, 1, PX_COLOR(255, 255, 0, 0));
+				switch (pCDA->pgrids[index].var.type)
+				{
+				case PX_VARIABLE_TYPE_INT:
+					PX_sprintf3(text,sizeof(text),"x:%1 y:%2\ntype:int\nvalue:%3",PX_STRINGFORMAT_INT(gridx),PX_STRINGFORMAT_INT(gridy),PX_STRINGFORMAT_INT(pCDA->pgrids[index].var._int));
+					break;
+				case PX_VARIABLE_TYPE_FLOAT:
+					PX_sprintf3(text, sizeof(text), "x:%1 y:%2\ntype:float\nvalue:%3", PX_STRINGFORMAT_INT(gridx), PX_STRINGFORMAT_INT(gridy), PX_STRINGFORMAT_FLOAT(pCDA->pgrids[index].var._float));
+					break;
+				case PX_VARIABLE_TYPE_STRING:
+					PX_sprintf3(text, sizeof(text), "x:%1 y:%2\ntype:string\nvalue:%3", PX_STRINGFORMAT_INT(gridx), PX_STRINGFORMAT_INT(gridy), PX_STRINGFORMAT_STRING(pCDA->pgrids[index].var._string.buffer));
+					break;
+				case PX_VARIABLE_TYPE_HANDLE:
+					PX_sprintf2(text, sizeof(text), "x:%1 y:%2\ntype:pointer\n", PX_STRINGFORMAT_INT(gridx), PX_STRINGFORMAT_INT(gridy));
+					break;
+				case PX_VARIABLE_TYPE_MEMORY:
+					PX_sprintf3(text, sizeof(text), "x:%1 y:%2\ntype:memory\nsize:%3", PX_STRINGFORMAT_INT(gridx), PX_STRINGFORMAT_INT(gridy), PX_STRINGFORMAT_INT((px_int)pCDA->pgrids[index].var._memory.allocsize));
+					break;
+				default:
+					PX_sprintf2(text, sizeof(text), "x:%1 y:%2", PX_STRINGFORMAT_INT(gridx), PX_STRINGFORMAT_INT(gridy));
+					break;
+				}
+				PX_FontModuleTextGetRenderWidthHeight(pCDA->fontmodule, text, &w, &h);
+				//draw background
+				x += pCDA->grid_size +2;
+				y += pCDA->grid_size +2;
+				PX_GeoDrawRect(psurface, x-2, y-2, x + w+2 , y + h+2, PX_COLOR(128, 255, 255, 168));
+				PX_GeoDrawBorder(psurface, x - 2, y - 2, x + w + 2, y + h + 2, 1, PX_COLOR(255, 0, 0, 0));
+				PX_FontModuleDrawText(psurface, pCDA->fontmodule, x+2  , y+2, PX_ALIGN_LEFTTOP, text, PX_COLOR(255, 0, 0, 0));
+			}
+		}
+	}
+}
+
 px_void PX_CDA_Render(px_surface *psurface,PX_CDA *pCDA,px_dword elapsed)
 {
 	//redner background
@@ -1130,6 +1182,10 @@ px_void PX_CDA_Render(px_surface *psurface,PX_CDA *pCDA,px_dword elapsed)
 
 	//render objects
 	PX_CDA_RenderObjects(psurface, pCDA, elapsed);
+
+	//render grid infos
+	PX_CDA_RenderGridInfos(psurface, pCDA, elapsed);
+
 }
 
 px_bool PX_CDA_BeginRouteEdit(PX_CDA* pCDA, px_int start_grid_x, px_int start_grid_y, PX_CDA_RouteClass* pRouteClass)
@@ -1616,10 +1672,56 @@ px_texture * PX_CDA_TakeSnapShot(PX_CDA* pCDA)
 	return &pCDA->snapshot_texture;
 }
 
+px_void PX_CDA_OnViewZoomScale(PX_CDA *pCDA, px_bool large)
+{
+	px_float ref_x, ref_y;
+	ref_x = pCDA->camera_x / pCDA->grid_size;
+	ref_y = pCDA->camera_y / pCDA->grid_size;
+	if (large)
+	{
+		pCDA->grid_size += 4;
+		if (pCDA->grid_size > 48)
+		{
+			pCDA->grid_size = 48;
+		}
+
+	}
+	else
+	{
+		pCDA->grid_size -= 4;
+		if (pCDA->grid_size < 8)
+		{
+			pCDA->grid_size = 4;
+		}
+	}
+	pCDA->camera_x = (ref_x * pCDA->grid_size);
+	pCDA->camera_y = (ref_y * pCDA->grid_size);
+}
+
 px_void PX_CDA_PostEvent(PX_CDA* pCDA, PX_Object_Event e)
 {
 	PX_Object* pObject;
 	px_int i;
+
+	if (e.Event == PX_OBJECT_EVENT_CURSORMOVE|| e.Event == PX_OBJECT_EVENT_CURSORDRAG)
+	{
+		px_float x, y;
+		x = PX_Object_Event_GetCursorX(e);
+		y = PX_Object_Event_GetCursorY(e);
+
+		pCDA->cursor_grid_x = (x + pCDA->camera_x - pCDA->view_width / 2) / pCDA->grid_size;
+		pCDA->cursor_grid_y = (y + pCDA->camera_y - pCDA->view_height / 2) / pCDA->grid_size;
+	}
+
+	if (e.Event == PX_OBJECT_EVENT_CURSORWHEEL)
+	{
+		px_float z;
+		z = PX_Object_Event_GetCursorZ(e);
+		PX_CDA_OnViewZoomScale(pCDA, z > 0);
+	}
+	
+
+
 	for (i = 0; i < pCDA->pObjects.size; i++)
 	{
 		pObject = *PX_VECTORAT(PX_Object *, &pCDA->pObjects, i);
@@ -1656,11 +1758,18 @@ PX_CDA_Object *PX_Object_GetCDAObject(PX_Object* pObject)
 	return pdesc;
 	
 }
-
+	
 px_bool PX_CDA_AddObjectClass(PX_CDA* pCDA, PX_CDA_ObjectClass *pclass)
 {
 	px_int i;
-	PX_CDA_ObjectClass *pNewClass=(PX_CDA_ObjectClass *)MP_Malloc(pCDA->mp,sizeof(PX_CDA_ObjectClass));
+	PX_CDA_ObjectClass* pNewClass;
+	if (PX_MapGet(&pCDA->objectClasses, (const px_byte*)pclass->name, PX_strlen(pclass->name)))
+	{
+		PX_ASSERT();
+		return PX_FALSE;
+	}
+
+	pNewClass = (PX_CDA_ObjectClass*)MP_Malloc(pCDA->mp, sizeof(PX_CDA_ObjectClass));
 	if (pNewClass==PX_NULL)
 	{
 		return PX_FALSE;
@@ -2817,11 +2926,11 @@ px_void PX_CDA_ObjectSetPortVariable(PX_Object* pCDAObject, px_int port, px_vari
 		px_float val = (PX_FRAC(pDesc->grid_x - pDesc->grid_width / 2.f));
 		if (PX_ABS(val) < 0.1 || PX_ABS(val) > 0.9f)
 		{
-			px_int apox = PX_APO(pDesc->grid_x - pDesc->grid_width / 2);
+			px_int apox = PX_APO(pDesc->grid_x - pDesc->grid_width / 2.f);
 			val = PX_FRAC(pDesc->grid_y - pDesc->grid_height / 2.f);
 			if (PX_ABS(val) < 0.1 || PX_ABS(val) > 0.9f)
 			{
-				px_int apoy = PX_APO(pDesc->grid_y - pDesc->grid_height / 2);
+				px_int apoy = PX_APO(pDesc->grid_y - pDesc->grid_height / 2.f);
 				apoy+=port/pDesc->grid_width;
 				apox+=port%pDesc->grid_width;
 

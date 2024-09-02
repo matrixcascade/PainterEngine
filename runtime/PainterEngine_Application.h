@@ -3,7 +3,7 @@
 
 #define PX_APPLICATION_NAME "PainterEngine"
 #define PX_APPLICATION_MEMORYPOOL_STATIC_SIZE (1024*1024*64)
-#define PX_APPLICATION_MEMORYPOOL_DYNAMIC_SIZE (1024*1024*32)
+#define PX_APPLICATION_MEMORYPOOL_DYNAMIC_SIZE (1024*1024*64)
 #define PX_APPLICATION_MEMORYPOOL_SPACE_SIZE (1024*1024*32)
 
 #define PX_APPLICATION_MEMORYPOOL_ALL_SIZE (PX_APPLICATION_MEMORYPOOL_STATIC_SIZE+PX_APPLICATION_MEMORYPOOL_DYNAMIC_SIZE+PX_APPLICATION_MEMORYPOOL_SPACE_SIZE)
@@ -21,6 +21,7 @@
 		PX_Object* object_root,*object_designer,*object_messagebox,*object_printer;
 		PX_SoundPlay soundplay;
 		PX_Runtime runtime;
+		PX_Json language;
 		PX_FontModule fontmodule,*pfontmodule;
 		px_byte cache[PX_APPLICATION_MEMORYPOOL_ALL_SIZE];
 	}PX_Application;
@@ -50,6 +51,8 @@
 	px_void PainterEngine_PrintSetFontColor(px_color clr);
 	PX_Object* PainterEngine_PrintGetArea();
 
+	const px_char* PainterEngine_Language(const px_char tr[]);
+
 	px_void PainterEngine_DrawTexture(px_texture* ptexture, px_int x, px_int y, PX_ALIGN align);
 	px_void PainterEngine_DrawLine(px_int x1, px_int y1, px_int x2, px_int y2, px_int linewidth, px_color color);
 	px_void PainterEngine_DrawRect(px_int x, px_int y, px_int width, px_int height, px_int linewidth, px_color color);
@@ -61,6 +64,8 @@
 	px_void PX_ApplicationUpdate(PX_Application* App, px_dword elapsed);
 	px_void PX_ApplicationRender(PX_Application* App, px_dword elapsed);
 	px_void PX_ApplicationPostEvent(PX_Application* App, PX_Object_Event e);
+
+	
 
 
 #endif

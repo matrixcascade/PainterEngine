@@ -41,7 +41,7 @@ px_bool PX_ExecuterVM_LastPrint(PX_VM *Ins,px_void *userptr)
 	PX_Object_Executer *pExecuter= (PX_Object_Executer*)PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_EXECUTER);
 	PX_ASSERTIF(!pExecuter);
 
-	if (PX_VM_STACK(Ins,0).type!=PX_VM_VARIABLE_TYPE_STRING)
+	if (PX_VM_STACK(Ins,0).type!=PX_VARIABLE_TYPE_STRING)
 	{
 		PX_VM_RET(Ins,PX_Variable_int(0));
 		return PX_TRUE;
@@ -57,7 +57,7 @@ px_bool PX_ExecuterVM_Print(PX_VM *Ins,px_void *userptr)
 	PX_Object_Executer* pExecuter = (PX_Object_Executer*)PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_EXECUTER);
 	PX_ASSERTIF(!pExecuter);
 
-	if (PX_VM_STACK(Ins,0).type!=PX_VM_VARIABLE_TYPE_STRING)
+	if (PX_VM_STACK(Ins,0).type!=PX_VARIABLE_TYPE_STRING)
 	{
 		PX_VM_RET(Ins,PX_Variable_int(0));
 		return PX_TRUE;
@@ -88,7 +88,7 @@ px_bool PX_ExecuterVM_Sleep(PX_VM *Ins,px_void *userptr)
 	PX_Object_Executer* pExecuter = (PX_Object_Executer*)PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_EXECUTER);
 	PX_ASSERTIF(!pExecuter);
 
-	if (PX_VM_STACK(Ins,0).type!=PX_VM_VARIABLE_TYPE_INT)
+	if (PX_VM_STACK(Ins,0).type!=PX_VARIABLE_TYPE_INT)
 	{
 		PX_VM_RET(Ins,PX_Variable_int(0));
 		return PX_TRUE;
@@ -106,7 +106,7 @@ px_bool PX_ExecuterVM_Rand(PX_VM *Ins,px_void *userptr)
 
 px_bool PX_ExecuterVM_Sin(PX_VM *Ins,px_void *userptr)
 {
-	if (PX_VM_STACK(Ins,0).type!=PX_VM_VARIABLE_TYPE_FLOAT)
+	if (PX_VM_STACK(Ins,0).type!=PX_VARIABLE_TYPE_FLOAT)
 	{
 		PX_VM_RET(Ins,PX_Variable_int(0));
 		return PX_TRUE;
@@ -117,7 +117,7 @@ px_bool PX_ExecuterVM_Sin(PX_VM *Ins,px_void *userptr)
 
 px_bool PX_ExecuterVM_Cos(PX_VM *Ins,px_void *userptr)
 {
-	if (PX_VM_STACK(Ins,0).type!=PX_VM_VARIABLE_TYPE_FLOAT)
+	if (PX_VM_STACK(Ins,0).type!=PX_VARIABLE_TYPE_FLOAT)
 	{
 		PX_VM_RET(Ins,PX_Variable_int(0));
 		return PX_TRUE;
@@ -154,7 +154,7 @@ px_bool PX_ExecuterVM_CreateThread(PX_VM *Ins,px_void *userptr)
 	PX_Object* pObject = (PX_Object*)userptr;
 	PX_Object_Executer* pExecute = (PX_Object_Executer*)PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_EXECUTER);
 
-	if (PX_VM_STACK(Ins,0).type!=PX_VM_VARIABLE_TYPE_STRING)
+	if (PX_VM_STACK(Ins,0).type!=PX_VARIABLE_TYPE_STRING)
 	{
 		PX_VM_RET(Ins,PX_Variable_int(0));
 		return PX_TRUE;
