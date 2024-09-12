@@ -166,6 +166,7 @@ A GPU IP core based on FPGA has been developed and functionally verified on the 
 <p align="center"><img width="600" src="images/l2d.png" alt="PainterEngine market"></p>
 
 ### 现在,访问PainterEngine.com,参与建设
+### Now, join the PainterEngine.com contribute to its development.
 <p align="center">
 <img src="platform/fox/mini/1.png" alt="logo">
 <img src="platform/fox/mini/2.png" alt="logo">
@@ -202,4 +203,4 @@ A GPU IP core based on FPGA has been developed and functionally verified on the 
 <img src="platform/fox/mini/24.png" alt="logo">
 </p>
 
-### Now, join the PainterEngine.com contribute to its development.
+
