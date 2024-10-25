@@ -76,6 +76,16 @@ px_void PainterEngine_DrawPixel( px_int x, px_int y, px_color color)
 	PX_SurfaceDrawPixel(PX_Object_PanelGetSurface(App.object_printer),  x, y, color);
 }
 
+px_void PainterEngine_DrawText(px_int x, px_int y, const px_char text[],PX_ALIGN align, px_color color)
+{
+	if (App.object_printer->Visible == PX_FALSE)
+	{
+		PX_ObjectSetVisible(App.object_printer, PX_TRUE);
+	}
+	PX_FontModuleDrawText(PX_Object_PanelGetSurface(App.object_printer), App.pfontmodule, x, y, align, text, color);
+	
+}
+
 px_void PainterEngine_DrawTexture(px_texture *ptexture,px_int x,px_int y,PX_ALIGN align)
 {
 	if (App.object_printer->Visible == PX_FALSE)
@@ -94,7 +104,7 @@ px_void PainterEngine_DrawLine(px_int x1,px_int y1,px_int x2,px_int y2,px_int li
 	PX_GeoDrawLine(PX_Object_PanelGetSurface(App.object_printer), x1, y1, x2, y2, linewidth, color);
 }
 
-px_void PainterEngine_DrawRect(px_int x,px_int y,px_int width,px_int height,px_int linewidth,px_color color)
+px_void PainterEngine_DrawRect(px_int x,px_int y,px_int width,px_int height,px_color color)
 {
 	if (App.object_printer->Visible == PX_FALSE)
 	{
@@ -205,6 +215,12 @@ px_bool PainterEngine_Initialize(px_int _screen_width,px_int _screen_height)
 	PX_Runtime* runtime = &App.runtime;
 	if (!PX_RuntimeInitialize(runtime, _screen_width, _screen_height, _screen_width, _screen_height, App.cache, sizeof(App.cache), PX_APPLICATION_MEMORYPOOL_STATIC_SIZE, PX_APPLICATION_MEMORYPOOL_DYNAMIC_SIZE))
 		return PX_FALSE;
+#ifdef PX_AUDIO_H
+	PX_SoundPlayInitialize(mp, &App.soundplay);
+	PainterEngine_InitializeAudio();
+#endif
+	if (_screen_width == 0 || _screen_height == 0)
+		return PX_TRUE;
 #ifdef PAINTERENGIN_FILE_SUPPORT
 	if(PX_LoadFontModuleFromTTF(&runtime->mp_static, &App.fontmodule, "assets/font.ttf",PX_FONTMODULE_CODEPAGE_UTF8,18))
 	{
@@ -243,10 +259,7 @@ px_bool PainterEngine_Initialize(px_int _screen_width,px_int _screen_height)
 	render_surface=&App.runtime.RenderSurface;
 	resource_library =&App.runtime.ResourceLibrary;
 	soundplay = &App.soundplay;
-	#ifdef PX_AUDIO_H
-	PX_SoundPlayInitialize(mp, &App.soundplay);
-	PainterEngine_InitializeAudio();
-	#endif
+
 	return PX_TRUE;
 }
 

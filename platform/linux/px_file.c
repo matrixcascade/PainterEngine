@@ -1,9 +1,12 @@
 
-#include "../modules/px_file.h"
+#include "platform/modules/px_file.h"
 #include "stdio.h"
 #include "stdlib.h"
 #include "string.h"
 #include <errno.h>
+#ifndef __USE_MISC
+#define __USE_MISC
+#endif
 #include "dirent.h"
 
 int PX_SaveDataToFile(void *buffer, int size, const char path[])

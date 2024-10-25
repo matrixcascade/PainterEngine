@@ -181,6 +181,7 @@ struct _PX_Object
 	px_bool  Visible;
 	px_bool  ReceiveEvents;
 	px_bool  delay_delete;
+	px_int   map_index;
 	px_dword impact_object_type;
 	px_dword impact_target_type;
 

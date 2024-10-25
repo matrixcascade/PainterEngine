@@ -1,4 +1,4 @@
-#include "../modules/px_time.h"
+#include "platform/modules/px_time.h"
 #include "time.h"
 #include <unistd.h>
 
@@ -6,7 +6,7 @@ unsigned int PX_TimeGetTime()
 {
 	unsigned int uptime = 0;
 	struct timespec on;
-	if(clock_gettime(CLOCK_MONOTONIC, &on) == 0)
+	if(clock_gettime(1, &on) == 0)
 		uptime = on.tv_sec*1000 + on.tv_nsec/1000000;
 	return uptime;
 }

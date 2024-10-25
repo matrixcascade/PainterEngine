@@ -543,6 +543,8 @@ px_bool PX_HuffmanInflateCodeData(const px_byte _in[], px_uint *pbit_position, p
 		{
 			if (!PX_MemoryCat(out, &code, 2))
 				return PX_FALSE;
+			if ((*pbit_position / 8) >= in_size)
+				return PX_FALSE;
 		}
 		else if (code >= 257 && code <= 285) 
 		{
@@ -606,7 +608,23 @@ px_bool PX_HuffmanDeflateCodeData(px_word* _in, px_uint in_size, px_memory* _out
 		do 
 		{
 			px_uint i;
+			px_uint max_counter_length[] = { 1597,3194,4791,6388,7985,9582,11179,12776,14373,15970,17567,19164,20761,22358,23955,25552,27149,\
+				28746,30343,31940,33537,35134, 36731,38328,39925,41522,43119,44716,46313,47910,49507,51104 };
 			px_dword counter[288] = { 0 };
+			px_uint flip_value=32;
+
+			for ( i = 0; i < PX_COUNTOF(max_counter_length); i++)
+			{
+				if(in_size<max_counter_length[i])
+				{
+					flip_value = i+1;
+				}
+				else
+				{
+					break;
+				}
+			}
+
 			for (i=0;i<in_size;i++)
 			{
 				counter[_in[i]]++;
@@ -615,6 +633,16 @@ px_bool PX_HuffmanDeflateCodeData(px_word* _in, px_uint in_size, px_memory* _out
 					i += 2;
 				}
 			}
+			
+			
+			for (i = 0; i < 288; i++)
+			{
+				if(counter[i]< flip_value &&counter[i])
+				{
+					counter[i] = flip_value;
+				}
+			}
+			
 
 			PX_HuffmanBuildDymanicTable(counter, 288, raw_code, raw_code_bl);//code_bit_length [1-19] 5bit
 
@@ -668,6 +696,14 @@ px_bool PX_HuffmanDeflateCodeData(px_word* _in, px_uint in_size, px_memory* _out
 			for (i = 0; i < 30; i++)
 			{
 				counter[distance_code_bl[i]]++;
+			}
+
+			for (i = 0; i < 19; i++)
+			{
+				if (counter[i] < 8 && counter[i])
+				{
+					counter[i] = 8;
+				}
 			}
 
 			PX_HuffmanBuildDymanicTable(counter, 19, raw_code_bl_code, raw_code_bl_code_bl);//code_code_bit_length 

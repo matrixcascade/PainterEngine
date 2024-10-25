@@ -16,6 +16,14 @@ typedef struct
 	volatile int isRun;
 }px_thread;
 
-int PX_ThreadCreate(px_thread *thread,func_thread func,void *ptr);
+typedef struct
+{
+	void* handle;
+}px_mutex;
 
+int PX_ThreadCreate(px_thread *thread,func_thread func,void *ptr);
+void PX_MutexInitialize(px_mutex* pmutex);
+void PX_MutexLock(px_mutex* pmutex);
+void PX_MutexUnlock(px_mutex* pmutex);
+void PX_MutexFree(px_mutex* pmutex);
 #endif

@@ -74,6 +74,7 @@ px_color PX_JsonGetColor(PX_Json* pjson, const px_char payload[]);
 const px_char *PX_JsonGetString(PX_Json *pjson,const px_char payload[]);
 px_double PX_JsonGetNumber(PX_Json *pjson,const px_char payload[]);
 px_bool  PX_JsonGetBoolean(PX_Json *pjson,const px_char payload[]);
+px_int PX_JsonGetInt(PX_Json* pjson, const px_char payload[]);
 
 const px_char* PX_JsonValueGetString(PX_Json_Value* pValue, const px_char payload[]);
 px_double PX_JsonValueGetNumber(PX_Json_Value* pValue, const px_char payload[]);

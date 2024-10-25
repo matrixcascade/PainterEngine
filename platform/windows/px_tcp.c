@@ -14,14 +14,12 @@ int PX_TCPInitialize(PX_TCP *tcp,PX_TCP_IP_TYPE type)
 {
 	WORD wVersionRequested; 
 	WSADATA wsaData;        
+	SOCKET newsock;
 	int err;           
-	int nZero=0;
-	int nRecvBuf=1024*1024*2;
-	int nSendBuf=1024*1024*2;
-	int optval=TRUE;
 	static int init = 0;
-	int disable = 0;
-
+	int disable = 1;
+	int nRecvBuf = 2*1024 * 1024;
+	int nSendBuf = 2*1024 * 1024;
 	tcp->type=type;
 
 	if (init==0)
@@ -42,15 +40,16 @@ int PX_TCPInitialize(PX_TCP *tcp,PX_TCP_IP_TYPE type)
 	}
 	
 	//Initialize socket
-	if ((tcp->socket=(unsigned int)socket(AF_INET,SOCK_STREAM,IPPROTO_TCP))==INVALID_SOCKET)
+	newsock= socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+	if (newsock==INVALID_SOCKET)
 	{
 		return 0;
 	}
+	tcp->socket=(unsigned int)newsock;
 	  	
-	setsockopt(tcp->socket,SOL_SOCKET,SO_RCVBUF,(const char*)&nRecvBuf,sizeof(int));
-	setsockopt(tcp->socket,SOL_SOCKET,SO_SNDBUF,(const char*)&nSendBuf,sizeof(int));
 	setsockopt(tcp->socket, IPPROTO_TCP, TCP_NODELAY, (const char*)&disable, sizeof(int));
-
+	setsockopt(tcp->socket, SOL_SOCKET, SO_RCVBUF, (const char*)&nRecvBuf, sizeof(int));
+	setsockopt(tcp->socket, SOL_SOCKET, SO_SNDBUF, (const char*)&nSendBuf, sizeof(int));
 	return 1;
 }
 
@@ -65,7 +64,9 @@ int PX_TCPConnect(PX_TCP *tcp,PX_TCP_ADDR addr)
 	ret=connect(tcp->socket,(LPSOCKADDR)&to,sizeof(to));
 	if (ret==0)
 	{
+		int disable = 1;
 		tcp->connectAddr=addr;
+		setsockopt(tcp->socket, IPPROTO_TCP, TCP_NODELAY, (const char*)&disable, sizeof(int));
 		return 1;
 	}
 	return 0;
@@ -73,23 +74,11 @@ int PX_TCPConnect(PX_TCP *tcp,PX_TCP_ADDR addr)
 
 int PX_TCPSend(PX_TCP *tcp,void *buffer,int size)
 {
-	char *sendBuffer=(char *)buffer;
-	int length;
 	switch(tcp->type)
 	{
 	case PX_TCP_IP_TYPE_IPV4:
 		{
-			do
-			{
-				if ((length=send(tcp->socket,(const char *)sendBuffer,size,0))==SOCKET_ERROR)
-				{
-					int error=WSAGetLastError();
-					return 0;
-				}
-				sendBuffer+=length;
-				size-=length;
-			}while(size>0);
-			return 1;
+		   return send(tcp->socket, (const char*)buffer, size, 0);
 		}
 		break;
 	case PX_TCP_IP_TYPE_IPV6:
@@ -103,7 +92,7 @@ int PX_TCPSend(PX_TCP *tcp,void *buffer,int size)
 
 int PX_TCPReceived(PX_TCP *tcp,void *buffer,int buffersize,int timeout)
 {
-	size_t ReturnSize;
+	int ReturnSize;
 	if (timeout>0)
 	{
 		int ret = setsockopt(tcp->socket, SOL_SOCKET, SO_RCVTIMEO, (const char*)&timeout, sizeof(timeout));
@@ -161,7 +150,7 @@ int PX_TCPSocketReceived(unsigned int socket, void* buffer, int buffersize, int 
 	if (ReturnSize<=0)
 	{
 		int error = WSAGetLastError();
-		if (error == 10060)
+		if (error == 10060|| error==0)
 			return 0;
 		else
 			return -1;
@@ -171,31 +160,20 @@ int PX_TCPSocketReceived(unsigned int socket, void* buffer, int buffersize, int 
 
 int PX_TCPSocketSend(unsigned int socket, void* buffer, int size)
 {
-	char* sendBuffer = (char*)buffer;
-	int length;
-	int sendsize = size;
-	do
-	{
-		if ((length = send(socket, (const char*)sendBuffer, size, 0)) == SOCKET_ERROR)
-		{
-			int error = WSAGetLastError();
-			return 0;
-		}
-		sendBuffer += length;
-		size -= length;
-	} while (size > 0);
-	return sendsize;
+	return send(socket, (const char*)buffer, size, 0);
 }
 
 int PX_TCPAccept(PX_TCP *tcp,unsigned int *socket,PX_TCP_ADDR *fromAddr)
 {
 	DWORD lasterror;
 	SOCKADDR_IN sockaddr_in;
+	unsigned int disable = 1;
 	int len=sizeof(SOCKADDR);
 	*socket=(unsigned int)accept((SOCKET)(tcp->socket),(LPSOCKADDR)&sockaddr_in,&len);
 	lasterror=WSAGetLastError();
 	fromAddr->ipv4 = sockaddr_in.sin_addr.S_un.S_addr;
 	fromAddr->port = sockaddr_in.sin_port;
+	setsockopt(tcp->socket, IPPROTO_TCP, TCP_NODELAY, (const char*)&disable, sizeof(int));
 	return *socket!=INVALID_SOCKET;
 }
 
@@ -205,6 +183,7 @@ int PX_TCPIsConnecting(PX_TCP *tcp)
 	char b;
 	int err,ret;
 	int timeout=1;
+
 	setsockopt(tcp->socket,SOL_SOCKET,SO_RCVTIMEO,(const char *)&timeout,sizeof(timeout));
 	ret=recv(tcp->socket,&b,1,MSG_PEEK);
 	if ((err=WSAGetLastError())==10060)
@@ -225,7 +204,7 @@ int PX_TCPKeepConnect(PX_TCP *tcp)
 
 int PX_TCPRecvCacheSize(PX_TCP *tcp)
 {
-	unsigned long bytesToRecv;
+	unsigned long bytesToRecv=0;
 	if (ioctlsocket(tcp->socket, FIONREAD, &bytesToRecv) == 0)
 	{
 		return bytesToRecv;

@@ -65,6 +65,7 @@ int PX_TimeGetSecond()
 	return  p.tm_sec;
 }
 
+
 unsigned int PX_TimeGetTime()
 {
 	return timeGetTime();

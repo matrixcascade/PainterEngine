@@ -238,7 +238,7 @@ typedef struct _PX_CDA
 	PX_SoundPlay *soundplay;
 	PX_VM_DebuggerMap debugmap;
 	PX_VM  vm;
-	px_uint64 rand_seed;
+	PX_MT19937 mt19937;
 	px_map objectClasses,routeClasses;
 
 	//last 

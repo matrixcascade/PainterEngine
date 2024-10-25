@@ -1,5 +1,5 @@
 
-#include "../modules/px_udp.h"
+#include "platform/modules/px_udp.h"
 //GNU C
 #include <sys/socket.h>
 #include <sys/ioctl.h>
@@ -26,7 +26,7 @@ int PX_UDPInitialize(PX_UDP *udp,PX_UDP_IP_TYPE type)
 		return 0;
 	}
 	  
-	rev=ioctl(udp->socket,FIONBIO,(u_long *)&imode);
+	rev=ioctl(udp->socket,FIONBIO,(unsigned long *)&imode);
 	setsockopt(udp->socket,SOL_SOCKET,SO_RCVBUF,(const char*)&nRecvBuf,sizeof(int));
 	setsockopt(udp->socket,SOL_SOCKET,SO_SNDBUF,(const char*)&nSendBuf,sizeof(int));
 

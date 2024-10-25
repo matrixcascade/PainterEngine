@@ -3,12 +3,14 @@
 module painterengine_gpu_alphablend_tb();
 reg clock=0;
 reg resetn=0;
+reg [63:0] test;
 
 initial begin
     $dumpfile("painterengine_gpu_alphablend_tb.vcd");
     $dumpvars(0, painterengine_gpu_alphablend_tb);
     $display("Start of simulation");
     resetn=0;
+    test={1,0};
     #1000;
     resetn=1;
 end

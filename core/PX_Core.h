@@ -30,7 +30,6 @@
 #include "PX_Sha256.h"
 #include "PX_Arle.h"
 #include "PX_Huffman.h"
-#include "PX_Packet.h"
 #include "PX_Base64.h"
 #include "PX_3D.h"
 #include "PX_PointsMesh.h"
@@ -49,4 +48,5 @@
 #include "PX_Gif.h"
 #include "PX_Abi.h"
 #include "PX_Variable.h"
+#include "PX_Arle.h"
 #endif

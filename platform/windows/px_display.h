@@ -43,4 +43,5 @@ extern double PX_GetWindowScale();
 extern char *PX_OpenFileDialog(const char Filter[]);
 extern char *PX_MultFileDialog(const char Filter[]);
 extern char *PX_SaveFileDialog(const char Filter[],const char ext[]);
+
 #endif

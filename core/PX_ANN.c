@@ -73,7 +73,7 @@ px_bool PX_ANNAddLayer(PX_ANN *pAnn,px_int Neurals,px_double bias,PX_ANN_ACTIVAT
 		case PX_ANN_LAYER_WEIGHT_INITMODE_RAND:
 			for (i=0;i<newLayer->w_count;i++)
 			{
-				newLayer->w[i]=PX_rand()/1.0/PX_RAND_MAX;
+				newLayer->w[i]= PX_randRange(0, 1);
 			}
 			break;
 		case PX_ANN_LAYER_WEIGHT_INITMODE_GAUSSRAND:
@@ -465,7 +465,7 @@ px_void PX_ANNReset(PX_ANN *pANN)
 		case PX_ANN_LAYER_WEIGHT_INITMODE_RAND:
 			for (i=0;i<pLayer->w_count;i++)
 			{
-				pLayer->w[i]=PX_rand()/1.0/PX_RAND_MAX;
+				pLayer->w[i]=PX_randRange(0,1);
 			}
 			break;
 		case PX_ANN_LAYER_WEIGHT_INITMODE_GAUSSRAND:

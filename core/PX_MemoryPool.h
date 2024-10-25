@@ -14,7 +14,7 @@ typedef enum
 }PX_MEMORYPOOL_ERROR;
 
 typedef px_void (*PX_MP_ErrorCall)(px_void *ptr,PX_MEMORYPOOL_ERROR);
-
+#define PX_MEMORYPOOL_ERROR_FUNCTION(name) px_void name(px_void *ptr,PX_MEMORYPOOL_ERROR error)
 #if defined(PX_DEBUG_MODE) && defined(PX_MEMORYPOOL_DEBUG_CHECK)
 typedef struct 
 {

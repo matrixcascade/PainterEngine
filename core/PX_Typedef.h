@@ -22,7 +22,7 @@
 #define     PX_PI				3.141592653589793238462
 #define     PX_e                (2.7182818284590452353602)
 #define     PX_e2               (PX_e*PX_e)
-#define     PX_RAND_MAX         (0xffffff)
+
 
 #define PX_COLOR_WHITE PX_COLOR(255,255,255,255)
 #define PX_COLOR_BLACK PX_COLOR(255,0,0,0)
@@ -190,6 +190,7 @@
 
 
 #define PX_COUNTOF(x) (sizeof(x)/sizeof(x[0]))
+#define PX_ARRAY_INDEX(arrayptr,ptr) ((px_dword)((px_byte *)ptr-(px_byte *)arrayptr)/sizeof(arrayptr[0]))
 #define PX_MAX(a,b) ((a)>(b)?(a):(b))
 #define PX_MIN(a,b) ((a)<(b)?(a):(b))
 
@@ -442,11 +443,43 @@ px_word PX_ntohs(px_word n);
 
 
 //////////////////////////////////////////////////////////////////////////
-//PMMCLCG
+//MT19937
+#define PX_MT_64_W 64
+#define PX_MT_64_N 312
+#define PX_MT_64_M 156
+#define PX_MT_64_R 31
+#define PX_MT_64_A 0xB5026F5AA96619E9
+#define PX_MT_64_U 29
+#define PX_MT_64_D 0x5555555555555555
+#define PX_MT_64_S 17
+#define PX_MT_64_B 0x71D67FFFEDA60000
+#define PX_MT_64_T 37
+#define PX_MT_64_C 0xFFF7EEE000000000
+#define PX_MT_64_L 43
+#define PX_MT_64_F 0x5851F42D4C957F2D
+
+#define PX_MT_64_MAX 9223372036854775807 //(2^63)-1
+#define PX_MT_64_HIGH_BIT_MASK 0x8000000000000000
+#define PX_MT_64_LOW_BITS_MASK 0x7fffffffffffffff
+#define PX_MT_64_FLOAT_CHUNKS 16777216
+#define PX_RAND_MAX  PX_MT_64_MAX
+
+#define PX_MT_BIT_VAR(bits, var) PX_MT_##bits##_##var
+
+#define PX_MT_VAR(var) PX_MT_BIT_VAR(64, var)
+
+
+typedef struct
+{
+	px_int64 mt[PX_MT_VAR(N)];
+	px_int index;
+} PX_MT19937;
 px_void PX_srand(px_uint64 seed);
 px_uint32 PX_rand(void);
-px_double PX_randRange(px_double min,px_double max);
-px_uint32 PX_randEx(px_uint64 seed);
+px_float PX_randRange(px_float min, px_float max);
+px_uint32 PX_randEx(PX_MT19937* pmt);
+px_void PX_srandEx(PX_MT19937* pmt,px_uint64 seed);
+px_float PX_randRangeEx(PX_MT19937* pmt, px_float min, px_float max);
 //gauss rand
 px_double PX_GaussRand(void);
 

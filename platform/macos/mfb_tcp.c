@@ -58,38 +58,27 @@ int PX_TCPConnect(PX_TCP* tcp, PX_TCP_ADDR addr) {
 }
 
 // ------------------------------------
-int PX_TCPSend(PX_TCP* tcp, void* buffer, int size) {
-    int length;
-    switch (tcp->type) {
-        case PX_TCP_IP_TYPE_IPV4: {
-            while (size > 0) {
-                if ((length = (int)send(tcp->socket, (const char*)buffer, size, 0)) == -1) {
-                    return 0;
-                }
-                size -= length;
-            }
-            return 1;
-        } break;
-        case PX_TCP_IP_TYPE_IPV6: {
-            return 0;
-        } break;
-    }
-    return 0;
+int PX_TCPSend(PX_TCP *tcp,void *buffer,int size)
+{
+	int length;
+	switch(tcp->type)
+	{
+	case PX_TCP_IP_TYPE_IPV4:
+		{
+			return send(tcp->socket,(const char *)buffer,size,0);
+		}
+		break;
+	case PX_TCP_IP_TYPE_IPV6:
+		{
+			return 0;
+		}
+		break;
+	}
+	return 0;
 }
-
-// ------------------------------------
-int PX_TCPSocketSend(unsigned int socket, void* buffer, int size) {
-    char* sendBuffer = (char*)buffer;
-    int length;
-    int sendsize = size;
-    do {
-        if ((length = (int)send(socket, (const char*)sendBuffer, size, 0)) == -1) {
-            return 0;
-        }
-        sendBuffer += length;
-        size -= length;
-    } while (size > 0);
-    return sendsize;
+int PX_TCPSocketSend(unsigned int socket, void* buffer, int size)
+{
+	return send(socket, (const char*)sendBuffer, size, 0);
 }
 
 // ------------------------------------

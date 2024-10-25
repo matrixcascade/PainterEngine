@@ -8,6 +8,7 @@
 #include "PX_Png.h"
 #include "PX_jpg.h"
 #include "PX_GPU.h"
+#include "PX_Arle.h"
 typedef px_surface px_texture;
 
 
@@ -53,8 +54,8 @@ px_void PX_TextureRenderRotation(px_surface *psurface,px_texture *tex,px_int x,p
 px_void PX_TextureRenderRotation_vector(px_surface *psurface,px_texture *tex,px_int x,px_int y,PX_ALIGN refPoint,PX_TEXTURERENDER_BLEND *blend,px_point2D p_vector);
 px_void PX_TextureRenderRotation_sincos(px_surface *psurface,px_texture *tex,px_int x,px_int y,PX_ALIGN refPoint,PX_TEXTURERENDER_BLEND *blend,px_float sin,px_float cos);
 #define PX_TextureClear PX_SurfaceClear
-#define PX_TextureClearAll PX_SurfaceClearAll
-
+#define PX_TextureClearAll(ptexture,color) PX_SurfaceClearAll(ptexture,color)
+#define PX_TextureGetPixel(ptexture, x, y) PX_SurfaceGetPixel(ptexture, x, y)
 
 px_void PX_TextureRenderEx(px_surface *psurface,px_texture *resTexture,px_int x,px_int y,PX_ALIGN refPoint,PX_TEXTURERENDER_BLEND *blend,px_float scale,px_float Angle);
 px_void PX_TextureRenderEx_sincos(px_surface *psurface,px_texture *resTexture,px_int x,px_int y,PX_ALIGN refPoint,PX_TEXTURERENDER_BLEND *blend,px_float scale,px_float sin,px_float cos);
@@ -68,10 +69,13 @@ px_void PX_SurfaceRender(px_surface *pdestSurface,px_surface *pResSurface,px_int
 px_void PX_SurfaceCover(px_surface *pdestSurface,px_surface *pResSurface,px_int x,px_int y,PX_ALIGN refPoint);
 px_void PX_SurfaceSetRect(px_surface *psurface, px_int left, px_int top, px_int right, px_int bottom,px_color color);
 px_bool PX_TextureCreateRotationAngle(px_memorypool *mp,px_texture *resTexture,px_float Angle,px_texture *out);
+px_bool PX_TextureCreateMirrior(px_memorypool* mp, px_texture* resTexture, PX_TEXTURERENDER_MIRRROR_MODE mirror, px_texture* out);
 px_bool PX_TextureRotationAngleToTexture(px_texture *resTexture,px_float Angle,px_texture *out);
 px_bool PX_TextureCreateRotationRadian(px_memorypool *mp,px_texture *resTexture,px_float Angle,px_texture *out);
 px_void PX_TextureFree(px_texture *tex);
 px_int PX_TextureGetRenderRange(px_texture *tex, px_int clipx, px_int clipy, px_int clipw, px_int cliph,px_recti *render_range);
+px_bool PX_TextureDiffUnzip(px_memorypool* mp, px_void* buffer, px_int size, px_texture* srctex, px_texture* tex);
+px_bool PX_TextureDiffZip(px_memorypool* mp, px_texture* srctex, px_texture* ziptex, px_memory* mem);
 
 px_bool PX_ShapeCreate(px_memorypool *mp,px_shape *shape,px_int width,px_int height);
 px_bool PX_ShapeCreateFromTexture(px_memorypool *mp,px_shape *shape,px_texture *texture);

@@ -309,7 +309,7 @@ PX_OBJECT_EVENT_FUNCTION(PX_Object_PrinterOnEnter)
 
 PX_OBJECT_EVENT_FUNCTION(PX_Object_PrinterOnMouseDown)
 {
-	PX_Object_Printer* pDesc = PX_Object_GetPrinter(pObject);
+	PX_Object_Printer* pDesc = PX_Object_GetPrinter((PX_Object *)ptr);
 	if (e.Event == PX_OBJECT_EVENT_CURSORDOWN)
 	{
 		PX_Object_EditSetFocus(pDesc->Input, PX_TRUE);

@@ -74,7 +74,7 @@ PX_Object* PX_Object_VariousAttachObject( PX_Object* pObject,px_int attachIndex,
 	break;
 	case PX_OBJECT_VARIOUS_TYPE_SLIDERBAR:
 	{
-		pdesc->various = PX_Object_SliderBarCreate(mp, pObject, 0, 0, 1, 1, PX_OBJECT_SLIDERBAR_STYLE_BOX, PX_OBJECT_SLIDERBAR_TYPE_HORIZONTAL);
+		pdesc->various = PX_Object_SliderBarCreate(mp, pObject, 0, 0, 1, 1,PX_OBJECT_SLIDERBAR_TYPE_HORIZONTAL, PX_OBJECT_SLIDERBAR_STYLE_BOX);
 		PX_Object_SliderBarSetShowValue(pdesc->various, PX_TRUE,PX_COLOR_FONTCOLOR);
 		PX_ObjectRegisterEvent(pdesc->various, PX_OBJECT_EVENT_VALUECHANGED, PX_Object_VariousOnEditChange, pObject);
 	}
@@ -227,7 +227,7 @@ px_int PX_Object_VariousSelectBarGetCurrentIndex(PX_Object* pObject)
 	return 0;
 	
 }
-px_int PX_Object_VariousSliderBarGetValue(PX_Object* pObject)
+px_int PX_Object_VariousGetValue(PX_Object* pObject)
 {
 	PX_Object_Various* pDesc = PX_Object_GetVarious(pObject);
 	if (pDesc->type == PX_OBJECT_VARIOUS_TYPE_SLIDERBAR)
@@ -243,6 +243,19 @@ px_void PX_Object_VariousSliderBarSetRange(PX_Object* pObject,px_int min,px_int 
 	if (pDesc->type == PX_OBJECT_VARIOUS_TYPE_SLIDERBAR)
 	{
 		PX_Object_SliderBarSetRange(pDesc->various, min, max);
+	}
+}
+
+px_void PX_Object_VariousSetValue(PX_Object* pObject, px_int value)
+{
+	PX_Object_Various* pDesc = PX_Object_GetVarious(pObject);
+	if (pDesc->type == PX_OBJECT_VARIOUS_TYPE_SLIDERBAR)
+	{
+		PX_Object_SliderBarSetValue(pDesc->various, value);
+	}
+	else if (pDesc->type == PX_OBJECT_VARIOUS_TYPE_EDIT)
+	{
+		PX_Object_VariousSetInt(pDesc->various, value);
 	}
 }
 

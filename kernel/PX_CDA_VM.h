@@ -43,8 +43,7 @@ px_bool PX_CDA_VM_Rand(PX_VM* Ins, px_void* userptr)
 {
 	PX_CDA* pCDA = (PX_CDA*)userptr;
 
-	pCDA->rand_seed = PX_randEx(pCDA->rand_seed);
-	PX_VM_RET_float(Ins, (px_float)PX_randRange(0, 1));
+	PX_VM_RET_float(Ins, (px_float)PX_randRangeEx(&pCDA->mt19937,0, 1));
 	return PX_TRUE;
 }
 
@@ -483,6 +482,7 @@ px_bool PX_CDA_LoadScript(PX_CDA* pCDA, const px_char script[])
 		PX_MemoryInitialize(&compiler_cache, &vmbin);
 		if (!PX_VMDebuggerMapInitialize(pCDA->mp, &pCDA->debugmap))return PX_FALSE;
 		PX_CompilerAddSource(&compiler, script);
+		PX_srandEx(&pCDA->mt19937, 0x314159);
 
 		if (!PX_CompilerCompile(&compiler, &vmbin, &pCDA->debugmap, "main"))
 		{

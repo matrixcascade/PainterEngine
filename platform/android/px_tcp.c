@@ -63,15 +63,7 @@ int PX_TCPSend(PX_TCP *tcp,void *buffer,int size)
 	{
 	case PX_TCP_IP_TYPE_IPV4:
 		{
-			while(size>0)
-			{
-				if ((length=send(tcp->socket,(const char *)buffer,size,0))==-1)
-				{
-					return 0;
-				}
-				size-=length;
-			}
-			return 1;
+			return send(tcp->socket,(const char *)buffer,size,0);
 		}
 		break;
 	case PX_TCP_IP_TYPE_IPV6:
@@ -84,19 +76,7 @@ int PX_TCPSend(PX_TCP *tcp,void *buffer,int size)
 }
 int PX_TCPSocketSend(unsigned int socket, void* buffer, int size)
 {
-	char* sendBuffer = (char*)buffer;
-	int length;
-	int sendsize = size;
-	do
-	{
-		if ((length = send(socket, (const char*)sendBuffer, size, 0)) == -1)
-		{
-			return 0;
-		}
-		sendBuffer += length;
-		size -= length;
-	} while (size > 0);
-	return sendsize;
+	return send(socket, (const char*)sendBuffer, size, 0);
 }
 int PX_TCPReceived(PX_TCP *tcp,void *buffer,int buffersize,int timeout)
 {

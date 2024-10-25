@@ -408,6 +408,30 @@ px_void PX_Object_OscilloscopeSetMargin(PX_Object *pObject,px_int Left,px_int Ri
 	pcd->BottomSpacer=Bottom;
 }
 
+px_void PX_Object_OscilloscopeSetLeftMargin(PX_Object* pObject, px_int Left)
+{
+	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
+	pcd->LeftSpacer=Left;
+}
+
+px_void PX_Object_OscilloscopeSetRightMargin(PX_Object* pObject, px_int Right)
+{
+	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
+	pcd->RightSpacer=Right;
+}
+
+px_void PX_Object_OscilloscopeSetTopMargin(PX_Object* pObject, px_int Top)
+{
+	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
+	pcd->TopSpacer=Top;
+}
+
+px_void PX_Object_OscilloscopeSetBottomMargin(PX_Object* pObject, px_int Bottom)
+{
+	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
+	pcd->BottomSpacer=Bottom;
+}
+
 px_int  PX_Object_OscilloscopeMapHorizontalValueToPixel(PX_Object *pObject,px_double val)
 {
 	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);

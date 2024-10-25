@@ -4402,8 +4402,8 @@ static px_int32 __float_as_int(px_float a)
 px_double64 PX_ln(px_double x)
 {
 	px_double64 hfsq, f, s, z, R, w, t1, t2, dk;
-	int k, hx, i, j;
-	unsigned lx;
+	px_int k, hx, i, j;
+	px_uint lx;
 	static px_double64	ln2_hi = 6.93147180369123816490e-01,	/* 3fe62e42 fee00000 */
 		ln2_lo = 1.90821492927058770002e-10,	/* 3dea39ef 35793c76 */
 		two54 = 1.80143985094819840000e+16,  /* 43500000 00000000 */
@@ -4497,30 +4497,117 @@ px_double PX_tand(px_double radian)
 	return PX_tan_radian((px_float)radian);
 }
 
-px_uint64 px_srand_seed=0x31415926;
+
+
+
+
+
+PX_MT19937 g_px_mt19937;
+
+px_void px_mt_64_seed(PX_MT19937* pmt, px_int64 seed)
+{
+	px_int i;
+	pmt->index = PX_MT_VAR(N);
+	pmt->mt[0] = seed;
+	for (i = 1; i < PX_MT_VAR(N); ++i) {
+		pmt->mt[i] = PX_MT_VAR(F) * (pmt->mt[i - 1] ^ pmt->mt[i - 1] >> (PX_MT_VAR(W) - 2)) + i;
+	}
+}
+
+px_void _px_mt_64_twist(PX_MT19937* pmt)
+{
+	px_int i;
+	for (i = 0; i < PX_MT_VAR(N); ++i)
+	{
+		px_int64 y = ((pmt->mt[i] & PX_MT_VAR(HIGH_BIT_MASK)) +
+			(pmt->mt[(i + 1) % PX_MT_VAR(N)] & PX_MT_VAR(LOW_BITS_MASK)));
+		pmt->mt[i] = pmt->mt[(i + PX_MT_VAR(M)) % PX_MT_VAR(N)] ^ y >> 1;
+
+		if (y % 2 != 0) {
+			pmt->mt[i] = pmt->mt[i] ^ PX_MT_VAR(A);
+		}
+	}
+	pmt->index = 0;
+}
+
+px_int64 _px_mt_64_next(PX_MT19937* pmt)
+{
+	px_int64 y;
+	if (pmt->index >= PX_MT_VAR(N)) {
+		_px_mt_64_twist(pmt);
+	}
+
+	y = pmt->mt[pmt->index];
+
+	y = y ^ y >> PX_MT_VAR(U) & PX_MT_VAR(D);
+	y = y ^ y << PX_MT_VAR(S) & PX_MT_VAR(B);
+	y = y ^ y << PX_MT_VAR(T) & PX_MT_VAR(C);
+	y = y ^ y >> PX_MT_VAR(L);
+
+	pmt->index++;
+
+	return y;
+}
+
+
+px_int64 px_mt_64_next(PX_MT19937* pmt, px_int64 n)
+{
+	px_int64 x;
+	do {
+		x = _px_mt_64_next(pmt);
+	} while (x >= (PX_MT_VAR(MAX) - PX_MT_VAR(MAX) % n));
+	return x % n;
+}
+
+px_float px_mt_64_nextf(PX_MT19937* pmt)
+{
+	const px_int chunks = PX_MT_VAR(FLOAT_CHUNKS);
+	px_int64 i = px_mt_64_next(pmt, chunks);
+	return (px_float)i / (px_float)chunks;
+}
+
+px_int64 px_mt_64_range(PX_MT19937* pmt, px_int64 min, px_int64 max)
+{
+	px_int64 n = max - min;
+	return px_mt_64_next(pmt, n) + min;
+}
+
+px_float px_mt_64_rangef(PX_MT19937* pmt, px_float min, px_float max)
+{
+	px_float d = max - min;
+	return px_mt_64_nextf(pmt) * d + min;
+}
+
 
 px_void PX_srand(px_uint64 seed)
 {
-	  seed = (seed*16807+1)%(0xefffffff);
-	  px_srand_seed=seed;
+	  px_mt_64_seed(&g_px_mt19937, seed);
 }
 
 px_uint32 PX_rand()
 {
-	
-    px_srand_seed = (px_srand_seed*314159269+453806245)%(2147483648);
-	return (px_uint32)(px_srand_seed&PX_RAND_MAX);
+	return (px_uint32)px_mt_64_next(&g_px_mt19937,PX_RAND_MAX);
 }
 
 
-px_double PX_randRange(px_double min,px_double max)
+px_float PX_randRange(px_float min, px_float max)
 {
-	return min+PX_rand()*1.0/PX_RAND_MAX*(max-min);
+	return px_mt_64_rangef(&g_px_mt19937, min, max);
 }
 
-px_uint32 PX_randEx(px_uint64 seed)
+px_void PX_srandEx(PX_MT19937* pmt,px_uint64 seed)
 {
-	return  (px_uint32)(seed = ((seed * 314159269 + 453806245) % (2147483648)));
+	px_mt_64_seed(pmt, seed);
+}
+
+px_uint32 PX_randEx(PX_MT19937* pmt)
+{
+	return (px_uint32)px_mt_64_next(pmt, PX_RAND_MAX);
+}
+
+px_float PX_randRangeEx(PX_MT19937* pmt, px_float min, px_float max)
+{
+	return px_mt_64_rangef(&g_px_mt19937, min, max);
 }
 
 
@@ -4532,8 +4619,8 @@ px_double PX_GaussRand()
 	px_double c;
 	while (PX_TRUE)
 	{
-		u = ((px_double) PX_rand() / (PX_RAND_MAX)) * 2 - 1;
-		v = ((px_double) PX_rand() / (PX_RAND_MAX)) * 2 - 1;
+		u = PX_randRange(0, 1) * 2 - 1;
+		v = PX_randRange(0, 1) * 2 - 1;
 		r = u * u + v * v;
 		if (r == 0 || r > 1)  continue;
 		c = (px_double)PX_sqrt((px_float)(-2 * PX_ln(r) / r));

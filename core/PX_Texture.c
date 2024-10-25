@@ -1392,6 +1392,14 @@ px_bool PX_TextureCreateRotationAngle(px_memorypool *mp,px_texture *resTexture,p
 	return PX_TRUE;
 }
 
+px_bool PX_TextureCreateMirrior(px_memorypool* mp, px_texture* resTexture, PX_TEXTURERENDER_MIRRROR_MODE mirror, px_texture* out)
+{
+	if (PX_TextureCreate(mp, out, resTexture->width, resTexture->height))
+		return PX_FALSE;
+
+	PX_TextureRenderMirror( out, resTexture,0,0,PX_ALIGN_LEFTTOP,0, mirror);
+	return PX_TRUE;
+}
 px_bool PX_TextureRotationAngleToTexture(px_texture *resTexture,px_float Angle,px_texture *out)
 {
 	px_int height,width,i,j,resHeight,resWidth;
@@ -1572,6 +1580,197 @@ px_int PX_TextureGetRenderRange(px_texture* tex, px_int x, px_int y, px_int clip
 		render_range->height = bottom-top+1;
 		return render_range->width * render_range->height;
 	}
+}
+
+px_bool PX_TextureDiffZip(px_memorypool* mp, px_texture* srctex, px_texture* ziptex, px_memory* mem)
+{
+	//diff
+	px_int i, j;
+	px_memory enmem;
+	px_memory rle_compressed_data;
+	px_word* rle_expand_data;
+
+	if(srctex->width != ziptex->width || srctex->height != ziptex->height)
+	{
+		return PX_FALSE;
+	}
+	PX_MemoryInitialize(mp, &enmem);
+	PX_MemoryCat(&enmem, &srctex->width, sizeof(px_int));
+	PX_MemoryCat(&enmem, &srctex->height, sizeof(px_int));
+	for (i = 0; i < srctex->height; i++)
+	{
+		for (j = 0; j < srctex->width; j++)
+		{
+			px_byte c;
+			px_color *pc1=&PX_SURFACECOLOR(srctex, j, i);
+			px_color *pc2=&PX_SURFACECOLOR(ziptex, j, i);
+			c=pc2->_argb.a - pc1->_argb.a;
+			PX_MemoryCat(&enmem, &c,1);
+		}
+	}
+	for (i = 0; i < srctex->height; i++)
+	{
+		for (j = 0; j < srctex->width; j++)
+		{
+			px_byte c;
+			px_color* pc1 = &PX_SURFACECOLOR(srctex, j, i);
+			px_color* pc2 = &PX_SURFACECOLOR(ziptex, j, i);
+			c = pc2->_argb.r - pc1->_argb.r;
+			PX_MemoryCat(&enmem, &c, 1);
+		}
+	}
+	for (i = 0; i < srctex->height; i++)
+	{
+		for (j = 0; j < srctex->width; j++)
+		{
+			px_byte c;
+			px_color* pc1 = &PX_SURFACECOLOR(srctex, j, i);
+			px_color* pc2 = &PX_SURFACECOLOR(ziptex, j, i);
+			c = pc2->_argb.g - pc1->_argb.g;
+			PX_MemoryCat(&enmem, &c, 1);
+		}
+	}
+	for (i = 0; i < srctex->height; i++)
+	{
+		for (j = 0; j < srctex->width; j++)
+		{
+			px_byte c;
+			px_color* pc1 = &PX_SURFACECOLOR(srctex, j, i);
+			px_color* pc2 = &PX_SURFACECOLOR(ziptex, j, i);
+			c = pc2->_argb.b - pc1->_argb.b;
+			PX_MemoryCat(&enmem, &c, 1);
+		}
+	}
+
+	PX_MemoryInitialize(mp, &rle_compressed_data);
+	PX_ArleCompress(enmem.buffer, enmem.usedsize,&rle_compressed_data);
+	PX_MemoryFree(&enmem);
+	rle_expand_data = (px_word*)MP_Malloc(mp, 16384 *sizeof(px_word));
+	if (!rle_expand_data)
+	{
+		PX_MemoryFree(&rle_compressed_data);
+		return PX_FALSE;
+	}
+
+	
+
+	j = 0;
+	for(i=0;i<rle_compressed_data.usedsize;i++)
+	{
+		rle_expand_data[j] = rle_compressed_data.buffer[i];
+		j++;
+		if (j % 16383 == 0)
+		{
+			rle_expand_data[j] = 256;//end of data
+			if (!PX_HuffmanDeflateCodeData((px_word*)rle_expand_data, 16384, mem, PX_HUFFMAN_TREE_TYPE_DYNAMIC))
+			{
+				MP_Free(mp, rle_expand_data);
+				return PX_FALSE;
+			}
+		    PX_MemoryAlignBits(mem);
+			j = 0;
+		}
+	}
+	rle_expand_data[j] = 256;//end of data
+	if (!PX_HuffmanDeflateCodeData((px_word*)rle_expand_data, j+1, mem, PX_HUFFMAN_TREE_TYPE_DYNAMIC))
+	{
+		MP_Free(mp, rle_expand_data);
+		return PX_FALSE;
+	}
+
+	PX_MemoryFree(&rle_compressed_data);
+	MP_Free(mp, rle_expand_data);
+
+
+	return PX_TRUE;
+}
+
+px_bool PX_TextureDiffUnzip(px_memorypool* mp,px_void *buffer,px_int size, px_texture* srctex, px_texture* tex)
+{
+	px_int x, y,i;
+	px_int width, height;
+	px_uint offset=0,pos=0;
+	px_memory inflate_mem;
+	px_memory inflate_mem2;
+	px_byte *pchannel;
+	
+	PX_MemoryInitialize(mp, &inflate_mem);
+	while ((px_int)offset <size)
+	{
+		pos = 0;
+		if (!PX_HuffmanInflateCodeData((px_byte*)buffer+ offset, &pos, size, &inflate_mem, PX_HUFFMAN_TREE_TYPE_DYNAMIC))
+		{
+			PX_MemoryFree(&inflate_mem);
+			return PX_FALSE;
+		}
+		offset += (pos + 7) / 8;
+	}
+	
+	for ( i = 0; i < inflate_mem.usedsize/2; i++)
+	{
+		inflate_mem.buffer[i] = (px_byte)inflate_mem.buffer[i*2];
+	}
+	PX_MemoryRemove(&inflate_mem, inflate_mem.usedsize/2, inflate_mem.usedsize-1);
+	
+
+	PX_MemoryInitialize(mp, &inflate_mem2);
+	PX_ArleDecompress(inflate_mem.buffer, inflate_mem.usedsize,&inflate_mem2);
+	PX_MemoryFree(&inflate_mem);
+
+
+
+	width = *(px_int*)inflate_mem2.buffer;
+	height = *(px_int*)(inflate_mem2.buffer+sizeof(px_int));
+
+	if (tex->MP)
+	{
+		if (width != tex->width || height != tex->height)
+		{
+			PX_TextureFree(tex);
+			if (!PX_TextureCreate(mp, tex, width, height))
+			{
+				PX_MemoryFree(&inflate_mem2);
+				return PX_FALSE;
+			}
+		}
+	}
+	else
+	{
+		if (!PX_TextureCreate(mp, tex, width, height))
+		{
+			PX_MemoryFree(&inflate_mem2);
+			return PX_FALSE;
+		}
+	}
+	
+	
+	pchannel= (px_byte*)(inflate_mem2.buffer + sizeof(px_int) * 2);
+	for ( y = 0; y < tex->height; y++)
+	{
+		for (x = 0; x < tex->width; x++)
+		{
+			px_byte a,r,g,b;
+			px_byte ra=0, rr=0, rg=0, rb=0;
+			px_color* pc = &PX_SURFACECOLOR(tex, x, y);
+			a = pchannel[y*tex->width + x];
+			r = pchannel[tex->width*tex->height + y*tex->width + x];
+			g = pchannel[tex->width*tex->height*2 + y*tex->width + x];
+			b = pchannel[tex->width*tex->height*3 + y*tex->width + x];
+			if (srctex)
+			{
+				ra = srctex->surfaceBuffer[y * srctex->width + x]._argb.a;
+				rr = srctex->surfaceBuffer[y * srctex->width + x]._argb.r;
+				rg = srctex->surfaceBuffer[y * srctex->width + x]._argb.g;
+				rb = srctex->surfaceBuffer[y * srctex->width + x]._argb.b;
+			}
+			pc->_argb.a = a + ra;
+			pc->_argb.r = r + rr;
+			pc->_argb.g = g + rg;
+			pc->_argb.b = b + rb;
+		}
+	}
+	PX_MemoryFree(&inflate_mem2);
+	return PX_TRUE;
 }
 
 

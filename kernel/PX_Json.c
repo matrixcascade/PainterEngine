@@ -1106,6 +1106,16 @@ const px_char * PX_JsonGetString(PX_Json *pjson,const px_char payload[])
 	return "";
 }
 
+px_int PX_JsonGetInt(PX_Json *pjson,const px_char payload[])
+{
+	PX_Json_Value *pValue=PX_JsonGetValue(pjson,payload);
+	if (pValue&&pValue->type==PX_JSON_VALUE_TYPE_NUMBER)
+	{
+		return (px_int)pValue->_number;
+	}
+	return 0;
+}
+
 px_double PX_JsonGetNumber(PX_Json *pjson,const px_char payload[])
 {
 	PX_Json_Value *pValue=PX_JsonGetValue(pjson,payload);

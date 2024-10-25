@@ -1,11 +1,14 @@
 #include "runtime/PainterEngine_Application.h"
+#include "platform/modules/px_thread.h"
 #include "px_display.h"
 
 //mouse informations
 POINT main_zoomPoint;
 px_int main_ZoomRegion;
-
+px_byte main_surface[1024 * 1024 * 16];
 volatile px_bool main_exit=0;
+px_mutex main_surface_mutex;
+
 //////////////////////////////////////////////////////////////////////////
 DWORD WINAPI DEMO_RenderThreadFunc(LPVOID p)
 {   
@@ -252,8 +255,9 @@ DWORD WINAPI DEMO_RenderThreadFunc(LPVOID p)
 		}
 		PX_ApplicationUpdate(&App,elapsed);
 		PX_ApplicationRender(&App,elapsed);
-		PX_SystemRender(App.runtime.RenderSurface.surfaceBuffer,App.runtime.surface_width,App.runtime.surface_height);
-		Sleep(0);
+		PX_MutexLock(&main_surface_mutex);
+		memcpy(main_surface,App.runtime.RenderSurface.surfaceBuffer, App.runtime.RenderSurface.width* App.runtime.RenderSurface.height*4);
+		PX_MutexUnlock(&main_surface_mutex);
 	}
 	return 0;
 }
@@ -277,7 +281,7 @@ void setCurrentDirectory()
 {
 	HANDLE hThread;
 	DWORD  threadId;
-
+	PX_MutexInitialize(&main_surface_mutex);
 	setCurrentDirectory();
 	PX_srand(time(NULL));
 	if(!PX_ApplicationInitialize(&App,PX_GetScreenWidth(),PX_GetScreenHeight()))return 0;
@@ -301,7 +305,12 @@ void setCurrentDirectory()
 
 	hThread = CreateThread(NULL, 0, DEMO_RenderThreadFunc, 0, 0, &threadId);
 
-	while(PX_SystemLoop()&&!main_exit){};
+	while(PX_SystemLoop()&&!main_exit)
+	{
+		PX_MutexLock(&main_surface_mutex);
+		PX_SystemRender(main_surface, App.runtime.surface_width, App.runtime.surface_height);
+		PX_MutexUnlock(&main_surface_mutex);
+	};
 
 	return 0;
 }

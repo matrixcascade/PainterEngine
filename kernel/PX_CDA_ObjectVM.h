@@ -51,9 +51,9 @@ px_bool PX_CDA_ObjectVM_Sleep(PX_VM* Ins, px_void* userptr)
 px_bool PX_CDA_ObjectVM_Rand(PX_VM* Ins, px_void* userptr)
 {
 	PX_CDA_Object* pDesc = PX_ObjectGetDescIndex(PX_CDA_Object, (PX_Object*)userptr,1);
+	PX_CDA *pCDA=(PX_CDA *)pDesc->pCDA;
 
-	pDesc->rand_seed = PX_randEx(pDesc->rand_seed);
-	PX_VM_RET_float(Ins, (px_float)PX_randRange(0, 1));
+	PX_VM_RET_float(Ins, (px_float)PX_randRangeEx(&pCDA->mt19937,0, 1));
 	return PX_TRUE;
 }
 

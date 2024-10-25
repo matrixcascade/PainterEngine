@@ -13,26 +13,10 @@
 
 int PX_TCPInitialize(PX_TCP *tcp,PX_TCP_IP_TYPE type)
 {
-	int err;
-	int nZero=0;
-	int nRecvBuf=1024*1024;
-	int nSendBuf=1024*1024;
-	int optval=1;
-	int imode=1,rev;
 	tcp->type=type;
 
 	if ((tcp->socket=socket(AF_INET,SOCK_STREAM,IPPROTO_TCP))==-1)
 	{
-        err = errno;
-		return 0;
-	}
-
-	setsockopt(tcp->socket,SOL_SOCKET,SO_RCVBUF,(const char*)&nRecvBuf,sizeof(int));
-	setsockopt(tcp->socket,SOL_SOCKET,SO_SNDBUF,(const char*)&nSendBuf,sizeof(int));
-
-	if(rev == -1)
-	{
-        close(tcp->socket);
 		return 0;
 	}
 
@@ -63,15 +47,7 @@ int PX_TCPSend(PX_TCP *tcp,void *buffer,int size)
 	{
 	case PX_TCP_IP_TYPE_IPV4:
 		{
-			while(size>0)
-			{
-				if ((length=send(tcp->socket,(const char *)buffer,size,0))==-1)
-				{
-					return 0;
-				}
-				size-=length;
-			}
-			return 1;
+			return send(tcp->socket,(const char *)buffer,size,0);
 		}
 		break;
 	case PX_TCP_IP_TYPE_IPV6:
@@ -84,19 +60,7 @@ int PX_TCPSend(PX_TCP *tcp,void *buffer,int size)
 }
 int PX_TCPSocketSend(unsigned int socket, void* buffer, int size)
 {
-	char* sendBuffer = (char*)buffer;
-	int length;
-	int sendsize = size;
-	do
-	{
-		if ((length = send(socket, (const char*)sendBuffer, size, 0)) == -1)
-		{
-			return 0;
-		}
-		sendBuffer += length;
-		size -= length;
-	} while (size > 0);
-	return sendsize;
+	return send(socket, (const char*)sendBuffer, size, 0);
 }
 int PX_TCPReceived(PX_TCP *tcp,void *buffer,int buffersize,int timeout)
 {

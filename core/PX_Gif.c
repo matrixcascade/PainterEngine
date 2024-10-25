@@ -539,37 +539,26 @@ static px_void render_frame_rect(px_gif *gif, px_byte *buffer)
         for (k = 0; k < gif->fw; k++) {
             index = gif->frame[(gif->fy + j) * gif->width + gif->fx + k];
             color = &gif->palette->colors[index*3];
-            if (!gif->gce.transparency || index != gif->gce.tindex)
+            if (!gif->gce.transparency)
                 PX_memcpy(&buffer[(i+k)*3], color, 3);
+            else
+            {
+                if(index != gif->gce.tindex)
+                    PX_memcpy(&buffer[(i + k) * 3], color, 3);
+            }
         }
         i += gif->width;
     }
 }
 
-static px_void render_frame_texture(px_gif* gif, px_texture* ptexture)
-{
-    px_int i, j, k;
-    px_byte index, * color;
-    i = gif->fy * gif->width + gif->fx;
-    for (j = 0; j < gif->fh; j++) {
-        for (k = 0; k < gif->fw; k++) {
-            index = gif->frame[(gif->fy + j) * gif->width + gif->fx + k];
-            color = &gif->palette->colors[index * 3];
-            if (!gif->gce.transparency && index != gif->gce.tindex)
-            {
-                PX_SurfaceSetPixel(ptexture, k, j, PX_COLOR(255, color[0], color[1], color[2]));
-            }
-            
-        }
-        i += gif->width;
-    }
-}
+
 
 static px_void dispose(px_gif *gif)
 {
     px_int i, j, k;
     px_byte *bgcolor=0;
-    switch (gif->gce.disposal) {
+    switch (gif->gce.disposal) 
+    {
     case 2: /* Restore to background color. */
         bgcolor = &gif->palette->colors[gif->bgindex*3];
         i = gif->fy * gif->width + gif->fx;
@@ -591,7 +580,9 @@ static px_void dispose(px_gif *gif)
 px_void px_gif_render_to_frame_texture(px_gif* gif, px_texture* ptexture)
 {
     px_int x, y;
-    //PX_memcpy(buffer, gif->canvas, gif->width * gif->height * 3);
+    px_int i, j, k;
+    px_byte index, * color;
+
     for (y = 0; y < gif->height; y++)
     {
         for (x = 0; x < gif->width; x++)
@@ -599,7 +590,39 @@ px_void px_gif_render_to_frame_texture(px_gif* gif, px_texture* ptexture)
             PX_SurfaceSetPixel(ptexture, x, y, PX_COLOR(255, gif->canvas[(y * gif->width + x) * 3], gif->canvas[(y * gif->width + x) * 3 + 1], gif->canvas[(y * gif->width + x) * 3 + 2]));
         }
     }
-    render_frame_texture(gif, ptexture);
+    
+    if (gif->gce.disposal == 1&& gif->gce.transparency==1)
+        return;
+
+    i = gif->fy * gif->width + gif->fx;
+    for (j = 0; j < gif->height; j++)
+    {
+        for (k = 0; k < gif->width ; k++)
+        {
+            if (j>= gif->fh|| k>= gif->fw)
+            {
+                PX_SurfaceSetPixel(ptexture, k, j, PX_COLOR_NONE);
+            }
+            else
+            {
+                index = gif->frame[(gif->fy + j) * gif->width + gif->fx + k];
+                color = &gif->palette->colors[index * 3];
+                if (gif->gce.transparency)
+                {
+                    if (index == gif->gce.tindex)
+                        PX_SurfaceSetPixel(ptexture, k, j, PX_COLOR_NONE);
+                    else
+                        PX_SurfaceSetPixel(ptexture, k, j, PX_COLOR(255, color[0], color[1], color[2]));
+
+                }
+                else
+                {
+                    PX_SurfaceSetPixel(ptexture, k, j, PX_COLOR(255, color[0], color[1], color[2]));
+                }
+            }
+        }
+        i += gif->width;
+    }
 }
 
 

@@ -401,9 +401,9 @@ int main(int argc, char *argv[])
 {
 	
 	printf("PainterEngine Webassembly initializating...\n");
-
 	SDL_Init(SDL_INIT_VIDEO);
 	info=SDL_GetVideoInfo();
+	PX_srand(PX_TimeGetTime());
 	if(!PX_ApplicationInitialize(&App,info->current_w,info->current_h))
 	{
 		printf("PainterEngine startup failed.\n");

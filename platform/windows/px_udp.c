@@ -15,8 +15,8 @@ int PX_UDPInitialize(PX_UDP *udp,PX_UDP_IP_TYPE type)
 	WSADATA wsaData;        
 	int err;           
 	int nZero=0;
-	int nRecvBuf=1024*1024;
-	int nSendBuf=1024*1024;
+	int nRecvBuf=1024*1024*2;
+	int nSendBuf=1024*1024*2;
 	int optval=TRUE;
 	int imode=1,rev;
 	udp->type=type;

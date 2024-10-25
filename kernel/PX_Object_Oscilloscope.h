@@ -183,6 +183,11 @@ px_void PX_Object_OscilloscopeSetFloatFlagFormatVerticalLeft(PX_Object *pObject,
 px_void PX_Object_OscilloscopeSetIntFlagFormatVerticalLeft(PX_Object *pObject,const px_char *fmt);
 px_void PX_Object_OscilloscopeSetFloatFlagFormatVerticalRight(PX_Object *pObject,const px_char *fmt);
 px_void PX_Object_OscilloscopeSetIntFlagFormatVericalRight(PX_Object *pObject,const px_char *fmt);
+px_void PX_Object_OscilloscopeSetLeftMargin(PX_Object* pObject, px_int Left);
+px_void PX_Object_OscilloscopeSetRightMargin(PX_Object* pObject, px_int Right);
+px_void PX_Object_OscilloscopeSetTopMargin(PX_Object* pObject, px_int Top);
+px_void PX_Object_OscilloscopeSetBottomMargin(PX_Object* pObject, px_int Bottom);
+
 
 
 px_void PX_Object_OscilloscopeSetLeftTextMode(PX_Object *pObject,PX_OBJECT_OSCILLOSCOPE_TEXT_DISPLAYMODE mode);

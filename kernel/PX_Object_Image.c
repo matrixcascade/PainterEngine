@@ -245,6 +245,9 @@ px_void PX_Object_ImageSetTexture(PX_Object *pObject,px_texture *pTex)
 px_void PX_Object_ImageSetGif(PX_Object* pObject, px_gif* pgif)
 {
 	PX_Object_Image* pImg = PX_Object_GetImage(pObject);
+	PX_ASSERTIF(pImg == PX_NULL);
+	PX_ASSERTIF(pgif == PX_NULL);
+	PX_ASSERTIF(pgif->mp==PX_NULL);
 	if (pImg)
 	{
 		pImg->pgif = pgif;
