@@ -1,4 +1,4 @@
-#include <emscripten/emscripten.h>
+	#include <emscripten/emscripten.h>
 #include <emscripten/websocket.h>
 #include "platform/modules/px_socket.h"
 #include "platform/modules/px_time.h"
@@ -39,7 +39,7 @@ static EM_BOOL onopen(int eventType, const EmscriptenWebSocketOpenEvent* websock
 	PX_Socket* psocket = (PX_Socket*)userData;
 	PX_EMWebSocket_Handle *pem=(PX_EMWebSocket_Handle *)psocket->handler;
 	pem->socket = websocketEvent->socket;
-	printf("suceess to connect %s:%d:%d\n", host, port, PX_TimeGetTime());
+	printf("suceess to connect %d\n", PX_TimeGetTime());
 	psocket->connectcallback(psocket, psocket->userptr);
 	psocket->isConnecting=PX_TRUE;
     return EM_TRUE;

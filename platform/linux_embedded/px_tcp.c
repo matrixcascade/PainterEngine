@@ -60,7 +60,7 @@ int PX_TCPSend(PX_TCP *tcp,void *buffer,int size)
 }
 int PX_TCPSocketSend(unsigned int socket, void* buffer, int size)
 {
-	return send(socket, (const char*)sendBuffer, size, 0);
+	return send(socket, (const char*)buffer, size, 0);
 }
 int PX_TCPReceived(PX_TCP *tcp,void *buffer,int buffersize,int timeout)
 {

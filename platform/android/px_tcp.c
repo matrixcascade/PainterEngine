@@ -4,7 +4,7 @@
 #include <sys/socket.h>
 #include <sys/ioctl.h>
 #include <sys/un.h>
-#include <sys/endian.h>
+#include <endian.h>
 #include <sys/types.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -13,26 +13,10 @@
 
 int PX_TCPInitialize(PX_TCP *tcp,PX_TCP_IP_TYPE type)
 {
-	int err;
-	int nZero=0;
-	int nRecvBuf=1024*1024;
-	int nSendBuf=1024*1024;
-	int optval=1;
-	int imode=1,rev;
 	tcp->type=type;
 
 	if ((tcp->socket=socket(AF_INET,SOCK_STREAM,IPPROTO_TCP))==-1)
 	{
-        err = errno;
-		return 0;
-	}
-
-	setsockopt(tcp->socket,SOL_SOCKET,SO_RCVBUF,(const char*)&nRecvBuf,sizeof(int));
-	setsockopt(tcp->socket,SOL_SOCKET,SO_SNDBUF,(const char*)&nSendBuf,sizeof(int));
-
-	if(rev == -1)
-	{
-        close(tcp->socket);
 		return 0;
 	}
 
@@ -76,7 +60,7 @@ int PX_TCPSend(PX_TCP *tcp,void *buffer,int size)
 }
 int PX_TCPSocketSend(unsigned int socket, void* buffer, int size)
 {
-	return send(socket, (const char*)sendBuffer, size, 0);
+	return send(socket, (const char*)buffer, size, 0);
 }
 int PX_TCPReceived(PX_TCP *tcp,void *buffer,int buffersize,int timeout)
 {
@@ -94,11 +78,11 @@ int PX_TCPReceived(PX_TCP *tcp,void *buffer,int buffersize,int timeout)
 		break;
 	case PX_TCP_IP_TYPE_IPV6:
 		{
-			return -1;
+			return 0;
 		}
 		break;
 	}
-	return -1;
+	return 0;
 }
 int PX_TCPSocketReceived(unsigned int socket, void* buffer, int buffersize, int timeout)
 {

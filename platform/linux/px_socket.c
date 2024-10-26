@@ -70,10 +70,12 @@ static px_bool PX_SocketConnectToServer(PX_Socket* pSocket, const px_char host[]
 			return PX_FALSE;
 		}
 	}
+	printf("connecting to %s:%d:%d\n", host, port,PX_TimeGetTime());
 	if (!PX_TCPConnect((PX_TCP*)pSocket->handler, addr))
 	{
 		return PX_FALSE;
 	}
+	printf("suceess to connect %s:%d:%d\n", host, port, PX_TimeGetTime());
 	pSocket->recv_buffer_offset = 0;
 	pSocket->send_buffer_wcursor = 0;
 	pSocket->send_buffer_rcursor = 0;
@@ -81,8 +83,9 @@ static px_bool PX_SocketConnectToServer(PX_Socket* pSocket, const px_char host[]
 }
 
 
-px_void PX_SocketThread_Send(PX_Socket* pSocket)
+px_void PX_SocketThread_Send(px_void *ptr)
 {
+	PX_Socket* pSocket=(PX_Socket *)ptr;
 	PX_TCP_Handle *pHandle=(PX_TCP_Handle *)pSocket->handler;
 	PX_TCP* pTCP = (PX_TCP*)&pHandle->tcp;
 
@@ -123,8 +126,9 @@ px_void PX_SocketThread_Send(PX_Socket* pSocket)
 DISCONNECT:
 	return;
 }
-px_void PX_SocketThread_Recv(PX_Socket* pSocket)
+px_void PX_SocketThread_Recv(px_void *ptr)
 {
+	PX_Socket* pSocket = (PX_Socket*)ptr;
 	PX_TCP_Handle* pHandle = (PX_TCP_Handle*)pSocket->handler;
 	PX_TCP* pTCP = (PX_TCP*)&pHandle->tcp;
 

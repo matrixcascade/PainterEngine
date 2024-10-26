@@ -1,5 +1,5 @@
 
-#include "platform/modules/px_tcp.h"
+#include "../modules/px_tcp.h"
 //GNU C
 #include <sys/socket.h>
 #include <sys/ioctl.h>
@@ -13,26 +13,10 @@
 
 int PX_TCPInitialize(PX_TCP *tcp,PX_TCP_IP_TYPE type)
 {
-	int err;
-	int nZero=0;
-	int nRecvBuf=1024*1024;
-	int nSendBuf=1024*1024;
-	int optval=1;
-	int imode=1,rev;
 	tcp->type=type;
 
 	if ((tcp->socket=socket(AF_INET,SOCK_STREAM,IPPROTO_TCP))==-1)
 	{
-        err = errno;
-		return 0;
-	}
-
-	setsockopt(tcp->socket,SOL_SOCKET,SO_RCVBUF,(const char*)&nRecvBuf,sizeof(int));
-	setsockopt(tcp->socket,SOL_SOCKET,SO_SNDBUF,(const char*)&nSendBuf,sizeof(int));
-
-	if(rev == -1)
-	{
-        close(tcp->socket);
 		return 0;
 	}
 
@@ -80,10 +64,15 @@ int PX_TCPSocketSend(unsigned int socket, void* buffer, int size)
 }
 int PX_TCPReceived(PX_TCP *tcp,void *buffer,int buffersize,int timeout)
 {
+	size_t ReturnSize;
+	struct timeval stimeout= {0,timeout*1000};
+	setsockopt(tcp->socket,SOL_SOCKET,SO_SNDTIMEO,(int *)&stimeout,(socklen_t)sizeof(struct timeval));
+	
 	switch (tcp->type)
 	{
 	case PX_TCP_IP_TYPE_IPV4:
 		{
+			int SockAddrSize=sizeof(struct sockaddr_in);
 			return recv(tcp->socket,(char *)buffer,buffersize,0);
 		}
 		break;
@@ -97,6 +86,11 @@ int PX_TCPReceived(PX_TCP *tcp,void *buffer,int buffersize,int timeout)
 }
 int PX_TCPSocketReceived(unsigned int socket, void* buffer, int buffersize, int timeout)
 {
+	int SockAddrSize = sizeof(struct sockaddr_in);
+	size_t ReturnSize;
+	struct timeval stimeout = { 0,timeout * 1000 };
+	setsockopt(socket, SOL_SOCKET, SO_SNDTIMEO, (int*)&stimeout, sizeof(struct timeval));
+
 	return  recv(socket, (char*)buffer, buffersize, 0);
 }
 int PX_TCPAccept(PX_TCP *tcp,unsigned int *socket,PX_TCP_ADDR *fromAddr)
