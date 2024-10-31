@@ -91,7 +91,7 @@ PainterEngine.com中下载到的一款编译工具,你可以在主页下方找�
 
 ![](assets/img/2.5.png)
 
-将下载好的源码解压到计算机的某个目录下，然后你需要记录这个目录的位置，并在Windows的环境变量中将它添加到PATH变量中
+将下载好的源码解压到计算机的某个目录下，然后你需要记录这个目录的位置，并在Windows的环境变量中新建一个名叫PainterEnginePath的变量,并将它赋值为PainterEngine库所在目录
 
 ![](assets/img/2.6.png)
 
