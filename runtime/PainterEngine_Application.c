@@ -131,6 +131,16 @@ px_void PainterEngine_DrawSolidCircle(px_int x, px_int y, px_int radius,  px_col
 	PX_GeoDrawSolidCircle(PX_Object_PanelGetSurface(App.object_printer), x, y, radius, color);
 }
 
+px_void PainterEngine_DrawSector(px_int x, px_int y, px_int radius_inside, px_int radius_outside, px_int start_angle, px_int end_angle, px_color color)
+{
+	if (App.object_printer->Visible == PX_FALSE)
+	{
+		PX_ObjectSetVisible(App.object_printer, PX_TRUE);
+	}
+	PX_GeoDrawSector(PX_Object_PanelGetSurface(App.object_printer), x, y, (px_float)radius_inside, (px_float)radius_outside, color, start_angle, end_angle);
+}
+
+
 
 px_void PainterEngie_SetFontSize(px_int size)
 {
@@ -209,6 +219,31 @@ px_void PainterEngine_PrintSetCodepage(PX_FONTMODULE_CODEPAGE codepage)
 		PX_FontModuleSetCodepage(App.pfontmodule, codepage);
 }
 
+PX_FontModule* PainterEngine_GetFontModule()
+{
+	return App.pfontmodule;
+}
+
+px_bool PainterEngine_LoadFontModule(const px_char path[],PX_FONTMODULE_CODEPAGE codepage,px_int size)
+{
+#ifdef PAINTERENGIN_FILE_SUPPORT
+	if (!App.pfontmodule)
+	{
+		if (PX_LoadFontModuleFromTTF(&App.runtime.mp_static, &App.fontmodule, path, codepage, size))
+		{
+			App.pfontmodule = &App.fontmodule;
+			return PX_TRUE;
+		}
+		else
+		{
+			return PX_FALSE;
+		}
+	}
+	return PX_FALSE;
+#else
+	return PX_FALSE;
+	#endif
+}
 
 px_bool PainterEngine_Initialize(px_int _screen_width,px_int _screen_height)
 {
@@ -222,14 +257,8 @@ px_bool PainterEngine_Initialize(px_int _screen_width,px_int _screen_height)
 	if (_screen_width == 0 || _screen_height == 0)
 		return PX_TRUE;
 #ifdef PAINTERENGIN_FILE_SUPPORT
-	if(PX_LoadFontModuleFromTTF(&runtime->mp_static, &App.fontmodule, "assets/font.ttf",PX_FONTMODULE_CODEPAGE_UTF8,18))
-	{
-		App.pfontmodule=&App.fontmodule;
-	}
-	else
-	{
-		App.pfontmodule=PX_NULL;
-	}
+	
+	App.pfontmodule = PX_NULL;
 	if(!PX_JsonInitialize(&runtime->mp_static, &App.language))
 	{
 		return PX_FALSE;
@@ -279,6 +308,11 @@ PX_Runtime* PainterEngine_GetRuntime()
 	return &App.runtime;
 }
 
+PX_ResourceLibrary* PainterEngine_GetResourceLibrary()
+{
+	return &App.runtime.ResourceLibrary;
+}
+
 px_memorypool * PainterEngine_GetDynamicMP()
 {
 	return &App.runtime.mp_dynamic;
@@ -307,6 +341,11 @@ px_bool PainterEngine_InitializeAudio()
 px_void PainterEngine_SetBackgroundColor(px_color color)
 {
 	App.backgroundColor = color;
+}
+
+px_void PainterEngine_SetBackgroundTexture(px_texture *pTexture)
+{
+	App.pBackgroudTexture = pTexture;
 }
 
 PX_SoundPlay* PainterEngine_GetSoundPlay()
@@ -344,7 +383,10 @@ px_void PX_ApplicationRender(PX_Application *pApp,px_dword elapsed)
 {
 	px_surface *pRenderSurface=&pApp->runtime.RenderSurface;
 	PX_RuntimeRenderClear(&pApp->runtime,pApp->backgroundColor);
-
+	if(pApp->pBackgroudTexture)
+	{
+		PX_TextureRender(pRenderSurface, pApp->pBackgroudTexture, 0, 0, PX_ALIGN_LEFTTOP, 0);
+	}
 	PX_ObjectRender(pRenderSurface, pApp->object_root,elapsed);
 }
 

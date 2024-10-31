@@ -41,6 +41,7 @@ typedef struct _memoryPool
 	px_uint32 nodeCount;
 	px_uint32 FreeTableCount;
 	px_uint32 MaxMemoryfragSize;
+	px_bool   no_catch_error;
 	PX_MP_ErrorCall ErrorCall_Ptr;
 	px_void* userptr;
 #if defined(PX_DEBUG_MODE) && defined(PX_MEMORYPOOL_DEBUG_CHECK)
@@ -88,7 +89,8 @@ px_void		MP_Free		(px_memorypool *Pool,px_void *pAddress);
 px_void		MP_Release	(px_memorypool *Pool);
 px_void     MP_Reset    (px_memorypool *Pool);
 px_void		MP_ResetZero(px_memorypool* Pool);
-
+px_void     MP_NoCatchError(px_memorypool* Pool);
+px_void     MP_CatchError(px_memorypool* Pool);
 //add memoryPool error
 px_void MP_ErrorCatch(px_memorypool* Pool, PX_MP_ErrorCall ErrorCall, px_void* ptr);
 #endif

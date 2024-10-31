@@ -512,8 +512,10 @@ PX_Object* PX_Object_AsmDebuggerAttachObject( PX_Object* pObject, px_int attachI
 	PX_ObjectRegisterEvent(pDesc->button_pause, PX_OBJECT_EVENT_EXECUTE, PX_Object_AsmDebuggerOnButtonPause, pObject);
 	PX_ObjectRegisterEvent(pDesc->button_reset, PX_OBJECT_EVENT_EXECUTE, PX_Object_AsmDebuggerOnButtonReset, pObject);
 	pDesc->list_source = PX_Object_ListCreate(mp, pObject, 0, 0, 10, 10, 18, PX_Object_AsmDebuggerSourceOnCreate, pObject);
+	PX_Object_ListSetBackgroundColor(pDesc->list_source,PX_COLOR_BLACK);
 	pDesc->autotext_data = PX_Object_AutoTextCreate(mp, pObject, 0, 0, 10, fm);
 	pDesc->list_monitor = PX_Object_ListCreate(mp, pObject, 0, 0, 10, 10, 18, PX_Object_AsmDebuggerMonitorOnCreate, pObject);
+	PX_Object_ListSetBackgroundColor(pDesc->list_monitor, PX_COLOR_BLACK);
 	PX_ObjectRegisterEvent(pDesc->list_monitor, PX_OBJECT_EVENT_VALUECHANGED, PX_Object_AsmDebuggerOnMonitorChanged, pObject);
 	PX_ObjectRegisterEvent(pDesc->list_source, PX_OBJECT_EVENT_VALUECHANGED, PX_Object_AsmDebuggerOnSourceChanged, pObject);
 	pDesc->label_name = PX_Object_LabelCreate(mp, pObject, 0, 0, 128, 24, "", PX_NULL, PX_COLOR(255, 64, 255, 64));

@@ -1,0 +1,19 @@
+texture "1.png" _1
+
+
+
+animation song
+frame tex_song
+clipx 0
+clipy 0
+clipw 128
+cliph 128
+loop 16
+tag $song_begin
+sleep 500
+clipinc 1
+goto $song_begin
+loop -1
+goto song
+end
+

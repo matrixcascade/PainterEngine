@@ -1,0 +1,13 @@
+{
+    "configurations": [
+        {
+            "name": "PainterEngineIncludePath",
+            "includePath": [
+                "${default}",
+                "${workspaceFolder}/**",
+                "${PainterEnginePath}"
+            ]
+        }
+    ],
+    "version": 4
+}

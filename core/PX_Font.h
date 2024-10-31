@@ -40,7 +40,13 @@ typedef struct
 typedef struct
 {
 	PX_FontModule_Charactor_Header header;
-	px_shape shape;
+	px_bool render_type;
+	union 
+	{
+		px_shape shape;
+		px_texture texture;
+	};
+	
 }PX_FontModule_Charactor;
 
 typedef enum  
@@ -82,6 +88,7 @@ px_int PX_FontModuleGetOneCharacterDesc(PX_FontModule *module,const px_char *Tex
 px_void PX_FontModuleTextGetRenderWidthHeight(PX_FontModule *module,const px_char *Text,px_int *advance,px_int *height);
 px_int PX_FontModuleDrawCharacter(px_surface *psurface,PX_FontModule *mod,px_int x,px_int y,const px_dword code,px_color Color);
 px_int PX_FontModuleDrawText(px_surface *psurface,PX_FontModule *mod,px_int x,px_int y,PX_ALIGN align,const px_char *Text,px_color Color);
-
+px_bool PX_FontModuleAddNewTextureCharacterEx(PX_FontModule* mod, px_dword unicode, px_texture* ptexture, px_dword BearingX, px_dword BearingY);
+px_bool PX_FontModuleAddNewTextureCharacter(PX_FontModule* mod, px_dword unicode, px_texture* pcopytexture);
 #endif
  

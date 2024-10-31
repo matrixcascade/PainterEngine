@@ -2395,6 +2395,7 @@ PX_FontModule_Charactor* PX_FontModuleCreateTTFCharacter(PX_FontModule* mod,px_d
 		{
 			return 0;
 		}
+		PX_memset(pcharactor, 0, sizeof(PX_FontModule_Charactor));
 		if (!PX_ttInitFont(mod->mp, &info, mod->ttfbuffer, 0))
 		{
 			return 0;
@@ -2705,7 +2706,7 @@ px_bool PX_FontModuleLoad(PX_FontModule *module,px_byte *buffer,px_int size)
 		{
 			goto _ERROR;
 		}
-		
+		PX_memset(cpy,0,sizeof(PX_FontModule_Charactor));
 		PX_memcpy(cpy,pcHeader,sizeof(PX_FontModule_Charactor_Header));
 
 		if(!PX_ShapeCreate(module->mp,&cpy->shape,cpy->header.Font_Width,cpy->header.Font_Height))
@@ -2845,7 +2846,10 @@ px_int PX_FontModuleDrawCharacter(px_surface *psurface,PX_FontModule *mod,px_int
 	pChar=(PX_FontModule_Charactor *)PX_MapGet(&mod->characters_map, (px_byte*)&unicode_code, sizeof(unicode_code));
 	if (pChar)
 	{
-		PX_ShapeRender(psurface,&pChar->shape,x+pChar->header.BearingX,y+mod->max_BearingY-pChar->header.BearingY,PX_ALIGN_LEFTTOP,Color);
+		if(pChar->render_type==0)
+			PX_ShapeRender(psurface,&pChar->shape,x+pChar->header.BearingX,y+mod->max_BearingY-pChar->header.BearingY,PX_ALIGN_LEFTTOP,Color);
+		else
+			PX_TextureRender(psurface,&pChar->texture,x+pChar->header.BearingX,y+mod->max_BearingY-pChar->header.BearingY, PX_ALIGN_LEFTTOP,PX_NULL);
 		return pChar->header.Advance;
 	}
 	return 0;
@@ -2942,3 +2946,46 @@ px_int PX_FontModuleDrawText(px_surface *psurface,PX_FontModule *mod,px_int x,px
 	return dx-x+1;
 }
 
+px_bool PX_FontModuleAddNewTextureCharacterEx(PX_FontModule* mod, px_dword unicode, px_texture* ptexture, px_dword BearingX, px_dword BearingY)
+{
+	PX_FontModule_Charactor* pChar;
+	if (PX_MapGet(&mod->characters_map, (px_byte*)&unicode, sizeof(unicode)))
+	{
+		return PX_FALSE;
+	}
+	pChar = (PX_FontModule_Charactor*)MP_Malloc(mod->mp, sizeof(PX_FontModule_Charactor));
+	if (!pChar)
+	{
+		return PX_FALSE;
+	}
+	PX_memset(pChar, 0, sizeof(PX_FontModule_Charactor));
+	pChar->header.Advance = ptexture->width;
+	pChar->header.BearingX = BearingX;
+	pChar->header.BearingY = BearingY;
+	pChar->header.Font_Height = ptexture->height;
+	pChar->header.Font_Width = ptexture->width;
+	pChar->render_type = 1;
+	if (PX_TextureCopy(mod->mp, ptexture, &pChar->texture ))
+	{
+		PX_MapPut(&mod->characters_map, (px_byte*)&unicode, sizeof(unicode), pChar);
+		if (ptexture->width> mod->max_Width)
+		{
+			mod->max_Width = ptexture->width;
+		}
+		if (ptexture->height> mod->max_Height)
+		{
+			mod->max_Height = ptexture->height;
+		}
+	}
+	else
+	{
+		return PX_FALSE;
+	}
+	return PX_TRUE;
+	
+}
+
+px_bool PX_FontModuleAddNewTextureCharacter(PX_FontModule* mod, px_dword unicode, px_texture* ptexture)
+{
+	return PX_FontModuleAddNewTextureCharacterEx(mod, unicode, ptexture, 0, 0);
+}

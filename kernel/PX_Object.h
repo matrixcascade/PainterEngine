@@ -40,6 +40,7 @@
 #define PX_OBJECT_EVENT_SAVE				28
 #define PX_OBJECT_EVENT_TIMEOUT				29
 #define PX_OBJECT_EVENT_DAMAGE				30
+#define PX_OBJECT_EVENT_RESET			    31
 //////////////////////////////////////////////////////////////////////////////
 //    Type of Controls
 /////////////////////////////////////////////////////////////////////////////
@@ -55,6 +56,7 @@ enum PX_OBJECT_TYPE
   PX_OBJECT_TYPE_SLIDERBAR		,
   PX_OBJECT_TYPE_LIST			,
   PX_OBJECT_TYPE_LISTITEM		,
+  PX_OBJECT_TYPE_BUTTON			,
   PX_OBJECT_TYPE_PUSHBUTTON		,
   PX_OBJECT_TYPE_EDIT           ,
   PX_OBJECT_TYPE_SCROLLAREA     ,
@@ -109,8 +111,10 @@ enum PX_OBJECT_TYPE
   PX_OBJECT_TYPE_FIREWORK		,
   PX_OBJECT_TYPE_MATRIXEFFECT   ,
   PX_OBJECT_TYPE_SLIDERTEXT		,
-  PX_OBJECT_TYPE_CDA_DESIGNER		,
+  PX_OBJECT_TYPE_CDA_DESIGNER	,
   PX_OBJECT_TYPE_CDA_OBJECT		,
+  PX_OBJECT_TYPE_DRAG,
+  PX_OBJECT_TYPE_SCOREPANEL		,
 };
 
 
@@ -343,6 +347,8 @@ px_void     PX_ObjectClearFocus(PX_Object *pObject);
 
 px_bool		PX_ObjectIsPointInRegion(PX_Object *pObject,px_float x,px_float y);
 px_bool		PX_ObjectIsCursorInRegion(PX_Object *pObject,PX_Object_Event e);
+px_bool		PX_ObjectIsPointInRegionAlign(PX_Object* pObject, px_float x, px_float y, PX_ALIGN align);
+px_bool		PX_ObjectIsCursorInRegionAlign(PX_Object* pObject, PX_Object_Event e, PX_ALIGN align);
 px_float	PX_ObjectGetHeight(PX_Object *pObject);
 px_float	PX_ObjectGetWidth(PX_Object *pObject);
 
@@ -608,6 +614,17 @@ px_void PX_ObjectCollisionTestFree(PX_Object_CollisionTest* ptest);
 //MatrixEffect
 #include "PX_Object_MatrixEffect.h"
 
+//////////////////////////////////////////////////////////////////////////
+//Button
+#include "PX_Object_Button.h"
+
+//////////////////////////////////////////////////////////////////////////
+//Drag
+#include "PX_Object_Drag.h"
+
+//////////////////////////////////////////////////////////////////////////
+//ScorePanel
+#include "PX_Object_ScorePanel.h"
 #endif
 
 

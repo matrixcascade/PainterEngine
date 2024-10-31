@@ -1,0 +1,40 @@
+{
+    "configurations": [
+        {
+            "name": "PainterEngine Debug",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/PainterEngine.exe",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${fileDirname}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "miDebuggerPath": "gdb.exe",
+            "setupCommands": [
+              {
+                "description": "Enable pretty-printing for gdb",
+                "text": "-enable-pretty-printing",
+                "ignoreFailures": true
+              }
+            ],
+            "preLaunchTask": "PainterEngine Debug",
+            "console": "externalTerminal"
+        },
+        {
+            "name": "PainterEngine Release",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/PainterEngine.exe",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${fileDirname}",
+            "environment": [],
+            "externalConsole": false,
+            "preLaunchTask": "PainterEngine Release",
+            "console": "externalTerminal"
+        }
+    ],
+    "version": "2.0.0"
+}

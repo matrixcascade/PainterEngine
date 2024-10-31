@@ -176,16 +176,16 @@ px_bool PX_Object_ExecuterRunPayload(PX_Object* pObject, const px_byte bin[],px_
 		return PX_FALSE;
 	}
 
-	PX_VMRegistHostFunction(&pExecute->vm, "print", PX_ExecuterVM_Print, pObject);//Print
-	PX_VMRegistHostFunction(&pExecute->vm, "printf", PX_ExecuterVM_Print, pObject);//Print
-	PX_VMRegistHostFunction(&pExecute->vm, "gets", PX_ExecuterVM_Gets, pObject);//Gets
-	PX_VMRegistHostFunction(&pExecute->vm, "clear", PX_ExecuterVM_Clear, pObject);//Clear
-	PX_VMRegistHostFunction(&pExecute->vm, "sleep", PX_ExecuterVM_Sleep, pObject);//Sleep
-	PX_VMRegistHostFunction(&pExecute->vm, "rand", PX_ExecuterVM_Rand, pObject);//Rand
-	PX_VMRegistHostFunction(&pExecute->vm, "sin", PX_ExecuterVM_Sin, pObject);//Sin
-	PX_VMRegistHostFunction(&pExecute->vm, "cos", PX_ExecuterVM_Cos, pObject);//Cos
-	PX_VMRegistHostFunction(&pExecute->vm, "lastprint", PX_ExecuterVM_LastPrint, pObject);//lastprint
-	PX_VMRegistHostFunction(&pExecute->vm, "createthread", PX_ExecuterVM_CreateThread, pObject);//createthread
+	PX_VMRegisterHostFunction(&pExecute->vm, "print", PX_ExecuterVM_Print, pObject);//Print
+	PX_VMRegisterHostFunction(&pExecute->vm, "printf", PX_ExecuterVM_Print, pObject);//Print
+	PX_VMRegisterHostFunction(&pExecute->vm, "gets", PX_ExecuterVM_Gets, pObject);//Gets
+	PX_VMRegisterHostFunction(&pExecute->vm, "clear", PX_ExecuterVM_Clear, pObject);//Clear
+	PX_VMRegisterHostFunction(&pExecute->vm, "sleep", PX_ExecuterVM_Sleep, pObject);//Sleep
+	PX_VMRegisterHostFunction(&pExecute->vm, "rand", PX_ExecuterVM_Rand, pObject);//Rand
+	PX_VMRegisterHostFunction(&pExecute->vm, "sin", PX_ExecuterVM_Sin, pObject);//Sin
+	PX_VMRegisterHostFunction(&pExecute->vm, "cos", PX_ExecuterVM_Cos, pObject);//Cos
+	PX_VMRegisterHostFunction(&pExecute->vm, "lastprint", PX_ExecuterVM_LastPrint, pObject);//lastprint
+	PX_VMRegisterHostFunction(&pExecute->vm, "createthread", PX_ExecuterVM_CreateThread, pObject);//createthread
 
 	if (!PX_VMBeginThreadFunction(&pExecute->vm, 0, "main", PX_NULL, 0))
 	{
@@ -285,7 +285,7 @@ px_bool PX_ExecuterRegistryHostFunction(PX_Object *pObject,const px_char Name[],
 {
 	
 	PX_Object_Executer* pExecuter=(PX_Object_Executer*)PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_EXECUTER);
-	return PX_VMRegistHostFunction(&pExecuter->vm, Name, function, userptr);
+	return PX_VMRegisterHostFunction(&pExecuter->vm, Name, function, userptr);
 	
 }
 

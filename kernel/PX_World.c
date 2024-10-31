@@ -595,28 +595,28 @@ host int createthread(string callname);\n\
 		PX_memset(&pWorld->compiler,0,sizeof(PX_Compiler));
 		PX_MemoryFree(&pWorld->vmbin);
 		PX_memset(&pWorld->vmbin,0,sizeof(px_memory));
-		PX_VMRegistHostFunction(&pWorld->vm, "sleep", PX_World_VM_Sleep, pWorld);
-		PX_VMRegistHostFunction(&pWorld->vm, "sleep", PX_World_VM_Sleep, pWorld);//Sleep
-		PX_VMRegistHostFunction(&pWorld->vm, "rand", PX_World_VM_Rand, pWorld);//Rand
-		PX_VMRegistHostFunction(&pWorld->vm, "sin", PX_World_VM_Sin, pWorld);//Sin
-		PX_VMRegistHostFunction(&pWorld->vm, "cos", PX_World_VM_Cos, pWorld);//Cos
-		PX_VMRegistHostFunction(&pWorld->vm, "sqrt", PX_World_VM_Sqrt, pWorld);//sqrt
-		PX_VMRegistHostFunction(&pWorld->vm, "getworldsize", PX_World_VM_GetWorldSize, pWorld);//getworldsize
-		PX_VMRegistHostFunction(&pWorld->vm, "getobjectname", PX_World_VM_GetObjectName, pWorld);//getobjectname
-		PX_VMRegistHostFunction(&pWorld->vm, "setobjectname", PX_World_VM_SetObjectName, pWorld);//setobjectname
-		PX_VMRegistHostFunction(&pWorld->vm, "setobjectposition", PX_World_VM_SetObjectPosition, pWorld);//setobjectvelocity
-		PX_VMRegistHostFunction(&pWorld->vm, "getobjectposition", PX_World_VM_GetObjectPosition, pWorld);//setobjectvelocity
-		PX_VMRegistHostFunction(&pWorld->vm, "setobjectvelocity", PX_World_VM_SetObjectVelocity, pWorld);//setobjectvelocity
-		PX_VMRegistHostFunction(&pWorld->vm, "setobjectforce", PX_World_VM_SetObjectForce, pWorld);//setobjectforce
-		PX_VMRegistHostFunction(&pWorld->vm, "setobjectresistance", PX_World_VM_SetObjectResistance, pWorld);//setobjectresistance
-		PX_VMRegistHostFunction(&pWorld->vm, "setobjecttype", PX_World_VM_SetObjectType, pWorld);//setobjecttype
-		PX_VMRegistHostFunction(&pWorld->vm, "setobjectimpacttargettype", PX_World_VM_SetObjectImpactTargetType, pWorld);//setobjectimpacttargettype
-		PX_VMRegistHostFunction(&pWorld->vm, "abi_int", PX_World_VM_Abi_int, pWorld);//abi_int
-		PX_VMRegistHostFunction(&pWorld->vm, "abi_float", PX_World_VM_Abi_float, pWorld);//abi_float
-		PX_VMRegistHostFunction(&pWorld->vm, "abi_string", PX_World_VM_Abi_string, pWorld);//abi_string
-		PX_VMRegistHostFunction(&pWorld->vm, "abi_point", PX_World_VM_Abi_point, pWorld);//abi_point
-		PX_VMRegistHostFunction(&pWorld->vm, "abi_color", PX_World_VM_Abi_color, pWorld);//abi_color
-		PX_VMRegistHostFunction(&pWorld->vm, "createthread", PX_World_VM_CreateThread, pWorld);//createthread
+		PX_VMRegisterHostFunction(&pWorld->vm, "sleep", PX_World_VM_Sleep, pWorld);
+		PX_VMRegisterHostFunction(&pWorld->vm, "sleep", PX_World_VM_Sleep, pWorld);//Sleep
+		PX_VMRegisterHostFunction(&pWorld->vm, "rand", PX_World_VM_Rand, pWorld);//Rand
+		PX_VMRegisterHostFunction(&pWorld->vm, "sin", PX_World_VM_Sin, pWorld);//Sin
+		PX_VMRegisterHostFunction(&pWorld->vm, "cos", PX_World_VM_Cos, pWorld);//Cos
+		PX_VMRegisterHostFunction(&pWorld->vm, "sqrt", PX_World_VM_Sqrt, pWorld);//sqrt
+		PX_VMRegisterHostFunction(&pWorld->vm, "getworldsize", PX_World_VM_GetWorldSize, pWorld);//getworldsize
+		PX_VMRegisterHostFunction(&pWorld->vm, "getobjectname", PX_World_VM_GetObjectName, pWorld);//getobjectname
+		PX_VMRegisterHostFunction(&pWorld->vm, "setobjectname", PX_World_VM_SetObjectName, pWorld);//setobjectname
+		PX_VMRegisterHostFunction(&pWorld->vm, "setobjectposition", PX_World_VM_SetObjectPosition, pWorld);//setobjectvelocity
+		PX_VMRegisterHostFunction(&pWorld->vm, "getobjectposition", PX_World_VM_GetObjectPosition, pWorld);//setobjectvelocity
+		PX_VMRegisterHostFunction(&pWorld->vm, "setobjectvelocity", PX_World_VM_SetObjectVelocity, pWorld);//setobjectvelocity
+		PX_VMRegisterHostFunction(&pWorld->vm, "setobjectforce", PX_World_VM_SetObjectForce, pWorld);//setobjectforce
+		PX_VMRegisterHostFunction(&pWorld->vm, "setobjectresistance", PX_World_VM_SetObjectResistance, pWorld);//setobjectresistance
+		PX_VMRegisterHostFunction(&pWorld->vm, "setobjecttype", PX_World_VM_SetObjectType, pWorld);//setobjecttype
+		PX_VMRegisterHostFunction(&pWorld->vm, "setobjectimpacttargettype", PX_World_VM_SetObjectImpactTargetType, pWorld);//setobjectimpacttargettype
+		PX_VMRegisterHostFunction(&pWorld->vm, "abi_int", PX_World_VM_Abi_int, pWorld);//abi_int
+		PX_VMRegisterHostFunction(&pWorld->vm, "abi_float", PX_World_VM_Abi_float, pWorld);//abi_float
+		PX_VMRegisterHostFunction(&pWorld->vm, "abi_string", PX_World_VM_Abi_string, pWorld);//abi_string
+		PX_VMRegisterHostFunction(&pWorld->vm, "abi_point", PX_World_VM_Abi_point, pWorld);//abi_point
+		PX_VMRegisterHostFunction(&pWorld->vm, "abi_color", PX_World_VM_Abi_color, pWorld);//abi_color
+		PX_VMRegisterHostFunction(&pWorld->vm, "createthread", PX_World_VM_CreateThread, pWorld);//createthread
 		PX_VMBeginThreadFunction(&pWorld->vm, 0, "main", 0, 0);
 	}
 	

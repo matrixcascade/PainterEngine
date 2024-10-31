@@ -11,28 +11,28 @@ PX_OBJECT_EVENT_FUNCTION(PX_Object_PushButtonOnMouseMove)
 	{
 		if(PX_ObjectIsPointInRegion(pObject,(px_float)x,(px_float)y))
 		{
-			if (pPushButton->state!=PX_OBJECT_BUTTON_STATE_ONPUSH)
+			if (pPushButton->state!=PX_OBJECT_PUSHBUTTON_STATE_ONPUSH)
 			{
-				if (pPushButton->state!=PX_OBJECT_BUTTON_STATE_ONCURSOR)
+				if (pPushButton->state!=PX_OBJECT_PUSHBUTTON_STATE_ONCURSOR)
 				{
 					PX_Object_Event e = {0};
 					e.Event=PX_OBJECT_EVENT_CURSOROVER;
 					PX_ObjectExecuteEvent(pObject,e);
 				}
-				pPushButton->state=PX_OBJECT_BUTTON_STATE_ONCURSOR;
+				pPushButton->state=PX_OBJECT_PUSHBUTTON_STATE_ONCURSOR;
 				pPushButton->tips_x = x;
 				pPushButton->tips_y = y;
 			}
 		}
 		else
 		{
-			if (pPushButton->state!=PX_OBJECT_BUTTON_STATE_NORMAL)
+			if (pPushButton->state!=PX_OBJECT_PUSHBUTTON_STATE_NORMAL)
 			{
 				PX_Object_Event e = {0};
 				e.Event=PX_OBJECT_EVENT_CURSOROUT;
 				PX_ObjectExecuteEvent(pObject,e);
 			}
-			pPushButton->state=PX_OBJECT_BUTTON_STATE_NORMAL;
+			pPushButton->state=PX_OBJECT_PUSHBUTTON_STATE_NORMAL;
 			pPushButton->bCursorShowTipsElapsed = 0;
 		}
 	}
@@ -49,10 +49,10 @@ PX_OBJECT_EVENT_FUNCTION(PX_Object_PushButtonOnMouseLButtonDown)
 	if (pPushButton)
 	{
 		if(PX_ObjectIsPointInRegion(pObject,(px_float)x,(px_float)y))
-			pPushButton->state=PX_OBJECT_BUTTON_STATE_ONPUSH;
+			pPushButton->state=PX_OBJECT_PUSHBUTTON_STATE_ONPUSH;
 		else
 		{
-			if (pPushButton->state!=PX_OBJECT_BUTTON_STATE_NORMAL)
+			if (pPushButton->state!=PX_OBJECT_PUSHBUTTON_STATE_NORMAL)
 			{
 				PX_Object_Event e;
 				e.Event=PX_OBJECT_EVENT_CURSOROUT;
@@ -62,7 +62,7 @@ PX_OBJECT_EVENT_FUNCTION(PX_Object_PushButtonOnMouseLButtonDown)
 				e.Param_uint[3]=0;
 				PX_ObjectExecuteEvent(pObject,e);
 			}
-			pPushButton->state=PX_OBJECT_BUTTON_STATE_NORMAL;
+			pPushButton->state=PX_OBJECT_PUSHBUTTON_STATE_NORMAL;
 		}
 	}
 }
@@ -78,9 +78,9 @@ PX_OBJECT_EVENT_FUNCTION(PX_Object_PushButtonOnMouseLButtonUp)
 	if (pPushButton)
 	{
 		if(PX_ObjectIsPointInRegion(pObject,(px_float)x,(px_float)y))
-			if(pPushButton->state==PX_OBJECT_BUTTON_STATE_ONPUSH)
+			if(pPushButton->state==PX_OBJECT_PUSHBUTTON_STATE_ONPUSH)
 			{
-				pPushButton->state=PX_OBJECT_BUTTON_STATE_ONCURSOR;
+				pPushButton->state=PX_OBJECT_PUSHBUTTON_STATE_ONCURSOR;
 				e.Event=PX_OBJECT_EVENT_EXECUTE;
 				PX_ObjectExecuteEvent(pObject,e);
 			}
@@ -113,9 +113,9 @@ PX_OBJECT_RENDER_FUNCTION(PX_Object_PushButtonRender)
 
 	if (!pObject->Enabled)
 	{
-		pPushButton->state = PX_OBJECT_BUTTON_STATE_NORMAL;
+		pPushButton->state = PX_OBJECT_PUSHBUTTON_STATE_NORMAL;
 	}
-	if (pPushButton->state == PX_OBJECT_BUTTON_STATE_ONCURSOR)
+	if (pPushButton->state == PX_OBJECT_PUSHBUTTON_STATE_ONCURSOR)
 	{
 		pPushButton->bCursorShowTipsElapsed += elapsed;
 	}
@@ -126,13 +126,13 @@ PX_OBJECT_RENDER_FUNCTION(PX_Object_PushButtonRender)
 		PX_GeoDrawRect(psurface, (px_int)objx, (px_int)objy, (px_int)objx + (px_int)objWidth - 1, (px_int)objy + (px_int)objHeight - 1, pPushButton->BackgroundColor);
 		switch (pPushButton->state)
 		{
-		case PX_OBJECT_BUTTON_STATE_NORMAL:
+		case PX_OBJECT_PUSHBUTTON_STATE_NORMAL:
 			PX_GeoDrawRect(psurface, (px_int)objx, (px_int)objy, (px_int)objx + (px_int)objWidth - 1, (px_int)objy + (px_int)objHeight - 1, pPushButton->BackgroundColor);
 			break;
-		case PX_OBJECT_BUTTON_STATE_ONPUSH:
+		case PX_OBJECT_PUSHBUTTON_STATE_ONPUSH:
 			PX_GeoDrawRect(psurface, (px_int)objx, (px_int)objy, (px_int)objx + (px_int)objWidth - 1, (px_int)objy + (px_int)objHeight - 1, pPushButton->PushColor);
 			break;
-		case PX_OBJECT_BUTTON_STATE_ONCURSOR:
+		case PX_OBJECT_PUSHBUTTON_STATE_ONCURSOR:
 
 			PX_GeoDrawRect(psurface, (px_int)objx, (px_int)objy, (px_int)objx + (px_int)objWidth - 1, (px_int)objy + (px_int)objHeight - 1, pPushButton->CursorColor);
 			break;
@@ -142,13 +142,13 @@ PX_OBJECT_RENDER_FUNCTION(PX_Object_PushButtonRender)
 		PX_GeoDrawSolidRoundRect(psurface, (px_int)objx, (px_int)objy, (px_int)objx + (px_int)objWidth - 1, (px_int)objy + (px_int)objHeight - 1, pPushButton->roundradius, pPushButton->BackgroundColor);
 		switch (pPushButton->state)
 		{
-		case PX_OBJECT_BUTTON_STATE_NORMAL:
+		case PX_OBJECT_PUSHBUTTON_STATE_NORMAL:
 			PX_GeoDrawSolidRoundRect(psurface, (px_int)objx, (px_int)objy, (px_int)objx + (px_int)objWidth - 1, (px_int)objy + (px_int)objHeight - 1, pPushButton->roundradius, pPushButton->BackgroundColor);
 			break;
-		case PX_OBJECT_BUTTON_STATE_ONPUSH:
+		case PX_OBJECT_PUSHBUTTON_STATE_ONPUSH:
 			PX_GeoDrawSolidRoundRect(psurface, (px_int)objx, (px_int)objy, (px_int)objx + (px_int)objWidth - 1, (px_int)objy + (px_int)objHeight - 1, pPushButton->roundradius, pPushButton->PushColor);
 			break;
-		case PX_OBJECT_BUTTON_STATE_ONCURSOR:
+		case PX_OBJECT_PUSHBUTTON_STATE_ONCURSOR:
 			PX_GeoDrawSolidRoundRect(psurface, (px_int)objx, (px_int)objy, (px_int)objx + (px_int)objWidth - 1, (px_int)objy + (px_int)objHeight - 1, pPushButton->roundradius, pPushButton->CursorColor);
 			break;
 		}
@@ -158,13 +158,13 @@ PX_OBJECT_RENDER_FUNCTION(PX_Object_PushButtonRender)
 		PX_GeoDrawSolidCircle(psurface, (px_int)objx, (px_int)objy, (px_int)(pObject->diameter / 2), pPushButton->BackgroundColor);
 		switch (pPushButton->state)
 		{
-		case PX_OBJECT_BUTTON_STATE_NORMAL:
+		case PX_OBJECT_PUSHBUTTON_STATE_NORMAL:
 			PX_GeoDrawBall(psurface, objx, objy, (pObject->diameter / 2), pPushButton->BackgroundColor);
 			break;
-		case PX_OBJECT_BUTTON_STATE_ONPUSH:
+		case PX_OBJECT_PUSHBUTTON_STATE_ONPUSH:
 			PX_GeoDrawBall(psurface, objx, objy, (pObject->diameter / 2), pPushButton->PushColor);
 			break;
-		case PX_OBJECT_BUTTON_STATE_ONCURSOR:
+		case PX_OBJECT_PUSHBUTTON_STATE_ONCURSOR:
 			PX_GeoDrawBall(psurface, objx, objy, (pObject->diameter / 2), pPushButton->CursorColor);
 			break;
 		}
@@ -177,14 +177,14 @@ PX_OBJECT_RENDER_FUNCTION(PX_Object_PushButtonRender)
 	{
 		switch (pPushButton->state)
 		{
-		case PX_OBJECT_BUTTON_STATE_NORMAL:
+		case PX_OBJECT_PUSHBUTTON_STATE_NORMAL:
 			if (pPushButton->gif->roffset != 0)
 			{
 				PX_GifReset(pPushButton->gif);
 			}
 			break;
-		case PX_OBJECT_BUTTON_STATE_ONPUSH:
-		case PX_OBJECT_BUTTON_STATE_ONCURSOR:
+		case PX_OBJECT_PUSHBUTTON_STATE_ONPUSH:
+		case PX_OBJECT_PUSHBUTTON_STATE_ONCURSOR:
 			PX_GifUpdate(pPushButton->gif, elapsed);
 			break;
 		}
@@ -272,7 +272,7 @@ PX_Object* PX_Object_PushButtonAttachObject( PX_Object* pObject,px_int attachInd
 	pPushButton->BackgroundColor = PX_OBJECT_UI_DEFAULT_BACKGROUNDCOLOR;
 	pPushButton->BorderColor = PX_OBJECT_UI_DEFAULT_BORDERCOLOR;
 	pPushButton->Border = PX_TRUE;
-	pPushButton->state = PX_OBJECT_BUTTON_STATE_NORMAL;
+	pPushButton->state = PX_OBJECT_PUSHBUTTON_STATE_NORMAL;
 	pPushButton->Border = PX_TRUE;
 	pPushButton->style = PX_OBJECT_PUSHBUTTON_STYLE_RECT;
 	pPushButton->roundradius = PX_OBJECT_PUSHBUTTON_ROUNDRADIUS;

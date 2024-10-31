@@ -124,7 +124,7 @@ px_bool PX_VMIsRuning(PX_VM* Ins);
 px_bool PX_VMInitialize(PX_VM* Ins, px_memorypool* mp, const px_byte* code, px_int size);
 px_bool PX_VMLocalAlloc(PX_VM *Ins,px_int size,PX_VM_MEMORY_PTR *mem_ptr);
 px_bool PX_VMLocalFree(PX_VM *Ins,PX_VM_MEMORY_PTR *mem_ptr);
-px_bool PX_VMRegistHostFunction(PX_VM *Ins,const px_char *name,PX_VM_Host_Function_Modules funcModules,px_void *userptr);
+px_bool PX_VMRegisterHostFunction(PX_VM *Ins,const px_char *name,PX_VM_Host_Function_Modules funcModules,px_void *userptr);
 px_bool PX_VMFree(PX_VM *Ins);
 
 #define  PX_VM_STACK_THREAD(Ins,i,T) ((Ins)->_mem[(Ins)->pThread[T].SP+i])

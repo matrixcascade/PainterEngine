@@ -1,0 +1,34 @@
+texture "1.png" _1
+texture "2.png" _2
+texture "3.png" _3
+texture "4.png" _4
+texture "5.png" _5
+texture "6.png" _6
+texture "7.png" _7
+texture "8.png" _8
+texture "9.png" _9
+texture "10.png" _10
+texture "11.png" _11
+texture "12.png" _12
+texture "13.png" _13
+texture "14.png" _14
+texture "15.png" _15
+texture "16.png" _16
+
+
+
+animation song
+frame tex_song
+clipx 0
+clipy 0
+clipw 128
+cliph 128
+loop 16
+tag $song_begin
+sleep 500
+clipinc 1
+goto $song_begin
+loop -1
+goto song
+end
+

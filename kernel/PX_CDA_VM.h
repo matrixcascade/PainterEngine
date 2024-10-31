@@ -497,23 +497,23 @@ px_bool PX_CDA_LoadScript(PX_CDA* pCDA, const px_char script[])
 		PX_memset(&compiler, 0, sizeof(PX_Compiler));
 		PX_MemoryFree(&vmbin);
 		PX_memset(&vmbin, 0, sizeof(px_memory));
-		PX_VMRegistHostFunction(&pCDA->vm, "sleep", PX_CDA_VM_Sleep, pCDA);//Sleep
-		PX_VMRegistHostFunction(&pCDA->vm, "rand", PX_CDA_VM_Rand, pCDA);//Rand
-		PX_VMRegistHostFunction(&pCDA->vm, "sin", PX_CDA_VM_Sin, pCDA);//Sin
-		PX_VMRegistHostFunction(&pCDA->vm, "cos", PX_CDA_VM_Cos, pCDA);//Cos
-		PX_VMRegistHostFunction(&pCDA->vm, "sqrt", PX_CDA_VM_Sqrt, pCDA);//sqrt
-		PX_VMRegistHostFunction(&pCDA->vm, "getCDAsize", PX_CDA_VM_GetCDASize, pCDA);//getCDAsize
-		PX_VMRegistHostFunction(&pCDA->vm, "getobjectname", PX_CDA_VM_GetObjectName, pCDA);//getobjectname
-		PX_VMRegistHostFunction(&pCDA->vm, "setobjectname", PX_CDA_VM_SetObjectName, pCDA);//setobjectname
-		PX_VMRegistHostFunction(&pCDA->vm, "setobjectposition", PX_CDA_VM_SetObjectPosition, pCDA);//setobjectvelocity
-		PX_VMRegistHostFunction(&pCDA->vm, "getobjectposition", PX_CDA_VM_GetObjectPosition, pCDA);//setobjectvelocity
-		PX_VMRegistHostFunction(&pCDA->vm, "setobjectvelocity", PX_CDA_VM_SetObjectVelocity, pCDA);//setobjectvelocity
-		PX_VMRegistHostFunction(&pCDA->vm, "abi_int", PX_CDA_VM_Abi_int, pCDA);//abi_int
-		PX_VMRegistHostFunction(&pCDA->vm, "abi_float", PX_CDA_VM_Abi_float, pCDA);//abi_float
-		PX_VMRegistHostFunction(&pCDA->vm, "abi_string", PX_CDA_VM_Abi_string, pCDA);//abi_string
-		PX_VMRegistHostFunction(&pCDA->vm, "abi_point", PX_CDA_VM_Abi_point, pCDA);//abi_point
-		PX_VMRegistHostFunction(&pCDA->vm, "abi_color", PX_CDA_VM_Abi_color, pCDA);//abi_color
-		PX_VMRegistHostFunction(&pCDA->vm, "createthread", PX_CDA_VM_CreateThread, pCDA);//createthread
+		PX_VMRegisterHostFunction(&pCDA->vm, "sleep", PX_CDA_VM_Sleep, pCDA);//Sleep
+		PX_VMRegisterHostFunction(&pCDA->vm, "rand", PX_CDA_VM_Rand, pCDA);//Rand
+		PX_VMRegisterHostFunction(&pCDA->vm, "sin", PX_CDA_VM_Sin, pCDA);//Sin
+		PX_VMRegisterHostFunction(&pCDA->vm, "cos", PX_CDA_VM_Cos, pCDA);//Cos
+		PX_VMRegisterHostFunction(&pCDA->vm, "sqrt", PX_CDA_VM_Sqrt, pCDA);//sqrt
+		PX_VMRegisterHostFunction(&pCDA->vm, "getCDAsize", PX_CDA_VM_GetCDASize, pCDA);//getCDAsize
+		PX_VMRegisterHostFunction(&pCDA->vm, "getobjectname", PX_CDA_VM_GetObjectName, pCDA);//getobjectname
+		PX_VMRegisterHostFunction(&pCDA->vm, "setobjectname", PX_CDA_VM_SetObjectName, pCDA);//setobjectname
+		PX_VMRegisterHostFunction(&pCDA->vm, "setobjectposition", PX_CDA_VM_SetObjectPosition, pCDA);//setobjectvelocity
+		PX_VMRegisterHostFunction(&pCDA->vm, "getobjectposition", PX_CDA_VM_GetObjectPosition, pCDA);//setobjectvelocity
+		PX_VMRegisterHostFunction(&pCDA->vm, "setobjectvelocity", PX_CDA_VM_SetObjectVelocity, pCDA);//setobjectvelocity
+		PX_VMRegisterHostFunction(&pCDA->vm, "abi_int", PX_CDA_VM_Abi_int, pCDA);//abi_int
+		PX_VMRegisterHostFunction(&pCDA->vm, "abi_float", PX_CDA_VM_Abi_float, pCDA);//abi_float
+		PX_VMRegisterHostFunction(&pCDA->vm, "abi_string", PX_CDA_VM_Abi_string, pCDA);//abi_string
+		PX_VMRegisterHostFunction(&pCDA->vm, "abi_point", PX_CDA_VM_Abi_point, pCDA);//abi_point
+		PX_VMRegisterHostFunction(&pCDA->vm, "abi_color", PX_CDA_VM_Abi_color, pCDA);//abi_color
+		PX_VMRegisterHostFunction(&pCDA->vm, "createthread", PX_CDA_VM_CreateThread, pCDA);//createthread
 		PX_VMBeginThreadFunction(&pCDA->vm, 0, "main", 0, 0);
 	}
 	return PX_TRUE;

@@ -3459,7 +3459,7 @@ px_bool PX_ScriptVM_InstanceInitialize(PX_VM* Ins, px_memorypool* mp, px_byte* c
 	return PX_VMInitialize(Ins, mp, code, size);
 }
 
-px_bool PX_VMRegistHostFunction(PX_VM *Ins,const px_char *name,PX_VM_Host_Function_Modules funcModules,px_void *userptr)
+px_bool PX_VMRegisterHostFunction(PX_VM *Ins,const px_char *name,PX_VM_Host_Function_Modules funcModules,px_void *userptr)
 {
 	px_int i;
 	px_char uprname[__PX_SCRIPT_ASM_MNEMONIC_NAME_LEN];

@@ -25,7 +25,7 @@ DWORD WINAPI DEMO_RenderThreadFunc(LPVOID p)
 	/*	px_char *keyBoardString;*/
 	//////////////////////////////////////////////////////////////////////////
 	//CreateWindow
-
+	Sleep(1);
 	time=timeGetTime();
 
 	while(1)

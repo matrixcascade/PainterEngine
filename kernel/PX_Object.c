@@ -1032,9 +1032,43 @@ px_bool PX_ObjectIsPointInRegion( PX_Object *pObject,px_float x,px_float y )
 		return PX_isXYInRegion(x,y,objx,objy,objw,objh);
 }
 
+px_bool PX_ObjectIsPointInRegionAlign(PX_Object* pObject, px_float x, px_float y,PX_ALIGN align)
+{
+	switch (align)
+	{
+	case PX_ALIGN_LEFTTOP:
+		return PX_ObjectIsPointInRegion(pObject, x, y);
+	case PX_ALIGN_MIDTOP:
+		return PX_ObjectIsPointInRegion(pObject, x + pObject->Width / 2, y);
+	case PX_ALIGN_RIGHTTOP:
+		return PX_ObjectIsPointInRegion(pObject, x + pObject->Width, y);
+	case PX_ALIGN_LEFTMID:
+		return PX_ObjectIsPointInRegion(pObject, x, y + pObject->Height / 2);
+	case PX_ALIGN_CENTER:
+		return PX_ObjectIsPointInRegion(pObject, x + pObject->Width / 2, y + pObject->Height / 2);
+	case PX_ALIGN_RIGHTMID:
+		return PX_ObjectIsPointInRegion(pObject, x + pObject->Width, y + pObject->Height / 2);
+	case PX_ALIGN_LEFTBOTTOM:
+		return PX_ObjectIsPointInRegion(pObject, x, y + pObject->Height);
+	case PX_ALIGN_MIDBOTTOM:
+		return PX_ObjectIsPointInRegion(pObject, x + pObject->Width / 2, y + pObject->Height);
+	case PX_ALIGN_RIGHTBOTTOM:
+		return PX_ObjectIsPointInRegion(pObject, x + pObject->Width, y + pObject->Height);
+	default:
+		break;
+	}
+	return PX_FALSE;
+}
+
+
 px_bool PX_ObjectIsCursorInRegion(PX_Object *pObject,PX_Object_Event e)
 {
 	return PX_ObjectIsPointInRegion(pObject,PX_Object_Event_GetCursorX(e),PX_Object_Event_GetCursorY(e));
+}
+
+px_bool PX_ObjectIsCursorInRegionAlign(PX_Object* pObject, PX_Object_Event e, PX_ALIGN align)
+{
+	return PX_ObjectIsPointInRegionAlign(pObject, PX_Object_Event_GetCursorX(e), PX_Object_Event_GetCursorY(e), align);
 }
 
 px_float PX_ObjectGetHeight(PX_Object *pObject)

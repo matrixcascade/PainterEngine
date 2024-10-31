@@ -175,7 +175,7 @@ MemoryNode *PX_AllocFromFreq(px_memorypool *MP,px_uint Size)
 px_memorypool MP_Create( px_void *MemoryAddr,px_uint MemorySize )
 {
 	px_uint Index=0;
-	px_memorypool MP;
+	px_memorypool MP = {0};
 #if defined(PX_DEBUG_MODE) && defined(PX_MEMORYPOOL_DEBUG_CHECK)
 	px_int DEBUG_i;
 #endif
@@ -354,15 +354,18 @@ px_void * MP_Malloc(px_memorypool *MP, px_uint Size )
 		MP->nodeCount++;
 		return MemNode->StartAddr;
 	}
-
-	if (MP->ErrorCall_Ptr == PX_NULL)
+	if (!MP->no_catch_error)
 	{
-		PX_ERROR("MemoryPool Out Of Memory!");
+		if (MP->ErrorCall_Ptr == PX_NULL)
+		{
+			PX_ERROR("MemoryPool Out Of Memory!");
+		}
+		else
+		{
+			MP->ErrorCall_Ptr(MP->userptr, PX_MEMORYPOOL_ERROR_OUTOFMEMORY);
+		}
 	}
-	else
-	{
-		MP->ErrorCall_Ptr(MP->userptr,PX_MEMORYPOOL_ERROR_OUTOFMEMORY);
-	}
+	
 	return PX_NULL;
 
 }
@@ -636,4 +639,14 @@ px_void MP_ResetZero(px_memorypool* Pool)
 #if defined(PX_DEBUG_MODE) && defined(PX_MEMORYPOOL_DEBUG_CHECK)
 	PX_memset(Pool->DEBUG_allocdata, 0, sizeof(Pool->DEBUG_allocdata));
 #endif
+}
+
+px_void     MP_NoCatchError(px_memorypool* Pool)
+{
+	Pool->no_catch_error=PX_TRUE;
+}
+
+px_void     MP_CatchError(px_memorypool* Pool)
+{
+	Pool->no_catch_error = PX_FALSE;
 }

@@ -18,9 +18,9 @@ px_void PX_Object_CheckBoxOnMouseMove(PX_Object *pObject,PX_Object_Event e,px_vo
 	{
 		if(PX_ObjectIsPointInRegion(pObject,(px_float)x,(px_float)y))
 		{
-			if (pcb->state!=PX_OBJECT_BUTTON_STATE_ONPUSH)
+			if (pcb->state!=PX_OBJECT_PUSHBUTTON_STATE_ONPUSH)
 			{
-				if (pcb->state!=PX_OBJECT_BUTTON_STATE_ONCURSOR)
+				if (pcb->state!=PX_OBJECT_PUSHBUTTON_STATE_ONCURSOR)
 				{
 					PX_Object_Event e = {0};
 					e.Event=PX_OBJECT_EVENT_CURSOROVER;
@@ -32,7 +32,7 @@ px_void PX_Object_CheckBoxOnMouseMove(PX_Object *pObject,PX_Object_Event e,px_vo
 		}
 		else
 		{
-			if (pcb->state!=PX_OBJECT_BUTTON_STATE_NORMAL)
+			if (pcb->state!=PX_OBJECT_PUSHBUTTON_STATE_NORMAL)
 			{
 				PX_Object_Event e = {0};
 				e.Event=PX_OBJECT_EVENT_CURSOROUT;
@@ -55,7 +55,7 @@ PX_OBJECT_EVENT_FUNCTION(PX_Object_CheckBoxOnMouseLButtonDown)
 			pcb->state=PX_OBJECT_CHECKBOX_STATE_ONPUSH;
 		else
 		{
-			if (pcb->state!=PX_OBJECT_BUTTON_STATE_NORMAL)
+			if (pcb->state!=PX_OBJECT_PUSHBUTTON_STATE_NORMAL)
 			{
 				PX_Object_Event e;
 				e.Event=PX_OBJECT_EVENT_CURSOROUT;
@@ -114,13 +114,13 @@ PX_OBJECT_RENDER_FUNCTION(PX_Object_CheckBoxRender)
 	PX_GeoDrawRect(psurface,(px_int)objx,(px_int)objy,(px_int)objx+(px_int)objWidth-1,(px_int)objy+(px_int)objHeight-1,pcb->BackgroundColor);
 	switch (pcb->state)
 	{
-	case PX_OBJECT_BUTTON_STATE_NORMAL:
+	case PX_OBJECT_PUSHBUTTON_STATE_NORMAL:
 		PX_GeoDrawRect(psurface,(px_int)objx,(px_int)objy,(px_int)objx+(px_int)objWidth-1,(px_int)objy+(px_int)objHeight-1,pcb->BackgroundColor);
 		break;
-	case PX_OBJECT_BUTTON_STATE_ONPUSH:
+	case PX_OBJECT_PUSHBUTTON_STATE_ONPUSH:
 		PX_GeoDrawRect(psurface,(px_int)objx,(px_int)objy,(px_int)objx+(px_int)objWidth-1,(px_int)objy+(px_int)objHeight-1,pcb->PushColor);
 		break;
-	case PX_OBJECT_BUTTON_STATE_ONCURSOR:
+	case PX_OBJECT_PUSHBUTTON_STATE_ONCURSOR:
 		PX_GeoDrawRect(psurface,(px_int)objx,(px_int)objy,(px_int)objx+(px_int)objWidth-1,(px_int)objy+(px_int)objHeight-1,pcb->CursorColor);
 		break;
 	}
