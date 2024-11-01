@@ -171,39 +171,39 @@ A GPU IP core based on FPGA has been developed and functionally verified on the 
 ### 现在,访问PainterEngine.com,参与建设
 ### Now, join the PainterEngine.com contribute to its development.
 <p align="center">
-<img src="platform/fox/mini/1.png" alt="logo">
-<img src="platform/fox/mini/2.png" alt="logo">
-<img src="platform/fox/mini/3.png" alt="logo">
-<img src="platform/fox/mini/4.png" alt="logo">
-<img src="platform/fox/mini/5.png" alt="logo">
-<img src="platform/fox/mini/6.png" alt="logo">
+<img src="documents/assets/mini/1.png" alt="logo">
+<img src="documents/assets/mini/2.png" alt="logo">
+<img src="documents/assets/mini/3.png" alt="logo">
+<img src="documents/assets/mini/4.png" alt="logo">
+<img src="documents/assets/mini/5.png" alt="logo">
+<img src="documents/assets/mini/6.png" alt="logo">
 </p>
 
 <p align="center">
-<img src="platform/fox/mini/7.png" alt="logo">
-<img src="platform/fox/mini/8.png" alt="logo">
-<img src="platform/fox/mini/9.png" alt="logo">
-<img src="platform/fox/mini/10.png" alt="logo">
-<img src="platform/fox/mini/11.png" alt="logo">
-<img src="platform/fox/mini/12.png" alt="logo">
+<img src="documents/assets/mini/7.png" alt="logo">
+<img src="documents/assets/mini/8.png" alt="logo">
+<img src="documents/assets/mini/9.png" alt="logo">
+<img src="documents/assets/mini/10.png" alt="logo">
+<img src="documents/assets/mini/11.png" alt="logo">
+<img src="documents/assets/mini/12.png" alt="logo">
 </p>
 
 <p align="center">
-<img src="platform/fox/mini/13.png" alt="logo">
-<img src="platform/fox/mini/14.png" alt="logo">
-<img src="platform/fox/mini/15.png" alt="logo">
-<img src="platform/fox/mini/16.png" alt="logo">
-<img src="platform/fox/mini/17.png" alt="logo">
-<img src="platform/fox/mini/18.png" alt="logo">
+<img src="documents/assets/mini/13.png" alt="logo">
+<img src="documents/assets/mini/14.png" alt="logo">
+<img src="documents/assets/mini/15.png" alt="logo">
+<img src="documents/assets/mini/16.png" alt="logo">
+<img src="documents/assets/mini/17.png" alt="logo">
+<img src="documents/assets/mini/18.png" alt="logo">
 </p>
 
 <p align="center">
-<img src="platform/fox/mini/19.png" alt="logo">
-<img src="platform/fox/mini/20.png" alt="logo">
-<img src="platform/fox/mini/21.png" alt="logo">
-<img src="platform/fox/mini/22.png" alt="logo">
-<img src="platform/fox/mini/23.png" alt="logo">
-<img src="platform/fox/mini/24.png" alt="logo">
+<img src="documents/assets/mini/19.png" alt="logo">
+<img src="documents/assets/mini/20.png" alt="logo">
+<img src="documents/assets/mini/21.png" alt="logo">
+<img src="documents/assets/mini/22.png" alt="logo">
+<img src="documents/assets/mini/23.png" alt="logo">
+<img src="documents/assets/mini/24.png" alt="logo">
 </p>
 
 
