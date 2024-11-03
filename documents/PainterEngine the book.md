@@ -28,8 +28,8 @@ PainterEngine同样经历了近乎十年的发展，但在很长的一段时间�
 因此PainterEngine在很长一段时间，都没有详细且稳定的文档，而经过那么多年的迭代，我们最终可以将
 那些稳定、好用、简单易学的设计公布出来，并最终给大家带来这篇文档。
 
-最后，我并不希望将导言写的太长，是时候马上切入主题了，我们将从PainterEngine的环境搭建开始，
-开始PainterEngine的第一课，如果你有相关问题或发现了bug，你可以在PainterEngine论坛中提问，
+最后，我并不希望将导言写的太长，是时候马上切入主题了，我们将从PainterEngine的环境搭建开始PainterEngine
+的第一课，如果你有相关问题或发现了bug，你可以在PainterEngine论坛中提问，
 或者直接将问题发送到matrixcascade@gmail.com,我将在第一时间给你反馈。
 
 ![](assets/mini/1.png)
@@ -37,8 +37,7 @@ PainterEngine同样经历了近乎十年的发展，但在很长的一段时间�
 ## 1.一个最简单的PainterEngine程序
 
 在搭建开发环境之前，让我们先编写一个最简单的PainterEngine程序，让我们新建一个"main.c"文件(文
-件名可以任意取),然后在
-其中输入以下代码
+件名可以任意取),然后在其中输入以下代码
 
 ```c
 #include "PainterEngine.h"
@@ -415,7 +414,7 @@ int main()
 PainterEngine可以直接从文件中加载图片，它原生支持PNG、JPG、BMP、TRAW四种静态图片格式的加载，为了
 存储加载的图片，我们需要用到一个叫纹理的结构体。
 
-在PainterEngine中，纹理用`px_texture`结构体进行，描述，因此为了加载纹理，我们需要`PX_LoadTextureFromFile`
+在PainterEngine中，纹理用`px_texture`结构体进行描述，因此为了加载纹理，我们需要`PX_LoadTextureFromFile`
 函数,这个函数是一个三个参数的图片文件加载函数,第一个参数是内存池,在后面的章节,我将会更详细的讲解PainterEngine
 内存池的内容,在默认情况下,PainterEngine提供2个默认内存池,一个是`mp`一个是`mp_static`,其中,前面的内存池一般
 用于需要频繁分配释放的元素,后面的则用于静态资源的存储,在这里因为图片一般是静态资源,因此填写`mp_static`就可以了，
@@ -454,7 +453,7 @@ int main()
 
 ## 6.PainterEngine 内存池管理机制
 
-因为PainterEngine需要无系统及标准库依赖,因此在PainterEngine中,必须独立于系统及标准库的内存管理机制,实现PainterEngine内部
+因为PainterEngine是无系统及标准库依赖的,因此在PainterEngine中,必须独立于系统及标准库的内存管理机制,实现PainterEngine内部
 的内存管理系统。因此PainterEngine使用了内存池作为动态的内存管理系统。
 
 PainterEngine内存池实现方式同样很简洁，为了使用内存，你必须预先准备一段可用的内存空间，作为内存池管理的内存空间，例如在下面的
@@ -605,9 +604,9 @@ PainterEngine有2个系统默认的内存池，其实这里填`mp`或者`mp_stat
 
 以上`Update`、`Render`、`Free`函数具有传递的特性，也就是说。
 
-* 例如如果某个对象节点执行了`Update`,那么它的所有子对象也会执行`Update`
-* 例如如果某个对象节点执行了`Render`,那么它的所有子对象也会执行`Render`
-* 例如如果某个对象节点执行了`Free`,那么它的所有子对象也会执行`Free`,父对象被删除了,它的子节点也会被删除,被一直迭代到以这个节点为根节点的所有子节点被删除。
+* 如果某个对象节点执行了`Update`,那么它的所有子对象也会执行`Update`
+* 如果某个对象节点执行了`Render`,那么它的所有子对象也会执行`Render`
+* 如果某个对象节点执行了`Free`,那么它的所有子对象也会执行`Free`,父对象被删除了,它的子节点也会被删除,并且将会一直迭代到以这个节点为根节点的所有子节点都被删除。
 
 因此，在上一章节我们创建了按钮，并将它连接到了`root`节点,那么我们是不需要自己再手动执行`Update`、`Render`、`Free`函数的(在`PX_Object_PushButton.c`中它们已经被写好了),因为根节点`root`是被自动更新渲染和释放的,我们只需要负责`Create`就可以了。
 
@@ -626,7 +625,7 @@ int main()
 }
 ```
 
-这两个函数的功能和参数都是一样的,但是`PX_ObjectDelayDelete`会在更新和渲染完成后才执行删除,`PX_ObjectDelete`则是立即删除，我建议使用`PX_ObjectDelayDelete`，这样你就可以避免在某些情况下因为对象被立即删除了，而其它对象仍然引用了这个对象的数据，这会导致其访问内存内存。
+这两个函数的功能和参数都是一样的,但是`PX_ObjectDelayDelete`会在更新和渲染完成后才执行删除,`PX_ObjectDelete`则是立即删除，我建议使用`PX_ObjectDelayDelete`，这样你就可以避免在某些情况下因为对象被立即删除了，而其它对象仍然引用了这个对象的数据，这会导致其访问失效内存。
 
 ## 9.PainterEngine 消息机制
 
