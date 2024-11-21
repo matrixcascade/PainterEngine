@@ -3,7 +3,7 @@
 PX_OBJECT_RENDER_FUNCTION(PX_Object_LabelRender)
 {
 	px_int x,y,w,h;
-	px_float inheritX,inheritY;
+	px_rect rect;
 	PX_SurfaceLimitInfo limitInfo;
 	PX_Object_Label *pLabel= PX_ObjectGetDesc(PX_Object_Label,pObject);
 	if (pLabel==PX_NULL)
@@ -16,11 +16,12 @@ PX_OBJECT_RENDER_FUNCTION(PX_Object_LabelRender)
 		return;
 	}
 
-	PX_ObjectGetInheritXY(pObject,&inheritX,&inheritY);
-	x=(px_int)(pObject->x+inheritX);
-	y=(px_int)(pObject->y+inheritY);
-	w=(px_int)pObject->Width;
-	h=(px_int)pObject->Height;
+	rect = PX_ObjectGetRect(pObject);
+	x = (px_int)rect.x;
+	y = (px_int)rect.y;
+	w = (px_int)rect.width;
+	h = (px_int)rect.height;
+
 
 	PX_GeoDrawRect(psurface,x,y,x+w,y+h-1,pLabel->BackgroundColor);
 	if (pLabel->bBorder)

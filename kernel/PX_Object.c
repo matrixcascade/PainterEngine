@@ -574,6 +574,11 @@ px_int PX_ObjectSetFreeFunction(PX_Object* pObject, Function_ObjectFree Func_Obj
 	return index;
 }
 
+px_void PX_ObjectSetAlign(PX_Object* pObject, PX_ALIGN align)
+{
+	pObject->align = align;
+}
+
 
 px_void* PX_ObjectCreateDesc(PX_Object* pObject, px_int idesc, px_int type, Function_ObjectUpdate Func_ObjectUpdate, Function_ObjectRender Func_ObjectRender, Function_ObjectFree Func_ObjectFree, px_void* pDesc, px_int descSize)
 {
@@ -1016,48 +1021,15 @@ px_void PX_ObjectRender(px_surface *pSurface, PX_Object *pObject,px_uint elapsed
 
 px_bool PX_ObjectIsPointInRegion( PX_Object *pObject,px_float x,px_float y )
 {
-	px_float objx,objy,objw,objh,r;
-	px_float inheritX,inheritY;
+	px_rect rect;
+	px_float r;
+    rect=PX_ObjectGetRect(pObject);
 
-	PX_ObjectGetInheritXY(pObject,&inheritX,&inheritY);
-
-	objx=(pObject->x+inheritX);
-	objy=(pObject->y+inheritY);
-	objw=pObject->Width;
-	objh=pObject->Height;
 	r = pObject->diameter/2;
 	if (r)
-		return PX_isPoint2DInCircle(PX_POINT2D(x,y),PX_POINT2D(objx,objy),r);
+		return PX_isPoint2DInCircle(PX_POINT2D(x,y), PX_POINT2D(rect.x + rect.width / 2, rect.y + rect.height / 2),r);
 	else
-		return PX_isXYInRegion(x,y,objx,objy,objw,objh);
-}
-
-px_bool PX_ObjectIsPointInRegionAlign(PX_Object* pObject, px_float x, px_float y,PX_ALIGN align)
-{
-	switch (align)
-	{
-	case PX_ALIGN_LEFTTOP:
-		return PX_ObjectIsPointInRegion(pObject, x, y);
-	case PX_ALIGN_MIDTOP:
-		return PX_ObjectIsPointInRegion(pObject, x + pObject->Width / 2, y);
-	case PX_ALIGN_RIGHTTOP:
-		return PX_ObjectIsPointInRegion(pObject, x + pObject->Width, y);
-	case PX_ALIGN_LEFTMID:
-		return PX_ObjectIsPointInRegion(pObject, x, y + pObject->Height / 2);
-	case PX_ALIGN_CENTER:
-		return PX_ObjectIsPointInRegion(pObject, x + pObject->Width / 2, y + pObject->Height / 2);
-	case PX_ALIGN_RIGHTMID:
-		return PX_ObjectIsPointInRegion(pObject, x + pObject->Width, y + pObject->Height / 2);
-	case PX_ALIGN_LEFTBOTTOM:
-		return PX_ObjectIsPointInRegion(pObject, x, y + pObject->Height);
-	case PX_ALIGN_MIDBOTTOM:
-		return PX_ObjectIsPointInRegion(pObject, x + pObject->Width / 2, y + pObject->Height);
-	case PX_ALIGN_RIGHTBOTTOM:
-		return PX_ObjectIsPointInRegion(pObject, x + pObject->Width, y + pObject->Height);
-	default:
-		break;
-	}
-	return PX_FALSE;
+		return PX_isPointXYInRect(x,y,rect.x,rect.y,rect.width,rect.height);
 }
 
 
@@ -1066,10 +1038,6 @@ px_bool PX_ObjectIsCursorInRegion(PX_Object *pObject,PX_Object_Event e)
 	return PX_ObjectIsPointInRegion(pObject,PX_Object_Event_GetCursorX(e),PX_Object_Event_GetCursorY(e));
 }
 
-px_bool PX_ObjectIsCursorInRegionAlign(PX_Object* pObject, PX_Object_Event e, PX_ALIGN align)
-{
-	return PX_ObjectIsPointInRegionAlign(pObject, PX_Object_Event_GetCursorX(e), PX_Object_Event_GetCursorY(e), align);
-}
 
 px_float PX_ObjectGetHeight(PX_Object *pObject)
 {
@@ -1116,6 +1084,7 @@ px_void PX_ObjectInitialize(px_memorypool *mp,PX_Object *pObject,PX_Object *Pare
 	pObject->Visible=PX_TRUE;
 	pObject->ReceiveEvents=PX_TRUE;
 	pObject->mp=mp;
+	pObject->align=PX_ALIGN_LEFTTOP;
 
 	if (Parent!=PX_NULL)
 	{
@@ -1694,5 +1663,356 @@ px_void PX_ObjectSetParent(PX_Object* pObject, PX_Object* pParent)
 	}
 	else {
 		PX_ObjectAddChild(pParent, pObject);
+	}
+}
+
+
+px_int PX_ObjectGetChildCount(PX_Object* pObject)
+{
+	px_int count = 0;
+	PX_Object* pChild = pObject->pChilds;
+	while (pChild)
+	{
+		count++;
+		pChild = pChild->pNextBrother;
+	}
+	return count;
+}
+
+px_void PX_ObjectGetChildsRegion(PX_Object *pObject,px_int *x,px_int *y,px_int *width,px_int *height)
+{
+	px_int minx=0,miny=0,maxx=0,maxy=0;
+	px_int bFirst=PX_TRUE;
+	PX_Object* pChild=pObject->pChilds;
+	while (pChild)
+	{
+		if (bFirst)
+		{
+			minx=(px_int)pChild->x;
+			miny=(px_int)pChild->y;
+			maxx=(px_int)(pChild->x+pChild->Width);
+			maxy=(px_int)(pChild->y+pChild->Height);
+			bFirst=PX_FALSE;
+		}
+		else
+		{
+			if (minx>pChild->x)
+			{
+				minx=(px_int)pChild->x;
+			}
+			if (miny>pChild->y)
+			{
+				miny=(px_int)pChild->y;
+			}
+			if (maxx<(pChild->x+pChild->Width))
+			{
+				maxx=(px_int)(pChild->x+pChild->Width);
+			}
+			if (maxy<(pChild->y+pChild->Height))
+			{
+				maxy=(px_int)(pChild->y+pChild->Height);
+			}
+		}
+		pChild=pChild->pNextBrother;
+	}
+	*x=minx;
+	*y=miny;
+	*width=maxx-minx;
+	*height=maxy-miny;
+}
+
+px_rect PX_ObjectGetRect(PX_Object* pObject)
+{
+	px_float x, y, width, height;
+	px_rect rect = {0};
+	PX_OBJECT_INHERIT_CODE(pObject, x, y,width, height);
+	switch (pObject->align)
+	{
+	case PX_ALIGN_LEFTTOP:
+		rect.x = x;
+		rect.y = y;
+		rect.width = width;
+		rect.height = height;
+		break;
+	case PX_ALIGN_MIDTOP:
+		rect.x = x - width / 2;
+		rect.y = y;
+		rect.width = width;
+		rect.height = height;
+		break;
+	case PX_ALIGN_RIGHTTOP:
+		rect.x = x - width;
+		rect.y = y;
+		rect.width = width;
+		rect.height = height;
+		break;
+	case PX_ALIGN_LEFTMID:
+		rect.x = x;
+		rect.y = y - height / 2;
+		rect.width = width;
+		rect.height = height;
+		break;
+	case PX_ALIGN_CENTER:
+		rect.x = x - width / 2;
+		rect.y = y - height / 2;
+		rect.width = width;
+		rect.height = height;
+		break;
+	case PX_ALIGN_RIGHTMID:
+		rect.x = x - width;
+		rect.y = y - height / 2;
+		rect.width = width;
+		rect.height = height;
+		break;
+	case PX_ALIGN_LEFTBOTTOM:
+		rect.x = x;
+		rect.y = y - height;
+		rect.width = width;
+		rect.height = height;
+		break;
+	case PX_ALIGN_MIDBOTTOM:
+		rect.x = x - width / 2;
+		rect.y = y - height;
+		rect.width = width;
+		rect.height = height;
+		break;
+	case PX_ALIGN_RIGHTBOTTOM:
+		rect.x = x - width;
+		rect.y = y - height;
+		rect.width = width;
+		rect.height = height;
+		break;
+	default:
+		break;
+	}
+	return rect;
+}
+
+px_region PX_ObjectGetRegion(PX_Object* pObject)
+{
+	px_float x, y, width, height;
+	px_region region = {0};
+	PX_OBJECT_INHERIT_CODE(pObject, x, y, width, height);
+
+	
+	switch (pObject->align)
+	{
+	case PX_ALIGN_LEFTTOP:
+		region.left = x;
+		region.left = y;
+		region.right = x + width;
+		region.bottom = y+height;
+		break;
+	case PX_ALIGN_MIDTOP:
+		region.left = x - width / 2;
+		region.left = y;
+		region.right = x + width / 2;
+		region.bottom = y + height;
+		break;
+	case PX_ALIGN_RIGHTTOP:
+		region.left = x - width;
+		region.left = y;
+		region.right = x;
+		region.bottom = y + height;
+		break;
+	case PX_ALIGN_LEFTMID:
+		region.left = x;
+		region.left = y - height / 2;
+		region.right = x + width;
+		region.bottom = y + height / 2;
+		break;
+	case PX_ALIGN_CENTER:
+		region.left = x - width / 2;
+		region.left = y - height / 2;
+		region.right = x + width / 2;
+		region.bottom = y + height / 2;
+		break;
+	case PX_ALIGN_RIGHTMID:
+		region.left = x - width;
+		region.left = y - height / 2;
+		region.right = x;
+		region.bottom = y + height / 2;
+		break;
+
+	case PX_ALIGN_LEFTBOTTOM:
+		region.left = x;
+		region.left = y - height;
+		region.right = x + width;
+		region.bottom = y;
+		break;
+	case PX_ALIGN_MIDBOTTOM:
+		region.left = x - width / 2;
+		region.left = y - height;
+		region.right = x + width / 2;
+		region.bottom = y;
+		break;
+	case PX_ALIGN_RIGHTBOTTOM:
+		region.left = x - width;
+		region.left = y - height;
+		region.right = x;
+		region.bottom = y;
+		break;
+	default:
+		break;
+	}
+	return region;
+}
+
+
+px_void PX_ObjectImpactTest(px_memorypool* calcmp, PX_Object* pRootObject)
+{
+	PX_Quadtree Impact_Test_array[sizeof(px_dword) * 8] = {0};
+	px_int i,j;
+	PX_Object *pTestObject=pRootObject->pChilds;
+	px_int impact_count[sizeof(pRootObject->impact_object_type) * 8] = { 0 };
+	px_region region_rect[sizeof(pRootObject->impact_object_type) * 8] = {0};
+
+	for ( i = 0; i < sizeof(pRootObject->impact_object_type) * 8; i++)
+	{
+		region_rect[i].left = 2147483647.f;
+		region_rect[i].top = 2147483647.f;
+		region_rect[i].right = 2147483647.f;
+		region_rect[i].bottom = 2147483647.f;
+	}
+
+	if (1)
+	{
+		while (pTestObject)
+		{
+			if (pTestObject->impact_object_type)
+			{
+				px_region objectregion;
+				j = 0;
+				while (!(pTestObject->impact_object_type & (1 << j)))
+					j++;
+
+				impact_count[j]++;
+				objectregion = PX_ObjectGetRegion(pTestObject);
+				if (objectregion.left< region_rect[j].left)
+				{
+					region_rect[j].left = objectregion.left;
+				}
+				if (objectregion.top < region_rect[j].top)
+				{
+					region_rect[j].top = objectregion.top;
+				}
+				if (objectregion.right > region_rect[j].right)
+				{
+					region_rect[j].right = objectregion.right;
+				}
+				if (objectregion.bottom > region_rect[j].bottom)
+				{
+					region_rect[j].bottom = objectregion.bottom;
+				}
+			}
+			pTestObject = pTestObject->pNextBrother;
+		}
+
+		for (i = 0; i < sizeof(pRootObject->impact_object_type) * 8; i++)
+		{
+			if (impact_count[i]>256)
+			{
+				PX_QuadtreeCreate(calcmp, &Impact_Test_array[i], region_rect[i].left, region_rect[i].top, region_rect[i].right - region_rect[i].left, region_rect[i].bottom - region_rect[i].top, impact_count[i], 2);
+			}
+			else if (impact_count[i]>64)
+			{
+				PX_QuadtreeCreate(calcmp, &Impact_Test_array[i], region_rect[i].left, region_rect[i].top, region_rect[i].right - region_rect[i].left, region_rect[i].bottom - region_rect[i].top, impact_count[i], 1);
+			}
+			else
+			{
+				PX_QuadtreeCreate(calcmp, &Impact_Test_array[i], region_rect[i].left, region_rect[i].top, region_rect[i].right - region_rect[i].left, region_rect[i].bottom - region_rect[i].top, impact_count[i], 0);
+			}
+			
+		}
+
+		pTestObject = pRootObject->pChilds;
+		while (pTestObject)
+		{
+			if (pTestObject->impact_object_type)
+			{
+				px_int b;
+				for (b = 0; b < sizeof(pTestObject->impact_object_type) * 8; b++)
+				{
+					if ((pTestObject->impact_object_type & (1 << b)))
+					{
+						PX_Quadtree_UserData userData;
+						userData.ptr = pTestObject;
+						px_rect rect = PX_ObjectGetRect(pTestObject);
+						if ((px_float)pTestObject->diameter)
+						{
+							PX_QuadtreeAddNode(&Impact_Test_array[b], (px_float)rect.x-rect.width/2, (px_float)rect.y-rect.height/2, (px_float)pTestObject->diameter, (px_float)pTestObject->diameter, userData);
+						}
+						else
+						{
+							PX_QuadtreeAddNode(&Impact_Test_array[b], (px_float)rect.x-rect.width/2, (px_float)rect.y-rect.height/2, (px_float)rect.width, (px_float)rect.height, userData);
+						}
+
+					}
+				}
+			}
+		}
+		pTestObject = pRootObject->pChilds;
+		while (pTestObject)
+		{
+
+			if (pTestObject->impact_target_type)
+			{
+				px_int b;
+				for (b = 0; b < sizeof(pTestObject->impact_target_type) * 8; b++)
+				{
+					if ((pTestObject->impact_target_type & (1 << b)))
+					{
+						px_int im_i;
+						PX_Quadtree_UserData userData;
+						userData.ptr = pTestObject;
+						PX_QuadtreeResetTest(&Impact_Test_array[b]);
+						px_rect rect = PX_ObjectGetRect(pTestObject);
+						if (pTestObject->diameter)
+						{
+							PX_QuadtreeTestNode(&Impact_Test_array[b], (px_float)rect.x-rect.width/2, (px_float)rect.y-rect.height/2, (px_float)pTestObject->diameter, (px_float)pTestObject->diameter, userData);
+						}
+						else
+						{
+							PX_QuadtreeTestNode(&Impact_Test_array[b], (px_float)rect.x-rect.width/2, (px_float)rect.y-rect.height/2, (px_float)rect.width, (px_float)rect.height, userData);
+						}
+
+						for (im_i = 0; im_i < Impact_Test_array[b].Impacts.size; im_i++)
+						{
+							PX_Quadtree_UserData* puData = PX_VECTORAT(PX_Quadtree_UserData, &Impact_Test_array[b].Impacts, im_i);
+							PX_Object* pObj1 = pTestObject;
+							PX_Object* pObj2 = (PX_Object*)(puData->ptr);
+
+							if (pObj1->diameter && pObj2->diameter)
+							{
+								if (!PX_isCircleCrossCircle(PX_POINT(pObj1->x, pObj1->y, 0), pObj1->diameter / 2, PX_POINT(pObj2->x, pObj2->y, 0), pObj2->diameter / 2))
+									continue;
+							}
+							else if (pObj1->diameter == 0 && pObj2->diameter)
+							{
+								if (!PX_isRectCrossCircle(PX_RECT(pObj1->x - pObj1->Width / 2, pObj1->y - pObj1->Height / 2, pObj1->Width, pObj1->Height), PX_POINT(pObj2->x, pObj2->y, 0), pObj2->diameter / 2))
+								{
+									continue;
+								}
+							}
+							else if (pObj1->diameter && pObj2->diameter == 0)
+							{
+								if (!PX_isRectCrossCircle(PX_RECT(pObj2->x - pObj2->Width / 2, pObj2->y - pObj2->Height / 2, pObj2->Width, pObj2->Height), PX_POINT(pObj1->x, pObj1->y, 0), pObj1->diameter / 2))
+								{
+									continue;
+								}
+							}
+							if (pObj2->delay_delete != PX_TRUE)
+							{
+								PX_Object_Event e = {0};
+								e.Event = PX_OBJECT_EVENT_IMPACT;
+								PX_Object_Event_SetImpactTargetObject(&e, pObj2);
+								PX_ObjectExecuteEvent(pObj1, e);
+							}
+						}
+
+					}
+				}
+			}
+		}
 	}
 }

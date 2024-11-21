@@ -12,19 +12,19 @@ PX_OBJECT_EVENT_FUNCTION(PX_Object_ExplorerOnCursorMove)
 {
 	px_float x,y;
 	px_float objx,objy,objWidth,objHeight;
-	px_float inheritX,inheritY;
+	px_rect rect;
 
 	PX_Object_Explorer *pExp=PX_Object_GetExplorer(pObject);
-	PX_ObjectGetInheritXY(pObject,&inheritX,&inheritY);
-
-	objx=(pObject->x+inheritX);
-	objy=(pObject->y+inheritY);
-	objWidth=pObject->Width;
-	objHeight=pObject->Height;
+	rect=PX_ObjectGetRect(pObject);
+	objx=rect.x;
+	objy=rect.y;
+	objWidth=rect.width;
+	objHeight=rect.height;
+	
 
 	x=PX_Object_Event_GetCursorX(e);
 	y=PX_Object_Event_GetCursorY(e);
-	if (PX_isXYInRegion(x,y,objx,objy+PX_OBJECT_EXPOLRER_MENU_HEIGHT,objWidth-PX_OBJECT_EXPOLRER_SLIDERBAR_WIDTH,objHeight-PX_OBJECT_EXPOLRER_MENU_HEIGHT*2))
+	if (PX_isPointXYInRect(x,y,objx,objy+PX_OBJECT_EXPOLRER_MENU_HEIGHT,objWidth-PX_OBJECT_EXPOLRER_SLIDERBAR_WIDTH,objHeight-PX_OBJECT_EXPOLRER_MENU_HEIGHT*2))
 	{
 		//get cursor index
 		px_int i;
@@ -90,18 +90,18 @@ PX_OBJECT_EVENT_FUNCTION(PX_Object_ExplorerOnCursorDown)
 {
 	px_float x,y;
 	px_float objx,objy,objWidth,objHeight;
-	px_float inheritX,inheritY;
+	px_rect rect;
 	PX_Object_Explorer *pExp=PX_Object_GetExplorer(pObject);
-	PX_ObjectGetInheritXY(pObject,&inheritX,&inheritY);
+	rect = PX_ObjectGetRect(pObject);
+	objx = rect.x;
+	objy = rect.y;
+	objWidth = rect.width;
+	objHeight = rect.height;
 
-	objx=(pObject->x+inheritX);
-	objy=(pObject->y+inheritY);
-	objWidth=pObject->Width;
-	objHeight=pObject->Height;
 
 	x=PX_Object_Event_GetCursorX(e);
 	y=PX_Object_Event_GetCursorY(e);
-	if (PX_isXYInRegion(x,y,objx,objy+PX_OBJECT_EXPOLRER_MENU_HEIGHT,objWidth-PX_OBJECT_EXPOLRER_SLIDERBAR_WIDTH,objHeight-PX_OBJECT_EXPOLRER_MENU_HEIGHT*2))
+	if (PX_isPointXYInRect(x,y,objx,objy+PX_OBJECT_EXPOLRER_MENU_HEIGHT,objWidth-PX_OBJECT_EXPOLRER_SLIDERBAR_WIDTH,objHeight-PX_OBJECT_EXPOLRER_MENU_HEIGHT*2))
 	{
 		px_int i=0,selectcount=0;
 		px_int ofty;
@@ -205,16 +205,16 @@ static PX_OBJECT_EVENT_FUNCTION(PX_Object_ExplorerOnCursorWheel)
 	px_float y=PX_Object_Event_GetCursorY(e);
 	px_float z=PX_Object_Event_GetCursorZ(e);
 	px_float objx,objy,objWidth,objHeight;
-	px_float inheritX,inheritY;
+	px_rect rect;
 
-	PX_ObjectGetInheritXY(pObject,&inheritX,&inheritY);
+	rect = PX_ObjectGetRect(pObject);
+	objx = rect.x;
+	objy = rect.y;
+	objWidth = rect.width;
+	objHeight = rect.height;
 
-	objx=(pObject->x+inheritX);
-	objy=(pObject->y+inheritY);
-	objWidth=pObject->Width;
-	objHeight=pObject->Height;
 
-	if (PX_isXYInRegion(x,y,objx,objy+PX_OBJECT_EXPOLRER_MENU_HEIGHT,objWidth-PX_OBJECT_EXPOLRER_SLIDERBAR_WIDTH,objHeight-PX_OBJECT_EXPOLRER_MENU_HEIGHT*2))
+	if (PX_isPointXYInRect(x,y,objx,objy+PX_OBJECT_EXPOLRER_MENU_HEIGHT,objWidth-PX_OBJECT_EXPOLRER_SLIDERBAR_WIDTH,objHeight-PX_OBJECT_EXPOLRER_MENU_HEIGHT*2))
 	{
 		if (z<0)
 		{
@@ -248,7 +248,7 @@ PX_OBJECT_RENDER_FUNCTION(PX_Object_ExplorerRender)
 	PX_Object_Explorer *pExp=PX_Object_GetExplorer(pObject);
 	//background
 	px_float objx,objy,objWidth,objHeight;
-	px_float inheritX,inheritY;
+	px_rect rect;
 	px_int val,ofty;
 
 	if (pObject->Width<256)
@@ -261,12 +261,12 @@ PX_OBJECT_RENDER_FUNCTION(PX_Object_ExplorerRender)
 	}
 
 
-	PX_ObjectGetInheritXY(pObject,&inheritX,&inheritY);
+	rect = PX_ObjectGetRect(pObject);
+	objx = rect.x;
+	objy = rect.y;
+	objWidth = rect.width;
+	objHeight = rect.height;
 
-	objx=(pObject->x+inheritX);
-	objy=(pObject->y+inheritY);
-	objWidth=pObject->Width;
-	objHeight=pObject->Height;
 
 	val=PX_Object_SliderBarGetValue(pExp->SliderBar);
 	ofty=PX_Object_SliderBarGetValue(pExp->SliderBar);

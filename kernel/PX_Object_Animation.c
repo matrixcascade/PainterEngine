@@ -4,19 +4,17 @@ PX_OBJECT_RENDER_FUNCTION(PX_Object_AnimationRender)
 {
 	PX_Object_Animation* pDesc = PX_ObjectGetDesc(PX_Object_Animation,pObject);
 	px_float objx, objy, objWidth, objHeight;
-	px_float inheritX, inheritY;
-
-	PX_ObjectGetInheritXY(pObject, &inheritX, &inheritY);
-
-	objx = (pObject->x + inheritX);
-	objy = (pObject->y + inheritY);
-	objWidth = pObject->Width;
-	objHeight = pObject->Height;
+	px_rect rect;
+	rect=PX_ObjectGetRect(pObject);
+	objx=rect.x;
+	objy=rect.y;
+	objWidth=rect.width;
+	objHeight=rect.height;
 
 	if (pDesc&&pDesc->state==PX_OBJECT_ANIMATION_STATE_PLAY)
 	{
 		PX_AnimationUpdate(&pDesc->animation, elapsed);
-		PX_AnimationRender(psurface, &pDesc->animation, (px_int)objx, (px_int)objy, pDesc->_align, PX_NULL);
+		PX_AnimationRender(psurface, &pDesc->animation, (px_int)(objx+ objWidth/2), (px_int)(objy+ objHeight/2),PX_ALIGN_CENTER, PX_NULL);
 	}
 
 }
@@ -44,7 +42,7 @@ PX_Object* PX_Object_AnimationAttachObject( PX_Object* pObject,px_int attachInde
 	{
 		PX_AnimationCreate(&pDesc->animation, lib);
 	}
-	pDesc->_align = PX_ALIGN_CENTER;
+	pObject->align = PX_ALIGN_CENTER;
 	return pObject;
 }
 
@@ -80,12 +78,7 @@ PX_Object_Animation * PX_Object_GetAnimation(PX_Object *pObject)
 	return PX_NULL;
 }
 
-px_void PX_Object_AnimationSetAlign(PX_Object *panimation,PX_ALIGN Align)
-{
-	PX_Object_Animation *pDesc=PX_Object_GetAnimation(panimation);
-	PX_ASSERTIF(!pDesc);//object is not a animation object
-	pDesc->_align =Align;
-}
+
 
 px_void	   PX_Object_AnimationPlay(PX_Object* pObject, const px_char name[])
 {

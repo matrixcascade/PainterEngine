@@ -75,3 +75,18 @@ void PX_Sleep(unsigned int ms)
 {
 	Sleep(ms);
 }
+
+unsigned int PX_TimeGetTimeUs()
+{
+	unsigned int time_us;
+	LARGE_INTEGER nFreq,nCounter;
+	if (QueryPerformanceFrequency(&nFreq))
+	{
+		if (QueryPerformanceCounter(&nCounter))
+		{
+			time_us=(unsigned int)(nCounter.QuadPart*1000000/nFreq.QuadPart);
+			return time_us;
+		}
+	}
+	return 0;
+}

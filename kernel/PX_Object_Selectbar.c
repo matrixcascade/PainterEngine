@@ -27,14 +27,13 @@ static px_void PX_SelectbarOnCursorMove(PX_Object *pObject,px_float x,px_float y
 {
 	PX_Object_SelectBar *pSelectbar=PX_Object_GetSelectBar(pObject);
 	px_float objx,objy,objWidth,objHeight;
-	px_float inheritX,inheritY;
+	px_rect rect;
 
-	PX_ObjectGetInheritXY(pObject,&inheritX,&inheritY);
-
-	objx=(pObject->x+inheritX);
-	objy=(pObject->y+inheritY);
-	objWidth=pObject->Width;
-	objHeight=pObject->Height;
+	rect = PX_ObjectGetRect(pObject);
+	objx = rect.x;
+	objy = rect.y;
+	objWidth = rect.width;
+	objHeight = rect.height;
 
 
 	if(pSelectbar->activating)
@@ -83,14 +82,13 @@ static px_void PX_SelectbarOnCursorDown(PX_Object *pObject,px_float x,px_float y
 {
 	PX_Object_SelectBar *pSelectbar=PX_Object_GetSelectBar(pObject);
 	px_float objx,objy,objWidth,objHeight;
-	px_float inheritX,inheritY;
+	px_rect rect;
 
-	PX_ObjectGetInheritXY(pObject,&inheritX,&inheritY);
-
-	objx=(pObject->x+inheritX);
-	objy=(pObject->y+inheritY);
-	objWidth=pObject->Width;
-	objHeight=pObject->Height;
+	rect = PX_ObjectGetRect(pObject);
+	objx = rect.x;
+	objy = rect.y;
+	objWidth = rect.width;
+	objHeight = rect.height;
 
 	if(pSelectbar->activating)
 	{
@@ -214,15 +212,13 @@ static PX_OBJECT_RENDER_FUNCTION(PX_SelectbarRender)
 {
 	PX_Object_SelectBar *pSelectBar=PX_ObjectGetDesc(PX_Object_SelectBar,pObject);
 	px_float objx,objy,objWidth,objHeight;
-	px_float inheritX,inheritY;
+	px_rect rect;
 
-	PX_ObjectGetInheritXY(pObject,&inheritX,&inheritY);
-
-	objx=(pObject->x+inheritX);
-	objy=(pObject->y+inheritY);
-	objWidth=pObject->Width;
-	objHeight=pObject->Height;
-
+	rect = PX_ObjectGetRect(pObject);
+	objx = rect.x;
+	objy = rect.y;
+	objWidth = rect.width;
+	objHeight = rect.height;
 
 
 

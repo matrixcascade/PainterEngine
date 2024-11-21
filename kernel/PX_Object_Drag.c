@@ -4,7 +4,7 @@
 PX_OBJECT_EVENT_FUNCTION(PX_Object_DragOnCursorDown)
 {
 	PX_Object_Drag* pPX_Object_Drag = PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_DRAG);
-	if (PX_ObjectIsCursorInRegionAlign(pObject, e, PX_ALIGN_LEFTTOP))
+	if (PX_ObjectIsCursorInRegion(pObject, e))
 	{
 		pPX_Object_Drag->bselect = PX_TRUE;
 		pPX_Object_Drag->last_cursorx = PX_Object_Event_GetCursorX(e);

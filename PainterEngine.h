@@ -1,7 +1,9 @@
-#ifndef PAINTERENGINE
-#define PAINTERENGINE
+#ifdef PAINTERENGINE_STANDALONE
+#include "kernel/PX_Kernel.h"
+#else
+#ifndef PAINTERENGINE_PLATFORM
+#define PAINTERENGINE_PLATFORM
 #define main px_main
-
 #ifdef __cplusplus 
 extern "C" {
 #endif 
@@ -19,7 +21,5 @@ int px_main();
 #ifdef __cplusplus 
 }
 #endif 
-
-
-
+#endif
 #endif

@@ -6,13 +6,13 @@ PX_OBJECT_RENDER_FUNCTION(PX_Object_RingProcessBarRender)
 	px_int x,y,r;
 	px_char content[8]={0};
 	px_float process;
-	px_float inheritX,inheritY;
+	px_rect rect;
 
 	PX_Object_RingProcessBar *pDesc=PX_ObjectGetDesc(PX_Object_RingProcessBar,pObject);
-	PX_ObjectGetInheritXY(pObject,&inheritX,&inheritY);
+	rect = PX_ObjectGetRect(pObject);
 
-	x=(px_int)(pObject->x+inheritX);
-	y=(px_int)(pObject->y+inheritY);
+	x=(px_int)(rect.x);
+	y=(px_int)(rect.y);
 	r=(px_int)pObject->diameter/2;
 	
 	process=(pDesc->Value-pDesc->Min)*1.0f/(pDesc->Max-pDesc->Min);

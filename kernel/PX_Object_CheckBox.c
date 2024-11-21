@@ -16,7 +16,7 @@ px_void PX_Object_CheckBoxOnMouseMove(PX_Object *pObject,PX_Object_Event e,px_vo
 
 	if (pcb)
 	{
-		if(PX_ObjectIsPointInRegion(pObject,(px_float)x,(px_float)y))
+		if(PX_ObjectIsCursorInRegion(pObject,e))
 		{
 			if (pcb->state!=PX_OBJECT_PUSHBUTTON_STATE_ONPUSH)
 			{
@@ -51,7 +51,7 @@ PX_OBJECT_EVENT_FUNCTION(PX_Object_CheckBoxOnMouseLButtonDown)
 	PX_ASSERTIF(!pcb);
 	if (pcb)
 	{
-		if(PX_ObjectIsPointInRegion(pObject,(px_float)x,(px_float)y))
+		if(PX_ObjectIsCursorInRegion(pObject, e))
 			pcb->state=PX_OBJECT_CHECKBOX_STATE_ONPUSH;
 		else
 		{
@@ -80,7 +80,7 @@ PX_OBJECT_EVENT_FUNCTION(PX_Object_CheckBoxOnMouseLButtonUp)
 
 	if (pcb)
 	{
-		if(PX_ObjectIsPointInRegion(pObject,(px_float)x,(px_float)y))
+		if(PX_ObjectIsCursorInRegion(pObject, e))
 			if(pcb->state==PX_OBJECT_CHECKBOX_STATE_ONPUSH)
 			{
 				PX_Object_Event e = {0};
@@ -97,14 +97,14 @@ PX_OBJECT_RENDER_FUNCTION(PX_Object_CheckBoxRender)
 {
 	PX_Object_CheckBox *pcb=PX_ObjectGetDesc(PX_Object_CheckBox,pObject);
 	px_float objx,objy,objWidth,objHeight;
-	px_float inheritX,inheritY;
+	px_rect rect;
 	PX_ASSERTIF(!pcb);
-	PX_ObjectGetInheritXY(pObject,&inheritX,&inheritY);
-
-	objx=(pObject->x+inheritX);
-	objy=(pObject->y+inheritY);
-	objWidth=pObject->Width;
-	objHeight=pObject->Height;
+	rect=PX_ObjectGetRect(pObject);
+	objx=rect.x;
+	objy=rect.y;
+	objWidth=rect.width;
+	objHeight=rect.height;
+	
 
 	if (!pObject->Visible)
 	{

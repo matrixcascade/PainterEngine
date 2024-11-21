@@ -5,16 +5,15 @@ PX_OBJECT_RENDER_FUNCTION(PX_Object_AutoTextRender)
 	PX_Object_AutoText* pAt = PX_ObjectGetDesc(PX_Object_AutoText, pObject);
 	const px_char* Text = pAt->text.buffer;
 	px_float objx, objy, objHeight, objWidth;
-	px_float inheritX, inheritY;
 	px_float h = 0;
+	px_rect rect;
+	rect = PX_ObjectGetRect(pObject);
+	objx = rect.x;
+	objy = rect.y;
+	objWidth = rect.width;
+	objHeight = rect.height;
 
-	PX_ObjectGetInheritXY(pObject, &inheritX, &inheritY);
-
-	objx = (pObject->x + inheritX);
-	objy = (pObject->y + inheritY);
-	objWidth = pObject->Width;
-	objHeight = pObject->Height;
-
+	
 	if (pAt == PX_NULL)
 	{
 		return;

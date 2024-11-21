@@ -5,15 +5,14 @@ PX_OBJECT_RENDER_FUNCTION(PX_Object_ProcessBarRender)
 {
 	px_int px,py,pl;//Processing start X,Processing Start Y &Processing length
 	px_int x,y,w,h;
-	px_float inheritX,inheritY;
+	px_rect rect;
 
 	PX_Object_ProcessBar *pProcessBar=PX_ObjectGetDesc(PX_Object_ProcessBar,pObject);
-	PX_ObjectGetInheritXY(pObject,&inheritX,&inheritY);
-
-	x=(px_int)(pObject->x+inheritX);
-	y=(px_int)(pObject->y+inheritY);
-	w=(px_int)pObject->Width;
-	h=(px_int)pObject->Height;
+	rect = PX_ObjectGetRect(pObject);
+	x = (px_int)rect.x;
+	y = (px_int)rect.y;
+	w = (px_int)rect.width;
+	h = (px_int)rect.height;
 
 
 
@@ -78,7 +77,7 @@ PX_Object* PX_Object_ProcessBarAttachObject( PX_Object* pObject,px_int attachInd
 	PX_ASSERTIF(pObject == PX_NULL);
 	PX_ASSERTIF(attachIndex < 0 || attachIndex >= PX_COUNTOF(pObject->pObjectDesc));
 	PX_ASSERTIF(pObject->pObjectDesc[attachIndex] != PX_NULL);
-	ProcessBar = (PX_Object_ProcessBar*)PX_ObjectCreateDesc(pObject, attachIndex, PX_OBJECT_TYPE_PANEL, 0, PX_Object_ProcessBarRender, 0, 0, sizeof(PX_Object_ProcessBar));
+	ProcessBar = (PX_Object_ProcessBar*)PX_ObjectCreateDesc(pObject, attachIndex, PX_OBJECT_TYPE_PROCESSBAR, 0, PX_Object_ProcessBarRender, 0, 0, sizeof(PX_Object_ProcessBar));
 	PX_ASSERTIF(ProcessBar == PX_NULL);
 
 	ProcessBar->MAX = 100;

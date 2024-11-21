@@ -177,6 +177,7 @@ struct _PX_Object
 	px_float Width;
 	px_float Height;
 	px_float Length;
+	PX_ALIGN align;
 	px_float diameter;//if the member is not zero,The pObject is round shape
 	px_bool  OnFocus;
 	px_bool  OnFocusNode;
@@ -318,6 +319,7 @@ px_void    PX_ObjectDetach(PX_Object *pObject,px_int type);
 px_int	   PX_ObjectSetRenderFunction(PX_Object* pObject, Function_ObjectRender Func_ObjectRender, px_int index);
 px_int	   PX_ObjectSetUpdateFunction(PX_Object* pObject, Function_ObjectUpdate Func_ObjectUpdate, px_int index);
 px_int	   PX_ObjectSetFreeFunction(PX_Object* pObject, Function_ObjectFree Func_ObjectFree, px_int index);
+px_void    PX_ObjectSetAlign(PX_Object *pObject,PX_ALIGN align);
 
 px_void    PX_ObjectGetInheritXY(PX_Object *pObject,px_float *x,px_float *y);
 px_void	   PX_ObjectInitialize(px_memorypool *mp,PX_Object *pObject,PX_Object *Parent,px_float x,px_float y,px_float z,px_float Width,px_float Height,px_float Length);
@@ -342,13 +344,13 @@ PX_Object  *PX_ObjectGetObject(PX_Object *pObject,const px_char payload[]);
 px_void     PX_ObjectSetFocus(PX_Object *pObject);
 px_bool		PX_ObjectIsOnFocus(PX_Object* pObject);
 px_void     PX_ObjectClearFocus(PX_Object *pObject);
+px_rect		PX_ObjectGetRect(PX_Object* pObject);
+px_region	PX_ObjectGetRegion(PX_Object* pObject);
 
 #define		PX_ObjectReleaseFocus PX_ObjectClearFocus
 
 px_bool		PX_ObjectIsPointInRegion(PX_Object *pObject,px_float x,px_float y);
 px_bool		PX_ObjectIsCursorInRegion(PX_Object *pObject,PX_Object_Event e);
-px_bool		PX_ObjectIsPointInRegionAlign(PX_Object* pObject, px_float x, px_float y, PX_ALIGN align);
-px_bool		PX_ObjectIsCursorInRegionAlign(PX_Object* pObject, PX_Object_Event e, PX_ALIGN align);
 px_float	PX_ObjectGetHeight(PX_Object *pObject);
 px_float	PX_ObjectGetWidth(PX_Object *pObject);
 

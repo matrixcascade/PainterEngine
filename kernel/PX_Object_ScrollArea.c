@@ -4,14 +4,13 @@ PX_OBJECT_EVENT_FUNCTION(PX_Object_ScrollArea_EventDispatcher)
 {
 	PX_Object_ScrollArea *pSA=PX_Object_GetScrollArea(pObject);
 	px_float objx,objy,objWidth,objHeight;
-	px_float inheritX,inheritY;
+	px_rect rect;
 
-	PX_ObjectGetInheritXY(pObject,&inheritX,&inheritY);
-
-	objx=(pObject->x+inheritX);
-	objy=(pObject->y+inheritY);
-	objWidth=pObject->Width;
-	objHeight=pObject->Height;
+	rect = PX_ObjectGetRect(pObject);
+	objx = rect.x;
+	objy = rect.y;
+	objWidth = rect.width;
+	objHeight = rect.height;
 
 	if (!pSA)
 	{
@@ -218,7 +217,7 @@ px_void PX_Object_ScrollAreaMoveToTop(PX_Object *pObject)
 px_void PX_Object_ScrollAreaGetRegion(PX_Object *pObject,px_float *left,px_float *top,px_float *right,px_float *bottom)
 {
 	px_float objx,objy,objWidth,objHeight;
-	px_float inheritX,inheritY;
+	px_rect rect;
 
 	if (pObject==PX_NULL)
 	{
@@ -230,12 +229,11 @@ px_void PX_Object_ScrollAreaGetRegion(PX_Object *pObject,px_float *left,px_float
 		return;
 	}
 
-	PX_ObjectGetInheritXY(pObject,&inheritX,&inheritY);
-
-	objx=(pObject->x+inheritX);
-	objy=(pObject->y+inheritY);
-	objWidth=pObject->Width;
-	objHeight=pObject->Height;
+	rect = PX_ObjectGetRect(pObject);
+	objx = rect.x;
+	objy = rect.y;
+	objWidth = rect.width;
+	objHeight = rect.height;
 
 	if (objx<*left)
 	{
@@ -265,7 +263,7 @@ px_void PX_Object_ScrollAreaGetRegion(PX_Object *pObject,px_float *left,px_float
 px_void PX_Object_ScrollAreaUpdateRange( PX_Object *pObject)
 {
 	px_float objx,objy,objWidth,objHeight;
-	px_float inheritX,inheritY;
+	px_rect rect;
 	px_float left=0,top=0,right=0,bottom=0;
 	PX_Object_ScrollArea *pSA;
 
@@ -274,11 +272,11 @@ px_void PX_Object_ScrollAreaUpdateRange( PX_Object *pObject)
 	pSA->root->x = 0;
 	pSA->root->y = 0;
 
-	PX_ObjectGetInheritXY(pObject,&inheritX,&inheritY);
-	objx=(pObject->x+inheritX);
-	objy=(pObject->y+inheritY);
-	objWidth=pObject->Width;
-	objHeight=pObject->Height;
+	rect = PX_ObjectGetRect(pObject);
+	objx = rect.x;
+	objy = rect.y;
+	objWidth = rect.width;
+	objHeight = rect.height;
 
 	PX_Object_ScrollAreaGetRegion(pSA->root,&left,&top,&right,&bottom);
 

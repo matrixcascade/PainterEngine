@@ -7,14 +7,12 @@ PX_OBJECT_RENDER_FUNCTION(PX_Object_DesignerBoxRender)
 	px_color renderColor;
 	
 	px_float objx,objy,objWidth,objHeight;
-	px_float inheritX,inheritY;
-
-	PX_ObjectGetInheritXY(pObject,&inheritX,&inheritY);
-
-	objx=(pObject->x+inheritX);
-	objy=(pObject->y+inheritY);
-	objWidth=pObject->Width;
-	objHeight=pObject->Height;
+	px_rect rect=PX_ObjectGetRect(pObject);
+	objx=rect.x;
+	objy=rect.y;
+	objWidth=rect.width;
+	objHeight=rect.height;
+	
 
 	renderColor=pDesc->borderColor;
 	renderColor._argb.a/=2;
@@ -37,15 +35,15 @@ PX_OBJECT_EVENT_FUNCTION(PX_Object_DesignerBoxOnCursorDown)
 {
 	px_float x,y;
 	px_float objx,objy,objWidth,objHeight;
-	px_float inheritX,inheritY;
+	px_rect rect;
 	PX_Object_DesignerBox *pDesc=(PX_Object_DesignerBox *)PX_ObjectGetDescByType(pObject,PX_OBJECT_TYPE_DESIGNERBOX);
 	PX_ASSERTIF(!pDesc);
-	PX_ObjectGetInheritXY(pObject,&inheritX,&inheritY);
-
-	objx=(pObject->x+inheritX);
-	objy=(pObject->y+inheritY);
-	objWidth=pObject->Width;
-	objHeight=pObject->Height;
+	rect=PX_ObjectGetRect(pObject);
+	objx=rect.x;
+	objy=rect.y;
+	objWidth=rect.width;
+	objHeight=rect.height;
+	
 
 	x=PX_Object_Event_GetCursorX(e);
 	y=PX_Object_Event_GetCursorY(e);

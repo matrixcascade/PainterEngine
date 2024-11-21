@@ -764,7 +764,7 @@ px_void PX_WorldSoundPlay(PX_World* pWorld, const px_char key[], px_float x, px_
 {
 	if (pWorld->presourceLibrary&&pWorld->psoundplay)
 	{
-		if (PX_isXYInRegion(x, y, pWorld->offsetx-100, pWorld->offsety-100, pWorld->surface_width+200.f, pWorld->surface_height+200.f))
+		if (PX_isPointXYInRect(x, y, pWorld->offsetx-100, pWorld->offsety-100, pWorld->surface_width+200.f, pWorld->surface_height+200.f))
 		{
 			PX_SoundPlayPlayData(pWorld->psoundplay, PX_ResourceLibraryGetSound(pWorld->presourceLibrary, key));
 		}

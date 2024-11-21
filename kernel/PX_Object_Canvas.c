@@ -4,7 +4,12 @@ PX_OBJECT_RENDER_FUNCTION(PX_Object_CanvasOnRender)
 {
 	px_float x, y, w, h;
 	PX_Object_Canvas* pdesc = PX_ObjectGetDesc(PX_Object_Canvas, pObject);
-	PX_OBJECT_INHERIT_CODE(pObject, x, y, w, h);
+	px_rect rect;
+	rect= PX_ObjectGetRect(pObject);
+	x = rect.x;
+	y = rect.y;
+	w = rect.width;
+	h = rect.height;
 
 	PX_SurfaceRender(psurface, &pdesc->pCanvasVM->view_surface, (px_int)x, (px_int)y, PX_ALIGN_LEFTTOP,0);
 	PX_GeoDrawBorder(psurface, (px_int)x, (px_int)y, (px_int)(x + w), (px_int)(y + h), 1, PX_COLOR_BLACK);
@@ -56,9 +61,12 @@ PX_OBJECT_EVENT_FUNCTION(PX_Object_CanvasOnCursorWheeling)
 {
 	PX_Object_Canvas* pdesc = (PX_Object_Canvas *)PX_ObjectGetDescByType(pObject,PX_OBJECT_TYPE_CANVAS);
 	px_float cx, cy, cz;
-	px_float x, y,w,h;
+	px_int x, y;
+	px_rect rect;
+	rect = PX_ObjectGetRect(pObject);
+	x = (px_int)rect.x;
+	y = (px_int)rect.y;
 	PX_ASSERTIF(!pdesc);
-	PX_OBJECT_INHERIT_CODE(pObject, x, y, w, h);
 	if (PX_ObjectIsCursorInRegion(pObject,e))
 	{
 		px_float scale,new_v_x,new_v_y;
@@ -119,11 +127,14 @@ px_void PX_Object_CanvasEnterEdit(PX_Object* pObject,px_float x,px_float y,px_fl
 
 PX_OBJECT_EVENT_FUNCTION(PX_Object_CanvasOnCursorDown)
 {
-	px_float x, y, w, h;
+	px_rect rect;
+	px_float x, y;
 	PX_Object_Canvas* pdesc = (PX_Object_Canvas*)PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_CANVAS);
 	PX_ASSERTIF(!pdesc);
-	PX_OBJECT_INHERIT_CODE(pObject, x, y, w, h);
-
+	
+	rect = PX_ObjectGetRect(pObject);
+	x = rect.x;
+	y = rect.y;
 	if (PX_ObjectIsCursorInRegion(pObject,e))
 	{
 		pdesc->reg_x = PX_Object_Event_GetCursorX(e) - x;
@@ -142,10 +153,8 @@ PX_OBJECT_EVENT_FUNCTION(PX_Object_CanvasOnCursorDown)
 
 PX_OBJECT_EVENT_FUNCTION(PX_Object_CanvasOnCursorRDown)
 {
-	px_float x, y, w, h;
 	PX_Object_Canvas* pdesc = (PX_Object_Canvas*)PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_CANVAS);
 	PX_ASSERTIF(!pdesc);
-	PX_OBJECT_INHERIT_CODE(pObject, x, y, w, h);
 
 	PX_CanvasVMMoveBack(pdesc->pCanvasVM);
 }
@@ -153,10 +162,14 @@ PX_OBJECT_EVENT_FUNCTION(PX_Object_CanvasOnCursorRDown)
 
 PX_OBJECT_EVENT_FUNCTION(PX_Object_CanvasOnCursorMove)
 {
-	px_float x, y, w, h;
+	px_int x, y;
+	px_rect rect;
 	PX_Object_Canvas* pdesc = (PX_Object_Canvas*)PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_CANVAS);
 	PX_ASSERTIF(!pdesc);
-	PX_OBJECT_INHERIT_CODE(pObject, x, y, w, h);
+	
+	rect = PX_ObjectGetRect(pObject);
+	x = (px_int)rect.x;
+	y = (px_int)rect.y;
 	if (PX_ObjectIsCursorInRegion(pObject, e))
 	{
 		pdesc->reg_x = PX_Object_Event_GetCursorX(e) - x;
@@ -175,8 +188,12 @@ PX_OBJECT_EVENT_FUNCTION(PX_Object_CanvasOnCursorMove)
 PX_OBJECT_EVENT_FUNCTION(PX_Object_CanvasOnCursorDrag)
 {
 	px_float x, y, w, h;
+	px_rect rect;
 	PX_Object_Canvas* pdesc = (PX_Object_Canvas*)PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_CANVAS);
 	PX_ASSERTIF(!pdesc);
+	rect = PX_ObjectGetRect(pObject);
+	x = rect.x;
+	y = rect.y;
 	//px_surface* prender = PX_Object_CanvasGetCurrentEditingSurface(pObject);
 	
 	PX_OBJECT_INHERIT_CODE(pObject, x, y, w, h);
@@ -224,10 +241,13 @@ PX_OBJECT_EVENT_FUNCTION(PX_Object_CanvasOnCursorDrag)
 
 PX_OBJECT_EVENT_FUNCTION(PX_Object_CanvasOnCursorUp)
 {
-	px_float x, y, w, h;
+	px_float x,y;
+	px_rect rect;
 	PX_Object_Canvas* pdesc = (PX_Object_Canvas*)PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_CANVAS);
 	PX_ASSERTIF(!pdesc);
-	PX_OBJECT_INHERIT_CODE(pObject, x, y, w, h);
+	rect = PX_ObjectGetRect(pObject);
+	x = rect.x;
+	y = rect.y;
 
 	if (PX_ObjectIsCursorInRegion(pObject, e))
 	{

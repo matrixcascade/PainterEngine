@@ -66,11 +66,16 @@ px_bool PX_Object_ColorPanelUpdatePanelTexture(PX_Object* pObject)
 PX_OBJECT_RENDER_FUNCTION(PX_Object_ColorPanelRender)
 {
 	px_float x, y, w, h,ax=0,ay=0;
+	px_rect rect;
 	px_int d;
 	PX_Object_ColorPanel * pdesc;
 	pdesc = PX_ObjectGetDesc(PX_Object_ColorPanel,pObject);
 	PX_ASSERTIF(!pdesc);
-	PX_OBJECT_INHERIT_CODE(pObject, x, y, w, h);
+	rect=PX_ObjectGetRect(pObject);
+	x=rect.x;
+	y=rect.y;
+	w=rect.width;
+	h=rect.height;
 	d = (px_int)(w > h ? h : w);
 	if (w>h)
 	{
@@ -123,6 +128,8 @@ PX_OBJECT_EVENT_FUNCTION(PX_Object_ColorPanelOnCursorDown)
 {
 	PX_Object_ColorPanel* pdesc;
 	px_float x, y, w, h;
+	px_rect rect;
+	
 	
 	if (PX_ObjectIsCursorInRegion(pObject, e))
 	{
@@ -133,7 +140,11 @@ PX_OBJECT_EVENT_FUNCTION(PX_Object_ColorPanelOnCursorDown)
 		px_float ed;
 		pdesc = (PX_Object_ColorPanel*)PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_COLORPANEL);
 		PX_ASSERTIF(!pdesc);
-		PX_OBJECT_INHERIT_CODE(pObject, x, y, w, h);
+		rect = PX_ObjectGetRect(pObject);
+		x = rect.x;
+		y = rect.y;
+		w = rect.width;
+		h = rect.height;
 		d = pdesc->panel.width*1.f;
 		cx -= x; cy -= y;
 		if (w>h)
@@ -182,6 +193,7 @@ PX_OBJECT_EVENT_FUNCTION(PX_Object_ColorPanelOnCursorDrag)
 {
 	PX_Object_ColorPanel* pdesc;
 	px_float x, y, w, h;
+	px_rect rect;
 	px_float d;
 	px_float cx = PX_Object_Event_GetCursorX(e), cy = PX_Object_Event_GetCursorY(e);
 	px_float  edis;
@@ -189,7 +201,11 @@ PX_OBJECT_EVENT_FUNCTION(PX_Object_ColorPanelOnCursorDrag)
 	px_float ed;
 	pdesc = (PX_Object_ColorPanel*)PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_COLORPANEL);
 	PX_ASSERTIF(!pdesc);
-	PX_OBJECT_INHERIT_CODE(pObject, x, y, w, h);
+	rect = PX_ObjectGetRect(pObject);
+	x = rect.x;
+	y = rect.y;
+	w = rect.width;
+	h = rect.height;
 	if (pdesc->state == PX_Object_ColorPanel_State_Normal)
 	{
 		return;

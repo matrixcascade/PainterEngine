@@ -145,14 +145,13 @@ PX_OBJECT_RENDER_FUNCTION(PX_Object_VirtualKeyBoardRender)
 	px_int ofty;
 	PX_Object_VirtualKeyBoard *keyBoard= PX_Object_GetVirtualKeyBoard(pObject);
 	px_float objx,objy,objWidth,objHeight;
-	px_float inheritX,inheritY;
+	px_rect rect;
 
-	PX_ObjectGetInheritXY(pObject,&inheritX,&inheritY);
-
-	objx=(pObject->x+inheritX);
-	objy=(pObject->y+inheritY);
-	objWidth=pObject->Width;
-	objHeight=pObject->Height;
+	rect = PX_ObjectGetRect(pObject);
+	objx = rect.x;
+	objy = rect.y;
+	objWidth = rect.width;
+	objHeight = rect.height;
 
 	oftx=(px_int)objx;
 	ofty=(px_int)objy;
@@ -229,14 +228,13 @@ PX_OBJECT_EVENT_FUNCTION(PX_Object_VirtualKeyBoardOnCursorMove)
 	px_int kh=(px_int)(pObject->Height/5);
 	PX_Object_VirtualKeyBoard *pkb= PX_Object_GetVirtualKeyBoard( pObject);
 	px_float objx,objy,objWidth,objHeight;
-	px_float inheritX,inheritY;
+	px_rect rect;
 
-	PX_ObjectGetInheritXY(pObject,&inheritX,&inheritY);
-
-	objx=(pObject->x+inheritX);
-	objy=(pObject->y+inheritY);
-	objWidth=pObject->Width;
-	objHeight=pObject->Height;
+	rect = PX_ObjectGetRect(pObject);
+	objx = rect.x;
+	objy = rect.y;
+	objWidth = rect.width;
+	objHeight = rect.height;
 
 
 	x=(PX_Object_Event_GetCursorX(e)-objx);
@@ -325,7 +323,7 @@ PX_OBJECT_EVENT_FUNCTION(PX_Object_VirtualKeyBoardOnCursorDown)
 	PX_Object_VirtualKeyBoard *pkb= PX_Object_GetVirtualKeyBoard( pObject);
 
 	px_float objx,objy,objWidth,objHeight;
-	px_float inheritX,inheritY;
+	px_rect rect;
 
 	PX_Object_Event stringEvent;
 
@@ -335,12 +333,11 @@ PX_OBJECT_EVENT_FUNCTION(PX_Object_VirtualKeyBoardOnCursorDown)
 	PX_Object_Event_SetStringPtr(&stringEvent,strEve);
 
 
-	PX_ObjectGetInheritXY(pObject,&inheritX,&inheritY);
-
-	objx=(pObject->x+inheritX);
-	objy=(pObject->y+inheritY);
-	objWidth=pObject->Width;
-	objHeight=pObject->Height;
+	rect = PX_ObjectGetRect(pObject);
+	objx = rect.x;
+	objy = rect.y;
+	objWidth = rect.width;
+	objHeight = rect.height;
 
 	if (!PX_ObjectIsPointInRegion(pObject,(px_float)x,(px_float)y))
 	{
@@ -775,14 +772,13 @@ PX_OBJECT_RENDER_FUNCTION(PX_Object_VirtualNumberKeyBoardRender)
 	PX_Object_VirtualNumberKeyBoard *keyBoard= PX_Object_GetVirtualNumberKeyBoard(pObject);
 
 	px_float objx,objy,objWidth,objHeight;
-	px_float inheritX,inheritY;
+	px_rect rect;
 
-	PX_ObjectGetInheritXY(pObject,&inheritX,&inheritY);
-
-	objx=(pObject->x+inheritX);
-	objy=(pObject->y+inheritY);
-	objWidth=pObject->Width;
-	objHeight=pObject->Height;
+	rect = PX_ObjectGetRect(pObject);
+	objx = rect.x;
+	objy = rect.y;
+	objWidth = rect.width;
+	objHeight = rect.height;
 
 	oftx=(px_int)objx;
 	ofty=(px_int)objy;
@@ -850,14 +846,13 @@ PX_OBJECT_EVENT_FUNCTION(PX_Object_VirtualNumberKeyBoardOnCursorMove)
 	px_int kh=(px_int)(pObject->Height/5);
 	PX_Object_VirtualNumberKeyBoard *pkb= PX_Object_GetVirtualNumberKeyBoard(pObject);
 	px_float objx,objy,objWidth,objHeight;
-	px_float inheritX,inheritY;
+	px_rect rect;
 
-	PX_ObjectGetInheritXY(pObject,&inheritX,&inheritY);
-
-	objx=(pObject->x+inheritX);
-	objy=(pObject->y+inheritY);
-	objWidth=pObject->Width;
-	objHeight=pObject->Height;
+	rect = PX_ObjectGetRect(pObject);
+	objx = rect.x;
+	objy = rect.y;
+	objWidth = rect.width;
+	objHeight = rect.height;
 
 
 
@@ -947,7 +942,7 @@ PX_OBJECT_EVENT_FUNCTION(PX_Object_VirtualNumberKeyBoardOnCursorDown)
 	PX_Object_VirtualKeyBoard *pkb= PX_Object_GetVirtualKeyBoard(pObject);
 	PX_Object_Event ke;
 	px_float objx,objy,objWidth,objHeight;
-	px_float inheritX,inheritY;
+	px_rect rect;
 
 	px_char strEve[2]={0};
 
@@ -955,12 +950,11 @@ PX_OBJECT_EVENT_FUNCTION(PX_Object_VirtualNumberKeyBoardOnCursorDown)
 	PX_Object_Event_SetStringPtr(&stringEvent,strEve);
 
 
-	PX_ObjectGetInheritXY(pObject,&inheritX,&inheritY);
-
-	objx=(pObject->x+inheritX);
-	objy=(pObject->y+inheritY);
-	objWidth=pObject->Width;
-	objHeight=pObject->Height;
+	rect = PX_ObjectGetRect(pObject);
+	objx = rect.x;
+	objy = rect.y;
+	objWidth = rect.width;
+	objHeight = rect.height;
 
 	if (!PX_ObjectIsPointInRegion(pObject,(px_float)x,(px_float)y))
 	{

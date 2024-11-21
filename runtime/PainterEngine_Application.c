@@ -142,7 +142,7 @@ px_void PainterEngine_DrawSector(px_int x, px_int y, px_int radius_inside, px_in
 
 
 
-px_void PainterEngie_SetFontSize(px_int size)
+px_void PainterEngine_SetFontSize(px_int size)
 {
 if(App.pfontmodule)
 		PX_FontModuleSetSize(App.pfontmodule, size);

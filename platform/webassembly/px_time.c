@@ -10,6 +10,15 @@ unsigned int PX_TimeGetTime()
 	return uptime;
 }
 
+unsigned int PX_TimeGetTimeUs()
+{
+	unsigned int uptime = 0;
+	struct timespec on;
+	if(clock_gettime(CLOCK_MONOTONIC, &on) == 0)
+		uptime = on.tv_sec*1000000 + on.tv_nsec/1000;
+	return uptime;
+}
+
 int PX_TimeGetYear()
 {
 	time_t timep;

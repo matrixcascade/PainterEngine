@@ -13,13 +13,13 @@ PX_OBJECT_EVENT_FUNCTION(PX_Object_ListOnCursorMove)
 {
 	PX_Object_List *pList= PX_Object_GetList(pObject);
 	px_float objx,objy,objWidth,objHeight;
-	px_float inheritX,inheritY;
-	PX_ObjectGetInheritXY(pObject,&inheritX,&inheritY);
+	px_rect rect;
+	rect = PX_ObjectGetRect(pObject);
+	objx = rect.x;
+	objy = rect.y;
+	objWidth = rect.width;
+	objHeight = rect.height;
 
-	objx=(pObject->x+inheritX);
-	objy=(pObject->y+inheritY);
-	objWidth=pObject->Width;
-	objHeight=pObject->Height;
 	pList->currentCursorIndex=-1;
 	if (!PX_ObjectIsCursorInRegion(pObject,e))
 	{
@@ -70,15 +70,15 @@ PX_OBJECT_EVENT_FUNCTION(PX_Object_ListOnCursorDown)
 {
 	PX_Object_List *pList= PX_Object_GetList(pObject);
 	px_float objx,objy,objWidth,objHeight;
-	px_float inheritX,inheritY;
+	px_rect rect;
 	px_int currentSelectedIndex;
 	PX_Object_Event ne;
-	PX_ObjectGetInheritXY(pObject,&inheritX,&inheritY);
+	rect = PX_ObjectGetRect(pObject);
+	objx = rect.x;
+	objy = rect.y;
+	objWidth = rect.width;
+	objHeight = rect.height;
 
-	objx=(pObject->x+inheritX);
-	objy=(pObject->y+inheritY);
-	objWidth=pObject->Width;
-	objHeight=pObject->Height;
 
 	if (!PX_ObjectIsCursorInRegion(pObject,e))
 	{
@@ -173,14 +173,14 @@ PX_OBJECT_EVENT_FUNCTION(PX_Object_ListOnWheel)
 {
 	PX_Object_List *pList= PX_Object_GetList(pObject);
 	px_float objx,objy,objWidth,objHeight;
-	px_float inheritX,inheritY;
+	px_rect rect;
 
-	PX_ObjectGetInheritXY(pObject,&inheritX,&inheritY);
+	rect = PX_ObjectGetRect(pObject);
+	objx = rect.x;
+	objy = rect.y;
+	objWidth = rect.width;
+	objHeight = rect.height;
 
-	objx=(pObject->x+inheritX);
-	objy=(pObject->y+inheritY);
-	objWidth=pObject->Width;
-	objHeight=pObject->Height;
 
 	if (!PX_ObjectIsCursorInRegion(pObject,e))
 	{
@@ -246,14 +246,14 @@ PX_OBJECT_RENDER_FUNCTION(PX_Object_ListRender)
 	PX_Object_List *pList=PX_ObjectGetDesc(PX_Object_List,pObject);
 	PX_Object_ListItem *pItem;
 	px_float objx,objy,objWidth,objHeight;
-	px_float inheritX,inheritY;
+	px_rect rect;
 
-	PX_ObjectGetInheritXY(pObject,&inheritX,&inheritY);
+	rect = PX_ObjectGetRect(pObject);
+	objx = rect.x;
+	objy = rect.y;
+	objWidth = rect.width;
+	objHeight = rect.height;
 
-	objx=(pObject->x+inheritX);
-	objy=(pObject->y+inheritY);
-	objWidth=pObject->Width;
-	objHeight=pObject->Height;
 
 	pList->click_elapsed += elapsed;
 

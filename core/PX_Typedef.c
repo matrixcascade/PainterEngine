@@ -2430,8 +2430,17 @@ px_bool PX_isPointInRect(px_point p,px_rect rect)
 		return PX_TRUE;
 }
 
+px_bool PX_isPointInRegion(px_point p, px_region region)
+{
+	px_rect rect;
+	rect.x = region.left;
+	rect.y = region.top;
+	rect.width = region.right - region.left;
+	rect.height = region.bottom - region.top;
+	return PX_isPointInRect(p, rect);
+}
 
-px_bool PX_isXYInRegion(px_float x,px_float y,px_float rectx,px_float recty,px_float width,px_float height)
+px_bool PX_isPointXYInRect(px_float x,px_float y,px_float rectx,px_float recty,px_float width,px_float height)
 {
 	if (x<rectx)
 	{
@@ -2452,6 +2461,11 @@ px_bool PX_isXYInRegion(px_float x,px_float y,px_float rectx,px_float recty,px_f
 	return PX_TRUE;
 }
 
+
+px_bool PX_isPointXYInRegion(px_float x, px_float y, px_region region)
+{
+	return PX_isPointXYInRect(x, y, region.left, region.top, region.right - region.left, region.bottom - region.top);
+}
 
 px_bool PX_isLineCrossRect(px_point p1,px_point p2,px_rect rect,px_point *cp1,px_point *cp2)
 {

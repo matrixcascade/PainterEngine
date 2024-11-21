@@ -502,14 +502,14 @@ static px_void PX_Object_OscilloscopeDrawFrameLine(px_surface *psurface,PX_Objec
 	px_int offsetx;
 	px_int offsety;
 	px_float objx,objy,objWidth,objHeight;
-	px_float inheritX,inheritY;
+	px_rect rect;
 
-	PX_ObjectGetInheritXY(pObject,&inheritX,&inheritY);
+	rect = PX_ObjectGetRect(pObject);
+	objx = rect.x;
+	objy = rect.y;
+	objWidth = rect.width;
+	objHeight = rect.height;
 
-	objx=(pObject->x+inheritX);
-	objy=(pObject->y+inheritY);
-	objWidth=pObject->Width;
-	objHeight=pObject->Height;
 
 	offsetx=(px_int)objx;
 	offsety=(px_int)objy;
@@ -532,14 +532,14 @@ static px_void PX_Object_OscilloscopeDrawDashed(px_surface *psurface,PX_Object *
 	px_int Divid=PX_Object_OscilloscopeGetOscilloscopeWidth(pObject)/pcd->MinHorizontalPixelDividing;
 
 	px_float objx,objy,objWidth,objHeight;
-	px_float inheritX,inheritY;
+	px_rect rect;
 
-	PX_ObjectGetInheritXY(pObject,&inheritX,&inheritY);
+	rect = PX_ObjectGetRect(pObject);
+	objx = rect.x;
+	objy = rect.y;
+	objWidth = rect.width;
+	objHeight = rect.height;
 
-	objx=(pObject->x+inheritX);
-	objy=(pObject->y+inheritY);
-	objWidth=pObject->Width;
-	objHeight=pObject->Height;
 
 	offsetx=(px_int)objx;
 	offsety=(px_int)objy;
@@ -621,14 +621,14 @@ static px_void PX_Object_OscilloscopeDrawDashText(px_surface *psurface,PX_Object
 	px_int Divid=PX_Object_OscilloscopeGetOscilloscopeWidth(pObject)/pcd->MinHorizontalPixelDividing;
 
 	px_float objx,objy,objWidth,objHeight;
-	px_float inheritX,inheritY;
+	px_rect rect;
 
-	PX_ObjectGetInheritXY(pObject,&inheritX,&inheritY);
+	rect = PX_ObjectGetRect(pObject);
+	objx = rect.x;
+	objy = rect.y;
+	objWidth = rect.width;
+	objHeight = rect.height;
 
-	objx=(pObject->x+inheritX);
-	objy=(pObject->y+inheritY);
-	objWidth=pObject->Width;
-	objHeight=pObject->Height;
 
 	offsetx=(px_int)objx;
 	offsety=(px_int)objy;
@@ -816,14 +816,14 @@ static px_void PX_Object_OscilloscopeDrawTitle(px_surface *psurface,PX_Object *p
 	px_int offsetx;
 	px_int offsety;
 	px_float objx,objy,objWidth,objHeight;
-	px_float inheritX,inheritY;
+	px_rect rect;
 
-	PX_ObjectGetInheritXY(pObject,&inheritX,&inheritY);
+	rect = PX_ObjectGetRect(pObject);
+	objx = rect.x;
+	objy = rect.y;
+	objWidth = rect.width;
+	objHeight = rect.height;
 
-	objx=(pObject->x+inheritX);
-	objy=(pObject->y+inheritY);
-	objWidth=pObject->Width;
-	objHeight=pObject->Height;
 
 	offsetx=(px_int)objx;
 	offsety=(px_int)objy;
@@ -859,14 +859,14 @@ static px_void PX_Object_OscilloscopeDrawDataInfo(px_surface *psurface,PX_Object
 
 	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
 	px_float objx,objy,objWidth,objHeight;
-	px_float inheritX,inheritY;
+	px_rect rect;
 
-	PX_ObjectGetInheritXY(pObject,&inheritX,&inheritY);
+	rect = PX_ObjectGetRect(pObject);
+	objx = rect.x;
+	objy = rect.y;
+	objWidth = rect.width;
+	objHeight = rect.height;
 
-	objx=(pObject->x+inheritX);
-	objy=(pObject->y+inheritY);
-	objWidth=pObject->Width;
-	objHeight=pObject->Height;
 
 	offsetx=(px_int)objx;
 	offsety=(px_int)objy;
@@ -1024,14 +1024,14 @@ static px_void PX_Object_OscilloscopeDrawScaleDraging(px_surface *psurface,PX_Ob
 	px_int offsety;
 	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
 	px_float objx,objy,objWidth,objHeight;
-	px_float inheritX,inheritY;
+	px_rect rect;
 
-	PX_ObjectGetInheritXY(pObject,&inheritX,&inheritY);
+	rect = PX_ObjectGetRect(pObject);
+	objx = rect.x;
+	objy = rect.y;
+	objWidth = rect.width;
+	objHeight = rect.height;
 
-	objx=(pObject->x+inheritX);
-	objy=(pObject->y+inheritY);
-	objWidth=pObject->Width;
-	objHeight=pObject->Height;
 
 	offsetx=(px_int)objx;
 	offsety=(px_int)objy;
@@ -1054,14 +1054,14 @@ static px_void PX_Object_OscilloscopeDrawHelpLine(px_surface *psurface,PX_Object
 	px_double value;
 	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
 	px_float objx,objy,objWidth,objHeight;
-	px_float inheritX,inheritY;
+	px_rect rect;
 
-	PX_ObjectGetInheritXY(pObject,&inheritX,&inheritY);
+	rect = PX_ObjectGetRect(pObject);
+	objx = rect.x;
+	objy = rect.y;
+	objWidth = rect.width;
+	objHeight = rect.height;
 
-	objx=(pObject->x+inheritX);
-	objy=(pObject->y+inheritY);
-	objWidth=pObject->Width;
-	objHeight=pObject->Height;
 
 	if (!pcd->ShowHelpLine)
 	{
@@ -1193,14 +1193,14 @@ static px_void PX_Object_OscilloscopeDrawFlagLine(px_surface *psurface,PX_Object
 	px_int x,y,i;
 	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
 	px_float objx,objy,objWidth,objHeight;
-	px_float inheritX,inheritY;
+	px_rect rect;
 
-	PX_ObjectGetInheritXY(pObject,&inheritX,&inheritY);
+	rect = PX_ObjectGetRect(pObject);
+	objx = rect.x;
+	objy = rect.y;
+	objWidth = rect.width;
+	objHeight = rect.height;
 
-	objx=(pObject->x+inheritX);
-	objy=(pObject->y+inheritY);
-	objWidth=pObject->Width;
-	objHeight=pObject->Height;
 
 	for (i=0;i<pcd->vFlagLine.size;i++)
 	{
@@ -1451,14 +1451,14 @@ PX_OBJECT_EVENT_FUNCTION(PX_Object_OscilloscopeCursorPressEvent)
 	px_float y;
 	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
 	px_float objx,objy,objWidth,objHeight;
-	px_float inheritX,inheritY;
+	px_rect rect;
 
-	PX_ObjectGetInheritXY(pObject,&inheritX,&inheritY);
+	rect = PX_ObjectGetRect(pObject);
+	objx = rect.x;
+	objy = rect.y;
+	objWidth = rect.width;
+	objHeight = rect.height;
 
-	objx=(pObject->x+inheritX);
-	objy=(pObject->y+inheritY);
-	objWidth=pObject->Width;
-	objHeight=pObject->Height;
 
 	x=(PX_Object_Event_GetCursorX(e)-objx);
 	y=(PX_Object_Event_GetCursorY(e)-objy);
@@ -1500,14 +1500,14 @@ PX_OBJECT_EVENT_FUNCTION(PX_Object_OscilloscopeCursorReleaseEvent)
 
 	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
 	px_float objx,objy,objWidth,objHeight;
-	px_float inheritX,inheritY;
+	px_rect rect;
 
-	PX_ObjectGetInheritXY(pObject,&inheritX,&inheritY);
+	rect = PX_ObjectGetRect(pObject);
+	objx = rect.x;
+	objy = rect.y;
+	objWidth = rect.width;
+	objHeight = rect.height;
 
-	objx=(pObject->x+inheritX);
-	objy=(pObject->y+inheritY);
-	objWidth=pObject->Width;
-	objHeight=pObject->Height;
 
 	pcd->OnMarkStatus=PX_FALSE;
 	pcd->MarkLineX=-1;
@@ -1534,14 +1534,14 @@ PX_OBJECT_EVENT_FUNCTION(PX_Object_OscilloscopeCursorDragEvent)
 {
 	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
 	px_float objx,objy,objWidth,objHeight;
-	px_float inheritX,inheritY;
+	px_rect rect;
 
-	PX_ObjectGetInheritXY(pObject,&inheritX,&inheritY);
+	rect = PX_ObjectGetRect(pObject);
+	objx = rect.x;
+	objy = rect.y;
+	objWidth = rect.width;
+	objHeight = rect.height;
 
-	objx=(pObject->x+inheritX);
-	objy=(pObject->y+inheritY);
-	objWidth=pObject->Width;
-	objHeight=pObject->Height;
 
 	if (pcd->bScaleDrag)
 	{
@@ -1581,14 +1581,14 @@ PX_OBJECT_EVENT_FUNCTION(PX_Object_OscilloscopeCursorMoveEvent)
 {
 	PX_Object_Oscilloscope *pcd=PX_Object_GetOscilloscope(pObject);
 	px_float objx,objy,objWidth,objHeight;
-	px_float inheritX,inheritY;
+	px_rect rect;
 
-	PX_ObjectGetInheritXY(pObject,&inheritX,&inheritY);
+	rect = PX_ObjectGetRect(pObject);
+	objx = rect.x;
+	objy = rect.y;
+	objWidth = rect.width;
+	objHeight = rect.height;
 
-	objx=(pObject->x+inheritX);
-	objy=(pObject->y+inheritY);
-	objWidth=pObject->Width;
-	objHeight=pObject->Height;
 
 	if (pcd->ShowHelpLine)
 	{
@@ -1748,14 +1748,14 @@ static px_void PX_Object_FilterEditorDrawFrameLine(px_surface *psurface,PX_Objec
 	px_int offsetx;
 	px_int offsety;
 	px_float objx,objy,objWidth,objHeight;
-	px_float inheritX,inheritY;
+	px_rect rect;
 
-	PX_ObjectGetInheritXY(pObject,&inheritX,&inheritY);
+	rect = PX_ObjectGetRect(pObject);
+	objx = rect.x;
+	objy = rect.y;
+	objWidth = rect.width;
+	objHeight = rect.height;
 
-	objx=(pObject->x+inheritX);
-	objy=(pObject->y+inheritY);
-	objWidth=pObject->Width;
-	objHeight=pObject->Height;
 
 	offsetx=(px_int)objx;
 	offsety=(px_int)objy;
@@ -1772,14 +1772,14 @@ static px_void PX_Object_FilterEditorDrawSelectDraging(px_surface *psurface,PX_O
 	px_int offsetx;
 	px_int offsety;
 	px_float objx,objy,objWidth,objHeight;
-	px_float inheritX,inheritY;
+	px_rect rect;
 
-	PX_ObjectGetInheritXY(pObject,&inheritX,&inheritY);
+	rect = PX_ObjectGetRect(pObject);
+	objx = rect.x;
+	objy = rect.y;
+	objWidth = rect.width;
+	objHeight = rect.height;
 
-	objx=(pObject->x+inheritX);
-	objy=(pObject->y+inheritY);
-	objWidth=pObject->Width;
-	objHeight=pObject->Height;
 
 	offsetx=(px_int)objx;
 	offsety=(px_int)objy;
@@ -1799,14 +1799,14 @@ static px_void PX_Object_FilterEditorDrawPt(px_surface *psurface,PX_Object *pObj
 	px_float oftx;
 	px_float ofty;
 	px_float objx,objy,objWidth,objHeight;
-	px_float inheritX,inheritY;
+	px_rect rect;
 
-	PX_ObjectGetInheritXY(pObject,&inheritX,&inheritY);
+	rect = PX_ObjectGetRect(pObject);
+	objx = rect.x;
+	objy = rect.y;
+	objWidth = rect.width;
+	objHeight = rect.height;
 
-	objx=(pObject->x+inheritX);
-	objy=(pObject->y+inheritY);
-	objWidth=pObject->Width;
-	objHeight=pObject->Height;
 
 	oftx=objx;
 	ofty=objy;
@@ -1834,14 +1834,14 @@ static px_void PX_Object_FilterEditorDrawHelpLine(px_surface *psurface,PX_Object
 	px_double midy,incx,incy,x,y,val;
 	px_double oftx,ofty;
 	px_float objx,objy,objWidth,objHeight;
-	px_float inheritX,inheritY;
+	px_rect rect;
 
-	PX_ObjectGetInheritXY(pObject,&inheritX,&inheritY);
+	rect = PX_ObjectGetRect(pObject);
+	objx = rect.x;
+	objy = rect.y;
+	objWidth = rect.width;
+	objHeight = rect.height;
 
-	objx=(pObject->x+inheritX);
-	objy=(pObject->y+inheritY);
-	objWidth=pObject->Width;
-	objHeight=pObject->Height;
 
 
 	if (!pfe->ShowHelpLine)
@@ -1933,14 +1933,14 @@ PX_OBJECT_EVENT_FUNCTION(PX_Object_FilterEditorCursorPressEvent)
 	px_float y;
 	PX_Object_FilterEditor *pfe=PX_Object_GetFilterEditor(pObject);
 	px_float objx,objy,objWidth,objHeight;
-	px_float inheritX,inheritY;
+	px_rect rect;
 
-	PX_ObjectGetInheritXY(pObject,&inheritX,&inheritY);
+	rect = PX_ObjectGetRect(pObject);
+	objx = rect.x;
+	objy = rect.y;
+	objWidth = rect.width;
+	objHeight = rect.height;
 
-	objx=(pObject->x+inheritX);
-	objy=(pObject->y+inheritY);
-	objWidth=pObject->Width;
-	objHeight=pObject->Height;
 
 	x=(PX_Object_Event_GetCursorX(e)-objx);
 	y=(PX_Object_Event_GetCursorY(e)-objy);
@@ -1996,14 +1996,14 @@ PX_OBJECT_EVENT_FUNCTION(PX_Object_FilterEditorCursorMoveEvent)
 	px_int i;
 	px_float x,y;
 	px_float objx,objy,objWidth,objHeight;
-	px_float inheritX,inheritY;
+	px_rect rect;
 
-	PX_ObjectGetInheritXY(pObject,&inheritX,&inheritY);
+	rect = PX_ObjectGetRect(pObject);
+	objx = rect.x;
+	objy = rect.y;
+	objWidth = rect.width;
+	objHeight = rect.height;
 
-	objx=(pObject->x+inheritX);
-	objy=(pObject->y+inheritY);
-	objWidth=pObject->Width;
-	objHeight=pObject->Height;
 
 	x=(PX_Object_Event_GetCursorX(e)-objx);
 	y=(PX_Object_Event_GetCursorY(e)-objy);
@@ -2035,14 +2035,14 @@ PX_OBJECT_EVENT_FUNCTION(PX_Object_FilterEditorCursorDragEvent)
 	PX_Object_FilterEditor *pfe=PX_Object_GetFilterEditor(pObject);
 	px_float x,y;
 	px_float objx,objy,objWidth,objHeight;
-	px_float inheritX,inheritY;
+	px_rect rect;
 
-	PX_ObjectGetInheritXY(pObject,&inheritX,&inheritY);
+	rect = PX_ObjectGetRect(pObject);
+	objx = rect.x;
+	objy = rect.y;
+	objWidth = rect.width;
+	objHeight = rect.height;
 
-	objx=(pObject->x+inheritX);
-	objy=(pObject->y+inheritY);
-	objWidth=pObject->Width;
-	objHeight=pObject->Height;
 
 	x=(PX_Object_Event_GetCursorX(e)-objx);
 	y=(PX_Object_Event_GetCursorY(e)-objy);

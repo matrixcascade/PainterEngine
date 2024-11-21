@@ -7,14 +7,12 @@ px_void PX_Object_EditGetCursorXY(PX_Object *pObject, px_int *cx, px_int *cy, px
 	PX_Object_Edit *pEdit = PX_Object_GetEdit(pObject);
 	const px_char *Text = pEdit->text.buffer;
 	px_float objx, objy, objWidth, objHeight;
-	px_float inheritX, inheritY;
+	px_rect rect=PX_ObjectGetRect(pObject);
+	objx = rect.x;
+	objy = rect.y;
+	objWidth = rect.width;
+	objHeight = rect.height;
 
-	PX_ObjectGetInheritXY(pObject, &inheritX, &inheritY);
-
-	objx = (pObject->x + inheritX);
-	objy = (pObject->y + inheritY);
-	objWidth = pObject->Width;
-	objHeight = pObject->Height;
 
 
 	if (pEdit == PX_NULL)
@@ -173,12 +171,9 @@ PX_OBJECT_EVENT_FUNCTION(PX_Object_EditOnMouseLButtonDown)
 	PX_Object_Edit *pEdit=PX_Object_GetEdit(pObject);
 	px_float x,y;
 	px_float objx,objy;
-	px_float inheritX,inheritY;
-
-	PX_ObjectGetInheritXY(pObject,&inheritX,&inheritY);
-
-	objx=(pObject->x+inheritX);
-	objy=(pObject->y+inheritY);
+	px_rect rect=PX_ObjectGetRect(pObject);
+	objx=rect.x;
+	objy=rect.y;
 
 	x=PX_Object_Event_GetCursorX(e);
 	y=PX_Object_Event_GetCursorY(e);
@@ -240,14 +235,11 @@ PX_OBJECT_RENDER_FUNCTION(PX_Object_EditRender)
 	PX_Object_Edit* pEdit = PX_ObjectGetDesc(PX_Object_Edit, pObject);
 	const px_char* Text = pEdit->text.buffer;
 	px_float objx, objy, objWidth, objHeight;
-	px_float inheritX, inheritY;
-
-	PX_ObjectGetInheritXY(pObject, &inheritX, &inheritY);
-
-	objx = (pObject->x + inheritX);
-	objy = (pObject->y + inheritY);
-	objWidth = pObject->Width;
-	objHeight = pObject->Height;
+	px_rect rect=PX_ObjectGetRect(pObject);
+	objx = rect.x;
+	objy = rect.y;
+	objWidth = rect.width;
+	objHeight = rect.height;
 
 	if (pEdit == PX_NULL)
 	{
@@ -643,14 +635,12 @@ px_void PX_Object_EditUpdateCursorOnDown(PX_Object *pObject,px_int cx,px_int cy)
 	PX_Object_Edit *pEdit=PX_Object_GetEdit(pObject);
 	const px_char *Text=pEdit->text.buffer;
 	px_float objx,objy,objWidth,objHeight;
-	px_float inheritX,inheritY;
+	px_rect rect=PX_ObjectGetRect(pObject);
 
-	PX_ObjectGetInheritXY(pObject,&inheritX,&inheritY);
-
-	objx=(pObject->x+inheritX);
-	objy=(pObject->y+inheritY);
-	objWidth=pObject->Width;
-	objHeight=pObject->Height;
+	objx=rect.x;
+	objy=rect.y;
+	objWidth=rect.width;
+	objHeight=rect.height;
 
 	if (pEdit==PX_NULL)
 	{

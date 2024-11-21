@@ -297,6 +297,17 @@ px_byte *PX_AbiReadNext_desc(px_byte* pbuffer, px_abi_desc *pdesc)
 	return pbuffer;
 }
 
+px_byte* PX_AbiGetData(px_abi_desc* pdesc)
+{
+	return pdesc->buffer;
+}
+
+px_int PX_AbiGetSize(px_abi_desc* pdesc)
+{
+	return pdesc->size;
+	
+}
+
 px_void PX_AbiDynamicFree(px_abi* pabi)
 {
 	if (pabi->dynamic.mp)

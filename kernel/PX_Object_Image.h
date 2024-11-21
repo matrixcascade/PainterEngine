@@ -17,6 +17,7 @@ typedef struct
 
 PX_Object* PX_Object_ImageAttachObject(PX_Object* pObject, px_int attachIndex, px_texture* ptex);
 PX_Object * PX_Object_ImageCreate(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y,px_int width,px_int height,px_texture *ptex );
+PX_Object* PX_Object_ImageCreateGif(px_memorypool* mp, PX_Object* Parent, px_int x, px_int y, px_int width, px_int height, px_gif* pgif);
 PX_Object_Image *PX_Object_GetImage(PX_Object *pObject);
 px_void	   PX_Object_ImageSetAlign(PX_Object *pObject,PX_ALIGN Align);
 px_void	   PX_Object_ImageSetMask(PX_Object *pObject,px_texture *pmask);

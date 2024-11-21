@@ -137,14 +137,13 @@ PX_OBJECT_RENDER_FUNCTION(PX_Object_RadioBoxRender)
 
 	PX_Object_RadioBox *pcb=PX_Object_GetRadioBox(pObject);
 	px_float objx,objy,objWidth,objHeight;
-	px_float inheritX,inheritY;
+	px_rect rect;
 
-	PX_ObjectGetInheritXY(pObject,&inheritX,&inheritY);
-
-	objx=(pObject->x+inheritX);
-	objy=(pObject->y+inheritY);
-	objWidth=pObject->Width;
-	objHeight=pObject->Height;
+	rect = PX_ObjectGetRect(pObject);
+	objx = rect.x;
+	objy = rect.y;
+	objWidth = rect.width;
+	objHeight = rect.height;
 
 
 	if (pcb==PX_NULL)

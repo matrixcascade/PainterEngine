@@ -3348,7 +3348,6 @@ px_void PX_VMSleep(PX_VM* Ins, px_int thread, px_uint sleepms)
 px_void PX_VMSuspend(PX_VM* Ins)
 {
 	Ins->Suspend = PX_TRUE;
-	
 }
 
 px_void PX_VMContinue(PX_VM* Ins)

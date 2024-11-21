@@ -5,14 +5,13 @@ PX_OBJECT_RENDER_FUNCTION(PX_Object_RingProgressRender)
 	PX_Object_RingProgress* pDesc = PX_ObjectGetDesc(PX_Object_RingProgress, pObject);
 	px_int angle;
 	px_float objx, objy, objHeight, objWidth;
-	px_float inheritX, inheritY;
+	px_rect rect;
 
-	PX_ObjectGetInheritXY(pObject, &inheritX, &inheritY);
-
-	objx = (pObject->x + inheritX);
-	objy = (pObject->y + inheritY);
-	objWidth = pObject->Width;
-	objHeight = pObject->Height;
+	rect = PX_ObjectGetRect(pObject);
+	objx = rect.x;
+	objy = rect.y;
+	objWidth = rect.width;
+	objHeight = rect.height;
 
 	
 	if (pDesc->current_value < pDesc->target_value)

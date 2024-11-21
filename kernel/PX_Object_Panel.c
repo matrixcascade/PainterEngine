@@ -4,14 +4,14 @@ PX_OBJECT_RENDER_FUNCTION(PX_Object_PanelRender)
 {
 	PX_Object_Panel *pDesc=PX_ObjectGetDesc(PX_Object_Panel,pObject);
 	px_int x,y,w,h;
-	px_float inheritX,inheritY;
+	px_rect rect;
 
-	PX_ObjectGetInheritXY(pObject,&inheritX,&inheritY);
+	rect = PX_ObjectGetRect(pObject);
+	x = (px_int)rect.x;
+	y = (px_int)rect.y;
+	w = (px_int)rect.width;
+	h= (px_int)rect.height;
 
-	x=(px_int)(pObject->x+inheritX);
-	y=(px_int)(pObject->y+inheritY);
-	w=(px_int)pObject->Width;
-	h=(px_int)pObject->Height;
 
 
 	if (w != pDesc->rendersurface.width || h != pDesc->rendersurface.height)

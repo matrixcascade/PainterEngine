@@ -4,14 +4,11 @@ PX_OBJECT_RENDER_FUNCTION(PX_Object_ParticalRender)
 {
 	PX_Object_Partical *pDesc = (PX_Object_Partical *)pObject->pObjectDesc[0];
 	px_float objx, objy, objWidth, objHeight;
-	px_float inheritX, inheritY;
-	PX_ObjectGetInheritXY(pObject, &inheritX, &inheritY);
-
-	objx = (pObject->x + inheritX);
-	objy = (pObject->y + inheritY);
-	objWidth = pObject->Width;
-	objHeight = pObject->Height;
-
+	px_rect rect=PX_ObjectGetRect(pObject);
+	objx = rect.x;
+	objy = rect.y;
+	objWidth = rect.width;
+	objHeight = rect.height;
 	PX_ParticalLauncherSetPosition(&pDesc->launcher, objx, objy, 0);
 	PX_ParticalLauncherRender(psurface, &pDesc->launcher, elapsed);
 }

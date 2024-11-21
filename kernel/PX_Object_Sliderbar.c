@@ -9,14 +9,12 @@ PX_OBJECT_EVENT_FUNCTION(PX_Object_SliderBarOnMouseLButtonDown)
 	px_int Range,relValue;
 
 	px_int objx,objy,objw,objh;
-	px_float inheritX,inheritY;
 
-	PX_ObjectGetInheritXY(pObject,&inheritX,&inheritY);
-
-	objx=(px_int)(pObject->x+inheritX);
-	objy=(px_int)(pObject->y+inheritY);
-	objw=(px_int)pObject->Width;
-	objh=(px_int)pObject->Height;
+	rect = PX_ObjectGetRect(pObject);
+	objx = (px_int)rect.x;
+	objy = (px_int)rect.y;
+	objw = (px_int)rect.width;
+	objh = (px_int)rect.height;
 
 	x=PX_Object_Event_GetCursorX(e);
 	y=PX_Object_Event_GetCursorY(e);
@@ -209,14 +207,13 @@ PX_OBJECT_EVENT_FUNCTION(PX_Object_SliderBarOnCursorDrag)
 	px_float x,y;
 
 	px_float objx,objy,objWidth,objHeight;
-	px_float inheritX,inheritY;
+	px_rect rect;
 
-	PX_ObjectGetInheritXY(pObject,&inheritX,&inheritY);
-
-	objx=(pObject->x+inheritX);
-	objy=(pObject->y+inheritY);
-	objWidth=pObject->Width;
-	objHeight=pObject->Height;
+	rect = PX_ObjectGetRect(pObject);
+	objx = rect.x;
+	objy = rect.y;
+	objWidth = rect.width;
+	objHeight = rect.height;
 
 
 	x=PX_Object_Event_GetCursorX(e);

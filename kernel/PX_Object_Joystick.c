@@ -34,13 +34,13 @@ PX_OBJECT_RENDER_FUNCTION(Func_JoystickRender)
 {
     PX_Object_Joystick* pJoystick = PX_ObjectGetDesc(PX_Object_Joystick, pObject);
     px_float objx, objy, objWidth, objHeight;
-    px_float inheritX, inheritY;
-    PX_ObjectGetInheritXY(pObject, &inheritX, &inheritY);
+    px_rect rect;
+    rect = PX_ObjectGetRect(pObject);
+    objx = rect.x;
+    objy = rect.y;
+    objWidth = rect.width;
+    objHeight = rect.height;
 
-    objx = (pObject->x + inheritX);
-    objy = (pObject->y + inheritY);
-    objWidth = pObject->Width;
-    objHeight = pObject->Height;
 
     PX_GeoDrawSolidCircle(
         psurface,
@@ -60,15 +60,15 @@ PX_OBJECT_EVENT_FUNCTION(Func_JoystickOnCursorDown)
 {
     PX_Object_Joystick* pJoystick = PX_Object_GetJoystick(pObject);
     px_float objx, objy, objWidth, objHeight;
-    px_float inheritX, inheritY;
+    px_rect rect;
     px_float x, y, r;
     PX_ASSERTIF(!pJoystick);
-    PX_ObjectGetInheritXY(pObject, &inheritX, &inheritY);
+    rect = PX_ObjectGetRect(pObject);
+    objx = rect.x;
+    objy = rect.y;
+    objWidth = rect.width;
+    objHeight = rect.height;
 
-    objx = (pObject->x + inheritX);
-    objy = (pObject->y + inheritY);
-    objWidth = pObject->Width;
-    objHeight = pObject->Height;
     x = PX_Object_Event_GetCursorX(e) - objx,
         y = PX_Object_Event_GetCursorY(e) - objy,
         r = PX_sqrt(x * x + y * y);
@@ -94,15 +94,15 @@ PX_OBJECT_EVENT_FUNCTION(Func_JoystickOnCursorDrag)
 {
     PX_Object_Joystick* pJoystick = PX_Object_GetJoystick(pObject);
     px_float objx, objy, objWidth, objHeight;
-    px_float inheritX, inheritY;
+    px_rect rect;
     px_float x, y, r;
     PX_ASSERTIF(!pJoystick);
-    PX_ObjectGetInheritXY(pObject, &inheritX, &inheritY);
+    rect = PX_ObjectGetRect(pObject);
+    objx = rect.x;
+    objy = rect.y;
+    objWidth = rect.width;
+    objHeight = rect.height;
 
-    objx = (pObject->x + inheritX);
-    objy = (pObject->y + inheritY);
-    objWidth = pObject->Width;
-    objHeight = pObject->Height;
 
     x = PX_Object_Event_GetCursorX(e) - objx,
         y = PX_Object_Event_GetCursorY(e) - objy,
@@ -131,15 +131,15 @@ PX_OBJECT_EVENT_FUNCTION(Func_JoystickOnCursorUp)
 {
     PX_Object_Joystick* pJoystick = PX_Object_GetJoystick(pObject);
     px_float objx, objy, objWidth, objHeight;
-    px_float inheritX, inheritY;
+    px_rect rect;
     px_float x, y, r;
     PX_ASSERTIF(!pJoystick);
-    PX_ObjectGetInheritXY(pObject, &inheritX, &inheritY);
+    rect = PX_ObjectGetRect(pObject);
+    objx = rect.x;
+    objy = rect.y;
+    objWidth = rect.width;
+    objHeight = rect.height;
 
-    objx = (pObject->x + inheritX);
-    objy = (pObject->y + inheritY);
-    objWidth = pObject->Width;
-    objHeight = pObject->Height;
 
     x = PX_Object_Event_GetCursorX(e) - objx,
         y = PX_Object_Event_GetCursorY(e) - objy,

@@ -4,14 +4,14 @@ PX_OBJECT_RENDER_FUNCTION(PX_Object_ExplosionRender)
 {
 	PX_Object_Explosion* pDesc = PX_ObjectGetDesc(PX_Object_Explosion, pObject);
 	px_float objx, objy, objWidth, objHeight;
-	px_float inheritX, inheritY;
+	px_rect rect;
 
-	PX_ObjectGetInheritXY(pObject, &inheritX, &inheritY);
+	rect = PX_ObjectGetRect(pObject);
+	objx = rect.x;
+	objy = rect.y;
+	objWidth = rect.width;
+	objHeight = rect.height;
 
-	objx = (pObject->x + inheritX);
-	objy = (pObject->y + inheritY);
-	objWidth = pObject->Width;
-	objHeight = pObject->Height;
 
 	pDesc->elapsed += elapsed;
 	if (pDesc->elapsed > pDesc->alive)
@@ -285,13 +285,13 @@ PX_OBJECT_RENDER_FUNCTION(PX_Object_Explosion04Render)
 	PX_Object_Explosion04* pDesc =PX_ObjectGetDesc(PX_Object_Explosion04, pObject);
 	px_float fr;
 	px_float objx, objy, objWidth, objHeight;
-	px_float inheritX, inheritY;
-	PX_ObjectGetInheritXY(pObject, &inheritX, &inheritY);
+	px_rect rect;
+	rect = PX_ObjectGetRect(pObject);
+	objx = rect.x;
+	objy = rect.y;
+	objWidth = rect.width;
+	objHeight = rect.height;
 
-	objx = (pObject->x + inheritX);
-	objy = (pObject->y + inheritY);
-	objWidth = pObject->Width;
-	objHeight = pObject->Height;
 
 	pDesc->elapsed += elapsed;
 	if (pDesc->elapsed > pDesc->alive)

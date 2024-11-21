@@ -11,13 +11,13 @@ PX_OBJECT_RENDER_FUNCTION(PX_Object_PX_Live2DRender)
 {
 	PX_Object_Live2D *pLive2D=PX_ObjectGetDesc(PX_Object_Live2D,pObject);
 	px_float objx, objy, objWidth, objHeight;
-	px_float inheritX, inheritY;
-	PX_ObjectGetInheritXY(pObject, &inheritX, &inheritY);
+	px_rect rect;
+	rect = PX_ObjectGetRect(pObject);
+	objx = rect.x;
+	objy = rect.y;
+	objWidth = rect.width;
+	objHeight = rect.height;
 
-	objx = (pObject->x + inheritX);
-	objy = (pObject->y + inheritY);
-	objWidth = pObject->Width;
-	objHeight = pObject->Height;
 
 	PX_LiveRender(psurface,&pLive2D->live,(px_int)objx,(px_int)objy,PX_ALIGN_CENTER,elapsed);
 }

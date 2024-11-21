@@ -67,7 +67,6 @@ px_bool PX_AbiMemoryWrite_bool(px_memory* pmem, const px_char name[], px_bool _b
 px_bool PX_AbiMemoryWrite_data(px_memory* pmem, const px_char name[], px_void* data, px_int size);
 
 
-
 px_bool PX_AbiRead_int(px_abi* pabi,const px_char name[],px_int *_int);
 px_bool PX_AbiRead_ptr(px_abi* pabi, const px_char name[], px_void** ptr);
 px_bool PX_AbiRead_float(px_abi* pabi,const px_char name[],px_float *_float);
@@ -79,7 +78,8 @@ px_bool PX_AbiRead_bool(px_abi* pabi,const px_char name[],px_bool *_bool);
 px_bool PX_AbiRead_data(px_abi* pabi,const px_char name[],px_void *data,px_int size);
 
 px_byte* PX_AbiReadNext_desc(px_byte* pbuffer, px_abi_desc* pdesc);
-
+px_byte* PX_AbiGetData(px_abi_desc* pdesc);
+px_int   PX_AbiGetSize(px_abi_desc* pdesc);
 
 px_void PX_AbiDynamicFree(px_abi* pabi);
 

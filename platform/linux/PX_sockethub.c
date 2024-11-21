@@ -762,3 +762,17 @@ px_int  PX_SocketHubGetClientRecvCacheSize(PX_SocketHub* pServerHub, const  px_b
 	}
 	return 0;
 }
+
+px_int PX_SocketHubGetCurrentOnlineCount(PX_SocketHub* pServerHub)
+{
+	px_int i;
+	px_int count = 0;
+	for (i = 0; i < PX_SOCKETHUB_MAX_CONNECTION; i++)
+	{
+		if (pServerHub->tcp_instance[i].socket)
+		{
+			count++;
+		}
+	}
+	return count;
+}

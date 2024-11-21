@@ -18,12 +18,18 @@ PX_OBJECT_EVENT_FUNCTION(PX_Object_LayerBoxListOnChanged)
 PX_OBJECT_RENDER_FUNCTION(PX_Object_LayerBoxListItemOnRender)
 {
 	px_float x, y, w, h;
+	px_rect rect;
 	PX_Object* pLayerBoxObject = (PX_Object*)pObject->User_ptr;
 	PX_Object_LayerBox* pdesc = PX_ObjectGetDesc(PX_Object_LayerBox, pLayerBoxObject);
 	PX_Object_Layer *pLayer=(PX_Object_Layer*)PX_Object_ListItemGetData(pObject);
 	PX_Object* pButtonObject;
 	PX_ASSERTIF(!pdesc);
-	PX_OBJECT_INHERIT_CODE(pObject, x, y, w, h);
+	rect = PX_ObjectGetRect(pObject);
+	x = rect.x;
+	y = rect.y;
+	w = rect.width;
+	h = rect.height;
+
 
 	if (!pLayer->activating)
 	{

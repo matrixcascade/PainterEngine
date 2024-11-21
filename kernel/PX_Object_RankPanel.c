@@ -6,15 +6,14 @@ PX_OBJECT_RENDER_FUNCTION(PX_Object_RankPanelRender)
 	px_float currentStage=pDesc->current_value/pDesc->max*pDesc->stage;
 	px_int angle,colorIndex;
 	px_float objx, objy, objHeight, objWidth;
-	px_float inheritX, inheritY;
+	px_rect rect;
 	px_color aColor;
 
-	PX_ObjectGetInheritXY(pObject, &inheritX, &inheritY);
-
-	objx = (pObject->x + inheritX);
-	objy = (pObject->y + inheritY);
-	objWidth = pObject->Width;
-	objHeight = pObject->Height;
+	rect = PX_ObjectGetRect(pObject);
+	objx = rect.x;
+	objy = rect.y;
+	objWidth = rect.width;
+	objHeight = rect.height;
 
 	
 	pDesc->a1_angle += (PX_OBJECT_RANKPANEL_RING1_NORMAL_SPEED+(PX_OBJECT_RANKPANEL_RING1_MAX_SPEED- PX_OBJECT_RANKPANEL_RING1_NORMAL_SPEED)*(pDesc->current_value)/ pDesc->max) *elapsed / 1000;

@@ -5,7 +5,7 @@ PX_OBJECT_RENDER_FUNCTION(PX_Object_ImageRender)
 	PX_Object_Image *pImage=PX_Object_GetImage(pObject);
 	px_int x,y,w,h;
 	PX_SurfaceLimitInfo limitInfo;
-	px_float inheritX,inheritY;
+	px_rect rect;
 	px_texture *prenderTexture=PX_NULL;
 	PX_TEXTURERENDER_BLEND blend = {0}, * pblend;
 	if (!pImage->pTexture&&!pImage->pgif)
@@ -24,12 +24,12 @@ PX_OBJECT_RENDER_FUNCTION(PX_Object_ImageRender)
 		prenderTexture = pImage->pTexture;
 	}
 
-	PX_ObjectGetInheritXY(pObject,&inheritX,&inheritY);
+	rect = PX_ObjectGetRect(pObject);
+	x = (px_int)rect.x;
+	y = (px_int)rect.y;
+	w = (px_int)rect.width;
+	h = (px_int)rect.height;
 
-	x=(px_int)(pObject->x+inheritX);
-	y=(px_int)(pObject->y+inheritY);
-	w=(px_int)pObject->Width;
-	h=(px_int)pObject->Height;
 
 	limitInfo=PX_SurfaceGetLimit(psurface);
 	PX_SurfaceSetLimit(psurface,x,y,x+w-1,y+h-1);
@@ -203,6 +203,16 @@ PX_Object * PX_Object_ImageCreate(px_memorypool *mp,PX_Object *Parent,px_int x,p
 	}
 
 	
+	return pObject;
+}
+
+PX_Object* PX_Object_ImageCreateGif(px_memorypool* mp, PX_Object* Parent, px_int x, px_int y, px_int width, px_int height, px_gif* pgif)
+{
+	PX_Object* pObject = PX_Object_ImageCreate(mp, Parent, x, y, width, height, 0);
+	if (pObject)
+	{
+		PX_Object_ImageSetGif(pObject, pgif);
+	}
 	return pObject;
 }
 

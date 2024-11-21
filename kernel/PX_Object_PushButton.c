@@ -92,14 +92,12 @@ PX_OBJECT_RENDER_FUNCTION(PX_Object_PushButtonRender)
 	px_int fx, fy;
 	PX_Object_PushButton* pPushButton = PX_ObjectGetDesc(PX_Object_PushButton, pObject);
 	px_float objx, objy, objWidth, objHeight;
-	px_float inheritX, inheritY;
+	px_rect rect=PX_ObjectGetRect(pObject);
+	objx = rect.x;
+	objy = rect.y;
+	objWidth = rect.width;
+	objHeight = rect.height;
 
-	PX_ObjectGetInheritXY(pObject, &inheritX, &inheritY);
-
-	objx = (pObject->x + inheritX);
-	objy = (pObject->y + inheritY);
-	objWidth = pObject->Width;
-	objHeight = pObject->Height;
 
 	if (pPushButton == PX_NULL)
 	{
@@ -304,6 +302,16 @@ PX_Object * PX_Object_PushButtonCreate(px_memorypool *mp,PX_Object *Parent,px_in
 		return PX_NULL;
 	}
 	
+	return pObject;
+}
+
+PX_Object* PX_Object_PushButtonCreateAlign(px_memorypool* mp, PX_Object* Parent, px_int x, px_int y, px_int Width, px_int Height, const px_char* Text, PX_FontModule* fontmodule, PX_ALIGN align)
+{
+	PX_Object *pObject= PX_Object_PushButtonCreate(mp, Parent, x, y, Width, Height, Text, fontmodule);
+	if (pObject)
+	{
+		PX_ObjectSetAlign(pObject, align);
+	}
 	return pObject;
 }
 

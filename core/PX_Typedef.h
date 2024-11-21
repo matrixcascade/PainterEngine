@@ -409,6 +409,11 @@ typedef struct _px_rect
 	px_float x,y,width,height;
 }px_rect;
 
+typedef struct _px_region
+{
+	px_float left, top, right, bottom;
+}px_region;
+
 typedef struct _px_recti
 {
 	px_int x, y, width, height;
@@ -572,7 +577,9 @@ px_void PX_strcut(px_char* dest, px_int left, px_int right);
 px_bool PX_isPointInCircle(px_point p,px_point circle,px_float radius);
 px_bool PX_isPoint2DInCircle(px_point2D p,px_point2D circle,px_float radius);
 px_bool PX_isPointInRect(px_point p,px_rect rect);
-px_bool PX_isXYInRegion(px_float x,px_float y,px_float rectx,px_float recty,px_float width,px_float height);
+px_bool PX_isPointXYInRect(px_float x,px_float y,px_float rectx,px_float recty,px_float width,px_float height);
+px_bool PX_isPointXYInRegion(px_float x, px_float y, px_region region);
+px_bool PX_isPointInRegion(px_point p, px_region region);
 //////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////

@@ -119,5 +119,6 @@ px_void* PX_SocketHubGetUserPtr(PX_SocketHub* pServerHub, const  px_byte Session
 px_void PX_SocketHubCloseSession(PX_SocketHub* pServerHub, const  px_byte Session[16]);
 px_int  PX_SocketHubGetClientSendCacheSize(PX_SocketHub* pServerHub, const  px_byte Session[16]);
 px_int  PX_SocketHubGetClientRecvCacheSize(PX_SocketHub* pServerHub, const  px_byte Session[16]);
+px_int PX_SocketHubGetCurrentOnlineCount(PX_SocketHub* pServerHub);
 
 #endif // !PX_SocketHub_H

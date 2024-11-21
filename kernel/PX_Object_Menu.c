@@ -164,7 +164,7 @@ px_bool PX_Menu_CursorAction(PX_Object *pObject,PX_Object_Menu_Item *pItem,px_fl
 	px_list_node *pNode=PX_NULL;
 	PX_Object_Menu *pMenu=PX_Object_GetMenu(pObject);
 
-	if (PX_isXYInRegion(x,y,(px_float)pItem->x,(px_float)pItem->y,(px_float)pItem->width,(px_float)pItem->height))
+	if (PX_isPointXYInRect(x,y,(px_float)pItem->x,(px_float)pItem->y,(px_float)pItem->width,(px_float)pItem->height))
 	{
 		
 		PX_MenuClearParent(pMenu,pItem);
@@ -242,7 +242,7 @@ px_void PX_MenuPostEvent_OnCursorDown(PX_Object *pObject,PX_Object_Event e)
 		for (pNode=PX_ListNodeAt(&pMenu->root.Items,0);pNode;pNode=PX_ListNodeNext(pNode))
 		{
 			PX_Object_Menu_Item *pSubItem=PX_LIST_NODETDATA(PX_Object_Menu_Item,pNode);
-			if (PX_isXYInRegion(x,y,(px_float)pSubItem->x,(px_float)pSubItem->y,(px_float)pSubItem->width,(px_float)pSubItem->height)&&pSubItem->enable)
+			if (PX_isPointXYInRect(x,y,(px_float)pSubItem->x,(px_float)pSubItem->y,(px_float)pSubItem->width,(px_float)pSubItem->height)&&pSubItem->enable)
 			{
 				if (pSubItem->Items.size)
 				{

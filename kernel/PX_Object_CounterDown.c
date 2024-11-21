@@ -24,13 +24,13 @@ PX_OBJECT_RENDER_FUNCTION(PX_Object_CounterDownRender)
 {
 	px_char n[16];
 	px_float objx, objy, objHeight, objWidth;
-	px_float inheritX, inheritY;
+	px_rect rect;
 	PX_Object_CounterDown* pdesc = PX_ObjectGetDesc(PX_Object_CounterDown, pObject);
-	PX_ObjectGetInheritXY(pObject, &inheritX, &inheritY);
-	objx = (pObject->x + inheritX);
-	objy = (pObject->y + inheritY);
-	objWidth = pObject->Width;
-	objHeight = pObject->Height;
+	rect= PX_ObjectGetRect(pObject);
+	objx = rect.x;
+	objy = rect.y;
+	objWidth = rect.width;
+	objHeight = rect.height;
 	
 	do 
 	{

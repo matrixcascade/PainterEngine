@@ -2022,7 +2022,7 @@ px_bool PX_ScriptAsmOptimization(px_string *asmcode)
 	opt=opt|PX_StringTrimer_Solve(asmcode,"ADD %1,0\n","");
 	opt=opt|PX_StringTrimer_Solve(asmcode,"MUL %1,1\n","");
 	opt=opt|PX_StringTrimer_Solve(asmcode,"PUSH %1\nPOP %1\n","");
-	opt=opt|PX_StringTrimer_Solve(asmcode,"JMP %1\n%1:\n","");
+	opt=opt|PX_StringTrimer_Solve(asmcode,"JMP %1\n%1:\n","%1:\n");
 	opt=opt|PX_StringTrimer_Solve(asmcode,"RET\nRET\n","RET\n");
 	opt=opt|PX_StringTrimer_Solve(asmcode,"PUSH %1\nPOP %2\n","MOV %2,%1\n");
 	opt=opt|PX_StringTrimer_Solve(asmcode,"MOV R%1,%2\nMOV %3,R%1\n","MOV %3,%2\n");

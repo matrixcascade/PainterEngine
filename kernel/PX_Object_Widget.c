@@ -59,13 +59,13 @@ PX_OBJECT_EVENT_FUNCTION(PX_Object_Widget_EventDispatcher)
 	PX_Object_Event oe;
 	PX_Object_Widget *pwidget=PX_Object_GetWidget(pObject);
 	px_float objx,objy,objWidth,objHeight;
-	px_float inheritX,inheritY;
+	px_rect rect;
 
-	PX_ObjectGetInheritXY(pObject,&inheritX,&inheritY);
-	objx=(pObject->x+inheritX);
-	objy=(pObject->y+inheritY);
-	objWidth=pObject->Width;
-	objHeight=pObject->Height;
+	rect = PX_ObjectGetRect(pObject);
+	objx = rect.x;
+	objy = rect.y;
+	objWidth = rect.width;
+	objHeight = rect.height;
 
 
 	switch(e.Event)
@@ -143,14 +143,13 @@ PX_OBJECT_RENDER_FUNCTION(PX_Object_WidgetRender)
 {
 	PX_Object_Widget *pwidget=PX_Object_GetWidget(pObject);
 	px_float objx,objy,objWidth,objHeight;
-	px_float inheritX,inheritY;
+	px_rect rect;
 
-	PX_ObjectGetInheritXY(pObject,&inheritX,&inheritY);
-
-	objx=(pObject->x+inheritX);
-	objy=(pObject->y+inheritY);
-	objWidth=pObject->Width;
-	objHeight=pObject->Height;
+	rect = PX_ObjectGetRect(pObject);
+	objx = rect.x;
+	objy = rect.y;
+	objWidth = rect.width;
+	objHeight = rect.height;
 
 	if (!pObject->Visible)
 	{

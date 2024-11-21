@@ -42,6 +42,7 @@ typedef struct
 
 PX_Object* PX_Object_PushButtonAttachObject(PX_Object* pObject, px_int attachIndex, const px_char* Text, PX_FontModule* fontmodule);
 PX_Object *PX_Object_PushButtonCreate(px_memorypool *mp,PX_Object *Parent,px_int x,px_int y,px_int Width,px_int Height,const px_char *Text,PX_FontModule *fontmodule);
+PX_Object* PX_Object_PushButtonCreateAlign(px_memorypool* mp, PX_Object* Parent, px_int x, px_int y, px_int Width, px_int Height, const px_char* Text, PX_FontModule* fontmodule,PX_ALIGN align);
 PX_Object* PX_Object_CircleButtonCreate(px_memorypool* mp, PX_Object* Parent, px_int x, px_int y, px_int Radius, const px_char* Text, PX_FontModule* fontmodule);
 PX_Object_PushButton * PX_Object_GetPushButton( PX_Object *pObject );
 px_char * PX_Object_PushButtonGetText( PX_Object *PushButton );

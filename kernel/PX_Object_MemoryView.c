@@ -8,17 +8,18 @@ static px_int PX_Object_MemoryViewGetCursorMapIndex(PX_Object *pObject,px_float 
 {
 	PX_Object_MemoryView *pdesc;
 	px_int x,y,w,h;
-	px_float inheritX,inheritY;
+	px_rect rect;
 	px_int row;
 	px_int columnoffset;
 	px_int rel_address_offset;
 	px_int xIndex,yIndex,Index;
 	pdesc=(PX_Object_MemoryView *)PX_ObjectGetDescByType(pObject,PX_OBJECT_TYPE_MEMORYVIEW);
-	PX_ObjectGetInheritXY(pObject,&inheritX,&inheritY);
-	x=(px_int)(pObject->x+inheritX);
-	y=(px_int)(pObject->y+inheritY);
-	w=(px_int)pObject->Width;
-	h=(px_int)pObject->Height;
+	rect = PX_ObjectGetRect(pObject);
+	x = (px_int)rect.x;
+	y = (px_int)rect.y;
+	w = (px_int)rect.width;
+	h = (px_int)rect.height;
+
 
 	row=(w-(16+64+16+8+16))/32;
 
@@ -66,7 +67,7 @@ PX_OBJECT_RENDER_FUNCTION(PX_Object_MemoryViewRender)
 	px_int mst,med;
 	PX_Object_MemoryView *pdesc;
 	px_int x,y,w,h;
-	px_float inheritX,inheritY;
+	px_rect rect;
 	px_int columnoffset;
 	px_int drawx,drawy;
 
@@ -76,11 +77,12 @@ PX_OBJECT_RENDER_FUNCTION(PX_Object_MemoryViewRender)
 	pdesc->cursor_elapsed+=elapsed;
 	columnoffset=PX_Object_SliderBarGetValue(pdesc->scrollbar);
 
-	PX_ObjectGetInheritXY(pObject,&inheritX,&inheritY);
-	x=(px_int)(pObject->x+inheritX);
-	y=(px_int)(pObject->y+inheritY);
-	w=(px_int)pObject->Width;
-	h=(px_int)pObject->Height;
+	rect = PX_ObjectGetRect(pObject);
+	x = (px_int)rect.x;
+	y = (px_int)rect.y;
+	w = (px_int)rect.width;
+	h = (px_int)rect.height;
+
 
 
 	pdesc->scrollbar->x=w-16.f;

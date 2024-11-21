@@ -15,13 +15,12 @@ PX_OBJECT_RENDER_FUNCTION(PX_Object_PianoRender)
 	PX_Object_Piano* pPiano = PX_Object_GetPiano(pObject);
 	const px_char* note_content[] = { "A","#A","B", "C","#C","D","#D","E","F","#F","G","#G", };
 	px_float objx, objy, objWidth, objHeight;
-	px_float inheritX, inheritY;
-	PX_ObjectGetInheritXY(pObject, &inheritX, &inheritY);
-
-	objx = (pObject->x + inheritX);
-	objy = (pObject->y + inheritY);
-	objWidth = pObject->Width;
-	objHeight = pObject->Height;
+	px_rect rect;
+	rect = PX_ObjectGetRect(pObject);
+	objx = rect.x;
+	objy = rect.y;
+	objWidth = rect.width;
+	objHeight = rect.height;
 
 	keyh = objHeight;
 	white_key_w = objWidth / 52;
@@ -86,13 +85,12 @@ px_int PX_Object_PianoCursorInkeyIndex(PX_Object* pObject, px_float cursorx, px_
 	PX_Object_Piano* pPiano = PX_Object_GetPiano(pObject);
 	const px_char* note_content[] = { "A","#A","B", "C","#C","D","#D","E","F","#F","G","#G", };
 	px_float objx, objy, objWidth, objHeight;
-	px_float inheritX, inheritY;
-	PX_ObjectGetInheritXY(pObject, &inheritX, &inheritY);
-
-	objx = (pObject->x + inheritX);
-	objy = (pObject->y + inheritY);
-	objWidth = pObject->Width;
-	objHeight = pObject->Height;
+	px_rect rect;
+	rect = PX_ObjectGetRect(pObject);
+	objx = rect.x;
+	objy = rect.y;
+	objWidth = rect.width;
+	objHeight = rect.height;
 
 	keyh = objHeight;
 	white_key_w = objWidth / 52;
@@ -121,7 +119,7 @@ px_int PX_Object_PianoCursorInkeyIndex(PX_Object* pObject, px_float cursorx, px_
 				x = (px_int)(objx + step * white_key_w);
 				step++;
 			}
-			if (PX_isXYInRegion(cursorx, cursory,x*1.0f,objy,keyw, keyh))
+			if (PX_isPointXYInRect(cursorx, cursory,x*1.0f,objy,keyw, keyh))
 			{
 				lastIndex = i;
 			}

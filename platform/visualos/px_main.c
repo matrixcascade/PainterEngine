@@ -295,26 +295,30 @@ int main()
 		PX_ApplicationUpdate(&App,elapsed);
 		PX_ApplicationRender(&App,elapsed);
 
-		PX_MutexLock(&cache_surface_lock);
-		if (cache_surface.width!=App.runtime.surface_width|| cache_surface.height!= App.runtime.surface_height)
+		if (PX_SocketHubGetCurrentOnlineCount(&SocketHub))
 		{
-			if(cache_surface.surfaceBuffer)
-				PX_SurfaceFree(&cache_surface);
-			if (!PX_SurfaceCreate(&App.runtime.mp, App.runtime.surface_width, App.runtime.surface_height, &cache_surface))
+			PX_MutexLock(&cache_surface_lock);
+			if (cache_surface.width != App.runtime.surface_width || cache_surface.height != App.runtime.surface_height)
 			{
-				//outofmemory crash
-				return 0;
+				if (cache_surface.surfaceBuffer)
+					PX_SurfaceFree(&cache_surface);
+				if (!PX_SurfaceCreate(&App.runtime.mp, App.runtime.surface_width, App.runtime.surface_height, &cache_surface))
+				{
+					//outofmemory crash
+					return 0;
+				}
 			}
-		}
-		//copy render surface to cache surface
-		if (cache_surface.surfaceBuffer)
-		{
-			if(!PX_memequ(cache_surface.surfaceBuffer, App.runtime.RenderSurface.surfaceBuffer, cache_surface.width*cache_surface.height*sizeof(px_color)))
+			//copy render surface to cache surface
+			if (cache_surface.surfaceBuffer)
 			{
-				memcpy(cache_surface.surfaceBuffer, App.runtime.RenderSurface.surfaceBuffer, cache_surface.width*cache_surface.height* sizeof(px_color));
-				cache_surface_id++;
+				if (!PX_memequ(cache_surface.surfaceBuffer, App.runtime.RenderSurface.surfaceBuffer, cache_surface.width * cache_surface.height * sizeof(px_color)))
+				{
+					memcpy(cache_surface.surfaceBuffer, App.runtime.RenderSurface.surfaceBuffer, cache_surface.width * cache_surface.height * sizeof(px_color));
+					cache_surface_id++;
+				}
 			}
+			PX_MutexUnlock(&cache_surface_lock);
 		}
-		PX_MutexUnlock(&cache_surface_lock);
+		
 	}
 }

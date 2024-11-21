@@ -188,5 +188,13 @@ unsigned int PX_TimeGetTime() {
     return (unsigned int)(ts.tv_sec * 1000 + ts.tv_nsec / 1000000);
 }
 
+unsigned int PX_TimeGetTimeUs() {
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+
+    // Convert time to milliseconds
+    return (unsigned int)(ts.tv_sec * 1000000 + ts.tv_nsec / 1000);
+}
+
 // ------------------------------------
 void PX_Sleep(unsigned int ms) { usleep(ms * 1000); }

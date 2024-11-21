@@ -6,14 +6,13 @@ PX_OBJECT_RENDER_FUNCTION(PX_Object_ScaleBoxRender)
 
 	PX_Object_ScaleBox * pScaleBox=PX_ObjectGetDesc(PX_Object_ScaleBox,pObject);
 	px_float objx,objy,objWidth,objHeight;
-	px_float inheritX,inheritY;
+	px_rect rect;
 
-	PX_ObjectGetInheritXY(pObject,&inheritX,&inheritY);
-
-	objx=(pObject->x+inheritX);
-	objy=(pObject->y+inheritY);
-	objWidth=pObject->Width;
-	objHeight=pObject->Height;
+	rect = PX_ObjectGetRect(pObject);
+	objx = rect.x;
+	objy = rect.y;
+	objWidth = rect.width;
+	objHeight = rect.height;
 
 	switch (pScaleBox->editpt_count)
 	{

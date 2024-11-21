@@ -7,15 +7,11 @@ PX_OBJECT_RENDER_FUNCTION(PX_Object_CursorButtonRender)
 	px_uchar alpha;
 	PX_Object_CursorButton *pcb;
 	px_float objx,objy,objWidth,objHeight;
-	px_float inheritX,inheritY;
-
-	PX_ObjectGetInheritXY(pObject,&inheritX,&inheritY);
-
-	objx=(pObject->x+inheritX);
-	objy=(pObject->y+inheritY);
-	objWidth=pObject->Width;
-	objHeight=pObject->Height;
-
+	px_rect rect=PX_ObjectGetRect(pObject);
+	objx=rect.x;
+	objy=rect.y;
+	objWidth=rect.width;
+	objHeight=rect.height;
 
 	w=objWidth/4.f;
 	h=objHeight/4.f;
@@ -82,7 +78,7 @@ PX_OBJECT_EVENT_FUNCTION(PX_Object_CursorButtonOnMouseMove)
 	x=PX_Object_Event_GetCursorX(e);
 	y=PX_Object_Event_GetCursorY(e);
 
-	if(PX_ObjectIsPointInRegion(pObject,(px_float)x,(px_float)y))
+	if(PX_ObjectIsCursorInRegion(pObject,e))
 	{
 		if (!pCB->enter)
 		{
