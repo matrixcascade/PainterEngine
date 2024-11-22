@@ -4,7 +4,7 @@
   </a>
 </p>
 
-[![中文](https://img.shields.io/badge/语言-中文-brightgreen)](https://github.com/QuantumCipherMaster/PainterEngine/blob/master/README(CHINESE).md)
+[![中文](https://img.shields.io/badge/语言-中文-brightgreen)](https://github.com/QuantumCipherMaster/PainterEngine/blob/master/README.md)
 
 PainterEngine is a cross-platform graphics engine written in C language, with support for Windows, Linux, iOS, Android, WebAssembly, and even bare-metal embedded platforms without OS. It is built on a component-based design pattern, making it accessible to even C language beginners. [PainterEngine Make](https://www.painterengine.com/) enables you to compile your PainterEngine project for multiple platforms with just one click.
 It covers various fields including basic data structures, graphics, acoustics, digital signal processing, compiler design, virtual machine systems, cryptography, human-computer interaction, game engines, FPGA-GPU graphics acceleration, and more. You can use it to create mini-applications or as a learning project for acquiring knowledge.
