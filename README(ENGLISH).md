@@ -46,11 +46,7 @@ int main()
 
 Use ["PainterEngine Make"](https://www.painterengine.com/) to quickly compile and deploy your project to various platforms such as Windows, Linux, WebAssembly, Android, and more. One-click compilation and deployment, with no need to modify the source code, enabling seamless portability at zero cost.
 
-<p align="center">
-  <a href="https://cdn.painterengine.com/PainterEngine_make.zip" target="_blank" rel="noopener noreferrer">
-    <img src="images/pemake.png" alt="PainterEngine make">
-  </a>
-</p>
+
 
 <p align="center">
   <a href="https://cdn.painterengine.com/PainterEngine_make_en.zip" target="_blank" rel="noopener noreferrer">
