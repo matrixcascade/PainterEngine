@@ -44,6 +44,18 @@ int main()
 
 Use ["PainterEngine Make"](https://www.painterengine.com/) to quickly compile and deploy your project to various platforms such as Windows, Linux, WebAssembly, Android, and more. One-click compilation and deployment, with no need to modify the source code, enabling seamless portability at zero cost.
 
+<p align="center">
+  <a href="https://cdn.painterengine.com/PainterEngine_make.zip" target="_blank" rel="noopener noreferrer">
+    <img src="images/pemake.png" alt="PainterEngine make">
+  </a>
+</p>
+
+<p align="center">
+  <a href="https://cdn.painterengine.com/PainterEngine_make_en.zip" target="_blank" rel="noopener noreferrer">
+    <img src="images/pemakeen.png" alt="PainterEngine make">
+  </a>
+</p>
+
 ## Swift development and smooth transitions
 
 If you don't need the one-key compilation feature provided by PainterEngine Make and prefer to develop PainterEngine programs or components using your preferred IDE, you just need to:
@@ -82,8 +94,60 @@ If you don't need the one-key compilation feature provided by PainterEngine Make
 
 A GPU IP core based on FPGA has been developed and functionally verified on the Zynq 7020 platform. It provides 2D Blender graphics rendering acceleration with a performance of no less than 50Mpps (Million pixels per second) and supports HDMI output. This solution has been successfully validated on the Zynq 7000 series SoC.
 
+<p align="center"><img src="images/gpu_block_design.png" alt="PainterEngine designer"></p>
+
+<p align="center"><img src="images/gpu_demo.png" alt="PainterEngine designer"></p>
+
+<p align="center"><img src="images/gpu_demo2.png" alt="PainterEngine designer"></p>
+
 ## Component-based development with support for a designer mode, making it as simple as it gets
+
+<p align="center"><img src="images/designer.png" alt="PainterEngine designer"></p>
 
 ## An abundance of components to unleash your creativity without limitations.
 
+<p align="center"><img width="600" src="images/market.png" alt="PainterEngine market"></p>
+
+<p align="center"><img width="600" src="images/paint.png" alt="PainterEngine market"></p>
+
+<p align="center"><img width="600" src="images/piano.png" alt="PainterEngine market"></p>
+
+<p align="center"><img width="600" src="images/l2d.png" alt="PainterEngine market"></p>
+
 ### Now, join the PainterEngine.com contribute to its development.
+
+<p align="center">
+<img src="documents/assets/mini/1.png" alt="logo">
+<img src="documents/assets/mini/2.png" alt="logo">
+<img src="documents/assets/mini/3.png" alt="logo">
+<img src="documents/assets/mini/4.png" alt="logo">
+<img src="documents/assets/mini/5.png" alt="logo">
+<img src="documents/assets/mini/6.png" alt="logo">
+</p>
+
+<p align="center">
+<img src="documents/assets/mini/7.png" alt="logo">
+<img src="documents/assets/mini/8.png" alt="logo">
+<img src="documents/assets/mini/9.png" alt="logo">
+<img src="documents/assets/mini/10.png" alt="logo">
+<img src="documents/assets/mini/11.png" alt="logo">
+<img src="documents/assets/mini/12.png" alt="logo">
+</p>
+
+<p align="center">
+<img src="documents/assets/mini/13.png" alt="logo">
+<img src="documents/assets/mini/14.png" alt="logo">
+<img src="documents/assets/mini/15.png" alt="logo">
+<img src="documents/assets/mini/16.png" alt="logo">
+<img src="documents/assets/mini/17.png" alt="logo">
+<img src="documents/assets/mini/18.png" alt="logo">
+</p>
+
+<p align="center">
+<img src="documents/assets/mini/19.png" alt="logo">
+<img src="documents/assets/mini/20.png" alt="logo">
+<img src="documents/assets/mini/21.png" alt="logo">
+<img src="documents/assets/mini/22.png" alt="logo">
+<img src="documents/assets/mini/23.png" alt="logo">
+<img src="documents/assets/mini/24.png" alt="logo">
+</p>
