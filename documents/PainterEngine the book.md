@@ -212,6 +212,7 @@ int main()
 * x2, y2: 线段的终点坐标。
 * linewidth: 线段的宽度。
 * color: 线段的颜色。
+
 ```c
 #include "PainterEngine.h"
 int main()
@@ -297,6 +298,7 @@ int main()
 
 ![](assets/img/3.6.png)
 
+
 `px_void PainterEngine_DrawSolidCircle(px_int x, px_int y, px_int radius, px_color color);`
 这个函数用于绘制一个实心圆。
 * x, y: 圆心的坐标。
@@ -326,6 +328,7 @@ int main()
 ```
 
 ![](assets/img/3.7.png)
+
 
 `px_void PainterEngine_DrawSector(px_int x, px_int y, px_int inside_radius,px_int outside_radius, px_int start_angle, px_int end_angle, px_color color);`
 这个函数用于绘制一个扇形。
@@ -361,7 +364,6 @@ int main()
 ![](assets/img/3.8.png)
 
 
-
 `px_void PainterEngine_DrawPixel(px_int x, px_int y, px_color color);`
 这个函数用于绘制一个像素点。
 * x, y: 像素点的坐标。
@@ -375,11 +377,7 @@ int main()
 
 PainterEngine可以直接从文件中加载图片，它原生支持PNG、JPG、BMP、TRAW四种静态图片格式的加载，为了存储加载的图片，我们需要用到一个叫纹理的结构体。
 
-在PainterEngine中，纹理用`px_texture`结构体进行描述，因此为了加载纹理，我们需要`PX_LoadTextureFromFile`函数,这个函数是一个三个参数的图片文件加载函数,第一个参数是内存池,在后面的章节,我将会更详细的讲解PainterEngine内存池的内容,在默认情况下,PainterEngine提供2个默认内存池,一个是`mp`一个是`mp_static`,其中,前面的内存池一般用于需要频繁分配释放的元素,后面的则用于静态资源的存储,在这里因为图片一般是静态资源,因此填写`mp_static`就可以了，
-
-第二个参数，则是我们纹理结构体的指针，在图片成功加载后，将会初始化这个结构体，并用于保存图片数据。
-
-最后一个参数，则是图片文件的所在路径。
+在PainterEngine中，纹理用`px_texture`结构体进行描述，因此为了加载纹理，我们需要`PX_LoadTextureFromFile`函数,这个函数是一个三个参数的图片文件加载函数,第一个参数是内存池,在后面的章节,我将会更详细的讲解PainterEngine内存池的内容,在默认情况下,PainterEngine提供2个默认内存池,一个是`mp`一个是`mp_static`,其中,前面的内存池一般用于需要频繁分配释放的元素,后面的则用于静态资源的存储,在这里因为图片一般是静态资源,因此填写`mp_static`就可以了，第二个参数，则是我们纹理结构体的指针，在图片成功加载后，将会初始化这个结构体，并用于保存图片数据。最后一个参数，则是图片文件的所在路径。
 
 在加载文件成功后，我们使用`PainterEngine_DrawTexture`函数绘制出来这是一个四参数的函数
 
@@ -537,7 +535,6 @@ int main()
 
 最后一个是字模指针，也就是之前我们加载的ttf字模文件，如果没有它，我们的按钮就不能显示中文汉字了，当然你可以选择其他的字体，以实现不同的风格。
 
-
 ## 8.PainterEngine 对象传递机制
 
 在上一个章节中，我们初略了解了根对象`root`,那么在本章节,我们将学习一下PainterEngine的对象管理机制。
@@ -607,7 +604,6 @@ int main()
 
 ![](assets/img/9.1.gif)
 
-
 其中,`PX_OBJECT_EVENT_FUNCTION`是一个宏,因为事件响应函数是一个固定的格式,因此非常建议你使用宏的方式来申明它,它的定义原型如下:
 
 ```c
@@ -650,7 +646,8 @@ int main()
 #define PX_OBJECT_EVENT_SAVE				28 //保存事件
 #define PX_OBJECT_EVENT_TIMEOUT				29 //超时事件
 #define PX_OBJECT_EVENT_DAMAGE				30 //伤害事件
-``` 
+```
+
 以上事件并非全部都是任何组件都会响应的,例如在上面例子中的`PX_OBJECT_EVENT_EXECUTE`,他是按钮被单击时会被触发的事件,或者是文本框中按下回车会触发的事件,但有些例如滚动条和进度条,并不会触发这个事件。也就是说有些事件是专属的。
 
 但是类似于带有`CURSOR`或`KEY`的事件是所有连接在`root`节点的组件都会收到的事件(但不一定响应),需要注意的是,类似于鼠标或触摸屏的`CURSOR`事件,并非只有鼠标或触摸屏移动到组件所在位置与范围时才会触发,只要有这类事件投递到`root`节点,他就会逐层传递给它的所有子节点,如果你希望实现类似于按钮中的"仅在鼠标点击到按钮时"才触发,你必须自行实现范围判断。
@@ -850,6 +847,7 @@ int main()
 ![](assets/img/11.4.gif)
 
 * 示波器
+
 ```c
 #include "PainterEngine.h"
 
@@ -905,7 +903,6 @@ int main()
 
 ![](assets/img/11.6.png)
 
-
 ## 12.实现自己的PainterEngine组件
 
 PainterEngine鼓励组件式的开发架构。也就是说，不论是游戏还是GUI交互程序，甚至是程序功能，我们都可以用组件的形式去开发它。
@@ -934,11 +931,13 @@ px_int main()
 ```
 
 之后,我们需要定义我们的`Create` `Update` `Render` `Free`函数,其中`Update` `Render` `Free`我们有对应的格式,它们都有一个宏来简化我们的定义过程
+
 ```c
 #define PX_OBJECT_RENDER_FUNCTION(name) px_void name(px_surface *psurface,PX_Object *pObject,px_int idesc,px_dword elapsed)
 #define PX_OBJECT_UPDATE_FUNCTION(name) px_void name(PX_Object *pObject,px_int idesc,px_dword elapsed)
 #define PX_OBJECT_FREE_FUNCTION(name) px_void name(PX_Object *pObject,px_int idesc)
 ``` 
+
 那么,在主函数中,我们就可以这样定义我们的这几个函数
 
 ```c
@@ -1126,7 +1125,6 @@ PX_OBJECT_RENDER_FUNCTION(MyObjectRender)
 
 ![](assets/img/12.3.gif)
 
-
 那么,我们如何实现拖动效果呢,想要做到拖动效果,我们在对象结构体中,新增`float`类型的变量`x`,`y`,用来记录当鼠标选中图片时的位置,同时我们加入了`bool`类型的变量`bselect`,表示当前的图标是否被选中,当鼠标点击我们的图标以后,我们就可以监听`PX_OBJECT_EVENT_CURSORDRAG`事件,这是鼠标在屏幕上拖动时会产生的事件,我们通过坐标的偏移,移动我们的组件,最后,不论鼠标非拖动时的移动或鼠标左键抬起,都会取消我们组件的选中状态,在对应处理函数中取消选中状态即可。
 
 ```c
@@ -1268,6 +1266,7 @@ px_int main()
 首先，仍然是定一个一个组件对象结构体，需要实现拖拽功能，我们需要鼠标按下时候的x,y坐标,同时需要一个bool类型记录是否是选中状态,然后我们需要注册CURSOR事件,这些事件在上一章节我们已经写过了,最后,我们用`PX_ObjectCreateDesc`函数创建一个对象结构体并将它Attach到我们的对象上。
 
 `PX_ObjectCreateDesc`是一个对象结构体创建函数,它的定义原型如下
+
 ```c
 px_void* PX_ObjectCreateDesc(PX_Object* pObject, px_int idesc, px_int type, Function_ObjectUpdate Func_ObjectUpdate, Function_ObjectRender Func_ObjectRender, Function_ObjectFree Func_ObjectFree, px_void* pDesc, px_int descSize)
 ```
@@ -1414,6 +1413,7 @@ int main()
 	return 0;
 }
 ```
+
 以下是这段代码的主要功能和流程解释：
 
 1. `#include "PainterEngine.h"`：引入PainterEngine的头文件，以便使用引擎的功能。
@@ -1435,7 +1435,6 @@ int main()
 9. 针对`ParticalInfo`的各个属性进行了具体的配置，包括粒子的位置、速度、寿命、大小、旋转等。这些属性决定了粒子的外观和行为。
 
 10. `pObject=PX_Object_ParticalCreate(mp,root,300,200,ParticalInfo);`：使用配置好的`ParticalInfo`创建一个粒子系统对象，并将其存储在`pObject`中。这个粒子系统对象将会在窗口中的位置(300, 200)处发射粒子。
-
 
 其中`PX_ParticalLauncher_InitializeInfo`，它用于配置粒子发射器的初始化信息，即在创建粒子系统时，可以通过填充这个结构体来指定粒子系统的各种属性和行为。以下是该结构体的各个成员的说明：
 
@@ -1530,7 +1529,6 @@ int main()
 ![](assets/img/15.1.gif)
 
 其中,`PX_LoadSoundFromFile`函数从文件中加载音乐,并解码成`sounddata`类型。`PX_SoundCreate`可以用`sounddata`创建一个播放实例,第二个参数表示这个实例是否循环播放,最后使用`PX_SoundPlayAdd`将播放实例送入混音器中,即可完成音乐播放。
-
 
 ## 16.PainterEngine Live2D动画系统
 
@@ -1801,7 +1799,6 @@ PainterEngine内置了一个资源管理器，他在`PainterEngine_Initialize`�
 同时我们还调用了`PainterEngine_SetBackgroundTexture`设置PainterEngine界面的背景,请注意`PX_ResourceLibraryGetTexture`函数,它的作用是使用一个查询key,从资源管理器中取得这个图片的数据结构指针。以上完成后你将可以看到这样的界面。
 
 ![](assets/img/18.2.png)
-
 
 ### 设计游戏对象
 
