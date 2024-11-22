@@ -50,11 +50,6 @@ int main()
   </a>
 </p>
 
-<p align="center">
-  <a href="https://cdn.painterengine.com/PainterEngine_make_en.zip" target="_blank" rel="noopener noreferrer">
-    <img src="images/pemakeen.png" alt="PainterEngine make">
-  </a>
-</p>
 
 ## 快速开发, 无缝迁移
 
