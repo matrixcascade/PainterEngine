@@ -2,42 +2,23 @@
 
 ## 导言 
 
-欢迎开始我们的PainterEngine的第一课,但在此之前相信大家并不清楚PainterEngine到底是一个做什么的
-,也许您已经在互联网上对它有些许印象,它或许是一个图形库,或者是游戏引擎,你可能已经看过了基于它的
-关于声学、密码学、神经网络、数字信号处理、编译器、虚拟机等等相关内容，甚至还有一个基于FPGA的GPU
- IP核。所以你可能认为它是一个集合了各式各样程式库的大混合体。
+欢迎开始我们的PainterEngine的第一课,但在此之前相信大家并不清楚PainterEngine到底是一个做什么的,也许您已经在互联网上对它有些许印象,它或许是一个图形库,或者是游戏引擎,你可能已经看过了基于它的关于声学、密码学、神经网络、数字信号处理、编译器、虚拟机等等相关内容，甚至还有一个基于FPGA的GPU IP核。所以你可能认为它是一个集合了各式各样程式库的大混合体。
 
-以上都对，但总的来说，我更倾向于将PainterEngine认为是一个应用程序框架，它诞生之初的最终原因，
-是为了解决程序开发过程中极其麻烦的三方库（甚至是标准库）依赖问题，最大程度简化程序的平台移植和
-编译难度。
+以上都对，但总的来说，我更倾向于将PainterEngine认为是一个应用程序框架，它诞生之初的最终原因，是为了解决程序开发过程中极其麻烦的三方库（甚至是标准库）依赖问题，最大程度简化程序的平台移植和编译难度。
 
-因此如你所见，PainterEngine的编译不会让你陷入各式各样的三方依赖中，目前它可以在几乎所有提供C
-语言编译环境的平台上运行，它没有操作系统及文件系统依赖，可以运行在裸MCU环境中，甚至
-PainterEngine的官网首页也是由PainterEngine开发的。
+因此如你所见，PainterEngine的编译不会让你陷入各式各样的三方依赖中，目前它可以在几乎所有提供C语言编译环境的平台上运行，它没有操作系统及文件系统依赖，可以运行在裸MCU环境中，甚至PainterEngine的官网首页也是由PainterEngine开发的。
 
-PainterEngine始终遵循着最简设计原则，而PainterEngine使用了C语言作为其主要开发语言，而其
-内置的脚本引擎，同样最大程度的兼容C语言语法，并对C语言的类型做了少量的抽象及泛化，进一步减少它
-的上手及使用门槛。C语言作为一门历史悠久的语言，如今几乎是各大工科类专业必学的一门课程，其在计算
-机编程开发的发展中，始终保持着强大的竞争力及广泛认可，并成为了几乎所有硬件平台，所需要并提供支持
-的事实标准。C语言在学习与开发成本维持着一个微秒的平衡，因此你可以在很短的时间学习并上手C语言，
-配合PainterEngine，你就能将你的程序运行在全平台，并深刻感受编程艺术所带来的魅力。
+PainterEngine始终遵循着最简设计原则，而PainterEngine使用了C语言作为其主要开发语言，而其内置的脚本引擎，同样最大程度的兼容C语言语法，并对C语言的类型做了少量的抽象及泛化，进一步减少它的上手及使用门槛。C语言作为一门历史悠久的语言，如今几乎是各大工科类专业必学的一门课程，其在计算机编程开发的发展中，始终保持着强大的竞争力及广泛认可，并成为了几乎所有硬件平台，所需要并提供支持的事实标准。C语言在学习与开发成本维持着一个微秒的平衡，因此你可以在很短的时间学习并上手C语言，配合PainterEngine，你就能将你的程序运行在全平台，并深刻感受编程艺术所带来的魅力。
 
-PainterEngine同样经历了近乎十年的发展，但在很长的一段时间，其作为一个私用库较少在公开领域正式
-推广，一个是在其迭代的过程中，很多的接口和函数仍然未稳定，我们必须在长期的实践中，保证接口设计
-的合理性和易用性，区分哪些是“真正拥有且好用”的，哪些只是“灵光一闪看上去光鲜亮丽，其实没啥用的”
-因此PainterEngine在很长一段时间，都没有详细且稳定的文档，而经过那么多年的迭代，我们最终可以将
-那些稳定、好用、简单易学的设计公布出来，并最终给大家带来这篇文档。
+PainterEngine同样经历了近乎十年的发展，但在很长的一段时间，其作为一个私用库较少在公开领域正式推广，一个是在其迭代的过程中，很多的接口和函数仍然未稳定，我们必须在长期的实践中，保证接口设计的合理性和易用性，区分哪些是“真正拥有且好用”的，哪些只是“灵光一闪看上去光鲜亮丽，其实没啥用的”因此PainterEngine在很长一段时间，都没有详细且稳定的文档，而经过那么多年的迭代，我们最终可以将那些稳定、好用、简单易学的设计公布出来，并最终给大家带来这篇文档。
 
-最后，我并不希望将导言写的太长，是时候马上切入主题了，我们将从PainterEngine的环境搭建开始PainterEngine
-的第一课，如果你有相关问题或发现了bug，你可以在PainterEngine论坛中提问，
-或者直接将问题发送到matrixcascade@gmail.com,我将在第一时间给你反馈。
+最后，我并不希望将导言写的太长，是时候马上切入主题了，我们将从PainterEngine的环境搭建开始PainterEngine的第一课，如果你有相关问题或发现了bug，你可以在PainterEngine论坛中提问，或者直接将问题发送到matrixcascade@gmail.com,我将在第一时间给你反馈。
 
 ![](assets/mini/1.png)
 
 ## 1.一个最简单的PainterEngine程序
 
-在搭建开发环境之前，让我们先编写一个最简单的PainterEngine程序，让我们新建一个"main.c"文件(文
-件名可以任意取),然后在其中输入以下代码
+在搭建开发环境之前，让我们先编写一个最简单的PainterEngine程序，让我们新建一个"main.c"文件(文件名可以任意取),然后在其中输入以下代码
 
 ```c
 #include "PainterEngine.h"
@@ -48,25 +29,16 @@ int main()
 }
 ```
 
-这是一个相当简单的PainterEngine程序,简单来说,在第一行我们使用include将PainterEngine的头文件
-包含了进来,在main函数中,我们使用`PainterEngine_Initialize`对PainterEngine进行初始化操作,
-`PainterEngine_Initialize`接受2个参数,分别是窗口(或者是屏幕)的宽度和高度,在程序运行后,你大概能
-看到这样的结果。
+这是一个相当简单的PainterEngine程序,简单来说,在第一行我们使用include将PainterEngine的头文件包含了进来,在main函数中,我们使用`PainterEngine_Initialize`对PainterEngine进行初始化操作,`PainterEngine_Initialize`接受2个参数,分别是窗口(或者是屏幕)的宽度和高度,在程序运行后,你大概能看到这样的结果。
 ![](assets/img/1.1.png)
 
-当然,现在我们还没有使用PainterEngine在窗口上绘制任何东西,因此你看到的是一个空白的画面,需要注意的
-是,在PainterEngine的框架中,main函数返回后,程序并不会立即结束,实际上在`PainterEngine.h`中,`main`
-函数被替换成了`px_main`,真正的`main`函数,在`px_main.c`中实现,但用户目前可以用不着关心这个,只需要
-记住`main`函数返回后,程序仍然是在正常运行的,如果你希望退出程序,你可以自行调用C语言的`exit`函数,但
-在PainterEngine中的很多时候你并不需要这么做,因为像在嵌入式单片机、网页、驱动程序中，大部分是用不到
-退出这个概念的，哪怕是在Android，iOS平台，绝大部分时候也不需要你在程序中设计退出功能。
+当然,现在我们还没有使用PainterEngine在窗口上绘制任何东西,因此你看到的是一个空白的画面,需要注意的是,在PainterEngine的框架中,main函数返回后,程序并不会立即结束,实际上在`PainterEngine.h`中,`main`函数被替换成了`px_main`,真正的`main`函数,在`px_main.c`中实现,但用户目前可以用不着关心这个,只需要记住`main`函数返回后,程序仍然是在正常运行的,如果你希望退出程序,你可以自行调用C语言的`exit`函数,但在PainterEngine中的很多时候你并不需要这么做,因为像在嵌入式单片机、网页、驱动程序中，大部分是用不到退出这个概念的，哪怕是在Android，iOS平台，绝大部分时候也不需要你在程序中设计退出功能。
 
 ## 2.编译PainterEngine程序
 
 ### 使用PainterEngine Make编译
 
-如果你想要编译PainterEngine的项目文件，最简单的做法是使用PainterEngine Make，这是一款你能够在
-PainterEngine.com中下载到的一款编译工具,你可以在主页下方找到它的下载按钮:
+如果你想要编译PainterEngine的项目文件，最简单的做法是使用PainterEngine Make，这是一款你能够在PainterEngine.com中下载到的一款编译工具,你可以在主页下方找到它的下载按钮:
 
 ![](assets/img/2.1.png)
 
@@ -110,8 +82,7 @@ PainterEngine.com中下载到的一款编译工具,你可以在主页下方找�
 
 ### 使用Visual Studio 编译
 
-当然,如果你需要使用完整的IDE开发体验,那么仍然建议使用Visual Studio进行开发编译。要使用Visual Studio
-开发PainterEngine，你需要打开Visual Studio创建一个空项目。
+当然,如果你需要使用完整的IDE开发体验,那么仍然建议使用Visual Studio进行开发编译。要使用Visual Studio开发PainterEngine，你需要打开Visual Studio创建一个空项目。
 
 ![](assets/img/2.12.png)
 
@@ -121,8 +92,7 @@ PainterEngine.com中下载到的一款编译工具,你可以在主页下方找�
 
 ![](assets/img/2.14.png)
 
-然后把PainterEngine目录下的`core` `kernel` `runtime` 与`platform/windows` 中的所有文件添加到这个
-筛选器中
+然后把PainterEngine目录下的`core` `kernel` `runtime` 与`platform/windows` 中的所有文件添加到这个筛选器中
 
 ![](assets/img/2.15.png)
 
@@ -150,8 +120,7 @@ PainterEngine.com中下载到的一款编译工具,你可以在主页下方找�
 
 ## 3.PainterEngine 第一课，输出文字“Hello PainterEngine”
 
-正如你所见，PainterEngine是一个图形化应用程序框架,但依据传统,我们的第一课仍然是如何用PainterEngine
-输出文字,但多数时候,与其说是输出文字不如说是绘制文字,使用PainterEngine绘制文字非常简单,查看如下代码
+正如你所见，PainterEngine是一个图形化应用程序框架,但依据传统,我们的第一课仍然是如何用PainterEngine输出文字,但多数时候,与其说是输出文字不如说是绘制文字,使用PainterEngine绘制文字非常简单,查看如下代码
 
 ```c
 #include "PainterEngine.h"
@@ -172,8 +141,7 @@ int main()
 
 ![](assets/img/3.1.png)
 
-整个函数非常好理解,但这里我们详细解释一下`对齐方式`和`颜色`这两个参数的意义,因为在后续的教程中,这两个概念
-会经常被提及:
+整个函数非常好理解,但这里我们详细解释一下`对齐方式`和`颜色`这两个参数的意义,因为在后续的教程中,这两个概念会经常被提及:
 
 其中,`对齐方式`就是对应内容绘制在屏幕上的对齐方式,PainterEngine中的对齐方式包含以下几种格式
 
@@ -194,12 +162,9 @@ typedef enum
 
 这个对齐方式的枚举类型是设计过的,你可以直接看看你数字小键盘,其对齐方式和数字小键盘的数值是对应关系。
 
-而`颜色格式`则是一个被定义为`px_color`的结构体,这个结构体有4个字节,内部有4个成员变量,分别是a、r、g、b
-分别代表颜色的透明度，红色通道，绿色通道和蓝色通道，每一个分量的取值范围都是0-255，例如红色，这个数值
-越大，这个颜色就越红。
+而`颜色格式`则是一个被定义为`px_color`的结构体,这个结构体有4个字节,内部有4个成员变量,分别是a、r、g、b分别代表颜色的透明度，红色通道，绿色通道和蓝色通道，每一个分量的取值范围都是0-255，例如红色，这个数值越大，这个颜色就越红。
 
-因此，你可以看到，在上面的示范代码中，我们绘制了一个红色的文本`Hello PainterEngine`,现在让我们试试中
-文,修改上面的代码,改为下面这种格式
+因此，你可以看到，在上面的示范代码中，我们绘制了一个红色的文本`Hello PainterEngine`,现在让我们试试中文,修改上面的代码,改为下面这种格式
 
 ```c
 #include "PainterEngine.h"
@@ -220,8 +185,7 @@ int main()
 ![](assets/img/3.2.png)
 
 但是,中文却不能正确显示,这是因为PainterEngine中,默认只有英文的字模,如果我们想要支持中文怎么办呢?
-这仍然不困难,为此,我们需要先准备一个ttf字模文件,例如在这里,我准备了一个幼圆字体,那么,我只需要将这个字体
-加载进来就可以了
+这仍然不困难,为此,我们需要先准备一个ttf字模文件,例如在这里,我准备了一个幼圆字体,那么,我只需要将这个字体加载进来就可以了
 
 ```c
 #include "PainterEngine.h"
@@ -236,9 +200,7 @@ int main()
 
 ![](assets/img/3.3.png)
 
-`PainterEngine_LoadFontModule`的函数的第一个参数,是TTF字体文件的路径,相对路径是以exe文件所在路径相对的
-第二个参数是字符集,在默认情况下,Visual Stduio代码使用的时GBK字符集,如果你使用Visual Studio Code,那么默认
-是UTF8编码,第二个参数应该换成`PX_FONTMODULE_CODEPAGE_GBK`,而最后一个参数是字体的大小。
+`PainterEngine_LoadFontModule`的函数的第一个参数,是TTF字体文件的路径,相对路径是以exe文件所在路径相对的第二个参数是字符集,在默认情况下,Visual Stduio代码使用的时GBK字符集,如果你使用Visual Studio Code,那么默认是UTF8编码,第二个参数应该换成`PX_FONTMODULE_CODEPAGE_GBK`,而最后一个参数是字体的大小。
 
 ## 4.使用PainterEngine绘制几何图形
 
@@ -411,13 +373,9 @@ int main()
 
 使用PainterEngine绘制图像仍然很简单,但在绘制图像之前,我们需要先加载图片。
 
-PainterEngine可以直接从文件中加载图片，它原生支持PNG、JPG、BMP、TRAW四种静态图片格式的加载，为了
-存储加载的图片，我们需要用到一个叫纹理的结构体。
+PainterEngine可以直接从文件中加载图片，它原生支持PNG、JPG、BMP、TRAW四种静态图片格式的加载，为了存储加载的图片，我们需要用到一个叫纹理的结构体。
 
-在PainterEngine中，纹理用`px_texture`结构体进行描述，因此为了加载纹理，我们需要`PX_LoadTextureFromFile`
-函数,这个函数是一个三个参数的图片文件加载函数,第一个参数是内存池,在后面的章节,我将会更详细的讲解PainterEngine
-内存池的内容,在默认情况下,PainterEngine提供2个默认内存池,一个是`mp`一个是`mp_static`,其中,前面的内存池一般
-用于需要频繁分配释放的元素,后面的则用于静态资源的存储,在这里因为图片一般是静态资源,因此填写`mp_static`就可以了，
+在PainterEngine中，纹理用`px_texture`结构体进行描述，因此为了加载纹理，我们需要`PX_LoadTextureFromFile`函数,这个函数是一个三个参数的图片文件加载函数,第一个参数是内存池,在后面的章节,我将会更详细的讲解PainterEngine内存池的内容,在默认情况下,PainterEngine提供2个默认内存池,一个是`mp`一个是`mp_static`,其中,前面的内存池一般用于需要频繁分配释放的元素,后面的则用于静态资源的存储,在这里因为图片一般是静态资源,因此填写`mp_static`就可以了，
 
 第二个参数，则是我们纹理结构体的指针，在图片成功加载后，将会初始化这个结构体，并用于保存图片数据。
 
@@ -453,11 +411,9 @@ int main()
 
 ## 6.PainterEngine 内存池管理机制
 
-因为PainterEngine是无系统及标准库依赖的,因此在PainterEngine中,必须独立于系统及标准库的内存管理机制,实现PainterEngine内部
-的内存管理系统。因此PainterEngine使用了内存池作为动态的内存管理系统。
+因为PainterEngine是无系统及标准库依赖的,因此在PainterEngine中,必须独立于系统及标准库的内存管理机制,实现PainterEngine内部的内存管理系统。因此PainterEngine使用了内存池作为动态的内存管理系统。
 
-PainterEngine内存池实现方式同样很简洁，为了使用内存，你必须预先准备一段可用的内存空间，作为内存池管理的内存空间，例如在下面的
-代码中，我们可以用C语言定义一个较大的全局数组，然后用这个数组空间作为内存池的分配空间。例如如下代码
+PainterEngine内存池实现方式同样很简洁，为了使用内存，你必须预先准备一段可用的内存空间，作为内存池管理的内存空间，例如在下面的代码中，我们可以用C语言定义一个较大的全局数组，然后用这个数组空间作为内存池的分配空间。例如如下代码
 
 ```c
 #include "PainterEngine.h"
@@ -558,8 +514,7 @@ int main()
 
 在PainterEngine中,所有的组件都是由`PX_Object`结构体进行描述的,创建组件返回的都是一个`PX_Object *`类型的指针
 
-但在本章节中,我们并不需要考虑的那么复杂,我们只需要创建一个按钮出来即可,在PainterEngine中,最常用的按钮是`PX_Object_PushButton`
-类型。
+但在本章节中,我们并不需要考虑的那么复杂,我们只需要创建一个按钮出来即可,在PainterEngine中,最常用的按钮是`PX_Object_PushButton`类型。
 
 ```c
 #include "PainterEngine.h"
@@ -574,8 +529,7 @@ int main()
 ```
 ![](assets/img/7.1.gif)
 
-现在,我们来详细看看`PX_Object_PushButtonCreate`函数,其中,第一个参数是一个内存池,在之前我们说过
-PainterEngine有2个系统默认的内存池，其实这里填`mp`或者`mp_static`都是没有问题的,但考虑到界面可能会变动设计对象分配与销毁,所以我们还是选择`mp`内存池。
+现在,我们来详细看看`PX_Object_PushButtonCreate`函数,其中,第一个参数是一个内存池,在之前我们说过PainterEngine有2个系统默认的内存池，其实这里填`mp`或者`mp_static`都是没有问题的,但考虑到界面可能会变动设计对象分配与销毁,所以我们还是选择`mp`内存池。
 
 第二个参数`root`是PainterEngine的根对象,PainterEngine对象管理机制我们将在之后讨论,在这里,你只需要理解为,这里填`root`的意思是**_创建一个按钮对象作为根对象的子对象_**这样按钮就能链接到系统对象树中,进行事件响应和渲染。
 
@@ -717,8 +671,7 @@ px_float PX_Object_Event_GetCursorZ(PX_Object_Event e);//获取cursor事件的z�
 
 ## 10.小例子，用PainterEngine实现一个电子相册
 
-现在，让我们用一个小例子来开启PainterEngine组件化开发的第一步,在本例程中,我将使用按钮和图片框组件,开发一个电子相册功能,本文中的美术资源,你可以在documens/assets/logo中
-找到。
+现在，让我们用一个小例子来开启PainterEngine组件化开发的第一步,在本例程中,我将使用按钮和图片框组件,开发一个电子相册功能,本文中的美术资源,你可以在documens/assets/logo中找到。
 
 ```c
 #include "PainterEngine.h"
@@ -780,7 +733,7 @@ int main()
 
 ## 11.更多常用的PainterEngine组件
 
-  你可以在PainterEngine/kernel的文件中,找到PainterEngine的内置组件,在所有的组件名称,都是以PX_Object_XXXXX开头的,在这里,我为你列举一些常用的组件及示范代码
+你可以在PainterEngine/kernel的文件中,找到PainterEngine的内置组件,在所有的组件名称,都是以PX_Object_XXXXX开头的,在这里,我为你列举一些常用的组件及示范代码
 
 * 文本框:
 
@@ -948,23 +901,22 @@ int main()
 
 ![](assets/img/11.5.gif)
 
-因为实在太多了,因此我无法为你列举所有的组件,如果你希望知道这个组件的具体用法和这个组件到底做什么的,你可以访问PainterEngine的
-[组件市场](https://market.painterengine.com/),在那里你可以找到PainterEngine内置组件和三方组件的说明和示例代码。
+因为实在太多了,因此我无法为你列举所有的组件,如果你希望知道这个组件的具体用法和这个组件到底做什么的,你可以访问PainterEngine的[组件市场](https://market.painterengine.com/),在那里你可以找到PainterEngine内置组件和三方组件的说明和示例代码。
 
 ![](assets/img/11.6.png)
 
 
 ## 12.实现自己的PainterEngine组件
 
- PainterEngine鼓励组件式的开发架构。也就是说，不论是游戏还是GUI交互程序，甚至是程序功能，我们都可以用组件的形式去开发它。
+PainterEngine鼓励组件式的开发架构。也就是说，不论是游戏还是GUI交互程序，甚至是程序功能，我们都可以用组件的形式去开发它。
 
- 组件式开发有点类似于C++中的Class，每一个组件，都要实现自己`Create` `Update` `Render` `Free`函数,关于上面四个函数,你可以使用
- 参造[上面的对象传递机制这一章节](#8painterengine-对象传递机制)。
+组件式开发有点类似于C++中的Class，每一个组件，都要实现自己`Create` `Update` `Render` `Free`函数,关于上面四个函数,你可以使用
+参造[上面的对象传递机制这一章节](#8painterengine-对象传递机制)。
 
- 为了演示这一点，让我们来实现一个“可控拖动旋转图片组件”，即我们可以用鼠标拖动图片在界面的位置，并用鼠标中键盘旋转它。
+为了演示这一点，让我们来实现一个“可控拖动旋转图片组件”，即我们可以用鼠标拖动图片在界面的位置，并用鼠标中键盘旋转它。
 
- 为了实现这一个功能,让我们一步一步完成这个步骤,首先,为了创建一个组件,我们需要一个结构体来描述我们的组件,因为我们需要绘制图片,因此我们
- 需要一个`px_texture`类型,同时,我们还需要旋转图片,因此它还有一个`rotation`用于描述旋转的角度
+为了实现这一个功能,让我们一步一步完成这个步骤,首先,为了创建一个组件,我们需要一个结构体来描述我们的组件,因为我们需要绘制图片,因此我们
+需要一个`px_texture`类型,同时,我们还需要旋转图片,因此它还有一个`rotation`用于描述旋转的角度
 
 ```c
 #include "PainterEngine.h"
@@ -1020,9 +972,7 @@ px_int main()
 }
 ```
 
-* 其中,这个因为我们不需要更新一些物理信息,所以`MyObjectUpdate`函数中我们可以什么都不写,在`MyObjectRender`中我们只需要把图片绘制出来就可以了,这里我们先使用`PX_ObjectGetDesc`函数
-获得我们定义好的结构体指针,它的第一个参数是结构体类型,第二个参数则是函数传递进来的`pObject`指针,然后我们只需要用`PX_TextureRenderEx`函数把图片绘制出来就可以了,
-多提一句`PX_TextureRenderEx`函数用于在指定的表面上渲染纹理，并提供了对齐、混合、缩放和旋转等扩展选项。
+* 其中,这个因为我们不需要更新一些物理信息,所以`MyObjectUpdate`函数中我们可以什么都不写,在`MyObjectRender`中我们只需要把图片绘制出来就可以了,这里我们先使用`PX_ObjectGetDesc`函数获得我们定义好的结构体指针,它的第一个参数是结构体类型,第二个参数则是函数传递进来的`pObject`指针,然后我们只需要用`PX_TextureRenderEx`函数把图片绘制出来就可以了,多提一句`PX_TextureRenderEx`函数用于在指定的表面上渲染纹理，并提供了对齐、混合、缩放和旋转等扩展选项。
 其中
 * psurface：指向要渲染纹理的表面的指针。
 * resTexture：指向要渲染的纹理资源的指针。
@@ -1050,8 +1000,7 @@ px_int main()
 * desc：指向对象描述数据的指针。你可以设置为0,创建时会把这个对象类型的数据填充为0,
 * size：描述数据的大小,就是你定义的对象结构体类型的大小，创建对象函数会在内存池申请一段内存空间，并用于存储你的对象结构体。
 
-在创建好一个空对象后,我们使用`PX_ObjectGetDescIndex`将对象中的对象结构体指针取出来,这是一个三参数的函数,第一个参数是对象结构体类型,第二个参数则是`PX_Object *`指针类型,因为一个`PX_Object`
-可以将多个对象结构体组合在一起,这个组合结构体我们将在之后的教程中会进一步描述,但现在我们只需要知道,调用`PX_ObjectCreateEx`函数后,其第一个存储的对象结构体索引是0就可以了
+在创建好一个空对象后,我们使用`PX_ObjectGetDescIndex`将对象中的对象结构体指针取出来,这是一个三参数的函数,第一个参数是对象结构体类型,第二个参数则是`PX_Object *`指针类型,因为一个`PX_Object`可以将多个对象结构体组合在一起,这个组合结构体我们将在之后的教程中会进一步描述,但现在我们只需要知道,调用`PX_ObjectCreateEx`函数后,其第一个存储的对象结构体索引是0就可以了
 
 取出结构体指针后,我们对其进行一系列初始化,比如加载图片和初始化旋转角度,最后在`main`函数中我们创建这个对象
 
@@ -1178,11 +1127,7 @@ PX_OBJECT_RENDER_FUNCTION(MyObjectRender)
 ![](assets/img/12.3.gif)
 
 
-那么,我们如何实现拖动效果呢,想要做到拖动效果,我们在对象结构体中,新增`float`类型的变量`x`,`y`,用来记录
-当鼠标选中图片时的位置,同时我们加入了`bool`类型的变量`bselect`,表示当前的图标是否被选中,当鼠标点击我们的图标
-以后,我们就可以监听`PX_OBJECT_EVENT_CURSORDRAG`事件,这是鼠标在屏幕上拖动时会产生的事件,我们通过坐标的偏移,
-移动我们的组件,最后,不论鼠标非拖动时的移动或鼠标左键抬起,都会取消我们组件的选中状态,在对应处理函数中取消选中状态
-即可。
+那么,我们如何实现拖动效果呢,想要做到拖动效果,我们在对象结构体中,新增`float`类型的变量`x`,`y`,用来记录当鼠标选中图片时的位置,同时我们加入了`bool`类型的变量`bselect`,表示当前的图标是否被选中,当鼠标点击我们的图标以后,我们就可以监听`PX_OBJECT_EVENT_CURSORDRAG`事件,这是鼠标在屏幕上拖动时会产生的事件,我们通过坐标的偏移,移动我们的组件,最后,不论鼠标非拖动时的移动或鼠标左键抬起,都会取消我们组件的选中状态,在对应处理函数中取消选中状态即可。
 
 ```c
 #include "PainterEngine.h"
@@ -1320,18 +1265,14 @@ px_int main()
 
 那么,我们如何设计我们自己的可组合对象呢,那么回到我们的第十二章节,现在,我们就将"可拖拽"这个功能,将它设计成一个组合式组件。
 
-首先，仍然是定一个一个组件对象结构体，需要实现拖拽功能，我们需要鼠标按下时候的x,y坐标,同时需要一个bool类型记录是否是选中状态,
-然后我们需要注册CURSOR事件,这些事件在上一章节我们已经写过了,最后,我们用`PX_ObjectCreateDesc`函数创建一个对象结构体并将它Attach
-到我们的对象上。
+首先，仍然是定一个一个组件对象结构体，需要实现拖拽功能，我们需要鼠标按下时候的x,y坐标,同时需要一个bool类型记录是否是选中状态,然后我们需要注册CURSOR事件,这些事件在上一章节我们已经写过了,最后,我们用`PX_ObjectCreateDesc`函数创建一个对象结构体并将它Attach到我们的对象上。
 
 `PX_ObjectCreateDesc`是一个对象结构体创建函数,它的定义原型如下
 ```c
 px_void* PX_ObjectCreateDesc(PX_Object* pObject, px_int idesc, px_int type, Function_ObjectUpdate Func_ObjectUpdate, Function_ObjectRender Func_ObjectRender, Function_ObjectFree Func_ObjectFree, px_void* pDesc, px_int descSize)
 ```
 
-第一个参数是需要Attach的对象,第二个参数是Attach到的对象索引,还记得我们之前提到的对象数据索引么,使用`PX_ObjectCreateEx`默认使用的是索引0,因此,如果我们要附加到一个对象
-上,我们应该选1,当然如果1也被占用了,他就是2,以此类推,第三个参数是对象类型,我们使用`PX_ObjectGetDescByType`时,可以通过对象类型取出对应的指针,然后就是我们熟悉的`Update``Render``Free`三件套了,最后一个参数
-给出其结构体描述和结构体大小,请参阅下面的代码:
+第一个参数是需要Attach的对象,第二个参数是Attach到的对象索引,还记得我们之前提到的对象数据索引么,使用`PX_ObjectCreateEx`默认使用的是索引0,因此,如果我们要附加到一个对象上,我们应该选1,当然如果1也被占用了,他就是2,以此类推,第三个参数是对象类型,我们使用`PX_ObjectGetDescByType`时,可以通过对象类型取出对应的指针,然后就是我们熟悉的`Update``Render``Free`三件套了,最后一个参数给出其结构体描述和结构体大小,请参阅下面的代码:
 
 ```c
 #include "PainterEngine.h"
@@ -1588,8 +1529,7 @@ int main()
 
 ![](assets/img/15.1.gif)
 
-其中,`PX_LoadSoundFromFile`函数从文件中加载音乐,并解码成`sounddata`类型。
-`PX_SoundCreate`可以用`sounddata`创建一个播放实例,第二个参数表示这个实例是否循环播放,最后使用`PX_SoundPlayAdd`将播放实例送入混音器中,即可完成音乐播放。
+其中,`PX_LoadSoundFromFile`函数从文件中加载音乐,并解码成`sounddata`类型。`PX_SoundCreate`可以用`sounddata`创建一个播放实例,第二个参数表示这个实例是否循环播放,最后使用`PX_SoundPlayAdd`将播放实例送入混音器中,即可完成音乐播放。
 
 
 ## 16.PainterEngine Live2D动画系统
@@ -1683,12 +1623,9 @@ px_void PX_Object_Live2DPlayAnimationIndex(PX_Object* pObject, px_int index);
 
 ## PainterEngine 脚本引擎
 
-PainterEngine内置了一个平台无关的脚本引擎系统，集成了编译，运行，调试等功能，你可以很轻松的在脚本之上，实现并行调度功能，
-PainterEngine Script的设计，最大程度和C语言保持一致性，并对一些类型进行的拓展和简化。
+PainterEngine内置了一个平台无关的脚本引擎系统，集成了编译，运行，调试等功能，你可以很轻松的在脚本之上，实现并行调度功能，PainterEngine Script的设计，最大程度和C语言保持一致性，并对一些类型进行的拓展和简化。
 
-例如在脚本中，支持`int`,`float`,`string`,`memory`四种类型,`int`类型是一个32位的有符号整数,`float`是一个浮点数类型,这个和C语言的类型保持了一致。
-`string`类型类似于C++的`string`,它允许直接用`+`法运算符进行字符串拼接,使用`strlen`来获取其字符串长度,而`memory`是一个二进制数据存储类型,同样支持`+`运算
-进行拼接。
+例如在脚本中，支持`int`,`float`,`string`,`memory`四种类型,`int`类型是一个32位的有符号整数,`float`是一个浮点数类型,这个和C语言的类型保持了一致。`string`类型类似于C++的`string`,它允许直接用`+`法运算符进行字符串拼接,使用`strlen`来获取其字符串长度,而`memory`是一个二进制数据存储类型,同样支持`+`运算进行拼接。
 
 在脚本中如果需要调用C语言函数，应该使用`PX_VM_HOST_FUNCTION`宏进行定义声明,和组件回调函数一样,`PX_VM_HOST_FUNCTION`的定义如下:
 
@@ -1735,9 +1672,7 @@ PX_VM_HOST_FUNCTION(host_sleep)
 
 ```
 
-首先,shellcode数组中存储着一个输出99乘法表的程序,其中需要调用两个host函数(脚本调用c语言函数称为host call,因此host函数实际就是专门提供给脚本调用的c语言函数),
-一个是`print`函数,一个是`sleep`函数,因此在下面,我们定义了两个host函数,`PX_VM_HOSTPARAM`用于取得脚本传递过来的参数,在这里,我们需要判断传递过来的参数类型是否
-符合我们的调用规则,像`host_print`函数,作用是在PainterEngine中输出字符串,而`sleep`函数,则是用来延迟一段时间。
+首先,shellcode数组中存储着一个输出99乘法表的程序,其中需要调用两个host函数(脚本调用c语言函数称为host call,因此host函数实际就是专门提供给脚本调用的c语言函数),一个是`print`函数,一个是`sleep`函数,因此在下面,我们定义了两个host函数,`PX_VM_HOSTPARAM`用于取得脚本传递过来的参数,在这里,我们需要判断传递过来的参数类型是否符合我们的调用规则,像`host_print`函数,作用是在PainterEngine中输出字符串,而`sleep`函数,则是用来延迟一段时间。
 
 现在，PainterEngine Script是一个编译型脚本,我们需要将上面的代码编译成二进制形式,然后将它送入虚拟机中运行,观察以下代码
 
@@ -1773,8 +1708,7 @@ px_int main()
 }
 ```
 
-首先我们用`PX_Compiler`编译我们的脚本,然后我们注册我们的host call,`PX_VMBeginThreadFunction`的功能是C语言调用脚本语言中函数,在这里
-我们调用脚本中的`main`开始运行我们的脚本函数,最后我们将一个Update函数绑定到root节点,以循环更新虚拟机,来执行脚本。
+首先我们用`PX_Compiler`编译我们的脚本,然后我们注册我们的host call,`PX_VMBeginThreadFunction`的功能是C语言调用脚本语言中函数,在这里我们调用脚本中的`main`开始运行我们的脚本函数,最后我们将一个Update函数绑定到root节点,以循环更新虚拟机,来执行脚本。
 
 最后，看看运行的结果。
 
@@ -1814,9 +1748,7 @@ px_int main()
 
 ## 18.使用PainterEngine快速创作一个小游戏
 
-为了更好的演示PainterEngine的使用,我将用PainterEngine创作一个简单的小游戏,你可以在document/game下找到有关这个游戏的所有
-源码及原始素材,得益于PainterEngine的全平台可移植性你也可以在
-[PainterEngine 在线应用APP--打地鼠](https://www.painterengine.com/main/app/documentgame/)中,直接玩到这个在线小游戏。
+为了更好的演示PainterEngine的使用,我将用PainterEngine创作一个简单的小游戏,你可以在document/game下找到有关这个游戏的所有源码及原始素材,得益于PainterEngine的全平台可移植性你也可以在[PainterEngine 在线应用APP--打地鼠](https://www.painterengine.com/main/app/documentgame/)中,直接玩到这个在线小游戏。
 
 在这个小游戏中，我将充分为你展示，如何使用PainterEngine的组件化开发模式，快速创建一个App Game。
 
