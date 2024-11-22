@@ -42,6 +42,18 @@ int main()
 
 使用 [PainterEngine Make](https://www.painterengine.com/) 快速将您的项目编译到 Windows, Linux, WebAssembly, Android 等任意平台, 一键编译部署, 源码无需修改, 零成本移植.
 
+<p align="center">
+  <a href="https://cdn.painterengine.com/PainterEngine_make.zip" target="_blank" rel="noopener noreferrer">
+  	<img src="images/pemake.png" alt="PainterEngine make">
+  </a>
+</p>
+
+<p align="center">
+  <a href="https://cdn.painterengine.com/PainterEngine_make_en.zip" target="_blank" rel="noopener noreferrer">
+    <img src="images/pemakeen.png" alt="PainterEngine make">
+  </a>
+</p>
+
 ## 快速开发, 无缝迁移
 
 如果您不需要 PainterEngine Make 提供的一键编译功能, 希望使用自己常用的 IDE 开发 PainterEngine 程序或组件, 您只需要:
@@ -80,8 +92,61 @@ int main()
 
 提供一个基于 FPGA 的 GPU IP 核, 已在 Zynq7020 上完成功能验证, 提供不低于 50Mpps 的 2D Blender 图形渲染加速, 支持 HDMI 输出, 目前已在 zynq7000 系列 Soc 上完成验证.
 
+<p align="center"><img src="images/gpu_block_design.png" alt="PainterEngine designer"></p>
+
+<p align="center"><img src="images/gpu_demo.png" alt="PainterEngine designer"></p>
+
+<p align="center"><img src="images/gpu_demo2.png" alt="PainterEngine designer"></p>
+
 ## 组件化开发, 支持设计器模式, 简单的不能再简单
+
+<p align="center"><img src="images/designer.png" alt="PainterEngine designer"></p>
 
 ## 海量组件, 创意无界
 
+<p align="center"><img width="600" src="images/market.png" alt="PainterEngine market"></p>
+
+<p align="center"><img width="600" src="images/paint.png" alt="PainterEngine market"></p>
+
+<p align="center"><img width="600" src="images/piano.png" alt="PainterEngine market"></p>
+
+<p align="center"><img width="600" src="images/l2d.png" alt="PainterEngine market"></p>
+
 ### 现在, 访问 PainterEngine.com, 参与建设
+
+<p align="center">
+<img src="documents/assets/mini/1.png" alt="logo">
+<img src="documents/assets/mini/2.png" alt="logo">
+<img src="documents/assets/mini/3.png" alt="logo">
+<img src="documents/assets/mini/4.png" alt="logo">
+<img src="documents/assets/mini/5.png" alt="logo">
+<img src="documents/assets/mini/6.png" alt="logo">
+</p>
+
+<p align="center">
+<img src="documents/assets/mini/7.png" alt="logo">
+<img src="documents/assets/mini/8.png" alt="logo">
+<img src="documents/assets/mini/9.png" alt="logo">
+<img src="documents/assets/mini/10.png" alt="logo">
+<img src="documents/assets/mini/11.png" alt="logo">
+<img src="documents/assets/mini/12.png" alt="logo">
+</p>
+
+<p align="center">
+<img src="documents/assets/mini/13.png" alt="logo">
+<img src="documents/assets/mini/14.png" alt="logo">
+<img src="documents/assets/mini/15.png" alt="logo">
+<img src="documents/assets/mini/16.png" alt="logo">
+<img src="documents/assets/mini/17.png" alt="logo">
+<img src="documents/assets/mini/18.png" alt="logo">
+</p>
+
+<p align="center">
+<img src="documents/assets/mini/19.png" alt="logo">
+<img src="documents/assets/mini/20.png" alt="logo">
+<img src="documents/assets/mini/21.png" alt="logo">
+<img src="documents/assets/mini/22.png" alt="logo">
+<img src="documents/assets/mini/23.png" alt="logo">
+<img src="documents/assets/mini/24.png" alt="logo">
+</p>
+
