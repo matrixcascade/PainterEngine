@@ -2456,7 +2456,7 @@ PX_OBJECT_EVENT_FUNCTION(PX_Object_StartGameOnClick)
     startgame->Visible = PX_FALSE;
     game->Enabled = PX_TRUE;
     PX_Object_ScorePanelSetScore(scorePanel, 0);
-    PX_Object_ClockBegin(gameclock, 30000); // Start countdown, 30 seconds
+    PX_Object_ClockBegin(gameclock, 30000); // Start the countdown of 30 seconds
 }
 
 
