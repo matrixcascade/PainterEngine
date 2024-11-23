@@ -24,7 +24,7 @@ PainterEngine 同样经历了近乎十年的发展，但在很长的一段时间
 #include "PainterEngine.h"
 int main()
 {
-    PainterEngine_Initialize(800,480);
+    PainterEngine_Initialize(800, 480);
     return 1;
 }
 ```
@@ -128,12 +128,12 @@ int main()
 int main()
 {
     PainterEngine_Initialize(800, 480);
-	// PainterEngine_DrawText
-	// 参数1：x坐标
-	// 参数2：y坐标
-	// 参数3：文本内容
-	// 参数4：对齐方式
-	// 参数5：颜色
+    // PainterEngine_DrawText
+    // 参数1：x 坐标
+    // 参数2：y 坐标
+    // 参数3：文本内容
+    // 参数4：对齐方式
+    // 参数5：颜色
     PainterEngine_DrawText(400, 240, "Hello PainterEngine", PX_ALIGN_CENTER, PX_COLOR(255, 255, 0, 0));
     return 1;
 }
@@ -150,15 +150,15 @@ int main()
 ```c
 typedef enum
 {
-	PX_ALIGN_LEFTTOP = 7,     // 左上角对齐
-	PX_ALIGN_MIDTOP = 8,      // 中上对齐
-	PX_ALIGN_RIGHTTOP = 9,    // 右上角对齐
-	PX_ALIGN_LEFTMID = 4,     // 左中对齐
-	PX_ALIGN_CENTER = 5,      // 居中对齐
-	PX_ALIGN_RIGHTMID = 6,    // 右中对齐
-	PX_ALIGN_LEFTBOTTOM = 1,  // 左下角对齐
-	PX_ALIGN_MIDBOTTOM = 2,   // 中底对齐
-	PX_ALIGN_RIGHTBOTTOM = 3, // 右下角对齐
+    PX_ALIGN_LEFTTOP = 7,     // 左上角对齐
+    PX_ALIGN_MIDTOP = 8,      // 中上对齐
+    PX_ALIGN_RIGHTTOP = 9,    // 右上角对齐
+    PX_ALIGN_LEFTMID = 4,     // 左中对齐
+    PX_ALIGN_CENTER = 5,      // 居中对齐
+    PX_ALIGN_RIGHTMID = 6,    // 右中对齐
+    PX_ALIGN_LEFTBOTTOM = 1,  // 左下角对齐
+    PX_ALIGN_MIDBOTTOM = 2,   // 中底对齐
+    PX_ALIGN_RIGHTBOTTOM = 3, // 右下角对齐
 }PX_ALIGN;
 ```
 
@@ -174,8 +174,8 @@ int main()
 {
     PainterEngine_Initialize(800, 480);
     // PainterEngine_DrawText
-    // 参数1：x坐标
-    // 参数2：y坐标
+    // 参数1：x 坐标
+    // 参数2：y 坐标
     // 参数3：文本内容
     // 参数4：对齐方式
     // 参数5：颜色
@@ -210,16 +210,16 @@ int main()
 
 `px_void PainterEngine_DrawLine(px_int x1, px_int y1, px_int x2, px_int y2, px_int linewidth, px_color color);`
 这个函数用于绘制一条线段。
-* x1, y1：线段的起点坐标。
-* x2, y2：线段的终点坐标。
-* linewidth：线段的宽度。
-* color：线段的颜色。
+- x1, y1：线段的起点坐标。
+- x2, y2：线段的终点坐标。
+- linewidth：线段的宽度。
+- color：线段的颜色。
 
 ```c
 #include "PainterEngine.h"
 int main()
 {
-    PainterEngine_Initialize(800,480);
+    PainterEngine_Initialize(800, 480);
     // 设置起点和终点坐标
     px_int x1 = 50;
     px_int y1 = 50;
@@ -241,10 +241,10 @@ int main()
 
 `px_void PainterEngine_DrawRect(px_int x, px_int y, px_int width, px_int height, px_color color);`
 这个函数用于绘制一个矩形。
-* x, y：矩形的左上角坐标。
-* width：矩形的宽度。
-* height：矩形的高度。
-* color：矩形的颜色。
+- x, y：矩形的左上角坐标。
+- width：矩形的宽度。
+- height：矩形的高度。
+- color：矩形的颜色。
 
 ![](assets/img/3.5.png)
 
@@ -252,7 +252,7 @@ int main()
 #include "PainterEngine.h"
 int main()
 {
-    PainterEngine_Initialize(800,480);
+    PainterEngine_Initialize(800, 480);
     // 设置矩形的左上角坐标
     px_int x = 100;
     px_int y = 100;
@@ -262,7 +262,7 @@ int main()
     px_int height = 100;
 
     // 设置矩形的颜色
-    px_color color = PX_COLOR(255, 0, 255,0 ); // 绿色
+    px_color color = PX_COLOR(255, 0, 255, 0); // 绿色
 
     // 绘制矩形
     PainterEngine_DrawRect(x, y, width, height, color);
@@ -273,16 +273,16 @@ int main()
 
 `px_void PainterEngine_DrawCircle(px_int x, px_int y, px_int radius, px_int linewidth, px_color color);`
 这个函数用于绘制一个圆环。
-* x, y：圆心的坐标。
-* radius：圆的半径。
-* linewidth：圆的线宽。
-* color：圆的颜色。
+- x, y：圆心的坐标。
+- radius：圆的半径。
+- linewidth：圆的线宽。
+- color：圆的颜色。
 
 ```c
 #include "PainterEngine.h"
 int main()
 {
-    PainterEngine_Initialize(800,480);
+    PainterEngine_Initialize(800, 480);
     // 设置圆心的坐标
     px_int x = 200;
     px_int y = 200;
@@ -303,9 +303,9 @@ int main()
 
 `px_void PainterEngine_DrawSolidCircle(px_int x, px_int y, px_int radius, px_color color);`
 这个函数用于绘制一个实心圆。
-* x, y：圆心的坐标。
-* radius：圆的半径。
-* color：圆的颜色。
+- x, y：圆心的坐标。
+- radius：圆的半径。
+- color：圆的颜色。
 
 ```c
 #include "PainterEngine.h"
@@ -332,15 +332,15 @@ int main()
 ![](assets/img/3.7.png)
 
 
-`px_void PainterEngine_DrawSector(px_int x, px_int y, px_int inside_radius,px_int outside_radius, px_int start_angle, px_int end_angle, px_color color);`
+`px_void PainterEngine_DrawSector(px_int x, px_int y, px_int inside_radius, px_int outside_radius, px_int start_angle, px_int end_angle, px_color color);`
 这个函数用于绘制一个扇形。
 参数说明：
-* x, y：扇形的圆心坐标。
-* inside_radius：扇形的内半径。
-* inside_radius：扇形的外半径。
-* start_angle：扇形的起始角度（以度为单位，支持负角度）。
-* end_angle：扇形的结束角度（以度为单位，支持负角度）。
-* color：扇形的颜色。
+- x, y：扇形的圆心坐标。
+- inside_radius：扇形的内半径。
+- inside_radius：扇形的外半径。
+- start_angle：扇形的起始角度（以度为单位，支持负角度）。
+- end_angle：扇形的结束角度（以度为单位，支持负角度）。
+- color：扇形的颜色。
 
 ```c
 #include "PainterEngine.h"
@@ -368,8 +368,8 @@ int main()
 
 `px_void PainterEngine_DrawPixel(px_int x, px_int y, px_color color);`
 这个函数用于绘制一个像素点。
-* x, y：像素点的坐标。
-* color：像素点的颜色。
+- x, y：像素点的坐标。
+- color：像素点的颜色。
 
 这只是绘制一个像素点，就不放示例图了。
 
@@ -383,9 +383,9 @@ PainterEngine 可以直接从文件中加载图片，它原生支持 PNG、JPG�
 
 在加载文件成功后，我们使用 `PainterEngine_DrawTexture` 函数绘制出来。这是一个四参数的函数：
 
-* 第一个参数是我们之前的纹理结构体指针；
-* 第二第三是需要绘制到的 x, y 坐标；
-* 第四个则是之前我们说过的对齐方式。
+- 第一个参数是我们之前的纹理结构体指针；
+- 第二第三是需要绘制到的 x, y 坐标；
+- 第四个则是之前我们说过的对齐方式。
 
 参考如下代码：
 
@@ -395,11 +395,11 @@ px_texture mytexture; // 纹理
 int main()
 {
     PainterEngine_Initialize(512, 512);
-    if(!PX_LoadTextureFromFile(mp_static,&mytexture,"assets/demo.png"))
-	{
+    if (!PX_LoadTextureFromFile(mp_static, &mytexture, "assets/demo.png"))
+    {
         // 加载纹理失败
-		return 0;
-	}
+        return 0;
+    }
     PainterEngine_DrawTexture(&mytexture, 0, 0, PX_ALIGN_LEFTTOP);
     
     return 1;
@@ -422,8 +422,8 @@ int main()
 {
     px_memorypool mp;
     px_void* myalloc;
-    mp=PX_MemorypoolCreate(my_memory_cache, sizeof(my_memory_cache)); // 创建内存池
-    myalloc=MP_Malloc(&mp, 1024); // 在内存池中分配1024字节
+    mp = PX_MemorypoolCreate(my_memory_cache, sizeof(my_memory_cache)); // 创建内存池
+    myalloc = MP_Malloc(&mp, 1024); // 在内存池中分配 1024 字节
     return 1;
 }
 ```
@@ -437,15 +437,15 @@ int main()
 {
     px_memorypool mp;
     px_void* myalloc;
-    mp=PX_MemorypoolCreate(my_memory_cache, sizeof(my_memory_cache)); // 创建内存池
-    myalloc=MP_Malloc(&mp, 1024*1024); // 在内存池中分配1024*1024字节，但内存池实际容量小于分配给内存池容量,因此这里内存不足，这里将会进入中断
+    mp = PX_MemorypoolCreate(my_memory_cache, sizeof(my_memory_cache)); // 创建内存池
+    myalloc = MP_Malloc(&mp, 1024*1024); // 在内存池中分配 1024*1024 字节，但内存池实际容量小于分配给内存池容量，因此这里内存不足，将会进入中断
     return 1;
 }
 ```
 
 如果你不希望因为内存池不足导致停机错误，你可以使用以下两种方式：
 
-1.你可以设置错误回调，自行处理内存池的错误：
+1. 你可以设置错误回调，自行处理内存池的错误：
 
 ```c
 #include "PainterEngine.h"
@@ -453,33 +453,33 @@ unsigned char my_memory_cache[1024 * 1024];
 
 PX_MEMORYPOOL_ERROR_FUNCTION(my_memory_cache_error)
 {
-	switch (error)
-	{
-	case PX_MEMORYPOOL_ERROR_OUTOFMEMORY:
-		printf("内存访问错误\n");
-		break;
-	case PX_MEMORYPOOL_ERROR_INVALID_ACCESS:
-		printf("无法访问内存\n");
-		break;
-	case PX_MEMORYPOOL_ERROR_INVALID_ADDRESS:
-		printf("无效的内存地址(UAF or double free)\n");
-		break;
-	default:
-		break;
-	}
+    switch (error)
+    {
+    case PX_MEMORYPOOL_ERROR_OUTOFMEMORY:
+        printf("内存访问错误\n");
+        break;
+    case PX_MEMORYPOOL_ERROR_INVALID_ACCESS:
+        printf("无法访问内存\n");
+        break;
+    case PX_MEMORYPOOL_ERROR_INVALID_ADDRESS:
+        printf("无效的内存地址(UAF or double free)\n");
+        break;
+    default:
+        break;
+    }
 }
 int main()
 {
     px_memorypool mp;
     px_void* myalloc;
-    mp=PX_MemorypoolCreate(my_memory_cache, sizeof(my_memory_cache)); // 创建内存池
-	MP_ErrorCatch(&mp, my_memory_cache_error,0); // 设置错误回调
-    myalloc=MP_Malloc(&mp, 1024*1024); // 在内存池中分配1024*1024字节
+    mp = PX_MemorypoolCreate(my_memory_cache, sizeof(my_memory_cache)); // 创建内存池
+    MP_ErrorCatch(&mp, my_memory_cache_error, 0); // 设置错误回调
+    myalloc = MP_Malloc(&mp, 1024*1024); // 在内存池中分配 1024*1024 字节
     return 1;
 }
 ```
 
-2.或者你也可以直接关闭内存池的错误异常处理，那么当内存池无法正常分配足够内存时，将会直接返回 `NULL`：
+2. 或者你也可以直接关闭内存池的错误异常处理，那么当内存池无法正常分配足够内存时，将会直接返回 `NULL`：
 
 ```c
 #include "PainterEngine.h"
@@ -489,9 +489,9 @@ int main()
 {
     px_memorypool mp;
     px_void* myalloc;
-    mp=PX_MemorypoolCreate(my_memory_cache, sizeof(my_memory_cache)); // 创建内存池
-	MP_NoCatchError(&mp, PX_TRUE); // 设置内存池不捕获错误
-    myalloc=MP_Malloc(&mp, 1024*1024); // 在内存池中分配1024*1024字节,但内存池不捕获错误，所以会直接返回NULL
+    mp = PX_MemorypoolCreate(my_memory_cache, sizeof(my_memory_cache)); // 创建内存池
+    MP_NoCatchError(&mp, PX_TRUE); // 设置内存池不捕获错误
+    myalloc = MP_Malloc(&mp, 1024*1024); // 在内存池中分配 1024*1024 字节，但内存池不捕获错误，所以会直接返回 NULL
     return 1;
 }
 ```
@@ -522,8 +522,8 @@ int main()
 {
     PX_Object* myButtonObject;
     PainterEngine_Initialize(800, 480);
-    PainterEngine_LoadFontModule("assets/font.ttf",PX_FONTMODULE_CODEPAGE_GBK,20);
-    myButtonObject=PX_Object_PushButtonCreate(mp,root,300,200,200,80,"我是一个按钮", PainterEngine_GetFontModule());
+    PainterEngine_LoadFontModule("assets/font.ttf", PX_FONTMODULE_CODEPAGE_GBK, 20);
+    myButtonObject = PX_Object_PushButtonCreate(mp, root, 300, 200, 200, 80, "我是一个按钮", PainterEngine_GetFontModule());
     return 1;
 }
 ```
@@ -557,9 +557,9 @@ int main()
 
 以上 `Update`、`Render`、`Free` 函数具有传递的特性，也就是说：
 
-* 如果某个对象节点执行了 `Update`，那么它的所有子对象也会执行 `Update`
-* 如果某个对象节点执行了 `Render`，那么它的所有子对象也会执行 `Render`
-* 如果某个对象节点执行了 `Free`，那么它的所有子对象也会执行 `Free`，父对象被删除了，它的子节点也会被删除，并且将会一直迭代到以这个节点为根节点的所有子节点都被删除。
+- 如果某个对象节点执行了 `Update`，那么它的所有子对象也会执行 `Update`
+- 如果某个对象节点执行了 `Render`，那么它的所有子对象也会执行 `Render`
+- 如果某个对象节点执行了 `Free`，那么它的所有子对象也会执行 `Free`，父对象被删除了，它的子节点也会被删除，并且将会一直迭代到以这个节点为根节点的所有子节点都被删除。
 
 因此，在上一章节我们创建了按钮，并将它连接到了 `root` 节点，那么我们是不需要自己再手动执行 `Update`、`Render`、`Free` 函数的（在 `PX_Object_PushButton.c` 中它们已经被写好了），因为根节点 `root` 是被自动更新渲染和释放的，我们只需要负责 `Create` 就可以了。
 
@@ -571,8 +571,8 @@ int main()
 {
     PX_Object* myButtonObject;
     PainterEngine_Initialize(800, 480);
-    PainterEngine_LoadFontModule("assets/font.ttf",PX_FONTMODULE_CODEPAGE_GBK,20);
-    myButtonObject=PX_Object_PushButtonCreate(mp,root,300,200,200,80,"我是一个按钮", PainterEngine_GetFontModule());
+    PainterEngine_LoadFontModule("assets/font.ttf", PX_FONTMODULE_CODEPAGE_GBK, 20);
+    myButtonObject = PX_Object_PushButtonCreate(mp, root, 300, 200, 200, 80, "我是一个按钮", PainterEngine_GetFontModule());
     PX_ObjectDelayDelete(myButtonObject); // 删除对象
     return 1;
 }
@@ -589,16 +589,16 @@ int main()
 
 PX_OBJECT_EVENT_FUNCTION(OnButtonClick)
 {
-    PX_Object_PushButtonSetText(pObject,"我被点击了");
+    PX_Object_PushButtonSetText(pObject, "我被点击了");
 }
 
 int main()
 {
     PX_Object* myButtonObject;
     PainterEngine_Initialize(800, 480);
-    PainterEngine_LoadFontModule("assets/font.ttf",PX_FONTMODULE_CODEPAGE_GBK,20);
-    myButtonObject=PX_Object_PushButtonCreate(mp,root,300,200,200,80,"我是一个按钮", PainterEngine_GetFontModule());
-    PX_ObjectRegisterEvent(myButtonObject,PX_OBJECT_EVENT_EXECUTE,OnButtonClick,0);
+    PainterEngine_LoadFontModule("assets/font.ttf", PX_FONTMODULE_CODEPAGE_GBK, 20);
+    myButtonObject = PX_Object_PushButtonCreate(mp, root, 300, 200, 200, 80, "我是一个按钮", PainterEngine_GetFontModule());
+    PX_ObjectRegisterEvent(myButtonObject, PX_OBJECT_EVENT_EXECUTE, OnButtonClick, 0);
     
     return 1;
 }
@@ -609,7 +609,7 @@ int main()
 其中，`PX_OBJECT_EVENT_FUNCTION` 是一个宏，因为事件响应函数是一个固定的格式，因此非常建议你使用宏的方式来申明它，它的定义原型如下：
 
 ```c
-#define PX_OBJECT_EVENT_FUNCTION(name) px_void name(PX_Object *pObject,PX_Object_Event e,px_void * ptr)
+#define PX_OBJECT_EVENT_FUNCTION(name) px_void name(PX_Object *pObject, PX_Object_Event e, px_void * ptr)
 ```
 
 可以看到，这个回调函数有 3 个参数，第一个是响应时间的对象的指针，因为是按钮点击被触发了，所以这个指针指向的就是这个按钮对象；第二个参数是事件类型 `e`，它是触发的事件类型；最后一个参数则是用户传递来的指针，它在注册时间响应函数 `PX_ObjectRegisterEvent` 被调用时就被传递进来了。
@@ -617,37 +617,37 @@ int main()
 事件类型有以下几种：
 
 ```c
-#define PX_OBJECT_EVENT_ANY					0 //任意事件
-#define PX_OBJECT_EVENT_CURSORMOVE			1 //鼠标移动
-#define PX_OBJECT_EVENT_CURSORUP			2 //鼠标左键弹起或触摸屏弹起
-#define PX_OBJECT_EVENT_CURSORRDOWN			3 //鼠标右键按下
-#define PX_OBJECT_EVENT_CURSORDOWN			4 //鼠标左键按下或触摸屏按下
-#define PX_OBJECT_EVENT_CURSORRUP			5 //鼠标右键弹起
-#define PX_OBJECT_EVENT_CURSOROVER			6 //鼠标进入范围
-#define PX_OBJECT_EVENT_CURSOROUT			7 //鼠标离开范围
-#define PX_OBJECT_EVENT_CURSORWHEEL         8 //鼠标滚轮
-#define PX_OBJECT_EVENT_CURSORCLICK			9 //鼠标左键点击
-#define PX_OBJECT_EVENT_CURSORDRAG			10 //鼠标拖拽
-#define PX_OBJECT_EVENT_STRING				11 //字符串事件（输入法输入）
-#define PX_OBJECT_EVENT_EXECUTE				12 //执行事件,不同组件有不同的执行方式
-#define PX_OBJECT_EVENT_VALUECHANGED		13 //值改变事件,例如滑动条的值改变,或者文本框的值改变,或者列表框的选中项改变
-#define PX_OBJECT_EVENT_DRAGFILE			14 //拖拽文件
-#define PX_OBJECT_EVENT_KEYDOWN				15 //键盘按下
-#define PX_OBJECT_EVENT_KEYUP				16 //键盘弹起
-#define PX_OBJECT_EVENT_IMPACT				17 //碰撞事件
-#define PX_OBJECT_EVENT_SCALE               18 //缩放事件
-#define PX_OBJECT_EVENT_WINDOWRESIZE        19 //窗口大小改变
-#define PX_OBJECT_EVENT_ONFOCUS				20 //获得焦点
-#define PX_OBJECT_EVENT_LOSTFOCUS           21 //失去焦点
-#define PX_OBJECT_EVENT_CANCEL				22 //取消事件
-#define PX_OBJECT_EVENT_CLOSE				23 //关闭事件
-#define PX_OBJECT_EVENT_CURSORMUP			24 //鼠标中键弹起
-#define PX_OBJECT_EVENT_CURSORMDOWN			25 //鼠标中键按下
-#define PX_OBJECT_EVENT_REQUESTDATA			26 //请求数据
-#define PX_OBJECT_EVENT_OPEN				27 //打开事件
-#define PX_OBJECT_EVENT_SAVE				28 //保存事件
-#define PX_OBJECT_EVENT_TIMEOUT				29 //超时事件
-#define PX_OBJECT_EVENT_DAMAGE				30 //伤害事件
+#define PX_OBJECT_EVENT_ANY           0  // 任意事件
+#define PX_OBJECT_EVENT_CURSORMOVE    1  // 鼠标移动
+#define PX_OBJECT_EVENT_CURSORUP      2  // 鼠标左键弹起或触摸屏弹起
+#define PX_OBJECT_EVENT_CURSORRDOWN   3  // 鼠标右键按下
+#define PX_OBJECT_EVENT_CURSORDOWN    4  // 鼠标左键按下或触摸屏按下
+#define PX_OBJECT_EVENT_CURSORRUP     5  // 鼠标右键弹起
+#define PX_OBJECT_EVENT_CURSOROVER    6  // 鼠标进入范围
+#define PX_OBJECT_EVENT_CURSOROUT     7  // 鼠标离开范围
+#define PX_OBJECT_EVENT_CURSORWHEEL   8  // 鼠标滚轮
+#define PX_OBJECT_EVENT_CURSORCLICK   9  // 鼠标左键点击
+#define PX_OBJECT_EVENT_CURSORDRAG    10 // 鼠标拖拽
+#define PX_OBJECT_EVENT_STRING        11 // 字符串事件（输入法输入）
+#define PX_OBJECT_EVENT_EXECUTE       12 // 执行事件，不同组件有不同的执行方式
+#define PX_OBJECT_EVENT_VALUECHANGED  13 // 值改变事件，例如滑动条的值改变，或者文本框的值改变，或者列表框的选中项改变
+#define PX_OBJECT_EVENT_DRAGFILE      14 // 拖拽文件
+#define PX_OBJECT_EVENT_KEYDOWN       15 // 键盘按下
+#define PX_OBJECT_EVENT_KEYUP         16 // 键盘弹起
+#define PX_OBJECT_EVENT_IMPACT        17 // 碰撞事件
+#define PX_OBJECT_EVENT_SCALE         18 // 缩放事件
+#define PX_OBJECT_EVENT_WINDOWRESIZE  19 // 窗口大小改变
+#define PX_OBJECT_EVENT_ONFOCUS       20 // 获得焦点
+#define PX_OBJECT_EVENT_LOSTFOCUS     21 // 失去焦点
+#define PX_OBJECT_EVENT_CANCEL        22 // 取消事件
+#define PX_OBJECT_EVENT_CLOSE         23 // 关闭事件
+#define PX_OBJECT_EVENT_CURSORMUP     24 // 鼠标中键弹起
+#define PX_OBJECT_EVENT_CURSORMDOWN   25 // 鼠标中键按下
+#define PX_OBJECT_EVENT_REQUESTDATA   26 // 请求数据
+#define PX_OBJECT_EVENT_OPEN          27 // 打开事件
+#define PX_OBJECT_EVENT_SAVE          28 // 保存事件
+#define PX_OBJECT_EVENT_TIMEOUT       29 // 超时事件
+#define PX_OBJECT_EVENT_DAMAGE        30 // 伤害事件
 ```
 
 以上事件并非全部都是任何组件都会响应的，例如在上面例子中的 `PX_OBJECT_EVENT_EXECUTE`，它是按钮被单击时会被触发的事件，或者是文本框中按下回车会触发的事件，但有些例如滚动条和进度条，并不会触发这个事件。也就是说有些事件是专属的。
@@ -657,9 +657,9 @@ int main()
 你可以使用
 
 ```c
-px_float PX_Object_Event_GetCursorX(PX_Object_Event e); // 获取cursor事件的x坐标
-px_float PX_Object_Event_GetCursorY(PX_Object_Event e); // 获取cursor事件的y坐标
-px_float PX_Object_Event_GetCursorZ(PX_Object_Event e); // 获取cursor事件的z坐标,一般用于鼠标中键滚轮
+px_float PX_Object_Event_GetCursorX(PX_Object_Event e); // 获取cursor事件的 x 坐标
+px_float PX_Object_Event_GetCursorY(PX_Object_Event e); // 获取cursor事件的 y 坐标
+px_float PX_Object_Event_GetCursorZ(PX_Object_Event e); // 获取cursor事件的 z 坐标，一般用于鼠标中键滚轮
 ```
 
 来获取 `cursor` 事件中类似于 "鼠标现在在哪里" 的功能。
@@ -682,44 +682,44 @@ px_int index = 0; // 当前图片的索引
 PX_OBJECT_EVENT_FUNCTION(OnButtonPreClick)
 {
     index--;
-	if(index < 0)
-	{
-		index = 9;
-	}
-	PX_Object_ImageSetTexture(Image, &my_texture[index]); // 设置图片
+    if (index < 0)
+    {
+        index = 9;
+    }
+    PX_Object_ImageSetTexture(Image, &my_texture[index]); // 设置图片
 }
 
 PX_OBJECT_EVENT_FUNCTION(OnButtonNextClick)
 {
-	index++;
-	if(index > 9)
-	{
-		index = 0;
-	}
-	PX_Object_ImageSetTexture(Image, &my_texture[index]);
+    index++;
+    if (index > 9)
+    {
+        index = 0;
+    }
+    PX_Object_ImageSetTexture(Image, &my_texture[index]);
 }
 
 int main()
 {
     px_int i;
     PainterEngine_Initialize(512, 560); // 初始化
-    for(i=0;i<10;i++)
-	{
+    for(i = 0; i < 10; i++)
+    {
         px_char path[256];
-        PX_sprintf1(path,256, "assets/%1.png", PX_STRINGFORMAT_INT(i+1));
-		if(!PX_LoadTextureFromFile(mp_static, &my_texture[i],path)) // 加载图片
-		{
+        PX_sprintf1(path, 256, "assets/%1.png", PX_STRINGFORMAT_INT(i+1));
+        if (!PX_LoadTextureFromFile(mp_static, &my_texture[i], path)) // 加载图片
+        {
             // 加载失败
             printf("加载失败");
-			return 0;
-		}
-	}
+            return 0;
+        }
+    }
     PainterEngine_LoadFontModule("assets/font.ttf", PX_FONTMODULE_CODEPAGE_GBK, 20); // 加载字体
     Image = PX_Object_ImageCreate(mp, root, 0, 0, 512, 512, 0); // 创建图片对象
-    Previous= PX_Object_PushButtonCreate(mp, root, 0, 512, 256, 48, "上一张",PainterEngine_GetFontModule()); // 创建按钮对象
+    Previous = PX_Object_PushButtonCreate(mp, root, 0, 512, 256, 48, "上一张", PainterEngine_GetFontModule()); // 创建按钮对象
     Next = PX_Object_PushButtonCreate(mp, root, 256, 512, 256, 48, "下一张", PainterEngine_GetFontModule()); // 创建按钮对象
-	PX_ObjectRegisterEvent(Previous, PX_OBJECT_EVENT_EXECUTE, OnButtonPreClick, PX_NULL); // 注册按钮事件
-	PX_ObjectRegisterEvent(Next, PX_OBJECT_EVENT_EXECUTE, OnButtonNextClick, PX_NULL); // 注册按钮事件
+    PX_ObjectRegisterEvent(Previous, PX_OBJECT_EVENT_EXECUTE, OnButtonPreClick, PX_NULL); // 注册按钮事件
+    PX_ObjectRegisterEvent(Next, PX_OBJECT_EVENT_EXECUTE, OnButtonNextClick, PX_NULL); // 注册按钮事件
     return 1;
 }
 ```
@@ -734,169 +734,169 @@ int main()
 
 你可以在 `PainterEngine/kernel` 的文件中，找到 PainterEngine 的内置组件，所有的组件名称都是以 `PX_Object_XXXXX` 开头的，在这里，我为你列举一些常用的组件及示范代码：
 
-* 文本框：
+- 文本框：
 
 ```c
 #include "PainterEngine.h"
 PX_OBJECT_EVENT_FUNCTION(PX_Object_EditOnTextChanged)
 {
-	// 文本改变后后这里会被执行
+    // 文本改变后后这里会被执行
 }
 
 int main()
 {
-	PX_Object* pObject;
-	PainterEngine_Initialize(600, 400);
-	// 创建文本框
-	pObject=PX_Object_EditCreate(mp,root,200,180,200,40,0);
-	// 注册编辑框文本改变事件
-	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_VALUECHANGED, PX_Object_EditOnTextChanged,PX_NULL);
-	return 0;
+    PX_Object* pObject;
+    PainterEngine_Initialize(600, 400);
+    // 创建文本框
+    pObject = PX_Object_EditCreate(mp, root, 200, 180, 200, 40, 0);
+    // 注册编辑框文本改变事件
+    PX_ObjectRegisterEvent(pObject, PX_OBJECT_EVENT_VALUECHANGED, PX_Object_EditOnTextChanged, PX_NULL);
+    return 0;
 }
 ```
 
 ![](assets/img/11.1.gif)
 
-* 列表框：
+- 列表框：
 
 ```c
 #include "PainterEngine.h"
 
 PX_OBJECT_RENDER_FUNCTION(PX_Object_OnMyListItemRender)
 {
-	px_float objx,objy,objWidth,objHeight;
-	PX_Object_ListItem *pItem=PX_Object_GetListItem(pObject);
-	PX_OBJECT_INHERIT_CODE(pObject,objx, objy, objWidth, objHeight);
-	// 绘制出其文本
-	PX_FontModuleDrawText(psurface, 0, (px_int)objx + 3, (px_int)objy + 3, PX_ALIGN_LEFTTOP, (const px_char *)pItem->pdata, PX_COLOR_WHITE);
+    px_float objx, objy, objWidth, objHeight;
+    PX_Object_ListItem *pItem = PX_Object_GetListItem(pObject);
+    PX_OBJECT_INHERIT_CODE(pObject, objx, objy, objWidth, objHeight);
+    // 绘制出其文本
+    PX_FontModuleDrawText(psurface, 0, (px_int)objx + 3, (px_int)objy + 3, PX_ALIGN_LEFTTOP, (const px_char *)pItem->pdata, PX_COLOR_WHITE);
 }
 
 
 PX_OBJECT_LIST_ITEM_CREATE_FUNCTION(PX_Object_OnMyListItemCreate)
 {
-	// 绑定ListItem的渲染函数
-	ItemObject->Func_ObjectRender[0]=PX_Object_OnMyListItemRender;
-	return PX_TRUE;
+    // 绑定 ListItem 的渲染函数
+    ItemObject->Func_ObjectRender[0] = PX_Object_OnMyListItemRender;
+    return PX_TRUE;
 }
 
 PX_OBJECT_EVENT_FUNCTION(PX_Object_ListOnSelectChanged)
 {
-	// 当选中项改变时
-	return;
+    // 当选中项改变时
+    return;
 }
 
 int main()
 {
-	PX_Object* pObject;
-	PainterEngine_Initialize(600, 400);
+    PX_Object* pObject;
+    PainterEngine_Initialize(600, 400);
 
-	// 创建list
-	pObject = PX_Object_ListCreate(mp,root,100,100,400,200,24,PX_Object_OnMyListItemCreate,0);
-	PX_Object_ListAdd(pObject, "Item1");
-	PX_Object_ListAdd(pObject, "Item2");
-	PX_Object_ListAdd(pObject, "Item3");
-	PX_Object_ListAdd(pObject, "Item4");
-	PX_Object_ListAdd(pObject, "Item5");
-	PX_ObjectRegisterEvent(pObject, PX_OBJECT_EVENT_VALUECHANGED, PX_Object_ListOnSelectChanged, 0);
-	return 0;
+    // 创建 list
+    pObject = PX_Object_ListCreate(mp, root, 100, 100, 400, 200, 24, PX_Object_OnMyListItemCreate, 0);
+    PX_Object_ListAdd(pObject, "Item1");
+    PX_Object_ListAdd(pObject, "Item2");
+    PX_Object_ListAdd(pObject, "Item3");
+    PX_Object_ListAdd(pObject, "Item4");
+    PX_Object_ListAdd(pObject, "Item5");
+    PX_ObjectRegisterEvent(pObject, PX_OBJECT_EVENT_VALUECHANGED, PX_Object_ListOnSelectChanged, 0);
+    return 0;
 }
 ```
 
 ![](assets/img/11.2.gif)
 
-* 滑动条：
+- 滑动条：
 
 ```c
 #include "PainterEngine.h"
 
 PX_OBJECT_EVENT_FUNCTION(SliderChanged)
 {
-	// 垂直滑动条值改变后执行这里的代码
-	return;
+    // 垂直滑动条值改变后执行这里的代码
+    return;
 }
 
 int main()
 {
-	PX_Object* pObject;
-	PainterEngine_Initialize(600, 400);
-	// 水平滑动条
-	PX_Object_SliderBarCreate(mp, root, 200, 50, 200,24,PX_OBJECT_SLIDERBAR_TYPE_HORIZONTAL,PX_OBJECT_SLIDERBAR_STYLE_BOX);
-	// 垂直滑动条
-	pObject=PX_Object_SliderBarCreate(mp, root, 200, 100, 24, 200, PX_OBJECT_SLIDERBAR_TYPE_VERTICAL, PX_OBJECT_SLIDERBAR_STYLE_BOX);
-	PX_ObjectRegisterEvent(pObject, PX_OBJECT_EVENT_VALUECHANGED, SliderChanged, 0);
-	return 0;
+    PX_Object* pObject;
+    PainterEngine_Initialize(600, 400);
+    // 水平滑动条
+    PX_Object_SliderBarCreate(mp, root, 200, 50, 200, 24, PX_OBJECT_SLIDERBAR_TYPE_HORIZONTAL, PX_OBJECT_SLIDERBAR_STYLE_BOX);
+    // 垂直滑动条
+    pObject = PX_Object_SliderBarCreate(mp, root, 200, 100, 24, 200, PX_OBJECT_SLIDERBAR_TYPE_VERTICAL, PX_OBJECT_SLIDERBAR_STYLE_BOX);
+    PX_ObjectRegisterEvent(pObject, PX_OBJECT_EVENT_VALUECHANGED, SliderChanged, 0);
+    return 0;
 }
 ```
 ![](assets/img/11.3.gif)
 
-* 下拉框：
+- 下拉框：
 
 ```c
 #include "PainterEngine.h"
 
 int main()
 {
-	PX_Object* pObject;
-	PainterEngine_Initialize(600, 400);
-	pObject = PX_Object_SelectBarCreate(mp, root, 200, 150, 200,24,0);
-	PX_Object_SelectBarAddItem(pObject, "Item1");
-	PX_Object_SelectBarAddItem(pObject, "Item2");
-	PX_Object_SelectBarAddItem(pObject, "Item3");
-	PX_Object_SelectBarAddItem(pObject, "Item4");
-	PX_Object_SelectBarAddItem(pObject, "Item5");
-	return 0;
+    PX_Object* pObject;
+    PainterEngine_Initialize(600, 400);
+    pObject = PX_Object_SelectBarCreate(mp, root, 200, 150, 200, 24, 0);
+    PX_Object_SelectBarAddItem(pObject, "Item1");
+    PX_Object_SelectBarAddItem(pObject, "Item2");
+    PX_Object_SelectBarAddItem(pObject, "Item3");
+    PX_Object_SelectBarAddItem(pObject, "Item4");
+    PX_Object_SelectBarAddItem(pObject, "Item5");
+    return 0;
 }
 ```
 ![](assets/img/11.4.gif)
 
-* 示波器：
+- 示波器：
 
 ```c
 #include "PainterEngine.h"
 
-// 必须是生存域内有效可访问的数据,这里定义为全局变量
+// 必须是生存域内有效可访问的数据，这里定义为全局变量
 px_double data_x[100];
 px_double data_y[100];
 
 int main()
 {
-	PX_Object_OscilloscopeData data;
-	PX_Object* pObject;
+    PX_Object_OscilloscopeData data;
+    PX_Object* pObject;
 
-	px_int i;
-	PainterEngine_Initialize(600, 600);
-	
-	// 初始化一个测试数据
-	for (i = 0; i < 100; i++)
-	{
-		data_x[i] = i;
-		data_y[i] = i+PX_randRange(-10,10);
-	}
-	
-	pObject = PX_Object_OscilloscopeCreate(mp, root, 0, 0, 600, 600, 0);
+    px_int i;
+    PainterEngine_Initialize(600, 600);
+    
+    // 初始化一个测试数据
+    for (i = 0; i < 100; i++)
+    {
+        data_x[i] = i;
+        data_y[i] = i+PX_randRange(-10, 10);
+    }
+    
+    pObject = PX_Object_OscilloscopeCreate(mp, root, 0, 0, 600, 600, 0);
 
-	// 设置水平坐标最小值最大值
-	PX_Object_OscilloscopeSetHorizontalMin(pObject, 0);
-	PX_Object_OscilloscopeSetHorizontalMax(pObject, 100);
+    // 设置水平坐标最小值最大值
+    PX_Object_OscilloscopeSetHorizontalMin(pObject, 0);
+    PX_Object_OscilloscopeSetHorizontalMax(pObject, 100);
 
-	// 设置垂直坐标（左边）最小值最大值0-100
-	PX_Object_OscilloscopeSetLeftVerticalMin(pObject, 0);
-	PX_Object_OscilloscopeSetLeftVerticalMax(pObject, 100);
+    // 设置垂直坐标（左边）最小值最大值 0-100
+    PX_Object_OscilloscopeSetLeftVerticalMin(pObject, 0);
+    PX_Object_OscilloscopeSetLeftVerticalMax(pObject, 100);
 
-	// 数据类型
-	data.Color=PX_COLOR(255,192,255,128); // 数据颜色
-	data.ID = 0;
-	data.linewidth = 3; // 数据线宽
-	data.Map = PX_OBJECT_OSCILLOSCOPE_OSCILLOSCOPEDATA_MAP_LEFT; // 数据映射到左边垂直坐标
-	data.MapHorizontalArray = data_x; // 数据水平坐标
-	data.MapVerticalArray = data_y; // 数据垂直坐标
-	data.Size = 100; // 数据大小
-	data.Visibled = PX_TRUE; // 数据可见
-	data.Normalization = 1; // 数据归一化系数为1
-	
-	// 添加数据
-	PX_Object_OscilloscopeAddData(pObject, data);
-	return 0;
+    // 数据类型
+    data.Color = PX_COLOR(255, 192, 255, 128); // 数据颜色
+    data.ID = 0;
+    data.linewidth = 3; // 数据线宽
+    data.Map = PX_OBJECT_OSCILLOSCOPE_OSCILLOSCOPEDATA_MAP_LEFT; // 数据映射到左边垂直坐标
+    data.MapHorizontalArray = data_x; // 数据水平坐标
+    data.MapVerticalArray = data_y; // 数据垂直坐标
+    data.Size = 100; // 数据大小
+    data.Visibled = PX_TRUE; // 数据可见
+    data.Normalization = 1; // 数据归一化系数为 1
+    
+    // 添加数据
+    PX_Object_OscilloscopeAddData(pObject, data);
+    return 0;
 }
 ```
 
@@ -910,7 +910,7 @@ int main()
 
 PainterEngine 鼓励组件式的开发架构。也就是说，不论是游戏还是 GUI 交互程序，甚至是程序功能，我们都可以用组件的形式去开发它。
 
-组件式开发有点类似于 C++中的 Class，每一个组件，都要实现自己的 `Create`、`Update`、`Render`、`Free` 函数。关于上面四个函数，你可以参考 [前面的对象传递机制](#8painterengine-对象传递机制) 这一章节。
+组件式开发有点类似于 C++ 中的 Class，每一个组件，都要实现自己的 `Create`、`Update`、`Render`、`Free` 函数。关于上面四个函数，你可以参考 [前面的对象传递机制](#8painterengine-对象传递机制) 这一章节。
 
 为了演示这一点，让我们来实现一个“可控拖动旋转图片组件”，即我们可以用鼠标拖动图片在界面的位置，并用鼠标中键来旋转它。
 
@@ -920,23 +920,23 @@ PainterEngine 鼓励组件式的开发架构。也就是说，不论是游戏还
 #include "PainterEngine.h"
 typedef struct
 {
-	px_texture image;
-	px_int rotation;
+    px_texture image;
+    px_int rotation;
 }PX_Object_MyObject;
 
 px_int main()
 {
-	PainterEngine_Initialize(800, 480);
-	return PX_TRUE;
+    PainterEngine_Initialize(800, 480);
+    return PX_TRUE;
 }
 ```
 
 之后，我们需要定义我们的 `Create`、`Update`、`Render` 和 `Free` 函数，其中 `Update`、`Render`、`Free` 有对应的格式，它们都有一个宏来简化我们的定义过程：
 
 ```c
-#define PX_OBJECT_RENDER_FUNCTION(name) px_void name(px_surface *psurface,PX_Object *pObject,px_int idesc,px_dword elapsed)
-#define PX_OBJECT_UPDATE_FUNCTION(name) px_void name(PX_Object *pObject,px_int idesc,px_dword elapsed)
-#define PX_OBJECT_FREE_FUNCTION(name) px_void name(PX_Object *pObject,px_int idesc)
+#define PX_OBJECT_RENDER_FUNCTION(name) px_void name(px_surface *psurface, PX_Object *pObject, px_int idesc, px_dword elapsed)
+#define PX_OBJECT_UPDATE_FUNCTION(name) px_void name(PX_Object *pObject, px_int idesc, px_dword elapsed)
+#define PX_OBJECT_FREE_FUNCTION(name) px_void name(PX_Object *pObject, px_int idesc)
 ```
 
 那么，在主函数中，我们就可以这样定义我们的这几个函数：
@@ -945,8 +945,8 @@ px_int main()
 #include "PainterEngine.h"
 typedef struct
 {
-	px_texture image;
-	px_int rotation;
+    px_texture image;
+    px_int rotation;
 }PX_Object_MyObject;
 
 PX_OBJECT_UPDATE_FUNCTION(MyObjectUpdate)
@@ -955,51 +955,51 @@ PX_OBJECT_UPDATE_FUNCTION(MyObjectUpdate)
 
 PX_OBJECT_RENDER_FUNCTION(MyObjectRender)
 {
-	PX_Object_MyObject *pMyObject=PX_ObjectGetDesc(PX_Object_MyObject,pObject);
-	PX_TextureRenderEx(psurface, &pMyObject->image, (px_int)pObject->x, (px_int)pObject->y, PX_ALIGN_CENTER,0,1, pMyObject->rotation);
+    PX_Object_MyObject *pMyObject = PX_ObjectGetDesc(PX_Object_MyObject, pObject);
+    PX_TextureRenderEx(psurface, &pMyObject->image, (px_int)pObject->x, (px_int)pObject->y, PX_ALIGN_CENTER, 0, 1, pMyObject->rotation);
 }
 
 PX_OBJECT_FREE_FUNCTION(MyObjectFree)
 {
-	PX_Object_MyObject *pMyObject=PX_ObjectGetDesc(PX_Object_MyObject,pObject);
-	PX_TextureFree(&pMyObject->image);
+    PX_Object_MyObject *pMyObject = PX_ObjectGetDesc(PX_Object_MyObject, pObject);
+    PX_TextureFree(&pMyObject->image);
 }
 
 px_int main()
 {
-	PainterEngine_Initialize(800, 480);
-	return PX_TRUE;
+    PainterEngine_Initialize(800, 480);
+    return PX_TRUE;
 }
 ```
 
 其中，因为我们不需要更新一些物理信息，所以 `MyObjectUpdate` 函数中我们可以什么都不写，在 `MyObjectRender` 中我们只需要把图片绘制出来就可以了，这里我们先使用 `PX_ObjectGetDesc` 函数获得我们定义好的结构体指针，它的第一个参数是结构体类型，第二个参数则是函数传递进来的 `pObject` 指针，然后我们只需要用 `PX_TextureRenderEx` 函数把图片绘制出来就可以了。
 
 多提一句，`PX_TextureRenderEx` 函数用于在指定的表面上渲染纹理，并提供了对齐、混合、缩放和旋转等扩展选项。其中：
-  * `psurface`：指向要渲染纹理的表面的指针。
-  * `resTexture`：指向要渲染的纹理资源的指针。
-  * `x`：在表面上绘制纹理的 x 坐标。
-  * `y`：在表面上绘制纹理的 y 坐标。
-  * `refPoint`：对齐的参考点（例如，中心，左上角等）。
-  * `blend`：指向混合选项结构的指针（如果不需要混合，可以为 `NULL`）。
-  * `scale`：纹理的缩放因子（1.0 表示不缩放）。
-  * `Angle`：纹理的旋转角度，以度为单位。
+  - `psurface`：指向要渲染纹理的表面的指针。
+  - `resTexture`：指向要渲染的纹理资源的指针。
+  - `x`：在表面上绘制纹理的 x 坐标。
+  - `y`：在表面上绘制纹理的 y 坐标。
+  - `refPoint`：对齐的参考点（例如，中心，左上角等）。
+  - `blend`：指向混合选项结构的指针（如果不需要混合，可以为 `NULL`）。
+  - `scale`：纹理的缩放因子（1.0 表示不缩放）。
+  - `Angle`：纹理的旋转角度，以度为单位。
 
 最后，是时候编写创建新对象的函数了，这里我们需要用到 `PX_ObjectCreateEx` 函数，`PX_ObjectCreateEx` 函数用于创建一个扩展对象，并初始化其属性和回调函数。它的参数说明如下：
 
-* `mp`：指向内存池的指针，用于分配对象所需的内存。
-* `Parent`：指向父对象的指针，如果没有父对象则为 `NULL`。
-* `x`：对象在 x 轴上的初始位置。
-* `y`：对象在 y 轴上的初始位置。
-* `z`：对象在 z 轴上的初始位置，z 坐标会影响其渲染的先后顺序。
-* `Width`：对象的宽度。
-* `Height`：对象的高度。
-* `Lenght`：对象的长度，2D 对象，一般可以是 0。
-* `type`：对象的类型。
-* `Func_ObjectUpdate`：指向对象更新函数的指针。
-* `Func_ObjectRender`：指向对象渲染函数的指针。
-* `Func_ObjectFree`：指向对象释放函数的指针。
-* `desc`：指向对象描述数据的指针。你可以设置为 0，创建时会把这个对象类型的数据填充为 0。
-* `size`：描述数据的大小，就是你定义的对象结构体类型的大小，创建对象函数会在内存池申请一段内存空间，并用于存储你的对象结构体。
+- `mp`：指向内存池的指针，用于分配对象所需的内存。
+- `Parent`：指向父对象的指针，如果没有父对象则为 `NULL`。
+- `x`：对象在 x 轴上的初始位置。
+- `y`：对象在 y 轴上的初始位置。
+- `z`：对象在 z 轴上的初始位置，z 坐标会影响其渲染的先后顺序。
+- `Width`：对象的宽度。
+- `Height`：对象的高度。
+- `Lenght`：对象的长度，2D 对象，一般可以是 0。
+- `type`：对象的类型。
+- `Func_ObjectUpdate`：指向对象更新函数的指针。
+- `Func_ObjectRender`：指向对象渲染函数的指针。
+- `Func_ObjectFree`：指向对象释放函数的指针。
+- `desc`：指向对象描述数据的指针。你可以设置为 0，创建时会把这个对象类型的数据填充为 0。
+- `size`：描述数据的大小，就是你定义的对象结构体类型的大小，创建对象函数会在内存池申请一段内存空间，并用于存储你的对象结构体。
 
 在创建好一个空对象后，我们使用 `PX_ObjectGetDescIndex` 将对象中的对象结构体指针取出来，这是一个三参数的函数，第一个参数是对象结构体类型，第二个参数则是 `PX_Object *` 指针类型，因为一个 `PX_Object` 可以将多个对象结构体组合在一起，这个组合结构体我们将在之后的教程中会进一步描述，但现在我们只需要知道，调用 `PX_ObjectCreateEx` 函数后，其第一个存储的对象结构体索引是 0 就可以了。
 
@@ -1009,8 +1009,8 @@ px_int main()
 #include "PainterEngine.h"
 typedef struct
 {
-	px_texture image;
-	px_int rotation;
+    px_texture image;
+    px_int rotation;
 }PX_Object_MyObject;
 
 PX_OBJECT_UPDATE_FUNCTION(MyObjectUpdate)
@@ -1019,34 +1019,34 @@ PX_OBJECT_UPDATE_FUNCTION(MyObjectUpdate)
 
 PX_OBJECT_RENDER_FUNCTION(MyObjectRender)
 {
-	PX_Object_MyObject *pMyObject=PX_ObjectGetDesc(PX_Object_MyObject,pObject);
-	PX_TextureRenderEx(psurface, &pMyObject->image, (px_int)pObject->x, (px_int)pObject->y, PX_ALIGN_CENTER,0,1, pMyObject->rotation); // 渲染图片
+    PX_Object_MyObject *pMyObject = PX_ObjectGetDesc(PX_Object_MyObject, pObject);
+    PX_TextureRenderEx(psurface, &pMyObject->image, (px_int)pObject->x, (px_int)pObject->y, PX_ALIGN_CENTER, 0, 1, pMyObject->rotation); // 渲染图片
 }
 
 PX_OBJECT_FREE_FUNCTION(MyObjectFree)
 {
-	PX_Object_MyObject *pMyObject=PX_ObjectGetDesc(PX_Object_MyObject,pObject);
-	PX_TextureFree(&pMyObject->image); // 释放图片
+    PX_Object_MyObject *pMyObject = PX_ObjectGetDesc(PX_Object_MyObject, pObject);
+    PX_TextureFree(&pMyObject->image); // 释放图片
 }
 
 PX_Object* PX_Object_MyObjectCreate(px_memorypool* mp, PX_Object* parent, px_float x, px_float y)
 {
-	PX_Object *pObject=PX_ObjectCreateEx(mp,parent,x,y,0,128,128,0,0, MyObjectUpdate, MyObjectRender, MyObjectFree,0,sizeof(PX_Object_MyObject)); // 创建一个空的自定义对象
-	PX_Object_MyObject* pMyObject = PX_ObjectGetDescIndex(PX_Object_MyObject, pObject,0); // 取得自定义对象数据
-	pMyObject->rotation = 0;
-	if(!PX_LoadTextureFromFile(mp,&pMyObject->image, "assets/test.png")) // 加载图片
-	{
-		PX_ObjectDelete(pObject); // 加载失败则删除对象
-		return PX_NULL;
-	}
-	return pObject;
+    PX_Object *pObject = PX_ObjectCreateEx(mp, parent, x, y, 0, 128, 128, 0, 0, MyObjectUpdate, MyObjectRender, MyObjectFree, 0, sizeof(PX_Object_MyObject)); // 创建一个空的自定义对象
+    PX_Object_MyObject* pMyObject = PX_ObjectGetDescIndex(PX_Object_MyObject, pObject, 0); // 取得自定义对象数据
+    pMyObject->rotation = 0;
+    if (!PX_LoadTextureFromFile(mp, &pMyObject->image, "assets/test.png")) // 加载图片
+    {
+        PX_ObjectDelete(pObject); // 加载失败则删除对象
+        return PX_NULL;
+    }
+    return pObject;
 }
 
 px_int main()
 {
-	PainterEngine_Initialize(800, 480);
-	PX_Object_MyObjectCreate(mp,root,400,240); // 创建一个自定义对象
-	return PX_TRUE;
+    PainterEngine_Initialize(800, 480);
+    PX_Object_MyObjectCreate(mp, root, 400, 240); // 创建一个自定义对象
+    return PX_TRUE;
 }
 ```
 
@@ -1060,8 +1060,8 @@ px_int main()
 #include "PainterEngine.h"
 typedef struct
 {
-	px_texture image;
-	px_float rotation;
+    px_texture image;
+    px_float rotation;
 }PX_Object_MyObject;
 
 PX_OBJECT_UPDATE_FUNCTION(MyObjectUpdate)
@@ -1070,42 +1070,42 @@ PX_OBJECT_UPDATE_FUNCTION(MyObjectUpdate)
 
 PX_OBJECT_RENDER_FUNCTION(MyObjectRender)
 {
-	PX_Object_MyObject *pMyObject=PX_ObjectGetDesc(PX_Object_MyObject,pObject);
-	PX_TextureRenderEx(psurface, &pMyObject->image, (px_int)pObject->x, (px_int)pObject->y, PX_ALIGN_CENTER,0,1, pMyObject->rotation); // 渲染图片
+    PX_Object_MyObject *pMyObject = PX_ObjectGetDesc(PX_Object_MyObject, pObject);
+    PX_TextureRenderEx(psurface, &pMyObject->image, (px_int)pObject->x, (px_int)pObject->y, PX_ALIGN_CENTER, 0, 1, pMyObject->rotation); // 渲染图片
 }
 
 PX_OBJECT_FREE_FUNCTION(MyObjectFree)
 {
-	PX_Object_MyObject *pMyObject=PX_ObjectGetDesc(PX_Object_MyObject,pObject);
-	PX_TextureFree(&pMyObject->image); // 释放图片
+    PX_Object_MyObject *pMyObject = PX_ObjectGetDesc(PX_Object_MyObject, pObject);
+    PX_TextureFree(&pMyObject->image); // 释放图片
 }
 
 PX_OBJECT_EVENT_FUNCTION(MyObjectOnCursorWheel)
 {
-	PX_Object_MyObject *pMyObject=PX_ObjectGetDescIndex(PX_Object_MyObject,pObject,0);
-	if(PX_ObjectIsCursorInRegion(pObject,e)) // Object是鼠标位置是否选中当前组件，e是事件
-		pMyObject->rotation += (px_float)PX_Object_Event_GetCursorZ(e)/10;
+    PX_Object_MyObject *pMyObject = PX_ObjectGetDescIndex(PX_Object_MyObject, pObject, 0);
+    if (PX_ObjectIsCursorInRegion(pObject, e)) // Object 是鼠标位置是否选中当前组件，e 是事件
+        pMyObject->rotation += (px_float)PX_Object_Event_GetCursorZ(e)/10;
 }
 
 PX_Object* PX_Object_MyObjectCreate(px_memorypool* mp, PX_Object* parent, px_float x, px_float y)
 {
-	PX_Object *pObject=PX_ObjectCreateEx(mp,parent,x,y,0,128,128,0,0, MyObjectUpdate, MyObjectRender, MyObjectFree,0,sizeof(PX_Object_MyObject)); // 创建一个空的自定义对象
-	PX_Object_MyObject* pMyObject = PX_ObjectGetDescIndex(PX_Object_MyObject, pObject,0); // 取得自定义对象数据
-	pMyObject->rotation = 0;
-	if(!PX_LoadTextureFromFile(mp,&pMyObject->image, "assets/test.png")) // 加载图片
-	{
-		PX_ObjectDelete(pObject); // 加载失败则删除对象
-		return PX_NULL;
-	}
-	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_CURSORWHEEL,MyObjectOnCursorWheel,0); // 注册鼠标滚轮事件
-	return pObject;
+    PX_Object *pObject = PX_ObjectCreateEx(mp, parent, x, y, 0, 128, 128, 0, 0, MyObjectUpdate, MyObjectRender, MyObjectFree, 0, sizeof(PX_Object_MyObject)); // 创建一个空的自定义对象
+    PX_Object_MyObject* pMyObject = PX_ObjectGetDescIndex(PX_Object_MyObject, pObject, 0); // 取得自定义对象数据
+    pMyObject->rotation = 0;
+    if (!PX_LoadTextureFromFile(mp, &pMyObject->image, "assets/test.png")) // 加载图片
+    {
+        PX_ObjectDelete(pObject); // 加载失败则删除对象
+        return PX_NULL;
+    }
+    PX_ObjectRegisterEvent(pObject, PX_OBJECT_EVENT_CURSORWHEEL, MyObjectOnCursorWheel, 0); // 注册鼠标滚轮事件
+    return pObject;
 }
 
 px_int main()
 {
-	PainterEngine_Initialize(800, 480);
-	PX_Object_MyObjectCreate(mp,root,400,240); // 创建一个自定义对象
-	return PX_TRUE;
+    PainterEngine_Initialize(800, 480);
+    PX_Object_MyObjectCreate(mp, root, 400, 240); // 创建一个自定义对象
+    return PX_TRUE;
 }
 ```
 
@@ -1118,8 +1118,8 @@ px_int main()
 ```c
 PX_OBJECT_RENDER_FUNCTION(MyObjectRender)
 {
-	PX_Object_MyObject *pMyObject=PX_ObjectGetDesc(PX_Object_MyObject,pObject);
-	PX_TextureRenderRotation(psurface, &pMyObject->image, (px_int)pObject->x, (px_int)pObject->y, PX_ALIGN_CENTER,0, pMyObject->rotation); // 渲染图片
+    PX_Object_MyObject *pMyObject = PX_ObjectGetDesc(PX_Object_MyObject, pObject);
+    PX_TextureRenderRotation(psurface, &pMyObject->image, (px_int)pObject->x, (px_int)pObject->y, PX_ALIGN_CENTER, 0, pMyObject->rotation); // 渲染图片
 }
 
 ```
@@ -1132,10 +1132,10 @@ PX_OBJECT_RENDER_FUNCTION(MyObjectRender)
 #include "PainterEngine.h"
 typedef struct
 {
-	px_float last_cursorx, last_cursory;
-	px_bool bselect;
-	px_texture image;
-	px_float rotation;
+    px_float last_cursorx, last_cursory;
+    px_bool bselect;
+    px_texture image;
+    px_float rotation;
 }PX_Object_MyObject;
 
 PX_OBJECT_UPDATE_FUNCTION(MyObjectUpdate)
@@ -1144,75 +1144,75 @@ PX_OBJECT_UPDATE_FUNCTION(MyObjectUpdate)
 
 PX_OBJECT_RENDER_FUNCTION(MyObjectRender)
 {
-	PX_Object_MyObject *pMyObject=PX_ObjectGetDesc(PX_Object_MyObject,pObject);
-	PX_TextureRenderRotation(psurface, &pMyObject->image, (px_int)pObject->x, (px_int)pObject->y, PX_ALIGN_CENTER,0, (px_int)pMyObject->rotation); // 渲染图片
+    PX_Object_MyObject *pMyObject = PX_ObjectGetDesc(PX_Object_MyObject, pObject);
+    PX_TextureRenderRotation(psurface, &pMyObject->image, (px_int)pObject->x, (px_int)pObject->y, PX_ALIGN_CENTER, 0, (px_int)pMyObject->rotation); // 渲染图片
 }
 
 PX_OBJECT_FREE_FUNCTION(MyObjectFree)
 {
-	PX_Object_MyObject *pMyObject=PX_ObjectGetDesc(PX_Object_MyObject,pObject);
-	PX_TextureFree(&pMyObject->image); // 释放图片
+    PX_Object_MyObject *pMyObject = PX_ObjectGetDesc(PX_Object_MyObject, pObject);
+    PX_TextureFree(&pMyObject->image); // 释放图片
 }
 
 PX_OBJECT_EVENT_FUNCTION(MyObjectOnCursorWheel)
 {
-	PX_Object_MyObject *pMyObject=PX_ObjectGetDescIndex(PX_Object_MyObject,pObject,0);
-	if(PX_ObjectIsCursorInRegionAlign(pObject,e,PX_ALIGN_CENTER)) // Object是鼠标位置是否选中当前组件，e是事件
-		pMyObject->rotation += (px_float)PX_Object_Event_GetCursorZ(e)/10;
+    PX_Object_MyObject *pMyObject = PX_ObjectGetDescIndex(PX_Object_MyObject, pObject, 0);
+    if (PX_ObjectIsCursorInRegionAlign(pObject, e, PX_ALIGN_CENTER)) // Object 是鼠标位置是否选中当前组件，e 是事件
+        pMyObject->rotation += (px_float)PX_Object_Event_GetCursorZ(e)/10;
 }
 
 PX_OBJECT_EVENT_FUNCTION(MyObjectOnCursorDown)
 {
-	PX_Object_MyObject* pMyObject = PX_ObjectGetDescIndex(PX_Object_MyObject, pObject, 0);
-	if (PX_ObjectIsCursorInRegionAlign(pObject, e, PX_ALIGN_CENTER)) // Object是鼠标位置是否选中当前组件，e是事件
-	{
-		pMyObject->bselect = PX_TRUE;
-		pMyObject->last_cursorx = PX_Object_Event_GetCursorX(e);
-		pMyObject->last_cursory = PX_Object_Event_GetCursorY(e);
-	}
+    PX_Object_MyObject* pMyObject = PX_ObjectGetDescIndex(PX_Object_MyObject, pObject, 0);
+    if (PX_ObjectIsCursorInRegionAlign(pObject, e, PX_ALIGN_CENTER)) // Object 是鼠标位置是否选中当前组件，e 是事件
+    {
+        pMyObject->bselect = PX_TRUE;
+        pMyObject->last_cursorx = PX_Object_Event_GetCursorX(e);
+        pMyObject->last_cursory = PX_Object_Event_GetCursorY(e);
+    }
 }
 
 PX_OBJECT_EVENT_FUNCTION(MyObjectOnCursorRelease)
 {
-	PX_Object_MyObject* pMyObject = PX_ObjectGetDescIndex(PX_Object_MyObject, pObject, 0);
-	pMyObject->bselect = PX_FALSE;
+    PX_Object_MyObject* pMyObject = PX_ObjectGetDescIndex(PX_Object_MyObject, pObject, 0);
+    pMyObject->bselect = PX_FALSE;
 }
 
 PX_OBJECT_EVENT_FUNCTION(MyObjectOnCursorDrag)
 {
-	PX_Object_MyObject* pMyObject = PX_ObjectGetDescIndex(PX_Object_MyObject, pObject, 0);
-	if (pMyObject->bselect)
-	{
-		pObject->x += PX_Object_Event_GetCursorX(e) - pMyObject->last_cursorx;
-		pObject->y += PX_Object_Event_GetCursorY(e) - pMyObject->last_cursory;
-	}
-	pMyObject->last_cursorx = PX_Object_Event_GetCursorX(e);
-	pMyObject->last_cursory = PX_Object_Event_GetCursorY(e);
+    PX_Object_MyObject* pMyObject = PX_ObjectGetDescIndex(PX_Object_MyObject, pObject, 0);
+    if (pMyObject->bselect)
+    {
+        pObject->x += PX_Object_Event_GetCursorX(e) - pMyObject->last_cursorx;
+        pObject->y += PX_Object_Event_GetCursorY(e) - pMyObject->last_cursory;
+    }
+    pMyObject->last_cursorx = PX_Object_Event_GetCursorX(e);
+    pMyObject->last_cursory = PX_Object_Event_GetCursorY(e);
 }
 
 PX_Object* PX_Object_MyObjectCreate(px_memorypool* mp, PX_Object* parent, px_float x, px_float y)
 {
-	PX_Object *pObject=PX_ObjectCreateEx(mp,parent,x,y,0,128,128,0,0, MyObjectUpdate, MyObjectRender, MyObjectFree,0,sizeof(PX_Object_MyObject)); // 创建一个空的自定义对象
-	PX_Object_MyObject* pMyObject = PX_ObjectGetDescIndex(PX_Object_MyObject, pObject,0); // 取得自定义对象数据
-	pMyObject->rotation = 0;
-	if(!PX_LoadTextureFromFile(mp,&pMyObject->image, "assets/test.png")) // 加载图片
-	{
-		PX_ObjectDelete(pObject); // 加载失败则删除对象
-		return PX_NULL;
-	}
-	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_CURSORWHEEL,MyObjectOnCursorWheel,0); // 注册鼠标滚轮事件
-	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_CURSORDRAG,MyObjectOnCursorDrag,0); // 注册鼠标拖拽事件
-	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_CURSORDOWN,MyObjectOnCursorDown,0); // 注册鼠标按下事件
-	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_CURSORUP,MyObjectOnCursorRelease,0); // 注册鼠标释放事件
-	PX_ObjectRegisterEvent(pObject, PX_OBJECT_EVENT_CURSORMOVE, MyObjectOnCursorRelease, 0); // 注册鼠标释放事件
-	return pObject;
+    PX_Object *pObject = PX_ObjectCreateEx(mp, parent, x, y, 0, 128, 128, 0, 0, MyObjectUpdate, MyObjectRender, MyObjectFree, 0, sizeof(PX_Object_MyObject)); // 创建一个空的自定义对象
+    PX_Object_MyObject* pMyObject = PX_ObjectGetDescIndex(PX_Object_MyObject, pObject, 0); // 取得自定义对象数据
+    pMyObject->rotation = 0;
+    if (!PX_LoadTextureFromFile(mp, &pMyObject->image, "assets/test.png")) // 加载图片
+    {
+        PX_ObjectDelete(pObject); // 加载失败则删除对象
+        return PX_NULL;
+    }
+    PX_ObjectRegisterEvent(pObject, PX_OBJECT_EVENT_CURSORWHEEL, MyObjectOnCursorWheel, 0); // 注册鼠标滚轮事件
+    PX_ObjectRegisterEvent(pObject, PX_OBJECT_EVENT_CURSORDRAG, MyObjectOnCursorDrag, 0); // 注册鼠标拖拽事件
+    PX_ObjectRegisterEvent(pObject, PX_OBJECT_EVENT_CURSORDOWN, MyObjectOnCursorDown, 0); // 注册鼠标按下事件
+    PX_ObjectRegisterEvent(pObject, PX_OBJECT_EVENT_CURSORUP, MyObjectOnCursorRelease, 0); // 注册鼠标释放事件
+    PX_ObjectRegisterEvent(pObject, PX_OBJECT_EVENT_CURSORMOVE, MyObjectOnCursorRelease, 0); // 注册鼠标释放事件
+    return pObject;
 }
 
 px_int main()
 {
-	PainterEngine_Initialize(800, 480);
-	PX_Object_MyObjectCreate(mp,root,400,240); // 创建一个自定义对象
-	return PX_TRUE;
+    PainterEngine_Initialize(800, 480);
+    PX_Object_MyObjectCreate(mp, root, 400, 240); // 创建一个自定义对象
+    return PX_TRUE;
 }
 ```
 ![](assets/img/12.4.gif)
@@ -1234,27 +1234,27 @@ PX_Object* image;
 
 PX_OBJECT_EVENT_FUNCTION(ButtonEvent)
 {
-	PX_Object_Image *pImage=PX_Object_GetImage(pObject); // 取得Image对象数据
-	PX_Object_Button *pButton=PX_Object_GetButton(pObject); // 取得Button对象数据
-	if (pImage->pTexture==&tex1)
-	{
-		PX_Object_ImageSetTexture(pObject,&tex2);
-	}
-	else
-	{
-		PX_Object_ImageSetTexture(pObject,&tex1);
-	}
+    PX_Object_Image *pImage = PX_Object_GetImage(pObject); // 取得 Image 对象数据
+    PX_Object_Button *pButton = PX_Object_GetButton(pObject); // 取得 Button 对象数据
+    if (pImage->pTexture == &tex1)
+    {
+        PX_Object_ImageSetTexture(pObject, &tex2);
+    }
+    else
+    {
+        PX_Object_ImageSetTexture(pObject, &tex1);
+    }
 }
 
 px_int main()
 {
-	PainterEngine_Initialize(800, 480);
-	if(!PX_LoadTextureFromFile(mp_static,&tex1,"assets/1.png")) return 0; // 加载纹理1
-	if(!PX_LoadTextureFromFile(mp_static,&tex2,"assets/2.png")) return 0; // 加载纹理2
-	image=PX_Object_ImageCreate(mp,root,300,140,200,200,&tex1); // 创建Image对象
-	PX_Object_ButtonAttachObject(image, 1, PX_COLOR(64, 255, 255, 255), PX_COLOR(96, 255, 255, 255)); // 将一个Button对象类型组合到Image对象上
-	PX_ObjectRegisterEvent(image,PX_OBJECT_EVENT_EXECUTE,ButtonEvent,0); // 这里实际上是注册Button对象的事件
-	return 1;
+    PainterEngine_Initialize(800, 480);
+    if (!PX_LoadTextureFromFile(mp_static, &tex1, "assets/1.png")) return 0; // 加载纹理 1
+    if (!PX_LoadTextureFromFile(mp_static, &tex2, "assets/2.png")) return 0; // 加载纹理 2
+    image = PX_Object_ImageCreate(mp, root, 300, 140, 200, 200, &tex1); // 创建 Image 对象
+    PX_Object_ButtonAttachObject(image, 1, PX_COLOR(64, 255, 255, 255), PX_COLOR(96, 255, 255, 255)); // 将一个 Button 对象类型组合到 Image 对象上
+    PX_ObjectRegisterEvent(image, PX_OBJECT_EVENT_EXECUTE, ButtonEvent, 0); // 这里实际上是注册 Button 对象的事件
+    return 1;
 }
 ```
 
@@ -1278,56 +1278,56 @@ px_void* PX_ObjectCreateDesc(PX_Object* pObject, px_int idesc, px_int type, Func
 #include "PainterEngine.h"
 typedef struct
 {
-	px_float last_cursorx, last_cursory;
-	px_bool bselect;
+    px_float last_cursorx, last_cursory;
+    px_bool bselect;
 }PX_Object_Drag;
 
 
 PX_OBJECT_EVENT_FUNCTION(PX_Object_DragOnCursorDown)
 {
-	PX_Object_Drag* pPX_Object_Drag = PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_DRAG);
-	if (PX_ObjectIsCursorInRegionAlign(pObject, e, PX_ALIGN_LEFTTOP))
-	{
-		pPX_Object_Drag->bselect = PX_TRUE;
-		pPX_Object_Drag->last_cursorx = PX_Object_Event_GetCursorX(e);
-		pPX_Object_Drag->last_cursory = PX_Object_Event_GetCursorY(e);
-	}
+    PX_Object_Drag* pPX_Object_Drag = PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_DRAG);
+    if (PX_ObjectIsCursorInRegionAlign(pObject, e, PX_ALIGN_LEFTTOP))
+    {
+        pPX_Object_Drag->bselect = PX_TRUE;
+        pPX_Object_Drag->last_cursorx = PX_Object_Event_GetCursorX(e);
+        pPX_Object_Drag->last_cursory = PX_Object_Event_GetCursorY(e);
+    }
 }
 
 PX_OBJECT_EVENT_FUNCTION(PX_Object_DragOnCursorRelease)
 {
-	PX_Object_Drag* pPX_Object_Drag = PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_DRAG);
-	pPX_Object_Drag->bselect = PX_FALSE;
+    PX_Object_Drag* pPX_Object_Drag = PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_DRAG);
+    pPX_Object_Drag->bselect = PX_FALSE;
 }
 
 PX_OBJECT_EVENT_FUNCTION(PX_Object_DragOnCursorDrag)
 {
-	PX_Object_Drag* pPX_Object_Drag = PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_DRAG);
-	if (pPX_Object_Drag->bselect)
-	{
-		pObject->x += PX_Object_Event_GetCursorX(e) - pPX_Object_Drag->last_cursorx;
-		pObject->y += PX_Object_Event_GetCursorY(e) - pPX_Object_Drag->last_cursory;
-	}
-	pPX_Object_Drag->last_cursorx = PX_Object_Event_GetCursorX(e);
-	pPX_Object_Drag->last_cursory = PX_Object_Event_GetCursorY(e);
+    PX_Object_Drag* pPX_Object_Drag = PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_DRAG);
+    if (pPX_Object_Drag->bselect)
+    {
+        pObject->x += PX_Object_Event_GetCursorX(e) - pPX_Object_Drag->last_cursorx;
+        pObject->y += PX_Object_Event_GetCursorY(e) - pPX_Object_Drag->last_cursory;
+    }
+    pPX_Object_Drag->last_cursorx = PX_Object_Event_GetCursorX(e);
+    pPX_Object_Drag->last_cursory = PX_Object_Event_GetCursorY(e);
 }
 
 
 PX_Object* PX_Object_DragAttachObject(PX_Object* pObject, px_int attachIndex)
 {
-	PX_Object_Drag* pDesc;
+    PX_Object_Drag* pDesc;
 
 
-	PX_ASSERTIF(pObject == PX_NULL);
-	PX_ASSERTIF(attachIndex < 0 || attachIndex >= PX_COUNTOF(pObject->pObjectDesc));
-	PX_ASSERTIF(pObject->pObjectDesc[attachIndex] != PX_NULL);
-	pDesc = (PX_Object_Drag*)PX_ObjectCreateDesc(pObject, attachIndex, PX_OBJECT_TYPE_DRAG, 0, 0, 0, 0, sizeof(PX_Object_Drag));
-	PX_ASSERTIF(pDesc == PX_NULL);
-	PX_ObjectRegisterEvent(pObject, PX_OBJECT_EVENT_CURSORDRAG, PX_Object_DragOnCursorDrag, 0);
-	PX_ObjectRegisterEvent(pObject, PX_OBJECT_EVENT_CURSORDOWN, PX_Object_DragOnCursorDown, 0);
-	PX_ObjectRegisterEvent(pObject, PX_OBJECT_EVENT_CURSORUP, PX_Object_DragOnCursorRelease, 0);
-	PX_ObjectRegisterEvent(pObject, PX_OBJECT_EVENT_CURSORMOVE, PX_Object_DragOnCursorRelease, 0);
-	return pObject;
+    PX_ASSERTIF(pObject == PX_NULL);
+    PX_ASSERTIF(attachIndex < 0 || attachIndex >= PX_COUNTOF(pObject->pObjectDesc));
+    PX_ASSERTIF(pObject->pObjectDesc[attachIndex] != PX_NULL);
+    pDesc = (PX_Object_Drag*)PX_ObjectCreateDesc(pObject, attachIndex, PX_OBJECT_TYPE_DRAG, 0, 0, 0, 0, sizeof(PX_Object_Drag));
+    PX_ASSERTIF(pDesc == PX_NULL);
+    PX_ObjectRegisterEvent(pObject, PX_OBJECT_EVENT_CURSORDRAG, PX_Object_DragOnCursorDrag, 0);
+    PX_ObjectRegisterEvent(pObject, PX_OBJECT_EVENT_CURSORDOWN, PX_Object_DragOnCursorDown, 0);
+    PX_ObjectRegisterEvent(pObject, PX_OBJECT_EVENT_CURSORUP, PX_Object_DragOnCursorRelease, 0);
+    PX_ObjectRegisterEvent(pObject, PX_OBJECT_EVENT_CURSORMOVE, PX_Object_DragOnCursorRelease, 0);
+    return pObject;
 }
 
 px_texture tex1;
@@ -1335,11 +1335,11 @@ PX_Object* image;
 
 px_int main()
 {
-	PainterEngine_Initialize(800, 480);
-	if(!PX_LoadTextureFromFile(mp_static,&tex1,"assets/1.png")) return 0; // 加载纹理1
-	image=PX_Object_ImageCreate(mp,root,300,140,200,200,&tex1); // 创建Image对象
-	PX_Object_DragAttachObject(image, 1); // 将一个Drag对象类型组合到Image对象上
-	return 1;
+    PainterEngine_Initialize(800, 480);
+    if (!PX_LoadTextureFromFile(mp_static, &tex1, "assets/1.png")) return 0; // 加载纹理 1
+    image = PX_Object_ImageCreate(mp, root, 300, 140, 200, 200, &tex1); // 创建 Image 对象
+    PX_Object_DragAttachObject(image, 1); // 将一个 Drag 对象类型组合到 Image 对象上
+    return 1;
 }
 ```
 
@@ -1357,17 +1357,17 @@ PainterEngine 提供了一个粒子系统实现，下面是一个粒子系统的
 
 PX_OBJECT_EVENT_FUNCTION(MyClick)
 {
-	px_float x = PX_Object_Event_GetCursorX(e);
-	px_float y = PX_Object_Event_GetCursorY(e);
+    px_float x = PX_Object_Event_GetCursorX(e);
+    px_float y = PX_Object_Event_GetCursorY(e);
 
-	PX_Object_Explosion05Create(mp, root, x, y, 10, 20);
+    PX_Object_Explosion05Create(mp, root, x, y, 10, 20);
 }
 
 px_int main()
 {
-	PainterEngine_Initialize(800, 600);
-	PX_ObjectRegisterEvent(root, PX_OBJECT_EVENT_CURSORDOWN, MyClick, PX_NULL);
-	return 0;
+    PainterEngine_Initialize(800, 600);
+    PX_ObjectRegisterEvent(root, PX_OBJECT_EVENT_CURSORDOWN, MyClick, PX_NULL);
+    return 0;
 }
 ```
 
@@ -1381,37 +1381,37 @@ px_texture texture;
 
 int main()
 {
-	PX_Object* pObject;
-	PX_ParticalLauncher_InitializeInfo ParticalInfo;
-	PainterEngine_Initialize(600, 400);
-	PX_LoadTextureFromFile(mp_static, &texture, "assets/star.traw");
+    PX_Object* pObject;
+    PX_ParticalLauncher_InitializeInfo ParticalInfo;
+    PainterEngine_Initialize(600, 400);
+    PX_LoadTextureFromFile(mp_static, &texture, "assets/star.traw");
 
-	PX_ParticalLauncherInitializeDefaultInfo(&ParticalInfo);
-	ParticalInfo.deviation_rangAngle = 360;
-	ParticalInfo.deviation_velocity_max = 50;
-	ParticalInfo.deviation_velocity_min = -50;
-	ParticalInfo.direction = PX_POINT(0, -1, 0);
-	ParticalInfo.generateDuration = 100;
-	ParticalInfo.launchCount = -1;
-	ParticalInfo.maxCount = 100;
-	ParticalInfo.position = PX_POINT(0, 0, 0);
-	ParticalInfo.tex = &texture;
-	ParticalInfo.velocity = 100;
-	ParticalInfo.alive = 5000;
-	ParticalInfo.rotation = 180;
-	ParticalInfo.deviation_rotation = 180;
-	ParticalInfo.atomsize = 0.7f;
-	ParticalInfo.deviation_atomsize_max = 0.7f;
-	ParticalInfo.deviation_atomsize_min = -0.5f;
-	ParticalInfo.alpha = 0.8f;
-	ParticalInfo.deviation_alpha = 0.3f;
-	ParticalInfo.deviation_hdrR = 0.5f;
-	ParticalInfo.deviation_hdrG = 0.5f;
-	ParticalInfo.deviation_hdrB = 0.5f;
-	ParticalInfo.alphaincrease = -0.2f;
+    PX_ParticalLauncherInitializeDefaultInfo(&ParticalInfo);
+    ParticalInfo.deviation_rangAngle = 360;
+    ParticalInfo.deviation_velocity_max = 50;
+    ParticalInfo.deviation_velocity_min = -50;
+    ParticalInfo.direction = PX_POINT(0, -1, 0);
+    ParticalInfo.generateDuration = 100;
+    ParticalInfo.launchCount = -1;
+    ParticalInfo.maxCount = 100;
+    ParticalInfo.position = PX_POINT(0, 0, 0);
+    ParticalInfo.tex = &texture;
+    ParticalInfo.velocity = 100;
+    ParticalInfo.alive = 5000;
+    ParticalInfo.rotation = 180;
+    ParticalInfo.deviation_rotation = 180;
+    ParticalInfo.atomsize = 0.7f;
+    ParticalInfo.deviation_atomsize_max = 0.7f;
+    ParticalInfo.deviation_atomsize_min = -0.5f;
+    ParticalInfo.alpha = 0.8f;
+    ParticalInfo.deviation_alpha = 0.3f;
+    ParticalInfo.deviation_hdrR = 0.5f;
+    ParticalInfo.deviation_hdrG = 0.5f;
+    ParticalInfo.deviation_hdrB = 0.5f;
+    ParticalInfo.alphaincrease = -0.2f;
 
-	pObject=PX_Object_ParticalCreate(mp,root,300,200,ParticalInfo);
-	return 0;
+    pObject = PX_Object_ParticalCreate(mp, root, 300, 200, ParticalInfo);
+    return 0;
 }
 ```
 
@@ -1435,7 +1435,7 @@ int main()
 
 9. 针对 `ParticalInfo` 的各个属性进行了具体的配置，包括粒子的位置、速度、寿命、大小、旋转等。这些属性决定了粒子的外观和行为。
 
-10. `pObject=PX_Object_ParticalCreate(mp,root,300,200,ParticalInfo);`：使用配置好的 `ParticalInfo` 创建一个粒子系统对象，并将其存储在 `pObject` 中。这个粒子系统对象将会在窗口中的位置 (300, 200) 处发射粒子。
+10. `pObject = PX_Object_ParticalCreate(mp, root, 300, 200, ParticalInfo);`：使用配置好的 `ParticalInfo` 创建一个粒子系统对象，并将其存储在 `pObject` 中。这个粒子系统对象将会在窗口中的位置 (300, 200) 处发射粒子。
 
 其中 `PX_ParticalLauncher_InitializeInfo` 用于配置粒子发射器的初始化信息，即在创建粒子系统时，可以通过填充这个结构体来指定粒子系统的各种属性和行为。以下是该结构体的各个成员的说明：
 
@@ -1517,13 +1517,13 @@ PainterEngine 内置了对 wav 及 mp3 格式音乐的原生支持，使用 Pain
 PX_SoundData sounddata; // 定义音乐格式
 int main()
 {
-	PX_Object* pObject;
-	PainterEngine_Initialize(600, 400);
-	PainterEngine_InitializeAudio(); // 初始化混音器及音乐设备
-	if (!PX_LoadSoundFromFile(mp_static, &sounddata, "assets/bliss.wav"))return PX_FALSE; // 加载音乐,支持wav及mp3格式
-	PX_SoundPlayAdd(soundplay, PX_SoundCreate(&sounddata, PX_TRUE)); // 播放音乐
-	pObject = PX_Object_SoundViewCreate(mp,root,0,0,600,400,soundplay); // 音乐频谱可视化组件,可选
-	return 0;
+    PX_Object* pObject;
+    PainterEngine_Initialize(600, 400);
+    PainterEngine_InitializeAudio(); // 初始化混音器及音乐设备
+    if (!PX_LoadSoundFromFile(mp_static, &sounddata, "assets/bliss.wav")) return PX_FALSE; // 加载音乐，支持 wav 及 mp3 格式
+    PX_SoundPlayAdd(soundplay, PX_SoundCreate(&sounddata, PX_TRUE)); // 播放音乐
+    pObject = PX_Object_SoundViewCreate(mp, root, 0, 0, 600, 400, soundplay); // 音乐频谱可视化组件，可选
+    return 0;
 }
 ```
 
@@ -1543,24 +1543,24 @@ PX_Object* pObject;
 
 PX_OBJECT_EVENT_FUNCTION(onClick)
 {
-	PX_Object_Live2DPlayAnimationRandom(pObject);
+    PX_Object_Live2DPlayAnimationRandom(pObject);
 }
 
 int main()
 {
-	
-	PX_IO_Data iodata;
-	PainterEngine_Initialize(600, 600);
-	// 加载模型数据
-	iodata = PX_LoadFileToIOData("assets/release.live");
-	if (iodata.size == 0)return PX_FALSE;
-	PX_LiveFrameworkImport(mp_static, &liveframework, iodata.buffer, iodata.size);
-	PX_FreeIOData(&iodata);
-	// 创建Live2D对象
-	pObject = PX_Object_Live2DCreate(mp,root,300,300,&liveframework);
-	PX_ObjectRegisterEvent(pObject, PX_OBJECT_EVENT_CURSORDOWN, onClick, PX_NULL);
+    
+    PX_IO_Data iodata;
+    PainterEngine_Initialize(600, 600);
+    // 加载模型数据
+    iodata = PX_LoadFileToIOData("assets/release.live");
+    if (iodata.size == 0) return PX_FALSE;
+    PX_LiveFrameworkImport(mp_static, &liveframework, iodata.buffer, iodata.size);
+    PX_FreeIOData(&iodata);
+    // 创建 Live2D 对象
+    pObject = PX_Object_Live2DCreate(mp, root, 300, 300, &liveframework);
+    PX_ObjectRegisterEvent(pObject, PX_OBJECT_EVENT_CURSORDOWN, onClick, PX_NULL);
 
-	return 0;
+    return 0;
 }
 
 ```
@@ -1624,12 +1624,12 @@ px_void PX_Object_Live2DPlayAnimationIndex(PX_Object* pObject, px_int index);
 
 PainterEngine 内置了一个平台无关的脚本引擎系统，集成了编译，运行，调试等功能，你可以很轻松地在脚本之上，实现并行调度功能。PainterEngine Script 的设计，最大程度和 C 语言保持一致性，并对一些类型进行的拓展和简化。
 
-例如在脚本中，支持 `int`、`float`、`string`、`memory` 四种类型，`int` 类型是一个 32 位的有符号整数，`float` 是一个浮点数类型，这个和 C 语言的类型保持了一致。`string` 类型类似于 C++的 `string`，它允许直接用 `+` 法运算符进行字符串拼接，使用 `strlen` 来获取其字符串长度，而 `memory` 是一个二进制数据存储类型，同样支持 `+` 运算进行拼接。
+例如在脚本中，支持 `int`、`float`、`string`、`memory` 四种类型，`int` 类型是一个 32 位的有符号整数，`float` 是一个浮点数类型，这个和 C 语言的类型保持了一致。`string` 类型类似于 C++ 的 `string`，它允许直接用 `+` 法运算符进行字符串拼接，使用 `strlen` 来获取其字符串长度，而 `memory` 是一个二进制数据存储类型，同样支持 `+` 运算进行拼接。
 
 在脚本中如果需要调用 C 语言函数，应该使用 `PX_VM_HOST_FUNCTION` 宏进行定义声明。和组件回调函数一样，`PX_VM_HOST_FUNCTION` 的定义如下：
 
 ```c
-#define PX_VM_HOST_FUNCTION(name) px_bool name(PX_VM *Ins,px_void *userptr)
+#define PX_VM_HOST_FUNCTION(name) px_bool name(PX_VM *Ins, px_void *userptr)
 ```
 在下面的内容中，我将以一个简单的脚本实例作为范例，为你演示如何使用 PainterEngine 的脚本引擎：
 
@@ -1640,7 +1640,7 @@ host void print(string s);\n\
 host void sleep(int ms);\n\
 int main()\n\
 {\n\
- int i,j;\n\
+ int i, j;\n\
  for(i = 1; i <= 9; i++)\n\
  {\n\
   for(j = 1; j <= i; j++)\n\
@@ -1653,20 +1653,20 @@ int main()\n\
 
 PX_VM_HOST_FUNCTION(host_print)
 {
-	if (PX_VM_HOSTPARAM(Ins, 0).type == PX_VARIABLE_TYPE_STRING)
-	{
-		PainterEngine_Print(PX_VM_HOSTPARAM(Ins, 0)._string.buffer);
-	}
-	return PX_TRUE;
+    if (PX_VM_HOSTPARAM(Ins, 0).type == PX_VARIABLE_TYPE_STRING)
+    {
+        PainterEngine_Print(PX_VM_HOSTPARAM(Ins, 0)._string.buffer);
+    }
+    return PX_TRUE;
 }
 
 PX_VM_HOST_FUNCTION(host_sleep)
 {
-	if (PX_VM_HOSTPARAM(Ins, 0).type == PX_VARIABLE_TYPE_INT)
-	{
-		PX_VM_Sleep(Ins,PX_VM_HOSTPARAM(Ins, 0)._int);
-	}
-	return PX_TRUE;
+    if (PX_VM_HOSTPARAM(Ins, 0).type == PX_VARIABLE_TYPE_INT)
+    {
+        PX_VM_Sleep(Ins, PX_VM_HOSTPARAM(Ins, 0)._int);
+    }
+    return PX_TRUE;
 }
 
 ```
@@ -1679,31 +1679,31 @@ PX_VM_HOST_FUNCTION(host_sleep)
 PX_VM vm;
 PX_OBJECT_UPDATE_FUNCTION(VMUpdate)
 {
-	PX_VMRun(&vm, 0xffff, elapsed); // 运行虚拟机
+    PX_VMRun(&vm, 0xffff, elapsed); // 运行虚拟机
 }
 
 px_int main()
 {
-	PX_Compiler compiler;
-	px_memory bin;
-	PainterEngine_Initialize(800, 600);
-	PainterEngine_SetBackgroundColor(PX_COLOR_BLACK);
-	PX_CompilerInitialize(mp, &compiler); // 初始化编译器
-	PX_CompilerAddSource(&compiler, shellcode); // 编译器中添加代码
-	PX_MemoryInitialize(mp, &bin); // 初始化内存/用于存储编译后的结果
-	if (!PX_CompilerCompile(&compiler, &bin, 0, "main"))
-	{
-		// 编译失败
-		return 0;
-	}
-	PX_CompilerFree(&compiler); // 释放编译器
-	PX_VMInitialize(&vm,mp,bin.buffer,bin.usedsize); // 初始化虚拟机
-	PX_VMRegisterHostFunction(&vm, "print", host_print,0); // 注册主机函数print
-	PX_VMRegisterHostFunction(&vm, "sleep", host_sleep,0); // 注册主机函数sleep
-	PX_VMBeginThreadFunction(&vm, 0, "main", PX_NULL, 0); // 开始运行虚拟机函数
-	PX_ObjectSetUpdateFunction(root, VMUpdate, 0); // 设置更新函数
+    PX_Compiler compiler;
+    px_memory bin;
+    PainterEngine_Initialize(800, 600);
+    PainterEngine_SetBackgroundColor(PX_COLOR_BLACK);
+    PX_CompilerInitialize(mp, &compiler); // 初始化编译器
+    PX_CompilerAddSource(&compiler, shellcode); // 编译器中添加代码
+    PX_MemoryInitialize(mp, &bin); // 初始化内存/用于存储编译后的结果
+    if (!PX_CompilerCompile(&compiler, &bin, 0, "main"))
+    {
+        // 编译失败
+        return 0;
+    }
+    PX_CompilerFree(&compiler); // 释放编译器
+    PX_VMInitialize(&vm, mp, bin.buffer, bin.usedsize); // 初始化虚拟机
+    PX_VMRegisterHostFunction(&vm, "print", host_print, 0); // 注册主机函数 print
+    PX_VMRegisterHostFunction(&vm, "sleep", host_sleep, 0); // 注册主机函数 sleep
+    PX_VMBeginThreadFunction(&vm, 0, "main", PX_NULL, 0); // 开始运行虚拟机函数
+    PX_ObjectSetUpdateFunction(root, VMUpdate, 0); // 设置更新函数
 
-	return 0;
+    return 0;
 }
 ```
 
@@ -1718,28 +1718,28 @@ px_int main()
 ```c
 px_int main()
 {
-	PX_Compiler compiler;
-	px_memory bin;
-	PainterEngine_Initialize(800, 480);
-	PX_VMDebuggerMapInitialize(mp,&debugmap);
-	PainterEngine_SetBackgroundColor(PX_COLOR_BLACK);
-	PX_CompilerInitialize(mp, &compiler); // 初始化编译器
-	PX_CompilerAddSource(&compiler, shellcode); // 编译器中添加代码
-	PX_MemoryInitialize(mp, &bin); // 初始化内存/用于存储编译后的结果
-	if (!PX_CompilerCompile(&compiler, &bin, &debugmap, "main"))
-	{
-		// 编译失败
-		return 0;
-	}
-	PX_CompilerFree(&compiler); // 释放编译器
-	PX_VMInitialize(&vm,mp,bin.buffer,bin.usedsize); // 初始化虚拟机
-	PX_VMRegisterHostFunction(&vm, "print", host_print,0); // 注册主机函数print
-	PX_VMRegisterHostFunction(&vm, "sleep", host_sleep,0); // 注册主机函数sleep
-	PX_VMBeginThreadFunction(&vm, 0, "main", PX_NULL, 0); // 开始运行虚拟机函数
-	PX_Object *pDbgObject = PX_Object_AsmDebuggerCreate(mp, root, 0, 0, 800, 480, 0);
-	pDbgObject->Visible = PX_TRUE;
-	PX_Object_AsmDebuggerAttach(pDbgObject, &debugmap, &vm);
-	return 0;
+    PX_Compiler compiler;
+    px_memory bin;
+    PainterEngine_Initialize(800, 480);
+    PX_VMDebuggerMapInitialize(mp, &debugmap);
+    PainterEngine_SetBackgroundColor(PX_COLOR_BLACK);
+    PX_CompilerInitialize(mp, &compiler); // 初始化编译器
+    PX_CompilerAddSource(&compiler, shellcode); // 编译器中添加代码
+    PX_MemoryInitialize(mp, &bin); // 初始化内存/用于存储编译后的结果
+    if (!PX_CompilerCompile(&compiler, &bin, &debugmap, "main"))
+    {
+        // 编译失败
+        return 0;
+    }
+    PX_CompilerFree(&compiler); // 释放编译器
+    PX_VMInitialize(&vm, mp, bin.buffer, bin.usedsize); // 初始化虚拟机
+    PX_VMRegisterHostFunction(&vm, "print", host_print, 0); // 注册主机函数 print
+    PX_VMRegisterHostFunction(&vm, "sleep", host_sleep, 0); // 注册主机函数 sleep
+    PX_VMBeginThreadFunction(&vm, 0, "main", PX_NULL, 0); // 开始运行虚拟机函数
+    PX_Object *pDbgObject = PX_Object_AsmDebuggerCreate(mp, root, 0, 0, 800, 480, 0);
+    pDbgObject->Visible = PX_TRUE;
+    PX_Object_AsmDebuggerAttach(pDbgObject, &debugmap, &vm);
+    return 0;
 }
 ```
 
@@ -1760,30 +1760,30 @@ px_int main()
 ```c
 px_int main()
 {
-	px_int i;
-	PainterEngine_Initialize(800, 480);
-	PX_FontModuleInitialize(mp_static,&score_fm);
-	PX_FontModuleSetCodepage(&score_fm, PX_FONTMODULE_CODEPAGE_GBK);
-	if (!PX_LoadTextureToResource(PainterEngine_GetResourceLibrary(), "assets/rasing.png", "fox_rasing")) return 0;
-	if (!PX_LoadTextureToResource(PainterEngine_GetResourceLibrary(), "assets/taunt.png", "fox_taunt")) return 0;
-	if (!PX_LoadTextureToResource(PainterEngine_GetResourceLibrary(), "assets/escape.png", "fox_escape")) return 0;
-	if (!PX_LoadTextureToResource(PainterEngine_GetResourceLibrary(), "assets/beat.png", "fox_beat")) return 0;
-	if (!PX_LoadTextureToResource(PainterEngine_GetResourceLibrary(), "assets/hurt.png", "fox_hurt")) return 0;
-	if (!PX_LoadTextureToResource(PainterEngine_GetResourceLibrary(), "assets/mask.png", "fox_mask")) return 0;
-	if (!PX_LoadTextureToResource(PainterEngine_GetResourceLibrary(), "assets/background.png", "background")) return 0;
-	if (!PX_LoadAnimationToResource(PainterEngine_GetResourceLibrary(), "assets/song.2dx", "song"))return 0;
-	PainterEngine_SetBackgroundTexture(PX_ResourceLibraryGetTexture(PainterEngine_GetResourceLibrary(), "background"));
-	for (i = 0; i <= 9; i++)
-	{
-		px_texture tex;
-		px_char path[64];
-		PX_sprintf1(path,64, "assets/%1.png", PX_STRINGFORMAT_INT(i));
-		if (PX_LoadTextureFromFile(mp,&tex,path))
-		{
-			PX_FontModuleAddNewTextureCharacter(&score_fm, '0' + i, &tex);
-		}
-		PX_TextureFree(&tex);
-	}
+    px_int i;
+    PainterEngine_Initialize(800, 480);
+    PX_FontModuleInitialize(mp_static, &score_fm);
+    PX_FontModuleSetCodepage(&score_fm, PX_FONTMODULE_CODEPAGE_GBK);
+    if (!PX_LoadTextureToResource(PainterEngine_GetResourceLibrary(), "assets/rasing.png", "fox_rasing")) return 0;
+    if (!PX_LoadTextureToResource(PainterEngine_GetResourceLibrary(), "assets/taunt.png", "fox_taunt")) return 0;
+    if (!PX_LoadTextureToResource(PainterEngine_GetResourceLibrary(), "assets/escape.png", "fox_escape")) return 0;
+    if (!PX_LoadTextureToResource(PainterEngine_GetResourceLibrary(), "assets/beat.png", "fox_beat")) return 0;
+    if (!PX_LoadTextureToResource(PainterEngine_GetResourceLibrary(), "assets/hurt.png", "fox_hurt")) return 0;
+    if (!PX_LoadTextureToResource(PainterEngine_GetResourceLibrary(), "assets/mask.png", "fox_mask")) return 0;
+    if (!PX_LoadTextureToResource(PainterEngine_GetResourceLibrary(), "assets/background.png", "background")) return 0;
+    if (!PX_LoadAnimationToResource(PainterEngine_GetResourceLibrary(), "assets/song.2dx", "song")) return 0;
+    PainterEngine_SetBackgroundTexture(PX_ResourceLibraryGetTexture(PainterEngine_GetResourceLibrary(), "background"));
+    for (i = 0; i <= 9; i++)
+    {
+        px_texture tex;
+        px_char path[64];
+        PX_sprintf1(path, 64, "assets/%1.png", PX_STRINGFORMAT_INT(i));
+        if (PX_LoadTextureFromFile(mp, &tex, path))
+        {
+            PX_FontModuleAddNewTextureCharacter(&score_fm, '0' + i, &tex);
+        }
+        PX_TextureFree(&tex);
+    }
 }
 ```
 
@@ -1822,194 +1822,193 @@ PX_Object_PushButtonSetCursorColor(startgame, PX_COLOR(168, 255, 255, 255));
 ```c
 typedef enum
 {
-	PX_OBJECT_FOX_STATE_IDLE,   // 狐狸还在洞里
-	PX_OBJECT_FOX_STATE_RASING, // 狐狸正在升起
-	PX_OBJECT_FOX_STATE_TAUNT,  // 狐狸在嘲讽
-	PX_OBJECT_FOX_STATE_ESCAPE, // 狐狸逃跑
-	PX_OBJECT_FOX_STATE_BEAT,   // 狐狸被打
-	PX_OBJECT_FOX_STATE_HURT,   // 狐狸受伤后逃跑
+    PX_OBJECT_FOX_STATE_IDLE,   // 狐狸还在洞里
+    PX_OBJECT_FOX_STATE_RASING, // 狐狸正在升起
+    PX_OBJECT_FOX_STATE_TAUNT,  // 狐狸在嘲讽
+    PX_OBJECT_FOX_STATE_ESCAPE, // 狐狸逃跑
+    PX_OBJECT_FOX_STATE_BEAT,   // 狐狸被打
+    PX_OBJECT_FOX_STATE_HURT,   // 狐狸受伤后逃跑
 }PX_OBJECT_FOX_STATE;
 
 typedef struct
 {
-	PX_OBJECT_FOX_STATE state;            // 狐狸状态
-	px_dword elapsed;                     // 状态持续时间
-	px_float texture_render_offset;       // 纹理渲染偏移
-	px_dword gen_rand_time;               // 生成随机时间
-	px_float rasing_down_speed;           // 升起速度
-	px_texture render_target;             // 渲染目标
-	px_texture* pcurrent_display_texture; // 当前显示的纹理
-	px_texture* ptexture_mask;            // 遮罩
+    PX_OBJECT_FOX_STATE state;            // 狐狸状态
+    px_dword elapsed;                     // 状态持续时间
+    px_float texture_render_offset;       // 纹理渲染偏移
+    px_dword gen_rand_time;               // 生成随机时间
+    px_float rasing_down_speed;           // 升起速度
+    px_texture render_target;             // 渲染目标
+    px_texture* pcurrent_display_texture; // 当前显示的纹理
+    px_texture* ptexture_mask;            // 遮罩
 }PX_Object_Fox;
 
 PX_OBJECT_UPDATE_FUNCTION(PX_Object_FoxOnUpdate)
 {
-	PX_Object_Fox* pfox=PX_ObjectGetDescByType(pObject,PX_OBJECT_TYPE_FOX);
-	switch (pfox->state)
-	{
-		case PX_OBJECT_FOX_STATE_IDLE:
-		{
-			if (pfox->gen_rand_time ==0)
-			{
-				pfox->gen_rand_time = PX_rand() % 3000 + 1000; // 狐狸在洞里的时间,时间到了就升起来
-			}
-			else
-			{
-				if (pfox->gen_rand_time <elapsed) // 时间到了
-				{
-					// 升起
-					pfox->state = PX_OBJECT_FOX_STATE_RASING;
-					pfox->elapsed = 0;
-					pfox->gen_rand_time = 0;
-					pfox->texture_render_offset = pObject->Height;
-					// 改变纹理
-					pfox->pcurrent_display_texture= PX_ResourceLibraryGetTexture(PainterEngine_GetResourceLibrary(), "fox_rasing");
-				}
-				else
-				{
-					pfox->gen_rand_time -= elapsed;
-				}
-			}
-		}
-		break;
-		case PX_OBJECT_FOX_STATE_RASING: // 狐狸升起
-		{
-			pfox->elapsed += elapsed;
-			// 升起纹理偏移量
-			pfox->texture_render_offset -= pfox->rasing_down_speed * elapsed / 1000;
-			if (pfox->texture_render_offset <= 0)
-			{
-				pfox->texture_render_offset = 0;
-				pfox->state = PX_OBJECT_FOX_STATE_TAUNT; // 升起后嘲讽
-				pfox->elapsed = 0;
-			}
-		}
-		break;
-		case PX_OBJECT_FOX_STATE_TAUNT: // 狐狸嘲讽
-		{
-			pfox->elapsed += elapsed;
-			if (pfox->elapsed>600&& pfox->elapsed <1500) // 嘲讽时间
-			{
-				pfox->pcurrent_display_texture = PX_ResourceLibraryGetTexture(PainterEngine_GetResourceLibrary(), "fox_taunt"); // 嘲讽纹理
-			}
-			else if (pfox->elapsed>1500) // 嘲讽结束
-			{
-				pfox->texture_render_offset = 0;
-				pfox->state = PX_OBJECT_FOX_STATE_ESCAPE; // 逃跑
-				pfox->pcurrent_display_texture = PX_ResourceLibraryGetTexture(PainterEngine_GetResourceLibrary(), "fox_escape"); // 逃跑纹理
-				pfox->elapsed = 0;
-			}
-		}
-		break;
-		case PX_OBJECT_FOX_STATE_BEAT: // 狐狸被打
-		{
-			pfox->elapsed += elapsed;
-			if (pfox->elapsed>800)
-			{
-				pfox->pcurrent_display_texture = PX_ResourceLibraryGetTexture(PainterEngine_GetResourceLibrary(), "fox_hurt"); // 受伤纹理
-				pfox->state = PX_OBJECT_FOX_STATE_ESCAPE; // 逃跑
-			}
-		}
-		break;
-		case PX_OBJECT_FOX_STATE_ESCAPE:
-		{
-			pfox->elapsed += elapsed;
-			pfox->texture_render_offset+=pfox->rasing_down_speed * elapsed / 1000;
-			if (pfox->texture_render_offset >= pObject->Height)
-			{
-				pfox->texture_render_offset = pObject->Height;
-				pfox->state = PX_OBJECT_FOX_STATE_IDLE; // 逃跑结束
-				pfox->elapsed = 0; // 重置时间
-				pfox->pcurrent_display_texture = PX_NULL;
-			}
-		}
-		break;
-	default:
-		break;
-	}
+    PX_Object_Fox* pfox = PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_FOX);
+    switch (pfox->state)
+    {
+        case PX_OBJECT_FOX_STATE_IDLE:
+        {
+            if (pfox->gen_rand_time == 0)
+            {
+                pfox->gen_rand_time = PX_rand() % 3000 + 1000; // 狐狸在洞里的时间，时间到了就升起来
+            }
+            else
+            {
+                if (pfox->gen_rand_time <elapsed) // 时间到了
+                {
+                    // 升起
+                    pfox->state = PX_OBJECT_FOX_STATE_RASING;
+                    pfox->elapsed = 0;
+                    pfox->gen_rand_time = 0;
+                    pfox->texture_render_offset = pObject->Height;
+                    // 改变纹理
+                    pfox->pcurrent_display_texture = PX_ResourceLibraryGetTexture(PainterEngine_GetResourceLibrary(), "fox_rasing");
+                }
+                else
+                {
+                    pfox->gen_rand_time -= elapsed;
+                }
+            }
+        }
+        break;
+        case PX_OBJECT_FOX_STATE_RASING: // 狐狸升起
+        {
+            pfox->elapsed += elapsed;
+            // 升起纹理偏移量
+            pfox->texture_render_offset -= pfox->rasing_down_speed * elapsed / 1000;
+            if (pfox->texture_render_offset <= 0)
+            {
+                pfox->texture_render_offset = 0;
+                pfox->state = PX_OBJECT_FOX_STATE_TAUNT; // 升起后嘲讽
+                pfox->elapsed = 0;
+            }
+        }
+        break;
+        case PX_OBJECT_FOX_STATE_TAUNT: // 狐狸嘲讽
+        {
+            pfox->elapsed += elapsed;
+            if (pfox->elapsed>600&& pfox->elapsed <1500) // 嘲讽时间
+            {
+                pfox->pcurrent_display_texture = PX_ResourceLibraryGetTexture(PainterEngine_GetResourceLibrary(), "fox_taunt"); // 嘲讽纹理
+            }
+            else if (pfox->elapsed>1500) // 嘲讽结束
+            {
+                pfox->texture_render_offset = 0;
+                pfox->state = PX_OBJECT_FOX_STATE_ESCAPE; // 逃跑
+                pfox->pcurrent_display_texture = PX_ResourceLibraryGetTexture(PainterEngine_GetResourceLibrary(), "fox_escape"); // 逃跑纹理
+                pfox->elapsed = 0;
+            }
+        }
+        break;
+        case PX_OBJECT_FOX_STATE_BEAT: // 狐狸被打
+        {
+            pfox->elapsed += elapsed;
+            if (pfox->elapsed>800)
+            {
+                pfox->pcurrent_display_texture = PX_ResourceLibraryGetTexture(PainterEngine_GetResourceLibrary(), "fox_hurt"); // 受伤纹理
+                pfox->state = PX_OBJECT_FOX_STATE_ESCAPE; // 逃跑
+            }
+        }
+        break;
+        case PX_OBJECT_FOX_STATE_ESCAPE:
+        {
+            pfox->elapsed += elapsed;
+            pfox->texture_render_offset += pfox->rasing_down_speed * elapsed / 1000;
+            if (pfox->texture_render_offset >= pObject->Height)
+            {
+                pfox->texture_render_offset = pObject->Height;
+                pfox->state = PX_OBJECT_FOX_STATE_IDLE; // 逃跑结束
+                pfox->elapsed = 0; // 重置时间
+                pfox->pcurrent_display_texture = PX_NULL;
+            }
+        }
+        break;
+    default:
+        break;
+    }
 }
 
 PX_OBJECT_RENDER_FUNCTION(PX_Object_FoxOnRender)
 {
-	PX_Object_Fox* pfox = PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_FOX);
-	px_float x,y,width,height;
-	PX_OBJECT_INHERIT_CODE(pObject,x,y,width,height);
-	PX_TextureClearAll(&pfox->render_target, PX_COLOR_NONE); // 清空渲染目标
-	if (pfox->pcurrent_display_texture)
-	{
-		PX_TextureRender(&pfox->render_target, pfox->pcurrent_display_texture, (px_int)pfox->render_target.width/2, (px_int)pfox->texture_render_offset, PX_ALIGN_MIDTOP, PX_NULL); // 渲染狐狸
-	}
-	PX_TextureRenderMask(psurface, pfox->ptexture_mask, &pfox->render_target, (px_int)x, (px_int)y, PX_ALIGN_MIDBOTTOM, PX_NULL); // 以遮罩形式绘制纹理
+    PX_Object_Fox* pfox = PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_FOX);
+    px_float x, y, width, height;
+    PX_OBJECT_INHERIT_CODE(pObject, x, y, width, height);
+    PX_TextureClearAll(&pfox->render_target, PX_COLOR_NONE); // 清空渲染目标
+    if (pfox->pcurrent_display_texture)
+    {
+        PX_TextureRender(&pfox->render_target, pfox->pcurrent_display_texture, (px_int)pfox->render_target.width/2, (px_int)pfox->texture_render_offset, PX_ALIGN_MIDTOP, PX_NULL); // 渲染狐狸
+    }
+    PX_TextureRenderMask(psurface, pfox->ptexture_mask, &pfox->render_target, (px_int)x, (px_int)y, PX_ALIGN_MIDBOTTOM, PX_NULL); // 以遮罩形式绘制纹理
 }
 
 
 PX_OBJECT_FREE_FUNCTION(PX_Object_FoxFree)
 {
-	PX_Object_Fox* pfox = PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_FOX);
-	PX_TextureFree(&pfox->render_target);
+    PX_Object_Fox* pfox = PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_FOX);
+    PX_TextureFree(&pfox->render_target);
 }
 
 PX_OBJECT_EVENT_FUNCTION(PX_Object_FoxOnClick) // 狐狸被点击
 {
-	PX_Object_Fox* pfox = PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_FOX);
-	if (pfox->state == PX_OBJECT_FOX_STATE_TAUNT|| pfox->state == PX_OBJECT_FOX_STATE_RASING) // 狐狸嘲讽或者升起时点击有效
-	{
-		if (PX_ObjectIsCursorInRegionAlign(pObject, e, PX_ALIGN_MIDBOTTOM)) // 点击有效区域
-		{
-			px_int x= (px_int)PX_Object_Event_GetCursorX(e);
-			px_int y= (px_int)PX_Object_Event_GetCursorY(e);
-			x=(px_int)(x-(pObject->x-pObject->Width/2));
-			y= (px_int)(y-(pObject->y - pObject->Height));
-			if (x>32&&y<128)
-			{
-				pfox->pcurrent_display_texture = PX_ResourceLibraryGetTexture(PainterEngine_GetResourceLibrary(), "fox_beat");
-				pfox->state = PX_OBJECT_FOX_STATE_BEAT;
-				pfox->elapsed = 0;
-				PX_Object_ScorePanelAddScore(scorePanel, 100);
-			}
-			
-		}
-	}
+    PX_Object_Fox* pfox = PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_FOX);
+    if (pfox->state == PX_OBJECT_FOX_STATE_TAUNT|| pfox->state == PX_OBJECT_FOX_STATE_RASING) // 狐狸嘲讽或者升起时点击有效
+    {
+        if (PX_ObjectIsCursorInRegionAlign(pObject, e, PX_ALIGN_MIDBOTTOM)) // 点击有效区域
+        {
+            px_int x = (px_int)PX_Object_Event_GetCursorX(e);
+            px_int y = (px_int)PX_Object_Event_GetCursorY(e);
+            x = (px_int)(x - (pObject->x - pObject->Width/2));
+            y = (px_int)(y - (pObject->y - pObject->Height));
+            if (x>32&&y<128)
+            {
+                pfox->pcurrent_display_texture = PX_ResourceLibraryGetTexture(PainterEngine_GetResourceLibrary(), "fox_beat");
+                pfox->state = PX_OBJECT_FOX_STATE_BEAT;
+                pfox->elapsed = 0;
+                PX_Object_ScorePanelAddScore(scorePanel, 100);
+            }
+        }
+    }
 }
 
 PX_OBJECT_EVENT_FUNCTION(PX_Object_FoxOnReset)
 {
-	PX_Object_Fox* pfox = PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_FOX);
-	pfox->state = PX_OBJECT_FOX_STATE_IDLE;
-	pfox->elapsed = 0;
-	pfox->texture_render_offset = pObject->Height;
-	pfox->gen_rand_time = 0;
-	pfox->pcurrent_display_texture = PX_NULL;
+    PX_Object_Fox* pfox = PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_FOX);
+    pfox->state = PX_OBJECT_FOX_STATE_IDLE;
+    pfox->elapsed = 0;
+    pfox->texture_render_offset = pObject->Height;
+    pfox->gen_rand_time = 0;
+    pfox->pcurrent_display_texture = PX_NULL;
 
 }
 
-PX_Object *PX_Object_FoxCreate(px_memorypool *mp,PX_Object *parent,px_float x,px_float y)
+PX_Object *PX_Object_FoxCreate(px_memorypool *mp, PX_Object *parent, px_float x, px_float y)
 {
-	PX_Object_Fox* pfox;
-	px_texture *ptexture=PX_ResourceLibraryGetTexture(PainterEngine_GetResourceLibrary(),"fox_rasing"); // 从资源管理器中获取纹理
-	PX_Object* pObject = PX_ObjectCreateEx(mp, parent, x, y, 0, ptexture->width*1.f, ptexture->height*1.f, 0, PX_OBJECT_TYPE_FOX, PX_Object_FoxOnUpdate, PX_Object_FoxOnRender, PX_Object_FoxFree, 0, sizeof(PX_Object_Fox));
-	pfox=PX_ObjectGetDescByType(pObject,PX_OBJECT_TYPE_FOX);
-	pfox->state= PX_OBJECT_FOX_STATE_IDLE; // 狐狸状态
-	pfox->rasing_down_speed = 512; // 升起速度
-	pfox->ptexture_mask = PX_ResourceLibraryGetTexture(PainterEngine_GetResourceLibrary(), "fox_mask"); // 遮罩
-	if(!PX_TextureCreate(mp,&pfox->render_target,ptexture->width,ptexture->height))
-	{
-		PX_ObjectDelete(pObject);
-		return 0;
-	}
-	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_CURSORDOWN,PX_Object_FoxOnClick,0); // 注册点击事件
-	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_RESET,PX_Object_FoxOnReset,0); // 注册重置事件
-	return pObject;
+    PX_Object_Fox* pfox;
+    px_texture *ptexture = PX_ResourceLibraryGetTexture(PainterEngine_GetResourceLibrary(), "fox_rasing"); // 从资源管理器中获取纹理
+    PX_Object* pObject = PX_ObjectCreateEx(mp, parent, x, y, 0, ptexture->width*1.f, ptexture->height*1.f, 0, PX_OBJECT_TYPE_FOX, PX_Object_FoxOnUpdate, PX_Object_FoxOnRender, PX_Object_FoxFree, 0, sizeof(PX_Object_Fox));
+    pfox = PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_FOX);
+    pfox->state = PX_OBJECT_FOX_STATE_IDLE; // 狐狸状态
+    pfox->rasing_down_speed = 512; // 升起速度
+    pfox->ptexture_mask = PX_ResourceLibraryGetTexture(PainterEngine_GetResourceLibrary(), "fox_mask"); // 遮罩
+    if (!PX_TextureCreate(mp, &pfox->render_target, ptexture->width, ptexture->height))
+    {
+        PX_ObjectDelete(pObject);
+        return 0;
+    }
+    PX_ObjectRegisterEvent(pObject, PX_OBJECT_EVENT_CURSORDOWN, PX_Object_FoxOnClick, 0); // 注册点击事件
+    PX_ObjectRegisterEvent(pObject, PX_OBJECT_EVENT_RESET, PX_Object_FoxOnReset, 0); // 注册重置事件
+    return pObject;
 }
 
 ```
 
-* 首先是 `PX_Object_FoxOnUpdate`，这是对象三件套中的 `update` 函数，在这个函数中，我们判断当前这个 `地鼠` 的状态，到底是升起、嘲讽，还是缩回去。
-* 然后是 `PX_Object_FoxOnRender`，这是执行 `render` 的函数，我们通过偏移量把纹理绘制出来，当然在这里我们调用了 `PX_TextureRenderMask` 函数，这是一个带纹理遮罩的绘制函数。
-* `PX_Object_FoxFree` 函数中，主要是对临时渲染表面的释放处理，虽然在本项目中并没有用到。
-* `PX_Object_FoxOnClick` 函数，表示当前的地鼠被击打了，其中是一些命中范围的判断，如果被击中了，应该把状态设置为受伤。
-* `PX_Object_FoxOnReset` 用于执行复位，即游戏结束后，所有地鼠都应该是重置状态，这是一个 `PX_OBJECT_EVENT_RESET` 的回调，你可以在 `PX_Object_FoxCreate` 中找到它。
-* 最后是 `PX_Object_FoxCreate` 函数，在这个函数中我们做了一些初始化工作，为 `地鼠` 注册了事件回调，最终完成这个组件的开发设计。
+- 首先是 `PX_Object_FoxOnUpdate`，这是对象三件套中的 `update` 函数，在这个函数中，我们判断当前这个 `地鼠` 的状态，到底是升起、嘲讽，还是缩回去。
+- 然后是 `PX_Object_FoxOnRender`，这是执行 `render` 的函数，我们通过偏移量把纹理绘制出来，当然在这里我们调用了 `PX_TextureRenderMask` 函数，这是一个带纹理遮罩的绘制函数。
+- `PX_Object_FoxFree` 函数中，主要是对临时渲染表面的释放处理，虽然在本项目中并没有用到。
+- `PX_Object_FoxOnClick` 函数，表示当前的地鼠被击打了，其中是一些命中范围的判断，如果被击中了，应该把状态设置为受伤。
+- `PX_Object_FoxOnReset` 用于执行复位，即游戏结束后，所有地鼠都应该是重置状态，这是一个 `PX_OBJECT_EVENT_RESET` 的回调，你可以在 `PX_Object_FoxCreate` 中找到它。
+- 最后是 `PX_Object_FoxCreate` 函数，在这个函数中我们做了一些初始化工作，为 `地鼠` 注册了事件回调，最终完成这个组件的开发设计。
 
 
 ![](assets/img/18.4.gif)
@@ -2020,67 +2019,67 @@ PX_Object *PX_Object_FoxCreate(px_memorypool *mp,PX_Object *parent,px_float x,px
 ```c
 typedef struct
 {
-	px_texture ham01; // 锤子纹理1,没有按下
-	px_texture ham02; // 锤子纹理2,按下
-	px_bool bHit; // 是否按下
+    px_texture ham01; // 锤子纹理 1，没有按下
+    px_texture ham02; // 锤子纹理 2，按下
+    px_bool bHit; // 是否按下
 }PX_Object_Hammer;
 
 PX_OBJECT_RENDER_FUNCTION(PX_Object_HammerRender) // 锤子渲染
 {
-	PX_Object_Hammer* phammer = PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_HAMMER);
-	px_float x, y, width, height;
-	PX_OBJECT_INHERIT_CODE(pObject, x, y, width, height);
-	if (phammer->bHit)
-	{
-		PX_TextureRender(psurface, &phammer->ham02, (px_int)x, (px_int)y, PX_ALIGN_CENTER, PX_NULL); // 按下
-	}
-	else
-	{
-		PX_TextureRender(psurface, &phammer->ham01, (px_int)x, (px_int)y, PX_ALIGN_CENTER, PX_NULL); // 未按下
-	}
-	
+    PX_Object_Hammer* phammer = PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_HAMMER);
+    px_float x, y, width, height;
+    PX_OBJECT_INHERIT_CODE(pObject, x, y, width, height);
+    if (phammer->bHit)
+    {
+        PX_TextureRender(psurface, &phammer->ham02, (px_int)x, (px_int)y, PX_ALIGN_CENTER, PX_NULL); // 按下
+    }
+    else
+    {
+        PX_TextureRender(psurface, &phammer->ham01, (px_int)x, (px_int)y, PX_ALIGN_CENTER, PX_NULL); // 未按下
+    }
+    
 }
 
 PX_OBJECT_FREE_FUNCTION(PX_Object_HammerFree)
 {
-	PX_Object_Hammer* phammer = PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_HAMMER);
-	PX_TextureFree(&phammer->ham01);
-	PX_TextureFree(&phammer->ham02);
+    PX_Object_Hammer* phammer = PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_HAMMER);
+    PX_TextureFree(&phammer->ham01);
+    PX_TextureFree(&phammer->ham02);
 }
 
 PX_OBJECT_EVENT_FUNCTION(PX_Object_HammerOnMove)
 {
-	pObject->x=PX_Object_Event_GetCursorX(e); // 锤子跟随鼠标移动
-	pObject->y=PX_Object_Event_GetCursorY(e);
+    pObject->x = PX_Object_Event_GetCursorX(e); // 锤子跟随鼠标移动
+    pObject->y = PX_Object_Event_GetCursorY(e);
 }
 
 PX_OBJECT_EVENT_FUNCTION(PX_Object_HammerOnCursorDown)
 {
-	PX_Object_Hammer* phammer = PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_HAMMER);
-	phammer->bHit = PX_TRUE; // 按下
+    PX_Object_Hammer* phammer = PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_HAMMER);
+    phammer->bHit = PX_TRUE; // 按下
 }
 
 PX_OBJECT_EVENT_FUNCTION(PX_Object_HammerOnCursorUp)
 {
-	PX_Object_Hammer* phammer = PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_HAMMER);
-	phammer->bHit = PX_FALSE; // 抬起
+    PX_Object_Hammer* phammer = PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_HAMMER);
+    phammer->bHit = PX_FALSE; // 抬起
 }
 
 PX_Object* PX_Object_HammerCreate(px_memorypool* mp, PX_Object* parent)
 {
-	PX_Object_Hammer* phammer;
-	PX_Object* pObject = PX_ObjectCreateEx(mp, parent, 0, 0, 0, 0, 0, 0, PX_OBJECT_TYPE_HAMMER, 0, PX_Object_HammerRender, PX_Object_HammerFree, 0, sizeof(PX_Object_Hammer));
-	phammer = PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_HAMMER);
-	phammer->bHit = PX_FALSE;
-	if (!PX_LoadTextureFromFile(mp_static,&phammer->ham01, "assets/ham1.png")) return PX_NULL;
-	if (!PX_LoadTextureFromFile(mp_static,&phammer->ham02, "assets/ham2.png")) return PX_NULL;
-	PX_ObjectRegisterEvent(pObject, PX_OBJECT_EVENT_CURSORMOVE, PX_Object_HammerOnMove, PX_NULL); // 注册移动事件
-	PX_ObjectRegisterEvent(pObject, PX_OBJECT_EVENT_CURSORDRAG, PX_Object_HammerOnMove, PX_NULL); // 注册拖拽事件
-	PX_ObjectRegisterEvent(pObject, PX_OBJECT_EVENT_CURSORDOWN, PX_Object_HammerOnCursorDown, PX_NULL); // 注册按下事件
-	PX_ObjectRegisterEvent(pObject, PX_OBJECT_EVENT_CURSORDOWN, PX_Object_HammerOnMove, PX_NULL); // 注册按下事件
-	PX_ObjectRegisterEvent(pObject, PX_OBJECT_EVENT_CURSORUP, PX_Object_HammerOnCursorUp, PX_NULL); // 注册抬起事件
+    PX_Object_Hammer* phammer;
+    PX_Object* pObject = PX_ObjectCreateEx(mp, parent, 0, 0, 0, 0, 0, 0, PX_OBJECT_TYPE_HAMMER, 0, PX_Object_HammerRender, PX_Object_HammerFree, 0, sizeof(PX_Object_Hammer));
+    phammer = PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_HAMMER);
+    phammer->bHit = PX_FALSE;
+    if (!PX_LoadTextureFromFile(mp_static, &phammer->ham01, "assets/ham1.png")) return PX_NULL;
+    if (!PX_LoadTextureFromFile(mp_static, &phammer->ham02, "assets/ham2.png")) return PX_NULL;
+    PX_ObjectRegisterEvent(pObject, PX_OBJECT_EVENT_CURSORMOVE, PX_Object_HammerOnMove, PX_NULL); // 注册移动事件
+    PX_ObjectRegisterEvent(pObject, PX_OBJECT_EVENT_CURSORDRAG, PX_Object_HammerOnMove, PX_NULL); // 注册拖拽事件
+    PX_ObjectRegisterEvent(pObject, PX_OBJECT_EVENT_CURSORDOWN, PX_Object_HammerOnCursorDown, PX_NULL); // 注册按下事件
+    PX_ObjectRegisterEvent(pObject, PX_OBJECT_EVENT_CURSORDOWN, PX_Object_HammerOnMove, PX_NULL); // 注册按下事件
+    PX_ObjectRegisterEvent(pObject, PX_OBJECT_EVENT_CURSORUP, PX_Object_HammerOnCursorUp, PX_NULL); // 注册抬起事件
 
-	return pObject;
+    return pObject;
 }
 ```
 
@@ -2089,68 +2088,68 @@ PX_Object* PX_Object_HammerCreate(px_memorypool* mp, PX_Object* parent)
 ```c
 typedef struct
 {
-	PX_Animation animation; // 动画
-	px_dword time; // 倒计时时间
-	px_dword elapsed; // 倒计时开始后已经过去的时间
+    PX_Animation animation; // 动画
+    px_dword time; // 倒计时时间
+    px_dword elapsed; // 倒计时开始后已经过去的时间
 }PX_Object_Clock;
 
 
 PX_OBJECT_UPDATE_FUNCTION(PX_Object_ClockUpdate)
 {
-	PX_Object_Clock* clock = PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_CLOCK);
-	clock->elapsed += elapsed;
-	if (clock->elapsed >= clock->time)
-	{
-		clock->elapsed = 0;
-		PX_ObjectPostEvent(game, PX_OBJECT_BUILD_EVENT(PX_OBJECT_EVENT_RESET)); // 重置狐狸状态,给game对象发送重置事件
-		game->Visible = PX_FALSE;
-		game->Enabled = PX_FALSE;
-		startgame->Visible = PX_TRUE;
-		pObject->Visible = PX_FALSE;
-		pObject->Enabled = PX_FALSE;
-	}
+    PX_Object_Clock* clock = PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_CLOCK);
+    clock->elapsed += elapsed;
+    if (clock->elapsed >= clock->time)
+    {
+        clock->elapsed = 0;
+        PX_ObjectPostEvent(game, PX_OBJECT_BUILD_EVENT(PX_OBJECT_EVENT_RESET)); // 重置狐狸状态，给 game 对象发送重置事件
+        game->Visible = PX_FALSE;
+        game->Enabled = PX_FALSE;
+        startgame->Visible = PX_TRUE;
+        pObject->Visible = PX_FALSE;
+        pObject->Enabled = PX_FALSE;
+    }
 
 }
 
 PX_OBJECT_RENDER_FUNCTION(PX_Object_ClockRender)
 {
-	PX_Object_Clock* clock = PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_CLOCK);
-	PX_AnimationUpdate(&clock->animation, elapsed); // 更新动画
-	PX_AnimationRender(psurface, &clock->animation, (px_int)pObject->x, (px_int)pObject->y, PX_ALIGN_CENTER, PX_NULL); // 绘制动画
-	// draw ring
-	PX_GeoDrawCircle(psurface, (px_int)pObject->x, (px_int)pObject->y, 38, 8, PX_COLOR_BLACK); // 绘制倒计时环边框
-	PX_GeoDrawRing(psurface, (px_int)pObject->x, (px_int)pObject->y, 36, 6, PX_COLOR(128,192,255,32), -90, -90 + (px_int)(360 * (1 - clock->elapsed * 1.0f / clock->time))); // 绘制倒计时环
+    PX_Object_Clock* clock = PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_CLOCK);
+    PX_AnimationUpdate(&clock->animation, elapsed); // 更新动画
+    PX_AnimationRender(psurface, &clock->animation, (px_int)pObject->x, (px_int)pObject->y, PX_ALIGN_CENTER, PX_NULL); // 绘制动画
+    // draw ring
+    PX_GeoDrawCircle(psurface, (px_int)pObject->x, (px_int)pObject->y, 38, 8, PX_COLOR_BLACK); // 绘制倒计时环边框
+    PX_GeoDrawRing(psurface, (px_int)pObject->x, (px_int)pObject->y, 36, 6, PX_COLOR(128, 192, 255, 32), -90, -90 + (px_int)(360 * (1 - clock->elapsed * 1.0f / clock->time))); // 绘制倒计时环
 }
 
 PX_OBJECT_FREE_FUNCTION(PX_Object_ClockFree)
 {
-	PX_Object_Clock* clock = PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_CLOCK);
-	PX_AnimationFree(&clock->animation);
+    PX_Object_Clock* clock = PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_CLOCK);
+    PX_AnimationFree(&clock->animation);
 }
 
 px_void PX_Object_ClockBegin(PX_Object* pClock, px_dword time) // 开始倒计时
 {
-	PX_Object_Clock* clock = PX_ObjectGetDescByType(pClock, PX_OBJECT_TYPE_CLOCK);
-	clock->time = time;
-	pClock->Visible = PX_TRUE;
-	pClock->Enabled = PX_TRUE;
+    PX_Object_Clock* clock = PX_ObjectGetDescByType(pClock, PX_OBJECT_TYPE_CLOCK);
+    clock->time = time;
+    pClock->Visible = PX_TRUE;
+    pClock->Enabled = PX_TRUE;
 }
 
 PX_Object* PX_Object_ClockCreate(px_memorypool* mp, PX_Object* parent, px_float x, px_float y)
 {
-	PX_Object_Clock* clock;
-	PX_Object* pObject = PX_ObjectCreateEx(mp, parent, x, y, 0, 0, 0, 0, PX_OBJECT_TYPE_CLOCK, PX_Object_ClockUpdate, PX_Object_ClockRender, PX_Object_ClockFree, 0, sizeof(PX_Object_Clock));
-	clock = PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_CLOCK);
-	clock->time = 0;
-	clock->elapsed = 0;
-	if (!PX_AnimationCreate(&clock->animation, PX_ResourceLibraryGetAnimationLibrary(PainterEngine_GetResourceLibrary(), "song"))) // 从资源管理器中获取动画
-	{
-		PX_ObjectDelete(pObject);
-		return PX_NULL;
-	}
-	pObject->Enabled = PX_FALSE;
-	pObject->Visible = PX_FALSE;
-	return pObject;
+    PX_Object_Clock* clock;
+    PX_Object* pObject = PX_ObjectCreateEx(mp, parent, x, y, 0, 0, 0, 0, PX_OBJECT_TYPE_CLOCK, PX_Object_ClockUpdate, PX_Object_ClockRender, PX_Object_ClockFree, 0, sizeof(PX_Object_Clock));
+    clock = PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_CLOCK);
+    clock->time = 0;
+    clock->elapsed = 0;
+    if (!PX_AnimationCreate(&clock->animation, PX_ResourceLibraryGetAnimationLibrary(PainterEngine_GetResourceLibrary(), "song"))) // 从资源管理器中获取动画
+    {
+        PX_ObjectDelete(pObject);
+        return PX_NULL;
+    }
+    pObject->Enabled = PX_FALSE;
+    pObject->Visible = PX_FALSE;
+    return pObject;
 }
 ```
 
@@ -2160,21 +2159,21 @@ PX_Object* PX_Object_ClockCreate(px_memorypool* mp, PX_Object* parent, px_float 
 
 ```c
 // 创建地鼠
-game=PX_ObjectCreate(mp, root, 0, 0, 0, 0, 0, 0);
+game = PX_ObjectCreate(mp, root, 0, 0, 0, 0, 0, 0);
 PX_Object_FoxCreate(mp, game, 173, 326);
 PX_Object_FoxCreate(mp, game, 401, 326);
 PX_Object_FoxCreate(mp, game, 636, 326);
 PX_Object_FoxCreate(mp, game, 173, 476);
 PX_Object_FoxCreate(mp, game, 401, 476);
 PX_Object_FoxCreate(mp, game, 636, 476);
-game->Visible=PX_FALSE;
-game->Enabled=PX_FALSE;
+game->Visible = PX_FALSE;
+game->Enabled = PX_FALSE;
 
 // 创建锤子
 PX_Object_HammerCreate(mp, root);
 scorePanel = PX_Object_ScorePanelCreate(mp, root, 400, 60, &score_fm, 100);
 // 创建倒计时框
-gameclock=PX_Object_ClockCreate(mp,root,680,60);
+gameclock = PX_Object_ClockCreate(mp, root, 680, 60);
 ```
 
 在这里，我放上整个游戏的完整代码：
@@ -2182,333 +2181,332 @@ gameclock=PX_Object_ClockCreate(mp,root,680,60);
 ```c
 #include "PainterEngine.h"
 
-#define PX_OBJECT_TYPE_FOX		24103001
-#define PX_OBJECT_TYPE_HAMMER	24103002
-#define PX_OBJECT_TYPE_CLOCK	24103003
+#define PX_OBJECT_TYPE_FOX    24103001
+#define PX_OBJECT_TYPE_HAMMER 24103002
+#define PX_OBJECT_TYPE_CLOCK  24103003
 
 PX_FontModule score_fm;
 PX_Object* scorePanel;
-PX_Object* game,*startgame,*gameclock;
+PX_Object* game, *startgame, *gameclock;
 
 typedef enum
 {
-	PX_OBJECT_FOX_STATE_IDLE,   // 狐狸还在洞里
-	PX_OBJECT_FOX_STATE_RASING, // 狐狸正在升起
-	PX_OBJECT_FOX_STATE_TAUNT,  // 狐狸在嘲讽
-	PX_OBJECT_FOX_STATE_ESCAPE, // 狐狸逃跑
-	PX_OBJECT_FOX_STATE_BEAT,   // 狐狸被打
-	PX_OBJECT_FOX_STATE_HURT,   // 狐狸受伤后逃跑
+    PX_OBJECT_FOX_STATE_IDLE,   // 狐狸还在洞里
+    PX_OBJECT_FOX_STATE_RASING, // 狐狸正在升起
+    PX_OBJECT_FOX_STATE_TAUNT,  // 狐狸在嘲讽
+    PX_OBJECT_FOX_STATE_ESCAPE, // 狐狸逃跑
+    PX_OBJECT_FOX_STATE_BEAT,   // 狐狸被打
+    PX_OBJECT_FOX_STATE_HURT,   // 狐狸受伤后逃跑
 }PX_OBJECT_FOX_STATE;
 
 typedef struct
 {
-	PX_OBJECT_FOX_STATE state;            // 狐狸状态
-	px_dword elapsed;                     // 状态持续时间
-	px_float texture_render_offset;       // 纹理渲染偏移
-	px_dword gen_rand_time;               // 生成随机时间
-	px_float rasing_down_speed;           // 升起速度
-	px_texture render_target;             // 渲染目标
-	px_texture* pcurrent_display_texture; // 当前显示的纹理
-	px_texture* ptexture_mask;            // 遮罩
+    PX_OBJECT_FOX_STATE state;            // 狐狸状态
+    px_dword elapsed;                     // 状态持续时间
+    px_float texture_render_offset;       // 纹理渲染偏移
+    px_dword gen_rand_time;               // 生成随机时间
+    px_float rasing_down_speed;           // 升起速度
+    px_texture render_target;             // 渲染目标
+    px_texture* pcurrent_display_texture; // 当前显示的纹理
+    px_texture* ptexture_mask;            // 遮罩
 }PX_Object_Fox;
 
 typedef struct
 {
-	px_texture ham01; // 锤子纹理1,没有按下
-	px_texture ham02; // 锤子纹理2,按下
-	px_bool bHit; // 是否按下
+    px_texture ham01; // 锤子纹理 1，没有按下
+    px_texture ham02; // 锤子纹理 2，按下
+    px_bool bHit; // 是否按下
 }PX_Object_Hammer;
 
 typedef struct
 {
-	PX_Animation animation; // 动画
-	px_dword time; // 倒计时时间
-	px_dword elapsed; // 倒计时开始后已经过去的时间
+    PX_Animation animation; // 动画
+    px_dword time; // 倒计时时间
+    px_dword elapsed; // 倒计时开始后已经过去的时间
 }PX_Object_Clock;
 
 
 PX_OBJECT_UPDATE_FUNCTION(PX_Object_ClockUpdate)
 {
-	PX_Object_Clock* clock = PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_CLOCK);
-	clock->elapsed += elapsed;
-	if (clock->elapsed >= clock->time)
-	{
-		clock->elapsed = 0;
-		PX_ObjectPostEvent(game, PX_OBJECT_BUILD_EVENT(PX_OBJECT_EVENT_RESET)); // 重置狐狸状态,给game对象发送重置事件
-		game->Visible = PX_FALSE;
-		game->Enabled = PX_FALSE;
-		startgame->Visible = PX_TRUE;
-		pObject->Visible = PX_FALSE;
-		pObject->Enabled = PX_FALSE;
-	}
+    PX_Object_Clock* clock = PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_CLOCK);
+    clock->elapsed += elapsed;
+    if (clock->elapsed >= clock->time)
+    {
+        clock->elapsed = 0;
+        PX_ObjectPostEvent(game, PX_OBJECT_BUILD_EVENT(PX_OBJECT_EVENT_RESET)); // 重置狐狸状态，给 game 对象发送重置事件
+        game->Visible = PX_FALSE;
+        game->Enabled = PX_FALSE;
+        startgame->Visible = PX_TRUE;
+        pObject->Visible = PX_FALSE;
+        pObject->Enabled = PX_FALSE;
+    }
 
 }
 
 PX_OBJECT_RENDER_FUNCTION(PX_Object_ClockRender)
 {
-	PX_Object_Clock* clock = PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_CLOCK);
-	PX_AnimationUpdate(&clock->animation, elapsed); // 更新动画
-	PX_AnimationRender(psurface, &clock->animation, (px_int)pObject->x, (px_int)pObject->y, PX_ALIGN_CENTER, PX_NULL); // 绘制动画
-	// draw ring
-	PX_GeoDrawCircle(psurface, (px_int)pObject->x, (px_int)pObject->y, 38, 8, PX_COLOR_BLACK); // 绘制倒计时环边框
-	PX_GeoDrawRing(psurface, (px_int)pObject->x, (px_int)pObject->y, 36, 6, PX_COLOR(128,192,255,32), -90, -90 + (px_int)(360 * (1 - clock->elapsed * 1.0f / clock->time))); // 绘制倒计时环
+    PX_Object_Clock* clock = PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_CLOCK);
+    PX_AnimationUpdate(&clock->animation, elapsed); // 更新动画
+    PX_AnimationRender(psurface, &clock->animation, (px_int)pObject->x, (px_int)pObject->y, PX_ALIGN_CENTER, PX_NULL); // 绘制动画
+    // draw ring
+    PX_GeoDrawCircle(psurface, (px_int)pObject->x, (px_int)pObject->y, 38, 8, PX_COLOR_BLACK); // 绘制倒计时环边框
+    PX_GeoDrawRing(psurface, (px_int)pObject->x, (px_int)pObject->y, 36, 6, PX_COLOR(128, 192, 255, 32), -90, -90 + (px_int)(360 * (1 - clock->elapsed * 1.0f / clock->time))); // 绘制倒计时环
 }
 
 PX_OBJECT_FREE_FUNCTION(PX_Object_ClockFree)
 {
-	PX_Object_Clock* clock = PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_CLOCK);
-	PX_AnimationFree(&clock->animation);
+    PX_Object_Clock* clock = PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_CLOCK);
+    PX_AnimationFree(&clock->animation);
 }
 
 px_void PX_Object_ClockBegin(PX_Object* pClock, px_dword time) // 开始倒计时
 {
-	PX_Object_Clock* clock = PX_ObjectGetDescByType(pClock, PX_OBJECT_TYPE_CLOCK);
-	clock->time = time;
-	pClock->Visible = PX_TRUE;
-	pClock->Enabled = PX_TRUE;
+    PX_Object_Clock* clock = PX_ObjectGetDescByType(pClock, PX_OBJECT_TYPE_CLOCK);
+    clock->time = time;
+    pClock->Visible = PX_TRUE;
+    pClock->Enabled = PX_TRUE;
 }
 
 PX_Object* PX_Object_ClockCreate(px_memorypool* mp, PX_Object* parent, px_float x, px_float y)
 {
-	PX_Object_Clock* clock;
-	PX_Object* pObject = PX_ObjectCreateEx(mp, parent, x, y, 0, 0, 0, 0, PX_OBJECT_TYPE_CLOCK, PX_Object_ClockUpdate, PX_Object_ClockRender, PX_Object_ClockFree, 0, sizeof(PX_Object_Clock));
-	clock = PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_CLOCK);
-	clock->time = 0;
-	clock->elapsed = 0;
-	if (!PX_AnimationCreate(&clock->animation, PX_ResourceLibraryGetAnimationLibrary(PainterEngine_GetResourceLibrary(), "song"))) // 从资源管理器中获取动画
-	{
-		PX_ObjectDelete(pObject);
-		return PX_NULL;
-	}
-	pObject->Enabled = PX_FALSE;
-	pObject->Visible = PX_FALSE;
-	return pObject;
+    PX_Object_Clock* clock;
+    PX_Object* pObject = PX_ObjectCreateEx(mp, parent, x, y, 0, 0, 0, 0, PX_OBJECT_TYPE_CLOCK, PX_Object_ClockUpdate, PX_Object_ClockRender, PX_Object_ClockFree, 0, sizeof(PX_Object_Clock));
+    clock = PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_CLOCK);
+    clock->time = 0;
+    clock->elapsed = 0;
+    if (!PX_AnimationCreate(&clock->animation, PX_ResourceLibraryGetAnimationLibrary(PainterEngine_GetResourceLibrary(), "song"))) // 从资源管理器中获取动画
+    {
+        PX_ObjectDelete(pObject);
+        return PX_NULL;
+    }
+    pObject->Enabled = PX_FALSE;
+    pObject->Visible = PX_FALSE;
+    return pObject;
 }
 
 PX_OBJECT_UPDATE_FUNCTION(PX_Object_FoxOnUpdate)
 {
-	PX_Object_Fox* pfox=PX_ObjectGetDescByType(pObject,PX_OBJECT_TYPE_FOX);
-	switch (pfox->state)
-	{
-		case PX_OBJECT_FOX_STATE_IDLE:
-		{
-			if (pfox->gen_rand_time ==0)
-			{
-				pfox->gen_rand_time = PX_rand() % 3000 + 1000; // 狐狸在洞里的时间,时间到了就升起来
-			}
-			else
-			{
-				if (pfox->gen_rand_time <elapsed) // 时间到了
-				{
-					// 升起
-					pfox->state = PX_OBJECT_FOX_STATE_RASING;
-					pfox->elapsed = 0;
-					pfox->gen_rand_time = 0;
-					pfox->texture_render_offset = pObject->Height;
-					// 改变纹理
-					pfox->pcurrent_display_texture= PX_ResourceLibraryGetTexture(PainterEngine_GetResourceLibrary(), "fox_rasing");
-				}
-				else
-				{
-					pfox->gen_rand_time -= elapsed;
-				}
-			}
-		}
-		break;
-		case PX_OBJECT_FOX_STATE_RASING: // 狐狸升起
-		{
-			pfox->elapsed += elapsed;
-			// 升起纹理偏移量
-			pfox->texture_render_offset -= pfox->rasing_down_speed * elapsed / 1000;
-			if (pfox->texture_render_offset <= 0)
-			{
-				pfox->texture_render_offset = 0;
-				pfox->state = PX_OBJECT_FOX_STATE_TAUNT; // 升起后嘲讽
-				pfox->elapsed = 0;
-			}
-		}
-		break;
-		case PX_OBJECT_FOX_STATE_TAUNT: // 狐狸嘲讽
-		{
-			pfox->elapsed += elapsed;
-			if (pfox->elapsed>600&& pfox->elapsed <1500) // 嘲讽时间
-			{
-				pfox->pcurrent_display_texture = PX_ResourceLibraryGetTexture(PainterEngine_GetResourceLibrary(), "fox_taunt"); // 嘲讽纹理
-			}
-			else if (pfox->elapsed>1500) // 嘲讽结束
-			{
-				pfox->texture_render_offset = 0;
-				pfox->state = PX_OBJECT_FOX_STATE_ESCAPE; // 逃跑
-				pfox->pcurrent_display_texture = PX_ResourceLibraryGetTexture(PainterEngine_GetResourceLibrary(), "fox_escape"); // 逃跑纹理
-				pfox->elapsed = 0;
-			}
-		}
-		break;
-		case PX_OBJECT_FOX_STATE_BEAT: // 狐狸被打
-		{
-			pfox->elapsed += elapsed;
-			if (pfox->elapsed>800)
-			{
-				pfox->pcurrent_display_texture = PX_ResourceLibraryGetTexture(PainterEngine_GetResourceLibrary(), "fox_hurt"); // 受伤纹理
-				pfox->state = PX_OBJECT_FOX_STATE_ESCAPE; // 逃跑
-			}
-		}
-		break;
-		case PX_OBJECT_FOX_STATE_ESCAPE:
-		{
-			pfox->elapsed += elapsed;
-			pfox->texture_render_offset+=pfox->rasing_down_speed * elapsed / 1000;
-			if (pfox->texture_render_offset >= pObject->Height)
-			{
-				pfox->texture_render_offset = pObject->Height;
-				pfox->state = PX_OBJECT_FOX_STATE_IDLE; // 逃跑结束
-				pfox->elapsed = 0; // 重置时间
-				pfox->pcurrent_display_texture = PX_NULL;
-			}
-		}
-		break;
-	default:
-		break;
-	}
+    PX_Object_Fox* pfox = PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_FOX);
+    switch (pfox->state)
+    {
+        case PX_OBJECT_FOX_STATE_IDLE:
+        {
+            if (pfox->gen_rand_time == 0)
+            {
+                pfox->gen_rand_time = PX_rand() % 3000 + 1000; // 狐狸在洞里的时间，时间到了就升起来
+            }
+            else
+            {
+                if (pfox->gen_rand_time <elapsed) // 时间到了
+                {
+                    // 升起
+                    pfox->state = PX_OBJECT_FOX_STATE_RASING;
+                    pfox->elapsed = 0;
+                    pfox->gen_rand_time = 0;
+                    pfox->texture_render_offset = pObject->Height;
+                    // 改变纹理
+                    pfox->pcurrent_display_texture = PX_ResourceLibraryGetTexture(PainterEngine_GetResourceLibrary(), "fox_rasing");
+                }
+                else
+                {
+                    pfox->gen_rand_time -= elapsed;
+                }
+            }
+        }
+        break;
+        case PX_OBJECT_FOX_STATE_RASING: // 狐狸升起
+        {
+            pfox->elapsed += elapsed;
+            // 升起纹理偏移量
+            pfox->texture_render_offset -= pfox->rasing_down_speed * elapsed / 1000;
+            if (pfox->texture_render_offset <= 0)
+            {
+                pfox->texture_render_offset = 0;
+                pfox->state = PX_OBJECT_FOX_STATE_TAUNT; // 升起后嘲讽
+                pfox->elapsed = 0;
+            }
+        }
+        break;
+        case PX_OBJECT_FOX_STATE_TAUNT: // 狐狸嘲讽
+        {
+            pfox->elapsed += elapsed;
+            if (pfox->elapsed>600&& pfox->elapsed <1500) // 嘲讽时间
+            {
+                pfox->pcurrent_display_texture = PX_ResourceLibraryGetTexture(PainterEngine_GetResourceLibrary(), "fox_taunt"); // 嘲讽纹理
+            }
+            else if (pfox->elapsed>1500) // 嘲讽结束
+            {
+                pfox->texture_render_offset = 0;
+                pfox->state = PX_OBJECT_FOX_STATE_ESCAPE; // 逃跑
+                pfox->pcurrent_display_texture = PX_ResourceLibraryGetTexture(PainterEngine_GetResourceLibrary(), "fox_escape"); // 逃跑纹理
+                pfox->elapsed = 0;
+            }
+        }
+        break;
+        case PX_OBJECT_FOX_STATE_BEAT: // 狐狸被打
+        {
+            pfox->elapsed += elapsed;
+            if (pfox->elapsed>800)
+            {
+                pfox->pcurrent_display_texture = PX_ResourceLibraryGetTexture(PainterEngine_GetResourceLibrary(), "fox_hurt"); // 受伤纹理
+                pfox->state = PX_OBJECT_FOX_STATE_ESCAPE; // 逃跑
+            }
+        }
+        break;
+        case PX_OBJECT_FOX_STATE_ESCAPE:
+        {
+            pfox->elapsed += elapsed;
+            pfox->texture_render_offset += pfox->rasing_down_speed * elapsed / 1000;
+            if (pfox->texture_render_offset >= pObject->Height)
+            {
+                pfox->texture_render_offset = pObject->Height;
+                pfox->state = PX_OBJECT_FOX_STATE_IDLE; // 逃跑结束
+                pfox->elapsed = 0; // 重置时间
+                pfox->pcurrent_display_texture = PX_NULL;
+            }
+        }
+        break;
+    default:
+        break;
+    }
 }
 
 PX_OBJECT_RENDER_FUNCTION(PX_Object_FoxOnRender)
 {
-	PX_Object_Fox* pfox = PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_FOX);
-	px_float x,y,width,height;
-	PX_OBJECT_INHERIT_CODE(pObject,x,y,width,height);
-	PX_TextureClearAll(&pfox->render_target, PX_COLOR_NONE); // 清空渲染目标
-	if (pfox->pcurrent_display_texture)
-	{
-		PX_TextureRender(&pfox->render_target, pfox->pcurrent_display_texture, (px_int)pfox->render_target.width/2, (px_int)pfox->texture_render_offset, PX_ALIGN_MIDTOP, PX_NULL); // 渲染狐狸
-	}
-	PX_TextureRenderMask(psurface, pfox->ptexture_mask, &pfox->render_target, (px_int)x, (px_int)y, PX_ALIGN_MIDBOTTOM, PX_NULL); // 以遮罩形式绘制纹理
+    PX_Object_Fox* pfox = PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_FOX);
+    px_float x, y, width, height;
+    PX_OBJECT_INHERIT_CODE(pObject, x, y, width, height);
+    PX_TextureClearAll(&pfox->render_target, PX_COLOR_NONE); // 清空渲染目标
+    if (pfox->pcurrent_display_texture)
+    {
+        PX_TextureRender(&pfox->render_target, pfox->pcurrent_display_texture, (px_int)pfox->render_target.width/2, (px_int)pfox->texture_render_offset, PX_ALIGN_MIDTOP, PX_NULL); // 渲染狐狸
+    }
+    PX_TextureRenderMask(psurface, pfox->ptexture_mask, &pfox->render_target, (px_int)x, (px_int)y, PX_ALIGN_MIDBOTTOM, PX_NULL); // 以遮罩形式绘制纹理
 }
 
 PX_OBJECT_FREE_FUNCTION(PX_Object_FoxFree)
 {
-	PX_Object_Fox* pfox = PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_FOX);
-	PX_TextureFree(&pfox->render_target);
+    PX_Object_Fox* pfox = PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_FOX);
+    PX_TextureFree(&pfox->render_target);
 }
 
 PX_OBJECT_EVENT_FUNCTION(PX_Object_FoxOnClick) // 狐狸被点击
 {
-	PX_Object_Fox* pfox = PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_FOX);
-	if (pfox->state == PX_OBJECT_FOX_STATE_TAUNT|| pfox->state == PX_OBJECT_FOX_STATE_RASING) // 狐狸嘲讽或者升起时点击有效
-	{
-		if (PX_ObjectIsCursorInRegionAlign(pObject, e, PX_ALIGN_MIDBOTTOM)) // 点击有效区域
-		{
-			px_int x= (px_int)PX_Object_Event_GetCursorX(e);
-			px_int y= (px_int)PX_Object_Event_GetCursorY(e);
-			x=(px_int)(x-(pObject->x-pObject->Width/2));
-			y= (px_int)(y-(pObject->y - pObject->Height));
-			if (x>32&&y<128)
-			{
-				pfox->pcurrent_display_texture = PX_ResourceLibraryGetTexture(PainterEngine_GetResourceLibrary(), "fox_beat");
-				pfox->state = PX_OBJECT_FOX_STATE_BEAT;
-				pfox->elapsed = 0;
-				PX_Object_ScorePanelAddScore(scorePanel, 100);
-			}
-			
-		}
-	}
+    PX_Object_Fox* pfox = PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_FOX);
+    if (pfox->state == PX_OBJECT_FOX_STATE_TAUNT|| pfox->state == PX_OBJECT_FOX_STATE_RASING) // 狐狸嘲讽或者升起时点击有效
+    {
+        if (PX_ObjectIsCursorInRegionAlign(pObject, e, PX_ALIGN_MIDBOTTOM)) // 点击有效区域
+        {
+            px_int x = (px_int)PX_Object_Event_GetCursorX(e);
+            px_int y = (px_int)PX_Object_Event_GetCursorY(e);
+            x = (px_int)(x - (pObject->x - pObject->Width/2));
+            y = (px_int)(y - (pObject->y - pObject->Height));
+            if (x>32&&y<128)
+            {
+                pfox->pcurrent_display_texture = PX_ResourceLibraryGetTexture(PainterEngine_GetResourceLibrary(), "fox_beat");
+                pfox->state = PX_OBJECT_FOX_STATE_BEAT;
+                pfox->elapsed = 0;
+                PX_Object_ScorePanelAddScore(scorePanel, 100);
+            }
+        }
+    }
 }
 
 PX_OBJECT_EVENT_FUNCTION(PX_Object_FoxOnReset)
 {
-	PX_Object_Fox* pfox = PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_FOX);
-	pfox->state = PX_OBJECT_FOX_STATE_IDLE;
-	pfox->elapsed = 0;
-	pfox->texture_render_offset = pObject->Height;
-	pfox->gen_rand_time = 0;
-	pfox->pcurrent_display_texture = PX_NULL;
+    PX_Object_Fox* pfox = PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_FOX);
+    pfox->state = PX_OBJECT_FOX_STATE_IDLE;
+    pfox->elapsed = 0;
+    pfox->texture_render_offset = pObject->Height;
+    pfox->gen_rand_time = 0;
+    pfox->pcurrent_display_texture = PX_NULL;
 
 }
 
-PX_Object *PX_Object_FoxCreate(px_memorypool *mp,PX_Object *parent,px_float x,px_float y)
+PX_Object *PX_Object_FoxCreate(px_memorypool *mp, PX_Object *parent, px_float x, px_float y)
 {
-	PX_Object_Fox* pfox;
-	px_texture *ptexture=PX_ResourceLibraryGetTexture(PainterEngine_GetResourceLibrary(),"fox_rasing"); // 从资源管理器中获取纹理
-	PX_Object* pObject = PX_ObjectCreateEx(mp, parent, x, y, 0, ptexture->width*1.f, ptexture->height*1.f, 0, PX_OBJECT_TYPE_FOX, PX_Object_FoxOnUpdate, PX_Object_FoxOnRender, PX_Object_FoxFree, 0, sizeof(PX_Object_Fox));
-	pfox=PX_ObjectGetDescByType(pObject,PX_OBJECT_TYPE_FOX);
-	pfox->state= PX_OBJECT_FOX_STATE_IDLE; // 狐狸状态
-	pfox->rasing_down_speed = 512; // 升起速度
-	pfox->ptexture_mask = PX_ResourceLibraryGetTexture(PainterEngine_GetResourceLibrary(), "fox_mask"); // 遮罩
-	if(!PX_TextureCreate(mp,&pfox->render_target,ptexture->width,ptexture->height))
-	{
-		PX_ObjectDelete(pObject);
-		return 0;
-	}
-	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_CURSORDOWN,PX_Object_FoxOnClick,0); // 注册点击事件
-	PX_ObjectRegisterEvent(pObject,PX_OBJECT_EVENT_RESET,PX_Object_FoxOnReset,0); // 注册重置事件
-	return pObject;
+    PX_Object_Fox* pfox;
+    px_texture *ptexture = PX_ResourceLibraryGetTexture(PainterEngine_GetResourceLibrary(), "fox_rasing"); // 从资源管理器中获取纹理
+    PX_Object* pObject = PX_ObjectCreateEx(mp, parent, x, y, 0, ptexture->width*1.f, ptexture->height*1.f, 0, PX_OBJECT_TYPE_FOX, PX_Object_FoxOnUpdate, PX_Object_FoxOnRender, PX_Object_FoxFree, 0, sizeof(PX_Object_Fox));
+    pfox = PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_FOX);
+    pfox->state = PX_OBJECT_FOX_STATE_IDLE; // 狐狸状态
+    pfox->rasing_down_speed = 512; // 升起速度
+    pfox->ptexture_mask = PX_ResourceLibraryGetTexture(PainterEngine_GetResourceLibrary(), "fox_mask"); // 遮罩
+    if (!PX_TextureCreate(mp, &pfox->render_target, ptexture->width, ptexture->height))
+    {
+        PX_ObjectDelete(pObject);
+        return 0;
+    }
+    PX_ObjectRegisterEvent(pObject, PX_OBJECT_EVENT_CURSORDOWN, PX_Object_FoxOnClick, 0); // 注册点击事件
+    PX_ObjectRegisterEvent(pObject, PX_OBJECT_EVENT_RESET, PX_Object_FoxOnReset, 0); // 注册重置事件
+    return pObject;
 }
 
 PX_OBJECT_RENDER_FUNCTION(PX_Object_HammerRender) // 锤子渲染
 {
-	PX_Object_Hammer* phammer = PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_HAMMER);
-	px_float x, y, width, height;
-	PX_OBJECT_INHERIT_CODE(pObject, x, y, width, height);
-	if (phammer->bHit)
-	{
-		PX_TextureRender(psurface, &phammer->ham02, (px_int)x, (px_int)y, PX_ALIGN_CENTER, PX_NULL); // 按下
-	}
-	else
-	{
-		PX_TextureRender(psurface, &phammer->ham01, (px_int)x, (px_int)y, PX_ALIGN_CENTER, PX_NULL); // 未按下
-	}
-	
+    PX_Object_Hammer* phammer = PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_HAMMER);
+    px_float x, y, width, height;
+    PX_OBJECT_INHERIT_CODE(pObject, x, y, width, height);
+    if (phammer->bHit)
+    {
+        PX_TextureRender(psurface, &phammer->ham02, (px_int)x, (px_int)y, PX_ALIGN_CENTER, PX_NULL); // 按下
+    }
+    else
+    {
+        PX_TextureRender(psurface, &phammer->ham01, (px_int)x, (px_int)y, PX_ALIGN_CENTER, PX_NULL); // 未按下
+    }
+    
 }
 
 PX_OBJECT_FREE_FUNCTION(PX_Object_HammerFree)
 {
-	PX_Object_Hammer* phammer = PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_HAMMER);
-	PX_TextureFree(&phammer->ham01);
-	PX_TextureFree(&phammer->ham02);
+    PX_Object_Hammer* phammer = PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_HAMMER);
+    PX_TextureFree(&phammer->ham01);
+    PX_TextureFree(&phammer->ham02);
 }
 
 PX_OBJECT_EVENT_FUNCTION(PX_Object_HammerOnMove)
 {
-	pObject->x=PX_Object_Event_GetCursorX(e); // 锤子跟随鼠标移动
-	pObject->y=PX_Object_Event_GetCursorY(e);
+    pObject->x = PX_Object_Event_GetCursorX(e); // 锤子跟随鼠标移动
+    pObject->y = PX_Object_Event_GetCursorY(e);
 }
 
 PX_OBJECT_EVENT_FUNCTION(PX_Object_HammerOnCursorDown)
 {
-	PX_Object_Hammer* phammer = PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_HAMMER);
-	phammer->bHit = PX_TRUE; // 按下
+    PX_Object_Hammer* phammer = PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_HAMMER);
+    phammer->bHit = PX_TRUE; // 按下
 }
 
 PX_OBJECT_EVENT_FUNCTION(PX_Object_HammerOnCursorUp)
 {
-	PX_Object_Hammer* phammer = PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_HAMMER);
-	phammer->bHit = PX_FALSE; // 抬起
+    PX_Object_Hammer* phammer = PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_HAMMER);
+    phammer->bHit = PX_FALSE; // 抬起
 }
 
 PX_Object* PX_Object_HammerCreate(px_memorypool* mp, PX_Object* parent)
 {
-	PX_Object_Hammer* phammer;
-	PX_Object* pObject = PX_ObjectCreateEx(mp, parent, 0, 0, 0, 0, 0, 0, PX_OBJECT_TYPE_HAMMER, 0, PX_Object_HammerRender, PX_Object_HammerFree, 0, sizeof(PX_Object_Hammer));
-	phammer = PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_HAMMER);
-	phammer->bHit = PX_FALSE;
-	if (!PX_LoadTextureFromFile(mp_static,&phammer->ham01, "assets/ham1.png")) return PX_NULL;
-	if (!PX_LoadTextureFromFile(mp_static,&phammer->ham02, "assets/ham2.png")) return PX_NULL;
-	PX_ObjectRegisterEvent(pObject, PX_OBJECT_EVENT_CURSORMOVE, PX_Object_HammerOnMove, PX_NULL); // 注册移动事件
-	PX_ObjectRegisterEvent(pObject, PX_OBJECT_EVENT_CURSORDRAG, PX_Object_HammerOnMove, PX_NULL); // 注册拖拽事件
-	PX_ObjectRegisterEvent(pObject, PX_OBJECT_EVENT_CURSORDOWN, PX_Object_HammerOnCursorDown, PX_NULL); // 注册按下事件
-	PX_ObjectRegisterEvent(pObject, PX_OBJECT_EVENT_CURSORDOWN, PX_Object_HammerOnMove, PX_NULL); // 注册按下事件
-	PX_ObjectRegisterEvent(pObject, PX_OBJECT_EVENT_CURSORUP, PX_Object_HammerOnCursorUp, PX_NULL); // 注册抬起事件
+    PX_Object_Hammer* phammer;
+    PX_Object* pObject = PX_ObjectCreateEx(mp, parent, 0, 0, 0, 0, 0, 0, PX_OBJECT_TYPE_HAMMER, 0, PX_Object_HammerRender, PX_Object_HammerFree, 0, sizeof(PX_Object_Hammer));
+    phammer = PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_HAMMER);
+    phammer->bHit = PX_FALSE;
+    if (!PX_LoadTextureFromFile(mp_static, &phammer->ham01, "assets/ham1.png")) return PX_NULL;
+    if (!PX_LoadTextureFromFile(mp_static, &phammer->ham02, "assets/ham2.png")) return PX_NULL;
+    PX_ObjectRegisterEvent(pObject, PX_OBJECT_EVENT_CURSORMOVE, PX_Object_HammerOnMove, PX_NULL); // 注册移动事件
+    PX_ObjectRegisterEvent(pObject, PX_OBJECT_EVENT_CURSORDRAG, PX_Object_HammerOnMove, PX_NULL); // 注册拖拽事件
+    PX_ObjectRegisterEvent(pObject, PX_OBJECT_EVENT_CURSORDOWN, PX_Object_HammerOnCursorDown, PX_NULL); // 注册按下事件
+    PX_ObjectRegisterEvent(pObject, PX_OBJECT_EVENT_CURSORDOWN, PX_Object_HammerOnMove, PX_NULL); // 注册按下事件
+    PX_ObjectRegisterEvent(pObject, PX_OBJECT_EVENT_CURSORUP, PX_Object_HammerOnCursorUp, PX_NULL); // 注册抬起事件
 
-	return pObject;
+    return pObject;
 }
 
 PX_OBJECT_EVENT_FUNCTION(PX_Object_StartGameOnClick)
 {
-	game->Visible = PX_TRUE;
-	startgame->Visible = PX_FALSE;
-	game->Enabled = PX_TRUE;
-	PX_Object_ScorePanelSetScore(scorePanel, 0);
-	PX_Object_ClockBegin(gameclock, 30000); // 开始游戏,游戏时间30秒
+    game->Visible = PX_TRUE;
+    startgame->Visible = PX_FALSE;
+    game->Enabled = PX_TRUE;
+    PX_Object_ScorePanelSetScore(scorePanel, 0);
+    PX_Object_ClockBegin(gameclock, 30000); // 开始游戏，游戏时间 30 秒
 }
 
 
@@ -2516,57 +2514,57 @@ PX_OBJECT_EVENT_FUNCTION(PX_Object_StartGameOnClick)
 
 px_int main()
 {
-	px_int i;
-	PainterEngine_Initialize(800, 480);
-	PX_FontModuleInitialize(mp_static,&score_fm);
-	PX_FontModuleSetCodepage(&score_fm, PX_FONTMODULE_CODEPAGE_GBK);
-	if (!PX_LoadTextureToResource(PainterEngine_GetResourceLibrary(), "assets/rasing.png", "fox_rasing")) return 0;
-	if (!PX_LoadTextureToResource(PainterEngine_GetResourceLibrary(), "assets/taunt.png", "fox_taunt")) return 0;
-	if (!PX_LoadTextureToResource(PainterEngine_GetResourceLibrary(), "assets/escape.png", "fox_escape")) return 0;
-	if (!PX_LoadTextureToResource(PainterEngine_GetResourceLibrary(), "assets/beat.png", "fox_beat")) return 0;
-	if (!PX_LoadTextureToResource(PainterEngine_GetResourceLibrary(), "assets/hurt.png", "fox_hurt")) return 0;
-	if (!PX_LoadTextureToResource(PainterEngine_GetResourceLibrary(), "assets/mask.png", "fox_mask")) return 0;
-	if (!PX_LoadTextureToResource(PainterEngine_GetResourceLibrary(), "assets/background.png", "background")) return 0;
-	if (!PX_LoadAnimationToResource(PainterEngine_GetResourceLibrary(), "assets/song.2dx", "song"))return 0;
-	PainterEngine_SetBackgroundTexture(PX_ResourceLibraryGetTexture(PainterEngine_GetResourceLibrary(), "background"));
-	for (i = 0; i <= 9; i++)
-	{
-		px_texture tex;
-		px_char path[64];
-		PX_sprintf1(path,64, "assets/%1.png", PX_STRINGFORMAT_INT(i));
-		if (PX_LoadTextureFromFile(mp,&tex,path))
-		{
-			PX_FontModuleAddNewTextureCharacter(&score_fm, '0' + i, &tex);
-		}
-		PX_TextureFree(&tex);
-	}
-	
-	startgame = PX_Object_PushButtonCreate(mp, root, 300, 200, 200, 90, "Start Game", 0);
-	startgame->Visible = PX_TRUE;
-	PX_Object_PushButtonSetBackgroundColor(startgame, PX_COLOR(96, 255, 255, 255));
-	PX_Object_PushButtonSetPushColor(startgame, PX_COLOR(224, 255, 255, 255));
-	PX_Object_PushButtonSetCursorColor(startgame, PX_COLOR(168, 255, 255, 255));
-	PX_ObjectRegisterEvent(startgame, PX_OBJECT_EVENT_EXECUTE, PX_Object_StartGameOnClick, 0);
+    px_int i;
+    PainterEngine_Initialize(800, 480);
+    PX_FontModuleInitialize(mp_static, &score_fm);
+    PX_FontModuleSetCodepage(&score_fm, PX_FONTMODULE_CODEPAGE_GBK);
+    if (!PX_LoadTextureToResource(PainterEngine_GetResourceLibrary(), "assets/rasing.png", "fox_rasing")) return 0;
+    if (!PX_LoadTextureToResource(PainterEngine_GetResourceLibrary(), "assets/taunt.png", "fox_taunt")) return 0;
+    if (!PX_LoadTextureToResource(PainterEngine_GetResourceLibrary(), "assets/escape.png", "fox_escape")) return 0;
+    if (!PX_LoadTextureToResource(PainterEngine_GetResourceLibrary(), "assets/beat.png", "fox_beat")) return 0;
+    if (!PX_LoadTextureToResource(PainterEngine_GetResourceLibrary(), "assets/hurt.png", "fox_hurt")) return 0;
+    if (!PX_LoadTextureToResource(PainterEngine_GetResourceLibrary(), "assets/mask.png", "fox_mask")) return 0;
+    if (!PX_LoadTextureToResource(PainterEngine_GetResourceLibrary(), "assets/background.png", "background")) return 0;
+    if (!PX_LoadAnimationToResource(PainterEngine_GetResourceLibrary(), "assets/song.2dx", "song")) return 0;
+    PainterEngine_SetBackgroundTexture(PX_ResourceLibraryGetTexture(PainterEngine_GetResourceLibrary(), "background"));
+    for (i = 0; i <= 9; i++)
+    {
+        px_texture tex;
+        px_char path[64];
+        PX_sprintf1(path, 64, "assets/%1.png", PX_STRINGFORMAT_INT(i));
+        if (PX_LoadTextureFromFile(mp, &tex, path))
+        {
+            PX_FontModuleAddNewTextureCharacter(&score_fm, '0' + i, &tex);
+        }
+        PX_TextureFree(&tex);
+    }
+    
+    startgame = PX_Object_PushButtonCreate(mp, root, 300, 200, 200, 90, "Start Game", 0);
+    startgame->Visible = PX_TRUE;
+    PX_Object_PushButtonSetBackgroundColor(startgame, PX_COLOR(96, 255, 255, 255));
+    PX_Object_PushButtonSetPushColor(startgame, PX_COLOR(224, 255, 255, 255));
+    PX_Object_PushButtonSetCursorColor(startgame, PX_COLOR(168, 255, 255, 255));
+    PX_ObjectRegisterEvent(startgame, PX_OBJECT_EVENT_EXECUTE, PX_Object_StartGameOnClick, 0);
 
-	
-	
-	game=PX_ObjectCreate(mp, root, 0, 0, 0, 0, 0, 0);
-	PX_Object_FoxCreate(mp, game, 173, 326);
-	PX_Object_FoxCreate(mp, game, 401, 326);
-	PX_Object_FoxCreate(mp, game, 636, 326);
-	PX_Object_FoxCreate(mp, game, 173, 476);
-	PX_Object_FoxCreate(mp, game, 401, 476);
-	PX_Object_FoxCreate(mp, game, 636, 476);
-	game->Visible=PX_FALSE;
-	game->Enabled=PX_FALSE;
+    
+    
+    game = PX_ObjectCreate(mp, root, 0, 0, 0, 0, 0, 0);
+    PX_Object_FoxCreate(mp, game, 173, 326);
+    PX_Object_FoxCreate(mp, game, 401, 326);
+    PX_Object_FoxCreate(mp, game, 636, 326);
+    PX_Object_FoxCreate(mp, game, 173, 476);
+    PX_Object_FoxCreate(mp, game, 401, 476);
+    PX_Object_FoxCreate(mp, game, 636, 476);
+    game->Visible = PX_FALSE;
+    game->Enabled = PX_FALSE;
 
-	
-	PX_Object_HammerCreate(mp, root);
-	scorePanel = PX_Object_ScorePanelCreate(mp, root, 400, 60, &score_fm, 100);
+    
+    PX_Object_HammerCreate(mp, root);
+    scorePanel = PX_Object_ScorePanelCreate(mp, root, 400, 60, &score_fm, 100);
 
-	gameclock=PX_Object_ClockCreate(mp,root,680,60);
-	
-	return PX_TRUE;
+    gameclock = PX_Object_ClockCreate(mp, root, 680, 60);
+    
+    return PX_TRUE;
 }
 ```
 
