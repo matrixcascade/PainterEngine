@@ -513,16 +513,15 @@ In PainterEngine, there are two system default memory pools: `mp` and `mp_static
 #define PX_APPLICATION_MEMORYPOOL_SPACE_SIZE (1024*1024*16)
 ```
 
-这是这两个内存池的直接相关配置宏, 其中 `PX_APPLICATION_MEMORYPOOL_STATIC_SIZE` 表示 `mp_static` 内存池的内存分配大小, 而 `PX_APPLICATION_MEMORYPOOL_DYNAMIC_SIZE` 则是 `mp` 内存池的内存分配大小, `PX_APPLICATION_MEMORYPOOL_SPACE_SIZE` 则是系统其它资源。PainterEngine 程序运行开始, 就至少会占用这三个宏累加起来的内存, 之后的内存分配, 都围绕在这几个内存池中进行。如果你发现 PainterEngine 运行的内存不够了, 你可以自己手动拓展内存池的大小。当然, 如果你希望节约点内存, 你也可以手动将它们改小。
+These are the directly related configuration macros for the two memory pools. `PX_APPLICATION_MEMORYPOOL_STATIC_SIZE` specifies the memory allocation size for the `mp_static` memory pool, while `PX_APPLICATION_MEMORYPOOL_DYNAMIC_SIZE` specifies the memory allocation size for the `mp` memory pool. `PX_APPLICATION_MEMORYPOOL_SPACE_SIZE` represents other system resources. At the start of the PainterEngine program, at least the cumulative memory defined by these three macros is occupied. All subsequent memory allocations revolve around these memory pools. If you find that the memory is insufficient when running PainterEngine, you can manually expand the size of the memory pools. Of course, if you want to save memory, you can manually reduce their sizes.
 
+## 7. Using PainterEngine to Create GUI Buttons
 
-## 7. 使用 PainterEngine 创建 GUI 按钮
+In this chapter, we will encounter PainterEngine components for the first time. Now, we will use PainterEngine to create a classic GUI component—a button.
 
-在本章节中, 我们将第一次接触 PainterEngine 的组件。现在, 我们将使用 PainterEngine 创建一个经典 GUI 组件——按钮。
+In PainterEngine, all components are described by the `PX_Object` structure, and the creation of a component always returns a pointer of type `PX_Object *`.
 
-在 PainterEngine 中, 所有的组件都是由 `PX_Object` 结构体进行描述的, 创建组件返回的都是一个 `PX_Object *` 类型的指针。
-
-但在本章节中, 我们并不需要考虑的那么复杂, 我们只需要创建一个按钮出来即可。在 PainterEngine 中, 最常用的按钮是 `PX_Object_PushButton` 类型。
+However, in this chapter, we do not need to consider complexities. We only need to create a button. In PainterEngine, the most commonly used button type is `PX_Object_PushButton`.
 
 ```c
 #include "PainterEngine.h"
@@ -538,41 +537,43 @@ int main()
 
 ![](assets/img/7.1.gif)
 
-现在, 我们来详细看看 `PX_Object_PushButtonCreate` 函数。其中, 第一个参数是一个内存池, 在之前我们说过 PainterEngine 有 2 个系统默认的内存池，其实这里填 `mp` 或者 `mp_static` 都是没有问题的, 但考虑到界面可能会变动设计对象分配与销毁, 所以我们还是选择 `mp` 内存池。
+Now, let us take a detailed look at the `PX_Object_PushButtonCreate` function. 
 
-第二个参数 `root` 是 PainterEngine 的根对象, PainterEngine 对象管理机制我们将在之后讨论。在这里, 你只需要理解为, 这里填 `root` 的意思是 **_创建一个按钮对象作为根对象的子对象_**。这样按钮就能链接到系统对象树中, 进行事件响应和渲染。
+The first parameter is a memory pool. As mentioned earlier, PainterEngine has two default system memory pools. In this case, using either `mp` or `mp_static` works fine. However, considering that the interface design might involve allocating and destroying objects, it is better to use the `mp` memory pool.
 
-然后是按钮的 x，y，width，height，也就是位置和宽度高度等信息。
+The second parameter, `root`, is the root object in PainterEngine. We will discuss the object management mechanism in PainterEngine later. For now, you just need to understand that providing `root` here means **_creating a button object as a child object of the root object_**. This allows the button to be linked to the system object tree, enabling event response and rendering.
 
-最后一个是字模指针，也就是之前我们加载的 ttf 字模文件，如果没有它，我们的按钮就不能显示中文汉字了。当然你可以选择其他的字体，以实现不同的风格。
+Next are the `x`, `y`, `width`, and `height` parameters, which specify the position, width, and height of the button.
 
-## 8. PainterEngine 对象传递机制
+The last parameter is a font pointer, which is the TTF font file we loaded earlier. Without it, the button cannot display Chinese characters. Of course, you can choose other fonts to achieve different styles.
 
-在上一个章节中，我们初略了解了根对象 `root`, 那么在本章节, 我们将学习一下 PainterEngine 的对象管理机制。
+## 8. PainterEngine Object Transmission Mechanism
 
-正如我们之前所说的，在 PainterEngine 中, 所有的组件都是由 `PX_Object` 结构体进行描述的, PainterEngine 的对象是以树的形式存在的:
+In the previous chapter, we briefly introduced the root object, `root`. In this chapter, we will learn about the object management mechanism in PainterEngine.
+
+As mentioned earlier, all components in PainterEngine are described by the `PX_Object` structure. PainterEngine's objects exist in the form of a tree structure:
 
 ![](assets/img/8.1.png)
 
-每一个 `PX_Object` 都是这个树中的一个节点, 都可以有自己的子节点（可能多个）和自己的父节点（只能有一个）。同时, 每一个 `PX_Object` 都有以下四个基本功能函数：
+Each `PX_Object` is a node in the tree, and can have its own children (possibly more than one) and its own parent (only one). At the same time, each `PX_Object` has the following four basic functions:
 
-`Create`：对象创建函数，或者说是对象初始化函数, 在 PainterEngine 中它一般是 `PX_Object_xxxxxCreate` 这种形式的, 其中 `xxxxx` 就是这个对象的名称, 比如上一章节的 `PushButton`, `Create` 函数一般是对象的一些初始化处理，并会将自己连接到对象树中。
+`Create`: object creation function, or object initialisation function, in PainterEngine it is usually `PX_Object_xxxxxCreate`, where `xxxxx` is the name of the object, such as the `PushButton` in the previous section, `Create` function is usually the object and connects itself to the object tree.
 
-`Update`：对象的物理信息更新工作基本在这个函数中完成，一般会处理对象的一些物理信息, 比如位置大小速度等，常见于游戏设计中的物体，在 GUI 对象中则比较少见，其设计是与之后的 `Render` 也就是绘制函数进行区分, 因为在例如游戏服务端中, 对象并不需要进行绘制, 且绘制是非常消耗性能的。
+`Update`: the physical information of the object is basically updated in this function, which generally deals with the physical information of the object, such as position, size, speed, etc. It is commonly used for objects in game design, and is less common in GUI objects, which is designed to be differentiated from the `Render` function, which is the drawing function, because in the game server side, for example, the object doesn't need to be drawn, and drawing is a very important part of game design. because in game servers, for example, objects don't need to be drawn, and drawing is very performance-intensive.
 
-`Render`: 对象的绘制工作基本在这个函数中完成, 用于 `PX_Object` 的绘制功能, 将图像数据渲染到屏幕上, 当然有些情况下物理信息也会在这个函数中做, 是因为这个对象的物理信息并不会影响游戏的实际运行结果, 例如一些特效和粒子效果, 多数的 GUI 组件也几乎只用得到 `Render` 函数。
+`Render`: the drawing of the object is basically done in this function, which is used in the drawing function of `PX_Object` to render the image data to the screen, of course, in some cases, the physics information is also done in this function, because the physics information of the object doesn't affect the actual running result of the game, for example, some special effects and particle effects, and most of the GUI components are almost only used by the `Render` function. Most GUI components also use the `Render` function almost exclusively.
 
-`Free`：对象的释放工作基本在这个函数中完成，例如在 `Create` 中加载了纹理，或者申请了内存，在这个函数中应该被释放。
+`Free`: the release of the object is basically done in this function, e.g. if a texture is loaded in `Create`, or memory is requested, it should be released in this function.
 
-以上 `Update`、`Render`、`Free` 函数具有传递的特性，也就是说：
+The above `Update`, `Render`, and `Free` functions have a pass-through property, which means:
 
-* 如果某个对象节点执行了 `Update`, 那么它的所有子对象也会执行 `Update`
-* 如果某个对象节点执行了 `Render`, 那么它的所有子对象也会执行 `Render`
-* 如果某个对象节点执行了 `Free`, 那么它的所有子对象也会执行 `Free`, 父对象被删除了, 它的子节点也会被删除, 并且将会一直迭代到以这个节点为根节点的所有子节点都被删除。
+* If an object node executes `Update`, then all its children will also execute `Update` * If an object node executes `Update`, then all its children will also execute `Update`.
+* If an object node executes `Render`, all its children execute `Render`. * If an object node executes `Update`, all its children execute `Update`.
+* If an object node does `Free`, then all its children do `Free`, and if the parent is deleted, its children are deleted, and iterates until all children rooted at that node are deleted.
 
-因此，在上一章节我们创建了按钮，并将它连接到了 `root` 节点, 那么我们是不需要自己再手动执行 `Update`、`Render`、`Free` 函数的(在 `PX_Object_PushButton.c` 中它们已经被写好了), 因为根节点 `root` 是被自动更新渲染和释放的, 我们只需要负责 `Create` 就可以了。
+So, if we created the button in the previous section and attached it to the `root` node, we don't need to manually execute the `Update`, `Render`, and `Free` functions ourselves (they're already written in `PX_Object_PushButton.c`), because the root node, `root`, is automatically updated, rendered, and freed. and released automatically, we just need to take care of `Create`.
 
-当然，如果你希望删除这个对象的话，你只需要调用 `PX_ObjectDelayDelete` 或者 `PX_ObjectDelete` 就可以了：
+Of course, if you wish to delete the object, you can just call `PX_ObjectDelayDelete` or `PX_ObjectDelete`:
 
 ```c
 #include "PainterEngine.h"
@@ -587,11 +588,11 @@ int main()
 }
 ```
 
-这两个函数的功能和参数都是一样的, 但是 `PX_ObjectDelayDelete` 会在更新和渲染完成后才执行删除, `PX_ObjectDelete` 则是立即删除，我建议使用 `PX_ObjectDelayDelete`，这样你就可以避免在某些情况下因为对象被立即删除了，而其它对象仍然引用了这个对象的数据，这会导致其访问失效内存。
+The functionality and parameters of these two functions are the same. However, `PX_ObjectDelayDelete` executes the deletion only after the update and rendering are complete, whereas `PX_ObjectDelete` performs the deletion immediately. I recommend using `PX_ObjectDelayDelete` to avoid situations where an object is deleted immediately while other objects still reference its data, which could lead to accessing invalid memory.
 
-## 9. PainterEngine 消息机制
+## 9. PainterEngine Messaging Mechanism
 
-现在，虽然我们创建了一个按钮，但我们却没办法响应它，为了响应按钮事件，我们需要将按钮控件和消息进行绑定，请查看以下代码：
+Now, although we have created a button, we cannot yet respond to it. To respond to button events, we need to bind the button control to a message. Please refer to the following code:
 
 ```c
 #include "PainterEngine.h"
@@ -615,15 +616,15 @@ int main()
 
 ![](assets/img/9.1.gif)
 
-其中, `PX_OBJECT_EVENT_FUNCTION` 是一个宏, 因为事件响应函数是一个固定的格式, 因此非常建议你使用宏的方式来申明它, 它的定义原型如下:
+Among them, ``PX_OBJECT_EVENT_FUNCTION`` is a macro, because the event response function is a fixed format, so it is highly recommended that you use the macro to declare it, its definition prototype is as follows.
 
-```c
+``c
 #define PX_OBJECT_EVENT_FUNCTION(name) px_void name(PX_Object *pObject,PX_Object_Event e,px_void * ptr)
-```
+``
 
-可以看到, 这个回调函数有 3 个参数, 第一个是响应时间的对象的指针, 因为是按钮点击被触发了, 所以这个指针指向的就是这个按钮对象；第二个参数是事件类型 `e`，它是触发的事件类型；最后一个参数则是用户传递来的指针，它在注册时间响应函数 `PX_ObjectRegisterEvent` 被调用时就被传递进来了。
+As you can see, this callback function has three parameters, the first is a pointer to the object of the response time, because the button click was triggered, so this pointer points to the button object; the second parameter is the type of event `e`, which is the type of the triggered event; the last parameter is the pointer passed by the user, which is in the registration of the time response function `PX_ObjectRegisterEvent` is triggered. ObjectRegisterEvent` is called.
 
-事件类型有以下几种:
+The event types are the following.
 
 ```c
 #define PX_OBJECT_EVENT_ANY					0 //任意事件
@@ -659,11 +660,11 @@ int main()
 #define PX_OBJECT_EVENT_DAMAGE				30 //伤害事件
 ```
 
-以上事件并非全部都是任何组件都会响应的, 例如在上面例子中的 `PX_OBJECT_EVENT_EXECUTE`, 它是按钮被单击时会被触发的事件, 或者是文本框中按下回车会触发的事件, 但有些例如滚动条和进度条, 并不会触发这个事件。也就是说有些事件是专属的。
+Not all of the above events will be responded to by any component, such as `PX_OBJECT_EVENT_EXECUTE` in the above example, it is the event that will be triggered when a button is clicked, or the event that will be triggered when the enter is pressed in a text box, but some of them, such as scrollbars and progressbars, will not be triggered by this event. This means that some events are exclusive.
 
-但是类似于带有 `CURSOR` 或 `KEY` 的事件，是所有连接在 `root` 节点的组件都会收到的事件(但不一定响应)。需要注意的是, 类似于鼠标或触摸屏的 `CURSOR` 事件, 并非只有鼠标或触摸屏移动到组件所在位置与范围时才会触发, 只要有这类事件投递到 `root` 节点, 他就会逐层传递给它的所有子节点。如果你希望实现类似于按钮中的 "仅在鼠标点击到按钮时" 才触发, 你必须自行实现范围判断。
+But events like those with `CURSOR` or `KEY` are events that all components attached to the `root` node will receive (but not necessarily respond to). Note that `CURSOR` events, like mouse or touchscreen events, are not triggered only when the mouse or touchscreen is moved into the component's location and range; whenever such an event is delivered to the `root` node, it is passed on to all of its children, layer by layer. If you want to implement something similar to the `only on mouse click' in buttons, you will have to implement the scope judgement yourself.
 
-你可以使用
+You can use the
 
 ```c
 px_float PX_Object_Event_GetCursorX(PX_Object_Event e);//获取cursor事件的x坐标
@@ -671,15 +672,15 @@ px_float PX_Object_Event_GetCursorY(PX_Object_Event e);//获取cursor事件的y�
 px_float PX_Object_Event_GetCursorZ(PX_Object_Event e);//获取cursor事件的z坐标,一般用于鼠标中键滚轮
 ```
 
-来获取 `cursor` 事件中类似于 "鼠标现在在哪里" 的功能。
+to get something like ‘where is the mouse now’ in the `cursor` event.
 
-让我们回到源代码 `OnButtonClick` 中做的很简单, 就是用 `PX_Object_PushButtonSetText` 改变了按钮文本的内容。
+Let's go back to the source code `OnButtonClick` and do something very simple, change the content of the button text with `PX_Object_PushButtonSetText`.
 
-最后让我们来到 `PX_ObjectRegisterEvent` 函数，这个函数用于将事件与 C 语言函数绑定在一起，第一个参数是我们之前创建好的按钮组件的指针，第二个参数是我们想要绑定的事件类型，这里的 `PX_OBJECT_EVENT_EXECUTE` 就是按钮被点击时触发的, 第三个则是用户指针, 它会被传递到回调函数中, 如果你用不到, 你可以直接填 `PX_NULL`。
+Finally we come to the `PX_ObjectRegisterEvent` function, which is used to bind an event to a C function. The first parameter is a pointer to the button component we created earlier, the second parameter is the type of event we want to bind, in this case `PX_OBJECT_EVENT_EXECUTE` is the event triggered when the button is clicked, and the third parameter is the event triggered when the button is clicked, and the third parameter is the event triggered when the button is clicked. Here, `PX_OBJECT_EVENT_EXECUTE` is the event triggered when the button is clicked, and the third argument is the user pointer, which will be passed to the callback function, or if you don't want to use it, you can just fill in `PX_NULL`.
 
-## 10. 小例子，用 PainterEngine 实现一个电子相册
+## 10. Small example of a digital photo album with PainterEngine
 
-现在，让我们用一个小例子来开启 PainterEngine 组件化开发的第一步。在本例程中, 我将使用按钮和图片框组件, 开发一个电子相册功能。本文中的美术资源, 你可以在 `documents/logo` 中找到。
+Now, let's kick off the first step in the componentised development of PainterEngine with a small example. In this routine, I'll develop a digital photo album using buttons and picture frames components. You can find the art resources for this article in `documents/logo`.
 
 ```c
 #include "PainterEngine.h"
@@ -733,17 +734,17 @@ int main()
 }
 ```
 
-在上述代码中 `OnButtonPreClick` 和 `OnButtonNextClick` 分别是上一张和下一张按钮的回调函数, 我们使用 `PX_Object_ImageSetTexture` 函数, 对图片框进行切换。
+In the above code, `OnButtonPreClick` and `OnButtonNextClick` are the callback functions for the previous and next buttons respectively, and we use the `PX_Object_ImageSetTexture` function to switch the image box.
 
-而在 `main` 函数中, 我们先加载了 ttf 字体, 然后用 `PX_Object_ImageCreate` 创建了一个图片组件, 之后我们创建了 2 个按钮, 并用 `PX_ObjectRegisterEvent` 绑定了事件回调函数。最后, 看看运行结果：
+In the `main` function, we load the ttf font first, then we create an image component with `PX_Object_ImageCreate`, then we create 2 buttons and bind the event callback function with `PX_ObjectRegisterEvent`. Finally, let's take a look at the result:
 
 ![](assets/img/10.1.gif)
 
-## 11. 更多常用的 PainterEngine 组件
+## 11. More common PainterEngine components
 
-你可以在 `PainterEngine/kernel` 的文件中, 找到 PainterEngine 的内置组件, 所有的组件名称都是以 `PX_Object_XXXXX` 开头的, 在这里, 我为你列举一些常用的组件及示范代码：
+You can find the built-in components of PainterEngine in the `PainterEngine/kernel` file, all the component names start with `PX_Object_XXXXX`, here, I list some of the commonly used components and the sample code for you:
 
-* 文本框:
+* Textbox.
 
 ```c
 #include "PainterEngine.h"
@@ -766,7 +767,7 @@ int main()
 
 ![](assets/img/11.1.gif)
 
-* 列表框：
+* List Box:
 
 ```c
 #include "PainterEngine.h"
@@ -813,7 +814,7 @@ int main()
 
 ![](assets/img/11.2.gif)
 
-* 滑动条：
+* Slider:
 
 ```c
 #include "PainterEngine.h"
@@ -839,7 +840,7 @@ int main()
 
 ![](assets/img/11.3.gif)
 
-* 下拉框：
+* Dropdown box:
 
 ```c
 #include "PainterEngine.h"
@@ -860,7 +861,7 @@ int main()
 
 ![](assets/img/11.4.gif)
 
-* 示波器：
+* Oscilloscope:
 
 ```c
 #include "PainterEngine.h"
@@ -913,19 +914,19 @@ int main()
 
 ![](assets/img/11.5.gif)
 
-因为实在太多了, 我无法为你列举所有的组件, 如果你希望知道某个组件的具体用法和某个组件到底是做什么的, 你可以访问 PainterEngine 的 [组件市场](https://market.painterengine.com/), 在那里你可以找到 PainterEngine 内置组件和三方组件的说明和示例代码。
+Because there are too many, I can't list all of them for you, if you want to know exactly how to use a component and what a component does, you can visit PainterEngine's [Component Marketplace](https://market.painterengine.com/), there you can find PainterEngine's Component Marketplace (), where you can find descriptions and sample code for PainterEngine's built-in components and third-party components.
 
 ![](assets/img/11.6.png)
 
-## 12. 实现自己的 PainterEngine 组件
+## 12. Implementing your own PainterEngine components
 
-PainterEngine 鼓励组件式的开发架构。也就是说，不论是游戏还是 GUI 交互程序，甚至是程序功能，我们都可以用组件的形式去开发它。
+PainterEngine encourages a component-based development architecture. That is, whether it is a game, a GUI interaction, or even a program function, we can develop it as a component.
 
-组件式开发有点类似于 C++中的 Class，每一个组件，都要实现自己的 `Create`、`Update`、`Render`、`Free` 函数。关于上面四个函数, 你可以参考 [前面的对象传递机制](#8painterengine-对象传递机制) 这一章节。
+Component development is kind of like Class in C++, each component has to implement its own `Create`, `Update`, `Render`, `Free` functions. For the above four functions, you can refer to the section [Object Passing Mechanism in Front](#8painterengine - Object Passing Mechanism).
 
-为了演示这一点，让我们来实现一个“可控拖动旋转图片组件”，即我们可以用鼠标拖动图片在界面的位置，并用鼠标中键来旋转它。
+To demonstrate this, let's implement a ‘controlled drag and rotate image component’, i.e. we can drag the image with the mouse to the position in the interface and rotate it with the middle mouse button.
 
-为了实现这一个功能, 让我们一步一步完成这个步骤。首先, 为了创建一个组件, 我们需要一个结构体来描述我们的组件。我们需要绘制图片, 所以我们需要一个 `px_texture` 类型。同时, 我们还需要旋转图片, 因此它还有一个 `rotation` 用于描述旋转的角度：
+In order to implement this feature, let's go through the steps step by step. Firstly, in order to create a component, we need a structure to describe our component. We need to draw a picture, so we need a `px_texture` type. At the same time, we need to rotate the image, so it also has a `rotation` to describe the angle of rotation:
 
 ```c
 #include "PainterEngine.h"
@@ -942,7 +943,7 @@ px_int main()
 }
 ```
 
-之后, 我们需要定义我们的 `Create`、`Update`、`Render` 和 `Free` 函数, 其中 `Update`、`Render`、`Free` 有对应的格式, 它们都有一个宏来简化我们的定义过程：
+After that, we need to define our `Create`, `Update`, `Render`, and `Free` functions, where `Update`, `Render`, and `Free` have corresponding formats, and all of them have a macro to simplify our definition process:
 
 ```c
 #define PX_OBJECT_RENDER_FUNCTION(name) px_void name(px_surface *psurface,PX_Object *pObject,px_int idesc,px_dword elapsed)
@@ -950,7 +951,7 @@ px_int main()
 #define PX_OBJECT_FREE_FUNCTION(name) px_void name(PX_Object *pObject,px_int idesc)
 ```
 
-那么, 在主函数中, 我们就可以这样定义我们的这几个函数：
+So, in the main function, we can define our functions like this:
 
 ```c
 #include "PainterEngine.h"
@@ -983,39 +984,39 @@ px_int main()
 }
 ```
 
-其中, 因为我们不需要更新一些物理信息, 所以 `MyObjectUpdate` 函数中我们可以什么都不写, 在 `MyObjectRender` 中我们只需要把图片绘制出来就可以了, 这里我们先使用 `PX_ObjectGetDesc` 函数获得我们定义好的结构体指针, 它的第一个参数是结构体类型, 第二个参数则是函数传递进来的 `pObject` 指针, 然后我们只需要用 `PX_TextureRenderEx` 函数把图片绘制出来就可以了。
+Among them, because we do not need to update some physical information, so `MyObjectUpdate` function we can not write anything, in the `MyObjectRender` we just need to draw the picture out can be, here we first use the `PX_ObjectGetDesc` function to get our defined structure pointer, its first parameter is the structure type, the second parameter is the `pObject` pointer, then we just use the `PX_TextureRenderEx` function to draw the picture out, then we just need to use the `PX_TextureRenderEx` function to draw the picture out. The first parameter is the type of the structure, the second parameter is the `pObject` pointer passed in by the function, and then we just need to use the `PX_TextureRenderEx` function to render the picture.
 
-多提一句，`PX_TextureRenderEx` 函数用于在指定的表面上渲染纹理，并提供了对齐、混合、缩放和旋转等扩展选项。其中：
+As an aside, the `PX_TextureRenderEx` function is used to render a texture on a specified surface and provides extended options for alignment, blending, scaling and rotation. Among them:
 
-  * `psurface`：指向要渲染纹理的表面的指针。
-  * `resTexture`：指向要渲染的纹理资源的指针。
-  * `x`：在表面上绘制纹理的 x 坐标。
-  * `y`：在表面上绘制纹理的 y 坐标。
-  * `refPoint`：对齐的参考点（例如，中心，左上角等）。
-  * `blend`：指向混合选项结构的指针（如果不需要混合，可以为 `NULL`）。
-  * `scale`：纹理的缩放因子（1.0 表示不缩放）。
-  * `Angle`：纹理的旋转角度，以度为单位。
+  * `psurface`: a pointer to the surface on which to render the texture.
+  * `resTexture`: pointer to the texture resource to render.
+  * `x`: the x coordinate at which to draw the texture on the surface.
+  * `y`: y coordinate of the texture to draw on the surface.
+  * `refPoint`: reference point for alignment (e.g. centre, top left corner, etc.).
+  * `blend`: pointer to the blend options structure (can be `NULL` if no blending is needed).
+  * `scale`: the scale factor of the texture (1.0 means no scale).
+  * `Angle`: the rotation angle of the texture, in degrees.
 
-最后, 是时候编写创建新对象的函数了, 这里我们需要用到 `PX_ObjectCreateEx` 函数, `PX_ObjectCreateEx` 函数用于创建一个扩展对象，并初始化其属性和回调函数。它的参数说明如下:
+Finally, it's time to write the function that creates the new object, here we need to use the `PX_ObjectCreateEx` function, the `PX_ObjectCreateEx` function is used to create an extended object and initialise its properties and callback functions. Its parameters are described as follows.
 
-* `mp`：指向内存池的指针，用于分配对象所需的内存。
-* `Parent`：指向父对象的指针，如果没有父对象则为 `NULL`。
-* `x`：对象在 x 轴上的初始位置。
-* `y`：对象在 y 轴上的初始位置。
-* `z`：对象在 z 轴上的初始位置, z 坐标会影响其渲染的先后顺序。
-* `Width`：对象的宽度。
-* `Height`：对象的高度。
-* `Lenght`：对象的长度,2D 对象, 一般可以是 0。
-* `type`：对象的类型。
-* `Func_ObjectUpdate`：指向对象更新函数的指针。
-* `Func_ObjectRender`：指向对象渲染函数的指针。
-* `Func_ObjectFree`：指向对象释放函数的指针。
-* `desc`：指向对象描述数据的指针。你可以设置为 0, 创建时会把这个对象类型的数据填充为 0。
-* `size`：描述数据的大小, 就是你定义的对象结构体类型的大小，创建对象函数会在内存池申请一段内存空间，并用于存储你的对象结构体。
+* `mp`: pointer to a memory pool to allocate the memory required by the object.
+* `Parent`: pointer to the parent object, or `NULL` if there is no parent.
+* `x`: the initial position of the object on the x-axis.
+* `y`: the initial position of the object on the y-axis.
+* `z`: the initial position of the object on the z-axis, the z-coordinate affects its rendering order.
+* `Width`: the width of the object.
+* `Height`: the height of the object.
+* `Lenght`: the length of the object, for 2D objects, it can be 0. * `type`: the length of the object.
+* `type`: the type of the object.
+* `Func_ObjectUpdate`: pointer to the object update function.
+* `Func_ObjectRender`: pointer to the object render function.
+* `Func_ObjectFree`: pointer to the object free function.
+* `desc`: pointer to the object description data. You can set it to 0, which will fill the data of this object type with 0 when it is created.
+* `size`: the size of the description data, that is, the size of the type of object structure you defined. The object creation function will request a section of memory space in the memory pool and use it to store your object structure.
 
-在创建好一个空对象后, 我们使用 `PX_ObjectGetDescIndex` 将对象中的对象结构体指针取出来, 这是一个三参数的函数, 第一个参数是对象结构体类型, 第二个参数则是 `PX_Object *` 指针类型, 因为一个 `PX_Object` 可以将多个对象结构体组合在一起, 这个组合结构体我们将在之后的教程中会进一步描述, 但现在我们只需要知道, 调用 `PX_ObjectCreateEx` 函数后, 其第一个存储的对象结构体索引是 0 就可以了。
+After creating an empty object, we use `PX_ObjectGetDescIndex` to get the object structure pointer out of the object, this is a three-parameter function, the first parameter is the type of the object structure, and the second parameter is the type of the `PX_Object *` pointer, because a `PX_Object` can be combined with multiple object structures. We'll describe this combination of structures later in the tutorial, but for now we just need to know that after calling the `PX_ObjectCreateEx` function, the first object structure stored is at index zero.
 
-取出结构体指针后, 我们对其进行一系列初始化, 比如加载图片和初始化旋转角度, 最后在 `main` 函数中我们创建这个对象：
+After taking the pointer out of the structure, we do a series of initialisations on it, such as loading the image and initialising the rotation angle, and finally we create the object in the `main` function:
 
 ```c
 #include "PainterEngine.h"
@@ -1062,11 +1063,11 @@ px_int main()
 }
 ```
 
-那么它的运行效果是这样的:
+Then it runs like this.
 
 ![](assets/img/12.1.png)
 
-但现在还没有结束, 我们怎么让我们的组件, 响应鼠标中键实现旋转呢?还记得我们之前在 [PushButton](#8painterengine-对象传递机制) 中的对象传递机制么？现在, 我们也要让我们的组件响应鼠标中键的信息, 因此我们给它注册一个 `PX_OBJECT_EVENT_CURSORWHEEL` 事件的回调函数, 代码如下:
+But it doesn't end there, how do we get our component to rotate in response to the middle mouse button? Remember our object passing mechanism from [PushButton](#8painterengine-object passing mechanism)? Now, we also want our component to respond to the middle mouse button, so we register it with a callback function for the `PX_OBJECT_EVENT_CURSORWHEEL` event, with the following code.
 
 ```c
 #include "PainterEngine.h"
@@ -1121,11 +1122,11 @@ px_int main()
 }
 ```
 
-运行结果如下:
+The results are as follows.
 
 ![](assets/img/12.2.gif)
 
-如果你觉得旋转图的质量不好, 有很多锯齿, 这是因为 `PX_TextureRenderEx` 旋转时是对原图直接采样的。如果你想要高质量的旋转图, 你可以用 `PX_TextureRenderRotation` 函数来替换原函数:
+If you think the quality of the rotated image is not good, there are a lot of jaggies, it's because `PX_TextureRenderEx` rotates the image by sampling the original image directly. If you want a high quality rotation, you can replace the original function with the `PX_TextureRenderRotation` function.
 
 ```c
 PX_OBJECT_RENDER_FUNCTION(MyObjectRender)
@@ -1138,7 +1139,7 @@ PX_OBJECT_RENDER_FUNCTION(MyObjectRender)
 
 ![](assets/img/12.3.gif)
 
-那么, 我们如何实现拖动效果呢？想要做到拖动效果, 我们需要在对象结构体中, 新增 `float` 类型的变量 `x`, `y`, 用来记录当鼠标选中图片时的位置, 同时我们加入了 `bool` 类型的变量 `bselect`, 表示当前的图标是否被选中。当鼠标点击我们的图标以后, 我们就可以监听 `PX_OBJECT_EVENT_CURSORDRAG` 事件, 这是鼠标在屏幕上拖动时会产生的事件, 我们通过坐标的偏移, 移动我们的组件。最后, 不论鼠标非拖动时的移动或鼠标左键抬起, 都会取消我们组件的选中状态, 在对应处理函数中取消选中状态即可。
+So, how do we achieve the drag effect? To achieve the drag effect, we need to add `float` type variables `x`, `y`, used to record the position of the image when the mouse selects it, at the same time, we add a `bool` type variable `bselect`, which indicates whether the current icon is selected or not. When the mouse clicks on our icon, we can listen to the `PX_OBJECT_EVENT_CURSORDRAG` event, which is generated when the mouse is dragged on the screen, and we move our component by the offset of the coordinates. Finally, no matter the mouse non-dragging movement or the left mouse button lift, will be cancelled our component selection state, in the corresponding handler function to cancel the selection state can be.
 
 ```c
 #include "PainterEngine.h"
@@ -1230,15 +1231,15 @@ px_int main()
 
 ![](assets/img/12.4.gif)
 
-当然, 你可以调用 `PX_Object_MyObjectCreate` 多次, 创建多个组件对象, 它们的功能都是一样的：
+Of course, you can call `PX_Object_MyObjectCreate` multiple times to create multiple component objects, which all function the same way:
 
 ![](assets/img/12.5.gif)
 
-## 13. 组合式组件设计
+## 13. Combined Component Design
 
-PainterEngine 的组件允许同时拥有多种组件类型, 例如, 当我们将一个图片框组件和一个按钮进行组合, 我们就可以得到一个组合式组件图片按钮。
+PainterEngine's components allow to have multiple component types at the same time, for example, when we combine a PictureBox component with a Button, we get a Combo Component PictureButton.
 
-参考如下代码：
+Refer to the following code:
 
 ```c
 #include "PainterEngine.h"
@@ -1271,21 +1272,21 @@ px_int main()
 }
 ```
 
-我们创建了一个 Image 图像框类型, 然后将一个 Button 对象类型组合上去, 这样我们就获得了一个图片按钮：
+We create an Image image box type, and then put a Button object type on it, so we get a picture button:
 
 ![](assets/img/13.1.gif)
 
-那么, 我们如何设计我们自己的可组合对象呢？回到我们的第十二章节, 现在, 我们就将 "可拖拽" 这个功能设计成一个组合式组件。
+So, how do we design our own composable objects? Going back to our chapter 12, we will now design the ‘Drag and Drop’ functionality as a composable component.
 
-首先，仍然是定义一个组件对象结构体，为实现拖拽功能，我们需要鼠标按下时的 x, y 坐标, 同时需要一个 bool 类型记录是否是选中状态, 然后我们需要注册 `CURSOR` 事件, 这些事件在上一章节我们已经写过了, 最后, 我们用 `PX_ObjectCreateDesc` 函数创建一个对象结构体，并将它 Attach 到我们的对象上。
+First of all, we still define a component object structure, for drag and drop functionality, we need the x, y coordinates of the mouse press, and a bool type to record whether it is selected or not, then we need to register the `CURSOR` events, which we have already written about in the previous section, and lastly, we create an object structure with the `PX_ObjectCreateDesc` function. to create an object structure and attach it to our object.
 
-`PX_ObjectCreateDesc` 是一个对象结构体创建函数, 它的定义原型如下：
+``PX_ObjectCreateDesc`` is an object structure creation function, which is defined with the following prototype:
 
 ```c
 px_void* PX_ObjectCreateDesc(PX_Object* pObject, px_int idesc, px_int type, Function_ObjectUpdate Func_ObjectUpdate, Function_ObjectRender Func_ObjectRender, Function_ObjectFree Func_ObjectFree, px_void* pDesc, px_int descSize)
 ```
 
-第一个参数是需要 Attach 的对象, 第二个参数是 Attach 到的对象索引。还记得我们之前提到的对象数据索引么, 使用 `PX_ObjectCreateEx` 默认使用的是索引 0, 因此, 如果我们要附加到一个对象上, 我们应该选 1, 当然如果 1 也被占用了, 它就是 2, 以此类推。第三个参数是对象类型, 我们使用 `PX_ObjectGetDescByType` 时, 可以通过对象类型取出对应的指针, 然后就是我们熟悉的 `Update`、`Render`、`Free` 三件套了, 最后一个参数给出其结构体描述和结构体大小。请参阅下面的代码:
+The first parameter is the object to be Attached, the second parameter is the index of the object to be Attached to. Remember the object data index we mentioned before, using `PX_ObjectCreateEx` defaults to index 0, so if we want to attach to an object, we should choose 1, of course if 1 is also occupied, it is 2, and so on. The third parameter is the object type, when we use `PX_ObjectGetDescByType`, we can get the corresponding pointer from the object type, and then the familiar `Update`, `Render`, `Free` triple, and the last parameter gives the structure description and structure size. See the following code.
 
 ```c
 #include "PainterEngine.h"
@@ -1356,14 +1357,13 @@ px_int main()
 }
 ```
 
-运行结果如下:
+The running result is as follows:
 
 ![](assets/img/13.2.gif)
 
+## 14. Particle Systems
 
-## 14. 粒子系统
-
-PainterEngine 提供了一个粒子系统实现, 下面是一个粒子系统的示范程序：
+PainterEngine provides an implementation of a particle system, and the following is a sample particle system application:
 
 ```c
 #include "PainterEngine.h"
@@ -1386,7 +1386,7 @@ px_int main()
 
 ![](assets/img/14.1.gif)
 
-这是一个用组件包装起来的粒子系统实现, 另外一种是提供了更加详细的粒子系统参数配置:
+This is an implementation of a particle system wrapped in components, while the other provides more detailed configuration of the particle system parameters.
 
 ```c
 #include "PainterEngine.h"
@@ -1428,101 +1428,101 @@ int main()
 }
 ```
 
-以下是这段代码的主要功能和流程解释：
+Below is an explanation of the main functions and processes of this code:
 
-1. `#include "PainterEngine.h"`：引入 PainterEngine 的头文件，以便使用引擎的功能。
+1. `#include ‘PainterEngine.h’`: Introduces the PainterEngine header file in order to use the engine's functionality.
 
-2. `px_texture texture;`：声明一个名为 `texture` 的变量，用于存储纹理信息。
+2. `px_texture texture;`: declares a variable named `texture` to store texture information.
 
-3. `int main()`：主函数的入口点。
+3. `int main()`: entry point for the main function.
 
-4. `PX_Object* pObject;`：声明一个名为 `pObject` 的指向 `PX_Object` 类型的指针，将用于创建粒子系统对象。
+4. `PX_Object* pObject;`: Declare a pointer to a `PX_Object` type named `pObject`, which will be used to create the particle system object.
 
-5. `PX_ParticalLauncher_InitializeInfo ParticalInfo;`：声明一个名为 `ParticalInfo` 的结构体变量，用于配置粒子发射器的初始化信息。
+5. `PX_ParticalLauncher_InitializeInfo ParticalInfo;`: declares a struct variable named `ParticalInfo` that will be used to configure the initialisation information for the particle launcher.
 
-6. `PainterEngine_Initialize(600, 400);`：初始化 PainterEngine，设置窗口的宽度为 600 像素，高度为 400 像素。
+6. `PainterEngine_Initialize(600, 400);`: Initialise the PainterEngine and set the window width to 600 pixels and height to 400 pixels.
 
-7. `PX_LoadTextureFromFile(mp_static, &texture, "assets/star.traw");`：从文件加载纹理，将纹理数据存储在 `texture` 变量中。纹理文件路径为 "assets/star.traw"。
+7. `PX_LoadTextureFromFile(mp_static, &texture, ‘assets/star.draw’);`: load texture from file, store texture data in `texture` variable. Texture file path is `assets/star.traw`.
 
-8. `PX_ParticalLauncherInitializeDefaultInfo(&ParticalInfo);`：初始化 `ParticalInfo` 结构体，设置了一些默认的粒子发射器属性。
+8. `PX_ParticalLauncherInitializeDefaultInfo(&ParticalInfo);`: Initialise the `ParticalInfo` structure, set some default particle emitter properties.
 
-9. 针对 `ParticalInfo` 的各个属性进行了具体的配置，包括粒子的位置、速度、寿命、大小、旋转等。这些属性决定了粒子的外观和行为。
+9. Specific configurations are made for each property of `ParticalInfo`, including particle position, speed, lifetime, size, rotation, etc. These properties determine the appearance and rotation of the particles. These properties determine the appearance and behaviour of the particles.
 
-10. `pObject=PX_Object_ParticalCreate(mp,root,300,200,ParticalInfo);`：使用配置好的 `ParticalInfo` 创建一个粒子系统对象，并将其存储在 `pObject` 中。这个粒子系统对象将会在窗口中的位置 (300, 200) 处发射粒子。
+10. `pObject=PX_Object_ParticalCreate(mp,root,300,200,ParticalInfo);`: Creates a particle system object with the configured `ParticalInfo` and stores it in `pObject`. This particle system object will emit particles at position (300, 200) in the window.
 
-其中 `PX_ParticalLauncher_InitializeInfo` 用于配置粒子发射器的初始化信息，即在创建粒子系统时，可以通过填充这个结构体来指定粒子系统的各种属性和行为。以下是该结构体的各个成员的说明：
+The `PX_ParticalLauncher_InitializeInfo` is used to configure the initialisation information of the particle launcher, i.e. when creating a particle system, this structure can be populated to specify the properties and behaviour of the particle system. The following is a description of each member of this structure:
 
-1. `px_void *userptr;`：一个指向任意类型数据的指针，可用于存储用户自定义的数据。
+1. `px_void *userptr;`: a pointer to any type of data that can be used to store user-defined data.
 
-2. `px_texture *tex;`：指向纹理数据的指针，用于指定粒子的纹理图像。
+2. `px_texture *tex;`: a pointer to texture data that can be used to specify a texture image for the particle.
 
-3. `px_point position;`：一个包含 x、y、z 坐标的点，表示粒子系统的初始位置。
+3. `px_point position;`: a point containing x, y, and z coordinates representing the initial position of the particle system.
 
-4. `px_float deviation_position_distanceRange;`：一个浮点数，用于指定粒子的位置偏移范围。
+4. `px_float deviation_position_distanceRange;`: a floating point number that specifies the range of the particle's position offset.
 
-5. `px_point direction;`：一个包含 x、y、z 坐标的点，表示粒子的初始运动方向。
+5. `px_point direction;`: a point containing x, y, and z coordinates indicating the initial direction of motion of the particle.
 
-6. `px_float deviation_rangAngle;`：一个浮点数，用于指定粒子的初始运动方向偏移范围（角度）。
+6. `px_float deviation_rangAngle;`: a floating point number that specifies the range (angle) of the particle's initial motion direction offset.
 
-7. `px_float velocity;`：一个浮点数，表示粒子的初始速度。
+7. `px_float velocity;`: a floating point number specifying the initial velocity of the particle.
 
-8. `px_float deviation_velocity_max;`：一个浮点数，表示粒子速度的最大偏移值。
+8. `px_float deviation_velocity_max;`: a floating point number indicating the maximum deviation value of the particle velocity.
 
-9. `px_float deviation_velocity_min;`：一个浮点数，表示粒子速度的最小偏移值。
+9. `px_float deviation_velocity_min;`: a floating point number representing the minimum offset value of the particle velocity.
 
-10. `px_float atomsize;`：一个浮点数，表示粒子的初始大小。
+10. `px_float atomsize;`: a floating point number representing the initial size of the particle.
 
-11. `px_float deviation_atomsize_max;`：一个浮点数，表示粒子大小的最大偏移值。
+11. `px_float deviation_atomsize_max;`: a floating point number representing the maximum offset value for the particle size.
 
-12. `px_float deviation_atomsize_min;`：一个浮点数，表示粒子大小的最小偏移值。
+12. `px_float deviation_atomsize_min;`: a floating point number representing the minimum offset value for the particle size.
 
-13. `px_float rotation;`：一个浮点数，表示粒子的初始旋转角度。
+13. `px_float rotation;`: a floating point number representing the initial rotation angle of the particle.
 
-14. `px_float deviation_rotation;`：一个浮点数，表示粒子旋转角度的偏移范围。
+14. `px_float deviation_rotation;`: a floating point number representing the offset range of the particle rotation angle.
 
-15. `px_float alpha;`：一个浮点数，表示粒子的初始透明度。
+15. `px_float alpha;`: a floating point number indicating the initial transparency of the particle.
 
-16. `px_float deviation_alpha;`：一个浮点数，表示粒子透明度的偏移范围。
+16. `px_float deviation_alpha;`: a float number representing the offset range of the transparency of the particle.
 
-17. `px_float hdrR;`：一个浮点数，表示粒子的初始红色通道值。
+17. `px_float hdrR;`: a floating point number representing the initial red channel value of the particle.
 
-18. `px_float deviation_hdrR;`：一个浮点数，表示粒子红色通道值的偏移范围。
+18. `px_float deviation_hdrR;`: a float representing the offset range of the particle's red channel value.
 
-19. `px_float hdrG;`：一个浮点数，表示粒子的初始绿色通道值。
+19. `px_float hdrG;`: a float representing the initial green channel value of the particle.
 
-20. `px_float deviation_hdrG;`：一个浮点数，表示粒子绿色通道值的偏移范围。
+20. `px_float deviation_hdrG;`: a float representing the offset range of the particle's green channel value.
 
-21. `px_float hdrB;`：一个浮点数，表示粒子的初始蓝色通道值。
+21. `px_float hdrB;`: a float representing the initial blue channel value of the particle.
 
-22. `px_float deviation_hdrB;`：一个浮点数，表示粒子蓝色通道值的偏移范围。
+22. `px_float deviation_hdrB;`: a floating point number representing the offset range of the particle's blue channel value.
 
-23. `px_float sizeincrease;`：一个浮点数，表示粒子大小的增加率。
+23. `px_float sizeincrease;`: a floating point number indicating the rate of increase of the particle size.
 
-24. `px_float alphaincrease;`：一个浮点数，表示粒子透明度的增加率。
+24. `px_float alphaincrease;`: a floating point number indicating the rate of increase of the transparency of the particle.
 
-25. `px_point a;`：一个包含 x、y、z 坐标的点，用于自定义属性。
+25. `px_point a;`: a point containing x, y, and z coordinates for custom attributes.
 
-26. `px_float ak;`：一个浮点数，用于自定义属性。
+26. `px_float ak;`: a floating point number, used for custom attributes.
 
-27. `px_int alive;`：一个整数，表示粒子的生存时间（毫秒）。
+27. `px_int alive;`: an integer indicating how long the particle will be alive (in milliseconds).
 
-28. `px_int generateDuration;`：一个整数，表示粒子发射器的生成周期（毫秒）。
+28. `px_int generateDuration;`: an integer representing the generation period (in milliseconds) of the particle emitter.
 
-29. `px_int maxCount;`：一个整数，表示粒子系统中最大的粒子数量。
+29. `px_int maxCount;`: an integer indicating the maximum number of particles in the particle system.
 
-30. `px_int launchCount;`：一个整数，表示粒子系统的发射次数。
+30. `px_int launchCount;`: an integer indicating the number of launches of the particle system.
 
-31. `PX_ParticalLauncher_CreateAtom Create_func;`：一个函数指针，用于指定自定义的粒子创建函数。
+31. `PX_ParticalLauncher_CreateAtom Create_func;`: a function pointer specifying a custom particle creation function.
 
-32. `PX_ParticalLauncher_UpdateAtom Update_func;`：一个函数指针，用于指定自定义的粒子更新函数。
+32. `PX_ParticalLauncher_UpdateAtom Update_func;`: a function pointer to specify a custom particle update function.
 
-这个结构体允许你灵活地配置粒子系统的各种属性，以满足不同场景和效果的需求。通过调整这些属性，你可以控制粒子的外观、运动轨迹、生命周期等方面的行为。
+This structure allows you to flexibly configure various properties of the particle system to meet the needs of different scenes and effects. By adjusting these properties, you can control the behaviour of the particles in terms of their appearance, trajectory, lifecycle, and so on.
 
 ![](assets/img/14.2.gif)
 
-## 15. 使用 PainterEngine 播放音乐
+## 15.Playing Music with PainterEngine
 
-PainterEngine 内置了对 wav 及 mp3 格式音乐的原生支持，使用 PainterEngine 播放音乐的代码十分简单：
+PainterEngine has built-in native support for music in wav and mp3 formats, and the code to play music with PainterEngine is very simple:
 
 ```c
 #include "PainterEngine.h"
@@ -1542,11 +1542,11 @@ int main()
 
 ![](assets/img/15.1.gif)
 
-其中, `PX_LoadSoundFromFile` 函数从文件中加载音乐, 并解码成 `sounddata` 类型。`PX_SoundCreate` 可以用 `sounddata` 创建一个播放实例, 第二个参数表示这个实例是否循环播放, 最后使用 `PX_SoundPlayAdd` 将播放实例送入混音器中, 即可完成音乐播放。
+The `PX_LoadSoundFromFile` function loads music from a file and decodes it into `sounddata` type. The `PX_SoundCreate` function creates a playback instance with `sounddata`, the second parameter indicates whether the instance is looped or not, and the `PX_SoundPlayAdd` function feeds the playback instance into the mixer to complete the music playback.
 
-## 16. PainterEngine Live2D 动画系统
+## 16. PainterEngine live2D animation system
 
-PainterEngine 内置了一个类 live2D 动画系统，可以加载 live2d 动画，参考代码如下：
+PainterEngine has a built-in class live2D animation system which can load live2d animation, the reference code is as below:
 
 ```c
 #include "PainterEngine.h"
@@ -1578,7 +1578,7 @@ int main()
 
 ```
 
-以下是与 Live2D 模型预览器相关的函数的说明：
+The following are descriptions of functions related to the Live2D model viewer:
 
 `PX_Object_Live2DCreate`
 
@@ -1586,13 +1586,13 @@ int main()
 PX_Object* PX_Object_Live2DCreate(px_memorypool* mp, PX_Object* Parent, px_int x, px_int y, PX_LiveFramework *pLiveFramework);
 ```
 
-- **描述**: 创建一个 Live2D 模型预览器对象，用于在图形界面中显示和交互 Live2D 模型。
-- **参数**:
-  - `mp`: 内存池指针，用于分配内存。
-  - `Parent`: 父对象，Live2D 模型预览器对象将作为其子对象。
-  - `x`, `y`: Live2D 模型预览器对象的位置坐标。
-  - `pLiveFramework`: Live2D 模型框架的指针，包括模型数据、纹理等信息。
-- **返回值**: 创建的 Live2D 模型预览器对象的指针。
+- **Description**: Creates a Live2D model viewer object for displaying and interacting with Live2D models in a graphical interface.
+- **Parameters**:
+  - `mp`: Pointer to the memory pool used for memory allocation.
+  - `Parent`: Parent object, under which the Live2D model viewer object will be created as a child.
+  - `x`, `y`: Position coordinates of the Live2D model viewer object.
+  - `pLiveFramework`: Pointer to the Live2D framework, which includes model data, textures, and other related information.
+- **Return Value**: A pointer to the created Live2D model viewer object.
 
 `PX_Object_Live2DPlayAnimation`
 
@@ -1600,11 +1600,11 @@ PX_Object* PX_Object_Live2DCreate(px_memorypool* mp, PX_Object* Parent, px_int x
 px_void PX_Object_Live2DPlayAnimation(PX_Object *pObject, px_char *name);
 ```
 
-- **描述**: 播放指定名称的 Live2D 模型动画。
-- **参数**:
-  - `pObject`: Live2D 模型预览器对象的指针。
-  - `name`: 动画名称。
-- **返回值**: 无。
+- **Description**: Plays a Live2D model animation by its specified name.
+- **Parameters**:
+  - `pObject`: Pointer to the Live2D model viewer object.
+  - `name`: The name of the animation to play.
+- **Return Value**: None.
 
 `PX_Object_Live2DPlayAnimationRandom`
 
@@ -1612,10 +1612,10 @@ px_void PX_Object_Live2DPlayAnimation(PX_Object *pObject, px_char *name);
 px_void PX_Object_Live2DPlayAnimationRandom(PX_Object* pObject);
 ```
 
-- **描述**: 随机播放 Live2D 模型的动画。
-- **参数**:
-  - `pObject`: Live2D 模型预览器对象的指针。
-- **返回值**: 无。
+- **Description**: Plays a random animation of the Live2D model.
+- **Parameters**:
+  - `pObject`: Pointer to the Live2D model viewer object.
+- **Return Value**: None.
 
 `PX_Object_Live2DPlayAnimationIndex`
 
@@ -1623,29 +1623,29 @@ px_void PX_Object_Live2DPlayAnimationRandom(PX_Object* pObject);
 px_void PX_Object_Live2DPlayAnimationIndex(PX_Object* pObject, px_int index);
 ```
 
-- **描述**: 播放 Live2D 模型的指定索引处的动画。
-- **参数**:
-  - `pObject`: Live2D 模型预览器对象的指针。
-  - `index`: 动画的索引。
-- **返回值**: 无。
+- **Description**: Plays a Live2D model animation at the specified index.
+- **Parameters**:
+  - `pObject`: Pointer to the Live2D model viewer object.
+  - `index`: The index of the animation to play.
+- **Return Value**: None.
 
-这些函数用于创建、配置和管理 Live2D 模型预览器对象，以在图形用户界面中显示和交互 Live2D 模型。可以使用这些函数播放 Live2D 模型的动画，包括指定名称、随机选择和指定索引处的动画。
+These functions are used to create, configure, and manage Live2D model viewer objects for displaying and interacting with Live2D models in a graphical user interface. You can use these functions to play animations of the Live2D model, including by name, randomly, or by a specified index.
 
 ![](assets/img/16.1.gif)
 
-## 17. PainterEngine 脚本引擎
+## 17. PainterEngine Script Engine
 
-PainterEngine 内置了一个平台无关的脚本引擎系统，集成了编译，运行，调试等功能，你可以很轻松地在脚本之上，实现并行调度功能。PainterEngine Script 的设计，最大程度和 C 语言保持一致性，并对一些类型进行的拓展和简化。
+PainterEngine includes a platform-independent script engine system with integrated features for compiling, running, and debugging. It allows you to easily implement parallel scheduling functionality on top of the scripting system. The design of PainterEngine Script closely aligns with C language while extending and simplifying certain types.
 
-例如在脚本中，支持 `int`, `float`, `string`, `memory` 四种类型, `int` 类型是一个 32 位的有符号整数, `float` 是一个浮点数类型, 这个和 C 语言的类型保持了一致。`string` 类型类似于 C++的 `string`, 它允许直接用 `+` 法运算符进行字符串拼接, 使用 `strlen` 来获取其字符串长度, 而 `memory` 是一个二进制数据存储类型, 同样支持 `+` 运算进行拼接。
+For example, the scripting language supports four types: `int`, `float`, `string`, and `memory`. The `int` type is a 32-bit signed integer, and `float` is a floating-point type, both consistent with C language types. The `string` type is similar to C++'s `string`, allowing string concatenation using the `+` operator and using `strlen` to get the string length. The `memory` type is a binary data storage type that also supports concatenation using the `+` operator.
 
-在脚本中如果需要调用 C 语言函数，应该使用 `PX_VM_HOST_FUNCTION` 宏进行定义声明。和组件回调函数一样, `PX_VM_HOST_FUNCTION` 的定义如下:
+To call C language functions in the script, you should use the `PX_VM_HOST_FUNCTION` macro to define and declare them. Like component callback functions, the `PX_VM_HOST_FUNCTION` macro is defined as follows:
 
 ```c
-#define PX_VM_HOST_FUNCTION(name) px_bool name(PX_VM *Ins,px_void *userptr)
+#define PX_VM_HOST_FUNCTION(name) px_bool name(PX_VM *Ins, px_void *userptr)
 ```
 
-在下面的内容中, 我将以一个简单的脚本实例作为范例, 为你演示如何使用 PainterEngine 的脚本引擎：
+Below is a simple script example to demonstrate how to use the PainterEngine script engine:
 
 ```c
 const px_char shellcode[] = "\
@@ -1682,18 +1682,17 @@ PX_VM_HOST_FUNCTION(host_sleep)
 	}
 	return PX_TRUE;
 }
-
 ```
 
-首先, `shellcode` 数组中存储着一个输出九九乘法表的程序, 其中需要调用两个 `host` 函数(脚本调用 C 语言函数称为 host call, 因此 host 函数实际就是专门提供给脚本调用的 C 语言函数), 一个是 `print` 函数, 一个是 `sleep` 函数。因此在下面, 我们定义了两个 `host` 函数, `PX_VM_HOSTPARAM` 用于取得脚本传递过来的参数。在这里, 我们需要判断传递过来的参数类型是否符合我们的调用规则, 像 `host_print` 函数, 作用是在 PainterEngine 中输出字符串, 而 `sleep` 函数, 则是用来延迟一段时间。
+In this example, the `shellcode` array contains a program to output the multiplication table, which calls two `host` functions (functions provided to the script by C are called "host calls"). The `host` functions are `print` and `sleep`. Below, two `host` functions are defined. The `PX_VM_HOSTPARAM` macro is used to retrieve parameters passed from the script. Here, you must check whether the parameter types match the expected rules. The `host_print` function outputs a string in PainterEngine, and the `host_sleep` function delays execution for a specified time.
 
-现在，PainterEngine Script 是一个编译型脚本, 我们需要将上面的代码编译成二进制形式, 然后将它送入虚拟机中运行, 观察以下代码：
+PainterEngine Script is a compiled script. You need to compile the above code into binary form and then pass it to the virtual machine for execution. The following code demonstrates this process:
 
 ```c
 PX_VM vm;
 PX_OBJECT_UPDATE_FUNCTION(VMUpdate)
 {
-	PX_VMRun(&vm, 0xffff, elapsed);//运行虚拟机
+	PX_VMRun(&vm, 0xffff, elapsed); // Run the virtual machine
 }
 
 px_int main()
@@ -1702,32 +1701,32 @@ px_int main()
 	px_memory bin;
 	PainterEngine_Initialize(800, 600);
 	PainterEngine_SetBackgroundColor(PX_COLOR_BLACK);
-	PX_CompilerInitialize(mp, &compiler);//初始化编译器
-	PX_CompilerAddSource(&compiler, shellcode);//编译器中添加代码
-	PX_MemoryInitialize(mp, &bin);//初始化内存/用于存储编译后的结果
+	PX_CompilerInitialize(mp, &compiler); // Initialize the compiler
+	PX_CompilerAddSource(&compiler, shellcode); // Add the script code to the compiler
+	PX_MemoryInitialize(mp, &bin); // Initialize memory to store compiled binary
 	if (!PX_CompilerCompile(&compiler, &bin, 0, "main"))
 	{
-		//编译失败
+		// Compilation failed
 		return 0;
 	}
-	PX_CompilerFree(&compiler);//释放编译器
-	PX_VMInitialize(&vm,mp,bin.buffer,bin.usedsize);//初始化虚拟机
-	PX_VMRegisterHostFunction(&vm, "print", host_print,0);//注册主机函数print
-	PX_VMRegisterHostFunction(&vm, "sleep", host_sleep,0);//注册主机函数sleep
-	PX_VMBeginThreadFunction(&vm, 0, "main", PX_NULL, 0);//开始运行虚拟机函数
-	PX_ObjectSetUpdateFunction(root, VMUpdate, 0);//设置更新函数
+	PX_CompilerFree(&compiler); // Release the compiler resources
+	PX_VMInitialize(&vm, mp, bin.buffer, bin.usedsize); // Initialize the virtual machine
+	PX_VMRegisterHostFunction(&vm, "print", host_print, 0); // Register the `print` host function
+	PX_VMRegisterHostFunction(&vm, "sleep", host_sleep, 0); // Register the `sleep` host function
+	PX_VMBeginThreadFunction(&vm, 0, "main", PX_NULL, 0); // Begin executing the `main` script function
+	PX_ObjectSetUpdateFunction(root, VMUpdate, 0); // Set the update function for the root node
 
 	return 0;
 }
 ```
 
-首先我们用 `PX_Compiler` 编译我们的脚本, 然后我们注册我们的 host call, `PX_VMBeginThreadFunction` 的功能是 C 语言调用脚本语言中函数, 在这里我们调用脚本中的 `main` 开始运行我们的脚本函数, 最后我们将一个 `Update` 函数绑定到 root 节点, 以循环更新虚拟机, 来执行脚本。
+First, we compile the script using the `PX_Compiler`. Then, we register the host calls. The `PX_VMBeginThreadFunction` function allows C code to call script functions. Here, it invokes the `main` function to start executing the script. Finally, the `Update` function is bound to the root node to continuously update the virtual machine and execute the script.
 
-最后，看看运行的结果。
+Now, observe the result of the execution.
 
 ![](assets/img/17.1.gif)
 
-如果我们想要对脚本进行调试，我们还可以在编译期间，创建一个符号映射表，这样我们就可以直接使用 `PX_Object_DebuggerMap` 对脚本进行调试。
+If we want to debug the script, we can also create a symbol mapping table during compilation. This allows us to directly use `PX_Object_DebuggerMap` to debug the script.
 
 ```c
 px_int main()
@@ -1759,17 +1758,17 @@ px_int main()
 
 ![](assets/img/17.2.png)
 
-## 18. 使用 PainterEngine 快速创作一个小游戏
+## 18. Using PainterEngine to Quickly Create a Simple Game
 
-为了更好地演示 PainterEngine 的使用, 我将用 PainterEngine 创作一个简单的小游戏, 你可以在 documents/demo/game 下找到有关这个游戏的所有源码及原始素材。得益于 PainterEngine 的全平台可移植性，你也可以在 [PainterEngine 在线应用 APP--打地鼠](https://www.painterengine.com/main/app/documentgame/) 中, 直接玩到这个在线小游戏。
+To better demonstrate the usage of PainterEngine, I will create a simple game using it. You can find all the source code and original assets related to this game under `documents/demo/game`. Thanks to PainterEngine's cross-platform portability, you can also directly play this online game on [PainterEngine Online Application APP - Whack-a-Mole](https://www.painterengine.com/main/app/documentgame/).
 
-在这个小游戏中，我将充分为你展示，如何使用 PainterEngine 的组件化开发模式，快速创建一个 App Game。
+In this game, I will show you how to use PainterEngine's component-based development model to quickly create an app game.
 
-让我们先开始游戏创作的第一步，我们先准备好所需的美术资源及素材:
+Let us start with the first step of game creation by preparing the required art assets and materials:
 
 ![](assets/img/18.1.png)
 
-这是一个简单的游戏背景素材，然后我们就可以开始创建我们的 `main.c` 源代码文件, 在 PainterEngine 中我们输入下面的代码：
+This is a simple game background asset. Now we can begin creating our `main.c` source code file. In PainterEngine, we input the following code:
 
 ```c
 px_int main()
@@ -1801,23 +1800,27 @@ px_int main()
 }
 ```
 
-在代码的开始阶段, 我们初始化了一个 800x480 的窗口, 然后我们初始化了字模, 并用 `PX_FontModuleSetCodepage` 函数设置了其为 GBK 字符集, 再后面, 我们就是把资源加载进 PainterEngine 的资源管理器中了。
+### Initializing the Window and Font Module
 
-### 加载资源及设置背景
+At the beginning of the code, we initialize an 800x480 window. Then, we initialize the font module and use the `PX_FontModuleSetCodepage` function to set it to the GBK character set. Following that, we load resources into PainterEngine's resource manager.
 
-PainterEngine 内置了一个资源管理器，它在 `PainterEngine_Initialize` 中就被初始化了, 使用的是 `mp_static` 内存池。资源管理器的作用是像数据库一样, 将图片、音频、脚本等等素材加载到内存中, 并将它映射为一个 `key`, 之后对资源的访问都是通过 `key` 进行的。资源管理器的映射做了专门的优化, 因此你不必太担心映射查询带来的性能损耗问题。
+### Loading Resources and Setting the Background
 
-`PX_LoadTextureToResource` 函数用于将一个文件系统的资源加载到资源管理器中, 第一个参数是这个资源管理器的实例指针, PainterEngine 在初始化阶段会默认创建一个这样的管理器实例, 因此你可以直接用 `PainterEngine_GetResourceLibrary` 获得它。第二个参数是需要加载文件的所在路径，第三个参数则是我们想映射的 `key` 了。
+PainterEngine includes a built-in resource manager that is initialized during the `PainterEngine_Initialize` function. It uses the `mp_static` memory pool. The resource manager functions like a database, loading assets such as images, audio, and scripts into memory and mapping them to a `key`. Accessing these resources later is done via their `key`. The resource mapping is optimized, so you do not need to worry about performance loss caused by lookup operations.
 
-在代码的下一步, 我们使用 `PX_LoadTextureToResource` 加载了若干图片, `PX_LoadAnimationToResource` 加载了一个 2dx 动画(请到应用市场查看 2DX 动画详细说明)。最后，在游戏里我们并没有使用 TTF 字模文件，我们循环加载了 `0.png` 到 `9.png`, 并将这些纹理作为图片插入到字模中, 这样这个字模绘制数字时, 实际显示的就是我们的图片。
+The `PX_LoadTextureToResource` function is used to load a resource from the file system into the resource manager. The first parameter is a pointer to the resource manager instance. PainterEngine automatically creates this instance during initialization, and you can access it directly using `PainterEngine_GetResourceLibrary`. The second parameter is the file path of the resource to be loaded, and the third parameter is the `key` you want to map to the resource.
 
-同时我们还调用了 `PainterEngine_SetBackgroundTexture` 设置 PainterEngine 界面的背景, 请注意 `PX_ResourceLibraryGetTexture` 函数, 它的作用是使用一个查询 `key`, 从资源管理器中取得这个图片的数据结构指针。以上完成后你将可以看到这样的界面：
+In the next step of the code, we use `PX_LoadTextureToResource` to load several images and `PX_LoadAnimationToResource` to load a 2dx animation (refer to the app market for detailed explanations on 2DX animations). Finally, instead of using TTF font files in the game, we loop through `0.png` to `9.png` and insert these textures as images into the font module. This way, when the font module draws numbers, it actually displays the corresponding images.
+
+We also call `PainterEngine_SetBackgroundTexture` to set the PainterEngine interface background. Note the `PX_ResourceLibraryGetTexture` function, which is used to retrieve the texture's data structure pointer using a `key` from the resource manager. After completing these steps, you will see a screen like this:
 
 ![](assets/img/18.2.png)
 
-### 设计游戏对象
+### Designing Game Objects
 
-我们先来设计第一个游戏对象，就是 `开始游戏按钮`。这一部分我们并不要写太多的代码, 因为 PainterEngine 内置就有这种按钮的功能：
+#### Start Game Button
+
+The first game object we design is the "Start Game" button. This part does not require much code, as PainterEngine has built-in functionality for buttons:
 
 ```c
 startgame = PX_Object_PushButtonCreate(mp, root, 300, 200, 200, 90, "Start Game", 0);
@@ -1827,11 +1830,13 @@ PX_Object_PushButtonSetPushColor(startgame, PX_COLOR(224, 255, 255, 255));
 PX_Object_PushButtonSetCursorColor(startgame, PX_COLOR(168, 255, 255, 255));
 ```
 
-我们使用了一系列函数, 改变了按钮的背景颜色、鼠标悬停颜色和鼠标按下的颜色, 因此你可以看到这样的情况：
+We use a series of functions to change the button's background color, mouse hover color, and mouse pressed color. As a result, you will see this on the screen:
 
 ![](assets/img/18.3.png)
 
-然后我们需要创建我们的游戏里的地鼠对象, 这是游戏里最复杂的对象, 我贴上详细代码, 以逐步解释它们：
+#### Game Mole Object
+
+Next, we create the mole object for the game, which is the most complex object in the game. Below is the detailed code with step-by-step explanations:
 
 ```c
 typedef enum
@@ -2018,18 +2023,18 @@ PX_Object *PX_Object_FoxCreate(px_memorypool *mp,PX_Object *parent,px_float x,px
 
 ```
 
-* 首先是 `PX_Object_FoxOnUpdate`, 这是对象三件套中的 `update` 函数, 在这个函数中, 我们判断当前这个 `地鼠` 的状态, 到底是升起、嘲讽, 还是缩回去。
-* 然后是 `PX_Object_FoxOnRender`, 这是执行 `render` 的函数, 我们通过偏移量把纹理绘制出来, 当然在这里我们调用了 `PX_TextureRenderMask` 函数, 这是一个带纹理遮罩的绘制函数。
-* `PX_Object_FoxFree` 函数中, 主要是对临时渲染表面的释放处理, 虽然在本项目中并没有用到。
-* `PX_Object_FoxOnClick` 函数, 表示当前的地鼠被击打了, 其中是一些命中范围的判断, 如果被击中了, 应该把状态设置为受伤。
-* `PX_Object_FoxOnReset` 用于执行复位, 即游戏结束后, 所有地鼠都应该是重置状态, 这是一个 `PX_OBJECT_EVENT_RESET` 的回调, 你可以在 `PX_Object_FoxCreate` 中找到它。
-* 最后是 `PX_Object_FoxCreate` 函数, 在这个函数中我们做了一些初始化工作, 为 `地鼠` 注册了事件回调, 最终完成这个组件的开发设计。
+* First is `PX_Object_FoxOnUpdate`, this is the `update` function in the object suite, where we determine the current state of the `Gopher`, whether it's up, taunting, or down. * Then is `PX_Object_FoxOnRender`, this is the function that performs `rendering`, we draw the texture by offset, of course here we call the `Gopher` function.
+* Then there's the `PX_Object_FoxOnRender`, which is the function that does the `rendering`, where we draw the texture by offset, and of course we call the `PX_TextureRenderMask` function, which is a rendering function with a texture mask.
+* `PX_Object_FoxFree` function, mainly for the temporary rendering of the surface of the free processing, although in this project does not use.
+* `PX_Object_FoxOnClick` function, means the current gopher is hit, which is some judgement of the hit range, if it is hit, it should set the state to injured.
+* `PX_Object_FoxOnReset` is used to perform a reset, that is, after the game is over, all gophers should be reset, this is a `PX_OBJECT_EVENT_RESET` callback, you can find it in `PX_Object_FoxCreate`.
+* And finally the `PX_Object_FoxCreate` function, where we do some initialisation, register event callbacks for the `Gopher`, and finally complete the development of the component.
 
 
 ![](assets/img/18.4.gif)
 
 
-然后，我们需要创建一个 `锤子` 对象来改变我们鼠标的样式。锤子对象的设计很简单, 它只有 2 个纹理, 一个是鼠标没有按下时的状态，一个是按下时的状态。不同的状态对应不同的纹理：
+Then, we need to create a `hammer` object to change the style of our mouse. The hammer object has a simple design, it has only 2 textures, one for when the mouse is not pressed and one for when it is pressed. Different states correspond to different textures:
 
 ```c
 typedef struct
@@ -2098,7 +2103,7 @@ PX_Object* PX_Object_HammerCreate(px_memorypool* mp, PX_Object* parent)
 }
 ```
 
-最后则是一个倒计时框, 它中间其实是一个 2dx 的动画对象(PainterEngine 直接支持 gif 动画, 其实 gif 也可以), 外围是一个环, 环形的弧度不断减少, 以实现一个 `倒计时` 的显示效果：
+Finally, there is a countdown box, which is actually a 2dx animation object in the middle (PainterEngine supports gif animation directly, in fact, gif can also be used), and a ring on the outside, the arc of the ring decreases continuously, in order to achieve a `countdown` display effect:
 
 ```c
 typedef struct
@@ -2168,9 +2173,9 @@ PX_Object* PX_Object_ClockCreate(px_memorypool* mp, PX_Object* parent, px_float 
 }
 ```
 
-### 放置对象, 完成游戏
+### Place objects, complete the game
 
-在 `main` 函数中, 我们将上述对象一一创建, 并放置在游戏场景中, 最终完成这个游戏：
+In the `main` function, we create each of these objects and place them in the game scene to complete the game:
 
 ```c
 //创建地鼠
@@ -2191,7 +2196,7 @@ scorePanel = PX_Object_ScorePanelCreate(mp, root, 400, 60, &score_fm, 100);
 gameclock=PX_Object_ClockCreate(mp,root,680,60);
 ```
 
-在这里, 我放上整个游戏的完整代码：
+Here, I put the complete code for the entire game:
 
 ```c
 #include "PainterEngine.h"
@@ -2584,9 +2589,9 @@ px_int main()
 }
 ```
 
-你可以在 documents/demo/game 中找到这个游戏的完整资源, 并用 PainterEngine 直接编译。
+You can find the complete resources for this game in `documents/demo/game` and compile it directly with PainterEngine.
 
 ![](assets/img/18.5.gif)
 
-在线试玩: [PainterEngine 在线应用 APP--打地鼠](https://www.painterengine.com/main/app/documentgame/)
+Try it online: [PainterEngine Online App – Whack-a-Mole](https://www.painterengine.com/main/app/documentgame/)
 
