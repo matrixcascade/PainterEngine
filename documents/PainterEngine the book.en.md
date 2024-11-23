@@ -2442,37 +2442,108 @@ PX_OBJECT_FREE_FUNCTION(PX_Object_HammerFree)
   PX_TextureFree(&phammer->ham02);
 }
 
-px_void PX_Object_HammerReset(PX_Object* hammer)//Reset hammer state
+PX_OBJECT_EVENT_FUNCTION(PX_Object_HammerOnMove)
 {
-  PX_Object_Hammer* phammer = PX_ObjectGetDescByType(hammer, PX_OBJECT_TYPE_HAMMER);
-  hammer->Visible = PX_FALSE;
-  phammer->bHit = PX_FALSE;
+   pObject->x=PX_Object_Event_GetCursorX(e);//Hammer follows mouse movement
+   pObject->y=PX_Object_Event_GetCursorY(e);
 }
 
-PX_Object* PX_Object_HammerCreate(px_memorypool* mp, PX_Object* parent, px_float x, px_float y)//Create hammer object
+PX_OBJECT_EVENT_FUNCTION(PX_Object_HammerOnCursorDown)
 {
-  PX_Object_Hammer* phammer;
-  PX_Object* pObject = PX_ObjectCreateEx(mp, parent, x, y, 0, 0, 0, 0, PX_OBJECT_TYPE_HAMMER, 0, PX_Object_HammerRender, PX_Object_HammerFree, 0, sizeof(PX_Object_Hammer));
-  phammer = PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_HAMMER);
-
-  if (!PX_TextureCreateFromMemory(mp, PX_ResourceLibraryGetBuffer(PainterEngine_GetResourceLibrary(), "ham01"), &phammer->ham01))//Load hammer texture 1
-  {
-  	PX_ObjectDelete(pObject);
-  	return PX_NULL;
-  }
-
-  if (!PX_TextureCreateFromMemory(mp, PX_ResourceLibraryGetBuffer(PainterEngine_GetResourceLibrary(), "ham02"), &phammer->ham02))//Load hammer texture 2
-  {
-  	PX_TextureFree(&phammer->ham01);
-  	PX_ObjectDelete(pObject);
-  	return PX_NULL;
-  }
-
-  phammer->bHit = PX_FALSE;
-  pObject->Visible = PX_FALSE;
-
-  return pObject;
+   PX_Object_Hammer* phammer = PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_HAMMER);
+   phammer->bHit = PX_TRUE;//Pressed
 }
+
+PX_OBJECT_EVENT_FUNCTION(PX_Object_HammerOnCursorUp)
+{
+   PX_Object_Hammer* phammer = PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_HAMMER);
+   phammer->bHit = PX_FALSE;//Released
+}
+
+PX_Object* PX_Object_HammerCreate(px_memorypool* mp, PX_Object* parent)
+{
+   PX_Object_Hammer* phammer;
+   PX_Object* pObject = PX_ObjectCreateEx(mp, parent, 0, 0, 0, 0, 0, 0, PX_OBJECT_TYPE_HAMMER, 0, PX_Object_HammerRender, PX_Object_HammerFree, 0, sizeof(PX_Object_Hammer));
+   phammer = PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_HAMMER);
+   phammer->bHit = PX_FALSE;
+   if (!PX_LoadTextureFromFile(mp_static,&phammer->ham01, "assets/ham1.png")) return PX_NULL;
+   if (!PX_LoadTextureFromFile(mp_static,&phammer->ham02, "assets/ham2.png")) return PX_NULL;
+   PX_ObjectRegisterEvent(pObject, PX_OBJECT_EVENT_CURSORMOVE, PX_Object_HammerOnMove, PX_NULL);//Register move event
+   PX_ObjectRegisterEvent(pObject, PX_OBJECT_EVENT_CURSORDRAG, PX_Object_HammerOnMove, PX_NULL);//Register drag event 
+   PX_ObjectRegisterEvent(pObject, PX_OBJECT_EVENT_CURSORDOWN, PX_Object_HammerOnCursorDown, PX_NULL);//Register press event
+   PX_ObjectRegisterEvent(pObject, PX_OBJECT_EVENT_CURSORDOWN, PX_Object_HammerOnMove, PX_NULL);//Register press event
+   PX_ObjectRegisterEvent(pObject, PX_OBJECT_EVENT_CURSORUP, PX_Object_HammerOnCursorUp, PX_NULL);//Register release event
+
+   return pObject;
+}
+
+PX_OBJECT_EVENT_FUNCTION(PX_Object_StartGameOnClick)
+{
+   game->Visible = PX_TRUE;
+   startgame->Visible = PX_FALSE;
+   game->Enabled = PX_TRUE;
+   PX_Object_ScorePanelSetScore(scorePanel, 0);
+   PX_Object_ClockBegin(gameclock, 30000);//Start game, game time 30 seconds
+}
+
+
+
+
+px_int main()
+{
+   px_int i;
+   PainterEngine_Initialize(800, 480);
+   PX_FontModuleInitialize(mp_static,&score_fm);
+   PX_FontModuleSetCodepage(&score_fm, PX_FONTMODULE_CODEPAGE_GBK);
+   if (!PX_LoadTextureToResource(PainterEngine_GetResourceLibrary(), "assets/rasing.png", "fox_rasing")) return 0;
+   if (!PX_LoadTextureToResource(PainterEngine_GetResourceLibrary(), "assets/taunt.png", "fox_taunt")) return 0;
+   if (!PX_LoadTextureToResource(PainterEngine_GetResourceLibrary(), "assets/escape.png", "fox_escape")) return 0;
+   if (!PX_LoadTextureToResource(PainterEngine_GetResourceLibrary(), "assets/beat.png", "fox_beat")) return 0;
+   if (!PX_LoadTextureToResource(PainterEngine_GetResourceLibrary(), "assets/hurt.png", "fox_hurt")) return 0;
+   if (!PX_LoadTextureToResource(PainterEngine_GetResourceLibrary(), "assets/mask.png", "fox_mask")) return 0;
+   if (!PX_LoadTextureToResource(PainterEngine_GetResourceLibrary(), "assets/background.png", "background")) return 0;
+   if (!PX_LoadAnimationToResource(PainterEngine_GetResourceLibrary(), "assets/song.2dx", "song"))return 0;
+   PainterEngine_SetBackgroundTexture(PX_ResourceLibraryGetTexture(PainterEngine_GetResourceLibrary(), "background"));
+   for (i = 0; i <= 9; i++)
+   {
+   	px_texture tex;
+   	px_char path[64];
+   	PX_sprintf1(path,64, "assets/%1.png", PX_STRINGFORMAT_INT(i));
+   	if (PX_LoadTextureFromFile(mp,&tex,path))
+   	{
+   		PX_FontModuleAddNewTextureCharacter(&score_fm, '0' + i, &tex);
+   	}
+   	PX_TextureFree(&tex);
+   }
+   
+   startgame = PX_Object_PushButtonCreate(mp, root, 300, 200, 200, 90, "Start Game", 0);
+   startgame->Visible = PX_TRUE;
+   PX_Object_PushButtonSetBackgroundColor(startgame, PX_COLOR(96, 255, 255, 255));
+   PX_Object_PushButtonSetPushColor(startgame, PX_COLOR(224, 255, 255, 255));
+   PX_Object_PushButtonSetCursorColor(startgame, PX_COLOR(168, 255, 255, 255));
+   PX_ObjectRegisterEvent(startgame, PX_OBJECT_EVENT_EXECUTE, PX_Object_StartGameOnClick, 0);
+
+   
+   
+   game=PX_ObjectCreate(mp, root, 0, 0, 0, 0, 0, 0);
+   PX_Object_FoxCreate(mp, game, 173, 326);
+   PX_Object_FoxCreate(mp, game, 401, 326);
+   PX_Object_FoxCreate(mp, game, 636, 326);
+   PX_Object_FoxCreate(mp, game, 173, 476);
+   PX_Object_FoxCreate(mp, game, 401, 476);
+   PX_Object_FoxCreate(mp, game, 636, 476);
+   game->Visible=PX_FALSE;
+   game->Enabled=PX_FALSE;
+
+   
+   PX_Object_HammerCreate(mp, root);
+   scorePanel = PX_Object_ScorePanelCreate(mp, root, 400, 60, &score_fm, 100);
+
+   gameclock=PX_Object_ClockCreate(mp,root,680,60);
+   
+   return PX_TRUE;
+}
+
 ```
 
 You can find the complete resources for this game in `documents/demo/game` and compile it directly with PainterEngine.
