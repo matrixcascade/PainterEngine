@@ -4,54 +4,40 @@
   </a>
 </p>
 
+[![ENGLISH](https://img.shields.io/badge/language-English-red.svg)](README(ENGLISH).md)
+
 PainterEngine 是一个由 C 语言编写的跨平台图形引擎，支持 Windows/Linux/iOS/Android/WebAssembly 甚至无操作系统的裸嵌入式平台，它基于组件化的设计模式，即使是 C 语言初学者，也可以在几分钟内掌握它的使用，[PainterEngine Make](https://www.painterengine.com/) 允许您一键将您的 PainterEngine 项目编译到多个平台。
 它涵盖了基础数据结构、图形学、声学、数字信号处理、编译原理、虚拟机系统、密码学、人机交互、游戏引擎、FPGA-GPU 图形 IP 设计等多个领域，你既可以用它制作微应用，也可以将它作为学习项目。
 
 现在了解并使用 PainterEngine $\longrightarrow$
 *__[PainterEngine 快速入门手册（中文版）](./documents/PainterEngine_the_book_zh-CN.md)__*
 
-PainterEngine is a cross-platform graphics engine written in C language, with support for Windows, Linux, iOS, Android, WebAssembly, and even bare-metal embedded platforms without OS. It is built on a component-based design pattern, making it accessible to even C language beginners. [PainterEngine Make](https://www.painterengine.com/) enables you to compile your PainterEngine project for multiple platforms with just one click.
-It covers various fields including basic data structures, graphics, acoustics, digital signal processing, compiler design, virtual machine systems, cryptography, human-computer interaction, game engines, FPGA-GPU graphics acceleration, and more. You can use it to create mini-applications or as a learning project for acquiring knowledge.
-
-Now, learn and use PainterEngine $\longrightarrow$
-*__[PainterEngine Quick Start Guide (English Version)](./documents/PainterEngine_the_book_en.md)__*
-
 ## 30 秒速览 PainterEngine
-
-## 30-Second Quick Start Guide to PainterEngine
 
 将 PainterEngine 引入到您的 C/C++ 项目中，仅仅需要 `#include "PainterEngine.h"`。
 
-To incorporate PainterEngine into your project, all you need is:
-```c
-#include "PainterEngine.h"
-```
-
 使用 `PainterEngine_Initialize`，快速创建一个图形化的交互式界面：
 
-Utilize `PainterEngine_Initialize` to swiftly create a graphical interactive interface:
 ```c
 #include "PainterEngine.h"
 int main()
 {
-	PainterEngine_Initialize(800, 600);
-	return 1;
+    PainterEngine_Initialize(800, 600);
+    return 1;
 }
 ```
 
 创建组件，或者……创造自己的组件：
 
-Create components or even craft your own:
-
 ```c
 #include "PainterEngine.h"
 int main()
 {
-	PainterEngine_Initialize(800, 600);
-	PX_Object_Firework01Create(mp, root,200,600);
-	PX_Object_Firework01Create(mp, root,400,600);
-	PX_Object_Firework01Create(mp, root,600,600);
-	return 1;
+    PainterEngine_Initialize(800, 600);
+    PX_Object_Firework01Create(mp, root,200,600);
+    PX_Object_Firework01Create(mp, root,400,600);
+    PX_Object_Firework01Create(mp, root,600,600);
+    return 1;
 }
 ```
 
@@ -61,23 +47,14 @@ int main()
 
 使用 [PainterEngine Make](https://www.painterengine.com/) 快速将您的项目编译到 Windows、Linux、WebAssembly、Android 等任意平台，一键编译部署，源码无需修改，零成本移植。
 
-Use ["PainterEngine Make"](https://www.painterengine.com/) to quickly compile and deploy your project to various platforms such as Windows, Linux, WebAssembly, Android, and more. One-click compilation and deployment, with no need to modify the source code, enabling seamless portability at zero cost.
-
 <p align="center">
   <a href="https://cdn.painterengine.com/PainterEngine_make.zip" target="_blank" rel="noopener noreferrer">
   	<img src="images/pemake.png" alt="PainterEngine make">
   </a>
 </p>
 
-<p align="center">
-  <a href="https://cdn.painterengine.com/PainterEngine_make_en.zip" target="_blank" rel="noopener noreferrer">
-    <img src="images/pemakeen.png" alt="PainterEngine make">
-  </a>
-</p>
 
 ## 快速开发，无缝迁移
-
-## Swift development and smooth transitions
 
 如果您不需要 PainterEngine Make 提供的一键编译功能，希望使用自己常用的 IDE 开发 PainterEngine 程序或组件，您只需要：
 
@@ -91,23 +68,9 @@ Use ["PainterEngine Make"](https://www.painterengine.com/) to quickly compile an
 
 即可使用您的 IDE 完成 PainterEngine 的编译，PainterEngine 库将尽力保证所有平台的的运行结果一致性，在 Windows 上开发，同样在 Android/web/Linux/iOS/…… 中能够得到一致的结果。
 
-If you don't need the one-key compilation feature provided by PainterEngine Make and prefer to develop PainterEngine programs or components using your preferred IDE, you just need to:
+## 不仅是图形库, 更是应用程序框架
 
-1. Add all the code from "PainterEngine/core", "PainterEngine/kernel", and "PainterEngine/runtime" to your project.
-
-2. Select your working platform in "PainterEngine/platform" (eg: choose "PainterEngine/platform/windows" for Windows), and add all the code from the corresponding folder to your project.
-
-3. Include the directory containing PainterEngine source code in your project's include directories.
-
-4. Add your code to the project.
-
-You can now use your IDE to compile PainterEngine with these steps. PainterEngine library will strive to ensure consistent results across all platforms. What you develop on Windows will yield consistent results on Android, web, Linux, iOS, and more.
-
-## 不仅是图形库，更是应用程序框架
-
-## Not just a graphics library but also an application framework
-
-| Functions             | Support                                                      | Description                                                                       |
+| 功能                  | 支持内容                                                     | 描述                                                                           |
 | --------------------- | ------------------------------------------------------------ | ------------------------------------------------------------------------          |
 | 内存池                 | alloc/free                                                   | 平台无关的内存池实现                              |
 | 数学库               | sin/cos/tan/arcsin/log/exp/relu/...                | 绝大部分 C 标准数学库的完整实现                          |
@@ -129,37 +92,9 @@ You can now use your IDE to compile PainterEngine with these steps. PainterEngin
 
 还有更多探索……
 
----
-
-| functions             | support                                                      | Description                                                                       |
-| --------------------- | ------------------------------------------------------------ | ------------------------------------------------------------------------          |
-| memorypool            | alloc/free                                                   | Platform-agnostic memory management implementation                               |
-| math               | sin/cos/tan/arcsin/log/exp/relu/...                | The complete implementation of the vast majority of C standard math libraries                          |
-| signal processing     | dft/dct/fft/dwt/window functions/mfcc/...                | Fourier/Cosine/Wavelet Transform, common window functions, MFCC (Mel-Frequency Cepstral Coefficients), and other signal processing fundamental functions and higher-level feature extraction algorithms, etc.                         |
-| Data structures       | string/vector/list/map/stack/fifo/circular-buffer/...                | Platform-agnostic common data structures and algorithms                          |
-| Cryptography          | curve25519/AES/SHAx/MD5/...                | This includes commonly used symmetric key algorithms and key exchange algorithms                          |
-| image codec           | PNG/JPG/GIF/BMP                                              | Supports decoding of PNG/JPG/GIF/BMP images and encoding of PNG images           |
-| audio codec           | Wav/Mp3                                              | Supports decoding of Wav/Mp3 and encoding of Wav           |
-| fontmodule            | TTF                                                  | Support fontmodule of truetype(reference: stb_truetype.c)|
-| Geometric             | Line/Triangle/Rectangle/Circle/Ring/Sector/Rounded/...      | Geometric rasterization                                                           |
-| Renderer              | 2D/3D                                                        | Implementation of a 2D/3D software renderer. A painting  engine                  |
-| sound                 | VC codec/mixer/piano/ks                                               | Includes an implementation of a VC(voice conversion), a mixer, a physically-modeled piano and Karplus-Strong string synthesis. Direct synthesis of PCM audio streams|
-| Animation             | 2dx/live2D                                                   | 2D frame-by-frame animation and a Live2D-style animation system                  |
-| PainterScript         | Compiler/VM/Debugger                                         | A complete scripting engine, including a compiler, virtual machine, and debugger |
-| UI                    | button/radio/image/edit/label/list/...                       | Implementation of common UI controls                                             |
-| protocals             | MQTT/MODBUS/Game-network-synchronization                     | Common communication protocols                                                   |
-| Game framework.       |                                                              | PainterEngine Game Framework                                                      |
-| FPGA-GPU               |2D accelerator                                               | Implemented an FPGA-based GPU graphics accelerator that provides at least 50 million pixels per second (Mpps) 2D Blender acceleration for PainterEngine and supports HDMI output.validation has been completed on the Zynq-7000 series SoC|
-
-Many more to explore...
-
 ## FPGA-GPU 嵌入式图形加速方案
 
-## The FPGA-GPU Graphics Acceleration Solution
-
 提供一个基于 FPGA 的 GPU IP 核，已在 Zynq7020 上完成功能验证，提供不低于 50Mpps 的 2D Blender 图形渲染加速，支持 HDMI 输出，目前已在 zynq7000 系列 SoC 上完成验证。
-
-A GPU IP core based on FPGA has been developed and functionally verified on the Zynq 7020 platform. It provides 2D Blender graphics rendering acceleration with a performance of no less than 50Mpps (Million pixels per second) and supports HDMI output. This solution has been successfully validated on the Zynq 7000 series SoC.
 
 <p align="center"><img src="images/gpu_block_design.png" alt="PainterEngine designer"></p>
 
@@ -169,13 +104,9 @@ A GPU IP core based on FPGA has been developed and functionally verified on the 
 
 ## 组件化开发，支持设计器模式，简单的不能再简单
 
-## Component-based development with support for a designer mode, making it as simple as it gets
-
 <p align="center"><img src="images/designer.png" alt="PainterEngine designer"></p>
 
 ## 海量组件，创意无界
-
-## An abundance of components to unleash your creativity without limitations.
 
 <p align="center"><img width="600" src="images/market.png" alt="PainterEngine market"></p>
 
@@ -186,8 +117,6 @@ A GPU IP core based on FPGA has been developed and functionally verified on the 
 <p align="center"><img width="600" src="images/l2d.png" alt="PainterEngine market"></p>
 
 ### 现在，访问 PainterEngine.com，参与建设
-
-### Now, join the PainterEngine.com contribute to its development
 
 <p align="center">
 <img src="documents/assets/mini/1.png" alt="logo">
@@ -224,5 +153,4 @@ A GPU IP core based on FPGA has been developed and functionally verified on the 
 <img src="documents/assets/mini/23.png" alt="logo">
 <img src="documents/assets/mini/24.png" alt="logo">
 </p>
-
 
