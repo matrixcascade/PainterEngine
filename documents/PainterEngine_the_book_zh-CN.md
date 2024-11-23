@@ -1264,7 +1264,7 @@ px_int main()
 
 那么，我们如何设计我们自己的可组合对象呢？回到我们的第十二章节，现在，我们就将 "可拖拽" 这个功能设计成一个组合式组件。
 
-首先，仍然是定义一个组件对象结构体，为实现拖拽功能，我们需要鼠标按下时的 x, y 坐标，同时需要一个 bool 类型记录是否是选中状态，然后我们需要注册 `CURSOR` 事件，这些事件在上一章节我们已经写过了，最后，我们用 `PX_ObjectCreateDesc` 函数创建一个对象结构体，并将它 Attach 到我们的对象上。
+首先，仍然是定义一个组件对象结构体。为实现拖拽功能，我们需要鼠标按下时的 x, y 坐标，同时需要一个 bool 类型记录是否是选中状态，然后我们需要注册 `CURSOR` 事件，这些事件在上一章节我们已经写过了。最后，我们用 `PX_ObjectCreateDesc` 函数创建一个对象结构体，并将它 Attach 到我们的对象上。
 
 `PX_ObjectCreateDesc` 是一个对象结构体创建函数，它的定义原型如下：
 
@@ -1690,7 +1690,7 @@ px_int main()
     PainterEngine_SetBackgroundColor(PX_COLOR_BLACK);
     PX_CompilerInitialize(mp, &compiler); // 初始化编译器
     PX_CompilerAddSource(&compiler, shellcode); // 编译器中添加代码
-    PX_MemoryInitialize(mp, &bin); // 初始化内存/用于存储编译后的结果
+    PX_MemoryInitialize(mp, &bin); // 初始化内存，用于存储编译后的结果
     if (!PX_CompilerCompile(&compiler, &bin, 0, "main"))
     {
         // 编译失败
@@ -1725,7 +1725,7 @@ px_int main()
     PainterEngine_SetBackgroundColor(PX_COLOR_BLACK);
     PX_CompilerInitialize(mp, &compiler); // 初始化编译器
     PX_CompilerAddSource(&compiler, shellcode); // 编译器中添加代码
-    PX_MemoryInitialize(mp, &bin); // 初始化内存/用于存储编译后的结果
+    PX_MemoryInitialize(mp, &bin); // 初始化内存，用于存储编译后的结果
     if (!PX_CompilerCompile(&compiler, &bin, &debugmap, "main"))
     {
         // 编译失败
@@ -1747,7 +1747,7 @@ px_int main()
 
 ## 18. 使用 PainterEngine 快速创作一个小游戏
 
-为了更好地演示 PainterEngine 的使用，我将用 PainterEngine 创作一个简单的小游戏，你可以在 documents/demo/game 下找到有关这个游戏的所有源码及原始素材。得益于 PainterEngine 的全平台可移植性，你也可以在 [PainterEngine 在线应用 APP——打地鼠](https://www.painterengine.com/main/app/documentgame/) 中，直接玩到这个在线小游戏。
+为了更好地演示 PainterEngine 的使用，我将用 PainterEngine 创作一个简单的小游戏，你可以在 `documents/demo/game` 下找到有关这个游戏的所有源码及原始素材。得益于 PainterEngine 的全平台可移植性，你也可以在 [PainterEngine 在线应用 APP——打地鼠](https://www.painterengine.com/main/app/documentgame/) 中，直接玩到这个在线小游戏。
 
 在这个小游戏中，我将充分为你展示，如何使用 PainterEngine 的组件化开发模式，快速创建一个 App Game。
 

@@ -1217,11 +1217,11 @@ Of course, you can call `PX_Object_MyObjectCreate` multiple times to create mult
 
 ![](assets/img/12.5.gif)
 
-## 13. 组合式组件设计
+## 13. Composite Component Design
 
-PainterEngine 的组件允许同时拥有多种组件类型，例如，当我们将一个图片框组件和一个按钮进行组合，我们就可以得到一个组合式组件图片按钮。
+PainterEngine's components allow for the simultaneous possession of multiple component types, for example, when we combine an image box component with a button, we can get a composite component image button.
 
-参考如下代码：
+Refer to the following code:
 
 ```c
 #include "PainterEngine.h"
@@ -1230,8 +1230,8 @@ PX_Object* image;
 
 PX_OBJECT_EVENT_FUNCTION(ButtonEvent)
 {
-    PX_Object_Image *pImage = PX_Object_GetImage(pObject); // 取得 Image 对象数据
-    PX_Object_Button *pButton = PX_Object_GetButton(pObject); // 取得 Button 对象数据
+    PX_Object_Image *pImage = PX_Object_GetImage(pObject); // Get the Image object data
+    PX_Object_Button *pButton = PX_Object_GetButton(pObject); // Get the Button object data
     if (pImage->pTexture == &tex1)
     {
         PX_Object_ImageSetTexture(pObject, &tex2);
@@ -1245,30 +1245,30 @@ PX_OBJECT_EVENT_FUNCTION(ButtonEvent)
 px_int main()
 {
     PainterEngine_Initialize(800, 480);
-    if (!PX_LoadTextureFromFile(mp_static, &tex1, "assets/1.png")) return 0; // 加载纹理 1
-    if (!PX_LoadTextureFromFile(mp_static, &tex2, "assets/2.png")) return 0; // 加载纹理 2
-    image = PX_Object_ImageCreate(mp, root, 300, 140, 200, 200, &tex1); // 创建 Image 对象
-    PX_Object_ButtonAttachObject(image, 1, PX_COLOR(64, 255, 255, 255), PX_COLOR(96, 255, 255, 255)); // 将一个 Button 对象类型组合到 Image 对象上
-    PX_ObjectRegisterEvent(image, PX_OBJECT_EVENT_EXECUTE, ButtonEvent, 0); // 这里实际上是注册 Button 对象的事件
+    if (!PX_LoadTextureFromFile(mp_static, &tex1, "assets/1.png")) return 0; // Load texture 1
+    if (!PX_LoadTextureFromFile(mp_static, &tex2, "assets/2.png")) return 0; // Load texture 2
+    image = PX_Object_ImageCreate(mp, root, 300, 140, 200, 200, &tex1); // Create an Image object
+    PX_Object_ButtonAttachObject(image, 1, PX_COLOR(64, 255, 255, 255), PX_COLOR(96, 255, 255, 255)); // Attach a Button object type to the Image object
+    PX_ObjectRegisterEvent(image, PX_OBJECT_EVENT_EXECUTE, ButtonEvent, 0); // Here we actually register the Button object's event
     return 1;
 }
 ```
 
-我们创建了一个 Image 图像框类型，然后将一个 Button 对象类型组合上去，这样我们就获得了一个图片按钮：
+We created an Image image box type, then attached a Button object type to it, thus obtaining an image button:
 
 ![](assets/img/13.1.gif)
 
-那么，我们如何设计我们自己的可组合对象呢？回到我们的第十二章节，现在，我们就将 "可拖拽" 这个功能设计成一个组合式组件。
+So, how do we design our own composable objects? Let's go back to our twelfth chapter, and turn the "draggable" feature into a composite component.
 
-首先，仍然是定义一个组件对象结构体，为实现拖拽功能，我们需要鼠标按下时的 x, y 坐标，同时需要一个 bool 类型记录是否是选中状态，然后我们需要注册 `CURSOR` 事件，这些事件在上一章节我们已经写过了，最后，我们用 `PX_ObjectCreateDesc` 函数创建一个对象结构体，并将它 Attach 到我们的对象上。
+Firstly, still define a component object structure. To implement the drag function, we need the x, y coordinates when the mouse is pressed, as well as a bool type var to record whether it is selected, then we need to register `CURSOR` events, these events were already written in the previous chapter. Finally, we use the `PX_ObjectCreateDesc` function to create an object structure and attach it to our object.
 
-`PX_ObjectCreateDesc` 是一个对象结构体创建函数，它的定义原型如下：
+`PX_ObjectCreateDesc` is an object structure creation function, its prototype definition is as follows:
 
 ```c
 px_void* PX_ObjectCreateDesc(PX_Object* pObject, px_int idesc, px_int type, Function_ObjectUpdate Func_ObjectUpdate, Function_ObjectRender Func_ObjectRender, Function_ObjectFree Func_ObjectFree, px_void* pDesc, px_int descSize)
 ```
 
-第一个参数是需要 Attach 的对象，第二个参数是 Attach 到的对象索引。还记得我们之前提到的对象数据索引么，使用 `PX_ObjectCreateEx` 默认使用的是索引 0，因此，如果我们要附加到一个对象上，我们应该选 1，当然如果 1 也被占用了，它就是 2，以此类推。第三个参数是对象类型，我们使用 `PX_ObjectGetDescByType` 时，可以通过对象类型取出对应的指针，然后就是我们熟悉的 `Update`、`Render`、`Free` 三件套了，最后一个参数给出其结构体描述和结构体大小。请参阅下面的代码：
+The first parameter is the object that needs to be Attached, the second parameter is the index of the object being Attached to. Do you remember the object data index we mentioned before? Using `PX_ObjectCreateEx` defaults to using index 0, so if we want to attach to an object, we should choose 1. Of course if 1 is also occupied, it would be 2, and so on. The third parameter is the object type, we can retrieve the corresponding pointer through the object type when using `PX_ObjectGetDescByType`, followed by the familiar `Update`, `Render`, `Free` trio. The last parameter provides its structure description and structure size. Please refer to the following code:
 
 ```c
 #include "PainterEngine.h"
@@ -1313,7 +1313,6 @@ PX_Object* PX_Object_DragAttachObject(PX_Object* pObject, px_int attachIndex)
 {
     PX_Object_Drag* pDesc;
 
-
     PX_ASSERTIF(pObject == PX_NULL);
     PX_ASSERTIF(attachIndex < 0 || attachIndex >= PX_COUNTOF(pObject->pObjectDesc));
     PX_ASSERTIF(pObject->pObjectDesc[attachIndex] != PX_NULL);
@@ -1332,21 +1331,20 @@ PX_Object* image;
 px_int main()
 {
     PainterEngine_Initialize(800, 480);
-    if (!PX_LoadTextureFromFile(mp_static, &tex1, "assets/1.png")) return 0; // 加载纹理 1
-    image = PX_Object_ImageCreate(mp, root, 300, 140, 200, 200, &tex1); // 创建 Image 对象
-    PX_Object_DragAttachObject(image, 1); // 将一个 Drag 对象类型组合到 Image 对象上
+    if (!PX_LoadTextureFromFile(mp_static, &tex1, "assets/1.png")) return 0; // Load texture 1
+    image = PX_Object_ImageCreate(mp, root, 300, 140, 200, 200, &tex1); // Create an Image object
+    PX_Object_DragAttachObject(image, 1); // Attach a Drag object type to the Image object
     return 1;
 }
 ```
 
-运行结果如下：
+The running result is as follows:
 
 ![](assets/img/13.2.gif)
 
+## 14. Particle System
 
-## 14. 粒子系统
-
-PainterEngine 提供了一个粒子系统实现，下面是一个粒子系统的示范程序：
+PainterEngine provides an implementation of a particle system. Below is a demonstration program for a particle system:
 
 ```c
 #include "PainterEngine.h"
@@ -1369,7 +1367,7 @@ px_int main()
 
 ![](assets/img/14.1.gif)
 
-这是一个用组件包装起来的粒子系统实现，另外一种是提供了更加详细的粒子系统参数配置：
+This is a particle system implementation wrapped in a component. Another approach offers more detailed configuration parameters for the particle system:
 
 ```c
 #include "PainterEngine.h"
@@ -1411,125 +1409,85 @@ int main()
 }
 ```
 
-以下是这段代码的主要功能和流程解释：
+Below is the main functionality and flow explanation of this code:
 
-1. `#include "PainterEngine.h"`：引入 PainterEngine 的头文件，以便使用引擎的功能。
+1. `#include "PainterEngine.h"`: Includes the PainterEngine header file to enable the use of engine features.
+2. `px_texture texture;`: Declares a variable named `texture` to store texture information.
+3. `int main()`: Entry point of the main function.
+4. `PX_Object* pObject;`: Declares a pointer to `PX_Object` type named `pObject`, which will be used to create a particle system object.
+5. `PX_ParticalLauncher_InitializeInfo ParticalInfo;`: Declares a structure variable named `ParticalInfo` to configure the initialization information of the particle launcher.
+6. `PainterEngine_Initialize(600, 400);`: Initializes PainterEngine, setting the window width to 600 pixels and height to 400 pixels.
+7. `PX_LoadTextureFromFile(mp_static, &texture, "assets/star.traw");`: Loads a texture from a file, storing the texture data in the `texture` variable. The texture file path is "assets/star.traw".
+8. `PX_ParticalLauncherInitializeDefaultInfo(&ParticalInfo);`: Initializes the `ParticalInfo` structure, setting some default properties of the particle launcher.
+9. Specific configurations are made for various attributes of `ParticalInfo`, including the position, velocity, lifetime, size, and rotation of particles. These attributes determine the appearance and behavior of particles.
+10. `pObject = PX_Object_ParticalCreate(mp, root, 300, 200, ParticalInfo);`: Creates a particle system object using the configured `ParticalInfo` and stores it in `pObject`. This particle system object will emit particles at the position (300, 200) in the window.
 
-2. `px_texture texture;`：声明一个名为 `texture` 的变量，用于存储纹理信息。
+The `PX_ParticalLauncher_InitializeInfo` is used to configure the initialization information of the particle launcher. When creating a particle system, you can specify various attributes and behaviors of the particle system by filling out this structure. Here is an explanation of the members of this structure:
 
-3. `int main()`：主函数的入口点。
+1. `px_void *userptr;`: A pointer to any type of data, which can be used to store user-defined data.
+2. `px_texture *tex;`: A pointer to texture data, used to specify the texture image of the particles.
+3. `px_point position;`: A point containing x, y, z coordinates, representing the initial position of the particle system.
+4. `px_float deviation_position_distanceRange;`: A floating-point number specifying the range of position offset for particles.
+5. `px_point direction;`: A point containing x, y, z coordinates, indicating the initial motion direction of the particles.
+6. `px_float deviation_rangAngle;`: A floating-point number specifying the range of initial motion direction offset (in degrees) for particles.
+7. `px_float velocity;`: A floating-point number representing the initial velocity of the particles.
+8. `px_float deviation_velocity_max;`: A floating-point number representing the maximum velocity offset value for particles.
+9. `px_float deviation_velocity_min;`: A floating-point number representing the minimum velocity offset value for particles.
+10. `px_float atomsize;`: A floating-point number representing the initial size of the particles.
+11. `px_float deviation_atomsize_max;`: A floating-point number representing the maximum size offset value for particles.
+12. `px_float deviation_atomsize_min;`: A floating-point number representing the minimum size offset value for particles.
+13. `px_float rotation;`: A floating-point number representing the initial rotation angle of the particles.
+14. `px_float deviation_rotation;`: A floating-point number representing the range of rotation angle offset for particles.
+15. `px_float alpha;`: A floating-point number representing the initial transparency of the particles.
+16. `px_float deviation_alpha;`: A floating-point number representing the range of transparency offset for particles.
+17. `px_float hdrR;`: A floating-point number representing the initial red channel value of the particles.
+18. `px_float deviation_hdrR;`: A floating-point number representing the range of red channel value offset for particles.
+19. `px_float hdrG;`: A floating-point number representing the initial green channel value of the particles.
+20. `px_float deviation_hdrG;`: A floating-point number representing the range of green channel value offset for particles.
+21. `px_float hdrB;`: A floating-point number representing the initial blue channel value of the particles.
+22. `px_float deviation_hdrB;`: A floating-point number representing the range of blue channel value offset for particles.
+23. `px_float sizeincrease;`: A floating-point number representing the rate of increase in particle size.
+24. `px_float alphaincrease;`: A floating-point number representing the rate of increase in particle transparency.
+25. `px_point a;`: A point containing x, y, z coordinates, used for custom attributes.
+26. `px_float ak;`: A floating-point number used for custom attributes.
+27. `px_int alive;`: An integer representing the lifetime of particles (in milliseconds).
+28. `px_int generateDuration;`: An integer representing the generation period of the particle launcher (in milliseconds).
+29. `px_int maxCount;`: An integer representing the maximum number of particles in the particle system.
+30. `px_int launchCount;`: An integer representing the number of launches of the particle system.
+31. `PX_ParticalLauncher_CreateAtom Create_func;`: A function pointer specifying a custom particle creation function.
+32. `PX_ParticalLauncher_UpdateAtom Update_func;`: A function pointer specifying a custom particle update function.
 
-4. `PX_Object* pObject;`：声明一个名为 `pObject` 的指向 `PX_Object` 类型的指针，将用于创建粒子系统对象。
-
-5. `PX_ParticalLauncher_InitializeInfo ParticalInfo;`：声明一个名为 `ParticalInfo` 的结构体变量，用于配置粒子发射器的初始化信息。
-
-6. `PainterEngine_Initialize(600, 400);`：初始化 PainterEngine，设置窗口的宽度为 600 像素，高度为 400 像素。
-
-7. `PX_LoadTextureFromFile(mp_static, &texture, "assets/star.traw");`：从文件加载纹理，将纹理数据存储在 `texture` 变量中。纹理文件路径为 "assets/star.traw"。
-
-8. `PX_ParticalLauncherInitializeDefaultInfo(&ParticalInfo);`：初始化 `ParticalInfo` 结构体，设置了一些默认的粒子发射器属性。
-
-9. 针对 `ParticalInfo` 的各个属性进行了具体的配置，包括粒子的位置、速度、寿命、大小、旋转等。这些属性决定了粒子的外观和行为。
-
-10. `pObject = PX_Object_ParticalCreate(mp, root, 300, 200, ParticalInfo);`：使用配置好的 `ParticalInfo` 创建一个粒子系统对象，并将其存储在 `pObject` 中。这个粒子系统对象将会在窗口中的位置 (300, 200) 处发射粒子。
-
-其中 `PX_ParticalLauncher_InitializeInfo` 用于配置粒子发射器的初始化信息，即在创建粒子系统时，可以通过填充这个结构体来指定粒子系统的各种属性和行为。以下是该结构体的各个成员的说明：
-
-1. `px_void *userptr;`：一个指向任意类型数据的指针，可用于存储用户自定义的数据。
-
-2. `px_texture *tex;`：指向纹理数据的指针，用于指定粒子的纹理图像。
-
-3. `px_point position;`：一个包含 x、y、z 坐标的点，表示粒子系统的初始位置。
-
-4. `px_float deviation_position_distanceRange;`：一个浮点数，用于指定粒子的位置偏移范围。
-
-5. `px_point direction;`：一个包含 x、y、z 坐标的点，表示粒子的初始运动方向。
-
-6. `px_float deviation_rangAngle;`：一个浮点数，用于指定粒子的初始运动方向偏移范围（角度）。
-
-7. `px_float velocity;`：一个浮点数，表示粒子的初始速度。
-
-8. `px_float deviation_velocity_max;`：一个浮点数，表示粒子速度的最大偏移值。
-
-9. `px_float deviation_velocity_min;`：一个浮点数，表示粒子速度的最小偏移值。
-
-10. `px_float atomsize;`：一个浮点数，表示粒子的初始大小。
-
-11. `px_float deviation_atomsize_max;`：一个浮点数，表示粒子大小的最大偏移值。
-
-12. `px_float deviation_atomsize_min;`：一个浮点数，表示粒子大小的最小偏移值。
-
-13. `px_float rotation;`：一个浮点数，表示粒子的初始旋转角度。
-
-14. `px_float deviation_rotation;`：一个浮点数，表示粒子旋转角度的偏移范围。
-
-15. `px_float alpha;`：一个浮点数，表示粒子的初始透明度。
-
-16. `px_float deviation_alpha;`：一个浮点数，表示粒子透明度的偏移范围。
-
-17. `px_float hdrR;`：一个浮点数，表示粒子的初始红色通道值。
-
-18. `px_float deviation_hdrR;`：一个浮点数，表示粒子红色通道值的偏移范围。
-
-19. `px_float hdrG;`：一个浮点数，表示粒子的初始绿色通道值。
-
-20. `px_float deviation_hdrG;`：一个浮点数，表示粒子绿色通道值的偏移范围。
-
-21. `px_float hdrB;`：一个浮点数，表示粒子的初始蓝色通道值。
-
-22. `px_float deviation_hdrB;`：一个浮点数，表示粒子蓝色通道值的偏移范围。
-
-23. `px_float sizeincrease;`：一个浮点数，表示粒子大小的增加率。
-
-24. `px_float alphaincrease;`：一个浮点数，表示粒子透明度的增加率。
-
-25. `px_point a;`：一个包含 x、y、z 坐标的点，用于自定义属性。
-
-26. `px_float ak;`：一个浮点数，用于自定义属性。
-
-27. `px_int alive;`：一个整数，表示粒子的生存时间（毫秒）。
-
-28. `px_int generateDuration;`：一个整数，表示粒子发射器的生成周期（毫秒）。
-
-29. `px_int maxCount;`：一个整数，表示粒子系统中最大的粒子数量。
-
-30. `px_int launchCount;`：一个整数，表示粒子系统的发射次数。
-
-31. `PX_ParticalLauncher_CreateAtom Create_func;`：一个函数指针，用于指定自定义的粒子创建函数。
-
-32. `PX_ParticalLauncher_UpdateAtom Update_func;`：一个函数指针，用于指定自定义的粒子更新函数。
-
-这个结构体允许你灵活地配置粒子系统的各种属性，以满足不同场景和效果的需求。通过调整这些属性，你可以控制粒子的外观、运动轨迹、生命周期等方面的行为。
+This structure allows you to flexibly configure various attributes of the particle system to meet the needs of different scenarios and effects. By adjusting these attributes, you can control aspects of particle appearance, trajectory, lifecycle, and other behaviors.
 
 ![](assets/img/14.2.gif)
 
-## 15. 使用 PainterEngine 播放音乐
+## 15. Playing Music with PainterEngine
 
-PainterEngine 内置了对 wav 及 mp3 格式音乐的原生支持，使用 PainterEngine 播放音乐的代码十分简单：
+PainterEngine natively supports playing music in wav and mp3 formats. The code to play music using PainterEngine is very simple:
 
 ```c
 #include "PainterEngine.h"
 
-PX_SoundData sounddata; // 定义音乐格式
+PX_SoundData sounddata; // Define the music format
 int main()
 {
     PX_Object* pObject;
     PainterEngine_Initialize(600, 400);
-    PainterEngine_InitializeAudio(); // 初始化混音器及音乐设备
-    if (!PX_LoadSoundFromFile(mp_static, &sounddata, "assets/bliss.wav")) return PX_FALSE; // 加载音乐，支持 wav 及 mp3 格式
-    PX_SoundPlayAdd(soundplay, PX_SoundCreate(&sounddata, PX_TRUE)); // 播放音乐
-    pObject = PX_Object_SoundViewCreate(mp, root, 0, 0, 600, 400, soundplay); // 音乐频谱可视化组件，可选
+    PainterEngine_InitializeAudio(); // Initialize the mixer and audio device
+    if (!PX_LoadSoundFromFile(mp_static, &sounddata, "assets/bliss.wav")) return PX_FALSE; // Load the music, supporting wav and mp3 formats
+    PX_SoundPlayAdd(soundplay, PX_SoundCreate(&sounddata, PX_TRUE)); // Play the music
+    pObject = PX_Object_SoundViewCreate(mp, root, 0, 0, 600, 400, soundplay); // Optional music spectrum visualization component
     return 0;
 }
 ```
 
 ![](assets/img/15.1.gif)
 
-其中，`PX_LoadSoundFromFile` 函数从文件中加载音乐，并解码成 `sounddata` 类型。`PX_SoundCreate` 可以用 `sounddata` 创建一个播放实例，第二个参数表示这个实例是否循环播放，最后使用 `PX_SoundPlayAdd` 将播放实例送入混音器中，即可完成音乐播放。
+Here, the `PX_LoadSoundFromFile` function loads music from a file and decodes it into the `sounddata` type. `PX_SoundCreate` can create a playback instance using `sounddata`. The second parameter indicates whether this instance should loop. Finally, `PX_SoundPlayAdd` sends the playback instance to the mixer to complete the music playback.
 
-## 16. PainterEngine Live2D 动画系统
+## 16. PainterEngine Live2D Animation System
 
-PainterEngine 内置了一个类 live2D 动画系统，可以加载 live2d 动画，参考代码如下：
+PainterEngine includes a Live2D-like animation system that can load Live2D animations. The reference code is as follows:
 
 ```c
 #include "PainterEngine.h"
@@ -1547,21 +1505,20 @@ int main()
     
     PX_IO_Data iodata;
     PainterEngine_Initialize(600, 600);
-    // 加载模型数据
+    // Load model data
     iodata = PX_LoadFileToIOData("assets/release.live");
     if (iodata.size == 0) return PX_FALSE;
     PX_LiveFrameworkImport(mp_static, &liveframework, iodata.buffer, iodata.size);
     PX_FreeIOData(&iodata);
-    // 创建 Live2D 对象
+    // Create a Live2D object
     pObject = PX_Object_Live2DCreate(mp, root, 300, 300, &liveframework);
     PX_ObjectRegisterEvent(pObject, PX_OBJECT_EVENT_CURSORDOWN, onClick, PX_NULL);
 
     return 0;
 }
-
 ```
 
-以下是与 Live2D 模型预览器相关的函数的说明：
+Below are explanations of functions related to the Live2D model previewer:
 
 `PX_Object_Live2DCreate`
 
@@ -1569,13 +1526,13 @@ int main()
 PX_Object* PX_Object_Live2DCreate(px_memorypool* mp, PX_Object* Parent, px_int x, px_int y, PX_LiveFramework *pLiveFramework);
 ```
 
-- **描述**：创建一个 Live2D 模型预览器对象，用于在图形界面中显示和交互 Live2D 模型。
-- **参数**：
-  - `mp`：内存池指针，用于分配内存。
-  - `Parent`：父对象，Live2D 模型预览器对象将作为其子对象。
-  - `x`, `y`：Live2D 模型预览器对象的位置坐标。
-  - `pLiveFramework`：Live2D 模型框架的指针，包括模型数据、纹理等信息。
-- **返回值**：创建的 Live2D 模型预览器对象的指针。
+- **Description**: Creates a Live2D model previewer object for displaying and interacting with Live2D models in the graphical interface.
+- **Parameters**:
+  - `mp`: Pointer to the memory pool used for memory allocation.
+  - `Parent`: Parent object; the Live2D model previewer object will be a child of this object.
+  - `x`, `y`: Position coordinates of the Live2D model previewer object.
+  - `pLiveFramework`: Pointer to the Live2D model framework, which includes model data, textures, and other information.
+- **Return Value**: Pointer to the created Live2D model previewer object.
 
 `PX_Object_Live2DPlayAnimation`
 
@@ -1583,11 +1540,11 @@ PX_Object* PX_Object_Live2DCreate(px_memorypool* mp, PX_Object* Parent, px_int x
 px_void PX_Object_Live2DPlayAnimation(PX_Object *pObject, px_char *name);
 ```
 
-- **描述**：播放指定名称的 Live2D 模型动画。
-- **参数**：
-  - `pObject`：Live2D 模型预览器对象的指针。
-  - `name`：动画名称。
-- **返回值**：无。
+- **Description**: Plays a specified animation of the Live2D model.
+- **Parameters**:
+  - `pObject`: Pointer to the Live2D model previewer object.
+  - `name`: Name of the animation.
+- **Return Value**: None.
 
 `PX_Object_Live2DPlayAnimationRandom`
 
@@ -1595,10 +1552,10 @@ px_void PX_Object_Live2DPlayAnimation(PX_Object *pObject, px_char *name);
 px_void PX_Object_Live2DPlayAnimationRandom(PX_Object* pObject);
 ```
 
-- **描述**：随机播放 Live2D 模型的动画。
-- **参数**：
-  - `pObject`：Live2D 模型预览器对象的指针。
-- **返回值**：无。
+- **Description**: Plays a random animation of the Live2D model.
+- **Parameters**:
+  - `pObject`: Pointer to the Live2D model previewer object.
+- **Return Value**: None.
 
 `PX_Object_Live2DPlayAnimationIndex`
 
@@ -1606,28 +1563,29 @@ px_void PX_Object_Live2DPlayAnimationRandom(PX_Object* pObject);
 px_void PX_Object_Live2DPlayAnimationIndex(PX_Object* pObject, px_int index);
 ```
 
-- **描述**：播放 Live2D 模型的指定索引处的动画。
-- **参数**：
-  - `pObject`：Live2D 模型预览器对象的指针。
-  - `index`：动画的索引。
-- **返回值**：无。
+- **Description**: Plays the animation at the specified index of the Live2D model.
+- **Parameters**:
+  - `pObject`: Pointer to the Live2D model previewer object.
+  - `index`: Index of the animation.
+- **Return Value**: None.
 
-这些函数用于创建、配置和管理 Live2D 模型预览器对象，以在图形用户界面中显示和交互 Live2D 模型。可以使用这些函数播放 Live2D 模型的动画，包括指定名称、随机选择和指定索引处的动画。
+These functions are used to create, configure, and manage Live2D model previewer objects to display and interact with Live2D models in the graphical user interface. You can use these functions to play animations of the Live2D model, including those specified by name, randomly selected, and at a specific index.
 
 ![](assets/img/16.1.gif)
 
-## 17. PainterEngine 脚本引擎
+## 17. PainterEngine Script Engine
 
-PainterEngine 内置了一个平台无关的脚本引擎系统，集成了编译，运行，调试等功能，你可以很轻松地在脚本之上，实现并行调度功能。PainterEngine Script 的设计，最大程度和 C 语言保持一致性，并对一些类型进行的拓展和简化。
+PainterEngine includes a platform-independent script engine system that integrates compilation, execution, debugging, and other functionalities. You can easily implement parallel scheduling on top of scripts. The design of PainterEngine Script maintains maximum consistency with the C language and extends and simplifies some types.
 
-例如在脚本中，支持 `int`、`float`、`string`、`memory` 四种类型，`int` 类型是一个 32 位的有符号整数，`float` 是一个浮点数类型，这个和 C 语言的类型保持了一致。`string` 类型类似于 C++ 的 `string`，它允许直接用 `+` 法运算符进行字符串拼接，使用 `strlen` 来获取其字符串长度，而 `memory` 是一个二进制数据存储类型，同样支持 `+` 运算进行拼接。
+For example, in the script, four types are supported: `int`, `float`, `string`, and `memory`. The `int` type is a 32-bit signed integer, and the `float` type is a floating-point number, both of which are consistent with C language types. The `string` type is similar to C++'s `string`, allowing direct concatenation of strings using the `+` operator and obtaining the string length using `strlen`. The `memory` type is a binary data storage type that also supports concatenation using the `+` operator.
 
-在脚本中如果需要调用 C 语言函数，应该使用 `PX_VM_HOST_FUNCTION` 宏进行定义声明。和组件回调函数一样，`PX_VM_HOST_FUNCTION` 的定义如下：
+If you need to call C language functions in the script, you should define them using the `PX_VM_HOST_FUNCTION` macro. Similar to component callback functions, the definition of `PX_VM_HOST_FUNCTION` is as follows:
 
 ```c
 #define PX_VM_HOST_FUNCTION(name) px_bool name(PX_VM *Ins, px_void *userptr)
 ```
-在下面的内容中，我将以一个简单的脚本实例作为范例，为你演示如何使用 PainterEngine 的脚本引擎：
+
+In the following content, I will use a simple script example to demonstrate how to use PainterEngine's script engine:
 
 ```c
 const px_char shellcode[] = "\
@@ -1664,18 +1622,17 @@ PX_VM_HOST_FUNCTION(host_sleep)
     }
     return PX_TRUE;
 }
-
 ```
 
-首先，`shellcode` 数组中存储着一个输出九九乘法表的程序，其中需要调用两个 `host` 函数（脚本调用 C 语言函数称为 host call，因此 host 函数实际就是专门提供给脚本调用的 C 语言函数），一个是 `print` 函数，一个是 `sleep` 函数。因此在下面，我们定义了两个 `host` 函数，`PX_VM_HOSTPARAM` 用于取得脚本传递过来的参数。在这里，我们需要判断传递过来的参数类型是否符合我们的调用规则，像 `host_print` 函数，作用是在 PainterEngine 中输出字符串，而 `sleep` 函数，则是用来延迟一段时间。
+First, the `shellcode` array stores a program that outputs a multiplication table, which requires calling two `host` functions (calling C language functions from scripts is called a host call, so host functions are actually C language functions specifically provided for script calls). One is the `print` function, and the other is the `sleep` function. Therefore, we define two `host` functions below. `PX_VM_HOSTPARAM` is used to retrieve parameters passed from the script. Here, we need to check if the passed parameters match our calling rules. For example, the `host_print` function is used to output strings in PainterEngine, while the `sleep` function is used to delay for a certain period.
 
-现在，PainterEngine Script 是一个编译型脚本，我们需要将上面的代码编译成二进制形式，然后将它送入虚拟机中运行，观察以下代码：
+Now, PainterEngine Script is a compiled script. We need to compile the above code into binary form and then send it to the virtual machine for execution. Observe the following code:
 
 ```c
 PX_VM vm;
 PX_OBJECT_UPDATE_FUNCTION(VMUpdate)
 {
-    PX_VMRun(&vm, 0xffff, elapsed); // 运行虚拟机
+    PX_VMRun(&vm, 0xffff, elapsed); // Run the virtual machine
 }
 
 px_int main()
@@ -1684,32 +1641,32 @@ px_int main()
     px_memory bin;
     PainterEngine_Initialize(800, 600);
     PainterEngine_SetBackgroundColor(PX_COLOR_BLACK);
-    PX_CompilerInitialize(mp, &compiler); // 初始化编译器
-    PX_CompilerAddSource(&compiler, shellcode); // 编译器中添加代码
-    PX_MemoryInitialize(mp, &bin); // 初始化内存/用于存储编译后的结果
+    PX_CompilerInitialize(mp, &compiler); // Initialize the compiler
+    PX_CompilerAddSource(&compiler, shellcode); // Add code to the compiler
+    PX_MemoryInitialize(mp, &bin); // Initialize memory for storing the compiled result
     if (!PX_CompilerCompile(&compiler, &bin, 0, "main"))
     {
-        // 编译失败
+        // Compilation failed
         return 0;
     }
-    PX_CompilerFree(&compiler); // 释放编译器
-    PX_VMInitialize(&vm, mp, bin.buffer, bin.usedsize); // 初始化虚拟机
-    PX_VMRegisterHostFunction(&vm, "print", host_print, 0); // 注册主机函数 print
-    PX_VMRegisterHostFunction(&vm, "sleep", host_sleep, 0); // 注册主机函数 sleep
-    PX_VMBeginThreadFunction(&vm, 0, "main", PX_NULL, 0); // 开始运行虚拟机函数
-    PX_ObjectSetUpdateFunction(root, VMUpdate, 0); // 设置更新函数
+    PX_CompilerFree(&compiler); // Free the compiler
+    PX_VMInitialize(&vm, mp, bin.buffer, bin.usedsize); // Initialize the virtual machine
+    PX_VMRegisterHostFunction(&vm, "print", host_print, 0); // Register the host function print
+    PX_VMRegisterHostFunction(&vm, "sleep", host_sleep, 0); // Register the host function sleep
+    PX_VMBeginThreadFunction(&vm, 0, "main", PX_NULL, 0); // Start running the virtual machine function
+    PX_ObjectSetUpdateFunction(root, VMUpdate, 0); // Set the update function
 
     return 0;
 }
 ```
 
-首先我们用 `PX_Compiler` 编译我们的脚本，然后我们注册我们的 host call，`PX_VMBeginThreadFunction` 的功能是 C 语言调用脚本语言中函数，在这里我们调用脚本中的 `main` 开始运行我们的脚本函数，最后我们将一个 `Update` 函数绑定到 root 节点，以循环更新虚拟机，来执行脚本。
+First, we compile our script using `PX_Compiler`, then register our host calls. The function `PX_VMBeginThreadFunction` is used to call a function in the script language from C. Here, we call the `main` function in the script to start running our script function. Finally, we bind an `Update` function to the root node to cyclically update the virtual machine and execute the script.
 
-最后，看看运行的结果。
+Finally, let's look at the result of the run.
 
 ![](assets/img/17.1.gif)
 
-如果我们想要对脚本进行调试，我们还可以在编译期间，创建一个符号映射表，这样我们就可以直接使用 `PX_Object_DebuggerMap` 对脚本进行调试。
+If we want to debug the script, we can create a symbol mapping table during compilation. This way, we can directly use `PX_Object_DebuggerMap` to debug the script.
 
 ```c
 px_int main()
@@ -1719,19 +1676,19 @@ px_int main()
     PainterEngine_Initialize(800, 480);
     PX_VMDebuggerMapInitialize(mp, &debugmap);
     PainterEngine_SetBackgroundColor(PX_COLOR_BLACK);
-    PX_CompilerInitialize(mp, &compiler); // 初始化编译器
-    PX_CompilerAddSource(&compiler, shellcode); // 编译器中添加代码
-    PX_MemoryInitialize(mp, &bin); // 初始化内存/用于存储编译后的结果
+    PX_CompilerInitialize(mp, &compiler); // Initialize the compiler
+    PX_CompilerAddSource(&compiler, shellcode); // Add code to the compiler
+    PX_MemoryInitialize(mp, &bin); // Initialize memory for storing the compiled result
     if (!PX_CompilerCompile(&compiler, &bin, &debugmap, "main"))
     {
-        // 编译失败
+        // Compilation failed
         return 0;
     }
-    PX_CompilerFree(&compiler); // 释放编译器
-    PX_VMInitialize(&vm, mp, bin.buffer, bin.usedsize); // 初始化虚拟机
-    PX_VMRegisterHostFunction(&vm, "print", host_print, 0); // 注册主机函数 print
-    PX_VMRegisterHostFunction(&vm, "sleep", host_sleep, 0); // 注册主机函数 sleep
-    PX_VMBeginThreadFunction(&vm, 0, "main", PX_NULL, 0); // 开始运行虚拟机函数
+    PX_CompilerFree(&compiler); // Free the compiler
+    PX_VMInitialize(&vm, mp, bin.buffer, bin.usedsize); // Initialize the virtual machine
+    PX_VMRegisterHostFunction(&vm, "print", host_print, 0); // Register the host function print
+    PX_VMRegisterHostFunction(&vm, "sleep", host_sleep, 0); // Register the host function sleep
+    PX_VMBeginThreadFunction(&vm, 0, "main", PX_NULL, 0); // Start running the virtual machine function
     PX_Object *pDbgObject = PX_Object_AsmDebuggerCreate(mp, root, 0, 0, 800, 480, 0);
     pDbgObject->Visible = PX_TRUE;
     PX_Object_AsmDebuggerAttach(pDbgObject, &debugmap, &vm);
