@@ -4,10 +4,13 @@
   </a>
 </p>
 
-[![中文](https://img.shields.io/badge/语言-中文-brightgreen)](https://github.com/QuantumCipherMaster/PainterEngine/blob/master/README.md)
+[![中文](https://img.shields.io/badge/语言-中文-brightgreen)](README.md)
 
 PainterEngine is a cross-platform graphics engine written in C language, with support for Windows, Linux, iOS, Android, WebAssembly, and even bare-metal embedded platforms without OS. It is built on a component-based design pattern, making it accessible to even C language beginners. [PainterEngine Make](https://www.painterengine.com/) enables you to compile your PainterEngine project for multiple platforms with just one click.
 It covers various fields including basic data structures, graphics, acoustics, digital signal processing, compiler design, virtual machine systems, cryptography, human-computer interaction, game engines, FPGA-GPU graphics acceleration, and more. You can use it to create mini-applications or as a learning project for acquiring knowledge.
+
+Now, learn and use PainterEngine $\longrightarrow$
+*__[PainterEngine Quick Start Guide (English Version)](./documents/PainterEngine_the_book_en.md)__*
 
 ## 30-Second Quick Start Guide to PainterEngine
 
@@ -33,9 +36,9 @@ Create components or even craft your own:
 int main()
 {
     PainterEngine_Initialize(800, 600);
-    PX_Object_Firework01Create(mp, root,200,600);
-    PX_Object_Firework01Create(mp, root,400,600);
-    PX_Object_Firework01Create(mp, root,600,600);
+    PX_Object_Firework01Create(mp, root, 200, 600);
+    PX_Object_Firework01Create(mp, root, 400, 600);
+    PX_Object_Firework01Create(mp, root, 600, 600);
     return 1;
 }
 ```
@@ -45,8 +48,6 @@ int main()
 </p>
 
 Use ["PainterEngine Make"](https://www.painterengine.com/) to quickly compile and deploy your project to various platforms such as Windows, Linux, WebAssembly, Android, and more. One-click compilation and deployment, with no need to modify the source code, enabling seamless portability at zero cost.
-
-
 
 <p align="center">
   <a href="https://cdn.painterengine.com/PainterEngine_make_en.zip" target="_blank" rel="noopener noreferrer">
@@ -65,6 +66,8 @@ If you don't need the one-key compilation feature provided by PainterEngine Make
 3. Include the directory containing PainterEngine source code in your project's include directories.
 
 4. Add your code to the project.
+
+You can now use your IDE to compile PainterEngine with these steps. PainterEngine library will strive to ensure consistent results across all platforms. What you develop on Windows will yield consistent results on Android, web, Linux, iOS, and more.
 
 ## Not just a graphics library but also an application framework.
 
@@ -87,6 +90,8 @@ If you don't need the one-key compilation feature provided by PainterEngine Make
 | protocals             | MQTT/MODBUS/Game-network-synchronization                     | Common communication protocols                                                   |
 | Game framework        |                                                              | PainterEngine Game Framework                                                      |
 | FPGA-GPU             | 2D accelerator                                               | Implemented an FPGA-based GPU graphics accelerator that provides at least 50 million pixels per second (Mpps) 2D Blender acceleration for PainterEngine and supports HDMI output. Validation has been completed on the Zynq-7000 series SoC|
+
+Many more to explore...
 
 ## The FPGA-GPU Graphics Acceleration Solution
 
