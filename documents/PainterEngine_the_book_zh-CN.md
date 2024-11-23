@@ -1888,11 +1888,11 @@ PX_OBJECT_UPDATE_FUNCTION(PX_Object_FoxOnUpdate)
         case PX_OBJECT_FOX_STATE_TAUNT: // 狐狸嘲讽
         {
             pfox->elapsed += elapsed;
-            if (pfox->elapsed>600&& pfox->elapsed <1500) // 嘲讽时间
+            if (pfox->elapsed > 600 && pfox->elapsed < 1500) // 嘲讽时间
             {
                 pfox->pcurrent_display_texture = PX_ResourceLibraryGetTexture(PainterEngine_GetResourceLibrary(), "fox_taunt"); // 嘲讽纹理
             }
-            else if (pfox->elapsed>1500) // 嘲讽结束
+            else if (pfox->elapsed > 1500) // 嘲讽结束
             {
                 pfox->texture_render_offset = 0;
                 pfox->state = PX_OBJECT_FOX_STATE_ESCAPE; // 逃跑
@@ -1904,7 +1904,7 @@ PX_OBJECT_UPDATE_FUNCTION(PX_Object_FoxOnUpdate)
         case PX_OBJECT_FOX_STATE_BEAT: // 狐狸被打
         {
             pfox->elapsed += elapsed;
-            if (pfox->elapsed>800)
+            if (pfox->elapsed > 800)
             {
                 pfox->pcurrent_display_texture = PX_ResourceLibraryGetTexture(PainterEngine_GetResourceLibrary(), "fox_hurt"); // 受伤纹理
                 pfox->state = PX_OBJECT_FOX_STATE_ESCAPE; // 逃跑
@@ -1960,7 +1960,7 @@ PX_OBJECT_EVENT_FUNCTION(PX_Object_FoxOnClick) // 狐狸被点击
             px_int y = (px_int)PX_Object_Event_GetCursorY(e);
             x = (px_int)(x - (pObject->x - pObject->Width/2));
             y = (px_int)(y - (pObject->y - pObject->Height));
-            if (x>32&&y<128)
+            if (x > 32 && y < 128)
             {
                 pfox->pcurrent_display_texture = PX_ResourceLibraryGetTexture(PainterEngine_GetResourceLibrary(), "fox_beat");
                 pfox->state = PX_OBJECT_FOX_STATE_BEAT;
@@ -2330,11 +2330,11 @@ PX_OBJECT_UPDATE_FUNCTION(PX_Object_FoxOnUpdate)
         case PX_OBJECT_FOX_STATE_TAUNT: // 狐狸嘲讽
         {
             pfox->elapsed += elapsed;
-            if (pfox->elapsed>600&& pfox->elapsed <1500) // 嘲讽时间
+            if (pfox->elapsed > 600 && pfox->elapsed < 1500) // 嘲讽时间
             {
                 pfox->pcurrent_display_texture = PX_ResourceLibraryGetTexture(PainterEngine_GetResourceLibrary(), "fox_taunt"); // 嘲讽纹理
             }
-            else if (pfox->elapsed>1500) // 嘲讽结束
+            else if (pfox->elapsed > 1500) // 嘲讽结束
             {
                 pfox->texture_render_offset = 0;
                 pfox->state = PX_OBJECT_FOX_STATE_ESCAPE; // 逃跑
@@ -2346,7 +2346,7 @@ PX_OBJECT_UPDATE_FUNCTION(PX_Object_FoxOnUpdate)
         case PX_OBJECT_FOX_STATE_BEAT: // 狐狸被打
         {
             pfox->elapsed += elapsed;
-            if (pfox->elapsed>800)
+            if (pfox->elapsed > 800)
             {
                 pfox->pcurrent_display_texture = PX_ResourceLibraryGetTexture(PainterEngine_GetResourceLibrary(), "fox_hurt"); // 受伤纹理
                 pfox->state = PX_OBJECT_FOX_STATE_ESCAPE; // 逃跑
@@ -2401,7 +2401,7 @@ PX_OBJECT_EVENT_FUNCTION(PX_Object_FoxOnClick) // 狐狸被点击
             px_int y = (px_int)PX_Object_Event_GetCursorY(e);
             x = (px_int)(x - (pObject->x - pObject->Width/2));
             y = (px_int)(y - (pObject->y - pObject->Height));
-            if (x>32&&y<128)
+            if (x > 32 && y < 128)
             {
                 pfox->pcurrent_display_texture = PX_ResourceLibraryGetTexture(PainterEngine_GetResourceLibrary(), "fox_beat");
                 pfox->state = PX_OBJECT_FOX_STATE_BEAT;
