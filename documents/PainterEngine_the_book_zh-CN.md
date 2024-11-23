@@ -529,13 +529,13 @@ int main()
 ```
 ![](assets/img/7.1.gif)
 
-现在，我们来详细看看 `PX_Object_PushButtonCreate` 函数。其中，第一个参数是一个内存池，在之前我们说过 PainterEngine 有 2 个系统默认的内存池，其实这里填 `mp` 或者 `mp_static` 都是没有问题的，但考虑到界面可能会变动设计对象分配与销毁，所以我们还是选择 `mp` 内存池。
+现在，我们来详细看看 `PX_Object_PushButtonCreate` 函数。其中，第一个参数是一个内存池，在之前我们说过 PainterEngine 有 2 个系统默认的内存池，其实这里填 `mp` 或者 `mp_static` 都是没有问题的，但考虑到界面可能会变动，涉及对象分配与销毁，所以我们还是选择 `mp` 内存池。
 
 第二个参数 `root` 是 PainterEngine 的根对象，PainterEngine 对象管理机制我们将在之后讨论。在这里，你只需要理解为，这里填 `root` 的意思是 **_创建一个按钮对象作为根对象的子对象_**。这样按钮就能链接到系统对象树中，进行事件响应和渲染。
 
 然后是按钮的 x，y，width，height，也就是位置和宽度高度等信息。
 
-最后一个是字模指针，也就是之前我们加载的 ttf 字模文件，如果没有它，我们的按钮就不能显示中文汉字了。当然你可以选择其他的字体，以实现不同的风格。
+最后一个是字模指针，也就是之前我们加载的 TTF 字模文件，如果没有它，我们的按钮就不能显示中文汉字了。当然你可以选择其他的字体，以实现不同的风格。
 
 ## 8. PainterEngine 对象传递机制
 
@@ -549,7 +549,7 @@ int main()
 
 `Create`：对象创建函数，或者说是对象初始化函数，在 PainterEngine 中它一般是 `PX_Object_xxxxxCreate` 这种形式的，其中 `xxxxx` 就是这个对象的名称，比如上一章节的 `PushButton`，`Create` 函数一般是对象的一些初始化处理，并会将自己连接到对象树中。
 
-`Update`：对象的物理信息更新工作基本在这个函数中完成，一般会处理对象的一些物理信息，比如位置大小速度等，常见于游戏设计中的物体，在 GUI 对象中则比较少见，其设计是与之后的 `Render` 也就是绘制函数进行区分，因为在例如游戏服务端中，对象并不需要进行绘制，且绘制是非常消耗性能的。
+`Update`：对象的物理信息更新工作基本在这个函数中完成，一般会处理对象的一些物理信息，比如位置、大小、速度等，常见于游戏设计中的物体，在 GUI 对象中则比较少见，其设计是与之后的 `Render` 也就是绘制函数进行区分，因为在例如游戏服务端中，对象并不需要进行绘制，且绘制是非常消耗性能的。
 
 `Render`：对象的绘制工作基本在这个函数中完成，用于 `PX_Object` 的绘制功能，将图像数据渲染到屏幕上，当然有些情况下物理信息也会在这个函数中做，是因为这个对象的物理信息并不会影响游戏的实际运行结果，例如一些特效和粒子效果，多数的 GUI 组件也几乎只用得到 `Render` 函数。
 
@@ -726,7 +726,7 @@ int main()
 
 在上述代码中 `OnButtonPreClick` 和 `OnButtonNextClick` 分别是上一张和下一张按钮的回调函数，我们使用 `PX_Object_ImageSetTexture` 函数，对图片框进行切换。
 
-而在 `main` 函数中，我们先加载了 ttf 字体，然后用 `PX_Object_ImageCreate` 创建了一个图片组件，之后我们创建了 2 个按钮，并用 `PX_ObjectRegisterEvent` 绑定了事件回调函数。最后，看看运行结果：
+而在 `main` 函数中，我们先加载了 TTF 字体，然后用 `PX_Object_ImageCreate` 创建了一个图片组件，之后我们创建了 2 个按钮，并用 `PX_ObjectRegisterEvent` 绑定了事件回调函数。最后，看看运行结果：
 
 ![](assets/img/10.1.gif)
 
@@ -770,7 +770,6 @@ PX_OBJECT_RENDER_FUNCTION(PX_Object_OnMyListItemRender)
     // 绘制出其文本
     PX_FontModuleDrawText(psurface, 0, (px_int)objx + 3, (px_int)objy + 3, PX_ALIGN_LEFTTOP, (const px_char *)pItem->pdata, PX_COLOR_WHITE);
 }
-
 
 PX_OBJECT_LIST_ITEM_CREATE_FUNCTION(PX_Object_OnMyListItemCreate)
 {
@@ -827,6 +826,7 @@ int main()
     return 0;
 }
 ```
+
 ![](assets/img/11.3.gif)
 
 - 下拉框：
@@ -870,7 +870,7 @@ int main()
     for (i = 0; i < 100; i++)
     {
         data_x[i] = i;
-        data_y[i] = i+PX_randRange(-10, 10);
+        data_y[i] = i + PX_randRange(-10, 10);
     }
     
     pObject = PX_Object_OscilloscopeCreate(mp, root, 0, 0, 600, 600, 0);
@@ -910,7 +910,7 @@ int main()
 
 PainterEngine 鼓励组件式的开发架构。也就是说，不论是游戏还是 GUI 交互程序，甚至是程序功能，我们都可以用组件的形式去开发它。
 
-组件式开发有点类似于 C++ 中的 Class，每一个组件，都要实现自己的 `Create`、`Update`、`Render`、`Free` 函数。关于上面四个函数，你可以参考 [前面的对象传递机制](#8painterengine-对象传递机制) 这一章节。
+组件式开发有点类似于 C++ 中的 Class，每一个组件，都要实现自己的 `Create`、`Update`、`Render`、`Free` 函数。关于上面四个函数，你可以参考 [前面的对象传递机制](#8-painterengine-对象传递机制) 这一章节。
 
 为了演示这一点，让我们来实现一个“可控拖动旋转图片组件”，即我们可以用鼠标拖动图片在界面的位置，并用鼠标中键来旋转它。
 
@@ -1054,7 +1054,7 @@ px_int main()
 
 ![](assets/img/12.1.png)
 
-但现在还没有结束，我们怎么让我们的组件，响应鼠标中键实现旋转呢？还记得我们之前在 [PushButton](#8painterengine-对象传递机制) 中的对象传递机制么？现在，我们也要让我们的组件响应鼠标中键的信息，因此我们给它注册一个 `PX_OBJECT_EVENT_CURSORWHEEL` 事件的回调函数，代码如下：
+但现在还没有结束，我们怎么让我们的组件，响应鼠标中键实现旋转呢？还记得我们之前在 [PushButton](#8-painterengine-对象传递机制) 中的对象传递机制么？现在，我们也要让我们的组件响应鼠标中键的信息，因此我们给它注册一个 `PX_OBJECT_EVENT_CURSORWHEEL` 事件的回调函数，代码如下：
 
 ```c
 #include "PainterEngine.h"

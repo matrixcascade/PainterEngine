@@ -505,13 +505,13 @@ In PainterEngine, there are 2 system default memory pools, they are `mp` and `mp
 
 These are the configuration macros directly related to these two memory pools, where `PX_APPLICATION_MEMORYPOOL_STATIC_SIZE` represents the memory allocation size of the `mp_static` memory pool, and `PX_APPLICATION_MEMORYPOOL_DYNAMIC_SIZE` is the memory allocation size of the `mp` memory pool, while `PX_APPLICATION_MEMORYPOOL_SPACE_SIZE` refers to other system resources. When the PainterEngine program starts running, it will at least occupy the memory accumulated by these three macros, and subsequent memory allocations will revolve around these few memory pools. If you find that the memory available for PainterEngine's operation is not enough, you can manually expand the size of the memory pool. Of course, if you hope to save some memory, you can also manually reduce their sizes.
 
-## 7. 使用 PainterEngine 创建 GUI 按钮
+## 7. Creating a GUI Button Using PainterEngine
 
-在本章节中，我们将第一次接触 PainterEngine 的组件。现在，我们将使用 PainterEngine 创建一个经典 GUI 组件——按钮。
+In this chapter, we will first encounter PainterEngine components. Now, we will use PainterEngine to create a classic GUI component—a button.
 
-在 PainterEngine 中，所有的组件都是由 `PX_Object` 结构体进行描述的，创建组件返回的都是一个 `PX_Object *` 类型的指针。
+In PainterEngine, all components are described using the `PX_Object` structure, and creating a component returns a pointer of type `PX_Object *`.
 
-但在本章节中，我们并不需要考虑的那么复杂，我们只需要创建一个按钮出来即可。在 PainterEngine 中，最常用的按钮是 `PX_Object_PushButton` 类型。
+However, in this chapter, we don't need to consider things that complex; we just need to create a button. In PainterEngine, the most commonly used button type is `PX_Object_PushButton`.
 
 ```c
 #include "PainterEngine.h"
@@ -526,41 +526,41 @@ int main()
 ```
 ![](assets/img/7.1.gif)
 
-现在，我们来详细看看 `PX_Object_PushButtonCreate` 函数。其中，第一个参数是一个内存池，在之前我们说过 PainterEngine 有 2 个系统默认的内存池，其实这里填 `mp` 或者 `mp_static` 都是没有问题的，但考虑到界面可能会变动设计对象分配与销毁，所以我们还是选择 `mp` 内存池。
+Now, let's take a detailed look at the `PX_Object_PushButtonCreate` function. The first parameter is a memory pool. As we mentioned earlier, PainterEngine has two system default memory pools, and it doesn't matter whether you fill in `mp` or `mp_static` here. However, considering that the change of the interface may involve object allocation and destruction, we choose the `mp` memory pool.
 
-第二个参数 `root` 是 PainterEngine 的根对象，PainterEngine 对象管理机制我们将在之后讨论。在这里，你只需要理解为，这里填 `root` 的意思是 **_创建一个按钮对象作为根对象的子对象_**。这样按钮就能链接到系统对象树中，进行事件响应和渲染。
+The second parameter `root` is the root object of PainterEngine. We will discuss the PainterEngine object management mechanism later. Here, you just need to understand that filling in `root` means **_create a button object as a child object of the root object_**. This way, the button can be linked to the system object tree for event response and rendering.
 
-然后是按钮的 x，y，width，height，也就是位置和宽度高度等信息。
+Then come the x, y, width, and height of the button, which specify its position and dimensions.
 
-最后一个是字模指针，也就是之前我们加载的 ttf 字模文件，如果没有它，我们的按钮就不能显示中文汉字了。当然你可以选择其他的字体，以实现不同的风格。
+The last parameter is the font module pointer, which is the TTF font file we loaded earlier. Without it, our button won't be able to display Chinese characters. Of course, you can choose other fonts to achieve different styles.
 
-## 8. PainterEngine 对象传递机制
+## 8. PainterEngine Object Passing Mechanism
 
-在上一个章节中，我们初略了解了根对象 `root`，那么在本章节，我们将学习一下 PainterEngine 的对象管理机制。
+In the previous chapter, we briefly introduced the root object `root`. In this chapter, we will learn about the object management mechanism of PainterEngine.
 
-正如我们之前所说的，在 PainterEngine 中，所有的组件都是由 `PX_Object` 结构体进行描述的，PainterEngine 的对象是以树的形式存在的：
+As we mentioned earlier, in PainterEngine, all components are described using the `PX_Object` structure, and PainterEngine objects exist in the form of a tree:
 
 ![](assets/img/8.1.png)
 
-每一个 `PX_Object` 都是这个树中的一个节点，都可以有自己的子节点（可能多个）和自己的父节点（只能有一个）。同时，每一个 `PX_Object` 都有以下四个基本功能函数：
+Each `PX_Object` is a node in this tree and can have its own child nodes (possibly multiple) and parent node (only one). Additionally, each `PX_Object` has the following four basic functional functions:
 
-`Create`：对象创建函数，或者说是对象初始化函数，在 PainterEngine 中它一般是 `PX_Object_xxxxxCreate` 这种形式的，其中 `xxxxx` 就是这个对象的名称，比如上一章节的 `PushButton`，`Create` 函数一般是对象的一些初始化处理，并会将自己连接到对象树中。
+- `Create`: The object creation function, or rather, the object initialization function. In PainterEngine, it is generally in the form of `PX_Object_xxxxxCreate`, where `xxxxx` is the name of the object, such as `PushButton` in the previous chapter. The `Create` function generally handles some initialization processes of the object and connects it to the object tree.
 
-`Update`：对象的物理信息更新工作基本在这个函数中完成，一般会处理对象的一些物理信息，比如位置大小速度等，常见于游戏设计中的物体，在 GUI 对象中则比较少见，其设计是与之后的 `Render` 也就是绘制函数进行区分，因为在例如游戏服务端中，对象并不需要进行绘制，且绘制是非常消耗性能的。
+- `Update`: The physical information update work of the object is basically completed in this function. It usually handles some physical information of the object, such as position, size, speed, etc., which is common in game design objects and less common in GUI objects. Its design is to distinguish from the subsequent `Render` function, because in game servers for example, objects do not need to be rendered, and rendering is very performance-intensive.
 
-`Render`：对象的绘制工作基本在这个函数中完成，用于 `PX_Object` 的绘制功能，将图像数据渲染到屏幕上，当然有些情况下物理信息也会在这个函数中做，是因为这个对象的物理信息并不会影响游戏的实际运行结果，例如一些特效和粒子效果，多数的 GUI 组件也几乎只用得到 `Render` 函数。
+- `Render`: The rendering work of the object is basically completed in this function, used for the rendering functionality of `PX_Object`, rendering image data to the screen. In some cases, physical information is also handled in this function because the physical information of this object does not affect the actual operation of the game, such as special effects and particle effects. Most GUI components also almost only use the `Render` function.
 
-`Free`：对象的释放工作基本在这个函数中完成，例如在 `Create` 中加载了纹理，或者申请了内存，在这个函数中应该被释放。
+- `Free`: The release work of the object is basically completed in this function, such as releasing textures loaded in `Create` or freeing allocated memory.
 
-以上 `Update`、`Render`、`Free` 函数具有传递的特性，也就是说：
+The above `Update`, `Render`, and `Free` functions have a passing characteristic, meaning:
 
-- 如果某个对象节点执行了 `Update`，那么它的所有子对象也会执行 `Update`
-- 如果某个对象节点执行了 `Render`，那么它的所有子对象也会执行 `Render`
-- 如果某个对象节点执行了 `Free`，那么它的所有子对象也会执行 `Free`，父对象被删除了，它的子节点也会被删除，并且将会一直迭代到以这个节点为根节点的所有子节点都被删除。
+- If an object node executes `Update`, then all its child objects will also execute `Update`.
+- If an object node executes `Render`, then all its child objects will also execute `Render`.
+- If an object node executes `Free`, then all its child objects will also execute `Free`. When the parent object is deleted, its child nodes will also be deleted, and this process will continue until all child nodes under this node are deleted.
 
-因此，在上一章节我们创建了按钮，并将它连接到了 `root` 节点，那么我们是不需要自己再手动执行 `Update`、`Render`、`Free` 函数的（在 `PX_Object_PushButton.c` 中它们已经被写好了），因为根节点 `root` 是被自动更新渲染和释放的，我们只需要负责 `Create` 就可以了。
+Therefore, in the previous chapter, when we created a button and connected it to the `root` node, we do not need to manually execute the `Update`, `Render`, and `Free` functions (they are already implemented in `PX_Object_PushButton.c`). The root node `root` is automatically updated, rendered, and released, so we only need to handle the `Create` function.
 
-当然，如果你希望删除这个对象的话，你只需要调用 `PX_ObjectDelayDelete` 或者 `PX_ObjectDelete` 就可以了：
+Of course, if you want to delete this object, you can simply call `PX_ObjectDelayDelete` or `PX_ObjectDelete`:
 
 ```c
 #include "PainterEngine.h"
@@ -570,16 +570,16 @@ int main()
     PainterEngine_Initialize(800, 480);
     PainterEngine_LoadFontModule("assets/font.ttf", PX_FONTMODULE_CODEPAGE_GBK, 20);
     myButtonObject = PX_Object_PushButtonCreate(mp, root, 300, 200, 200, 80, "我是一个按钮", PainterEngine_GetFontModule());
-    PX_ObjectDelayDelete(myButtonObject); // 删除对象
+    PX_ObjectDelayDelete(myButtonObject); // Delete the object
     return 1;
 }
 ```
 
-这两个函数的功能和参数都是一样的，但是 `PX_ObjectDelayDelete` 会在更新和渲染完成后才执行删除，`PX_ObjectDelete` 则是立即删除，我建议使用 `PX_ObjectDelayDelete`，这样你就可以避免在某些情况下因为对象被立即删除了，而其它对象仍然引用了这个对象的数据，这会导致其访问失效内存。
+Both functions have the same functionality and parameters, but `PX_ObjectDelayDelete` will execute the deletion after updating and rendering are completed, while `PX_ObjectDelete` performs immediate deletion. I recommend using `PX_ObjectDelayDelete`, as this can prevent issues where other objects still reference the data of an object that has been immediately deleted, leading to accessing invalid memory.
 
-## 9. PainterEngine 消息机制
+## 9. PainterEngine Message Mechanism
 
-现在，虽然我们创建了一个按钮，但我们却没办法响应它，为了响应按钮事件，我们需要将按钮控件和消息进行绑定，请查看以下代码：
+Now, although we have created a button, we cannot respond to it. To respond to button events, we need to bind the button control to messages. Please see the following code:
 
 ```c
 #include "PainterEngine.h"
@@ -603,78 +603,76 @@ int main()
 
 ![](assets/img/9.1.gif)
 
-其中，`PX_OBJECT_EVENT_FUNCTION` 是一个宏，因为事件响应函数是一个固定的格式，因此非常建议你使用宏的方式来申明它，它的定义原型如下：
+Here, `PX_OBJECT_EVENT_FUNCTION` is a macro. Since event handler functions have a fixed format, it is highly recommended to declare them using a macro. Its definition prototype is as follows:
 
 ```c
 #define PX_OBJECT_EVENT_FUNCTION(name) px_void name(PX_Object *pObject, PX_Object_Event e, px_void * ptr)
 ```
 
-可以看到，这个回调函数有 3 个参数，第一个是响应时间的对象的指针，因为是按钮点击被触发了，所以这个指针指向的就是这个按钮对象；第二个参数是事件类型 `e`，它是触发的事件类型；最后一个参数则是用户传递来的指针，它在注册时间响应函数 `PX_ObjectRegisterEvent` 被调用时就被传递进来了。
+As you can see, this callback function has 3 parameters. The first is a pointer to the object that triggered the event, which in this case is the button object. The second parameter is the event type `e`, which is the type of the triggered event. The last parameter is a user-passed pointer, which is passed in when the event handler function `PX_ObjectRegisterEvent` is called.
 
-事件类型有以下几种：
-
-```c
-#define PX_OBJECT_EVENT_ANY           0  // 任意事件
-#define PX_OBJECT_EVENT_CURSORMOVE    1  // 鼠标移动
-#define PX_OBJECT_EVENT_CURSORUP      2  // 鼠标左键弹起或触摸屏弹起
-#define PX_OBJECT_EVENT_CURSORRDOWN   3  // 鼠标右键按下
-#define PX_OBJECT_EVENT_CURSORDOWN    4  // 鼠标左键按下或触摸屏按下
-#define PX_OBJECT_EVENT_CURSORRUP     5  // 鼠标右键弹起
-#define PX_OBJECT_EVENT_CURSOROVER    6  // 鼠标进入范围
-#define PX_OBJECT_EVENT_CURSOROUT     7  // 鼠标离开范围
-#define PX_OBJECT_EVENT_CURSORWHEEL   8  // 鼠标滚轮
-#define PX_OBJECT_EVENT_CURSORCLICK   9  // 鼠标左键点击
-#define PX_OBJECT_EVENT_CURSORDRAG    10 // 鼠标拖拽
-#define PX_OBJECT_EVENT_STRING        11 // 字符串事件（输入法输入）
-#define PX_OBJECT_EVENT_EXECUTE       12 // 执行事件，不同组件有不同的执行方式
-#define PX_OBJECT_EVENT_VALUECHANGED  13 // 值改变事件，例如滑动条的值改变，或者文本框的值改变，或者列表框的选中项改变
-#define PX_OBJECT_EVENT_DRAGFILE      14 // 拖拽文件
-#define PX_OBJECT_EVENT_KEYDOWN       15 // 键盘按下
-#define PX_OBJECT_EVENT_KEYUP         16 // 键盘弹起
-#define PX_OBJECT_EVENT_IMPACT        17 // 碰撞事件
-#define PX_OBJECT_EVENT_SCALE         18 // 缩放事件
-#define PX_OBJECT_EVENT_WINDOWRESIZE  19 // 窗口大小改变
-#define PX_OBJECT_EVENT_ONFOCUS       20 // 获得焦点
-#define PX_OBJECT_EVENT_LOSTFOCUS     21 // 失去焦点
-#define PX_OBJECT_EVENT_CANCEL        22 // 取消事件
-#define PX_OBJECT_EVENT_CLOSE         23 // 关闭事件
-#define PX_OBJECT_EVENT_CURSORMUP     24 // 鼠标中键弹起
-#define PX_OBJECT_EVENT_CURSORMDOWN   25 // 鼠标中键按下
-#define PX_OBJECT_EVENT_REQUESTDATA   26 // 请求数据
-#define PX_OBJECT_EVENT_OPEN          27 // 打开事件
-#define PX_OBJECT_EVENT_SAVE          28 // 保存事件
-#define PX_OBJECT_EVENT_TIMEOUT       29 // 超时事件
-#define PX_OBJECT_EVENT_DAMAGE        30 // 伤害事件
-```
-
-以上事件并非全部都是任何组件都会响应的，例如在上面例子中的 `PX_OBJECT_EVENT_EXECUTE`，它是按钮被单击时会被触发的事件，或者是文本框中按下回车会触发的事件，但有些例如滚动条和进度条，并不会触发这个事件。也就是说有些事件是专属的。
-
-但是类似于带有 `CURSOR` 或 `KEY` 的事件，是所有连接在 `root` 节点的组件都会收到的事件（但不一定响应）。需要注意的是，类似于鼠标或触摸屏的 `CURSOR` 事件，并非只有鼠标或触摸屏移动到组件所在位置与范围时才会触发，只要有这类事件投递到 `root` 节点，他就会逐层传递给它的所有子节点。如果你希望实现类似于按钮中的 "仅在鼠标点击到按钮时" 才触发，你必须自行实现范围判断。
-
-你可以使用
+There are several event types:
 
 ```c
-px_float PX_Object_Event_GetCursorX(PX_Object_Event e); // 获取cursor事件的 x 坐标
-px_float PX_Object_Event_GetCursorY(PX_Object_Event e); // 获取cursor事件的 y 坐标
-px_float PX_Object_Event_GetCursorZ(PX_Object_Event e); // 获取cursor事件的 z 坐标，一般用于鼠标中键滚轮
+#define PX_OBJECT_EVENT_ANY           0  // Any event
+#define PX_OBJECT_EVENT_CURSORMOVE    1  // Mouse move
+#define PX_OBJECT_EVENT_CURSORUP      2  // Left mouse button up or touch screen up
+#define PX_OBJECT_EVENT_CURSORRDOWN   3  // Right mouse button down
+#define PX_OBJECT_EVENT_CURSORDOWN    4  // Left mouse button down or touch screen down
+#define PX_OBJECT_EVENT_CURSORRUP     5  // Right mouse button up
+#define PX_OBJECT_EVENT_CURSOROVER    6  // Mouse enters range
+#define PX_OBJECT_EVENT_CURSOROUT     7  // Mouse leaves range
+#define PX_OBJECT_EVENT_CURSORWHEEL   8  // Mouse wheel
+#define PX_OBJECT_EVENT_CURSORCLICK   9  // Left mouse button click
+#define PX_OBJECT_EVENT_CURSORDRAG    10 // Mouse drag
+#define PX_OBJECT_EVENT_STRING        11 // String event (input by the input method)
+#define PX_OBJECT_EVENT_EXECUTE       12 // Execute event, different components have different execution methods
+#define PX_OBJECT_EVENT_VALUECHANGED  13 // Value changed event, such as slider value change, or text box value change, or list box selection change
+#define PX_OBJECT_EVENT_DRAGFILE      14 // Drag file
+#define PX_OBJECT_EVENT_KEYDOWN       15 // Key down
+#define PX_OBJECT_EVENT_KEYUP         16 // Key up
+#define PX_OBJECT_EVENT_IMPACT        17 // Impact event
+#define PX_OBJECT_EVENT_SCALE         18 // Scale event
+#define PX_OBJECT_EVENT_WINDOWRESIZE  19 // Window resize
+#define PX_OBJECT_EVENT_ONFOCUS       20 // Gain focus
+#define PX_OBJECT_EVENT_LOSTFOCUS     21 // Lose focus
+#define PX_OBJECT_EVENT_CANCEL        22 // Cancel event
+#define PX_OBJECT_EVENT_CLOSE         23 // Close event
+#define PX_OBJECT_EVENT_CURSORMUP     24 // Middle mouse button up
+#define PX_OBJECT_EVENT_CURSORMDOWN   25 // Middle mouse button down
+#define PX_OBJECT_EVENT_REQUESTDATA   26 // Request data
+#define PX_OBJECT_EVENT_OPEN          27 // Open event
+#define PX_OBJECT_EVENT_SAVE          28 // Save event
+#define PX_OBJECT_EVENT_TIMEOUT       29 // Timeout event
+#define PX_OBJECT_EVENT_DAMAGE        30 // Damage event
 ```
 
-来获取 `cursor` 事件中类似于 "鼠标现在在哪里" 的功能。
+Not all of these events are responded to by every component. For example, in the above example, `PX_OBJECT_EVENT_EXECUTE` is an event that is triggered when a button is clicked or when the <kbd>Enter</kbd> key is pressed in a text box, but components like scroll bars and progress bars do not trigger this event. That means some events are specific to certain components.
 
-让我们回到源代码 `OnButtonClick` 中做的很简单，就是用 `PX_Object_PushButtonSetText` 改变了按钮文本的内容。
+However, events like those prefixed with `CURSOR` or `KEY` are received by all components connected to the `root` node (though they may not all respond). It is important to note that `CURSOR` events, such as mouse or touch screen events, are not only triggered when the mouse or touch screen moves over the component's position and range. Whenever such an event is dispatched to the `root` node, it will be passed down layer by layer to all its child nodes. If you want to implement something like "only trigger when the mouse clicks on the button," you need to implement your own range check.
 
-最后让我们来到 `PX_ObjectRegisterEvent` 函数，这个函数用于将事件与 C 语言函数绑定在一起，第一个参数是我们之前创建好的按钮组件的指针，第二个参数是我们想要绑定的事件类型，这里的 `PX_OBJECT_EVENT_EXECUTE` 就是按钮被点击时触发的，第三个则是用户指针，它会被传递到回调函数中，如果你用不到，你可以直接填 `PX_NULL`。
+You can use the following functions to get the functionality of "where the mouse is now" in a `cursor` event:
 
-## 10. 小例子，用 PainterEngine 实现一个电子相册
+```c
+px_float PX_Object_Event_GetCursorX(PX_Object_Event e); // Get the x coordinate of the cursor event
+px_float PX_Object_Event_GetCursorY(PX_Object_Event e); // Get the y coordinate of the cursor event
+px_float PX_Object_Event_GetCursorZ(PX_Object_Event e); // Get the z coordinate of the cursor event, generally used for middle mouse button scroll wheel
+```
 
-现在，让我们用一个小例子来开启 PainterEngine 组件化开发的第一步。在本例程中，我将使用按钮和图片框组件，开发一个电子相册功能。本文中的美术资源，你可以在 `documents/logo` 中找到。
+Let's go back to the `OnButtonClick` function in the source code, which simply changes the button text using `PX_Object_PushButtonSetText`.
+
+Finally, let's look at the `PX_ObjectRegisterEvent` function. This function binds events to C language functions. The first parameter is a pointer to the button component we created earlier. The second parameter is the event type we want to bind, in this case, `PX_OBJECT_EVENT_EXECUTE`, which is triggered when the button is clicked. The third parameter is a user pointer, which is passed to the callback function. If you don't need it, you can directly pass `PX_NULL`.
+
+## 10. A Small Example: Implementing a Digital Photo Album with PainterEngine
+
+Now, let's start the first step in component-based development with PainterEngine using a small example. In this example, I will use button and image frame components to develop a digital photo album feature. The art resources used in this article can be found in `documents/logo`.
 
 ```c
 #include "PainterEngine.h"
 
-PX_Object* Previous, * Next, * Image;
-px_texture my_texture[10]; // 存放图片的数组
-px_int index = 0; // 当前图片的索引
+PX_Object* Previous, *Next, *Image;
+px_texture my_texture[10]; // Array to store images
+px_int index = 0; // Index of the current image
 
 PX_OBJECT_EVENT_FUNCTION(OnButtonPreClick)
 {
@@ -683,7 +681,7 @@ PX_OBJECT_EVENT_FUNCTION(OnButtonPreClick)
     {
         index = 9;
     }
-    PX_Object_ImageSetTexture(Image, &my_texture[index]); // 设置图片
+    PX_Object_ImageSetTexture(Image, &my_texture[index]); // Set the image
 }
 
 PX_OBJECT_EVENT_FUNCTION(OnButtonNextClick)
@@ -699,54 +697,54 @@ PX_OBJECT_EVENT_FUNCTION(OnButtonNextClick)
 int main()
 {
     px_int i;
-    PainterEngine_Initialize(512, 560); // 初始化
-    for(i = 0; i < 10; i++)
+    PainterEngine_Initialize(512, 560); // Initialization
+    for (i = 0; i < 10; i++)
     {
         px_char path[256];
-        PX_sprintf1(path, 256, "assets/%1.png", PX_STRINGFORMAT_INT(i+1));
-        if (!PX_LoadTextureFromFile(mp_static, &my_texture[i], path)) // 加载图片
+        PX_sprintf1(path, 256, "assets/%1.png", PX_STRINGFORMAT_INT(i + 1));
+        if (!PX_LoadTextureFromFile(mp_static, &my_texture[i], path)) // Load the image
         {
-            // 加载失败
+            // Load failed
             printf("加载失败");
             return 0;
         }
     }
-    PainterEngine_LoadFontModule("assets/font.ttf", PX_FONTMODULE_CODEPAGE_GBK, 20); // 加载字体
-    Image = PX_Object_ImageCreate(mp, root, 0, 0, 512, 512, 0); // 创建图片对象
-    Previous = PX_Object_PushButtonCreate(mp, root, 0, 512, 256, 48, "上一张", PainterEngine_GetFontModule()); // 创建按钮对象
-    Next = PX_Object_PushButtonCreate(mp, root, 256, 512, 256, 48, "下一张", PainterEngine_GetFontModule()); // 创建按钮对象
-    PX_ObjectRegisterEvent(Previous, PX_OBJECT_EVENT_EXECUTE, OnButtonPreClick, PX_NULL); // 注册按钮事件
-    PX_ObjectRegisterEvent(Next, PX_OBJECT_EVENT_EXECUTE, OnButtonNextClick, PX_NULL); // 注册按钮事件
+    PainterEngine_LoadFontModule("assets/font.ttf", PX_FONTMODULE_CODEPAGE_GBK, 20); // Load the font
+    Image = PX_Object_ImageCreate(mp, root, 0, 0, 512, 512, 0); // Create an image object
+    Previous = PX_Object_PushButtonCreate(mp, root, 0, 512, 256, 48, "Previous", PainterEngine_GetFontModule()); // Create a button object
+    Next = PX_Object_PushButtonCreate(mp, root, 256, 512, 256, 48, "Next", PainterEngine_GetFontModule()); // Create a button object
+    PX_ObjectRegisterEvent(Previous, PX_OBJECT_EVENT_EXECUTE, OnButtonPreClick, PX_NULL); // Register the button event
+    PX_ObjectRegisterEvent(Next, PX_OBJECT_EVENT_EXECUTE, OnButtonNextClick, PX_NULL); // Register the button event
     return 1;
 }
 ```
 
-在上述代码中 `OnButtonPreClick` 和 `OnButtonNextClick` 分别是上一张和下一张按钮的回调函数，我们使用 `PX_Object_ImageSetTexture` 函数，对图片框进行切换。
+In the above code, `OnButtonPreClick` and `OnButtonNextClick` are the callback functions for the "Previous" and "Next" buttons, respectively. We use the `PX_Object_ImageSetTexture` function to switch the images in the image frame.
 
-而在 `main` 函数中，我们先加载了 ttf 字体，然后用 `PX_Object_ImageCreate` 创建了一个图片组件，之后我们创建了 2 个按钮，并用 `PX_ObjectRegisterEvent` 绑定了事件回调函数。最后，看看运行结果：
+In the `main` function, we first load the TTF font, then create an image component using `PX_Object_ImageCreate`. After that, we create two buttons and bind their event callback functions using `PX_ObjectRegisterEvent`. Finally, here is the result:
 
 ![](assets/img/10.1.gif)
 
-## 11. 更多常用的 PainterEngine 组件
+## 11. More Commonly Used PainterEngine Components
 
-你可以在 `PainterEngine/kernel` 的文件中，找到 PainterEngine 的内置组件，所有的组件名称都是以 `PX_Object_XXXXX` 开头的，在这里，我为你列举一些常用的组件及示范代码：
+You can find PainterEngine's built-in components in the `PainterEngine/kernel` files. All component names start with `PX_Object_XXXXX`. Here, I will list some commonly used components along with sample code:
 
-- 文本框：
+- Text Box:
 
 ```c
 #include "PainterEngine.h"
 PX_OBJECT_EVENT_FUNCTION(PX_Object_EditOnTextChanged)
 {
-    // 文本改变后后这里会被执行
+    // This will be executed when the text changes
 }
 
 int main()
 {
     PX_Object* pObject;
     PainterEngine_Initialize(600, 400);
-    // 创建文本框
+    // Create a text box
     pObject = PX_Object_EditCreate(mp, root, 200, 180, 200, 40, 0);
-    // 注册编辑框文本改变事件
+    // Register the text change event for the edit box
     PX_ObjectRegisterEvent(pObject, PX_OBJECT_EVENT_VALUECHANGED, PX_Object_EditOnTextChanged, PX_NULL);
     return 0;
 }
@@ -754,7 +752,7 @@ int main()
 
 ![](assets/img/11.1.gif)
 
-- 列表框：
+- List Box:
 
 ```c
 #include "PainterEngine.h"
@@ -764,21 +762,20 @@ PX_OBJECT_RENDER_FUNCTION(PX_Object_OnMyListItemRender)
     px_float objx, objy, objWidth, objHeight;
     PX_Object_ListItem *pItem = PX_Object_GetListItem(pObject);
     PX_OBJECT_INHERIT_CODE(pObject, objx, objy, objWidth, objHeight);
-    // 绘制出其文本
+    // Draw its text
     PX_FontModuleDrawText(psurface, 0, (px_int)objx + 3, (px_int)objy + 3, PX_ALIGN_LEFTTOP, (const px_char *)pItem->pdata, PX_COLOR_WHITE);
 }
 
-
 PX_OBJECT_LIST_ITEM_CREATE_FUNCTION(PX_Object_OnMyListItemCreate)
 {
-    // 绑定 ListItem 的渲染函数
+    // Bind the render function to the ListItem
     ItemObject->Func_ObjectRender[0] = PX_Object_OnMyListItemRender;
     return PX_TRUE;
 }
 
 PX_OBJECT_EVENT_FUNCTION(PX_Object_ListOnSelectChanged)
 {
-    // 当选中项改变时
+    // When the selected item changes
     return;
 }
 
@@ -787,7 +784,7 @@ int main()
     PX_Object* pObject;
     PainterEngine_Initialize(600, 400);
 
-    // 创建 list
+    // Create a list
     pObject = PX_Object_ListCreate(mp, root, 100, 100, 400, 200, 24, PX_Object_OnMyListItemCreate, 0);
     PX_Object_ListAdd(pObject, "Item1");
     PX_Object_ListAdd(pObject, "Item2");
@@ -801,14 +798,14 @@ int main()
 
 ![](assets/img/11.2.gif)
 
-- 滑动条：
+- Slider:
 
 ```c
 #include "PainterEngine.h"
 
 PX_OBJECT_EVENT_FUNCTION(SliderChanged)
 {
-    // 垂直滑动条值改变后执行这里的代码
+    // Code to be executed when the vertical slider value changes
     return;
 }
 
@@ -816,17 +813,18 @@ int main()
 {
     PX_Object* pObject;
     PainterEngine_Initialize(600, 400);
-    // 水平滑动条
+    // Horizontal slider
     PX_Object_SliderBarCreate(mp, root, 200, 50, 200, 24, PX_OBJECT_SLIDERBAR_TYPE_HORIZONTAL, PX_OBJECT_SLIDERBAR_STYLE_BOX);
-    // 垂直滑动条
+    // Vertical slider
     pObject = PX_Object_SliderBarCreate(mp, root, 200, 100, 24, 200, PX_OBJECT_SLIDERBAR_TYPE_VERTICAL, PX_OBJECT_SLIDERBAR_STYLE_BOX);
     PX_ObjectRegisterEvent(pObject, PX_OBJECT_EVENT_VALUECHANGED, SliderChanged, 0);
     return 0;
 }
 ```
+
 ![](assets/img/11.3.gif)
 
-- 下拉框：
+- Drop-down Box:
 
 ```c
 #include "PainterEngine.h"
@@ -844,14 +842,15 @@ int main()
     return 0;
 }
 ```
+
 ![](assets/img/11.4.gif)
 
-- 示波器：
+- Oscilloscope:
 
 ```c
 #include "PainterEngine.h"
 
-// 必须是生存域内有效可访问的数据，这里定义为全局变量
+// Must be valid and accessible data within the lifetime domain, defined here as a global variable
 px_double data_x[100];
 px_double data_y[100];
 
@@ -863,35 +862,35 @@ int main()
     px_int i;
     PainterEngine_Initialize(600, 600);
     
-    // 初始化一个测试数据
+    // Initialize test data
     for (i = 0; i < 100; i++)
     {
         data_x[i] = i;
-        data_y[i] = i+PX_randRange(-10, 10);
+        data_y[i] = i + PX_randRange(-10, 10);
     }
     
     pObject = PX_Object_OscilloscopeCreate(mp, root, 0, 0, 600, 600, 0);
 
-    // 设置水平坐标最小值最大值
+    // Set the minimum and maximum values for the horizontal axis
     PX_Object_OscilloscopeSetHorizontalMin(pObject, 0);
     PX_Object_OscilloscopeSetHorizontalMax(pObject, 100);
 
-    // 设置垂直坐标（左边）最小值最大值 0-100
+    // Set the minimum and maximum values for the vertical axis (left side) 0-100
     PX_Object_OscilloscopeSetLeftVerticalMin(pObject, 0);
     PX_Object_OscilloscopeSetLeftVerticalMax(pObject, 100);
 
-    // 数据类型
-    data.Color = PX_COLOR(255, 192, 255, 128); // 数据颜色
+    // Data type
+    data.Color = PX_COLOR(255, 192, 255, 128); // Data color
     data.ID = 0;
-    data.linewidth = 3; // 数据线宽
-    data.Map = PX_OBJECT_OSCILLOSCOPE_OSCILLOSCOPEDATA_MAP_LEFT; // 数据映射到左边垂直坐标
-    data.MapHorizontalArray = data_x; // 数据水平坐标
-    data.MapVerticalArray = data_y; // 数据垂直坐标
-    data.Size = 100; // 数据大小
-    data.Visibled = PX_TRUE; // 数据可见
-    data.Normalization = 1; // 数据归一化系数为 1
+    data.linewidth = 3; // Line width of the data
+    data.Map = PX_OBJECT_OSCILLOSCOPE_OSCILLOSCOPEDATA_MAP_LEFT; // Map data to the left vertical axis
+    data.MapHorizontalArray = data_x; // Horizontal coordinates of the data
+    data.MapVerticalArray = data_y; // Vertical coordinates of the data
+    data.Size = 100; // Size of the data
+    data.Visibled = PX_TRUE; // Data visibility
+    data.Normalization = 1; // Data normalization factor is 1
     
-    // 添加数据
+    // Add data
     PX_Object_OscilloscopeAddData(pObject, data);
     return 0;
 }
@@ -899,19 +898,19 @@ int main()
 
 ![](assets/img/11.5.gif)
 
-因为实在太多了，我无法为你列举所有的组件，如果你希望知道某个组件的具体用法和某个组件到底是做什么的，你可以访问 PainterEngine 的 [组件市场](https://market.painterengine.com/)，在那里你可以找到 PainterEngine 内置组件和三方组件的说明和示例代码。
+Since there are too many components, I cannot list all of them. If you want to know the specific usage and purpose of a particular component, you can visit the [Component Market](https://market.painterengine.com/) of PainterEngine. There, you can find descriptions and sample code for both built-in and third-party components of PainterEngine.
 
 ![](assets/img/11.6.png)
 
-## 12. 实现自己的 PainterEngine 组件
+## 12. Implementing Your Own PainterEngine Component
 
-PainterEngine 鼓励组件式的开发架构。也就是说，不论是游戏还是 GUI 交互程序，甚至是程序功能，我们都可以用组件的形式去开发它。
+PainterEngine encourages a component-based development architecture. That is, whether it's a game, a GUI interactive program, or even program functionality, we can develop it in the form of a component.
 
-组件式开发有点类似于 C++ 中的 Class，每一个组件，都要实现自己的 `Create`、`Update`、`Render`、`Free` 函数。关于上面四个函数，你可以参考 [前面的对象传递机制](#8painterengine-对象传递机制) 这一章节。
+Component-based development is somewhat similar to Classes in C++. Each component needs to implement its own `Create`, `Update`, `Render`, and `Free` functions. For the above four functions, you can refer to the [previous section on object passing mechanism](#8-painterengine-object-passing-mechanism).
 
-为了演示这一点，让我们来实现一个“可控拖动旋转图片组件”，即我们可以用鼠标拖动图片在界面的位置，并用鼠标中键来旋转它。
+To demonstrate this, let's implement a "draggable and rotatable image component," which allows us to drag the image around the interface with the mouse and rotate it using the middle mouse button.
 
-为了实现这一个功能，让我们一步一步完成这个步骤。首先，为了创建一个组件，我们需要一个结构体来描述我们的组件。我们需要绘制图片，所以我们需要一个 `px_texture` 类型。同时，我们还需要旋转图片，因此它还有一个 `rotation` 用于描述旋转的角度：
+To achieve this function, let's complete this step-by-step. First, to create a component, we need a structure to describe our component. Since we need to draw an image, we require a `px_texture` type. Additionally, since we need to rotate the image, it also has a `rotation` to describe the angle of rotation:
 
 ```c
 #include "PainterEngine.h"
@@ -928,7 +927,7 @@ px_int main()
 }
 ```
 
-之后，我们需要定义我们的 `Create`、`Update`、`Render` 和 `Free` 函数，其中 `Update`、`Render`、`Free` 有对应的格式，它们都有一个宏来简化我们的定义过程：
+Afterwards, we need to define our `Create`, `Update`, `Render`, and `Free` functions. Among these, `Update`, `Render`, and `Free` have corresponding formats, each with a macro to simplify our definition process:
 
 ```c
 #define PX_OBJECT_RENDER_FUNCTION(name) px_void name(px_surface *psurface, PX_Object *pObject, px_int idesc, px_dword elapsed)
@@ -936,7 +935,7 @@ px_int main()
 #define PX_OBJECT_FREE_FUNCTION(name) px_void name(PX_Object *pObject, px_int idesc)
 ```
 
-那么，在主函数中，我们就可以这样定义我们的这几个函数：
+So, in the main function, we can define these functions as follows:
 
 ```c
 #include "PainterEngine.h"
@@ -953,13 +952,13 @@ PX_OBJECT_UPDATE_FUNCTION(MyObjectUpdate)
 PX_OBJECT_RENDER_FUNCTION(MyObjectRender)
 {
     PX_Object_MyObject *pMyObject = PX_ObjectGetDesc(PX_Object_MyObject, pObject);
-    PX_TextureRenderEx(psurface, &pMyObject->image, (px_int)pObject->x, (px_int)pObject->y, PX_ALIGN_CENTER, 0, 1, pMyObject->rotation);
+    PX_TextureRenderEx(psurface, &pMyObject->image, (px_int)pObject->x, (px_int)pObject->y, PX_ALIGN_CENTER, 0, 1, pMyObject->rotation); // Render the image
 }
 
 PX_OBJECT_FREE_FUNCTION(MyObjectFree)
 {
     PX_Object_MyObject *pMyObject = PX_ObjectGetDesc(PX_Object_MyObject, pObject);
-    PX_TextureFree(&pMyObject->image);
+    PX_TextureFree(&pMyObject->image); // Free the image
 }
 
 px_int main()
@@ -969,38 +968,38 @@ px_int main()
 }
 ```
 
-其中，因为我们不需要更新一些物理信息，所以 `MyObjectUpdate` 函数中我们可以什么都不写，在 `MyObjectRender` 中我们只需要把图片绘制出来就可以了，这里我们先使用 `PX_ObjectGetDesc` 函数获得我们定义好的结构体指针，它的第一个参数是结构体类型，第二个参数则是函数传递进来的 `pObject` 指针，然后我们只需要用 `PX_TextureRenderEx` 函数把图片绘制出来就可以了。
+Here, since we don't need to update any physical information, we can leave the `MyObjectUpdate` function empty. In the `MyObjectRender` function, we only need to draw the image. Here, we first use the `PX_ObjectGetDesc` function to obtain the pointer to our defined structure. Its first parameter is the structure type, and the second parameter is the `pObject` pointer passed into the function. Then, we just need to use the `PX_TextureRenderEx` function to draw the image.
 
-多提一句，`PX_TextureRenderEx` 函数用于在指定的表面上渲染纹理，并提供了对齐、混合、缩放和旋转等扩展选项。其中：
-  - `psurface`：指向要渲染纹理的表面的指针。
-  - `resTexture`：指向要渲染的纹理资源的指针。
-  - `x`：在表面上绘制纹理的 x 坐标。
-  - `y`：在表面上绘制纹理的 y 坐标。
-  - `refPoint`：对齐的参考点（例如，中心，左上角等）。
-  - `blend`：指向混合选项结构的指针（如果不需要混合，可以为 `NULL`）。
-  - `scale`：纹理的缩放因子（1.0 表示不缩放）。
-  - `Angle`：纹理的旋转角度，以度为单位。
+As a side note, the `PX_TextureRenderEx` function is used to render a texture on a specified surface and provides extended options such as alignment, blending, scaling, and rotation. Specifically:
+  - `psurface`: Pointer to the surface where the texture will be rendered.
+  - `resTexture`: Pointer to the texture resource to be rendered.
+  - `x`: X-coordinate where the texture will be drawn on the surface.
+  - `y`: Y-coordinate where the texture will be drawn on the surface.
+  - `refPoint`: Alignment reference point (e.g., center, top-left, etc.).
+  - `blend`: Pointer to a blend option structure (can be `NULL` if no blending is required).
+  - `scale`: Scaling factor of the texture (1.0 indicates no scaling).
+  - `Angle`: Rotation angle of the texture, in degrees.
 
-最后，是时候编写创建新对象的函数了，这里我们需要用到 `PX_ObjectCreateEx` 函数，`PX_ObjectCreateEx` 函数用于创建一个扩展对象，并初始化其属性和回调函数。它的参数说明如下：
+Finally, it's time to write the function for creating a new object. Here, we need to use the `PX_ObjectCreateEx` function, which is used to create an extended object and initialize its properties and callback functions. The parameters are described as follows:
 
-- `mp`：指向内存池的指针，用于分配对象所需的内存。
-- `Parent`：指向父对象的指针，如果没有父对象则为 `NULL`。
-- `x`：对象在 x 轴上的初始位置。
-- `y`：对象在 y 轴上的初始位置。
-- `z`：对象在 z 轴上的初始位置，z 坐标会影响其渲染的先后顺序。
-- `Width`：对象的宽度。
-- `Height`：对象的高度。
-- `Lenght`：对象的长度，2D 对象，一般可以是 0。
-- `type`：对象的类型。
-- `Func_ObjectUpdate`：指向对象更新函数的指针。
-- `Func_ObjectRender`：指向对象渲染函数的指针。
-- `Func_ObjectFree`：指向对象释放函数的指针。
-- `desc`：指向对象描述数据的指针。你可以设置为 0，创建时会把这个对象类型的数据填充为 0。
-- `size`：描述数据的大小，就是你定义的对象结构体类型的大小，创建对象函数会在内存池申请一段内存空间，并用于存储你的对象结构体。
+- `mp`: Pointer to the memory pool used for allocating the memory required by the object.
+- `Parent`: Pointer to the parent object, or `NULL` if there is no parent.
+- `x`: Initial position of the object on the x-axis.
+- `y`: Initial position of the object on the y-axis.
+- `z`: Initial position of the object on the z-axis, affecting the rendering order.
+- `Width`: Width of the object.
+- `Height`: Height of the object.
+- `Lenght`: Length of the object, generally 0 for 2D objects.
+- `type`: Type of the object.
+- `Func_ObjectUpdate`: Pointer to the object's update function.
+- `Func_ObjectRender`: Pointer to the object's render function.
+- `Func_ObjectFree`: Pointer to the object's free function.
+- `desc`: Pointer to the object's description data. You can set this to 0, and the function will zero-initialize the object type data during creation.
+- `size`: Size of the description data, which is the size of the object structure type you defined. The object creation function will allocate a block of memory from the memory pool to store your object structure.
 
-在创建好一个空对象后，我们使用 `PX_ObjectGetDescIndex` 将对象中的对象结构体指针取出来，这是一个三参数的函数，第一个参数是对象结构体类型，第二个参数则是 `PX_Object *` 指针类型，因为一个 `PX_Object` 可以将多个对象结构体组合在一起，这个组合结构体我们将在之后的教程中会进一步描述，但现在我们只需要知道，调用 `PX_ObjectCreateEx` 函数后，其第一个存储的对象结构体索引是 0 就可以了。
+After creating an empty object, we use `PX_ObjectGetDescIndex` to extract the pointer to the object structure within the object. This is a three-parameter function; the first parameter is the object structure type, and the second parameter is the `PX_Object *` pointer type. Because a single `PX_Object` can combine multiple object structures, we will further describe this combined structure in later tutorials. For now, we only need to know that after calling the `PX_ObjectCreateEx` function, the index of the first stored object structure is 0.
 
-取出结构体指针后，我们对其进行一系列初始化，比如加载图片和初始化旋转角度，最后在 `main` 函数中我们创建这个对象：
+After extracting the structure pointer, we perform a series of initializations, such as loading the image and initializing the rotation angle. Finally, in the `main` function, we create this object:
 
 ```c
 #include "PainterEngine.h"
@@ -1017,23 +1016,23 @@ PX_OBJECT_UPDATE_FUNCTION(MyObjectUpdate)
 PX_OBJECT_RENDER_FUNCTION(MyObjectRender)
 {
     PX_Object_MyObject *pMyObject = PX_ObjectGetDesc(PX_Object_MyObject, pObject);
-    PX_TextureRenderEx(psurface, &pMyObject->image, (px_int)pObject->x, (px_int)pObject->y, PX_ALIGN_CENTER, 0, 1, pMyObject->rotation); // 渲染图片
+    PX_TextureRenderEx(psurface, &pMyObject->image, (px_int)pObject->x, (px_int)pObject->y, PX_ALIGN_CENTER, 0, 1, pMyObject->rotation); // Render the image
 }
 
 PX_OBJECT_FREE_FUNCTION(MyObjectFree)
 {
     PX_Object_MyObject *pMyObject = PX_ObjectGetDesc(PX_Object_MyObject, pObject);
-    PX_TextureFree(&pMyObject->image); // 释放图片
+    PX_TextureFree(&pMyObject->image); // Free the image
 }
 
 PX_Object* PX_Object_MyObjectCreate(px_memorypool* mp, PX_Object* parent, px_float x, px_float y)
 {
-    PX_Object *pObject = PX_ObjectCreateEx(mp, parent, x, y, 0, 128, 128, 0, 0, MyObjectUpdate, MyObjectRender, MyObjectFree, 0, sizeof(PX_Object_MyObject)); // 创建一个空的自定义对象
-    PX_Object_MyObject* pMyObject = PX_ObjectGetDescIndex(PX_Object_MyObject, pObject, 0); // 取得自定义对象数据
+    PX_Object *pObject = PX_ObjectCreateEx(mp, parent, x, y, 0, 128, 128, 0, 0, MyObjectUpdate, MyObjectRender, MyObjectFree, 0, sizeof(PX_Object_MyObject)); // Create an empty custom object
+    PX_Object_MyObject* pMyObject = PX_ObjectGetDescIndex(PX_Object_MyObject, pObject, 0); // Get the custom object data
     pMyObject->rotation = 0;
-    if (!PX_LoadTextureFromFile(mp, &pMyObject->image, "assets/test.png")) // 加载图片
+    if (!PX_LoadTextureFromFile(mp, &pMyObject->image, "assets/test.png")) // Load the image
     {
-        PX_ObjectDelete(pObject); // 加载失败则删除对象
+        PX_ObjectDelete(pObject); // Delete the object if loading fails
         return PX_NULL;
     }
     return pObject;
@@ -1042,16 +1041,16 @@ PX_Object* PX_Object_MyObjectCreate(px_memorypool* mp, PX_Object* parent, px_flo
 px_int main()
 {
     PainterEngine_Initialize(800, 480);
-    PX_Object_MyObjectCreate(mp, root, 400, 240); // 创建一个自定义对象
+    PX_Object_MyObjectCreate(mp, root, 400, 240); // Create a custom object
     return PX_TRUE;
 }
 ```
 
-那么它的运行效果是这样的：
+The running effect is as follows:
 
 ![](assets/img/12.1.png)
 
-但现在还没有结束，我们怎么让我们的组件，响应鼠标中键实现旋转呢？还记得我们之前在 [PushButton](#8painterengine-对象传递机制) 中的对象传递机制么？现在，我们也要让我们的组件响应鼠标中键的信息，因此我们给它注册一个 `PX_OBJECT_EVENT_CURSORWHEEL` 事件的回调函数，代码如下：
+But it's not over yet. How do we make our component respond to the middle mouse button to enable rotation? Do you remember the object passing mechanism in [PushButton](#8-painterengine-object-passing-mechanism)? Now, we also need to make our component respond to the middle mouse button information, so we register a callback function for the `PX_OBJECT_EVENT_CURSORWHEEL` event. The code is as follows:
 
 ```c
 #include "PainterEngine.h"
@@ -1068,62 +1067,62 @@ PX_OBJECT_UPDATE_FUNCTION(MyObjectUpdate)
 PX_OBJECT_RENDER_FUNCTION(MyObjectRender)
 {
     PX_Object_MyObject *pMyObject = PX_ObjectGetDesc(PX_Object_MyObject, pObject);
-    PX_TextureRenderEx(psurface, &pMyObject->image, (px_int)pObject->x, (px_int)pObject->y, PX_ALIGN_CENTER, 0, 1, pMyObject->rotation); // 渲染图片
+    PX_TextureRenderEx(psurface, &pMyObject->image, (px_int)pObject->x, (px_int)pObject->y, PX_ALIGN_CENTER, 0, 1, pMyObject->rotation); // Render the image
 }
 
 PX_OBJECT_FREE_FUNCTION(MyObjectFree)
 {
     PX_Object_MyObject *pMyObject = PX_ObjectGetDesc(PX_Object_MyObject, pObject);
-    PX_TextureFree(&pMyObject->image); // 释放图片
+    PX_TextureFree(&pMyObject->image); // Free the image
 }
 
 PX_OBJECT_EVENT_FUNCTION(MyObjectOnCursorWheel)
 {
     PX_Object_MyObject *pMyObject = PX_ObjectGetDescIndex(PX_Object_MyObject, pObject, 0);
-    if (PX_ObjectIsCursorInRegion(pObject, e)) // Object 是鼠标位置是否选中当前组件，e 是事件
+    if (PX_ObjectIsCursorInRegion(pObject, e)) // Check if the mouse cursor is over the component, e is the event
         pMyObject->rotation += (px_float)PX_Object_Event_GetCursorZ(e)/10;
 }
 
 PX_Object* PX_Object_MyObjectCreate(px_memorypool* mp, PX_Object* parent, px_float x, px_float y)
 {
-    PX_Object *pObject = PX_ObjectCreateEx(mp, parent, x, y, 0, 128, 128, 0, 0, MyObjectUpdate, MyObjectRender, MyObjectFree, 0, sizeof(PX_Object_MyObject)); // 创建一个空的自定义对象
-    PX_Object_MyObject* pMyObject = PX_ObjectGetDescIndex(PX_Object_MyObject, pObject, 0); // 取得自定义对象数据
+    PX_Object *pObject = PX_ObjectCreateEx(mp, parent, x, y, 0, 128, 128, 0, 0, MyObjectUpdate, MyObjectRender, MyObjectFree, 0, sizeof(PX_Object_MyObject)); // Create an empty custom object
+    PX_Object_MyObject* pMyObject = PX_ObjectGetDescIndex(PX_Object_MyObject, pObject, 0); // Get the custom object data
     pMyObject->rotation = 0;
-    if (!PX_LoadTextureFromFile(mp, &pMyObject->image, "assets/test.png")) // 加载图片
+    if (!PX_LoadTextureFromFile(mp, &pMyObject->image, "assets/test.png")) // Load the image
     {
-        PX_ObjectDelete(pObject); // 加载失败则删除对象
+        PX_ObjectDelete(pObject); // Delete the object if loading fails
         return PX_NULL;
     }
-    PX_ObjectRegisterEvent(pObject, PX_OBJECT_EVENT_CURSORWHEEL, MyObjectOnCursorWheel, 0); // 注册鼠标滚轮事件
+    PX_ObjectRegisterEvent(pObject, PX_OBJECT_EVENT_CURSORWHEEL, MyObjectOnCursorWheel, 0); // Register the mouse wheel event
     return pObject;
 }
 
 px_int main()
 {
     PainterEngine_Initialize(800, 480);
-    PX_Object_MyObjectCreate(mp, root, 400, 240); // 创建一个自定义对象
+    PX_Object_MyObjectCreate(mp, root, 400, 240); // Create a custom object
     return PX_TRUE;
 }
 ```
 
-运行结果如下：
+The running result is as follows:
 
 ![](assets/img/12.2.gif)
 
-如果你觉得旋转图的质量不好，有很多锯齿，这是因为 `PX_TextureRenderEx` 旋转时是对原图直接采样的。如果你想要高质量的旋转图，你可以用 `PX_TextureRenderRotation` 函数来替换原函数：
+If you think the quality of the rotated image is poor and there are many jagged edges, this is because `PX_TextureRenderEx` directly samples the original image when rotating. If you want a high-quality rotated image, you can replace the original function with the `PX_TextureRenderRotation` function:
 
 ```c
 PX_OBJECT_RENDER_FUNCTION(MyObjectRender)
 {
     PX_Object_MyObject *pMyObject = PX_ObjectGetDesc(PX_Object_MyObject, pObject);
-    PX_TextureRenderRotation(psurface, &pMyObject->image, (px_int)pObject->x, (px_int)pObject->y, PX_ALIGN_CENTER, 0, pMyObject->rotation); // 渲染图片
+    PX_TextureRenderRotation(psurface, &pMyObject->image, (px_int)pObject->x, (px_int)pObject->y, PX_ALIGN_CENTER, 0, pMyObject->rotation); // Render the image
 }
 
 ```
 
 ![](assets/img/12.3.gif)
 
-那么，我们如何实现拖动效果呢？想要做到拖动效果，我们需要在对象结构体中，新增 `float` 类型的变量 `x`、`y`，用来记录当鼠标选中图片时的位置，同时我们加入了 `bool` 类型的变量 `bselect`，表示当前的图标是否被选中。当鼠标点击我们的图标以后，我们就可以监听 `PX_OBJECT_EVENT_CURSORDRAG` 事件，这是鼠标在屏幕上拖动时会产生的事件，我们通过坐标的偏移，移动我们的组件。最后，不论鼠标非拖动时的移动或鼠标左键抬起，都会取消我们组件的选中状态，在对应处理函数中取消选中状态即可。
+So, how do we implement the dragging effect? To achieve the dragging effect, we need to add `float` type variables `x` and `y` to the object structure to record the position of the mouse when the image is selected. We also add a `bool` type variable `bselect` to indicate whether the current icon is selected. When the mouse clicks on our icon, we can listen for the `PX_OBJECT_EVENT_CURSORDRAG` event, which is generated when the mouse is dragged on the screen. By offsetting the coordinates, we move our component. Finally, whether the mouse is moved without dragging or the left mouse button is released, it will cancel the selection state of our component. Simply unselect the component in the corresponding handler functions.
 
 ```c
 #include "PainterEngine.h"
@@ -1142,26 +1141,26 @@ PX_OBJECT_UPDATE_FUNCTION(MyObjectUpdate)
 PX_OBJECT_RENDER_FUNCTION(MyObjectRender)
 {
     PX_Object_MyObject *pMyObject = PX_ObjectGetDesc(PX_Object_MyObject, pObject);
-    PX_TextureRenderRotation(psurface, &pMyObject->image, (px_int)pObject->x, (px_int)pObject->y, PX_ALIGN_CENTER, 0, (px_int)pMyObject->rotation); // 渲染图片
+    PX_TextureRenderRotation(psurface, &pMyObject->image, (px_int)pObject->x, (px_int)pObject->y, PX_ALIGN_CENTER, 0, (px_int)pMyObject->rotation); // Render the image
 }
 
 PX_OBJECT_FREE_FUNCTION(MyObjectFree)
 {
     PX_Object_MyObject *pMyObject = PX_ObjectGetDesc(PX_Object_MyObject, pObject);
-    PX_TextureFree(&pMyObject->image); // 释放图片
+    PX_TextureFree(&pMyObject->image); // Free the image
 }
 
 PX_OBJECT_EVENT_FUNCTION(MyObjectOnCursorWheel)
 {
     PX_Object_MyObject *pMyObject = PX_ObjectGetDescIndex(PX_Object_MyObject, pObject, 0);
-    if (PX_ObjectIsCursorInRegionAlign(pObject, e, PX_ALIGN_CENTER)) // Object 是鼠标位置是否选中当前组件，e 是事件
+    if (PX_ObjectIsCursorInRegionAlign(pObject, e, PX_ALIGN_CENTER)) // Check if the mouse cursor is over the component, e is the event
         pMyObject->rotation += (px_float)PX_Object_Event_GetCursorZ(e)/10;
 }
 
 PX_OBJECT_EVENT_FUNCTION(MyObjectOnCursorDown)
 {
     PX_Object_MyObject* pMyObject = PX_ObjectGetDescIndex(PX_Object_MyObject, pObject, 0);
-    if (PX_ObjectIsCursorInRegionAlign(pObject, e, PX_ALIGN_CENTER)) // Object 是鼠标位置是否选中当前组件，e 是事件
+    if (PX_ObjectIsCursorInRegionAlign(pObject, e, PX_ALIGN_CENTER)) // Check if the mouse cursor is over the component, e is the event
     {
         pMyObject->bselect = PX_TRUE;
         pMyObject->last_cursorx = PX_Object_Event_GetCursorX(e);
@@ -1189,32 +1188,32 @@ PX_OBJECT_EVENT_FUNCTION(MyObjectOnCursorDrag)
 
 PX_Object* PX_Object_MyObjectCreate(px_memorypool* mp, PX_Object* parent, px_float x, px_float y)
 {
-    PX_Object *pObject = PX_ObjectCreateEx(mp, parent, x, y, 0, 128, 128, 0, 0, MyObjectUpdate, MyObjectRender, MyObjectFree, 0, sizeof(PX_Object_MyObject)); // 创建一个空的自定义对象
-    PX_Object_MyObject* pMyObject = PX_ObjectGetDescIndex(PX_Object_MyObject, pObject, 0); // 取得自定义对象数据
+    PX_Object *pObject = PX_ObjectCreateEx(mp, parent, x, y, 0, 128, 128, 0, 0, MyObjectUpdate, MyObjectRender, MyObjectFree, 0, sizeof(PX_Object_MyObject)); // Create an empty custom object
+    PX_Object_MyObject* pMyObject = PX_ObjectGetDescIndex(PX_Object_MyObject, pObject, 0); // Get the custom object data
     pMyObject->rotation = 0;
-    if (!PX_LoadTextureFromFile(mp, &pMyObject->image, "assets/test.png")) // 加载图片
+    if (!PX_LoadTextureFromFile(mp, &pMyObject->image, "assets/test.png")) // Load the image
     {
-        PX_ObjectDelete(pObject); // 加载失败则删除对象
+        PX_ObjectDelete(pObject); // Delete the object if loading fails
         return PX_NULL;
     }
-    PX_ObjectRegisterEvent(pObject, PX_OBJECT_EVENT_CURSORWHEEL, MyObjectOnCursorWheel, 0); // 注册鼠标滚轮事件
-    PX_ObjectRegisterEvent(pObject, PX_OBJECT_EVENT_CURSORDRAG, MyObjectOnCursorDrag, 0); // 注册鼠标拖拽事件
-    PX_ObjectRegisterEvent(pObject, PX_OBJECT_EVENT_CURSORDOWN, MyObjectOnCursorDown, 0); // 注册鼠标按下事件
-    PX_ObjectRegisterEvent(pObject, PX_OBJECT_EVENT_CURSORUP, MyObjectOnCursorRelease, 0); // 注册鼠标释放事件
-    PX_ObjectRegisterEvent(pObject, PX_OBJECT_EVENT_CURSORMOVE, MyObjectOnCursorRelease, 0); // 注册鼠标释放事件
+    PX_ObjectRegisterEvent(pObject, PX_OBJECT_EVENT_CURSORWHEEL, MyObjectOnCursorWheel, 0); // Register the mouse wheel event
+    PX_ObjectRegisterEvent(pObject, PX_OBJECT_EVENT_CURSORDRAG, MyObjectOnCursorDrag, 0); // Register the mouse drag event
+    PX_ObjectRegisterEvent(pObject, PX_OBJECT_EVENT_CURSORDOWN, MyObjectOnCursorDown, 0); // Register the mouse down event
+    PX_ObjectRegisterEvent(pObject, PX_OBJECT_EVENT_CURSORUP, MyObjectOnCursorRelease, 0); // Register the mouse up event
+    PX_ObjectRegisterEvent(pObject, PX_OBJECT_EVENT_CURSORMOVE, MyObjectOnCursorRelease, 0); // Register the mouse up event
     return pObject;
 }
 
 px_int main()
 {
     PainterEngine_Initialize(800, 480);
-    PX_Object_MyObjectCreate(mp, root, 400, 240); // 创建一个自定义对象
+    PX_Object_MyObjectCreate(mp, root, 400, 240); // Create a custom object
     return PX_TRUE;
 }
 ```
 ![](assets/img/12.4.gif)
 
-当然，你可以调用 `PX_Object_MyObjectCreate` 多次，创建多个组件对象，它们的功能都是一样的：
+Of course, you can call `PX_Object_MyObjectCreate` multiple times to create multiple component objects, and they will all have the same functionality:
 
 ![](assets/img/12.5.gif)
 
