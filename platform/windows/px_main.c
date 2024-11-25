@@ -1,5 +1,5 @@
-#include "runtime/PainterEngine_Application.h"
-#include "platform/modules/px_thread.h"
+#include "../../runtime/PainterEngine_Application.h"
+#include "../modules/px_thread.h"
 #include "px_display.h"
 
 //mouse informations

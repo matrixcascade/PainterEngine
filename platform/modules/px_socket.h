@@ -1,6 +1,6 @@
 #ifndef PX_SOCKET_H
 #define PX_SOCKET_H
-#include "kernel/PX_Kernel.h"
+#include "../../kernel/PX_Kernel.h"
 
 struct _PX_Socket;
 typedef px_void(*PX_Socket_ConnectCallback)(struct _PX_Socket* pSocket, px_void* ptr);

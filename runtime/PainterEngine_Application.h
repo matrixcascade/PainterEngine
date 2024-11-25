@@ -8,12 +8,12 @@
 
 #define PX_APPLICATION_MEMORYPOOL_ALL_SIZE (PX_APPLICATION_MEMORYPOOL_STATIC_SIZE+PX_APPLICATION_MEMORYPOOL_DYNAMIC_SIZE+PX_APPLICATION_MEMORYPOOL_SPACE_SIZE)
 #include "PainterEngine_Runtime.h"
-#include "platform/modules/px_file.h"
-#include "platform/modules/px_time.h"
-#include "platform/modules/px_audio.h"
-#include "platform/modules/px_request.h"
-#include "platform/modules/px_tcp.h"
-#include "platform/modules/px_udp.h"
+#include "../platform/modules/px_file.h"
+#include "../platform/modules/px_time.h"
+#include "../platform/modules/px_audio.h"
+#include "../platform/modules/px_request.h"
+#include "../platform/modules/px_tcp.h"
+#include "../platform/modules/px_udp.h"
 
 	typedef struct
 	{

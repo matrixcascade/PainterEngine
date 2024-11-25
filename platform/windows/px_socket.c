@@ -1,9 +1,9 @@
-#include "platform/modules/px_socket.h"
-#include "platform/modules/px_tcp.h"
-#include "platform/modules/px_udp.h"
-#include "platform/modules/px_time.h"
-#include "platform/modules/px_sysmemory.h"
-#include "platform/modules/px_thread.h"
+#include "../../platform/modules/px_socket.h"
+#include "../../platform/modules/px_tcp.h"
+#include "../../platform/modules/px_udp.h"
+#include "../../platform/modules/px_time.h"
+#include "../../platform/modules/px_sysmemory.h"
+#include "../../platform/modules/px_thread.h"
 
 typedef struct
 {

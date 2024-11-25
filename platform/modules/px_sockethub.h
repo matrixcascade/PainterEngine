@@ -1,9 +1,9 @@
 #ifndef PX_SocketHub_H
-#include "platform/modules/px_tcp.h"
-#include "platform/modules/px_thread.h"
-#include "platform/modules/px_sysmemory.h"
-#include "platform/modules/px_time.h"
-#include "kernel/PX_Kernel.h"
+#include "../modules/px_tcp.h"
+#include "../modules/px_thread.h"
+#include "../modules/px_sysmemory.h"
+#include "../modules/px_time.h"
+#include "../../kernel/PX_Kernel.h"
 
 
 
