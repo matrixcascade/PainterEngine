@@ -1,12 +1,12 @@
 #include "PainterEngine.h"
 
-#define PX_OBJECT_TYPE_FOX		24103001
-#define PX_OBJECT_TYPE_HAMMER	24103002
-#define PX_OBJECT_TYPE_CLOCK	24103003
+#define PX_OBJECT_TYPE_FOX		24103001  //狐狸对象类型
+#define PX_OBJECT_TYPE_HAMMER	24103002  //锤子对象类型
+#define PX_OBJECT_TYPE_CLOCK	24103003  //时钟对象类型
 
-PX_FontModule score_fm;
-PX_Object* scorePanel;
-PX_Object* game,*startgame,*gameclock;
+PX_FontModule score_fm;  //分数字体模块
+PX_Object* scorePanel;  //分数面板对象
+PX_Object* game,*startgame,*gameclock;  //游戏对象、开始游戏按钮、游戏时钟
 
 typedef enum
 {
@@ -53,9 +53,15 @@ PX_OBJECT_UPDATE_FUNCTION(PX_Object_ClockUpdate)
 	{
 		clock->elapsed = 0;
 		PX_ObjectPostEvent(game, PX_OBJECT_BUILD_EVENT(PX_OBJECT_EVENT_RESET));//重置狐狸状态,给game对象发送重置事件
+		//游戏结束时:
+		//1. 隐藏并禁用游戏界面
 		game->Visible = PX_FALSE;
 		game->Enabled = PX_FALSE;
+		
+		//2. 显示开始游戏按钮,让玩家可以重新开始
 		startgame->Visible = PX_TRUE;
+		
+		//3. 隐藏并禁用倒计时时钟
 		pObject->Visible = PX_FALSE;
 		pObject->Enabled = PX_FALSE;
 	}
@@ -67,7 +73,7 @@ PX_OBJECT_RENDER_FUNCTION(PX_Object_ClockRender)
 	PX_Object_Clock* clock = PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_CLOCK);
 	PX_AnimationUpdate(&clock->animation, elapsed);//更新动画
 	PX_AnimationRender(psurface, &clock->animation, (px_int)pObject->x, (px_int)pObject->y, PX_ALIGN_CENTER, PX_NULL);//绘制动画
-	//draw ring
+	// 绘制环形
 	PX_GeoDrawCircle(psurface, (px_int)pObject->x, (px_int)pObject->y, 38, 8, PX_COLOR_BLACK);//绘制倒计时环边框
 	PX_GeoDrawRing(psurface, (px_int)pObject->x, (px_int)pObject->y, 36, 6, PX_COLOR(128,192,255,32), -90, -90 + (px_int)(360 * (1 - clock->elapsed * 1.0f / clock->time)));//绘制倒计时环
 }
@@ -81,9 +87,9 @@ PX_OBJECT_FREE_FUNCTION(PX_Object_ClockFree)
 px_void PX_Object_ClockBegin(PX_Object* pClock, px_dword time)//开始倒计时
 {
 	PX_Object_Clock* clock = PX_ObjectGetDescByType(pClock, PX_OBJECT_TYPE_CLOCK);
-	clock->time = time;
-	pClock->Visible = PX_TRUE;
-	pClock->Enabled = PX_TRUE;
+	clock->time = time;//设置倒计时总时间
+	pClock->Visible = PX_TRUE;//显示倒计时时钟
+	pClock->Enabled = PX_TRUE;//启用倒计时时钟
 }
 
 PX_Object* PX_Object_ClockCreate(px_memorypool* mp, PX_Object* parent, px_float x, px_float y)

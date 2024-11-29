@@ -17,13 +17,16 @@ PX_SoundPlay* soundplay;
 
 
 px_char painterengine_loadbuffer[1024 * 1024 * 8];
-
+//打印文本到打印机对象
+//content: 要打印的文本内容
 px_void PainterEngine_Print(const px_char content[])
 {
+	//如果打印机对象不可见,则设置为可见
 	if (App.object_printer->Visible==PX_FALSE)
 	{
 		PX_ObjectSetVisible(App.object_printer, PX_TRUE);
 	}
+	//调用打印机对象的打印文本函数
 	PX_Object_PrinterPrintText(App.object_printer, content);
 }
 
