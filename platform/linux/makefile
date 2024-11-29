@@ -53,6 +53,5 @@ $(painterengine_path)/core/%.o:$(painterengine_path)/core/%.c
 $(painterengine_path)/platform/linux/%.o:$(painterengine_path)/platform/linux/%.c
 	gcc -c $^ -o $@ -I "$(project_path)" -I "$(painterengine_path)" -I "$(painterengine_path)/platform/linux" -I "$(painterengine_path)/runtime"
 
-.PHONY: clean
-clean:
-	rm -f $(project_build_o) $(painterengine_build_painterengine_o) $(target)
+
+	
