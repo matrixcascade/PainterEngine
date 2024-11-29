@@ -271,7 +271,15 @@ px_bool PainterEngine_Initialize(px_int _screen_width,px_int _screen_height)
 #endif
 
 	App.object_root = PX_ObjectCreateRoot(&runtime->mp_static);
+	if (!App.object_root)
+	{
+		return PX_FALSE;
+	}
 	App.object_printer=PX_Object_PrinterCreate(&runtime->mp, App.object_root, 0, 0, _screen_width, _screen_height, App.pfontmodule);
+	if (!App.object_printer)
+	{
+		return PX_FALSE;
+	}
 	PX_Object_PanelAttachObject(App.object_printer, PX_ObjectGetFreeDescIndex(App.object_printer));
 	PX_Object_PrinterSetBackgroundColor(App.object_printer, PX_COLOR_NONE);
 	App.object_printer->Visible = PX_FALSE;
