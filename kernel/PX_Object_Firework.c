@@ -166,6 +166,8 @@ PX_OBJECT_RENDER_FUNCTION(PX_Object_Firework01Render)
 
 PX_Object* PX_Object_Firework01Create(px_memorypool* mp, PX_Object* Parent, px_float x, px_float y)
 {
+	if (!mp) return PX_NULL;
+	
 	px_int i;
 	PX_Object_Firework01 desc;
 	PX_memset(&desc, 0, sizeof(desc));

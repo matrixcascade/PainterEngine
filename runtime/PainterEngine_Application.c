@@ -273,11 +273,13 @@ px_bool PainterEngine_Initialize(px_int _screen_width,px_int _screen_height)
 	App.object_root = PX_ObjectCreateRoot(&runtime->mp_static);
 	if (!App.object_root)
 	{
+		mp = NULL;
 		return PX_FALSE;
 	}
 	App.object_printer=PX_Object_PrinterCreate(&runtime->mp, App.object_root, 0, 0, _screen_width, _screen_height, App.pfontmodule);
 	if (!App.object_printer)
 	{
+		mp = NULL;
 		return PX_FALSE;
 	}
 	PX_Object_PanelAttachObject(App.object_printer, PX_ObjectGetFreeDescIndex(App.object_printer));
@@ -374,6 +376,12 @@ px_bool PX_ApplicationInitialize(PX_Application *pApp,px_int screen_width,px_int
 	PainterEngine_SetBackgroundColor(PX_COLOR_BACKGROUNDCOLOR);
 
 	px_main();
+
+	if (mp == PX_NULL){
+		printf("PainterEngine_Initialize:Create MemoryPool failed! \n");
+		printf("The window size must be set larger than 24 * 24! \n");
+		return PX_FALSE;
+	}
 	
 	if (pApp->runtime.window_height&&pApp->runtime.window_width&& pApp->runtime.surface_height&& pApp->runtime.surface_width)
 	{
