@@ -7,7 +7,7 @@
 [![ENGLISH](https://img.shields.io/badge/language-English-red.svg)](https://github.com/QuantumCipherMaster/PainterEngine/blob/master/README(ENGLISH).md)
 
 PainterEngine 是一个由 C 语言编写的跨平台图形引擎, 支持 Windows/Linux/iOS/Android/WebAssembly 甚至无操作系统的裸嵌入式平台, 它基于组件化的设计模式, 即使是 C 语言初学者, 也可以在几分钟内掌握它的使用, [PainterEngine Make](https://www.painterengine.com/) 允许您一键将您的 PainterEngine 项目编译到多个平台.
-它涵盖了基础数据结构、图形学、声学、数字信号处理、编译原理、虚拟机系统、密码学、人机交互、游戏引擎、FPGA-GPU 图形 IP 设计等多个领域, 你既可以用它制作微应用, 也可以将它作为学习项目。
+它涵盖了基础数据结构、图形学、声学、数字信号处理、编译原理、虚拟机系统、密码学、人机交互、游戏引擎、神经网络、FPGA-GPU 图形 IP 设计等多个领域, 你既可以用它制作微应用, 也可以将它作为学习项目。
 
 ## 30 秒速览 PainterEngine
 
@@ -72,6 +72,7 @@ int main()
 | 信号处理               | dft/dct/fft/dwt/window functions/mfcc/...                | 傅里叶/余弦/小波变换, 常用窗函数, mfcc 等特征采集算法...等等信号处理相关基础函数及上层特征采集算法                         |
 | 数据结构               | string/vector/list/map/stack/fifo/circular-buffer/...                | 平台无关的数据结构算法实现                          |
 | 密码学               | curve25519/AES/SHAx/MD5/...                | 包含常用的密钥对称算法及密钥协商算法                          |
+| 神经网络               | BP Neutral Network                        |经典BP神经网络框架,可实现简单分类问题|
 | 图片支持               | PNG/JPG/GIF/BMP                                              | 支持 PNG/JPG/GIF/BMP 解码及 PNG 编码           |
 | 音频支持               | WAV/MP3                                              | 支持 Wav, Mp3 解码及 Wav 编码|
 | 字模支持               | ttf                                              | 支持 ttf 字模文件(由 stb_truetype.c 移植而来)|
@@ -83,6 +84,7 @@ int main()
 | UI 框架                 | button/radio/image/edit/label/list/...                       | UI 框架实现                                                                        |
 | 协议                   | MQTT/MODBUS/Game-network-synchronization                     | 常用的通讯协议                                                                    |
 | 游戏引擎               |                                                              | 集成一个游戏世界框架                                                               |
+| 跨平台显示服务          | VisualOS                                                    |platform/visualos提供了一个基于TCP网络的显示服务器,可以完成cs/bs架构的远程界面交互连接,为没有显示条件的设备提供图形操作终端|
 | FPGA-GPU               |2D accelerator                                               | 实现了基于 FPGA 的 GPU 图形加速器, 能够为 PainterEngine 提供不低于 50Mpps 的 2D Blender 及图元光栅化加速, 支持 HDMI 输出, 目前已在 zynq7000 系列 Soc 上完成验证|
 
 ## FPGA-GPU 嵌入式图形加速方案
