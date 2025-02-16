@@ -17,6 +17,8 @@ px_bool PX_VectorPushback(px_vector *vec,px_void *data);
 px_bool PX_VectorPushTo(px_vector *vec,px_void *data,px_int index);
 px_bool PX_VectorErase(px_vector *vec,px_int index);
 px_bool PX_VectorPop(px_vector *vec);
+px_bool PX_VectorPopTo(px_vector* vec, px_void* data);
+px_bool PX_VectorLastTo(px_vector* vec, px_void* data);
 px_bool PX_VectorPopN(px_vector* vec, px_int N);
 px_bool PX_VectorCopy(px_vector *destvec,px_vector *resvec);
 px_void PX_VectorFree(px_vector *vec);

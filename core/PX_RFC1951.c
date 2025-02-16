@@ -102,6 +102,21 @@ px_bool PX_RFC1951Inflate(px_byte* _in, px_uint input_size, px_memory* _out)
 	px_uint32 bit_position = 0;
 	px_bool isLastBlock = 0;
 
+	if ((_in[0] * 256 + _in[1]) % 31 != 0)
+	{
+		 return PX_FALSE;
+	}
+	if ((_in[0] & 15) != 8 || ((_in[0] >> 4) & 15) > 7)
+	{
+		return PX_FALSE;
+	}
+	if (((_in[1] >> 5) & 1) != 0)
+	{
+		return PX_FALSE;
+	}
+	_in += 2;
+	input_size -= 2;
+
 	do
 	{
 		px_uint32 type;
@@ -224,6 +239,10 @@ px_bool PX_RFC1951Deflate(px_byte* _in, px_uint input_size, px_memory* _out,px_i
 	px_int block = input_size / PX_RFC1951_MAX_BLOCK;
 	px_int remain = input_size % PX_RFC1951_MAX_BLOCK;
 	px_int i;
+	if (!PX_MemoryCat(_out, "\x78\x9c", 2))
+	{
+		return PX_FALSE;
+	}
 	for (i=0;i< block;i++)
 	{
 		px_bool last_block = 0;

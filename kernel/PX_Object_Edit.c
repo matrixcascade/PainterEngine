@@ -429,7 +429,7 @@ PX_Object* PX_Object_EditAttachObject( PX_Object* pObject,px_int attachIndex, px
 	PX_StringInitialize(mp, &pEdit->text);
 
 	pEdit->TextColor = PX_OBJECT_UI_DEFAULT_FONTCOLOR;
-	pEdit->CursorColor = PX_COLOR_WHITE;
+	pEdit->CursorColor = PX_COLOR_FORCECOLOR;
 	pEdit->BorderColor = PX_OBJECT_UI_DEFAULT_BORDERCOLOR;
 	pEdit->BackgroundColor = PX_OBJECT_UI_DEFAULT_BACKGROUNDCOLOR;
 	pEdit->XOffset = 0;
@@ -507,7 +507,6 @@ px_void PX_Object_EditSetText( PX_Object *pObject,const px_char *Text )
 		PX_StringClear(&pEdit->text);
 		PX_StringCat(&pEdit->text,Text);
 		pEdit->cursor_index=PX_strlen(Text);
-		PX_Object_EditUpdateCursorViewRegion(pObject);
 	}
 }
 
@@ -520,6 +519,16 @@ px_void PX_Object_EditAppendText(PX_Object *pObject,const px_char *Text)
 		pEdit->cursor_index=PX_strlen(Text);
 		PX_Object_EditUpdateCursorViewRegion(pObject);
 	}
+}
+
+px_bool PX_Object_EditIsOnFocus(PX_Object* pObject)
+{
+	PX_Object_Edit* pEdit = PX_Object_GetEdit(pObject);
+	if (pEdit)
+	{
+		return pEdit->onFocus;
+	}
+	return PX_FALSE;
 }
 
 px_void PX_Object_EditSetFocus(PX_Object *pObject,px_bool OnFocus)
@@ -837,6 +846,52 @@ px_void PX_Object_EditAddString(PX_Object *pObject,px_char *Text)
 					{
 						PX_StringInsertChar(&pEdit->text, pEdit->cursor_index, ch);
 						pEdit->cursor_index++;
+					}
+				}
+				else if(pEdit->inputmode == PX_OBJECT_EDIT_INPUT_MODE_IP)
+				{
+					if ((ch >= '0' && ch <= '9') || ch == '.')
+					{
+						if (ch == '.')
+						{
+							if (PX_StringFindCharCount(&pEdit->text, '.') >= 3)
+							{
+								return;
+							}
+							if (PX_StringLastChar(&pEdit->text) != '.')
+							{
+								PX_StringInsertChar(&pEdit->text, pEdit->cursor_index, ch);
+								pEdit->cursor_index++;
+							}
+						}
+						else
+						{
+							//last 3 char is numeric
+							px_int i = PX_strlen(pEdit->text.buffer) - 1;
+							px_int count = 0;
+							while (i >= 0 && count < 3)
+							{
+								if (pEdit->text.buffer[i] == '.')
+								{
+									break;
+								}
+								if (pEdit->text.buffer[i] >= '0' && pEdit->text.buffer[i] <= '9')
+								{
+									count++;
+								}
+								else
+								{
+									break;
+								}
+								i--;
+							}
+							if (count == 3)
+							{
+								return;
+							}
+							PX_StringInsertChar(&pEdit->text, pEdit->cursor_index, ch);
+							pEdit->cursor_index++;
+						}
 					}
 				}
 				else if (pEdit->inputmode == PX_OBJECT_EDIT_INPUT_MODE_FLOAT)

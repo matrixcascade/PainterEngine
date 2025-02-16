@@ -96,7 +96,7 @@ PX_Object* PX_Object_RankPanelAttachObject( PX_Object* pObject,px_int attachInde
 	Desc.current_value = 0;
 	Desc.max = 100;
 	Desc.numericFM = fm;
-	Desc.rankColor[0] = PX_COLOR(255, 226, 228, 240);
+	Desc.rankColor[0] = PX_COLOR(255, 126, 228, 200);
 	Desc.rankColor[1] = PX_COLOR(255, 135, 192, 247);
 	Desc.rankColor[2] = PX_COLOR(255, 192, 225, 118);
 	Desc.rankColor[3] = PX_COLOR(255, 225, 100, 200);
@@ -108,7 +108,7 @@ PX_Object* PX_Object_RankPanelAttachObject( PX_Object* pObject,px_int attachInde
 	Desc.speed = 100;
 	Desc.stage = 8;
 	Desc.target_value = 0;
-	Desc.backgroundColor = PX_OBJECT_UI_DEFAULT_FONTCOLOR;
+	Desc.backgroundColor = PX_CSS_COLOR_Azure;
 
 	PX_ASSERTIF(pObject == PX_NULL);
 	PX_ASSERTIF(attachIndex < 0 || attachIndex >= PX_COUNTOF(pObject->pObjectDesc));

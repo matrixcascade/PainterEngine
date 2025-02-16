@@ -20,6 +20,7 @@ typedef enum
 	PX_OBJECT_EDIT_INPUT_MODE_LOWERCASE,
 	PX_OBJECT_EDIT_INPUT_MODE_UPPERCASE,
 	PX_OBJECT_EDIT_INPUT_MODE_INTEGER,
+	PX_OBJECT_EDIT_INPUT_MODE_IP,
 	PX_OBJECT_EDIT_INPUT_MODE_FLOAT,
 }PX_OBJECT_EDIT_INPUT_MODE;
 
@@ -75,5 +76,6 @@ px_void PX_Object_EditSetOffset(PX_Object *pObject,px_int TopOffset,px_int LeftO
 px_void PX_Object_EditSetXYOffset(PX_Object* pObject, px_int XOffset, px_int YOffset);
 px_void PX_Object_EditSetInputMode(PX_Object* pObject, PX_OBJECT_EDIT_INPUT_MODE mode);
 px_void PX_Object_EditSetMultiLines(PX_Object* pObject, px_bool b);
+px_bool PX_Object_EditIsOnFocus(PX_Object* pObject);
 #endif
 

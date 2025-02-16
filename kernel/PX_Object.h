@@ -41,6 +41,8 @@
 #define PX_OBJECT_EVENT_TIMEOUT				29
 #define PX_OBJECT_EVENT_DAMAGE				30
 #define PX_OBJECT_EVENT_RESET			    31
+#define PX_OBJECT_EVENT_ACTIVATING			32
+#define PX_OBJECT_EVENT_UPDATE			    33
 //////////////////////////////////////////////////////////////////////////////
 //    Type of Controls
 /////////////////////////////////////////////////////////////////////////////
@@ -49,6 +51,8 @@ enum PX_OBJECT_TYPE
 {
   PX_OBJECT_TYPE_NULL		 = 0,
   PX_OBJECT_TYPE_UNKNOW		 = 0,
+  PX_OBJECT_TYPE_DONTCARE	 = 0,
+  PX_OBJECT_TYPE_DEFAULT	 = 0,
   PX_OBJECT_TYPE_LABEL			,
   PX_OBJECT_TYPE_PROCESSBAR		,
   PX_OBJECT_TYPE_IMAGE			,
@@ -115,6 +119,8 @@ enum PX_OBJECT_TYPE
   PX_OBJECT_TYPE_CDA_OBJECT		,
   PX_OBJECT_TYPE_DRAG,
   PX_OBJECT_TYPE_SCOREPANEL		,
+  PX_OBJECT_TYPE_COLLAPSE		,
+  PX_OBJECT_TYPE_GRID			,		
 };
 
 
@@ -299,7 +305,7 @@ struct _PX_Object_EventAction
 	struct _PX_Object_EventAction *pPre;
 };
 
-typedef struct _PX_Object_EventAction PX_OBJECT_EventAction;
+typedef struct _PX_Object_EventAction PX_Object_EventAction;
 
 #define    PX_ObjectGetDescIndex(type,pobject,index) ((type *)((pobject)->pObjectDesc[index]))
 #define    PX_ObjectGetDesc(type,pobject) PX_ObjectGetDescIndex(type,pobject,idesc)
@@ -364,9 +370,10 @@ px_void PX_ObjectDisableEventAction(PX_Object *pObject,px_int ownerType);
 px_void PX_ObjectEnableNoTheEventAction(PX_Object* pObject, px_int ownerType);
 px_void PX_ObjectDisableNoTheEventAction(PX_Object* pObject, px_int ownerType);
 
-px_bool PX_ObjectRegisterEvent(PX_Object *pObject,px_uint Event,px_void (*ProcessFunc)(PX_Object *,PX_Object_Event e,px_void *user_ptr),px_void *ptr);
-px_bool PX_ObjectRegisterEventEx(PX_Object* pObject, px_uint Event,px_int owner,px_void(*ProcessFunc)(PX_Object*, PX_Object_Event e, px_void* user_ptr), px_void* ptr);
-px_void PX_ObjectRemoveEvent(PX_Object *pObject,px_uint Event);
+PX_Object_EventAction* PX_ObjectRegisterEvent(PX_Object *pObject,px_uint Event,px_void (*ProcessFunc)(PX_Object *,PX_Object_Event e,px_void *user_ptr),px_void *ptr);
+PX_Object_EventAction* PX_ObjectRegisterEventEx(PX_Object* pObject, px_uint Event,px_int owner,px_void(*ProcessFunc)(PX_Object*, PX_Object_Event e, px_void* user_ptr), px_void* ptr);
+px_void PX_ObjectRemoveEventType(PX_Object *pObject,px_uint Event);
+px_void PX_ObjectRemoveEvent(PX_Object *pObject,PX_Object_EventAction *pEventAction);
 px_void PX_ObjectPostEvent(PX_Object *pPost,PX_Object_Event Event);
 px_void PX_ObjectExecuteEvent(PX_Object *pPost,PX_Object_Event Event);
 
@@ -627,6 +634,15 @@ px_void PX_ObjectCollisionTestFree(PX_Object_CollisionTest* ptest);
 //////////////////////////////////////////////////////////////////////////
 //ScorePanel
 #include "PX_Object_ScorePanel.h"
+
+//////////////////////////////////////////////////////////////////////////
+//Collapse
+#include "PX_Object_Collapse.h"
+
+//////////////////////////////////////////////////////////////////////////
+//Grid
+#include "PX_Object_Grid.h"
+
 #endif
 
 

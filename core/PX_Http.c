@@ -147,7 +147,7 @@ px_bool PX_HttpGetContent(const px_char content[], const px_char requestHeader[]
 	return PX_FALSE;
 }
 
-px_int PX_HttpGetPacketSize(const px_char content[])
+px_int PX_HttpGetHttpHeaderSize(const px_char content[])
 {
 	px_int i;
 	px_int size = PX_strlen(content);
@@ -165,5 +165,82 @@ px_int PX_HttpGetPacketSize(const px_char content[])
 		
 	}
 	return 0;
+}
+
+px_bool PX_HttpContentIsComplete(const px_char content[], px_int size)
+{
+	px_int i;
+	for (i = 0; i < size - 3; i++)
+	{
+		if (content[i] == 0)
+		{
+			return PX_FALSE;
+		}
+		if (content[i] == '\r' && content[i + 1] == '\n' && content[i + 2] == '\r' && content[i + 3] == '\n')
+		{
+			//Content-Length
+			px_char token[64] = { 0 };
+			if (!PX_HttpGetContent(content, "Content-Length", token, sizeof(token)))
+			{
+				return PX_TRUE;
+			}
+			else
+			{
+				px_int Content_Length = PX_atoi(token);
+				if (Content_Length)
+				{
+					if (size >= i + 4 + Content_Length)
+					{
+						return PX_TRUE;
+					}
+					else
+					{
+						return PX_FALSE;
+					}
+				}
+				else
+				{
+					return PX_TRUE;
+				}
+			}
+		}
+	}
+	return PX_FALSE;
+	
+}
+
+px_bool PX_HttpGetRequestPath(const px_char content[],px_int content_size, px_char path[], px_int path_size)
+{
+	px_int i,oft;
+	if (!PX_HttpCheckContent(content))
+		return PX_FALSE;
+
+	oft = 0;
+	while(content[oft] != ' ')
+	{
+		oft++;
+	}
+	oft++;
+	i = 0;
+	while (PX_TRUE)
+	{
+		if (content[oft] == ' '|| content[oft] == '?')
+		{
+			break;
+		}
+		path[i] = content[oft];
+		i++;
+		oft++;
+		if (i>= path_size -1)
+		{
+			return PX_FALSE;
+		}
+		if (oft>= content_size)
+		{
+			return PX_FALSE;
+		}
+	}
+	path[i] = 0;
+	return PX_TRUE;
 }
 

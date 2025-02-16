@@ -46,7 +46,7 @@ typedef struct
 	px_memorypool *mp;
 	px_int	parallel;
 	px_bool pause;
-	volatile px_bool bLock;
+	PX_ATOMIC px_bool bLock;
 	PX_SOUND_MIX_MODE mix_mode;
 	px_soundplay_userread userread;
 	px_void *userptr;

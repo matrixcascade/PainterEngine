@@ -113,6 +113,7 @@ px_bool PX_SocketHubInitialize(PX_SocketHub* pSocketHub, \
 	PX_SocketHub_OnDisconnectCallback disconnect_callback,\
 	px_void *ptr);
 px_bool PX_SocketHubSend(PX_SocketHub* pServerHub, const  px_byte Session[16],const px_byte* data, px_int send_data_size);
+px_bool PX_SocketHubWriteSendCache(PX_SocketHub* pServerHub, const  px_byte Session[16], const px_byte* data, px_int send_data_size);
 px_void PX_SocketHubFree(PX_SocketHub* pSocketHub);
 px_void PX_SocketHubSetUserPtr(PX_SocketHub* pServerHub, const  px_byte Session[16], px_void* ptr);
 px_void* PX_SocketHubGetUserPtr(PX_SocketHub* pServerHub, const  px_byte Session[16]);

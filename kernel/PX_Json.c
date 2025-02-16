@@ -127,6 +127,19 @@ PX_Json_Value * PX_JsonGetValue(PX_Json *json,const px_char _payload[])
 	return PX_JsonValueGetValue(&json->rootValue, _payload);
 }
 
+PX_Json_Value* PX_JsonGetValueByIndex(PX_Json* json, px_int index)
+{
+	if (index < 0 || index >= json->rootValue._object.values.size)
+	{
+		return PX_NULL;
+	}
+	if(json->rootValue.type!=PX_JSON_VALUE_TYPE_OBJECT)
+	{
+		return PX_NULL;
+	}
+	return PX_LISTAT(PX_Json_Value, &json->rootValue._object.values, index);
+}
+
 PX_Json_Value * PX_JsonGetArrayValue(PX_Json_Value *value,px_int i)
 {
 	if (value->type!=PX_JSON_VALUE_TYPE_ARRAY)
@@ -467,7 +480,7 @@ px_bool PX_JsonParse(PX_Json *pjson,const px_char *json_content)
 	PX_LexerRegisterSpacer(&lexer,'\t');
 	PX_LexerRegisterComment(&lexer,"//","\n");
 	json_quotes=PX_LexerRegisterContainer(&lexer,"\"","\"");
-	if(!PX_LexerLoadSourceFromMemory(&lexer,json_content)) goto _ERROR;
+	if(!PX_LexerLoadSourceWithPresort(&lexer,json_content)) goto _ERROR;
 
 	if(!PX_JsonInterpret_Object(pjson,&lexer,&pjson->rootValue._object))
 		goto _ERROR;

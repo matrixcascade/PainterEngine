@@ -71,6 +71,21 @@ px_int PX_StringFind(px_string* str, const px_char find[])
 	return -1;
 	
 }
+px_int PX_StringFindCharCount(px_string* str, px_char find)
+{
+	px_int i,count=0;
+	if (str->buffer)
+	{
+		for (i=0;str->buffer[i];i++)
+		{
+			if (str->buffer[i]==find)
+			{
+				count++;
+			}
+		}
+	}
+	return count;
+}
 px_bool PX_StringRead(const px_char content[],  px_int readsize, px_char out[])
 {
 	if (readsize > PX_strlen(content))
@@ -752,3 +767,59 @@ px_bool PX_StringCatCharEx(px_string* text, px_char ch)
 		MP_Free(text->mp, old);
 	return PX_TRUE;
 }
+
+px_bool PX_StringCatFormat(px_string* text, const px_char fmt[], px_stringformat _1, px_stringformat _2, px_stringformat _3, px_stringformat _4, px_stringformat _5, px_stringformat _6, px_stringformat _7, px_stringformat _8)
+{
+	px_char* oldptr;
+	px_int finalLen = 0;
+	px_char shl = 0;
+	finalLen = PX_sprintf8(PX_NULL, 0, fmt, _1, _2, _3, _4, _5, _6, _7, _8)+text->exreg_strlen;
+	if (finalLen>=text->bufferlen)
+	{
+		oldptr = text->buffer;
+		while ((1 << ++shl) <= finalLen);
+		text->bufferlen = (1 << shl);
+		text->buffer = (px_char*)MP_Malloc(text->mp, text->bufferlen);
+		if (!text->buffer)
+		{
+			PX_StringUpdateExReg(text);
+			return PX_FALSE;
+		}
+		PX_strset(text->buffer, oldptr);
+		if (oldptr)
+			MP_Free(text->mp, oldptr);
+	}
+	PX_sprintf8(text->buffer+text->exreg_strlen, text->bufferlen-text->exreg_strlen, fmt, _1, _2, _3, _4, _5, _6, _7, _8);
+	return PX_TRUE;
+
+}
+px_bool PX_StringCatFormat7(px_string* text, const px_char fmt[], px_stringformat _1, px_stringformat _2, px_stringformat _3, px_stringformat _4, px_stringformat _5, px_stringformat _6, px_stringformat _7)
+{
+		return PX_StringCatFormat(text, fmt, _1, _2, _3, _4, _5, _6, _7, PX_STRINGFORMAT_INT(0));
+
+}
+px_bool PX_StringCatFormat6(px_string* text, const px_char fmt[], px_stringformat _1, px_stringformat _2, px_stringformat _3, px_stringformat _4, px_stringformat _5, px_stringformat _6)
+{
+	return PX_StringCatFormat(text, fmt, _1, _2, _3, _4, _5, _6, PX_STRINGFORMAT_INT(0), PX_STRINGFORMAT_INT(0));
+}
+px_bool PX_StringCatFormat5(px_string* text, const px_char fmt[], px_stringformat _1, px_stringformat _2, px_stringformat _3, px_stringformat _4, px_stringformat _5)
+{
+	return PX_StringCatFormat(text, fmt, _1, _2, _3, _4, _5, PX_STRINGFORMAT_INT(0), PX_STRINGFORMAT_INT(0), PX_STRINGFORMAT_INT(0));
+}
+px_bool PX_StringCatFormat4(px_string* text, const px_char fmt[], px_stringformat _1, px_stringformat _2, px_stringformat _3, px_stringformat _4)
+{
+	return PX_StringCatFormat(text, fmt, _1, _2, _3, _4, PX_STRINGFORMAT_INT(0), PX_STRINGFORMAT_INT(0), PX_STRINGFORMAT_INT(0), PX_STRINGFORMAT_INT(0));
+}
+px_bool PX_StringCatFormat3(px_string* text, const px_char fmt[], px_stringformat _1, px_stringformat _2, px_stringformat _3)
+{
+	return PX_StringCatFormat(text, fmt, _1, _2, _3, PX_STRINGFORMAT_INT(0), PX_STRINGFORMAT_INT(0), PX_STRINGFORMAT_INT(0), PX_STRINGFORMAT_INT(0), PX_STRINGFORMAT_INT(0));
+}
+px_bool PX_StringCatFormat2(px_string* text, const px_char fmt[], px_stringformat _1, px_stringformat _2)
+{
+	return PX_StringCatFormat(text, fmt, _1, _2, PX_STRINGFORMAT_INT(0), PX_STRINGFORMAT_INT(0), PX_STRINGFORMAT_INT(0), PX_STRINGFORMAT_INT(0), PX_STRINGFORMAT_INT(0), PX_STRINGFORMAT_INT(0));
+}
+px_bool PX_StringCatFormat1(px_string* text, const px_char fmt[], px_stringformat _1)
+{
+	return PX_StringCatFormat(text, fmt, _1, PX_STRINGFORMAT_INT(0), PX_STRINGFORMAT_INT(0), PX_STRINGFORMAT_INT(0), PX_STRINGFORMAT_INT(0), PX_STRINGFORMAT_INT(0), PX_STRINGFORMAT_INT(0), PX_STRINGFORMAT_INT(0));
+}
+

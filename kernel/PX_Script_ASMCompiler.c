@@ -796,6 +796,7 @@ px_bool PX_ScriptAsmScan(PX_SCRIPT_ASM_COMPILER *compiler)
 				break;
 		case PX_LEXER_LEXEME_TYPE_SPACER:
 		case PX_LEXER_LEXEME_TYPE_NEWLINE:
+		case PX_LEXER_LEXEME_TYPE_COMMENT:
 			continue;
 			break;
 		case PX_LEXER_LEXEME_TYPE_TOKEN:
@@ -1158,6 +1159,7 @@ px_bool PX_ScriptAsmCc(PX_SCRIPT_ASM_COMPILER *pCompiler)
 				break;
 		case PX_LEXER_LEXEME_TYPE_SPACER:
 		case PX_LEXER_LEXEME_TYPE_NEWLINE:
+		case PX_LEXER_LEXEME_TYPE_COMMENT:
 			continue;
 			break;
 		case PX_LEXER_LEXEME_TYPE_TOKEN:

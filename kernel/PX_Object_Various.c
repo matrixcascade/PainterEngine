@@ -135,7 +135,10 @@ px_void PX_Object_VariousSetEditStyle(PX_Object* pObject,PX_OBJECT_VARIOUS_EIDT_
 			break;
 		}
 	}
-	
+}
+PX_Object* PX_Object_VariousGetObject(PX_Object* pObject)
+{
+	return PX_Object_GetVarious(pObject)->various;
 }
 
 const px_char* PX_Object_VariousGetText(PX_Object* pObject)
@@ -227,6 +230,14 @@ px_int PX_Object_VariousSelectBarGetCurrentIndex(PX_Object* pObject)
 	return 0;
 	
 }
+px_void PX_Object_VariousSelectBarClear(PX_Object* pObject)
+{
+	PX_Object_Various* pDesc = PX_Object_GetVarious(pObject);
+	if (pDesc->type == PX_OBJECT_VARIOUS_TYPE_SELECTBAR)
+	{
+		PX_Object_SelectBarClear(pDesc->various);
+	}
+}
 px_int PX_Object_VariousGetValue(PX_Object* pObject)
 {
 	PX_Object_Various* pDesc = PX_Object_GetVarious(pObject);
@@ -317,7 +328,7 @@ px_void PX_Object_VariousSetString(PX_Object* pObject, const px_char* Text)
 	PX_Object_VariousSetText(pObject, Text);
 }
 
-px_void PX_Object_VariousSetFloat(PX_Object* pObject, float f)
+px_void PX_Object_VariousSetFloat(PX_Object* pObject, px_float f)
 {
 	px_char content[32];
 	PX_ftoa(f, content, sizeof(content), 6);

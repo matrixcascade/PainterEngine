@@ -11,6 +11,7 @@ typedef struct
 	px_color borderColor;
 	PX_Object *root;
 	PX_Object *hscroll,*vscroll;
+	PX_Object_EventAction* scrollAction;
 }PX_Object_ScrollArea;
 
 
@@ -21,11 +22,14 @@ px_void PX_Object_ScrollAreaMoveToBottom(PX_Object *pObject);
 px_void PX_Object_ScrollAreaMoveToTop(PX_Object *pObject);
 px_void PX_Object_ScrollAreaGetRegion(PX_Object *pObject,px_float *left,px_float *top,px_float *right,px_float *bottom);
 px_void PX_Object_ScrollAreaUpdateRange( PX_Object *pObject);
+px_void PX_Object_ScrollAreaVerticalReorder(PX_Object* pObject,px_int spacer);
+px_void PX_Object_ScrollAreaHorizontalReorder(PX_Object* pObject,px_int spacer);
 px_void PX_Object_ScrollAreaSetBkColor(PX_Object *pObj,px_color bkColor);
 px_void PX_Object_ScrollAreaSetBorder( PX_Object *pObj,px_bool Border );
 px_void PX_Object_ScrollAreaSetBorderColor(PX_Object *pObj,px_color borderColor);
 px_void PX_Object_ScrollAreaClear(PX_Object* pObj);
 px_bool PX_Object_ScrollAreaSetBackgroundColor(PX_Object* pObj, px_color color);
+px_void PX_Object_ScrollAreaScrollEnable(PX_Object* pObj,px_bool bEnable);
 
 px_color PX_Object_ScrollAreaGetBackgroundColor(PX_Object* pObj);
 #endif

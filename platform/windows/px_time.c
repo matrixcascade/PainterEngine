@@ -3,6 +3,21 @@
 #include "windows.h"
 #pragma comment (lib,"winmm.lib")
 
+px_timem PX_LocalTime(long long timet)
+{
+	px_timem t;
+	time_t timep;
+	struct tm p;
+	timep = timet;
+	gmtime_s(&p, &timep);
+	t.year = 1900 + p.tm_year;
+	t.month = p.tm_mon + 1;
+	t.day = p.tm_mday;
+	t.hour = p.tm_hour + 8;
+	t.minute = p.tm_min;
+	t.second = p.tm_sec;
+	return t;
+}
 
 int PX_TimeGetYear()
 {
@@ -42,7 +57,7 @@ int PX_TimeGetHour()
 	time(&timep);
 	gmtime_s(&p, &timep);
 
-	return  p.tm_hour;
+	return  p.tm_hour+8;
 }
 
 int PX_TimeGetMinute()

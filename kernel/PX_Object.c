@@ -502,7 +502,7 @@ PX_Object* PX_ObjectCreateEx(px_memorypool* mp, PX_Object* Parent, px_float x, p
 px_void PX_ObjectDetach(PX_Object* pObject, px_int type)
 {
 	px_int i;
-	PX_OBJECT_EventAction* pPre, * pCur;
+	PX_Object_EventAction* pPre, * pCur;
 	for (i = 0; i < PX_OBJECT_MAX_DESC_COUNT; i++)
 	{
 		if (pObject->Type[i] == type)
@@ -640,7 +640,7 @@ px_void PX_ObjectGetInheritXY(PX_Object *pObject,px_float *x,px_float *y)
 
 static px_void PX_Object_ObjectEventFree( PX_Object **pObject )
 {
-	PX_OBJECT_EventAction *pNext,*pCur;;
+	PX_Object_EventAction *pNext,*pCur;;
 	//PX_Object_Free Events linker
 	pCur=(*pObject)->pEventActions;
 	while (pCur)
@@ -1136,7 +1136,7 @@ px_void PX_ObjectDisable(PX_Object *pObject)
 
 px_void PX_ObjectEnableEventAction(PX_Object* pObject, px_int ownerType)
 {
-		PX_OBJECT_EventAction* pPoint;
+		PX_Object_EventAction* pPoint;
 		pPoint = pObject->pEventActions;
 		while (pPoint)
 		{
@@ -1149,7 +1149,7 @@ px_void PX_ObjectEnableEventAction(PX_Object* pObject, px_int ownerType)
 }
 px_void PX_ObjectDisableEventAction(PX_Object* pObject, px_int ownerType)
 {
-	PX_OBJECT_EventAction* pPoint;
+	PX_Object_EventAction* pPoint;
 	pPoint = pObject->pEventActions;
 	while (pPoint)
 	{
@@ -1162,7 +1162,7 @@ px_void PX_ObjectDisableEventAction(PX_Object* pObject, px_int ownerType)
 }
 px_void PX_ObjectEnableNoTheEventAction(PX_Object* pObject, px_int ownerType)
 {
-	PX_OBJECT_EventAction* pPoint;
+	PX_Object_EventAction* pPoint;
 	pPoint = pObject->pEventActions;
 	while (pPoint)
 	{
@@ -1175,7 +1175,7 @@ px_void PX_ObjectEnableNoTheEventAction(PX_Object* pObject, px_int ownerType)
 }
 px_void PX_ObjectDisableNoTheEventAction(PX_Object* pObject, px_int ownerType)
 {
-	PX_OBJECT_EventAction* pPoint;
+	PX_Object_EventAction* pPoint;
 	pPoint = pObject->pEventActions;
 	while (pPoint)
 	{
@@ -1187,18 +1187,18 @@ px_void PX_ObjectDisableNoTheEventAction(PX_Object* pObject, px_int ownerType)
 	}
 }
 
-px_bool PX_ObjectRegisterEvent( PX_Object *pObject,px_uint Event,px_void (*ProcessFunc)(PX_Object *,PX_Object_Event e,px_void *user_ptr),px_void *user)
+PX_Object_EventAction* PX_ObjectRegisterEvent( PX_Object *pObject,px_uint Event,px_void (*ProcessFunc)(PX_Object *,PX_Object_Event e,px_void *user_ptr),px_void *user)
 {
 	return PX_ObjectRegisterEventEx(pObject, Event, pObject->Type[0], ProcessFunc, user);
 }
 
-px_bool PX_ObjectRegisterEventEx(PX_Object* pObject, px_uint Event,px_int owner, px_void(*ProcessFunc)(PX_Object*, PX_Object_Event e, px_void* user_ptr), px_void* user)
+PX_Object_EventAction* PX_ObjectRegisterEventEx(PX_Object* pObject, px_uint Event,px_int owner, px_void(*ProcessFunc)(PX_Object*, PX_Object_Event e, px_void* user_ptr), px_void* user)
 {
-	PX_OBJECT_EventAction* pPoint;
-	PX_OBJECT_EventAction* pAction = (PX_OBJECT_EventAction*)MP_Malloc(pObject->mp, sizeof(PX_OBJECT_EventAction));
+	PX_Object_EventAction* pPoint;
+	PX_Object_EventAction* pAction = (PX_Object_EventAction*)MP_Malloc(pObject->mp, sizeof(PX_Object_EventAction));
 	if (pAction == PX_NULL)
 	{
-		return PX_FALSE;
+		return 0;
 	}
 	pAction->enable = PX_TRUE;
 	pAction->owner= owner;
@@ -1213,7 +1213,7 @@ px_bool PX_ObjectRegisterEventEx(PX_Object* pObject, px_uint Event,px_int owner,
 	if (pPoint == PX_NULL)
 	{
 		pObject->pEventActions = pAction;
-		return PX_TRUE;
+		return pAction;
 	}
 
 	while (pPoint->pNext)
@@ -1223,13 +1223,13 @@ px_bool PX_ObjectRegisterEventEx(PX_Object* pObject, px_uint Event,px_int owner,
 	pAction->pPre = pPoint;
 	pPoint->pNext = pAction;
 
-	return PX_TRUE;
+	return pAction;
 }
 
-px_void PX_ObjectRemoveEvent(PX_Object* pObject, px_uint Event)
+px_void PX_ObjectRemoveEventType(PX_Object* pObject, px_uint Event)
 {
-	PX_OBJECT_EventAction *pPoint;
-	PX_OBJECT_EventAction *pAction;
+	PX_Object_EventAction *pPoint;
+	PX_Object_EventAction *pAction;
 
 	pPoint = pObject->pEventActions;
 	while (pPoint)
@@ -1257,10 +1257,40 @@ px_void PX_ObjectRemoveEvent(PX_Object* pObject, px_uint Event)
 	
 }
 
+px_void PX_ObjectRemoveEvent(PX_Object* pObject, PX_Object_EventAction* pEventAction)
+{
+	PX_Object_EventAction *pPoint;
+	PX_Object_EventAction *pAction;
+	pPoint = pObject->pEventActions;
+	while (pPoint)
+	{
+		pAction = pPoint;
+		pPoint = pPoint->pNext;
+		if (pAction == pEventAction)
+		{
+			if (pAction->pPre)
+			{
+				pAction->pPre->pNext = pAction->pNext;
+			}
+			else
+			{
+				pObject->pEventActions = pAction->pNext;
+			}
+
+			if (pAction->pNext)
+			{
+				pAction->pNext->pPre = pAction->pPre;
+			}
+			MP_Free(pObject->mp, pAction);
+		}
+	}
+	
+}
+
 
 px_void PX_ObjectExecuteEvent(PX_Object *pPost,PX_Object_Event Event)
 {
-	PX_OBJECT_EventAction *EventAction;
+	PX_Object_EventAction *EventAction;
 
 	if (pPost->Visible==PX_FALSE||pPost->Enabled==PX_FALSE||pPost->ReceiveEvents==PX_FALSE)
 	{

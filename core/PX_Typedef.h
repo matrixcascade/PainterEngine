@@ -194,6 +194,11 @@
 #define PX_MAX(a,b) ((a)>(b)?(a):(b))
 #define PX_MIN(a,b) ((a)<(b)?(a):(b))
 
+#define PX_UDP_PACKET_SUGGEST_SIZE 548
+#define PX_UDP_PACKET_MAX_SIZE     65500
+
+#define PX_ATOMIC 
+
 typedef		void				px_void;
 typedef		int					px_bool;
 typedef		unsigned int		px_dword;//typedef     uint32_t		       px_dword;
@@ -491,6 +496,7 @@ px_double PX_GaussRand(void);
 //ceil
 px_double PX_Ceil(px_double v);
 
+
 //////////////////////////////////////////////////////////////////////////
 //file ext
 px_void PX_FileGetName(const px_char filefullName[],px_char _out[],px_int outSize);
@@ -562,16 +568,17 @@ px_int PX_HexStringToBuffer(const px_char hex_str[],px_byte data[]);
 px_uint PX_htoi(const px_char hex_str[]);
 px_int  PX_atoi(const px_char str[]);
 px_float PX_atof(const px_char fstr[]);
-PX_RETURN_STRING PX_ftos(px_float f, int precision);
+PX_RETURN_STRING PX_ftos(px_float f, px_int precision);
 PX_RETURN_STRING PX_itos(px_int num,px_int radix);
 px_void PX_AscToWord(const px_char *asc,px_word *u16);
-px_int PX_ftoa(px_float f, px_char *outbuf, int maxlen, int precision);
+px_int PX_ftoa(px_float f, px_char *outbuf, px_int maxlen, px_int precision);
 px_int PX_itoa(px_int num,px_char *str,px_int MaxStrSize,px_int radix);
 px_dword PX_SwapEndian(px_dword val);
-px_char *PX_strchr(const px_char *s,int ch);
+px_char *PX_strchr(const px_char *s,px_int ch);
 px_char* PX_strstr(const px_char* dest, const px_char* src);
 px_char* PX_strstr2(const px_char* dest, const px_char* src);
 px_void PX_strcut(px_char* dest, px_int left, px_int right);
+px_bool PX_strIsInteger(const px_char* str);
 ///////////////////////////////////////////////////////////////////////////
 //rectangle circle
 px_bool PX_isPointInCircle(px_point p,px_point circle,px_float radius);
@@ -615,6 +622,7 @@ px_int PX_wstrlen(const px_word *dst);
 px_int PX_strcmp(const px_char *str1, const px_char *str2);
 px_bool PX_strequ(const px_char *src,const px_char *dst);
 px_bool PX_strequ2(const px_char* src, const px_char* dst);
+px_bool PX_strequ3(const px_char* src, const px_char* dst, px_int src_size);
 px_void PX_strupr(px_char *src);
 px_void PX_strlwr(px_char *src);
 px_bool PX_strIsNumeric(const px_char *str);
@@ -632,6 +640,7 @@ typedef enum
 typedef struct
 {
 	PX_STRINGFORMAT_TYPE type;
+	px_int align;
 	union
 	{
 		px_int _int;
@@ -642,8 +651,11 @@ typedef struct
 
 
 px_stringformat PX_STRINGFORMAT_INT(px_int _i);
+px_stringformat PX_STRINGFORMAT_INT_ALIGN(px_int _i, px_int align);
 px_stringformat PX_STRINGFORMAT_FLOAT(px_float _f);
+px_stringformat PX_STRINGFORMAT_FLOAT_ALIGN(px_float _f, px_int align);
 px_stringformat PX_STRINGFORMAT_STRING(const px_char *_s);
+px_stringformat PX_STRINGFORMAT_STRING_ALIGN(const px_char *_s, px_int align);
 px_int PX_sprintf8(px_char *str,px_int str_size,const px_char fmt[],\
 	px_stringformat _1,\
 	px_stringformat _2,\
@@ -965,13 +977,17 @@ px_uint32 PX_ReadBitsLE(px_uint32* bitpointer, const px_byte* bitstream, px_int 
 typedef struct
 {
 	px_int32 bitpointer;
-	const px_byte* bitstream;
+	px_byte* bitstream;
 	px_int size;
 }PX_MemoryStream;
 
 px_void PX_MemoryStreamInitialize(PX_MemoryStream* pStream, px_byte* bitstream,px_int size);
 px_byte PX_MemoryStreamReadBitLE(PX_MemoryStream* pStream);
 px_byte PX_MemoryStreamReadBitBE(PX_MemoryStream* pStream);
+px_void PX_MemoryStreamWriteBitLE(PX_MemoryStream* pStream, px_byte b);
+px_void PX_MemoryStreamWriteBitBE(PX_MemoryStream* pStream, px_byte b);
+px_int PX_MemoryStreamGetByteSize(PX_MemoryStream* pStream);
+
 px_byte PX_MemoryStreamReadByte(PX_MemoryStream* pStream);
 px_word PX_MemoryStreamReadWord(PX_MemoryStream* pStream);
 px_dword PX_MemoryStreamReadDWord(PX_MemoryStream* pStream);

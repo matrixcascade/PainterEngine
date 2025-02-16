@@ -34,6 +34,7 @@ px_void PX_StringReplaceRange(px_string *str,px_int startindex,px_int endindex, 
 px_void PX_StringTrimLeft(px_string *str,px_int leftCount);
 px_void PX_StringTrimRight(px_string *str,px_int RightCount);
 px_int PX_StringFind(px_string* str, const px_char find[]);
+px_int PX_StringFindCharCount(px_string* str, px_char find);
 px_bool PX_StringRead(const px_char content[],px_int readsize,px_char out[]);
 px_int PX_StringReadUntil(const px_char content[], px_char until, px_char out[], px_int max_out_size);
 
@@ -60,6 +61,15 @@ px_bool PX_StringCatEx(px_string *text,const px_char *str2);
 px_void PX_StringBackspace(px_string *text);
 px_void PX_StringBackspaceEx(px_string* text);
 px_bool PX_StringCatCharEx(px_string* text, px_char ch);
+px_bool PX_StringCatFormat(px_string *text,const px_char fmt[],px_stringformat _1, px_stringformat _2, px_stringformat _3, px_stringformat _4,px_stringformat _5, px_stringformat _6, px_stringformat _7, px_stringformat _8);
+px_bool PX_StringCatFormat7(px_string *text,const px_char fmt[],px_stringformat _1, px_stringformat _2, px_stringformat _3, px_stringformat _4,px_stringformat _5, px_stringformat _6, px_stringformat _7);
+px_bool PX_StringCatFormat6(px_string *text,const px_char fmt[],px_stringformat _1, px_stringformat _2, px_stringformat _3, px_stringformat _4,px_stringformat _5, px_stringformat _6);
+px_bool PX_StringCatFormat5(px_string *text,const px_char fmt[],px_stringformat _1, px_stringformat _2, px_stringformat _3, px_stringformat _4,px_stringformat _5);
+px_bool PX_StringCatFormat4(px_string *text,const px_char fmt[],px_stringformat _1, px_stringformat _2, px_stringformat _3, px_stringformat _4);
+px_bool PX_StringCatFormat3(px_string *text,const px_char fmt[],px_stringformat _1, px_stringformat _2, px_stringformat _3);
+px_bool PX_StringCatFormat2(px_string *text,const px_char fmt[],px_stringformat _1, px_stringformat _2);
+px_bool PX_StringCatFormat1(px_string *text,const px_char fmt[],px_stringformat _1);
+
 
 
 #endif

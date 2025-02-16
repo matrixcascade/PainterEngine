@@ -33,7 +33,7 @@ px_bool PX_3D_ObjectDataLoad(PX_3D_ObjectData *ObjectData,const px_byte *data,px
 	PX_LexerRegisterDelimiter(&Lexer,'/');
 	PX_LexerSetTokenCase(&Lexer,PX_LEXER_LEXEME_CASE_LOWER);
 
-	if(!PX_LexerLoadSourceFromMemory(&Lexer,(const px_char *)data)) return PX_FALSE;
+	if(!PX_LexerLoadSourceWithPresort(&Lexer,(const px_char *)data)) return PX_FALSE;
 	
 	while (PX_TRUE)
 	{

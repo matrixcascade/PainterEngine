@@ -18,7 +18,7 @@ px_void PX_WebSocketInitialize(PX_WebSocket* pInstance, PX_Linker* pLinker, \
 	pInstance->userptr = ptr;
 }
 
-static px_bool PX_WebSocketWriteToCircularBuffer(px_byte* buffer, px_int buffersize, volatile px_int* wCursor, volatile px_dword rCursor, px_void* data, px_int datasize)
+static px_bool PX_WebSocketWriteToCircularBuffer(px_byte* buffer, px_int buffersize, PX_ATOMIC px_int* wCursor, PX_ATOMIC px_dword rCursor, px_void* data, px_int datasize)
 {
 	px_int spacesize, divsize;
 	px_int _WCursor = *wCursor;
@@ -357,7 +357,7 @@ static PX_WEBSOCKET_HANDER_RETURN PX_WebSocketUpdate_RecvHandleData(PX_WebSocket
 	{
 		if (PX_HttpCheckContent((const px_char*)pInstance->recv_cache))
 		{
-			px_dword packetSize = PX_HttpGetPacketSize((const px_char*)pInstance->recv_cache);
+			px_dword packetSize = PX_HttpGetHttpHeaderSize((const px_char*)pInstance->recv_cache);
 			if (packetSize < pInstance->recv_cache_offset)
 			{
 				px_char payload[128] = { 0 };
@@ -376,7 +376,7 @@ static PX_WEBSOCKET_HANDER_RETURN PX_WebSocketUpdate_RecvHandleData(PX_WebSocket
 	{
 		if (PX_HttpCheckContent((const px_char*)pInstance->recv_cache))
 		{
-			px_int packetSize = PX_HttpGetPacketSize((const px_char*)pInstance->recv_cache);
+			px_int packetSize = PX_HttpGetHttpHeaderSize((const px_char*)pInstance->recv_cache);
 			if (packetSize)
 			{
 				px_char payload[128] = { 0 };

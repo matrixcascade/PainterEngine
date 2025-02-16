@@ -33,9 +33,9 @@ typedef struct  _PX_WebSocket
 	px_byte  recv_cache[PX_WEBSOCKET_CACHE_MAX_SIZE];
 	px_dword recv_cache_offset;
 	px_byte  send_cache[PX_WEBSOCKET_CACHE_MAX_SIZE];
-	volatile px_int send_cache_wcursor, send_cache_rcursor;
+	PX_ATOMIC px_int send_cache_wcursor, send_cache_rcursor;
 	px_bool isServer;
-	volatile PX_WEBSOCKET_STATE state;
+	PX_ATOMIC PX_WEBSOCKET_STATE state;
 	PX_PX_WebSocket_OnConnectCallback connect_callback;
 	PX_PX_WebSocket_ReceiveCallback recv_callback;
 	PX_PX_WebSocket_OnDisconnectCallback disconnect_callback;

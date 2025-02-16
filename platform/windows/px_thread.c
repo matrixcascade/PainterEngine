@@ -27,6 +27,10 @@ int PX_ThreadCreate(px_thread *pthread,func_thread func,void *ptr)
 void PX_MutexInitialize(px_mutex *pmutex)
 {
 	pmutex->handle=malloc(sizeof(CRITICAL_SECTION));
+	if (pmutex->handle==0)
+	{
+		return;
+	}
 	InitializeCriticalSection((CRITICAL_SECTION *)pmutex->handle);
 }
 

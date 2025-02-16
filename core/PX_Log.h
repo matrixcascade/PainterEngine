@@ -2,10 +2,15 @@
 #define __PX_LOG_H
 
 #ifdef PX_DEBUG_MODE
-#define PX_ASSERTIF(x) do{if(x) PX_ASSERT();}while (0);
+#define PX_ASSERTIF(x) do{if(!(x))break; PX_ASSERT();}while (1);
+#define PX_ASSERTIFX(x,log) do{if(!(x))break; PX_ASSERT();}while (1);
 #else
 #define PX_ASSERTIF(x)
+#define PX_ASSERTIFX(x,log)
 #endif
+
+#include "stdio.h"
+#define PX_printf printf
 
 px_void PX_LOG(const px_char fmt[]);
 px_void PX_ERROR(const px_char fmt[]);

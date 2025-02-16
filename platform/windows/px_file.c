@@ -5,6 +5,21 @@
 #include "string.h"
 #include "windows.h"
 
+int PX_FileMove(const char src[],const char dst[])
+{
+	return MoveFileA(src,dst);
+}
+
+int PX_FileCopy(const char src[],const char dst[])
+{
+	return CopyFileA(src,dst,FALSE);
+}
+
+int PX_FileDelete(const char path[])
+{
+	return DeleteFileA(path);
+}
+
 int PX_SaveDataToFile(void *buffer,int size,const char path[])
 {
 	char _path[MAX_PATH];
@@ -30,8 +45,9 @@ int PX_SaveDataToFile(void *buffer,int size,const char path[])
 
 PX_IO_Data PX_LoadFileToIOData(const char path[])
 {
-	PX_IO_Data io;
-		int fileoft=0;
+		PX_IO_Data io;
+		char endl;
+		int fileoft=0, reservedsize=0;
 		FILE *pf;
 		int filesize;
 		char _path[MAX_PATH];
@@ -60,9 +76,24 @@ PX_IO_Data PX_LoadFileToIOData(const char path[])
 			goto _ERROR;
 		}
 
-		while (!feof(pf))
+		reservedsize = filesize;
+		while (reservedsize > 0)
 		{
-			fileoft+=(int)fread(io.buffer+fileoft,1,1024,pf);
+			int readsize;
+			if (reservedsize > 1024)
+				readsize = (int)fread(io.buffer + fileoft, 1, 1024, pf);
+			else
+				readsize = (int)fread(io.buffer + fileoft, 1, reservedsize, pf);
+
+			reservedsize -= readsize;
+			fileoft += readsize;
+		}
+		endl=(char)fread(&endl, 1, 1, pf);
+		if (endl)
+		{
+			fclose(pf);
+			free(io.buffer);
+			goto _ERROR;//file is still writing
 		}
 		fclose(pf);
 

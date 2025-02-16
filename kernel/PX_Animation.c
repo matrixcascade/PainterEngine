@@ -471,7 +471,7 @@ px_bool PX_AnimationShellCompile(px_memorypool* mp, const px_char script[], px_v
 	PX_LexerSetNumericMatch(&lexer, PX_TRUE);
 	PX_LexerSetTokenCase(&lexer, PX_LEXER_LEXEME_CASE_UPPER);
 
-	if (!PX_LexerLoadSourceFromMemory(&lexer, script))
+	if (!PX_LexerLoadSourceWithPresort(&lexer, script))
 	{
 		goto _RESERROR;
 	}

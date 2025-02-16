@@ -146,6 +146,29 @@ px_bool PX_VectorPop(px_vector *vec)
 	return PX_TRUE;
 }
 
+px_bool PX_VectorLastTo(px_vector* vec, px_void* data)
+{
+	if (vec->size == 0)
+	{
+		return PX_FALSE;
+	}
+	PX_memcpy(data, (px_byte*)vec->data + (vec->size - 1) * vec->nodesize, vec->nodesize);
+	return PX_TRUE;
+}
+
+px_bool PX_VectorPopTo(px_vector* vec, px_void* data)
+{
+	if (vec->size==0)
+	{
+		return PX_FALSE;
+	}
+	PX_memcpy(data,(px_byte *)vec->data+(vec->size-1)*vec->nodesize, vec->nodesize);
+	vec->size--;
+	return PX_TRUE;
+}
+
+
+
 px_bool PX_VectorPopN(px_vector* vec,px_int N)
 {
 	if (N == 0)

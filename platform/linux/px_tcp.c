@@ -10,6 +10,7 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <errno.h>
+#include <sys/time.h>
 
 int PX_TCPInitialize(PX_TCP *tcp,PX_TCP_IP_TYPE type)
 {
@@ -42,7 +43,6 @@ int PX_TCPConnect(PX_TCP *tcp,PX_TCP_ADDR addr)
 
 int PX_TCPSend(PX_TCP *tcp,void *buffer,int size)
 {
-	int length;
 	switch(tcp->type)
 	{
 	case PX_TCP_IP_TYPE_IPV4:
@@ -65,9 +65,13 @@ int PX_TCPSocketSend(unsigned int socket, void* buffer, int size)
 int PX_TCPReceived(PX_TCP *tcp,void *buffer,int buffersize,int timeout)
 {
 	size_t ReturnSize;
-	struct timeval stimeout= {0,timeout*1000};
-	setsockopt(tcp->socket,SOL_SOCKET,SO_SNDTIMEO,(int *)&stimeout,(socklen_t)sizeof(struct timeval));
-	
+	if (timeout > 0)
+	{
+		struct timeval stimeout;
+		stimeout.tv_sec = 0;
+		stimeout.tv_usec = timeout * 1000;
+		setsockopt(tcp->socket, SOL_SOCKET, SO_SNDTIMEO, (int*)&stimeout, sizeof(struct timeval));
+	}
 	switch (tcp->type)
 	{
 	case PX_TCP_IP_TYPE_IPV4:
@@ -88,8 +92,13 @@ int PX_TCPSocketReceived(unsigned int socket, void* buffer, int buffersize, int 
 {
 	int SockAddrSize = sizeof(struct sockaddr_in);
 	size_t ReturnSize;
-	struct timeval stimeout = { 0,timeout * 1000 };
-	setsockopt(socket, SOL_SOCKET, SO_SNDTIMEO, (int*)&stimeout, sizeof(struct timeval));
+	if (timeout > 0)
+	{
+		struct timeval stimeout;
+		stimeout.tv_sec = 0;
+		stimeout.tv_usec = timeout * 1000;
+		setsockopt(socket, SOL_SOCKET, SO_SNDTIMEO, (int*)&stimeout, sizeof(struct timeval));
+	}
 
 	return  recv(socket, (char*)buffer, buffersize, 0);
 }

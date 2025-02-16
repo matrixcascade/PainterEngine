@@ -11,7 +11,7 @@ typedef struct __PX_memory
 	px_int  allocsize;
 	px_int  bit_pointer;
 	px_bool bAsynchronous;
-	volatile px_bool AsynchronousLock;
+	PX_ATOMIC px_bool AsynchronousLock;
 }px_memory;
 
 px_void PX_MemoryInitialize(px_memorypool *mp,px_memory *memory);
@@ -26,6 +26,7 @@ px_byte *PX_MemoryFind(px_memory *memory,const px_void *buffer,px_int size);
 px_void PX_MemoryRemove(px_memory *memory,px_int start,px_int end);
 px_void PX_MemoryFree(px_memory *memory);
 px_bool PX_MemoryCatByte(px_memory *memory,px_byte b);
+px_bool PX_MemoryCatRepeatByte(px_memory* memory, px_byte code, px_int size);
 px_byte *PX_MemoryData(px_memory *memory);
 px_bool PX_MemoryCatBit(px_memory* memory, px_bool b);
 px_bool PX_MemoryCatBits(px_memory* memory, px_byte data[],px_int bit_count);
@@ -60,11 +61,13 @@ px_void PX_FifoBufferClear(px_fifobuffer* pfifo);
 px_void PX_FifoBufferFree(px_fifobuffer* pfifo);
 px_bool PX_FifoBufferPushSize(px_fifobuffer* pfifo, px_dword size);
 px_bool PX_FifoBufferPushData(px_fifobuffer* pfifo, px_void* data, px_dword datasize);
-
+px_int PX_FifoGetCount(px_fifobuffer* pfifo);
 typedef px_memory px_stack;
 px_void PX_StackInitialize(px_memorypool* mp, px_stack* pstack, px_bool bAsynchronous);
 px_int PX_StackPop(px_stack* pstack, px_void* data, px_int size);
 px_bool PX_StackPush(px_stack* pstack, px_void* data, px_int size);
 px_int PX_StackGetPopSize(px_stack* pstack);
+px_int PX_StackGetCount(px_stack* pstack);
+px_void* PX_StackGetPopData(px_stack* pstack);
 px_void PX_StackFree(px_stack* pstack);
 #endif

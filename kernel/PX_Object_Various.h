@@ -31,11 +31,12 @@ px_void PX_Object_VariousEditSetMaxLength(PX_Object* pObject, px_int len);
 PX_Object* PX_Object_VariousCreate(px_memorypool* mp, PX_Object* Parent, px_int x, px_int y, px_int Width, px_int Height, const px_char* Text, PX_OBJECT_VARIOUS_TYPE type, PX_FontModule* fm);
 PX_Object_Various* PX_Object_GetVarious(PX_Object* pObject);
 px_void PX_Object_VariousSetEditStyle(PX_Object* pObject, PX_OBJECT_VARIOUS_EIDT_TYPE type);
-
+PX_Object *PX_Object_VariousGetObject(PX_Object* pObject);
 
 const px_char* PX_Object_VariousGetText(PX_Object* pObject);
 const px_char* PX_Object_VariousGetLabelText(PX_Object* pObject);
 px_int PX_Object_VariousSelectBarGetCurrentIndex(PX_Object* pObject);
+px_void PX_Object_VariousSelectBarClear(PX_Object* pObject);
 px_int PX_Object_VariousGetValue(PX_Object* pObject);
 px_void PX_Object_VariousSliderBarSetRange(PX_Object* pObject, px_int min, px_int max);
 px_void	 PX_Object_VariousSetText(PX_Object* pObject, const px_char* Text);
@@ -47,7 +48,7 @@ px_void		PX_Object_VariousSetBackgroundColor(PX_Object* pObject, px_color Color)
 px_void		PX_Object_VariousSetAlign(PX_Object* pObject, PX_ALIGN Align);
 px_void PX_Object_VariousSetValue(PX_Object* pObject, px_int value);
 px_void	 PX_Object_VariousSetString(PX_Object* pObject, const px_char* Text);
-px_void	 PX_Object_VariousSetFloat(PX_Object* pObject, px_float f);
+px_void PX_Object_VariousSetFloat(PX_Object* pObject, px_float f);
 px_void	 PX_Object_VariousSetInt(PX_Object* pObject, px_int i);
 px_void PX_Object_VariousSetHex(PX_Object* pObject, px_dword i);
 px_void	 PX_Object_VariousSetBool(PX_Object* pObject, px_bool b);

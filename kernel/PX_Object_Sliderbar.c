@@ -712,6 +712,17 @@ px_void PX_Object_SliderBarSetRange( PX_Object *pSliderBar,px_int Min,px_int Max
 	}
 }
 
+px_void PX_Object_SliderBarGetRange(PX_Object* pSliderBar, px_int* Min, px_int* Max)
+{
+	PX_Object_SliderBar* SliderBar = PX_Object_GetSliderBar(pSliderBar);
+	if (SliderBar != PX_NULL)
+	{
+		*Min = SliderBar->Min;
+		*Max = SliderBar->Max;
+	}
+	
+}
+
 px_int PX_Object_SliderBarGetMax( PX_Object *pSliderBar )
 {
 	PX_Object_SliderBar *SliderBar=PX_Object_GetSliderBar(pSliderBar);

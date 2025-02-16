@@ -420,14 +420,7 @@ px_bool PX_PngToXBuffer(px_memorypool * mp,px_byte* ppngbuffer, px_int size,px_s
 	{
 		PX_MemoryInitialize(mp, &inflate_data);
 		
-		if ((compressed[0] * 256 + compressed[1]) % 31 != 0) 
-		{ PX_MemoryFree(&inflate_data); if (compressed)MP_Free(mp, compressed); return PX_FALSE;}
-		if ((compressed[0] & 15) != 8 || ((compressed[0] >> 4) & 15) > 7) 
-		{ PX_MemoryFree(&inflate_data); if (compressed)MP_Free(mp, compressed); return PX_FALSE; }
-		if (((compressed[1] >> 5) & 1) != 0) 
-		{ PX_MemoryFree(&inflate_data); if (compressed)MP_Free(mp, compressed); return PX_FALSE; }
-
-		if (!PX_RFC1951Inflate(compressed+2, compressed_size-2, &inflate_data))
+		if (!PX_RFC1951Inflate(compressed, compressed_size, &inflate_data))
 		{
 			PX_MemoryFree(&inflate_data);
 			if (compressed)MP_Free(mp, compressed);
@@ -830,24 +823,14 @@ px_bool PX_PngSurfaceToBuffer(px_surface* prenderbuffer, px_memory* out)
 	do
 	{
 		px_byte byte_code;
-		PX_MemoryInitialize(out->mp, &deflate_data);
-		if (!PX_MemoryCat(&deflate_data,"\x78\x9c",2))
-		{
-			PX_MemoryFree(&filter_data);
-			PX_MemoryFree(&deflate_data);
-			return PX_FALSE;
-		}
-
 		adler32 = PX_adler32(filter_data.buffer, filter_data.usedsize);
-
-
+		PX_MemoryInitialize(out->mp, &deflate_data);
 		if (!PX_RFC1951Deflate(filter_data.buffer,filter_data.usedsize,&deflate_data,1024))
 		{
 			PX_MemoryFree(&filter_data);
 			PX_MemoryFree(&deflate_data);
 			return PX_FALSE;
 		}
-
 		byte_code = (adler32 >> 24) & 0xff;
 		if (!PX_MemoryCat(&deflate_data, &byte_code, 1))return PX_FALSE;
 		byte_code = (adler32 >> 16) & 0xff;

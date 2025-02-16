@@ -1011,8 +1011,6 @@ px_bool PX_JpgDecodeHuffmanData(PX_JpgDecoder* pJpgdecoder)
                     for (v = 0; v < vMax; ++v) {
                         for (h = 0; h < hMax; ++h) 
                         {
-                            if (y == 18 && v == 1 && x == 1644 && h == 0)
-                                PX_LOG("");
                             if(i==0)
                                 if (!PX_JpgDecodeBlockComponent(
                                     pJpgdecoder,

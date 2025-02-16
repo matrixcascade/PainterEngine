@@ -31,7 +31,9 @@ void PX_FreeIOData(PX_IO_Data *io);
 
 int PX_FileGetDirectoryFileCount(const char path[],PX_FILEENUM_TYPE type,const char *filter);
 int PX_FileGetDirectoryFileName(const char path[],int count,char FileName[][260],PX_FILEENUM_TYPE type,const char *filter);
-
+int PX_FileMove(const char src[], const char dst[]);
+int PX_FileDelete(const char path[]);
+int PX_FileCopy(const char src[], const char dst[]);
 //////////////////////////////////////////////////////////////////////////
 #define PX_OBJECT_REQUEST_FUNCTION(name) px_void name(void* buffer, int size, void* ptr)
 #include "../../kernel/PX_Kernel.h"

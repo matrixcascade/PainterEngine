@@ -1,4 +1,4 @@
-	#include <emscripten/emscripten.h>
+#include <emscripten/emscripten.h>
 #include <emscripten/websocket.h>
 #include "platform/modules/px_socket.h"
 #include "platform/modules/px_time.h"

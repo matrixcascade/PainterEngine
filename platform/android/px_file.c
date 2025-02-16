@@ -9,6 +9,49 @@
 
 extern AAssetManager* PX_assetManager;
 
+int PX_FileMove(const char src[],const char dst[])
+{
+    if (rename(src, dst) == 0)
+    {
+        return 1;
+    }
+    return 0;
+}
+
+int PX_FileCopy(const char src[],const char dst[])
+{
+    //call api
+    FILE *pfsrc=fopen(src, "rb");
+    FILE *pfdst=fopen(dst, "wb");
+    if (pfsrc&&pfdst)
+    {
+        while (!feof(pfsrc))
+        {
+            char buffer[1024];
+            int readsize=fread(buffer, 1, 1024, pfsrc);
+            if(fwrite(buffer, 1, readsize, pfdst)!=readsize)
+            {
+                fclose(pfsrc);
+                fclose(pfdst);
+                return 0;
+            }
+        }
+        fclose(pfsrc);
+        fclose(pfdst);
+        return 1;
+    }
+    
+}
+
+int PX_FileDelete(const char path[])
+{
+    if (remove(path) == 0)
+    {
+        return 1;
+    }
+    return 0;
+}
+
 int PX_SaveDataToFile(void *buffer,int size,const char path[])
 {
     FILE *pf=fopen(path,"wb");

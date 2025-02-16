@@ -1,23 +1,63 @@
-
-#include "platform/modules/px_file.h"
-#include "stdio.h"
+#include "../modules/px_file.h"
 #include "stdlib.h"
 #include "string.h"
 #include <errno.h>
-#ifndef __USE_MISC
-#define __USE_MISC
-#endif
 #include "dirent.h"
+#include "sys/stat.h"
+
+int PX_FileMove(const char src[],const char dst[])
+{
+    if (rename(src, dst) == 0)
+    {
+        return 1;
+    }
+    return 0;
+}
+
+int PX_FileCopy(const char src[],const char dst[])
+{
+    //call api
+    FILE *pfsrc=fopen(src, "rb");
+    FILE *pfdst=fopen(dst, "wb");
+    if (pfsrc&&pfdst)
+    {
+        while (!feof(pfsrc))
+        {
+            char buffer[1024];
+            int readsize=fread(buffer, 1, 1024, pfsrc);
+            if(fwrite(buffer, 1, readsize, pfdst)!=readsize)
+            {
+                fclose(pfsrc);
+                fclose(pfdst);
+                return 0;
+            }
+        }
+        fclose(pfsrc);
+        fclose(pfdst);
+        return 1;
+    }
+    
+}
+
+int PX_FileDelete(const char path[])
+{
+    if (remove(path) == 0)
+    {
+        return 1;
+    }
+    return 0;
+}
 
 int PX_SaveDataToFile(void *buffer, int size, const char path[])
 {
-    FILE *pf=fopen(path, "rb");
+    FILE *pf=fopen(path, "wb");
     if (pf)
     {
         fwrite(buffer, 1, size, pf);
         fclose(pf);
         return 1;
     }
+	PX_printf("save file %s failed:error: %s\n", path, strerror(errno));
     return 0;
 }
 
@@ -27,8 +67,10 @@ PX_IO_Data PX_LoadFileToIOData(const char path[])
     
     PX_IO_Data io;
     int fileoft=0;
+    char endl;
     FILE *pf=fopen(path, "rb");
     int filesize;
+    int reservedsize=0;
     if (!pf)
     {
         goto _ERROR;
@@ -37,15 +79,36 @@ PX_IO_Data PX_LoadFileToIOData(const char path[])
     filesize=ftell(pf);
     fseek(pf, 0, SEEK_SET);
 
-    io.buffer=(unsigned char *)malloc(filesize+1);
-    if (!io.buffer)
+    if (filesize<=0)
     {
+        fclose(pf);
         goto _ERROR;
     }
 
-    while (!feof(pf))
+    io.buffer=(unsigned char *)malloc(filesize+1);
+    if (!io.buffer)
     {
-        fileoft += (int)fread(io.buffer+fileoft, 1, 1024, pf);
+        fclose(pf);
+        goto _ERROR;
+    }
+    reservedsize=filesize;
+    while (reservedsize>0)
+    {
+        int readsize;
+        if (reservedsize>1024)
+            readsize= (int)fread(io.buffer+fileoft, 1, 1024, pf);
+        else
+            readsize= (int)fread(io.buffer+fileoft, 1, reservedsize, pf);
+
+        reservedsize -= readsize;
+        fileoft += readsize;
+    }
+    endl=fread(&endl, 1, 1, pf);
+    if(endl)
+    {
+        fclose(pf);
+        free(io.buffer);
+        goto _ERROR;//file is still writing
     }
     fclose(pf);
 
@@ -80,9 +143,7 @@ int PX_FileExist(const char path[])
 }
 
 
-
-
-int PX_GetDirectoryFileCount(const char path[], PX_FILEENUM_TYPE type, const char *filter)
+int PX_FileGetDirectoryFileCount(const char path[], PX_FILEENUM_TYPE type, const char *filter)
 {
     struct dirent* ent = NULL;
     int count=0;
@@ -119,7 +180,19 @@ int PX_GetDirectoryFileCount(const char path[], PX_FILEENUM_TYPE type, const cha
                 break;
             case PX_FILEENUM_TYPE_FILE:
             {
-                if (ent->d_type == DT_REG)
+                char fullpath[260]={0};
+                struct stat file_stat;
+                strcpy(fullpath, path);
+                strcat(fullpath, "/");
+                strcat(fullpath, ent->d_name);
+                //get file type
+                if (stat(fullpath, &file_stat) < 0)
+                {
+                    printf("get file stat failed %s\n", fullpath);
+                    continue;
+                }
+
+                if (S_ISREG(file_stat.st_mode))
                 {
                     if (filter&&filter[0])
                     {
@@ -142,7 +215,18 @@ int PX_GetDirectoryFileCount(const char path[], PX_FILEENUM_TYPE type, const cha
                 break;
             case PX_FILEENUM_TYPE_FOLDER:
             {
-                if (ent->d_type == DT_DIR)
+                char fullpath[260]={0};
+                struct stat file_stat;
+                strcpy(fullpath, path);
+                strcat(fullpath, "/");
+                strcat(fullpath, ent->d_name);
+                //get file type
+                if (stat(fullpath, &file_stat) < 0)
+                {
+                    continue;
+                }
+
+                if (S_ISDIR(file_stat.st_mode))
                 {
                     if (filter&&filter[0])
                     {
@@ -162,10 +246,21 @@ int PX_GetDirectoryFileCount(const char path[], PX_FILEENUM_TYPE type, const cha
                     }
                 }
             }
-                break;
+            break;
             case PX_FILEENUM_TYPE_DEVICE:
             {
-                if (ent->d_type == DT_CHR)
+                char fullpath[260]={0};
+                struct stat file_stat;
+                strcpy(fullpath, path);
+                strcat(fullpath, "/");
+                strcat(fullpath, ent->d_name);
+                //get file type
+                if (stat(fullpath, &file_stat) < 0)
+                {
+                    continue;
+                }
+
+                if (S_ISCHR(file_stat.st_mode))
                 {
                     if (filter&&filter[0])
                     {
@@ -188,7 +283,7 @@ int PX_GetDirectoryFileCount(const char path[], PX_FILEENUM_TYPE type, const cha
     return  count;
 }
 
-int PX_GetDirectoryFileName(const char path[], int count, char *FileName[260], PX_FILEENUM_TYPE type, const char *filter)
+int PX_FileGetDirectoryFileName(const char path[], int count, char FileName[][260], PX_FILEENUM_TYPE type, const char *filter)
 {
     struct dirent* ent = NULL;
     int index=0;
@@ -203,7 +298,7 @@ int PX_GetDirectoryFileName(const char path[], int count, char *FileName[260], P
     {
         if (index>=count)
         {
-            return index;
+            break;
         }
 
         switch (type)
@@ -229,10 +324,22 @@ int PX_GetDirectoryFileName(const char path[], int count, char *FileName[260], P
                     index++;
                 }
             }
-                break;
+            break;
             case PX_FILEENUM_TYPE_FILE:
             {
-                if (ent->d_type == DT_REG)
+                char fullpath[260]={0};
+                struct stat file_stat;
+                strcpy(fullpath, path);
+                strcat(fullpath, "/");
+                strcat(fullpath, ent->d_name);
+                //get file type
+                if (stat(fullpath, &file_stat) < 0)
+                {
+                    printf("get file stat failed %s\n", fullpath);
+                    continue;
+                }
+
+                if (S_ISREG(file_stat.st_mode))
                 {
                     if (filter&&filter[0])
                     {
@@ -254,10 +361,21 @@ int PX_GetDirectoryFileName(const char path[], int count, char *FileName[260], P
                     }
                 }
             }
-                break;
+            break;
             case PX_FILEENUM_TYPE_FOLDER:
             {
-                if (ent->d_type == DT_DIR)
+                char fullpath[260]={0};
+                struct stat file_stat;
+                strcpy(fullpath, path);
+                strcat(fullpath, "/");
+                strcat(fullpath, ent->d_name);
+                //get file type
+                if (stat(fullpath, &file_stat) < 0)
+                {
+                    continue;
+                }
+
+                if (S_ISDIR(file_stat.st_mode))
                 {
                     if (filter&&filter[0])
                     {
@@ -282,7 +400,18 @@ int PX_GetDirectoryFileName(const char path[], int count, char *FileName[260], P
                 break;
             case PX_FILEENUM_TYPE_DEVICE:
             {
-                if (ent->d_type == DT_CHR)
+                char fullpath[260]={0};
+                struct stat file_stat;
+                strcpy(fullpath, path);
+                strcat(fullpath, "/");
+                strcat(fullpath, ent->d_name);
+                //get file type
+                if (stat(fullpath, &file_stat) < 0)
+                {
+                    continue;
+                }
+
+                if (S_ISCHR(file_stat.st_mode))
                 {
                     if (filter&&filter[0])
                     {
@@ -521,6 +650,7 @@ px_bool PX_LoadLiveFromFile(px_memorypool *mp,PX_LiveFramework *pliveframework, 
 
 
 
+
 px_bool PX_LoadScriptInstanceFromFile(px_memorypool *mp,PX_VM *ins,const px_char path[])
 {
 	PX_IO_Data io=PX_LoadFileToIOData(path);
@@ -651,37 +781,37 @@ _ERROR:
 
 px_bool PX_LoadGifFromFile(px_memorypool* mp, px_gif* gif, const px_char path[])
 {
-	PX_IO_Data io = PX_LoadFileToIOData((px_char*)path);
-	if (!io.size)
-	{
-		return PX_FALSE;
-	}
+    PX_IO_Data io = PX_LoadFileToIOData((px_char*)path);
+    if (!io.size)
+    {
+        return PX_FALSE;
+    }
 
-	if(!PX_GifCreate(mp,gif,io.buffer, io.size))goto _ERROR;
+    if (!PX_GifCreate(mp, gif, io.buffer, io.size))goto _ERROR;
 
-	PX_FreeIOData(&io);
-	return PX_TRUE;
+    PX_FreeIOData(&io);
+    return PX_TRUE;
 _ERROR:
-	PX_FreeIOData(&io);
-	return PX_FALSE;
+    PX_FreeIOData(&io);
+    return PX_FALSE;
 }
 
 px_bool PX_LoadLive2DFromFile(px_memorypool* mp, PX_LiveFramework* liveframework, const px_char path[])
 {
-	PX_IO_Data io = PX_LoadFileToIOData((px_char*)path);
-	if (!io.size)
-	{
-		return PX_FALSE;
-	}
+    PX_IO_Data io = PX_LoadFileToIOData((px_char*)path);
+    if (!io.size)
+    {
+        return PX_FALSE;
+    }
 
-	if (!PX_LiveFrameworkImport(mp,liveframework,io.buffer,io.size))goto _ERROR;
+    if (!PX_LiveFrameworkImport(mp, liveframework, io.buffer, io.size))goto _ERROR;
 
 
-	PX_FreeIOData(&io);
-	return PX_TRUE;
+    PX_FreeIOData(&io);
+    return PX_TRUE;
 _ERROR:
-	PX_FreeIOData(&io);
-	return PX_FALSE;
+    PX_FreeIOData(&io);
+    return PX_FALSE;
 }
 
 px_bool PX_LoadFontModuleFromTTF(px_memorypool *mp,PX_FontModule* fm, const px_char Path[], PX_FONTMODULE_CODEPAGE codepage, px_int fontsize)
@@ -696,7 +826,6 @@ _ERROR:
 	PX_FreeIOData(&io);
 	return PX_FALSE;
 }
-
 px_bool PX_LoadJsonFromJsonFile(px_memorypool* mp, PX_Json* json, const px_char* path)
 {
 	PX_IO_Data io = PX_LoadFileToIOData((px_char*)path);

@@ -1,0 +1,3 @@
+#ifndef PX_SYNTAX_IFNDEF_H
+#define PX_SYNTAX_IFNDEF_H
+#endif // !PX_SYNTAX_IFNDEF_H

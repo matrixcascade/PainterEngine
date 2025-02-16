@@ -155,6 +155,11 @@ px_void PX_SurfaceClear(px_surface *psurface, px_int left, px_int top, px_int ri
 		top=bottom;
 		bottom=mid;
 	}
+	if (right<0||left>psurface->width-1||top>psurface->height-1||bottom<0)
+	{
+		return;
+	}
+
 	if (left<0)
 	{
 		left=0;

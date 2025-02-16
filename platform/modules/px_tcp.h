@@ -21,7 +21,7 @@ typedef struct
 typedef struct
 {
 	unsigned int listenPort;
-	unsigned int socket;
+	int socket;
 	PX_TCP_IP_TYPE type;
 	PX_TCP_ADDR connectAddr;
 }PX_TCP;

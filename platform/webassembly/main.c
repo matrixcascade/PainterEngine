@@ -179,6 +179,8 @@ load_file_info=info;
 	}
 }
 
+px_int last_screen_width=0,last_screen_height=0;
+
 void mainloop(void *ptr)
 {
 	px_dword elpased;
@@ -188,6 +190,15 @@ void mainloop(void *ptr)
 
 	elpased=timecurrent-lastupdatetime;
 	lastupdatetime=timecurrent;
+
+	if(last_screen_width!=App.runtime.surface_width||last_screen_height!=App.runtime.surface_height)
+	{
+		SDL_FreeSurface(screen);
+		screen = SDL_SetVideoMode(App.runtime.surface_width, App.runtime.surface_height, 32, SDL_SWSURFACE);
+		last_screen_width=App.runtime.surface_width;
+		last_screen_height=App.runtime.surface_height;
+	}
+
 
 	PX_ApplicationUpdate(&App,elpased);
 	PX_ApplicationRender(&App,elpased);
@@ -411,6 +422,13 @@ int main(int argc, char *argv[])
 	}
 	printf("SDL Create surface %d %d\n",App.runtime.surface_width,App.runtime.surface_height);
 	screen = SDL_SetVideoMode(App.runtime.surface_width, App.runtime.surface_height, 32, SDL_SWSURFACE);
+	if (screen==PX_NULL)
+	{
+		printf("SDL Create surface failed.\n");
+		return PX_FALSE;
+	}
+	last_screen_width=App.runtime.surface_width;
+	last_screen_height=App.runtime.surface_height;
 	lastupdatetime=SDL_GetTicks();
 
 	emscripten_set_main_loop_arg(mainloop, 0, -1, 1);	

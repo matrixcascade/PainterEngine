@@ -154,6 +154,7 @@ static px_void PX_SelectbarOnCursorDown(PX_Object *pObject,px_float x,px_float y
 		if(PX_isPointInRect(PX_POINT(x,y,0),PX_RECT(objx,objy,objWidth,objHeight)))
 		{
 			pSelectbar->activating=PX_TRUE;
+			PX_ObjectExecuteEvent(pObject,PX_OBJECT_BUILD_EVENT(PX_OBJECT_EVENT_ACTIVATING));
 			PX_ObjectSetFocus(pObject);
 		}
 	}
@@ -258,7 +259,38 @@ static PX_OBJECT_RENDER_FUNCTION(PX_SelectbarRender)
 		if (pSelectBar->selectIndex>=0&&pSelectBar->selectIndex<pSelectBar->Items.size)
 		{
 			PX_Object_SelectBar_Item *pItem=PX_VECTORAT(PX_Object_SelectBar_Item,&pSelectBar->Items,pSelectBar->selectIndex);
-			PX_FontModuleDrawText(psurface,pSelectBar->fontmodule,(px_int)(objx+objHeight/2+1),(px_int)(objy+objHeight/2),PX_ALIGN_LEFTMID,pItem->Text,pSelectBar->fontColor);
+			switch (pSelectBar->text_align)
+			{
+				case PX_ALIGN_LEFTTOP:
+				PX_FontModuleDrawText(psurface,pSelectBar->fontmodule,(px_int)objx+2,(px_int)(objy+2), pSelectBar->text_align,pItem->Text,pSelectBar->fontColor);
+				break;
+				case PX_ALIGN_LEFTMID:
+				PX_FontModuleDrawText(psurface,pSelectBar->fontmodule,(px_int)objx+2,(px_int)(objy+objHeight/2), pSelectBar->text_align,pItem->Text,pSelectBar->fontColor);
+				break;
+				case PX_ALIGN_LEFTBOTTOM:
+				PX_FontModuleDrawText(psurface,pSelectBar->fontmodule,(px_int)objx+2,(px_int)(objy+objHeight-2), pSelectBar->text_align,pItem->Text,pSelectBar->fontColor);
+				break;
+				case PX_ALIGN_MIDTOP:
+				PX_FontModuleDrawText(psurface,pSelectBar->fontmodule,(px_int)(objx+objWidth/2),(px_int)(objy+2), pSelectBar->text_align,pItem->Text,pSelectBar->fontColor);
+				break;
+				case PX_ALIGN_CENTER:
+				PX_FontModuleDrawText(psurface,pSelectBar->fontmodule,(px_int)(objx+objWidth/2),(px_int)(objy+objHeight/2), pSelectBar->text_align,pItem->Text,pSelectBar->fontColor);
+				break;
+				case PX_ALIGN_MIDBOTTOM:
+				PX_FontModuleDrawText(psurface,pSelectBar->fontmodule,(px_int)(objx+objWidth/2),(px_int)(objy+objHeight-2), pSelectBar->text_align,pItem->Text,pSelectBar->fontColor);
+				break;
+				case PX_ALIGN_RIGHTTOP:
+				PX_FontModuleDrawText(psurface,pSelectBar->fontmodule,(px_int)(objx+objWidth-2),(px_int)(objy+2), pSelectBar->text_align,pItem->Text,pSelectBar->fontColor);
+				break;
+				case PX_ALIGN_RIGHTMID:
+				PX_FontModuleDrawText(psurface,pSelectBar->fontmodule,(px_int)(objx+objWidth-2),(px_int)(objy+objHeight/2), pSelectBar->text_align,pItem->Text,pSelectBar->fontColor);
+				break;
+				case PX_ALIGN_RIGHTBOTTOM:
+				PX_FontModuleDrawText(psurface,pSelectBar->fontmodule,(px_int)(objx+objWidth-2),(px_int)(objy+objHeight-2), pSelectBar->text_align,pItem->Text,pSelectBar->fontColor);
+				break;
+				default:
+					break;
+			}
 		}
 	} while (0);
 
@@ -300,12 +332,38 @@ static PX_OBJECT_RENDER_FUNCTION(PX_SelectbarRender)
 					);
 			}
 
-			PX_FontModuleDrawText(psurface,pSelectBar->fontmodule,(px_int)(objx+objHeight/2+1),
-				(px_int)(objy+objHeight+(i*pSelectBar->ItemHeight)+pSelectBar->ItemHeight/2),
-				PX_ALIGN_LEFTMID,
-				pItem->Text,
-				pSelectBar->fontColor
-				);
+			switch (pSelectBar->text_align)
+			{
+				case PX_ALIGN_LEFTTOP:
+				PX_FontModuleDrawText(psurface,pSelectBar->fontmodule,(px_int)objx+2,(px_int)(objy+objHeight+i*pSelectBar->ItemHeight+2), pSelectBar->text_align,pItem->Text,pSelectBar->fontColor);
+				break;
+				case PX_ALIGN_LEFTMID:
+				PX_FontModuleDrawText(psurface,pSelectBar->fontmodule,(px_int)objx+2,(px_int)(objy+objHeight+i*pSelectBar->ItemHeight+pSelectBar->ItemHeight/2), pSelectBar->text_align,pItem->Text,pSelectBar->fontColor);
+				break;
+				case PX_ALIGN_LEFTBOTTOM:
+				PX_FontModuleDrawText(psurface,pSelectBar->fontmodule,(px_int)objx+2,(px_int)(objy+objHeight+(i+1)*pSelectBar->ItemHeight-2), pSelectBar->text_align,pItem->Text,pSelectBar->fontColor);
+				break;
+				case PX_ALIGN_MIDTOP:
+				PX_FontModuleDrawText(psurface,pSelectBar->fontmodule,(px_int)(objx+objWidth/2),(px_int)(objy+objHeight+i*pSelectBar->ItemHeight+2), pSelectBar->text_align,pItem->Text,pSelectBar->fontColor);
+				break;
+				case PX_ALIGN_CENTER:
+				PX_FontModuleDrawText(psurface,pSelectBar->fontmodule,(px_int)(objx+objWidth/2),(px_int)(objy+objHeight+i*pSelectBar->ItemHeight+pSelectBar->ItemHeight/2), pSelectBar->text_align,pItem->Text,pSelectBar->fontColor);
+				break;
+				case PX_ALIGN_MIDBOTTOM:
+				PX_FontModuleDrawText(psurface,pSelectBar->fontmodule,(px_int)(objx+objWidth/2),(px_int)(objy+objHeight+(i+1)*pSelectBar->ItemHeight-2), pSelectBar->text_align,pItem->Text,pSelectBar->fontColor);
+				break;
+				case PX_ALIGN_RIGHTTOP:
+				PX_FontModuleDrawText(psurface,pSelectBar->fontmodule,(px_int)(objx+objWidth-2),(px_int)(objy+objHeight+i*pSelectBar->ItemHeight+2), pSelectBar->text_align,pItem->Text,pSelectBar->fontColor);
+				break;
+				case PX_ALIGN_RIGHTMID:
+				PX_FontModuleDrawText(psurface,pSelectBar->fontmodule,(px_int)(objx+objWidth-2),(px_int)(objy+objHeight+i*pSelectBar->ItemHeight+pSelectBar->ItemHeight/2), pSelectBar->text_align,pItem->Text,pSelectBar->fontColor);
+				break;
+				case PX_ALIGN_RIGHTBOTTOM:
+				PX_FontModuleDrawText(psurface,pSelectBar->fontmodule,(px_int)(objx+objWidth-2),(px_int)(objy+objHeight+(i+1)*pSelectBar->ItemHeight-2), pSelectBar->text_align,pItem->Text,pSelectBar->fontColor);
+				break;
+			default:
+				break;
+			}
 		}
 		PX_GeoDrawBorder(psurface,
 			(px_int)objx,
@@ -366,13 +424,14 @@ PX_Object* PX_Object_SelectBarAttachObject(PX_Object* pObject,px_int attachIndex
 		pSelectbar->ItemHeight = __PX_FONT_HEIGHT;
 	}
 
-	pSelectbar->maxDisplayCount = 16;
+	pSelectbar->maxDisplayCount = 4;
 	pSelectbar->backgroundColor = PX_OBJECT_UI_DEFAULT_BACKGROUNDCOLOR;
 	pSelectbar->cursorColor = PX_OBJECT_UI_DEFAULT_CURSORCOLOR;
 	pSelectbar->fontColor = PX_OBJECT_UI_DEFAULT_FONTCOLOR;
 	pSelectbar->borderColor = PX_OBJECT_UI_DEFAULT_BORDERCOLOR;
 	pSelectbar->activating = PX_FALSE;
 	pSelectbar->style = PX_OBJECT_SELECTBAR_STYLE_RECT;
+	pSelectbar->text_align = PX_ALIGN_LEFTMID;
 	PX_VectorInitialize(mp, &pSelectbar->Items, sizeof(PX_Object_SelectBar_Item), 16);
 
 	PX_ObjectRegisterEventEx(pObject, PX_OBJECT_EVENT_CURSORDOWN, PX_OBJECT_TYPE_SELECTBAR, PX_SelectbarOnCursorEvent, PX_NULL);
@@ -577,4 +636,14 @@ px_void PX_Object_SelectBarSetMaxDisplayCount(PX_Object* pObject, px_int i)
 	{
 		pSelectBar->maxDisplayCount = i;
 	}
+}
+
+px_void PX_Object_SelectBarSetTextAlign(PX_Object* pObject, PX_ALIGN align)
+{
+	PX_Object_SelectBar* pSelectBar = PX_Object_GetSelectBar(pObject);
+	if (pSelectBar)
+	{
+		pSelectBar->text_align = align;
+	}
+	
 }

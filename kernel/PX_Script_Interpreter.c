@@ -91,7 +91,7 @@ px_bool PX_ScriptCompilerLoad(PX_SCRIPT_LIBRARY *lib,const px_char *code)
 	PX_LexerRegisterContainer(&lexer,"\"","\"");
 	PX_LexerSetTokenCase(&lexer,PX_LEXER_LEXEME_CASE_UPPER);
 
-	if(!PX_LexerLoadSourceFromMemory(&lexer,code))
+	if(!PX_LexerLoadSourceWithPresort(&lexer,code))
 	{
 		PX_LexerFree(&lexer);
 		PX_LOG("Failed to load source from memory\n");
@@ -6812,7 +6812,7 @@ static px_bool PX_ScriptParseExpression(PX_ScriptInterpreter *analysis,px_char *
 	PX_LexerSetNumericMatch(&lexer,PX_TRUE);
 
 
-	if(!PX_LexerLoadSourceFromMemory(&lexer,expr))
+	if(!PX_LexerLoadSourceWithPresort(&lexer,expr))
 		return PX_FALSE;
 
 	PX_VectorInitialize(analysis->mp,&stream,sizeof(PX_SCRIPT_EXPR_STREAM),32);
@@ -9783,7 +9783,7 @@ px_bool PX_ScriptCompilerCompile(PX_SCRIPT_LIBRARY *lib,const px_char *name,px_s
 	PX_LexerSetTokenCase(&analysis.lexer,PX_LEXER_LEXEME_CASE_UPPER);
 
 
-	PX_LexerLoadSourceFromMemory(&analysis.lexer,codes.buffer);
+	PX_LexerLoadSourceWithPresort(&analysis.lexer,codes.buffer);
 	PX_StringFree(&codes);
 
 	PX_VectorInitialize(lib->mp,&analysis.v_variablesGlobalTable,sizeof(PX_SCRIPT_VARIABLES),1);

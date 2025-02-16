@@ -17,17 +17,23 @@ PX_OBJECT_EVENT_FUNCTION(PX_Object_ScrollArea_EventDispatcher)
 		return;
 	}
 
-	if (e.Event==PX_OBJECT_EVENT_EXECUTE||e.Event==PX_OBJECT_EVENT_CURSORDRAG||e.Event==PX_OBJECT_EVENT_CURSORDOWN||e.Event==PX_OBJECT_EVENT_CURSORUP||e.Event==PX_OBJECT_EVENT_CURSORMOVE)
-	{
-
-		if (!PX_ObjectIsPointInRegion(pObject,PX_Object_Event_GetCursorX(e),PX_Object_Event_GetCursorY(e)))
-		{
-			return;
-		}
-		PX_Object_Event_SetCursorX(&e,PX_Object_Event_GetCursorX(e)-objx);
-		PX_Object_Event_SetCursorY(&e,PX_Object_Event_GetCursorY(e)-objy);
-	}
+	e=PX_Object_Event_CursorOffset(e, PX_POINT(-objx, -objy, 0));
 	PX_ObjectPostEvent(pSA->root,e);
+	if (pSA->root->OnFocus)
+	{
+		if (!pObject->OnFocus)
+		{
+			PX_ObjectSetFocus(pObject);
+		}
+	}
+	else
+	{
+		if (pObject->OnFocus)
+		{
+			PX_ObjectClearFocus(pObject);
+		}
+	}
+
 }
 
 px_void  PX_Object_ScrollAreaLinkChild(PX_Object *parent,PX_Object *child)
@@ -48,6 +54,39 @@ PX_OBJECT_EVENT_FUNCTION(PX_Object_ScrollAreaVSliderChanged)
 	px_int value=PX_Object_SliderBarGetValue(pObject);
 	PX_Object_ScrollArea *pSA=(PX_Object_ScrollArea *)ptr;
 	pSA->root->y=-(px_float)value;
+}
+
+PX_OBJECT_EVENT_FUNCTION(PX_Object_ScrollAreaWheel)
+{
+	PX_Object_ScrollArea *pSA=PX_Object_GetScrollArea(pObject);
+	px_int minz,maxz;
+	if (!pSA->vscroll->Visible)
+	{
+		return;
+	}
+	if (pSA->root->OnFocus)
+	{
+		return;
+	}
+	PX_Object_SliderBarGetRange(pSA->vscroll,&minz,&maxz);
+
+	if (PX_ObjectIsCursorInRegion(pObject, e))
+	{
+		px_float z = PX_Object_Event_GetCursorZ(e);
+		pSA->root->y += z / 5;
+		if (-pSA->root->y<minz)
+		{
+			pSA->root->y = -minz*1.f;
+		}
+
+		if (-pSA->root->y> maxz)
+		{
+			pSA->root->y = -maxz*1.f;
+		}
+
+		PX_Object_SliderBarSetValue(pSA->vscroll, -(px_int)pSA->root->y);
+		return;
+	}
 }
 
 PX_OBJECT_RENDER_FUNCTION(PX_Object_ScrollAreaRender)
@@ -73,6 +112,14 @@ PX_OBJECT_RENDER_FUNCTION(PX_Object_ScrollAreaRender)
 	if (pSA->surface.height != (px_int)objHeight || pSA->surface.width != (px_int)objWidth)
 	{
 		PX_SurfaceFree(&pSA->surface);
+		if (objWidth==0)
+		{
+			objWidth = 1;
+		}
+		if (objHeight == 0)
+		{
+			objHeight = 1;
+		}
 		if (!PX_SurfaceCreate(pObject->mp, (px_int)objWidth, (px_int)objHeight, &pSA->surface))
 		{
 			return;
@@ -85,8 +132,6 @@ PX_OBJECT_RENDER_FUNCTION(PX_Object_ScrollAreaRender)
 
 	//draw
 	PX_ObjectRender(&pSA->surface, pSA->root, elapsed);
-	PX_SurfaceRender(psurface, &pSA->surface, (px_int)objx, (px_int)objy, PX_ALIGN_LEFTTOP, PX_NULL);
-
 	//Draw Border
 	if (pSA->bBorder)
 		PX_GeoDrawBorder(&pSA->surface, 0, 0, (px_int)objWidth - 1, (px_int)objHeight - 1, 1, pSA->borderColor);
@@ -120,7 +165,7 @@ PX_Object* PX_Object_ScrollAreaAttachObject(PX_Object* pObject,px_int attachInde
 	PX_ASSERTIF(pSA == PX_NULL);
 
 
-	pSA->BackgroundColor = PX_COLOR(0, 0, 0, 0);
+	pSA->BackgroundColor = PX_COLOR_BACKGROUNDCOLOR;
 	pSA->bBorder = PX_TRUE;
 	pSA->borderColor = PX_COLOR(255, 0, 0, 0);
 	//root
@@ -134,7 +179,8 @@ PX_Object* PX_Object_ScrollAreaAttachObject(PX_Object* pObject,px_int attachInde
 	PX_ObjectRegisterEventEx(pObject, PX_OBJECT_EVENT_ANY, PX_OBJECT_TYPE_SCROLLAREA, PX_Object_ScrollArea_EventDispatcher, PX_NULL);
 	PX_ObjectRegisterEventEx(pSA->hscroll, PX_OBJECT_EVENT_VALUECHANGED, PX_OBJECT_TYPE_SCROLLAREA, PX_Object_ScrollAreaHSliderChanged, pSA);
 	PX_ObjectRegisterEventEx(pSA->vscroll, PX_OBJECT_EVENT_VALUECHANGED, PX_OBJECT_TYPE_SCROLLAREA, PX_Object_ScrollAreaVSliderChanged, pSA);
-
+	pSA->scrollAction= PX_ObjectRegisterEventEx(pObject, PX_OBJECT_EVENT_CURSORWHEEL, PX_OBJECT_TYPE_SCROLLAREA, PX_Object_ScrollAreaWheel, PX_NULL);
+	pSA->scrollAction->enable = PX_FALSE;
 	pObject->Func_ObjectLinkChild = PX_Object_ScrollAreaLinkChild;
 	PX_Object_ScrollAreaUpdateRange(pObject);
 	return pObject;
@@ -177,6 +223,13 @@ px_bool PX_Object_ScrollAreaSetBackgroundColor(PX_Object* pObj, px_color color)
 	pSA=PX_Object_GetScrollArea(pObj);
 	pSA->BackgroundColor=color;
 	return PX_TRUE;
+}
+
+px_void PX_Object_ScrollAreaScrollEnable(PX_Object* pObj, px_bool bEnable)
+{
+	PX_Object_ScrollArea* pSA;
+	pSA = PX_Object_GetScrollArea(pObj);
+	pSA->scrollAction->enable=bEnable;
 }
 
 //get background color
@@ -295,7 +348,7 @@ px_void PX_Object_ScrollAreaUpdateRange( PX_Object *pObject)
 				pSA->hscroll->Visible=PX_TRUE;
 				PX_Object_SliderBarSetSliderButtonLength(pSA->hscroll,(px_int)btnW);
 			}
-			PX_Object_SliderBarSetRange(pSA->hscroll,(px_int)left,(px_int)(right-objWidth));
+			PX_Object_SliderBarSetRange(pSA->hscroll,(px_int)left,(px_int)(right-objWidth+32));
 			PX_Object_SliderBarSetValue(pSA->hscroll, (px_int)left);
 		}
 		else
@@ -322,9 +375,9 @@ px_void PX_Object_ScrollAreaUpdateRange( PX_Object *pObject)
 				PX_Object_SliderBarSetSliderButtonLength(pSA->vscroll,(px_int)btnH);
 			}
 			if(pSA->hscroll->Visible)
-				PX_Object_SliderBarSetRange(pSA->vscroll, (px_int)top, (px_int)(bottom - objHeight+36));
+				PX_Object_SliderBarSetRange(pSA->vscroll, (px_int)top, (px_int)(bottom - objHeight+36+128));
 			else
-				PX_Object_SliderBarSetRange(pSA->vscroll, (px_int)top, (px_int)(bottom - objHeight));
+				PX_Object_SliderBarSetRange(pSA->vscroll, (px_int)top, (px_int)(bottom - objHeight+128));
 			PX_Object_SliderBarSetValue(pSA->vscroll, (px_int)top);
 		}
 		else
@@ -334,6 +387,55 @@ px_void PX_Object_ScrollAreaUpdateRange( PX_Object *pObject)
 		}
 		
 	} while (0);
+}
+
+px_void PX_Object_ScrollAreaVerticalReorder(PX_Object* pScrollAreaObject,px_int spacer)
+{
+	PX_Object_ScrollArea *pSA;
+	PX_Object *pObject;
+	px_float ofty = spacer*1.f;
+	pSA=PX_Object_GetScrollArea(pScrollAreaObject);
+	if (!pSA->root)
+	{
+		PX_ASSERT();
+		return;
+	}
+	pObject=pSA->root->pChilds;
+	while (pObject)
+	{
+		if (pObject->Visible)
+		{
+			pObject->y = ofty;
+			ofty += pObject->Height + spacer;
+		}
+		pObject = pObject->pNextBrother;
+	}
+	PX_Object_ScrollAreaUpdateRange(pScrollAreaObject);
+}
+
+px_void PX_Object_ScrollAreaHorizontalReorder(PX_Object* pObject, px_int spacer)
+{
+	PX_Object_ScrollArea *pSA;
+	PX_Object *pChild;
+	px_float oftx = spacer*1.f;
+	pSA=PX_Object_GetScrollArea(pObject);
+	if (!pSA->root)
+	{
+		PX_ASSERT();
+		return;
+	}
+	pChild=pSA->root->pChilds;
+	while (pChild)
+	{
+		if (pChild->Visible)
+		{
+			pChild->x = oftx;
+			oftx += pChild->Width + spacer;
+		}
+		pChild = pChild->pNextBrother;
+	}
+	PX_Object_ScrollAreaUpdateRange(pObject);
+	
 }
 
 

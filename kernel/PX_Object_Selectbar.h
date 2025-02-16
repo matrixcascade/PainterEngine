@@ -32,6 +32,7 @@ typedef struct
 	px_color borderColor;
 	px_int   selectIndex;
 	PX_Object *sliderBar;
+	PX_ALIGN text_align;
 	PX_OBJECT_SELECTBAR_STYLE style;
 }PX_Object_SelectBar;
 
@@ -53,6 +54,7 @@ px_void PX_Object_SelectBarSetCursorColor(PX_Object *pObject,px_color color);
 px_void PX_Object_SelectBarSetBorderColor(PX_Object *pObject,px_color color);
 px_void PX_Object_SelectBarSetBackgroundColor(PX_Object *pObject,px_color color);
 px_void PX_Object_SelectBarSetMaxDisplayCount(PX_Object* pObject, px_int color);
+px_void PX_Object_SelectBarSetTextAlign(PX_Object *pObject,PX_ALIGN align);
 
 #endif
 

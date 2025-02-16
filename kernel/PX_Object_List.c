@@ -436,9 +436,9 @@ px_void * PX_Object_ListGetCurrentSelectData(PX_Object* pObject)
 	return PX_NULL;
 }
 
-px_int PX_Object_ListAdd(PX_Object *pListObj,px_void *ptr)
+px_int PX_Object_ListAdd(PX_Object *pObject,px_void *ptr)
 {
-	PX_Object_List  *pList=PX_Object_GetList(pListObj);
+	PX_Object_List  *pList=PX_Object_GetList(pObject);
 	if(pList)
 	{
 		if(PX_VectorPushback(&pList->pData,&ptr))

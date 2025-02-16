@@ -257,7 +257,7 @@ BOOL PX_CreateWindow( int surfaceWidth,int surfaceHeight,int windowWidth,int win
 	}
 	break;
 	default:
-		style = WS_OVERLAPPED | WS_SYSMENU | WS_MAXIMIZEBOX ;
+		style = WS_OVERLAPPED | WS_SYSMENU | WS_SIZEBOX;
 		window_x = CW_USEDEFAULT;
 		window_y = CW_USEDEFAULT;
 		break;

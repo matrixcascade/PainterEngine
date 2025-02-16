@@ -1,6 +1,8 @@
 #include "runtime/PainterEngine_Application.h"
 #include "platform/modules/px_time.h"
 #include "platform/modules/px_sockethub.h"
+#include "platform/modules/px_httpserver.h"
+#include "px_visualos_webruntime.h"
 
 #define PX_VISUALOS_OPEN		1
 #define PX_VISUALOS_PAUSE		2
@@ -12,6 +14,7 @@
 #define PX_VISUALOS_COOKIE     "0000000000000000"
 #endif
 PX_SocketHub SocketHub;
+PX_HttpServer HttpServer;
 px_mutex cache_surface_lock;
 volatile px_dword cache_surface_id = 1;
 volatile px_bool event_lock = PX_FALSE;
@@ -88,6 +91,16 @@ PX_SOCKETHUB_CONNECT_CALLBACK_FUNCTION(OnSocketHubConnect)
 	pNewClient->state=PX_VIRTUALPS_CLIENT_STATE_IDLE;
 	PX_MemoryInitialize(&pNewClient->mp ,&pNewClient->zip_data);
 	PX_SocketHubSetUserPtr(pSocketHub,session,pNewClient);
+	do
+	{
+		px_abi abi;
+		PX_AbiCreateDynamicWriter(&abi, &pNewClient->mp);
+		PX_AbiWrite_string(&abi, "type", "init");
+		PX_AbiWrite_int(&abi, "width", App.runtime.surface_width);
+		PX_AbiWrite_int(&abi, "height", App.runtime.surface_height);
+		PX_SocketHubSend(pSocketHub, session, PX_AbiGetPtr(&abi), PX_AbiGetPtrSize(&abi));
+		PX_AbiFree(&abi);
+	} while (0);
 }
 
 PX_SOCKETHUB_RECEIVE_CALLBACK_FUNCTION(OnSocketHubRecv)
@@ -124,6 +137,14 @@ PX_SOCKETHUB_RECEIVE_CALLBACK_FUNCTION(OnSocketHubRecv)
 		if (pClient->pre_texture.MP)
 			PX_TextureFree(&pClient->pre_texture);
 		PX_memset(&pClient->pre_texture,0,sizeof(pClient->pre_texture));
+		if(pLogin->width==0)
+		{
+			pLogin->width = App.runtime.surface_width;
+		}
+		if (pLogin->height == 0)
+		{
+			pLogin->height = App.runtime.surface_height;
+		}
 		//create texture
 		if(!PX_TextureCreate(&pClient->mp, &pClient->pre_texture, pLogin->width, pLogin->height))
 		{
@@ -181,8 +202,12 @@ PX_SOCKETHUB_RECEIVE_CALLBACK_FUNCTION(OnSocketHubRecv)
 		}PX_VisualOS_Packet_Ping;
 		PX_VisualOS_Packet_Ping *pPing=(PX_VisualOS_Packet_Ping *)data;
 		pPing->time=PX_TimeGetTime();
-		PX_SocketHubSend(pSocketHub,session,(px_byte *)pPing,sizeof(PX_VisualOS_Packet_Ping));
-		printf("Client Ping:session %x\n", *(px_dword*)session);
+		px_abi abi;
+		PX_AbiCreateDynamicWriter(&abi, &pClient->mp);
+		if(PX_AbiWrite_dword(&abi, "time", pPing->time))
+			if(PX_AbiWrite_string(&abi, "type", "ping"))
+				PX_SocketHubSend(pSocketHub, session, PX_AbiGetPtr(&abi), PX_AbiGetPtrSize(&abi));
+		PX_AbiFree(&abi);
 	}
 	break;
 	case PX_VISUALOS_EVENT:
@@ -220,13 +245,19 @@ PX_SOCKETHUB_SEND_CALLBACK_FUNCTION(OnSocketHubSend)
 			PX_MutexLock(&cache_surface_lock);
 			PX_TextureCover(&pClient->cur_texture, &cache_surface, -pClient->x, -pClient->y,PX_ALIGN_LEFTTOP);
 			PX_MutexUnlock(&cache_surface_lock);
-		
 			PX_MemoryClear(&pClient->zip_data);
 			if (PX_TextureDiffZip(&pClient->mp, &pClient->pre_texture, &pClient->cur_texture, &pClient->zip_data))
 			{
+				px_abi senddata_abi;
+				PX_AbiCreateDynamicWriter(&senddata_abi, &pClient->mp);
 				PX_TextureCover(&pClient->pre_texture, &pClient->cur_texture, 0, 0, PX_ALIGN_LEFTTOP);
-				PX_SocketHubSend(pSocketHub, session, pClient->zip_data.buffer, pClient->zip_data.usedsize);
-				printf("Send Frame %d\n",pClient->zip_data.usedsize);
+				PX_AbiWrite_string(&senddata_abi, "type","frame");
+				PX_AbiWrite_int(&senddata_abi, "width", pClient->cur_texture.width);
+				PX_AbiWrite_int(&senddata_abi, "height", pClient->cur_texture.height);
+				PX_AbiWrite_data(&senddata_abi, "data", pClient->zip_data.buffer, pClient->zip_data.usedsize);
+				PX_SocketHubSend(pSocketHub, session, PX_AbiGetPtr(&senddata_abi), PX_AbiGetPtrSize(&senddata_abi));
+				PX_AbiFree(&senddata_abi);
+				
 			}
 			else
 			{
@@ -255,6 +286,75 @@ int  PX_AudioInitialize(PX_SoundPlay* soundPlay)
 	return 0;
 }
 
+int PX_VisualOSInitializeWebServer()
+{
+	if (!PX_HttpServer_Initialize(&HttpServer, 12345))
+	{
+		return 0;
+	}
+	do
+	{
+		px_memory inflate_mem;
+		PX_MemoryInitialize(&App.runtime.mp_static, &inflate_mem);
+		if (PX_RFC1951Inflate(index_html,sizeof(index_html),&inflate_mem))
+		{
+			if(!PX_HttpServer_AddFile(&HttpServer,"/",inflate_mem.buffer,inflate_mem.usedsize))
+				return 0;
+		}
+		else
+		{
+			return 0;
+		}
+		PX_MemoryFree(&inflate_mem);
+	} while (0);
+
+	do
+	{
+		px_memory inflate_mem;
+		PX_MemoryInitialize(&App.runtime.mp_static, &inflate_mem);
+		if (PX_RFC1951Inflate(PainterEngine_data, sizeof(PainterEngine_data), &inflate_mem))
+		{
+			if (!PX_HttpServer_AddFile(&HttpServer, "/PainterEngine.data", inflate_mem.buffer, inflate_mem.usedsize))
+				return 0;
+		}
+		else
+		{
+			return 0;
+		}
+		PX_MemoryFree(&inflate_mem);
+	} while (0);
+
+	do
+	{
+		px_memory inflate_mem;
+		PX_MemoryInitialize(&App.runtime.mp_static, &inflate_mem);
+		if (PX_RFC1951Inflate(PainterEngine_js, sizeof(PainterEngine_js), &inflate_mem))
+		{
+			if (!PX_HttpServer_AddFile(&HttpServer, "/PainterEngine.js", inflate_mem.buffer, inflate_mem.usedsize))
+				return 0;
+		}
+		else
+		{
+			return 0;
+		}
+		PX_MemoryFree(&inflate_mem);
+	} while (0);
+
+	do
+	{
+		px_memory inflate_mem;
+		PX_MemoryInitialize(&App.runtime.mp_static, &inflate_mem);
+		if (PX_RFC1951Inflate(PainterEngine_wasm, sizeof(PainterEngine_wasm), &inflate_mem))
+		{
+			if (!PX_HttpServer_AddFile(&HttpServer, "/PainterEngine.wasm", inflate_mem.buffer, inflate_mem.usedsize))
+				return 0;
+		}
+		PX_MemoryFree(&inflate_mem);
+	} while (0);
+
+	return 1;
+}
+
 int main()
 {
 	px_dword timelasttime=0;
@@ -263,12 +363,18 @@ int main()
 	{
 		return 0;
 	}
-	printf("\nPainterEngine VisualOS Server\n");
+	printf("/////////////////////////////////\n");
+	printf("PainterEngine VisualOS Server\n");
+	printf("/////////////////////////////////\n");
 	if (!PX_SocketHubInitialize(&SocketHub, PX_SocketHub_DEFAULT_TCP_PORT, PX_SocketHub_DEFAULT_WEBSOCKET_PORT, 1024 * 1024 * 8, OnSocketHubConnect, OnSocketHubSend, OnSocketHubRecv, OnSocketHubDisconnect, &App))
 	{
 		return 0;
 	}
-	printf("Server Start\n");
+	
+	if (!PX_VisualOSInitializeWebServer())
+	{
+		return 0;
+	}
 
 	timelasttime=PX_TimeGetTime();
 	while (1)

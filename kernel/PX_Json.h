@@ -46,6 +46,7 @@ PX_Json_Value *PX_JsonGetObjectValue(PX_Json_Value *json_value,const px_char nam
 PX_Json_Value *PX_JsonGetObjectValueByIndex(PX_Json_Value *json_value,px_int i);
 PX_Json_Value* PX_JsonValueGetValue(PX_Json_Value* it, const px_char _payload[]);
 PX_Json_Value* PX_JsonGetValue(PX_Json* json, const px_char payload[]);
+PX_Json_Value* PX_JsonGetValueByIndex(PX_Json* json, px_int index);
 PX_Json_Value * PX_JsonGetArrayValue(PX_Json_Value *value,px_int i);
 
 

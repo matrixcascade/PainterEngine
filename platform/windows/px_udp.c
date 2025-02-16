@@ -228,10 +228,11 @@ unsigned int PX_UDPGetHostByName(const char *host, unsigned int dns_addr)
 			Sleep(200);
 			if (PX_UDPReceived(&udp, &target, content, sizeof(content), &size))
 			{
+				PX_UDPFree(&udp);
 				return (content[size - 1] << 24) + (content[size - 2] << 16) + (content[size - 3] << 8) + (content[size - 4]);
 			}
 		}
-		
+		PX_UDPFree(&udp);
 	}
 	return 0;
 }

@@ -1198,30 +1198,55 @@ px_double PX_acos(px_double x)
 
 px_stringformat PX_STRINGFORMAT_INT(px_int _i)
 {
-	px_stringformat fmt;
+	px_stringformat fmt = {0};
 	fmt.type=PX_STRINGFORMAT_TYPE_INT;
 	fmt._int=_i;
+	return fmt;
+}
+
+px_stringformat PX_STRINGFORMAT_INT_ALIGN(px_int _i,px_int align)
+{
+	px_stringformat fmt = { 0 };
+	fmt.type = PX_STRINGFORMAT_TYPE_INT;
+	fmt._int = _i;
+	fmt.align = align;
 	return fmt;
 }
 
 
 px_stringformat PX_STRINGFORMAT_FLOAT(px_float _f)
 {
-	px_stringformat fmt;
+	px_stringformat fmt = { 0 };
 	fmt.type=PX_STRINGFORMAT_TYPE_FLOAT;
 	fmt._float=_f;
 	return fmt;
 }
 
+px_stringformat PX_STRINGFORMAT_FLOAT_ALIGN(px_float _f,px_int align)
+{
+	px_stringformat fmt = { 0 };
+	fmt.type = PX_STRINGFORMAT_TYPE_FLOAT;
+	fmt._float = _f;
+	fmt.align = align;
+	return fmt;
+}
 
 px_stringformat PX_STRINGFORMAT_STRING(const px_char *_s)
 {
-	px_stringformat fmt;
+	px_stringformat fmt = { 0 };
 	fmt.type=PX_STRINGFORMAT_TYPE_STRING;
 	fmt._pstring=_s;
 	return fmt;
 }
 
+px_stringformat PX_STRINGFORMAT_STRING_ALIGN(const px_char *_s,px_int align)
+{
+	px_stringformat fmt = { 0 };
+	fmt.type = PX_STRINGFORMAT_TYPE_STRING;
+	fmt._pstring = _s;
+	fmt.align = align;
+	return fmt;
+}
 
 px_int PX_sprintf8(px_char *_out_str,px_int str_size,const px_char fmt[], px_stringformat _1, px_stringformat _2, px_stringformat _3, px_stringformat _4,px_stringformat _5, px_stringformat _6, px_stringformat _7, px_stringformat _8)
 {
@@ -1286,7 +1311,7 @@ px_int PX_sprintf8(px_char *_out_str,px_int str_size,const px_char fmt[], px_str
 			}
 			
 		}
-		return length;
+		return length<pstringfmt.align?pstringfmt.align: length ;
 	}
 	PX_memset(_out_str,0,str_size);
 	for (p = fmt;*p; p++) 
@@ -1333,38 +1358,97 @@ px_int PX_sprintf8(px_char *_out_str,px_int str_size,const px_char fmt[], px_str
 		switch (pstringfmt.type)
 		{
 		case PX_STRINGFORMAT_TYPE_INT:
-			tret=PX_itos(pstringfmt._int,10);
-			if(length+PX_strlen(tret.data)<str_size)
+		{
+			px_int slen;
+			tret = PX_itos(pstringfmt._int, 10);
+			slen=PX_strlen(tret.data);
+			if (slen < pstringfmt.align)
 			{
-				PX_strcat(_out_str,tret.data);
-				length+=PX_strlen(tret.data);
+				px_int i;
+				for (i = 0; i < pstringfmt.align - slen; i++)
+				{
+					if (length + 1 < str_size)
+					{
+						_out_str[length] = '0';
+						length++;
+					}
+					else
+						return length;
+				}
+			}
+			if (length + slen < str_size)
+			{
+				PX_strcat(_out_str, tret.data);
+				length += slen;
 			}
 			else
+			{
 				return length;
-			break;
+			}
+		}	
+		break;
 		case PX_STRINGFORMAT_TYPE_FLOAT:
-			tret=PX_ftos(pstringfmt._float,precision);
-			if(length+PX_strlen(tret.data)<str_size)
+		{
+			px_int slen;
+			tret = PX_ftos(pstringfmt._float, precision);
+			slen=PX_strlen(tret.data);
+			if (length + slen < str_size)
 			{
-				PX_strcat(_out_str,tret.data);
-				length+=PX_strlen(tret.data);
+				PX_strcat(_out_str, tret.data);
+				length += slen;
 			}
 			else
 			{
 				return length;
 			}
-			break;
+			if (precision&&slen < pstringfmt.align)
+			{
+				px_int i;
+				for (i = 0; i < pstringfmt.align - slen; i++)
+				{
+					if (length + 1 < str_size)
+					{
+						_out_str[length] = '0';
+
+						length++;
+					}
+					else
+						return length;
+				}
+			}
+
+		}
+		break;
 		case PX_STRINGFORMAT_TYPE_STRING:
-			if(length+PX_strlen(pstringfmt._pstring)<str_size)
+		{
+			px_int slen;
+			slen=PX_strlen(pstringfmt._pstring);
+			
+			if (length + slen < str_size)
 			{
-				PX_strcat(_out_str,pstringfmt._pstring);
-				length+=PX_strlen(pstringfmt._pstring);
+				PX_strcat(_out_str, pstringfmt._pstring);
+				length += slen;
 			}
 			else
 			{
 				return length;
 			}
-			break;
+			if (slen < pstringfmt.align)
+			{
+				px_int i;
+				for (i = 0; i < pstringfmt.align - slen; i++)
+				{
+					if (length + 1 < str_size)
+					{
+						_out_str[length] = ' ';
+						length++;
+					}
+					else
+						return length;
+				}
+			}
+		}
+		break;
 		default:
 			return 0;
 		}
@@ -2732,6 +2816,10 @@ px_void PX_memset(px_void *dst,px_byte byte,px_int size)
 px_void PX_memdwordset(px_void *dst,px_dword dw,px_int count)
 {
 	px_dword *p=(px_dword *)dst;
+	if (p==0)
+	{
+		PX_ASSERT();
+	}
 	while(count--)*p++=dw;
 }
 
@@ -3123,6 +3211,7 @@ px_int PX_strlen(const px_char *dst)
 	while(dst[len++]);
 	return len-1;
 }
+
 
 px_int PX_wstrlen(const px_word *dst)
 {
@@ -4222,6 +4311,18 @@ px_bool PX_strequ(const px_char *src,const px_char *dst)
 	return !ret;
 }
 
+px_bool PX_strequ3(const px_char* src, const px_char* dst,px_int src_size)
+{
+	px_int ret = 0;
+	while (src_size &&!(ret = *(px_uchar*)src - *(px_uchar*)dst) && *src)
+	{
+		src++;
+		dst++;
+		src_size--;
+	}
+	return !ret&& dst[0]=='\0';
+}
+
 
 px_bool PX_strIsNumeric(const px_char *str)
 {
@@ -4330,6 +4431,23 @@ px_bool PX_strIsInt(const px_char *str)
 		return PX_TRUE;
 	}
 	return PX_FALSE;
+}
+
+px_bool PX_strIsInteger(const px_char* str)
+{
+	px_int i;
+	if (str[0] == '\0')
+	{
+		return PX_FALSE;
+	}
+	for (i = 0; i < PX_strlen(str); i++)
+	{
+		if (str[i] < '0' || str[i]>'9')
+		{
+			return PX_FALSE;
+		}
+	}
+	return PX_TRUE;
 }
 
 static px_double __px_pow_i(px_double num,px_int n)
@@ -5805,7 +5923,10 @@ px_uint32 PX_ReadBitsBE(px_uint32* bitpointer, const px_byte* bitstream, px_int 
 	return result;
 }
 
-
+px_int PX_MemoryStreamGetByteSize(PX_MemoryStream* pStream)
+{
+	return pStream->bitpointer / 8;
+}
 
 px_void PX_MemoryStreamInitialize(PX_MemoryStream* pStream, px_byte* bitstream,px_int size)
 {
@@ -5835,6 +5956,43 @@ px_byte PX_MemoryStreamReadBitBE(PX_MemoryStream* pStream)
 		return 0;
 	}
 }
+px_void PX_MemoryStreamWriteBitLE(PX_MemoryStream* pStream,px_byte b)
+{
+	px_int index= pStream->bitpointer / 8;
+	px_int offset = pStream->bitpointer % 8;
+
+	if (index < pStream->size)
+	{
+		if(b)
+		{
+			pStream->bitstream[index] |= 1 << offset;
+		}
+		else
+		{
+			pStream->bitstream[index] &= ~(1 << offset);
+		}
+		pStream->bitpointer++;
+	}
+}
+px_void PX_MemoryStreamWriteBitBE(PX_MemoryStream* pStream, px_byte b)
+{
+	px_int index = pStream->bitpointer / 8;
+	px_int offset = pStream->bitpointer % 8;
+	if (index < pStream->size)
+	{
+		if (b)
+		{
+			pStream->bitstream[index] |= 1 << (7-offset);
+		}
+		else
+		{
+			pStream->bitstream[index] &= ~(1 << (7-offset));
+		}
+		
+		pStream->bitpointer++;
+	}
+}
+
 px_void PX_MemoryStreamAlign(PX_MemoryStream* pStream)
 {
 	pStream->bitpointer = (pStream->bitpointer + 7u) & ~7u;

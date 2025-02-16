@@ -15,9 +15,6 @@ PX_ResourceLibrary *resource_library;
 PX_SoundPlay* soundplay;
 //////////////////////////////////////////////////////////////////////////
 
-
-px_char painterengine_loadbuffer[1024 * 1024 * 8];
-
 px_void PainterEngine_Print(const px_char content[])
 {
 	if (App.object_printer->Visible==PX_FALSE)
@@ -86,6 +83,22 @@ px_void PainterEngine_DrawText(px_int x, px_int y, const px_char text[],PX_ALIGN
 	
 }
 
+px_surface *PainterEngine_GetDrawSurface()
+{
+	if (App.object_printer->Visible == PX_FALSE)
+	{
+		PX_ObjectSetVisible(App.object_printer, PX_TRUE);
+	}
+	return PX_Object_PanelGetSurface(App.object_printer);
+}
+px_int PainterEngine_GetSurfaceWidth()
+{
+		return App.runtime.surface_width;
+}
+px_int PainterEngine_GetSurfaceHeight()
+{
+	return App.runtime.surface_height;
+}
 px_void PainterEngine_DrawTexture(px_texture *ptexture,px_int x,px_int y,PX_ALIGN align)
 {
 	if (App.object_printer->Visible == PX_FALSE)
@@ -103,6 +116,7 @@ px_void PainterEngine_DrawLine(px_int x1,px_int y1,px_int x2,px_int y2,px_int li
 	}
 	PX_GeoDrawLine(PX_Object_PanelGetSurface(App.object_printer), x1, y1, x2, y2, linewidth, color);
 }
+
 
 px_void PainterEngine_DrawRect(px_int x,px_int y,px_int width,px_int height,px_color color)
 {
@@ -271,15 +285,7 @@ px_bool PainterEngine_Initialize(px_int _screen_width,px_int _screen_height)
 #endif
 
 	App.object_root = PX_ObjectCreateRoot(&runtime->mp_static);
-	if (!App.object_root)
-	{
-		return PX_FALSE;
-	}
 	App.object_printer=PX_Object_PrinterCreate(&runtime->mp, App.object_root, 0, 0, _screen_width, _screen_height, App.pfontmodule);
-	if (!App.object_printer)
-	{
-		return PX_FALSE;
-	}
 	PX_Object_PanelAttachObject(App.object_printer, PX_ObjectGetFreeDescIndex(App.object_printer));
 	PX_Object_PrinterSetBackgroundColor(App.object_printer, PX_COLOR_NONE);
 	App.object_printer->Visible = PX_FALSE;

@@ -1,5 +1,5 @@
-#include "platform/modules/px_sockethub.h"
-#include "platform/modules/px_sysmemory.h"
+#include "../modules/px_sockethub.h"
+#include "../modules/px_sysmemory.h"
 
 px_int PX_SocketHubCircularBufferGetSpaceSize(px_int buffersize, volatile px_int wCursor, volatile px_dword rCursor)
 {

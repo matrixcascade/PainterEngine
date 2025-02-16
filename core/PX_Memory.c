@@ -50,6 +50,44 @@ px_bool PX_MemoryCat(px_memory *memory,const px_void *buffer,px_int size)
 	return PX_TRUE;
 }
 
+px_bool PX_MemoryCatRepeatByte(px_memory* memory, px_byte code, px_int size)
+{
+	px_byte* old;
+	px_int length, shl;
+
+	if (size == 0)
+	{
+		return PX_TRUE;
+	}
+
+	if (memory->usedsize + size > memory->allocsize)
+	{
+		shl = 0;
+		old = memory->buffer;
+		length = memory->usedsize + size;
+		while ((px_int)(1 << ++shl) <= length);
+		memory->allocsize = (1 << shl);
+		memory->buffer = (px_byte*)MP_Malloc(memory->mp, memory->allocsize);
+		if (!memory->buffer) return PX_FALSE;
+		if (old)
+			PX_memcpy(memory->buffer, old, memory->usedsize);
+
+		//PX_memcpy(memory->buffer + memory->usedsize, buffer, size);
+		PX_memset(memory->buffer + memory->usedsize, code, size);
+
+		if (old)
+			MP_Free(memory->mp, old);
+	}
+	else
+	{
+		//PX_memcpy(memory->buffer + memory->usedsize, buffer, size);
+		PX_memset(memory->buffer + memory->usedsize, code, size);
+	}
+	memory->usedsize += size;
+	memory->bit_pointer = 0;
+	return PX_TRUE;
+}
+
 px_bool PX_MemoryCatString(px_memory* memory, const px_char* src)
 {
 	return PX_MemoryCat(memory, src, PX_strlen(src));
@@ -313,7 +351,6 @@ px_double PX_CircularBufferDelay(PX_CircularBuffer* pcbuffer, px_int pos)
 px_void PX_FifoBufferInitialize(px_memorypool* mp, px_fifobuffer* pfifo, px_bool bAsynchronous)
 {
 	PX_memset(pfifo, 0, sizeof(px_fifobuffer));
-	pfifo->bAsynchronous = bAsynchronous;
 	pfifo->AsynchronousLock = PX_FALSE;
 	PX_MemoryInitialize(mp, pfifo);
 }
@@ -358,6 +395,18 @@ px_int PX_FifoBufferPop(px_fifobuffer* pfifo, px_void* data, px_int size)
 
 	return 0;
 	
+}
+px_int PX_FifoGetCount(px_fifobuffer* pfifo)
+{
+	px_int count = 0;
+	px_int offset = 0;
+	while (offset < pfifo->usedsize)
+	{
+		px_int size = *(px_int*)(pfifo->buffer + offset);
+		offset += size + sizeof(px_int);
+		count++;
+	}
+	return count;
 }
 
 px_bool PX_FifoBufferPush(px_fifobuffer* pfifo, px_void* data, px_int size)
@@ -511,13 +560,18 @@ px_int PX_StackPop(px_stack* pstack, px_void* data, px_int size)
 				pstack->AsynchronousLock = PX_FALSE;
 			return 0;
 		}
-		if (size < rsize)
+		
+		if (data&&size>0)
 		{
-			if (pstack->bAsynchronous)
-				pstack->AsynchronousLock = PX_FALSE;
-			return 0;
+			if (size < rsize)
+			{
+				if (pstack->bAsynchronous)
+					pstack->AsynchronousLock = PX_FALSE;
+				return 0;
+			}
+			PX_memcpy(data, pstack->buffer + pstack->usedsize - sizeof(px_int) - rsize, rsize);
 		}
-		PX_memcpy(data, pstack->buffer + pstack->usedsize - sizeof(px_int)- rsize, rsize);
+			
 		PX_MemoryRemove(pstack, pstack->usedsize - sizeof(px_int) - rsize, pstack->usedsize - 1);
 		if (pstack->bAsynchronous)
 		{
@@ -575,6 +629,30 @@ px_int PX_StackGetPopSize(px_stack* pstack)
 	return 0;
 	
 }
+
+px_int PX_StackGetCount(px_stack* pstack)
+{
+	px_int count = 0;
+	px_int offset = pstack->usedsize;
+	while (offset >= sizeof(px_int))
+	{
+		px_int size = *(px_int*)(pstack->buffer + offset - sizeof(px_int));
+		offset -= size + sizeof(px_int);
+		count++;
+	}
+	return count;
+}
+
+px_void* PX_StackGetPopData(px_stack* pstack)
+{
+	if (pstack->usedsize > sizeof(px_int))
+	{
+		px_int datasize = *(px_int*)(pstack->buffer + pstack->usedsize - sizeof(px_int));
+		return pstack->buffer + pstack->usedsize - sizeof(px_int) - datasize;
+	}
+	return PX_NULL;
+}
+
 px_void PX_StackFree(px_stack* pstack)
 {
 	if (pstack->bAsynchronous)
