@@ -34,6 +34,13 @@ int PX_FileGetDirectoryFileName(const char path[],int count,char FileName[][260]
 int PX_FileMove(const char src[], const char dst[]);
 int PX_FileDelete(const char path[]);
 int PX_FileCopy(const char src[], const char dst[]);
+
+int PX_mkdir(const char path[]);
+int PX_DirExist(const char path[]);
+int PX_DirCreate(const char path[]);
+unsigned long long PX_FileGetDiskFreeSize(const char folderPath[]);
+unsigned long long PX_FileGetDiskUsedSize(const char folderPath[]);
+unsigned long long PX_FileGetDiskSize(const char folderPath[]);
 //////////////////////////////////////////////////////////////////////////
 #define PX_OBJECT_REQUEST_FUNCTION(name) px_void name(void* buffer, int size, void* ptr)
 #include "../../kernel/PX_Kernel.h"

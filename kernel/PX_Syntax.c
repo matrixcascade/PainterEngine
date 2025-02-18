@@ -978,8 +978,8 @@ px_void PX_Syntax_Terminate(PX_Syntax* pSyntax, PX_Syntax_ast *past, const px_ch
 
 px_void PX_Syntax_AstMessage(PX_Syntax* pSyntax, const px_char message[])
 {
-	PX_printf(message);
-	return;
+	//PX_printf(message);
+	//return;
 	if (!PX_StringCat(&pSyntax->ast_message, message))
 	{
 		PX_ASSERT();

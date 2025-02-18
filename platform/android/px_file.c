@@ -6,8 +6,63 @@
 #include <errno.h>
 #include <android/asset_manager.h>
 #include "dirent.h"
+#include "sys/stat.h"
+#include "unistd.h"
+#include "fcntl.h"
+#include "sys/types.h"
+#include "sys/vfs.h"
+#include "sys/statvfs.h"
 
 extern AAssetManager* PX_assetManager;
+
+int PX_DirExist(const char path[])
+{
+    if (access(path, 0) == 0)
+    {
+        return 1;
+    }
+    return 0;
+}
+
+int PX_mkdir(const char path[])
+{
+    if (mkdir(path, 0777) == 0)
+    {
+        return 1;
+    }
+    return 0;
+}
+
+int PX_DirCreate(const char path[])
+{
+    int i,len;
+    char str[260];    
+    strncpy(str, path, 260);
+    len=strlen(str);
+    for( i=0; i<len; i++ )
+    {
+        if( str[i]=='/' )
+        {
+            str[i] = '\0';
+            if(access(str,0)!=0)
+            {
+                if(mkdir(str,0777 )!=0)
+                {
+                    return 0;
+                }
+            }
+            str[i]='/';
+        }
+    }
+    if(len>0 && access(str,0)!=0)
+    {
+        if(mkdir(str,0777)!=0)
+        {
+            return 0;
+        }
+    }
+    return 1;
+}
 
 int PX_FileMove(const char src[],const char dst[])
 {
@@ -40,7 +95,7 @@ int PX_FileCopy(const char src[],const char dst[])
         fclose(pfdst);
         return 1;
     }
-    
+    return 0;
 }
 
 int PX_FileDelete(const char path[])
@@ -833,4 +888,52 @@ px_bool PX_LoadDataToResource(PX_ResourceLibrary* ResourceLibrary, const px_char
 _ERROR:
 	PX_FreeIOData(&io);
 	return PX_FALSE;
+}
+
+unsigned long long PX_FileGetDiskFreeSize(const char folderPath[])
+{
+    struct statvfs stat;
+
+    if (statvfs(folderPath, &stat) == 0) 
+    {
+        unsigned long long freeSpace = stat.f_bsize * stat.f_bfree;
+        unsigned long long totalSpace = stat.f_bsize * stat.f_blocks;
+
+        return  freeSpace;
+    }
+    else 
+    {
+        return 0;
+    }
+}
+unsigned long long PX_FileGetDiskUsedSize(const char folderPath[])
+{
+    struct statvfs stat;
+
+    if (statvfs(folderPath, &stat) == 0) 
+    {
+        unsigned long long freeSpace = stat.f_bsize * stat.f_bfree;
+        unsigned long long totalSpace = stat.f_bsize * stat.f_blocks;
+
+        return  totalSpace - freeSpace;
+    }
+    else 
+    {
+        return 0;
+    }
+}
+unsigned long long PX_FileGetDiskSize(const char folderPath[])
+{
+    struct statvfs stat;
+
+    if (statvfs(folderPath, &stat) == 0) 
+    {
+        unsigned long long totalSpace = stat.f_bsize * stat.f_blocks;
+
+        return  totalSpace;
+    }
+    else 
+    {
+        return 0;
+    }
 }

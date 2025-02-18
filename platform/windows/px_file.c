@@ -5,6 +5,49 @@
 #include "string.h"
 #include "windows.h"
 
+int PX_DirExist(const char path[])
+{
+	DWORD dwAttrib = GetFileAttributesA(path);
+	return (dwAttrib != INVALID_FILE_ATTRIBUTES && (dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
+}
+
+int PX_mkdir(const char path[])
+{
+	return CreateDirectoryA(path, NULL);
+}
+
+int PX_DirCreate(const char path[])
+{
+	char _path[MAX_PATH];
+	char* p;
+	strcpy_s(_path, sizeof(_path), path);
+	p = _path;
+	while (*p)
+	{
+		if (*p == '\\' || *p == '/')
+		{
+			*p = '\0';
+			if (!PX_DirExist(_path))
+			{
+				if (!PX_mkdir(_path))
+				{
+					return 0;
+				}
+			}
+			*p = '\\';
+		}
+		p++;
+	}
+	if (!PX_DirExist(_path))
+	{
+		if (!PX_mkdir(_path))
+		{
+			return 0;
+		}
+	}
+	return 1;
+}
+
 int PX_FileMove(const char src[],const char dst[])
 {
 	return MoveFileA(src,dst);
@@ -35,7 +78,11 @@ int PX_SaveDataToFile(void *buffer,int size,const char path[])
 	fopen_s(&pf,_path,"wb");
 	if (pf)
 	{
-		fwrite(buffer,1,size,pf);
+		if (fwrite(buffer, 1, size, pf) != size)
+		{
+			fclose(pf);
+			return 0;
+		}
 		fclose(pf);
 		return 1;
 	}
@@ -139,6 +186,49 @@ int PX_FileExist(const char path[])
 }
 
 
+unsigned long long PX_FileGetDiskFreeSize(const char folderPath[])
+{
+	DWORD dwSectPerClust, dwBytesPerSect, dwFreeClusters, dwTotalClusters;
+	ULARGE_INTEGER freeBytesAvailable, totalNumberOfBytes, totalNumberOfFreeBytes;
+
+	if (GetDiskFreeSpaceA(folderPath, &dwSectPerClust, &dwBytesPerSect, &dwFreeClusters, &dwTotalClusters)) 
+	{
+		freeBytesAvailable.QuadPart = (unsigned long long)dwFreeClusters * dwSectPerClust * dwBytesPerSect;
+		totalNumberOfBytes.QuadPart = (unsigned long long)dwTotalClusters * dwSectPerClust * dwBytesPerSect;
+		totalNumberOfFreeBytes.QuadPart = freeBytesAvailable.QuadPart;
+
+		return totalNumberOfFreeBytes.QuadPart;
+	}
+	return 0;
+}
+
+unsigned long long PX_FileGetDiskUsedSize(const char folderPath[])
+{
+	DWORD dwSectPerClust, dwBytesPerSect, dwFreeClusters, dwTotalClusters;
+	ULARGE_INTEGER freeBytesAvailable, totalNumberOfBytes, totalNumberOfFreeBytes;
+	if (GetDiskFreeSpaceA(folderPath, &dwSectPerClust, &dwBytesPerSect, &dwFreeClusters, &dwTotalClusters))
+	{
+		freeBytesAvailable.QuadPart = (unsigned long long)dwFreeClusters * dwSectPerClust * dwBytesPerSect;
+		totalNumberOfBytes.QuadPart = (unsigned long long)dwTotalClusters * dwSectPerClust * dwBytesPerSect;
+		totalNumberOfFreeBytes.QuadPart = freeBytesAvailable.QuadPart;
+		return totalNumberOfBytes.QuadPart - totalNumberOfFreeBytes.QuadPart;
+	}
+	return 0;
+}
+
+unsigned long long PX_FileGetDiskSize(const char folderPath[])
+{
+	DWORD dwSectPerClust, dwBytesPerSect, dwFreeClusters, dwTotalClusters;
+	ULARGE_INTEGER freeBytesAvailable, totalNumberOfBytes, totalNumberOfFreeBytes;
+	if (GetDiskFreeSpaceA(folderPath, &dwSectPerClust, &dwBytesPerSect, &dwFreeClusters, &dwTotalClusters))
+	{
+		freeBytesAvailable.QuadPart = (unsigned long long)dwFreeClusters * dwSectPerClust * dwBytesPerSect;
+		totalNumberOfBytes.QuadPart = (unsigned long long)dwTotalClusters * dwSectPerClust * dwBytesPerSect;
+		totalNumberOfFreeBytes.QuadPart = freeBytesAvailable.QuadPart;
+		return totalNumberOfBytes.QuadPart;
+	}
+	return 0;
+}
 
 
 int PX_FileGetDirectoryFileCount(const char path[],PX_FILEENUM_TYPE type,const char *filter)

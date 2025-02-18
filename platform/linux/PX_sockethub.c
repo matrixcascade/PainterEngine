@@ -319,11 +319,11 @@ PX_WEBSOCKET_DISCONNECT_CALLBACK_FUNCTION(PX_WebsocketServerDisconnectCallback)
 
 }
 
-px_bool PX_SocketHubSend(PX_SocketHub* pServerHub, const  px_byte Session[16],const px_byte* data, px_int send_data_size)
+px_bool PX_SocketHubWriteSendCache(PX_SocketHub* pServerHub, const  px_byte Session[16], const px_byte* data, px_int send_data_size)
 {
 	px_dword index;
 	PX_memcpy(&index, Session + 1, sizeof(index));
-	if(index >= PX_COUNTOF(pServerHub->websocket_instance))
+	if (index >= PX_COUNTOF(pServerHub->websocket_instance))
 	{
 		return 0;
 	}
@@ -331,24 +331,20 @@ px_bool PX_SocketHubSend(PX_SocketHub* pServerHub, const  px_byte Session[16],co
 	{
 	case 1:
 	{
-		PX_TCP_Instance *pInstance=&pServerHub->tcp_instance[index];
-		if (PX_SocketHubCircularBufferGetSpaceSize(pInstance->cache_size, pInstance->send_cache_wcursor, pInstance->send_cache_rcursor) >= send_data_size + 8)
+		PX_TCP_Instance* pInstance = &pServerHub->tcp_instance[index];
+		if (PX_SocketHubCircularBufferGetSpaceSize(pInstance->cache_size, pInstance->send_cache_wcursor, pInstance->send_cache_rcursor) >= send_data_size)
 		{
-			PX_SocketHubWriteToCircularBuffer(pInstance->send_cache, pInstance->cache_size, &pInstance->send_cache_wcursor, pInstance->send_cache_rcursor, &send_data_size, sizeof(px_dword));
-			PX_SocketHubWriteToCircularBuffer(pInstance->send_cache, pInstance->cache_size, &pInstance->send_cache_wcursor, pInstance->send_cache_rcursor, data, send_data_size);
-			return PX_TRUE;
+			return PX_SocketHubWriteToCircularBuffer(pInstance->send_cache, pInstance->cache_size, &pInstance->send_cache_wcursor, pInstance->send_cache_rcursor, data, send_data_size);
 		}
 		return PX_FALSE;
 	}
 	break;
 	case 2:
 	{
-		PX_Websocket_Instance *pInstance=&pServerHub->websocket_instance[index];
-		if (PX_SocketHubCircularBufferGetSpaceSize(pInstance->cache_size, pInstance->send_cache_wcursor, pInstance->send_cache_rcursor) >= send_data_size + 8)
+		PX_Websocket_Instance* pInstance = &pServerHub->websocket_instance[index];
+		if (PX_SocketHubCircularBufferGetSpaceSize(pInstance->cache_size, pInstance->send_cache_wcursor, pInstance->send_cache_rcursor) >= send_data_size)
 		{
-			PX_SocketHubWriteToCircularBuffer(pInstance->send_cache, pInstance->cache_size, &pInstance->send_cache_wcursor, pInstance->send_cache_rcursor, &send_data_size, sizeof(px_dword));
-			PX_SocketHubWriteToCircularBuffer(pInstance->send_cache, pInstance->cache_size, &pInstance->send_cache_wcursor, pInstance->send_cache_rcursor, data, send_data_size);
-			return PX_TRUE;
+			return PX_SocketHubWriteToCircularBuffer(pInstance->send_cache, pInstance->cache_size, &pInstance->send_cache_wcursor, pInstance->send_cache_rcursor, data, send_data_size);
 		}
 		return PX_FALSE;
 	}
@@ -356,6 +352,19 @@ px_bool PX_SocketHubSend(PX_SocketHub* pServerHub, const  px_byte Session[16],co
 	default:
 		return PX_FALSE;
 		break;
+	}
+	return PX_FALSE;
+}
+
+px_bool PX_SocketHubSend(PX_SocketHub* pServerHub, const  px_byte Session[16],const px_byte* data, px_int send_data_size)
+{
+	px_dword size = (px_dword)send_data_size;
+	if (PX_SocketHubWriteSendCache(pServerHub,Session,(px_byte *)&size, sizeof(size)))
+	{
+		if (PX_SocketHubWriteSendCache(pServerHub, Session, data, send_data_size))
+		{
+			return PX_TRUE;
+		}
 	}
 	return PX_FALSE;
 }
@@ -769,7 +778,7 @@ px_int PX_SocketHubGetCurrentOnlineCount(PX_SocketHub* pServerHub)
 	px_int count = 0;
 	for (i = 0; i < PX_SOCKETHUB_MAX_CONNECTION; i++)
 	{
-		if (pServerHub->tcp_instance[i].socket)
+		if (pServerHub->tcp_instance[i].socket || pServerHub->websocket_instance[i].socket)
 		{
 			count++;
 		}
