@@ -207,7 +207,7 @@ int main()
 
 ![](assets/img/3.3.png)
 
-The first parameter of the `PainterEngine_LoadFontModule` function is the path to the TTF font file, with the relative path being relative to the location of the executable file. The second parameter specifies the character set. By default, Visual Studio uses the GBK character set. If you are using Visual Studio Code, which defaults to UTF-8 encoding, the second parameter should be set to `PX_FONTMODULE_CODEPAGE_GBK`. The last parameter specifies the font size.
+The first parameter of the `PainterEngine_LoadFontModule` function is the path to the TTF font file, with the relative path being relative to the location of the executable file. The second parameter specifies the character set. By default, Visual Studio uses the GBK character set. If you are using Visual Studio Code, which defaults to UTF-8 encoding, the second parameter should be set to `PX_FONTMODULE_CODEPAGE_UTF8`. The last parameter specifies the font size.
 
 ## 4. Drawing Geometric Shapes with PainterEngine
 
