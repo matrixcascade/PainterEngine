@@ -686,6 +686,9 @@ PX_LEXER_LEXEME_TYPE PX_LexerGetNextLexeme(px_lexer *lexer)
 							case 'r': PX_StringCatChar(&lexer->CurLexeme,'\r'); lexer->Sources++;lexer->Sources++;break;
 							case 't': PX_StringCatChar(&lexer->CurLexeme,'\t'); lexer->Sources++;lexer->Sources++;break;
 							case 'b': PX_StringCatChar(&lexer->CurLexeme,'\b'); lexer->Sources++;lexer->Sources++;break;
+							default:
+								PX_StringCatChar(&lexer->CurLexeme,lexer->Sources[lexer->SourceOffset++]);
+								break;
 						}
 						// }
 					}else {
