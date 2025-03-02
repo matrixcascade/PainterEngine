@@ -487,6 +487,11 @@ px_bool PX_LexerSortTextMap(px_lexer *lexer,const px_char *SourceText,px_bool ma
 						currentDstSourceLine++;
 					}
 					///////////////////////////////////////////
+					if (lexer->Sources[w_Offset]=='\\') {
+						w_Offset++;
+						r_Offset++;
+						lexer->Sources[w_Offset] = (SourceText[r_Offset]);
+					}
 					w_Offset++;
 					r_Offset++;
 				}
@@ -671,8 +676,25 @@ PX_LEXER_LEXEME_TYPE PX_LexerGetNextLexeme(px_lexer *lexer)
 					PX_StringCatChar(&lexer->CurLexeme, lexer->Sources[lexer->SourceOffset++]);
 					PX_StringCatChar(&lexer->CurLexeme, lexer->Sources[lexer->SourceOffset++]);
 				}
-				else
-					PX_StringCatChar(&lexer->CurLexeme, lexer->Sources[lexer->SourceOffset++]);
+				else {
+					if (lexer->Sources[lexer->SourceOffset]=='\\') {
+						switch (lexer->Sources[lexer->SourceOffset+1]) {
+							case '"': PX_StringCatChar(&lexer->CurLexeme,'\"'); lexer->Sources++;lexer->Sources++;break;
+							case '\'': PX_StringCatChar(&lexer->CurLexeme,'\'');lexer->Sources++;lexer->Sources++;break;
+							case '\\': PX_StringCatChar(&lexer->CurLexeme,'\\');lexer->Sources++;lexer->Sources++;break;
+							case 'n': PX_StringCatChar(&lexer->CurLexeme,'\n'); lexer->Sources++;lexer->Sources++;break;
+							case 'r': PX_StringCatChar(&lexer->CurLexeme,'\r'); lexer->Sources++;lexer->Sources++;break;
+							case 't': PX_StringCatChar(&lexer->CurLexeme,'\t'); lexer->Sources++;lexer->Sources++;break;
+							case 'b': PX_StringCatChar(&lexer->CurLexeme,'\b'); lexer->Sources++;lexer->Sources++;break;
+							default:
+								PX_StringCatChar(&lexer->CurLexeme,lexer->Sources[lexer->SourceOffset++]);
+								break;
+						}
+						// }
+					}else {
+						PX_StringCatChar(&lexer->CurLexeme,lexer->Sources[lexer->SourceOffset++]);
+					}
+				}
 			}
 			PX_StringCat(&lexer->CurLexeme, chred);
 			lexer->SourceOffset += PX_strlen(chred);
