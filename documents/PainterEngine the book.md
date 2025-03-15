@@ -201,7 +201,7 @@ int main()
 
 ![](assets/img/3.3.png)
 
-`PainterEngine_LoadFontModule` 的函数的第一个参数是 TTF 字体文件的路径, 相对路径是以 exe 文件所在路径相对的。第二个参数是字符集，在默认情况下, Visual Studio 代码使用的是 GBK 字符集。如果你使用 Visual Studio Code, 那么默认是 UTF8 编码, 第二个参数应该换成 `PX_FONTMODULE_CODEPAGE_GBK`。最后一个参数是字体的大小。
+`PainterEngine_LoadFontModule` 的函数的第一个参数是 TTF 字体文件的路径, 相对路径是以 exe 文件所在路径相对的。第二个参数是字符集，在默认情况下, Visual Studio 代码使用的是 GBK 字符集。如果你使用 Visual Studio Code, 那么默认是 UTF8 编码, 第二个参数应该换成 `PX_FONTMODULE_CODEPAGE_UTF8`。最后一个参数是字体的大小。
 
 ## 4. 使用 PainterEngine 绘制几何图形
 
