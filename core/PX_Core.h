@@ -48,5 +48,7 @@
 #include "PX_Gif.h"
 #include "PX_Abi.h"
 #include "PX_Variable.h"
-#include "PX_Arle.h"
+#include "PX_Json.h"
+#include "PX_Lexer.h"
+
 #endif

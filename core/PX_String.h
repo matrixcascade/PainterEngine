@@ -56,6 +56,7 @@ px_bool PX_StringFormat3(px_string *str,const px_char fmt[],px_stringformat _1, 
 px_bool PX_StringFormat2(px_string *str,const px_char fmt[],px_stringformat _1, px_stringformat _2);
 px_bool PX_StringFormat1(px_string *str,const px_char fmt[],px_stringformat _1);
 px_bool PX_StringSet(px_string *str,const px_char fmt[]);
+px_void PX_StringSetStatic(px_string* str, const px_char fmt[]);
 
 px_bool PX_StringCatEx(px_string *text,const px_char *str2);
 px_void PX_StringBackspace(px_string *text);

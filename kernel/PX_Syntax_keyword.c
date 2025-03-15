@@ -1,6 +1,6 @@
 #include "PX_Syntax_keyword.h"
 
-PX_SYNTAX_FUNCTION(PX_Syntax_Parse_KEYWORD)
+PX_SYNTAX_FUNCTION(PX_Syntax_Parse_keyword)
 {
 	const px_char* PX_Script_Keywords[] = { "if","else","switch","case","default",\
 		"while","for","do","break","continue","return","goto","typedef",\
@@ -27,9 +27,9 @@ PX_SYNTAX_FUNCTION(PX_Syntax_Parse_KEYWORD)
 	return PX_FALSE;
 }
 
-px_bool PX_Syntax_Load_KEYWORD(PX_Syntax* pSyntax)
+px_bool PX_Syntax_Load_keyword(PX_Syntax* pSyntax)
 {
-	PX_Syntax_Parse_PEBNF(pSyntax, "IKEYWORD= *", PX_Syntax_Parse_KEYWORD);
+	PX_Syntax_Parse_PEBNF(pSyntax, "keyword= *", PX_Syntax_Parse_keyword);
 	return PX_TRUE;
 }
 

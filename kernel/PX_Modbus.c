@@ -1,75 +1,149 @@
 #include "PX_Modbus.h"
-
-PX_ModbusTCP_Write PX_ModbusTCPWriteSingleReg(px_word counter, px_byte unit, px_word startAddr, px_word regdata)
+px_bool PX_ModbusRTU_WriteCoilFrame(px_memory* pframe, px_byte slaveAddr, px_word startAddr, px_bool b)
 {
-	PX_ModbusTCP_Write write;
-	write.counter = counter;
-	write.magic = 0;
-	write.size[0] = 0;
-	write.size[1] = 6;
-	write.unit = unit;
-	write.opcode = 0x06;
-	write.startAddress[1] = startAddr & 0xff;
-	write.startAddress[0] = (startAddr>>8) & 0xff;
-	write.regdata[1] = regdata & 0xff;
-	write.regdata[0] = (regdata >> 8) & 0xff;
-	return write;
+	px_byte frame[8];
+	px_word crc;
+	px_int i = 0;
+	frame[i++] = slaveAddr;
+	frame[i++] = 0x05;
+	frame[i++] = (startAddr >> 8) & 0xff;
+	frame[i++] = startAddr & 0xff;
+	frame[i++] = b ? 0xff : 0x00;
+	frame[i++] = 0x00;
+	crc = PX_crc16(frame, i);
+	frame[i++] = crc & 0xff;
+	frame[i++] = (crc >> 8) & 0xff;
+	return PX_MemoryCat(pframe, frame, i);
 }
-
-PX_ModbusTCP_Write PX_ModbusTCPWriteSingleBool(px_word counter, px_byte unit, px_word startAddr, px_bool b)
+px_bool PX_ModbusRTU_WriteRegFrame(px_memory* pframe, px_byte slaveAddr, px_word startAddr, px_word regdata)
 {
-	PX_ModbusTCP_Write write;
-	write.counter = counter;
-	write.magic = 0;
-	write.size[0] = 0;
-	write.size[1] = 6;
-	write.unit = unit;
-	write.opcode = 0x06;
-	write.startAddress[1] = startAddr & 0xff;
-	write.startAddress[0] = (startAddr >> 8) & 0xff;
-	if (b)
-	{
-		write.regdata[1] = 0xff;
-		write.regdata[0] = 0xff;
-	}
-	else
-	{
-		write.regdata[1] = 0;
-		write.regdata[0] = 0;
-	}
+	px_byte frame[8];
+	px_word crc;
+	px_int i = 0;
+	frame[i++] = slaveAddr;
+	frame[i++] = 0x06;
+	frame[i++] = (startAddr >> 8) & 0xff;
+	frame[i++] = startAddr & 0xff;
+	frame[i++] = (regdata >> 8) & 0xff;
+	frame[i++] = regdata & 0xff;
+	crc = PX_crc16(frame, i);
+	frame[i++] = crc & 0xff;
+	frame[i++] = (crc >> 8) & 0xff;
+	return PX_MemoryCat(pframe, frame, i);
 	
-	return write;
+}
+px_bool PX_ModbusRTU_ReadCoilFrame(px_memory* pframe, px_byte slaveAddr, px_word startAddr, px_word count)
+{
+	px_byte frame[8];
+	px_word crc;
+	px_int i = 0;
+	frame[i++] = slaveAddr;
+	frame[i++] = 0x01;
+	frame[i++] = (startAddr >> 8) & 0xff;
+	frame[i++] = startAddr & 0xff;
+	frame[i++] = (count >> 8) & 0xff;
+	frame[i++] = count & 0xff;
+	crc = PX_crc16(frame, i);
+	frame[i++] = crc & 0xff;
+	frame[i++] = (crc >> 8) & 0xff;
+	return PX_MemoryCat(pframe, frame, i);
+}
+px_bool PX_ModbusRTU_ReadRegFrame(px_memory* pframe, px_byte slaveAddr, px_word startAddr, px_word count)
+{
+	px_byte frame[8];
+	px_word crc;
+	px_int i = 0;
+	frame[i++] = slaveAddr;
+	frame[i++] = 0x03;
+	frame[i++] = (startAddr >> 8) & 0xff;
+	frame[i++] = startAddr & 0xff;
+	frame[i++] = (count >> 8) & 0xff;
+	frame[i++] = count & 0xff;
+	crc = PX_crc16(frame, i);
+	frame[i++] = crc & 0xff;
+	frame[i++] = (crc >> 8) & 0xff;
+	return PX_MemoryCat(pframe, frame, i);
 }
 
-
-PX_ModbusTCP_Read PX_ModbusTCPReadReg(px_word counter, px_byte unit, px_word startAddr, px_int count)
+px_bool PX_ModbusASCII_WriteCoilFrame(px_memory* pframe, px_byte slaveAddr, px_word startAddr, px_bool b)
 {
-	PX_ModbusTCP_Read read;
-	read.counter = counter;
-	read.magic = 0;
-	read.size[0] = 0;
-	read.size[1] = 6;
-	read.unit = unit;
-	read.opcode = 0x03;
-	read.startAddress[1] = startAddr & 0xff;
-	read.startAddress[0] = (startAddr >> 8) & 0xff;
-	read.regcount[0] = (count>>8)&0xff;
-	read.regcount[1] = count&0xff;
-	return read;
+	px_byte frame[10];
+	px_char ascii_frame[33] = {0};
+	px_word crc;
+	px_int i = 0;
+	frame[i++] = slaveAddr;
+	frame[i++] = 0x05;
+	frame[i++] = (startAddr >> 8) & 0xff;
+	frame[i++] = startAddr & 0xff;
+	frame[i++] = b ? 0xff : 0x00;
+	frame[i++] = 0x00;
+	crc = PX_crc16(frame, i);
+	frame[i++] = crc & 0xff;
+	frame[i++] = (crc >> 8) & 0xff;
+	frame[i++] = 0x0d;
+	frame[i++] = 0x0a;
+	PX_BufferToHexString( frame, i, ascii_frame);
+	return PX_MemoryCat(pframe, ascii_frame, i * 2);
+}
+px_bool PX_ModbusASCII_WriteRegFrame(px_memory* pframe, px_byte slaveAddr, px_word startAddr, px_word regdata)
+{
+	px_byte frame[10];
+	px_char ascii_frame[33] = { 0 };
+	px_word crc;
+	px_int i = 0;
+	frame[i++] = slaveAddr;
+	frame[i++] = 0x06;
+	frame[i++] = (startAddr >> 8) & 0xff;
+	frame[i++] = startAddr & 0xff;
+	frame[i++] = (regdata >> 8) & 0xff;
+	frame[i++] = regdata & 0xff;
+	crc = PX_crc16(frame, i);
+	frame[i++] = crc & 0xff;
+	frame[i++] = (crc >> 8) & 0xff;
+	frame[i++] = 0x0d;
+	frame[i++] = 0x0a;
+	PX_BufferToHexString(frame, i, ascii_frame);
+	return PX_MemoryCat(pframe, ascii_frame, i * 2);
 }
 
-PX_ModbusTCP_Read PX_ModbusTCPReadBool(px_word counter, px_byte unit, px_word startAddr, px_int count)
+px_bool PX_ModbusASCII_ReadCoilFrame(px_memory* pframe, px_byte slaveAddr, px_word startAddr, px_word count)
 {
-	PX_ModbusTCP_Read read;
-	read.counter = counter;
-	read.magic = 0;
-	read.size[0] = 0;
-	read.size[1] = 6;
-	read.unit = unit;
-	read.opcode = 0x01;
-	read.startAddress[1] = startAddr & 0xff;
-	read.startAddress[0] = (startAddr >> 8) & 0xff;
-	read.regcount[0] = (count >> 8) & 0xff;
-	read.regcount[1] = count & 0xff;
-	return read;
+	px_byte frame[10];
+	px_char ascii_frame[33] = { 0 };
+	px_word crc;
+	px_int i = 0;
+	frame[i++] = slaveAddr;
+	frame[i++] = 0x01;
+	frame[i++] = (startAddr >> 8) & 0xff;
+	frame[i++] = startAddr & 0xff;
+	frame[i++] = (count >> 8) & 0xff;
+	frame[i++] = count & 0xff;
+	crc = PX_crc16(frame, i);
+	frame[i++] = crc & 0xff;
+	frame[i++] = (crc >> 8) & 0xff;
+	frame[i++] = 0x0d;
+	frame[i++] = 0x0a;
+	PX_BufferToHexString(frame, i, ascii_frame);
+	return PX_MemoryCat(pframe, ascii_frame, i * 2);
+}
+
+px_bool PX_ModbusASCII_ReadRegFrame(px_memory* pframe, px_byte slaveAddr, px_word startAddr, px_word count)
+{
+	px_byte frame[10];
+	px_char ascii_frame[33] = { 0 };
+	px_word crc;
+	px_int i = 0;
+	frame[i++] = slaveAddr;
+	frame[i++] = 0x03;
+	frame[i++] = (startAddr >> 8) & 0xff;
+	frame[i++] = startAddr & 0xff;
+	frame[i++] = (count >> 8) & 0xff;
+	frame[i++] = count & 0xff;
+	crc = PX_crc16(frame, i);
+	frame[i++] = crc & 0xff;
+	frame[i++] = (crc >> 8) & 0xff;
+	frame[i++] = 0x0d;
+	frame[i++] = 0x0a;
+	PX_BufferToHexString(frame, i, ascii_frame);
+	return PX_MemoryCat(pframe, ascii_frame, i * 2);
 }

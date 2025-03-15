@@ -1,6 +1,6 @@
 #include "PX_Syntax_identifier.h"
 
-PX_SYNTAX_FUNCTION(PX_Syntax_Parse_IDENTIFIER_KEYWORDUNEXPECTED)
+PX_SYNTAX_FUNCTION(PX_Syntax_Parse_identifier_notkeyword)
 {
 	PX_StringCatFormat2(&pSyntax->message, "%1:%2 Error:Key Should.\n", \
 		PX_STRINGFORMAT_INT(PX_LexerGetCurrentLine(past->lexer_state.plexer)), \
@@ -8,7 +8,7 @@ PX_SYNTAX_FUNCTION(PX_Syntax_Parse_IDENTIFIER_KEYWORDUNEXPECTED)
 	return PX_TRUE;
 }
 
-PX_SYNTAX_FUNCTION(PX_Syntax_Parse_IDENTIFIER)
+PX_SYNTAX_FUNCTION(PX_Syntax_Parse_identifier)
 {
 	px_abi* pnewabi;
 	px_int line, column;
@@ -28,7 +28,7 @@ PX_SYNTAX_FUNCTION(PX_Syntax_Parse_IDENTIFIER)
 
 	}
 
-	pnewabi = PX_Syntax_NewAbi(pSyntax, "identifier", pSyntax->lifetime);
+	pnewabi = PX_Syntax_PushNewAbi(pSyntax, "identifier", pSyntax->lifetime);
 	if (!pnewabi)
 	{
 		PX_StringCatFormat2(&pSyntax->message, "%1:%2 Error:Memory allocation failed.\n", PX_STRINGFORMAT_INT(line), PX_STRINGFORMAT_INT(column));
@@ -45,7 +45,7 @@ PX_SYNTAX_FUNCTION(PX_Syntax_Parse_IDENTIFIER)
 
 px_bool PX_Syntax_Load_identifier(PX_Syntax* pSyntax)
 {
-	PX_Syntax_Parse_PEBNF(pSyntax, "IDENTIFIER= IKEYWORD", PX_Syntax_Parse_IDENTIFIER_KEYWORDUNEXPECTED);
-	PX_Syntax_Parse_PEBNF(pSyntax, "IDENTIFIER= *", PX_Syntax_Parse_IDENTIFIER);
+	PX_Syntax_Parse_PEBNF(pSyntax, "identifier= keyword", PX_Syntax_Parse_identifier_notkeyword);
+	PX_Syntax_Parse_PEBNF(pSyntax, "identifier= *", PX_Syntax_Parse_identifier);
 	return PX_TRUE;
 }

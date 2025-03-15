@@ -70,4 +70,6 @@ px_int PX_StackGetPopSize(px_stack* pstack);
 px_int PX_StackGetCount(px_stack* pstack);
 px_void* PX_StackGetPopData(px_stack* pstack);
 px_void PX_StackFree(px_stack* pstack);
+const px_byte* PX_StackGetBottomData(px_stack* pstack);
+px_void PX_StackRemoveBottom(px_stack* pstack);
 #endif

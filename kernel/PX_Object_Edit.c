@@ -214,6 +214,12 @@ PX_OBJECT_EVENT_FUNCTION( PX_Object_EditOnKeyboardDown)
 		{
 			PX_Object_EditAddString(pObject,key);
 		}
+		else if (key[0] == PX_VK_RETURN&&!pEdit->multiLines)
+		{
+			PX_Object_Event e = {0};
+			e.Event = PX_OBJECT_EVENT_VALUECHANGED;
+			PX_ObjectExecuteEvent(pObject, e);
+		}
 	}
 }
 

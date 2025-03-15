@@ -43,3 +43,4 @@ void PX_MutexFree(px_mutex *pmutex)
 	pthread_mutex_destroy(pmutex->handle);
 	free(pmutex->handle);
 }
+

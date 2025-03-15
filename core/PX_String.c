@@ -118,8 +118,8 @@ px_int PX_StringReadUntil(const px_char content[], px_char until,  px_char out[]
 
 px_void PX_StringFree(px_string *str)
 {
-	if(str->buffer&&str->bufferlen)
-	MP_Free(str->mp,str->buffer);
+	if(str->mp&&str->buffer&&str->bufferlen)
+		MP_Free(str->mp,str->buffer);
 
 	str->buffer=PX_NULL;
 	str->bufferlen=0;
@@ -245,6 +245,18 @@ px_bool PX_StringSet(px_string *str,const px_char fmt[])
 
 	PX_StringUpdateExReg(str);
 	return PX_TRUE;
+}
+
+px_void PX_StringSetStatic(px_string* str, const px_char fmt[])
+{
+	if (str->mp)
+	{
+		MP_Free(str->mp, str->buffer);
+	}
+	PX_memset(str, 0, sizeof(px_string));
+	str->buffer = (px_char*)fmt;
+	str->bufferlen = PX_strlen(fmt) + 1;
+	str->exreg_strlen = str->bufferlen - 1;
 }
 
 px_float PX_StringToFloat(px_string *str)

@@ -13,6 +13,7 @@ px_int surface_height;
 px_surface* render_surface;
 PX_ResourceLibrary *resource_library;
 PX_SoundPlay* soundplay;
+px_char PX_APPLICATION_NAME[64] = "PainterEngine";
 //////////////////////////////////////////////////////////////////////////
 
 px_void PainterEngine_Print(const px_char content[])
@@ -22,6 +23,15 @@ px_void PainterEngine_Print(const px_char content[])
 		PX_ObjectSetVisible(App.object_printer, PX_TRUE);
 	}
 	PX_Object_PrinterPrintText(App.object_printer, content);
+}
+
+px_void PainterEngine_PrintWithColor(const px_char content[],px_color clr)
+{
+	if (App.object_printer->Visible == PX_FALSE)
+	{
+		PX_ObjectSetVisible(App.object_printer, PX_TRUE);
+	}
+	PX_Object_PrinterPrintTextWithColor(App.object_printer, content,clr);
 }
 
 px_void PainterEngine_PrintClear()
@@ -41,6 +51,7 @@ px_void PainterEngine_PrintSetFontColor(px_color clr)
 
 px_void PainterEngine_PrintImage(const px_char path[])
 {
+	#ifdef PAINTERENGIN_FILE_SUPPORT
 	PX_Object* pObject;
 	if (App.object_printer->Visible == PX_FALSE)
 	{
@@ -62,6 +73,7 @@ px_void PainterEngine_PrintImage(const px_char path[])
 		PX_Object_PrinterUpdateAll(App.object_printer);
 		PX_FreeIOData(&data);
 	}
+	#endif
 }
 
 px_void PainterEngine_DrawPixel( px_int x, px_int y, px_color color)
@@ -99,6 +111,16 @@ px_int PainterEngine_GetSurfaceHeight()
 {
 	return App.runtime.surface_height;
 }
+
+px_int PainterEngine_GetScreenWidth()
+{
+	return screen_width;
+}
+px_int PainterEngine_GetScreenHeight()
+{
+	return screen_height;
+}
+
 px_void PainterEngine_DrawTexture(px_texture *ptexture,px_int x,px_int y,PX_ALIGN align)
 {
 	if (App.object_printer->Visible == PX_FALSE)
@@ -259,6 +281,11 @@ px_bool PainterEngine_LoadFontModule(const px_char path[],PX_FONTMODULE_CODEPAGE
 	#endif
 }
 
+px_void PainterEngine_SetWindowText(const px_char text[])
+{
+	PX_strcpy(PX_APPLICATION_NAME, text, sizeof(PX_APPLICATION_NAME));
+}
+
 px_bool PainterEngine_Initialize(px_int _screen_width,px_int _screen_height)
 {
 	PX_Runtime* runtime = &App.runtime;
@@ -372,11 +399,11 @@ PX_SoundPlay* PainterEngine_GetSoundPlay()
 //Functions
 
 
-px_bool PX_ApplicationInitialize(PX_Application *pApp,px_int screen_width,px_int screen_height)
+px_bool PX_ApplicationInitialize(PX_Application *pApp,px_int _screen_width,px_int _screen_height)
 {
 	PX_memset(pApp, 0, sizeof(PX_Application));
-	screen_width = screen_width;
-	screen_height = screen_height;
+	screen_width = _screen_width;
+	screen_height = _screen_height;
 	PainterEngine_SetBackgroundColor(PX_COLOR_BACKGROUNDCOLOR);
 
 	px_main();

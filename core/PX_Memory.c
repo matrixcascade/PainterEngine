@@ -653,6 +653,30 @@ px_void* PX_StackGetPopData(px_stack* pstack)
 	return PX_NULL;
 }
 
+const px_byte * PX_StackGetBottomData(px_stack* pstack)
+{
+	if (pstack->usedsize > sizeof(px_int))
+	{
+		return pstack->buffer;
+	}
+	return PX_NULL;
+}
+px_void PX_StackRemoveBottom(px_stack* pstack)
+{
+	if (pstack->usedsize > sizeof(px_int))
+	{
+		px_int offset = pstack->usedsize;
+		px_int datasize=0;
+		while (offset>0)
+		{
+			datasize = *(px_int*)(pstack->buffer + pstack->usedsize - sizeof(px_int));
+			offset -= datasize + sizeof(px_int);
+		}
+		PX_MemoryRemove(pstack, 0, datasize + sizeof(px_int) - 1);
+	}
+}
+
+
 px_void PX_StackFree(px_stack* pstack)
 {
 	if (pstack->bAsynchronous)

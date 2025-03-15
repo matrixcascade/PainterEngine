@@ -1,7 +1,6 @@
 #ifndef PX_ANIMATION_H
 #define PX_ANIMATION_H
 #include "PX_2dxCommon.h"
-#include "PX_Lexer.h"
 typedef struct
 {
 	px_memorypool* mp;

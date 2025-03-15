@@ -102,6 +102,7 @@ px_int				PX_VMGetFreeThread(PX_VM* Ins, px_int reservedThread);
 px_bool				PX_VMBeginThreadFunction(PX_VM *Ins,px_int threadID,const px_char *functionName,const px_variable args[],px_int paramcount);
 px_bool				PX_VMBeginThreadFunctionIndex(PX_VM *Ins,px_int threadID,px_int funcIndex,const px_variable args[],px_int paramcount);
 px_int				PX_VMGetFreeThreadId(PX_VM *Ins);
+const px_char* PX_VMGetFunctionName(PX_VM* Ins, px_int index);
 px_void				PX_VMSleep(PX_VM* Ins, px_int thread, px_uint sleepms);
 
 

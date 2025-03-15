@@ -46,6 +46,7 @@ typedef struct __PX_VM_VARIABLE
 	};
 }px_variable;
 
+
 px_variable PX_Variable_int(px_int _int);
 px_void PX_VariableFree(px_variable* var);
 px_variable PX_Variable_handle(px_void* _ptr);
@@ -57,5 +58,12 @@ px_variable PX_Variable_memory(px_byte* buffer, px_int _size);
 px_variable PX_Variable_const_string(const px_char* buffer);
 px_variable PX_Variable_const_memory(const px_byte* buffer, px_int _size);
 px_variable PX_VariableCopy(px_memorypool* mp, px_variable *pvar, px_bool* bOutofMemory);
+px_bool PX_VariableSetInt(px_variable* var, px_int _int);
+px_bool PX_VariableSetFloat(px_variable* var, px_float _float);
+px_bool PX_VariableSetString(px_memorypool* mp, px_variable* var, const px_char* string);
+px_bool PX_VariableSetMemory(px_memorypool* mp, px_variable* var, px_byte* buffer, px_int _size);
+px_bool PX_VariableSetHandle(px_variable* var, px_void* _ptr);
+px_bool PX_VariableSetPtr(px_variable* var, px_void* _ptr);
+
 
 #endif // !PX_VARIBALE_H

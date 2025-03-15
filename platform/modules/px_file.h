@@ -42,7 +42,7 @@ unsigned long long PX_FileGetDiskFreeSize(const char folderPath[]);
 unsigned long long PX_FileGetDiskUsedSize(const char folderPath[]);
 unsigned long long PX_FileGetDiskSize(const char folderPath[]);
 //////////////////////////////////////////////////////////////////////////
-#define PX_OBJECT_REQUEST_FUNCTION(name) px_void name(void* buffer, int size, void* ptr)
+#define PX_REQUEST_FUNCTION(name) px_void name(void* buffer, int size, void* ptr)
 #include "../../kernel/PX_Kernel.h"
 px_bool PX_LoadTextureFromFile(px_memorypool *mp,px_texture *tex,const px_char path[]);
 px_bool PX_LoadStringFromFile(px_memorypool *mp,px_string *str,const px_char path[]);
@@ -69,6 +69,7 @@ px_bool PX_LoadDataToResource(PX_ResourceLibrary* ResourceLibrary, const px_char
 
 px_bool PX_LoadGifFromFile(px_memorypool* mp, px_gif* gif, const px_char path[]);
 px_bool PX_LoadLive2DFromFile(px_memorypool* mp, PX_LiveFramework* liveframework, const px_char path[]);
-
+px_bool PX_LoadVMFromScriptFile(px_memorypool* mp, const px_char path[], PX_VM* pvm, const px_char entry[]);
+const px_char* PX_GetSelfPath();
 #endif
 

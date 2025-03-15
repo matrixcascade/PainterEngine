@@ -937,3 +937,34 @@ unsigned long long PX_FileGetDiskSize(const char folderPath[])
         return 0;
     }
 }
+
+px_bool PX_LoadVMFromScriptFile(px_memorypool *mp,const px_char path[], PX_VM *pvm,const px_char entry[])
+{
+	PX_Compiler compiler;
+	px_memory bin;
+	PX_IO_Data io = PX_LoadFileToIOData(path);
+	if (!io.size)
+	{
+		return PX_FALSE;
+	}
+	PX_MemoryInitialize(mp, &bin);
+	
+	if(!PX_CompilerInitialize(mp,&compiler))
+		goto _ERROR;
+	
+	if (!PX_CompilerAddSource(&compiler, io.buffer))
+		goto _ERROR;
+
+	if (!PX_CompilerCompile(&compiler, &bin, 0, entry))
+		goto _ERROR;
+
+	if (!PX_VMInitialize(pvm, mp, bin.buffer, bin.usedsize))
+		goto _ERROR;
+
+	PX_MemoryFree(&bin);
+	PX_CompilerFree(&compiler);
+	PX_FreeIOData(&io);
+	return PX_TRUE;
+_ERROR:
+	return PX_FALSE;
+}

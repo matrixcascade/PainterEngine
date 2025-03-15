@@ -1,6 +1,6 @@
 #include "PX_Syntax_bcontainer.h"
 
-PX_SYNTAX_FUNCTION(PX_Syntax_Parse_BCONTAINER)
+PX_SYNTAX_FUNCTION(PX_Syntax_Parse_bcontainer)
 {
 	px_abi* pnewabi;
 	px_string str;
@@ -24,7 +24,7 @@ PX_SYNTAX_FUNCTION(PX_Syntax_Parse_BCONTAINER)
 
 	while (PX_TRUE)
 	{
-		nextchar = PX_LexerGetNextChar(past->lexer_state.plexer);
+		nextchar = PX_Syntax_GetNextChar(past);
 		if (nextchar == '\0' || nextchar == '\n')
 		{
 			PX_StringCatFormat2(&pSyntax->message, "%1:%2 Error:Unexpected end of file.\n", PX_STRINGFORMAT_INT(line), PX_STRINGFORMAT_INT(column));
@@ -39,7 +39,7 @@ PX_SYNTAX_FUNCTION(PX_Syntax_Parse_BCONTAINER)
 		PX_StringCatChar(&str, nextchar);
 	}
 
-	pnewabi = PX_Syntax_NewAbi(pSyntax, "string", pSyntax->lifetime);
+	pnewabi = PX_Syntax_PushNewAbi(pSyntax, "bcontainer", pSyntax->lifetime);
 	if (!pnewabi)
 	{
 		PX_StringCatFormat2(&pSyntax->message, "%1:%2 Error:Memory allocation failed.\n", PX_STRINGFORMAT_INT(line), PX_STRINGFORMAT_INT(column));
@@ -59,6 +59,6 @@ PX_SYNTAX_FUNCTION(PX_Syntax_Parse_BCONTAINER)
 
 px_bool PX_Syntax_Load_bcontainer(PX_Syntax* pSyntax)
 {
-	PX_Syntax_Parse_PEBNF(pSyntax, "BCONTAINER = *", PX_Syntax_Parse_BCONTAINER);
+	PX_Syntax_Parse_PEBNF(pSyntax, "bcontainer = *", PX_Syntax_Parse_bcontainer);
 	return PX_TRUE;
 }

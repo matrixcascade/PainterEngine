@@ -46,6 +46,12 @@ const BOOL PX_SerialPortInitialize(PX_SerialPort *com,const char *name,unsigned 
 	COMMTIMEOUTS  CommTimeouts;  
 	DCB  dcb; 
 
+	if (com->Handle)
+	{
+		CloseHandle((HANDLE)com->Handle);
+		com->Handle = 0;
+	}
+
 	if (strlen(name)>4&&strlen(name)<6)
 	{
 		char comName[16]="\\\\.\\";
@@ -133,6 +139,7 @@ const BOOL PX_SerialPortInitialize(PX_SerialPort *com,const char *name,unsigned 
 
 	return 1;
 _ERROR:
+	com->Handle = 0;
 	CloseHandle((HANDLE)com->Handle);
 	return 0;
 }

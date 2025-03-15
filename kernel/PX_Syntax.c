@@ -162,6 +162,10 @@ px_bool PX_Syntax_Parse_NextPENNF(PX_Syntax* pSyntax, PX_Syntax_pebnf* ppebnf, P
 			{
 				ast_type = PX_SYNTAX_AST_TYPE_FUNCTION;
 			}
+			else if (PX_strequ(pstr,"..."))
+			{
+				ast_type = PX_SYNTAX_AST_TYPE_RECURSION;
+			}
 			else
 			{
 				ast_type = PX_SYNTAX_AST_TYPE_LINKER;
@@ -186,8 +190,17 @@ px_bool PX_Syntax_Parse_NextPENNF(PX_Syntax* pSyntax, PX_Syntax_pebnf* ppebnf, P
 				if (!PX_StringInitialize(pSyntax->mp, &pnewast->constant))
 					return PX_NULL;
 				pnewast->type = ast_type;
-				if (!PX_StringCat(&pnewast->constant, pstr))
-					return PX_NULL;
+				if (ast_type== PX_SYNTAX_AST_TYPE_RECURSION)
+				{
+					if (!PX_StringCat(&pnewast->constant, ppebnf->mnenonic.buffer))
+						return PX_NULL;
+				}
+				else
+				{
+					if (!PX_StringCat(&pnewast->constant, pstr))
+						return PX_NULL;
+				}
+				
 				pnewast->pfunction = PX_NULL;
 				pnewast->pothers = PX_NULL;
 				pnewast->pnext = PX_NULL;
@@ -271,6 +284,13 @@ px_bool PX_Syntax_Parse_PEBNF(PX_Syntax* pSyntax, const px_char PEBNF[], PX_Synt
 			goto _ERROR;
 		}
 		type = PX_SyntaxGetNextLexemeFilter(&lexer);
+		if (type==PX_LEXER_LEXEME_TYPE_END)
+		{
+			ppebnf->pfunction = pfunction;
+			PX_LexerFree(&lexer);
+			return PX_TRUE;
+		}
+
 		PX_ASSERTIFX(type != PX_LEXER_LEXEME_TYPE_DELIMITER, "Error:PEBNF Error");
 		PX_ASSERTIFX(!PX_strequ(PX_LexerGetLexeme(&lexer), "="), "Error:::= expected but not found");
 		if (ppebnf)
@@ -319,6 +339,10 @@ px_bool PX_Syntax_PushOpcode(PX_Syntax* pSyntax, const px_char type[])
 	}
 	return PX_TRUE;
 }
+px_int PX_Syntax_GetAbiStackCount(PX_Syntax* pSyntax)
+{
+	return pSyntax->abistack.size;
+}
 
 px_abi* PX_Syntax_GetAbiStack(PX_Syntax* pSyntax, px_int index)
 {
@@ -333,6 +357,26 @@ px_abi* PX_Syntax_GetAbiStack(PX_Syntax* pSyntax, px_int index)
 		return PX_NULL;
 	}
 	return PX_VECTORAT(px_abi, &pSyntax->abistack, pSyntax->abistack.size + index);
+}
+
+px_abi* PX_Syntax_GetAbiStackLast(PX_Syntax* pSyntax)
+{
+	if (pSyntax->abistack.size == 0)
+	{
+		PX_ASSERT();
+		return PX_NULL;
+	}
+	return PX_VECTORLAST(px_abi, &pSyntax->abistack);
+}
+
+px_abi* PX_Syntax_GetAbiStackSecondLast(PX_Syntax* pSyntax)
+{
+	if (pSyntax->abistack.size < 2)
+	{
+		PX_ASSERT();
+		return PX_NULL;
+	}
+	return PX_VECTORAT(px_abi, &pSyntax->abistack, pSyntax->abistack.size - 2);
 }
 
 px_abi* PX_Syntax_GetAbi(PX_Syntax* pSyntax, const px_char name[], px_int lifetime)
@@ -363,7 +407,7 @@ px_abi* PX_Syntax_GetAbi(PX_Syntax* pSyntax, const px_char name[], px_int lifeti
 	return PX_NULL;
 }
 
-px_abi* PX_Syntax_NewAbi(PX_Syntax* pSyntax, const px_char name[], px_int lifetime)
+px_abi* PX_Syntax_PushNewAbi(PX_Syntax* pSyntax, const px_char name[], px_int lifetime)
 {
 	px_abi abi;
 	PX_AbiCreateDynamicWriter(&abi, pSyntax->mp);
@@ -429,8 +473,8 @@ px_void PX_Syntax_PopAbiStack(PX_Syntax* pSyntax)
 	pabi = PX_VECTORLAST(px_abi, &pSyntax->abistack);
 	PX_AbiFree(pabi);
 	PX_VectorPop(&pSyntax->abistack);
-
 }
+
 
 px_void PX_Syntax_PopAbiStackN(PX_Syntax* pSyntax, px_int N)
 {
@@ -489,6 +533,7 @@ px_void PX_SyntaxClear(PX_Syntax* pSyntax)
 		PX_AbiFree(pabi);
 	}
 	PX_VectorClear(&pSyntax->abistack);
+
 	for (i = 0; i < pSyntax->reg_ast_opcode.size; i++)
 	{
 		popcode = PX_VECTORAT(px_abi, &pSyntax->reg_ast_opcode, i);
@@ -501,6 +546,9 @@ px_void PX_SyntaxClear(PX_Syntax* pSyntax)
 		plexer = PX_VECTORAT(px_lexer, &pSyntax->reg_ast_lexer, i);
 		PX_LexerFree(plexer);
 	}
+
+
+
 	PX_VectorClear(&pSyntax->reg_ast_lexer);
 	PX_StringClear(&pSyntax->message);
 	PX_StringClear(&pSyntax->ast_message);
@@ -669,6 +717,7 @@ static px_bool PX_Syntax_ExecuteNext(PX_Syntax* pSyntax, PX_Syntax_ast* pcurrent
 		PX_Syntax_AstMessage(pSyntax, "\n");
 		newast.lexer_state = PX_LexerGetState(PX_Syntax_GetCurrentLexer(pSyntax));
 		newast.pbnfnode = pcurrent_ast->pbnfnode->pnext;//try next
+		newast.call_abistack_index = pSyntax->abistack.size;
 		if (!PX_VectorPushback(&pSyntax->aststack, &newast))
 		{
 			PX_Syntax_Terminate(pSyntax, pcurrent_ast, "out of memory");
@@ -701,6 +750,7 @@ static px_bool PX_Syntax_ExecuteOthers(PX_Syntax* pSyntax, PX_Syntax_ast* pcurre
 		PX_Syntax_AstMessage(pSyntax, "\n");
 		newast.lexer_state = pcurrent_ast->lexer_state;
 		newast.pbnfnode = pbnfnode->pothers;
+		newast.call_abistack_index = pSyntax->abistack.size;
 		if (!PX_VectorPushback(&pSyntax->aststack, &newast))
 		{
 			PX_Syntax_Terminate(pSyntax, pcurrent_ast, "out of memory");
@@ -790,19 +840,28 @@ static px_bool PX_Syntax_ExecuteAst(PX_Syntax* pSyntax)
 		return PX_Syntax_ExecuteOthers(pSyntax, &current_ast);
 	}
 	break;
+	case PX_SYNTAX_AST_TYPE_RECURSION:
 	case PX_SYNTAX_AST_TYPE_LINKER:
 	{
 		//call linker
-		px_int abibsp;
 		PX_Syntax_ast newast;
 		const px_char* pstr = pbnfnode->constant.buffer;
-		PX_Syntax_bnfnode* psearchbnf = PX_Syntax_GetPebnfNode(pSyntax, pstr);
-		if (!psearchbnf)
+		PX_Syntax_pebnf* ppebnf = PX_Syntax_GetPEBNF(pSyntax, pstr);
+		PX_Syntax_bnfnode* psearchbnf;
+		if (!ppebnf)
 		{
 			PX_ASSERT();
 			return PX_FALSE;
 		}
-		abibsp = pSyntax->abistack.size;
+		if (pbnfnode->type== PX_SYNTAX_AST_TYPE_LINKER &&ppebnf->pfunction)
+		{
+			if (!ppebnf->pfunction(pSyntax, &current_ast))
+			{
+				return PX_FALSE;
+			}
+		}
+
+		psearchbnf = ppebnf->pbnfnode;
 		PX_Syntax_AstMessage(pSyntax, "AST:linker matched ");
 		PX_Syntax_AstMessage(pSyntax, current_ast.pbnfnode->constant.buffer);
 		PX_Syntax_AstMessage(pSyntax, "-->");
@@ -812,10 +871,7 @@ static px_bool PX_Syntax_ExecuteAst(PX_Syntax* pSyntax)
 		PX_Syntax_AstMessage(pSyntax, "\n");
 		newast.lexer_state = PX_LexerGetState(current_ast.lexer_state.plexer);
 		newast.pbnfnode = psearchbnf;
-		if (!PX_VectorPushback(&pSyntax->abibsp, &abibsp))
-		{
-			return PX_FALSE;
-		}
+		newast.call_abistack_index = pSyntax->abistack.size;
 		if (!PX_VectorPushback(&pSyntax->aststack, &newast))
 		{
 			return PX_FALSE;
@@ -830,10 +886,27 @@ static px_bool PX_Syntax_ExecuteAst(PX_Syntax* pSyntax)
 	return PX_FALSE;
 }
 
+px_void PX_Syntax_AstClearAbiStack(PX_Syntax* pSyntax, PX_Syntax_ast *past)
+{
+	PX_ASSERTIFX(past->call_abistack_index > pSyntax->abistack.size, "Stack Error");
+	while (pSyntax->abistack.size > past->call_abistack_index)
+	{
+		PX_Syntax_PopAbiStack(pSyntax);
+	}
+}
+
 px_bool PX_Syntax_Execute(PX_Syntax* pSyntax, const px_char name[], const px_char pebnf[])
 {
 	PX_Syntax_ast ast;
-	PX_Syntax_Source* psource = PX_Syntax_GetSource(pSyntax, name);
+	PX_Syntax_bnfnode bnfnode = {0};
+	PX_Syntax_Source* psource;
+	PX_StringSetStatic(&bnfnode.constant, pebnf);
+	bnfnode.type = PX_SYNTAX_AST_TYPE_LINKER;
+	bnfnode.pfunction = PX_NULL;
+	bnfnode.pnext = PX_NULL;
+	bnfnode.pothers = PX_NULL;
+
+	psource = PX_Syntax_GetSource(pSyntax, name);
 	if (!psource)
 	{
 		PX_StringCatFormat1(&pSyntax->message, "Error:source file %1 not found.", PX_STRINGFORMAT_STRING(name));
@@ -844,12 +917,9 @@ px_bool PX_Syntax_Execute(PX_Syntax* pSyntax, const px_char name[], const px_cha
 
 	ast.lexer_state.plexer = PX_Syntax_GetCurrentLexer(pSyntax);
 	ast.lexer_state.offset = 0;
-	ast.pbnfnode = PX_Syntax_GetPebnfNode(pSyntax, pebnf);
-	if (!ast.pbnfnode)
-	{
-		PX_StringCatFormat1(&pSyntax->message, "Error:source file %1 syntax error.", PX_STRINGFORMAT_STRING(name));
-		return PX_FALSE;
-	}
+	ast.pbnfnode = &bnfnode;
+	ast.call_abistack_index = pSyntax->abistack.size;
+
 	if (!PX_VectorPushback(&pSyntax->aststack, &ast))
 		return PX_FALSE;
 	while (PX_TRUE)
@@ -898,7 +968,7 @@ px_bool PX_Syntax_Execute(PX_Syntax* pSyntax, const px_char name[], const px_cha
 						}
 					}
 					PX_VectorPopTo(&pSyntax->aststack, &current_ast);
-					if (current_ast.pbnfnode == PX_NULL || current_ast.pbnfnode->type != PX_SYNTAX_AST_TYPE_LINKER)
+					if (current_ast.pbnfnode == PX_NULL || (current_ast.pbnfnode->type != PX_SYNTAX_AST_TYPE_LINKER && current_ast.pbnfnode->type != PX_SYNTAX_AST_TYPE_RECURSION))
 					{
 						PX_ASSERT();
 						return PX_FALSE;
@@ -910,14 +980,16 @@ px_bool PX_Syntax_Execute(PX_Syntax* pSyntax, const px_char name[], const px_cha
 						PX_Syntax_AstMessage(pSyntax, " return true\n");
 						PX_AbiFree(pabi);
 						PX_VectorPop(&pSyntax->reg_ast_opcode);
-						PX_VectorPop(&pSyntax->abibsp);
 						if (current_ast.pbnfnode->pfunction)
 						{
 							if (current_ast.pbnfnode->pfunction(pSyntax, &current_ast))
 							{
 								PX_Syntax_AstMessage(pSyntax, "AST:");
 								PX_Syntax_AstMessage(pSyntax, current_ast.pbnfnode->constant.buffer);
-								PX_Syntax_AstMessage(pSyntax, " linker function return true,ast next\n");
+								if(current_ast.pbnfnode->type== PX_SYNTAX_AST_TYPE_LINKER)
+									PX_Syntax_AstMessage(pSyntax, " linker function return true,ast next\n");
+								else
+									PX_Syntax_AstMessage(pSyntax, " recursion function return true,ast next\n");
 								if (!PX_Syntax_ExecuteNext(pSyntax, &current_ast))
 									return PX_FALSE;
 							}
@@ -925,7 +997,11 @@ px_bool PX_Syntax_Execute(PX_Syntax* pSyntax, const px_char name[], const px_cha
 							{
 								PX_Syntax_AstMessage(pSyntax, "AST:");
 								PX_Syntax_AstMessage(pSyntax, current_ast.pbnfnode->constant.buffer);
-								PX_Syntax_AstMessage(pSyntax, " linker function return false,try others\n");
+								if (current_ast.pbnfnode->type == PX_SYNTAX_AST_TYPE_LINKER)
+									PX_Syntax_AstMessage(pSyntax, " linker function return false,try others\n");
+								else
+									PX_Syntax_AstMessage(pSyntax, " recursion function return false,try others\n");
+								PX_Syntax_AstClearAbiStack(pSyntax, &current_ast);
 								if (!PX_Syntax_ExecuteOthers(pSyntax, &current_ast))
 								{
 									return PX_FALSE;
@@ -934,16 +1010,14 @@ px_bool PX_Syntax_Execute(PX_Syntax* pSyntax, const px_char name[], const px_cha
 						}
 						else
 						{
-							px_dword abibsp;
+							
 							PX_Syntax_AstMessage(pSyntax, "AST:");
 							PX_Syntax_AstMessage(pSyntax, current_ast.pbnfnode->constant.buffer);
-							PX_Syntax_AstMessage(pSyntax, " linker function is null,ast next\n");
-							abibsp = *PX_VECTORLAST(px_dword, &pSyntax->abibsp);
-							PX_VectorPop(&pSyntax->abibsp);
-							while (pSyntax->abistack.size > (px_int)abibsp)
-							{
-								PX_Syntax_PopAbiStack(pSyntax);
-							}
+							if (current_ast.pbnfnode->type == PX_SYNTAX_AST_TYPE_LINKER)
+								PX_Syntax_AstMessage(pSyntax, " linker function is null,ast next\n");			
+							else
+								PX_Syntax_AstMessage(pSyntax, " recursion function is null,ast next\n");
+
 							if (!PX_Syntax_ExecuteNext(pSyntax, &current_ast))
 								return PX_FALSE;
 						}
@@ -953,6 +1027,7 @@ px_bool PX_Syntax_Execute(PX_Syntax* pSyntax, const px_char name[], const px_cha
 						//false
 						PX_AbiFree(pabi);
 						PX_VectorPop(&pSyntax->reg_ast_opcode);
+						PX_Syntax_AstClearAbiStack(pSyntax, &current_ast);
 						if (!PX_Syntax_ExecuteOthers(pSyntax, &current_ast))
 						{
 							return PX_FALSE;
@@ -978,11 +1053,24 @@ px_void PX_Syntax_Terminate(PX_Syntax* pSyntax, PX_Syntax_ast *past, const px_ch
 
 px_void PX_Syntax_AstMessage(PX_Syntax* pSyntax, const px_char message[])
 {
-	//PX_printf(message);
-	//return;
+	printf("%s", message);
 	if (!PX_StringCat(&pSyntax->ast_message, message))
 	{
 		PX_ASSERT();
 		return;
 	}
+}
+px_char PX_Syntax_GetNextChar(PX_Syntax_ast* past)
+{
+	while (PX_TRUE)
+	{
+		px_char ch=PX_LexerGetNextChar(past->lexer_state.plexer);
+		if (ch=='\\'&&PX_LexerPreviewNextChar(past->lexer_state.plexer)=='\n')
+		{
+			PX_LexerGetNextChar(past->lexer_state.plexer);
+			continue;
+		}
+		return ch;
+	}
+	 
 }

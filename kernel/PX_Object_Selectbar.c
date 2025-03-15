@@ -520,6 +520,25 @@ const px_char * PX_Object_SelectBarGetCurrentText(PX_Object *pObject)
 	return "";
 }
 
+px_bool PX_Object_SelectBarSetCurrentText(PX_Object* pObject,const px_char text[])
+{
+	PX_Object_SelectBar* pSelectBar = PX_Object_GetSelectBar(pObject);
+	if (pSelectBar)
+	{
+		px_int i;
+		for (i = 0; i < pSelectBar->Items.size; i++)
+		{
+			if (PX_strequ(text, PX_VECTORAT(PX_Object_SelectBar_Item, &pSelectBar->Items, i)->Text))
+			{
+				PX_Object_SelectBarSetCurrentIndex(pObject, i);
+				return PX_TRUE;
+			}
+		}
+		
+	}
+	return PX_FALSE;
+}
+
 
 const px_char* PX_Object_SelectBarGetItemText(PX_Object* pObject,px_int index)
 {
@@ -552,6 +571,16 @@ px_int PX_Object_SelectBarGetCurrentIndex(PX_Object *pObject)
 		return pSelectBar->selectIndex;
 	}
 	return -1;
+}
+
+px_int PX_Object_SelectBarGetItemCount(PX_Object* pObject)
+{
+	PX_Object_SelectBar* pSelectBar = PX_Object_GetSelectBar(pObject);
+	if (pSelectBar)
+	{
+		return pSelectBar->Items.size;
+	}
+	return 0;
 }
 
 px_void PX_Object_SelectBarSetCurrentIndex(PX_Object *pObject,px_int index)

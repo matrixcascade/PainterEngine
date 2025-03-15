@@ -39,8 +39,8 @@ typedef struct
 	px_dword  recv_cache_offset;
 
 	px_byte*  send_cache;
-	volatile px_dword  send_cache_wcursor;
-	volatile px_dword  send_cache_rcursor;
+	px_dword  send_cache_wcursor;
+	px_dword  send_cache_rcursor;
 
 	struct _PX_SocketHub * pSocketHub;
 	px_void* userptr;

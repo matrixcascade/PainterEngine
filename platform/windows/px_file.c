@@ -592,16 +592,19 @@ void PX_RequestData(const char url[], void* buffer, int size, void* ptr, void (*
 			{
 				PX_FileGetName(ppath, PX_RequestData_Extern, sizeof(PX_RequestData_Extern));
 				memcpy(buffer, io.buffer, io.size);
+				if(func_callback)
 				func_callback(buffer, io.size, ptr);
 			}
 			else
 			{
+				if (func_callback)
 				func_callback(buffer, 0, ptr);
 			}
 			PX_FreeIOData(&io);
 		}
 		else
 		{
+			if (func_callback)
 			func_callback(buffer, 0, ptr);
 		}
 	}
@@ -614,6 +617,7 @@ void PX_RequestData(const char url[], void* buffer, int size, void* ptr, void (*
 		}
 		else
 		{
+			if (func_callback)
 			func_callback(buffer, 0, ptr);
 		}
 	}
@@ -627,10 +631,12 @@ void PX_RequestData(const char url[], void* buffer, int size, void* ptr, void (*
 		if (io.size > 0 && io.buffer && io.size <= (unsigned int)size)
 		{
 			memcpy(buffer, io.buffer, io.size);
+			if (func_callback)
 			func_callback(buffer, io.size, ptr);
 		}
 		else
 		{
+			if (func_callback)
 			func_callback(buffer, 0, ptr);
 		}
 		PX_FreeIOData(&io);
@@ -810,7 +816,47 @@ px_bool PX_LoadScriptFromFile(px_memory *code,const px_char path[])
 _ERROR:
 	PX_FreeIOData(&io);
 	return PX_FALSE;
+}
 
+px_bool PX_LoadVMFromScriptFile(px_memorypool *mp,const px_char path[], PX_VM *pvm,const px_char entry[])
+{
+	PX_Compiler compiler;
+	px_memory bin;
+	PX_IO_Data io = PX_LoadFileToIOData(path);
+	if (!io.size)
+	{
+		return PX_FALSE;
+	}
+	PX_MemoryInitialize(mp, &bin);
+	
+	if (!PX_CompilerInitialize(mp, &compiler))
+	{
+		PX_FreeIOData(&io);
+		return PX_FALSE;
+	}
+	
+	if (!PX_CompilerAddSource(&compiler, (const px_char *)io.buffer))
+		goto _ERROR;
+
+	if (!PX_CompilerCompile(&compiler, &bin, 0, entry))
+	{
+		printf(compiler.error);
+		goto _ERROR;
+	}
+		
+
+	if (!PX_VMInitialize(pvm, mp, bin.buffer, bin.usedsize))
+		goto _ERROR;
+
+	PX_MemoryFree(&bin);
+	PX_CompilerFree(&compiler);
+	PX_FreeIOData(&io);
+	return PX_TRUE;
+_ERROR:
+	PX_MemoryFree(&bin);
+	PX_CompilerFree(&compiler);
+	PX_FreeIOData(&io);
+	return PX_FALSE;
 }
 
 px_bool PX_LoadLiveFromFile(px_memorypool *mp,PX_LiveFramework *pliveframework, const px_char path[])
@@ -1049,4 +1095,45 @@ px_bool PX_LoadDataToResource(PX_ResourceLibrary* ResourceLibrary, const px_char
 _ERROR:
 	PX_FreeIOData(&io);
 	return PX_FALSE;
+}
+
+const px_char* PX_GetSelfPath()
+{
+	static px_char path[MAX_PATH];
+	GetModuleFileNameA(NULL, path, MAX_PATH);
+	return path;
+}
+
+
+int PX_FileSelfUpgrade(const void* new_program_data, px_int size)
+{
+	char current_exe_path[MAX_PATH];
+	const char* new_version_path = "upgrade";
+	FILE* batch_file;
+	if (GetModuleFileNameA(NULL, current_exe_path, MAX_PATH) == 0)
+	{
+		return 0;
+	}
+
+	if (PX_SaveDataToFile((void*)new_program_data, size, new_version_path) == 0)
+	{
+		return 0;
+	}
+
+	fopen_s(&batch_file, "update.bat", "w");
+	if (batch_file == NULL) {
+		perror("Failed to create update script");
+		return 0;
+	}
+
+	fprintf(batch_file, "@echo off\n");
+	fprintf(batch_file, "timeout /t 1 /nobreak >nul\n");
+	fprintf(batch_file, "move /Y \"%s\" \"%s\"\n", new_version_path, current_exe_path);
+	fprintf(batch_file, "start \"\" \"%s\"\n", current_exe_path);
+	fprintf(batch_file, "del \"update.bat\"\n");
+	fclose(batch_file);
+
+	ShellExecuteA(NULL, "open", "update.bat", NULL, NULL, SW_HIDE);
+	exit(0);
+	return 1;
 }

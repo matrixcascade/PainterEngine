@@ -43,6 +43,7 @@ px_void PX_Object_SelectBarClear(PX_Object* pSelectBarObject);
 px_void PX_Object_SelectBarRemoveItem(PX_Object* PX_Object_SelectBar, px_int index);
 px_int PX_Object_SelectBarGetItemIndexByText(PX_Object *pObject,const px_char Text[]);
 const px_char *PX_Object_SelectBarGetCurrentText(PX_Object *pObject);
+px_bool PX_Object_SelectBarSetCurrentText(PX_Object* pObject, const px_char text[]);
 const px_char* PX_Object_SelectBarGetItemText(PX_Object* pObject, px_int index);
 px_void PX_Object_SelectBarSetDisplayCount(PX_Object* pObject, px_int count);
 px_int  PX_Object_SelectBarGetCurrentIndex(PX_Object *pObject);
@@ -55,6 +56,6 @@ px_void PX_Object_SelectBarSetBorderColor(PX_Object *pObject,px_color color);
 px_void PX_Object_SelectBarSetBackgroundColor(PX_Object *pObject,px_color color);
 px_void PX_Object_SelectBarSetMaxDisplayCount(PX_Object* pObject, px_int color);
 px_void PX_Object_SelectBarSetTextAlign(PX_Object *pObject,PX_ALIGN align);
-
+px_int PX_Object_SelectBarGetItemCount(PX_Object* pObject);
 #endif
 

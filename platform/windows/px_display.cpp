@@ -45,6 +45,7 @@ extern "C"
 	double PX_GetWindowScale();
 	void PX_SetWindowStyle(PX_WINODW_STYLE style);
 	void PX_SetWindowPosition(int x, int y);
+	void PX_SetWindowName(const char* name);
 }
  
 #define         WIN_MAX_INPUT_STRING_LEN   64
@@ -695,4 +696,9 @@ void PX_SetWindowStyle(PX_WINODW_STYLE style)
 void PX_SetWindowPosition(int x,int y)
 {
 	SetWindowPos(Win_Hwnd,HWND_TOPMOST,x,y,0,0,SWP_NOSIZE);
+}
+
+void PX_SetWindowName(const char* name)
+{
+	SetWindowTextA(Win_Hwnd, (LPCSTR)name);
 }

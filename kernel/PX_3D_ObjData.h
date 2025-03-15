@@ -1,6 +1,6 @@
 #ifndef PX_3D_OBJDATA_H
 #define PX_3D_OBJDATA_H
-#include "PX_Lexer.h"
+#include "../core/PX_Core.h"
 
 typedef struct 
 {

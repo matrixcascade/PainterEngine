@@ -1,7 +1,7 @@
 #ifndef PX_SYNTAX_H
 #define PX_SYNTAX_H
 
-#include "PX_Lexer.h"
+#include "../core/PX_Core.h"
 struct _PX_Syntax;
 struct _PX_Syntax_bnfnode;
 struct _PX_Syntax_ast;
@@ -15,8 +15,7 @@ typedef enum
 	PX_SYNTAX_AST_TYPE_CONSTANT,
 	PX_SYNTAX_AST_TYPE_LINKER,
 	PX_SYNTAX_AST_TYPE_FUNCTION,
-	PX_SYNTAX_AST_TYPE_RETURN_TRUE,
-	PX_SYNTAX_AST_TYPE_RETURN_FALSE,
+	PX_SYNTAX_AST_TYPE_RECURSION,
 }PX_SYNTAX_AST_TYPE;
 
 typedef struct _PX_Syntax_bnfnode
@@ -44,6 +43,7 @@ typedef struct
 typedef struct _PX_Syntax_ast
 {
 	PX_LEXER_STATE lexer_state;
+	px_int call_abistack_index;
 	PX_Syntax_bnfnode * pbnfnode;
 }PX_Syntax_ast;
 
@@ -55,7 +55,6 @@ typedef struct _PX_Syntax
 	px_vector pebnf;
 	px_vector aststack;
 	px_vector abistack;
-	px_vector abibsp;
 	px_vector sources;
 	px_vector reg_ast_opcode;
 	px_vector reg_ast_lexer;
@@ -80,11 +79,15 @@ px_abi* PX_Syntax_GetAbiStack(PX_Syntax* pSyntax, px_int index);
 px_bool PX_Syntax_PushAbiStack(PX_Syntax* pSyntax, px_abi* pabi);
 px_void PX_Syntax_PopAbiStack(PX_Syntax* pSyntax);
 px_abi* PX_Syntax_CreateNewIr(PX_Syntax* pSyntax);
-px_abi* PX_Syntax_NewAbi(PX_Syntax* pSyntax, const px_char name[], px_int lifetime);
+px_abi* PX_Syntax_PushNewAbi(PX_Syntax* pSyntax, const px_char name[], px_int lifetime);
+px_abi* PX_Syntax_GetAbiStackLast(PX_Syntax* pSyntax);
+px_abi* PX_Syntax_GetAbiStackSecondLast(PX_Syntax* pSyntax);
 px_bool PX_Syntax_AddSource(PX_Syntax* pSyntax, const px_char filename[], const px_char source[]);
 px_bool PX_Syntax_Execute(PX_Syntax* pSyntax, const px_char sources[],const px_char pebnf[]);
 px_void PX_Syntax_Terminate(PX_Syntax* pSyntax, PX_Syntax_ast *past,const px_char message[]);
 px_void PX_Syntax_AstMessage(PX_Syntax* pSyntax, const px_char message[]);
+px_int PX_Syntax_GetAbiStackCount(PX_Syntax* pSyntax);
+px_char PX_Syntax_GetNextChar(PX_Syntax_ast* past);
 px_bool PX_SyntaxInitialize(px_memorypool* mp, PX_Syntax* pSyntax);
 px_void PX_SyntaxFree(PX_Syntax* pSyntax);
 px_void PX_SyntaxClear(PX_Syntax* pSyntax);

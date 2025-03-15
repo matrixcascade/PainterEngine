@@ -18,7 +18,6 @@
 #include "PX_Sync.h"
 #include "PX_MQTT.h"
 #include "PX_Object.h"
-#include "PX_Json.h"
 #include "PX_3D_ObjData.h"
 #include "PX_Modbus.h"
 #include "PX_LiveFramework.h"
@@ -27,5 +26,13 @@
 #include "PX_CanvasVM.h"
 #include "PX_CDA.h"
 #include "PX_World.h"
-
+#include "PX_Syntax_const_int.h"
+#include "PX_Syntax_const_float.h"
+#include "PX_Syntax_const_string.h"
+#include "PX_Syntax_keyword.h"
+#include "PX_Syntax_bcontainer.h"
+#include "PX_Syntax_identifier.h"
+#include "PX_Syntax_numeric.h"
+#include "PX_Syntax_const_string_list.h"
+#include "PX_Syntax_const_int_list.h"
 #endif

@@ -1,4 +1,4 @@
-#include "PX_Syntax_string.h"
+#include "PX_Syntax_const_string.h"
 
 PX_SYNTAX_FUNCTION(PX_Syntax_Parse_const_string)
 {
@@ -24,7 +24,7 @@ PX_SYNTAX_FUNCTION(PX_Syntax_Parse_const_string)
 
 	while (PX_TRUE)
 	{
-		nextchar = PX_LexerGetNextChar(past->lexer_state.plexer);
+		nextchar = PX_Syntax_GetNextChar(past);
 		if (nextchar == '\0' || nextchar == '\n')
 		{
 			PX_StringCatFormat2(&pSyntax->message, "%1:%2 Error:Unexpected end of string.\n", PX_STRINGFORMAT_INT(line), PX_STRINGFORMAT_INT(column));
@@ -37,12 +37,9 @@ PX_SYNTAX_FUNCTION(PX_Syntax_Parse_const_string)
 		}
 		if (nextchar == '\\')
 		{
-			nextchar = PX_LexerGetNextChar(past->lexer_state.plexer);
+			nextchar = PX_Syntax_GetNextChar(past);
 			switch (nextchar)
 			{
-			case '\n':
-				continue;
-				break;
 			case 'n':
 				nextchar = '\n';
 				break;
@@ -72,7 +69,7 @@ PX_SYNTAX_FUNCTION(PX_Syntax_Parse_const_string)
 		PX_StringCatChar(&str, nextchar);
 	}
 
-	pnewabi = PX_Syntax_NewAbi(pSyntax, "string", pSyntax->lifetime);
+	pnewabi = PX_Syntax_PushNewAbi(pSyntax, "const_string", pSyntax->lifetime);
 	if (!pnewabi)
 	{
 		PX_StringCatFormat2(&pSyntax->message, "%1:%2 Error:Memory allocation failed.\n", PX_STRINGFORMAT_INT(line), PX_STRINGFORMAT_INT(column));

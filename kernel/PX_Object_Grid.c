@@ -1,5 +1,15 @@
 #include "PX_Object_Grid.h"
 
+PX_OBJECT_EVENT_FUNCTION(PX_Object_GridOnChanged)
+{
+	PX_Object_Event ne = { 0 };
+	PX_Object* pGridObject = (PX_Object*)ptr;
+	PX_Object_Event_SetDataPtr(&ne, pObject);
+	ne.Event = PX_OBJECT_EVENT_VALUECHANGED;
+	PX_ObjectExecuteEvent(pGridObject, ne);
+}
+
+
 PX_OBJECT_RENDER_FUNCTION(PX_Object_GridRender)
 {
 	//draw border
@@ -251,6 +261,7 @@ PX_Object* PX_Object_GridSetSelectBar(PX_Object* pObject, px_int x, px_int y, px
 		if (pSelectBar)
 		{
 			PX_Object_GridSetCellObject(pObject, x, y, xsize, ysize, pSelectBar);
+			PX_ObjectRegisterEvent(pSelectBar, PX_OBJECT_EVENT_VALUECHANGED, PX_Object_GridOnChanged, pObject);
 			return pSelectBar;
 		}
 		return PX_NULL;
@@ -266,6 +277,186 @@ PX_Object* PX_Object_GridGetObject(PX_Object* pObject, px_int x, px_int y)
 		return pGrid->cell[y*pGrid->xcount + x].object;
 	}
 	return PX_NULL;
+}
+
+const px_char* PX_Object_GridGetText(PX_Object* pObject, px_int x, px_int y)
+{
+	PX_Object* pGridObject = PX_Object_GridGetObject(pObject, x, y);
+	if (pGridObject)
+	{
+		if (PX_ObjectCheckType(pGridObject, PX_OBJECT_TYPE_LABEL))
+		{
+			return PX_Object_LabelGetText(pGridObject);
+		}
+		else if (PX_ObjectCheckType(pGridObject, PX_OBJECT_TYPE_EDIT))
+		{
+			return PX_Object_EditGetText(pGridObject);
+		}
+		else if (PX_ObjectCheckType(pGridObject, PX_OBJECT_TYPE_CHECKBOX))
+		{
+			return PX_Object_CheckBoxGetText(pGridObject);
+		}
+		else if (PX_ObjectCheckType(pGridObject, PX_OBJECT_TYPE_BUTTON))
+		{
+			return PX_Object_PushButtonGetText(pGridObject);
+		}
+		else if (PX_ObjectCheckType(pGridObject, PX_OBJECT_TYPE_SELECTBAR))
+		{
+			return PX_Object_SelectBarGetCurrentText(pGridObject);
+		}
+		else
+		{
+			return "";
+		}
+	}
+	PX_ASSERT();
+	return PX_NULL;
+}
+
+px_void PX_Object_GridSetText(PX_Object* pObject, px_int x, px_int y, const px_char text[])
+{
+	PX_Object* pGridObject = PX_Object_GridGetObject(pObject, x, y);
+	if (pGridObject)
+	{
+		if (PX_ObjectCheckType(pGridObject, PX_OBJECT_TYPE_LABEL))
+		{
+			PX_Object_LabelSetText(pGridObject, text);
+		}
+		else if (PX_ObjectCheckType(pGridObject, PX_OBJECT_TYPE_EDIT))
+		{
+			PX_Object_EditSetText(pGridObject, text);
+		}
+		else if (PX_ObjectCheckType(pGridObject, PX_OBJECT_TYPE_CHECKBOX))
+		{
+			PX_Object_CheckBoxSetText(pGridObject, text);
+		}
+		else if (PX_ObjectCheckType(pGridObject, PX_OBJECT_TYPE_BUTTON))
+		{
+			PX_Object_PushButtonSetText(pGridObject, text);
+		}
+		else if (PX_ObjectCheckType(pGridObject, PX_OBJECT_TYPE_SELECTBAR))
+		{
+			PX_Object_SelectBarSetCurrentText(pGridObject, text);
+		}
+	}
+}
+
+
+px_void PX_Object_GridSetIndex(PX_Object* pObject, px_int x, px_int y, px_int index)
+{
+	PX_Object* pGridObject = PX_Object_GridGetObject(pObject, x, y);
+	if (pGridObject)
+	{
+		if (PX_ObjectCheckType(pGridObject, PX_OBJECT_TYPE_SELECTBAR))
+		{
+			PX_Object_SelectBarSetCurrentIndex(pGridObject, index);
+		}
+	}
+}
+
+px_int PX_Object_GridGetSelectIndex(PX_Object* pObject, px_int x, px_int y)
+{
+	PX_Object* pGridObject = PX_Object_GridGetObject(pObject, x, y);
+	if (pGridObject)
+	{
+		if (PX_ObjectCheckType(pGridObject, PX_OBJECT_TYPE_SELECTBAR))
+		{
+			return PX_Object_SelectBarGetCurrentIndex(pGridObject);
+		}
+	}
+	return -1;
+}
+
+px_bool PX_Object_GridExportToAbi(PX_Object* pObject, px_abi* pAbi)
+{
+	PX_Object_grid* pGrid = (PX_Object_grid*)PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_GRID);
+	px_int i, j;
+	px_int count = 0;
+	for (i = 0; i < pGrid->ycount; i++)
+	{
+		for (j = 0; j < pGrid->xcount; j++)
+		{
+			if (pGrid->cell[i * pGrid->xcount + j].object != PX_NULL)
+			{
+				if (pGrid->cell[i * pGrid->xcount + j].startx==j&& pGrid->cell[i * pGrid->xcount + j].starty == i)
+				{
+					//first cell
+					px_char countcontent[8];
+					px_abi abitoken;
+					PX_itoa(count, countcontent, 8, 10);
+					count++;
+					PX_AbiCreateDynamicWriter(&abitoken, pGrid->mp);
+
+					PX_AbiSet_int(&abitoken, "x",j);
+					PX_AbiSet_int(&abitoken, "y", i);
+					if (PX_ObjectCheckType(pGrid->cell[i * pGrid->xcount + j].object, PX_OBJECT_TYPE_LABEL))
+					{
+						PX_AbiSet_string(&abitoken, "type", "label");
+						PX_AbiSet_string(&abitoken, "text", PX_Object_LabelGetText(pGrid->cell[i * pGrid->xcount + j].object));
+					}
+					else if (PX_ObjectCheckType(pGrid->cell[i * pGrid->xcount + j].object, PX_OBJECT_TYPE_EDIT))
+					{
+						PX_AbiSet_string(&abitoken, "type", "edit");
+						PX_AbiSet_string(&abitoken, "text", PX_Object_EditGetText(pGrid->cell[i * pGrid->xcount + j].object));
+					}
+					else if (PX_ObjectCheckType(pGrid->cell[i * pGrid->xcount + j].object, PX_OBJECT_TYPE_CHECKBOX))
+					{
+						PX_AbiSet_string(&abitoken, "type", "checkbox");
+						PX_AbiSet_string(&abitoken, "text", PX_Object_CheckBoxGetText(pGrid->cell[i * pGrid->xcount + j].object));
+					}
+					else if (PX_ObjectCheckType(pGrid->cell[i * pGrid->xcount + j].object, PX_OBJECT_TYPE_BUTTON))
+					{
+						PX_AbiSet_string(&abitoken, "type", "button");
+						PX_AbiSet_string(&abitoken, "text", PX_Object_PushButtonGetText(pGrid->cell[i * pGrid->xcount + j].object));
+					}
+					else if (PX_ObjectCheckType(pGrid->cell[i * pGrid->xcount + j].object, PX_OBJECT_TYPE_SELECTBAR))
+					{
+						PX_AbiSet_string(&abitoken, "type", "selectbar");
+						PX_AbiSet_string(&abitoken, "text", PX_Object_SelectBarGetCurrentText(pGrid->cell[i * pGrid->xcount + j].object));
+					}
+					else
+					{
+						PX_AbiFree(&abitoken);
+						return PX_FALSE;
+					}
+					PX_AbiSet_Abi(pAbi, countcontent, &abitoken);
+					PX_AbiFree(&abitoken);
+				}
+			}
+		}
+	}
+	return PX_TRUE;
+}
+
+px_bool PX_Object_GridImportFromAbi( PX_Object* pObject, px_abi* pAbi)
+{
+	px_char countcontent[8];
+	px_int count = 0;
+	while (PX_TRUE)
+	{
+		px_abi grid_abi;
+		const px_char* pType;
+		const px_char* pText;
+		px_int *px, *py;
+		PX_itoa(count, countcontent, 8, 10);
+		count++;
+		if (!PX_AbiRead_Abi(pAbi, countcontent, &grid_abi))
+		{
+			break;
+		}
+		pType = PX_AbiGet_string(&grid_abi, "type");
+		pText = PX_AbiGet_string(&grid_abi, "text");
+		px = PX_AbiGet_int(&grid_abi, "x");
+		py = PX_AbiGet_int(&grid_abi, "y");
+		if (!pType || !pText || !px || !py)
+		{
+			PX_AbiFree(&grid_abi);
+			return PX_FALSE;
+		}
+		PX_Object_GridSetText(pObject, *px, *py, pText);
+	}
+	return PX_TRUE;
+	
 }
 
 PX_Object* PX_Object_GridSetButton(PX_Object* pObject, px_int x, px_int y, px_int xsize, px_int ysize, const px_char label[], PX_FontModule* fontmodule)
@@ -292,6 +483,7 @@ PX_Object* PX_Object_GridSetSliderBar(PX_Object* pObject, px_int x, px_int y, px
 		if (pSliderBar)
 		{
 			PX_Object_GridSetCellObject(pObject, x, y, xsize, ysize, pSliderBar);
+			PX_ObjectRegisterEvent(pSliderBar, PX_OBJECT_EVENT_VALUECHANGED, PX_Object_GridOnChanged, pObject);
 			return pSliderBar;
 		}
 		return PX_NULL;
@@ -307,6 +499,7 @@ PX_Object* PX_Object_GridSetEdit(PX_Object* pObject, px_int x, px_int y, px_int 
 		if (pEdit)
 		{
 			PX_Object_GridSetCellObject(pObject, x, y, xsize, ysize, pEdit);
+			PX_ObjectRegisterEvent(pEdit, PX_OBJECT_EVENT_LOSTFOCUS, PX_Object_GridOnChanged, pObject);
 			return pEdit;
 		}
 		return PX_NULL;
@@ -322,6 +515,7 @@ PX_Object* PX_Object_GridSetCheckBox(PX_Object* pObject, px_int x, px_int y, px_
 		if (pCheckBox)
 		{
 			PX_Object_GridSetCellObject(pObject, x, y, xsize, ysize, pCheckBox);
+			PX_ObjectRegisterEvent(pCheckBox, PX_OBJECT_EVENT_VALUECHANGED, PX_Object_GridOnChanged, pObject);
 			return pCheckBox;
 		}
 		return PX_NULL;

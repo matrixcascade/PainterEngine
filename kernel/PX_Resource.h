@@ -7,7 +7,6 @@
 #include "PX_Partical.h"
 #include "PX_Script_Interpreter.h"
 #include "PX_Script_ASMCompiler.h"
-#include "PX_Json.h"
 
 typedef enum 
 {

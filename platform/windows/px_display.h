@@ -22,6 +22,7 @@ extern BOOL PX_WindowResize(int surfaceWidth,int surfaceHeight,int windowWidth,i
 extern int  PX_GetScreenHeight();
 extern int  PX_GetScreenWidth();
 extern int  PX_SetWindowResizeable();
+extern void PX_SetWindowName(const char* name);
 
 extern HWND PX_GetWindowHwnd();
 extern VOID PX_SystemReadDeviceState();

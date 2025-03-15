@@ -10,14 +10,28 @@
 #include "sys/vfs.h"
 #include "sys/statvfs.h"
 
+const px_char* PX_GetSelfPath()
+{
+    static px_char path[1024];
+    ssize_t len = readlink("/proc/self/exe", path, sizeof(path) - 1);
+    if (len == -1) {
+        return NULL;
+    }
+    path[len] = '\0';
+    return path;
+}
+
 int PX_DirExist(const char path[])
 {
-    if (access(path, 0) == 0)
+    struct stat st;
+    if (stat(path, &st) == 0)
     {
-        return 1;
+        if (S_ISDIR(st.st_mode))
+        {
+            return 1;
+        }
     }
     return 0;
-   
 }
 
 int PX_mkdir(const char path[])
@@ -27,6 +41,7 @@ int PX_mkdir(const char path[])
         return 1;
     }
     return 0;
+    
 }
 
 int PX_DirCreate(const char path[])
@@ -40,20 +55,26 @@ int PX_DirCreate(const char path[])
         if( str[i]=='/' )
         {
             str[i] = '\0';
-            if(access(str,0)!=0)
+            if(i!=0)
             {
-                if(mkdir(str,0777 )!=0)
+                if(!PX_DirExist(str))
                 {
-                    return 0;
+                    if(!PX_mkdir(str))
+                    {
+                        printf("create dir %s failed\n", str);
+                        return 0;
+                    }
                 }
+               
             }
             str[i]='/';
         }
     }
-    if( len>0 && access(str,0)!=0 )
+    if( len>0 && !PX_DirExist(str))
     {
-        if(mkdir(str,0777)!=0)
+        if(!PX_mkdir(str))
         {
+            printf("create dir %s failed\n", str);
             return 0;
         }
     }
@@ -661,10 +682,7 @@ unsigned long long PX_FileGetDiskFreeSize(const char folderPath[])
 
     if (statvfs(folderPath, &stat) == 0) 
     {
-        unsigned long long freeSpace = stat.f_bsize * stat.f_bfree;
-        unsigned long long totalSpace = stat.f_bsize * stat.f_blocks;
-
-        return  freeSpace;
+        return  (unsigned long long)stat.f_frsize * (unsigned long long)stat.f_bfree;
     }
     else 
     {
@@ -677,8 +695,8 @@ unsigned long long PX_FileGetDiskUsedSize(const char folderPath[])
 
     if (statvfs(folderPath, &stat) == 0) 
     {
-        unsigned long long freeSpace = stat.f_bsize * stat.f_bfree;
-        unsigned long long totalSpace = stat.f_bsize * stat.f_blocks;
+        unsigned long long freeSpace = (unsigned long long)stat.f_frsize * (unsigned long long)stat.f_bfree;
+        unsigned long long totalSpace = (unsigned long long)stat.f_frsize * (unsigned long long)stat.f_blocks;
 
         return  totalSpace - freeSpace;
     }
@@ -693,7 +711,7 @@ unsigned long long PX_FileGetDiskSize(const char folderPath[])
 
     if (statvfs(folderPath, &stat) == 0) 
     {
-        unsigned long long totalSpace = stat.f_bsize * stat.f_blocks;
+        unsigned long long totalSpace = (unsigned long long)stat.f_frsize * (unsigned long long)stat.f_blocks;
 
         return  totalSpace;
     }
@@ -975,4 +993,68 @@ px_bool PX_LoadDataToResource(PX_ResourceLibrary* ResourceLibrary, const px_char
 _ERROR:
 	PX_FreeIOData(&io);
 	return PX_FALSE;
+}
+
+px_bool PX_LoadVMFromScriptFile(px_memorypool *mp,const px_char path[], PX_VM *pvm,const px_char entry[])
+{
+	PX_Compiler compiler;
+	px_memory bin;
+	PX_IO_Data io = PX_LoadFileToIOData(path);
+	if (!io.size)
+	{
+		return PX_FALSE;
+	}
+	PX_MemoryInitialize(mp, &bin);
+	
+	if(!PX_CompilerInitialize(mp,&compiler))
+		goto _ERROR;
+	
+	if (!PX_CompilerAddSource(&compiler, (const px_char *)io.buffer))
+		goto _ERROR;
+
+	if (!PX_CompilerCompile(&compiler, &bin, 0, entry))
+		goto _ERROR;
+
+	if (!PX_VMInitialize(pvm, mp, bin.buffer, bin.usedsize))
+		goto _ERROR;
+
+	PX_MemoryFree(&bin);
+	PX_CompilerFree(&compiler);
+	PX_FreeIOData(&io);
+	return PX_TRUE;
+_ERROR:
+	return PX_FALSE;
+}
+
+
+
+int PX_FileSelfUpgrade(const void *new_program_data, size_t size) 
+{
+    char self_path[1024];
+    ssize_t len = readlink("/proc/self/exe", self_path, sizeof(self_path) - 1);
+    if (len == -1) {
+        return 0;
+    }
+    self_path[len] = '\0';
+
+    char temp_path[1024];
+    snprintf(temp_path, sizeof(temp_path), "%s.tmp", self_path);
+    int fd = open(temp_path, O_WRONLY | O_CREAT | O_TRUNC, 0755);
+    if (fd == -1) {
+        return 0;
+    }
+
+    ssize_t written = write(fd, new_program_data, size);
+    if (written != size) {
+        close(fd);
+        return 0;
+    }
+    close(fd);
+
+    if (rename(temp_path, self_path) == -1) {
+        return 0;
+    }
+
+    execl(self_path, self_path, (char *)NULL); 
+    return 1;
 }

@@ -1,10 +1,11 @@
 #ifndef PAINTERENGINE_APPLICATION_H
 #define PAINTERENGINE_APPLICATION_H
 
-#define PX_APPLICATION_NAME "PainterEngine"
+
+
 #define PX_APPLICATION_MEMORYPOOL_STATIC_SIZE (1024*1024*64)
-#define PX_APPLICATION_MEMORYPOOL_DYNAMIC_SIZE (1024*1024*32)
-#define PX_APPLICATION_MEMORYPOOL_SPACE_SIZE (1024*1024*32)
+#define PX_APPLICATION_MEMORYPOOL_DYNAMIC_SIZE (1024*1024*64)
+#define PX_APPLICATION_MEMORYPOOL_SPACE_SIZE (1024*1024*64)
 
 #define PX_APPLICATION_MEMORYPOOL_ALL_SIZE (PX_APPLICATION_MEMORYPOOL_STATIC_SIZE+PX_APPLICATION_MEMORYPOOL_DYNAMIC_SIZE+PX_APPLICATION_MEMORYPOOL_SPACE_SIZE)
 #include "PainterEngine_Runtime.h"
@@ -14,7 +15,7 @@
 #include "platform/modules/px_request.h"
 #include "platform/modules/px_tcp.h"
 #include "platform/modules/px_udp.h"
-
+extern px_char PX_APPLICATION_NAME[];
 	typedef struct
 	{
 		px_color backgroundColor;
@@ -30,6 +31,7 @@
 	extern PX_Application App;
 	px_bool PainterEngine_Initialize(px_int screen_width, px_int screen_height);
 	px_bool PainterEngine_InitializeAudio();
+	px_void PainterEngine_SetWindowText(const px_char text[]);
 
 	PX_Object* PainterEngine_GetRoot();
 	px_surface* PainterEngine_GetSurface();
@@ -42,6 +44,7 @@
 	PX_ResourceLibrary* PainterEngine_GetResourceLibrary();
 
 	px_void PainterEngine_Print(const px_char content[]);
+	px_void PainterEngine_PrintWithColor(const px_char content[], px_color clr);
 	px_void PainterEngine_PrintClear();
 	px_void PainterEngine_PrintImage(const px_char path[]);
 	px_void PainterEngine_SetFontSize(px_int size);
@@ -59,6 +62,8 @@
 	px_surface* PainterEngine_GetDrawSurface();
 	px_int PainterEngine_GetSurfaceWidth();
 	px_int PainterEngine_GetSurfaceHeight();
+	px_int PainterEngine_GetScreenWidth();
+	px_int PainterEngine_GetScreenHeight();
 	px_bool PainterEngine_LoadFontModule(const px_char path[], PX_FONTMODULE_CODEPAGE codepage, px_int size);
 	px_void PainterEngine_DrawTexture(px_texture* ptexture, px_int x, px_int y, PX_ALIGN align);
 	px_void PainterEngine_DrawLine(px_int x1, px_int y1, px_int x2, px_int y2, px_int linewidth, px_color color);

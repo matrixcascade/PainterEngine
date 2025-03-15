@@ -182,43 +182,6 @@ _ERROR:
 	return PX_FALSE;
 }
 
-px_variable PX_VariableCopy(px_memorypool *mp,px_variable *pvar,px_bool *bOutOfMemory)
-{
-	px_variable cpyVar;
-	cpyVar=*pvar;
-	if(bOutOfMemory)
-		*bOutOfMemory=PX_FALSE;
-
-	if (pvar->type==PX_VARIABLE_TYPE_STRING)
-	{
-		if(!PX_StringInitialize(mp,&cpyVar._string)) 
-		{
-			cpyVar.type=PX_VARIABLE_TYPE_INT;
-			if (bOutOfMemory)
-				*bOutOfMemory=PX_TRUE;
-		}
-		else
-		{
-			if(!PX_StringCopy(&cpyVar._string,&pvar->_string))
-			{
-				cpyVar.type=PX_VARIABLE_TYPE_INT;
-				if (bOutOfMemory)
-					*bOutOfMemory=PX_TRUE;
-			}
-		}
-	}
-	else if (pvar->type==PX_VARIABLE_TYPE_MEMORY)
-	{
-		PX_MemoryInitialize(mp,&cpyVar._memory);
-		if(!PX_MemoryCat(&cpyVar._memory, pvar->_memory.buffer, pvar->_memory.usedsize))
-		{
-			cpyVar.type=PX_VARIABLE_TYPE_INT;
-			if (bOutOfMemory)
-				*bOutOfMemory=PX_TRUE;
-		}
-	}
-	return cpyVar;
-}
 
 
 static px_variable  PX_VM_GetParamConst(PX_VM *Ins,px_char optype,px_int param,px_bool *bOutofMemory)
@@ -3474,6 +3437,15 @@ px_bool PX_VMRegisterHostFunction(PX_VM *Ins,const px_char *name,PX_VM_Host_Func
 		}
 	}
 	return PX_FALSE;
+}
+
+const px_char* PX_VMGetFunctionName(PX_VM* Ins, px_int index)
+{
+	if (index >= 0 && index < Ins->funcCount)
+	{
+		return Ins->_func[index].name;
+	}
+	return PX_NULL;
 }
 
 px_void PX_VM_RET(PX_VM *Ins,px_variable cVar)

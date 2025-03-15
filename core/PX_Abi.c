@@ -39,6 +39,11 @@ px_byte* PX_AbiGetRawDataPtr(px_byte* pStartBuffer)
 	return pStartBuffer + sizeof(PX_ABI_TYPE) + sizeof(px_dword) + PX_strlen((px_char*)(pStartBuffer + sizeof(PX_ABI_TYPE) + sizeof(px_dword)) + 1);
 }
 
+px_dword PX_AbiGetRawDataSize(px_byte* pStartBuffer)
+{
+	return *(px_dword*)(pStartBuffer + sizeof(PX_ABI_TYPE));
+}
+
 px_byte* PX_AbiGetRawPtr(px_abi *pabi, const px_char name[], PX_ABI_TYPE type)
 {
 	px_int readoffset = 0;
@@ -77,13 +82,11 @@ px_byte* PX_AbiGetRawPtr(px_abi *pabi, const px_char name[], PX_ABI_TYPE type)
 }
 
 
-px_dword PX_AbiGetRawDataSize(px_byte* pStartBuffer)
-{
-	return *(px_dword *)(pStartBuffer + sizeof(PX_ABI_TYPE));
-}
+
 px_dword PX_AbiGetRawBlockSize(px_byte* pStartBuffer)
 {
-	return sizeof(PX_ABI_TYPE) + sizeof(px_dword) + PX_strlen((px_char*)(pStartBuffer + sizeof(PX_ABI_TYPE) + sizeof(px_dword)) + 1) + PX_AbiGetRawDataSize(pStartBuffer);
+	px_dword name_data_size = *(px_dword*)(pStartBuffer + sizeof(PX_ABI_TYPE));
+	return sizeof(PX_ABI_TYPE)+sizeof(px_dword) + name_data_size;
 }
 
 px_int  PX_AbiGetPtrSize(px_abi* pabi)
@@ -129,16 +132,16 @@ px_bool PX_AbiWrite(px_abi* pabi, PX_ABI_TYPE type, const px_char name[], px_voi
 	}
 	else
 	{
-		px_dword size;
-		size = PX_strlen(name) + 1 + buffersize;
-		if (pabi->static_write_offset + sizeof(type) + sizeof(size) + PX_strlen(name) + 1 + buffersize > pabi->static_size)
+		px_dword name_data_size;
+		name_data_size = PX_strlen(name) + 1 + buffersize;
+		if (pabi->static_write_offset + sizeof(type) + sizeof(name_data_size) + PX_strlen(name) + 1 + buffersize > pabi->static_size)
 		{
 			return PX_FALSE;
 		}
 		PX_memcpy(pabi->pstatic_buffer + pabi->static_write_offset, &type, sizeof(type));
 		pabi->static_write_offset += sizeof(type);
-		PX_memcpy(pabi->pstatic_buffer + pabi->static_write_offset, &size, sizeof(size));
-		pabi->static_write_offset += sizeof(size);
+		PX_memcpy(pabi->pstatic_buffer + pabi->static_write_offset, &name_data_size, sizeof(name_data_size));
+		pabi->static_write_offset += sizeof(name_data_size);
 		PX_memcpy(pabi->pstatic_buffer + pabi->static_write_offset, name, PX_strlen(name) + 1);
 		pabi->static_write_offset += PX_strlen(name) + 1;
 		PX_memcpy(pabi->pstatic_buffer + pabi->static_write_offset, buffer, buffersize);
@@ -233,6 +236,11 @@ px_bool PX_AbiWrite_data(px_abi* pabi, const px_char name[], px_void* data, px_i
 	return PX_AbiWrite(pabi, PX_ABI_TYPE_DATA, name, data, size);
 }
 
+px_bool PX_AbiWrite_Abi(px_abi* pabi, const px_char name[], px_abi* pAbi)
+{
+	return PX_AbiWrite(pabi, PX_ABI_TYPE_ABI, name, PX_AbiGetPtr(pAbi), PX_AbiGetPtrSize(pAbi));
+}
+
 px_bool PX_AbiSet_int(px_abi* pabi, const px_char name[], px_int _int)
 {
 	return PX_AbiSet(pabi, PX_ABI_TYPE_INT, name, &_int, sizeof(_int));
@@ -280,6 +288,11 @@ px_bool PX_AbiSet_bool(px_abi* pabi, const px_char name[], px_bool _bool)
 px_bool PX_AbiSet_data(px_abi* pabi, const px_char name[], px_void* data, px_int size)
 {
 	return PX_AbiSet(pabi, PX_ABI_TYPE_DATA, name, data, size);
+}
+
+px_bool PX_AbiSet_Abi(px_abi* pabi, const px_char name[], px_abi* pAbi)
+{
+	return PX_AbiSet(pabi, PX_ABI_TYPE_ABI, name, PX_AbiGetPtr(pAbi), PX_AbiGetPtrSize(pAbi));
 }
 
 
@@ -334,6 +347,11 @@ px_bool PX_AbiMemoryWrite_bool(px_memory* pmem, const px_char name[], px_bool _b
 px_bool PX_AbiMemoryWrite_data(px_memory* pmem, const px_char name[], px_void* data, px_int size)
 {
 	return PX_AbiWriteMemory(pmem, PX_ABI_TYPE_DATA, name, data, size);
+}
+
+px_bool PX_AbiMemoryWrite_Abi(px_memory* pmem, const px_char name[], px_abi* pAbi)
+{
+	return PX_AbiWriteMemory(pmem, PX_ABI_TYPE_ABI, name, PX_AbiGetPtr(pAbi), PX_AbiGetPtrSize(pAbi));
 }
 
 
@@ -602,6 +620,18 @@ px_int PX_AbiRead_data(px_abi* pabi, const px_char name[], px_void* data, px_int
 	return PX_FALSE;
 }
 
+px_int PX_AbiRead_Abi(px_abi* pabi, const px_char name[], px_abi* pAbi)
+{
+	px_int datasize;
+	px_void *pabibuffer= PX_AbiRead(pabi, PX_ABI_TYPE_ABI, name, &datasize);
+	if (!pabibuffer)
+	{
+		return 0;
+	}
+	PX_AbiCreateStaticReader(pAbi, pabibuffer, datasize);
+	return datasize;
+}
+
 px_int* PX_AbiGet_int(px_abi* pabi, const px_char name[])
 {
 	px_int datasize;
@@ -661,6 +691,229 @@ px_bool* PX_AbiGet_bool(px_abi* pabi, const px_char name[])
 px_void* PX_AbiGet_data(px_abi* pabi, const px_char name[], px_int* size)
 {
 	return PX_AbiRead(pabi, PX_ABI_TYPE_DATA, name, size);
+}
+
+
+
+
+px_bool PX_AbiGet_Abi(px_abi* pabi,px_abi *pgetabi, const px_char _payload[])
+{
+	px_int r_offset = 0;
+	px_int s_offset = 0;
+	px_char payload[256] = { 0 };
+	px_char* lexeme = PX_NULL;
+	px_int i = 0;
+
+	if (PX_strlen(_payload) >= sizeof(payload))
+	{
+		return PX_FALSE;
+	}
+	PX_strset(payload, _payload);
+
+	while (payload[r_offset] != 0)
+	{
+		px_int size;
+		px_void* ptr;
+		while (PX_TRUE)
+		{
+			if (payload[s_offset] == '.')
+			{
+				payload[s_offset] = '\0';
+				s_offset++;
+				break;
+			}
+			if (payload[s_offset] == '\0')
+			{
+				break;
+			}
+			s_offset++;
+		}
+
+		lexeme = payload + r_offset;
+		
+		ptr = PX_AbiRead(pabi, PX_ABI_TYPE_ABI, lexeme, &size);
+		if (ptr)
+		{
+			PX_AbiCreateStaticReader(pgetabi, ptr, size);
+			r_offset = s_offset;
+		}
+		else
+		{
+			return PX_FALSE;
+		}
+
+	}
+	return PX_TRUE;
+}
+
+px_bool PX_Abi2Json(px_abi* pabi, px_string* pjson)
+{
+	px_int offset = 0;
+	px_byte* pbuffer = PX_AbiGetPtr(pabi);
+	px_int size = PX_AbiGetPtrSize(pabi);
+	PX_StringCat(pjson, "{\n");
+
+	while (PX_TRUE)
+	{
+		px_dword datasize;
+		px_char* pname;
+		px_byte* pdata;
+		PX_ABI_TYPE type;
+		PX_memcpy(&type, pbuffer + offset, sizeof(type));
+		offset += sizeof(type);
+		PX_memcpy(&datasize, pbuffer + offset, sizeof(datasize));
+		offset += sizeof(datasize);
+		pname = (px_char*)(pbuffer + offset);
+		pdata = pbuffer + offset+ PX_strlen(pname) + 1;
+		offset += datasize;
+		switch (type)
+		{
+		case PX_ABI_TYPE_INT:
+		{
+			px_int _int;
+			PX_memcpy(&_int, pdata, sizeof(_int));
+			if (!PX_StringCatFormat2(pjson, "\"%1\":\n{\n\"type\":\"int\",\n\"value\":%2\n}", PX_STRINGFORMAT_STRING(pname), PX_STRINGFORMAT_INT(_int)))
+				return PX_FALSE;
+		}
+		break;
+		case PX_ABI_TYPE_DWORD:
+		{
+			px_dword _dword;
+			PX_memcpy(&_dword, pdata, sizeof(_dword));
+			if (!PX_StringCatFormat2(pjson, "\"%1\":\n{\n\"type\":\"dword\",\n\"value\":%2\n}", PX_STRINGFORMAT_STRING(pname), PX_STRINGFORMAT_INT(_dword)))
+				return PX_FALSE;
+
+		}
+		break;
+		case PX_ABI_TYPE_WORD:
+		{
+			px_word _word;
+			PX_memcpy(&_word, pdata, sizeof(_word));
+			if (!PX_StringCatFormat2(pjson, "\"%1\":\n{\n\"type\":\"word\",\n\"value\":%2\n}", PX_STRINGFORMAT_STRING(pname), PX_STRINGFORMAT_INT(_word)))
+				return PX_FALSE;
+
+		}
+		break;
+		case PX_ABI_TYPE_BYTE:
+		{
+			px_byte _byte;
+			PX_memcpy(&_byte, pdata, sizeof(_byte));
+			if (!PX_StringCatFormat2(pjson, "\"%1\":\n{\n\"type\":\"byte\",\n\"value\":%2\n}", PX_STRINGFORMAT_STRING(pname), PX_STRINGFORMAT_INT(_byte)))
+				return PX_FALSE;
+		}
+		break;
+		case PX_ABI_TYPE_PTR:
+		{
+			px_void* ptr;
+			PX_memcpy(&ptr, pdata, sizeof(ptr));
+			if (!PX_StringCatFormat2(pjson, "\"%1\":\n{\n\"type\":\"ptr\",\n\"value\":%2\n}", PX_STRINGFORMAT_STRING(pname), PX_STRINGFORMAT_INT(datasize - PX_strlen(pname) - 1)))
+				return PX_FALSE;
+		}
+		break;
+		case PX_ABI_TYPE_FLOAT:
+		{
+			px_float _float;
+			PX_memcpy(&_float, pdata, sizeof(_float));
+			if (!PX_StringCatFormat2(pjson, "\"%1\":\n{\n\"type\":\"float\",\n\"value\":%2\n}", PX_STRINGFORMAT_STRING(pname), PX_STRINGFORMAT_FLOAT(_float)))
+				return PX_FALSE;
+		}
+		break;
+		case PX_ABI_TYPE_DOUBLE:
+		{
+			px_double _double;
+			PX_memcpy(&_double, pdata, sizeof(_double));
+			if (!PX_StringCatFormat2(pjson, "\"%1\":\n{\n\"type\":\"double\",\n\"value\":%2\n}", PX_STRINGFORMAT_STRING(pname), PX_STRINGFORMAT_FLOAT((px_float)_double)))
+				return PX_FALSE;
+		}
+		break;
+		case PX_ABI_TYPE_STRING:
+		{
+			px_char* _string;
+			_string = (px_char*)pdata;
+			if (!PX_StringCatFormat2(pjson, "\"%1\":\n{\n\"type\":\"string\",\n\"value\":\"%2\"\n}", PX_STRINGFORMAT_STRING(pname), PX_STRINGFORMAT_STRING(_string)))
+				return PX_FALSE;
+		}
+		break;
+		case PX_ABI_TYPE_POINT:
+		{
+			px_point point;
+			PX_memcpy(&point, pdata, sizeof(point));
+			if (!PX_StringCatFormat4(pjson, "\"%1\":\n{\n\"type\":\"point\",\n\"value\":{\"x\":%2,\"y\":%3,\"z\":%4}\n}",\
+				PX_STRINGFORMAT_STRING(pname),\
+				PX_STRINGFORMAT_FLOAT(point.x),\
+				PX_STRINGFORMAT_FLOAT(point.y),\
+				PX_STRINGFORMAT_FLOAT(point.z)\
+			))
+				return PX_FALSE;
+		}
+		break;
+		case PX_ABI_TYPE_COLOR:
+		{
+			px_color color;
+			PX_memcpy(&color, pdata, sizeof(color));
+			if (!PX_StringCatFormat5(pjson, "\"%1\":\n{\n\"type\":\"color\",\n\"value\":{\"a\":%2,\"r\":%3,\"g\":%4,\"b\":%5}\n}", \
+				PX_STRINGFORMAT_STRING(pname), \
+				PX_STRINGFORMAT_INT(color._argb.a), \
+				PX_STRINGFORMAT_INT(color._argb.r), \
+				PX_STRINGFORMAT_INT(color._argb.g), \
+				PX_STRINGFORMAT_INT(color._argb.b)))
+				return PX_FALSE;
+		}
+		break;
+		case PX_ABI_TYPE_BOOL:
+		{
+			px_bool _bool;
+			PX_memcpy(&_bool, pdata, sizeof(_bool));
+			if (!PX_StringCatFormat2(pjson, "\"%1\":\n{\n\"type\":\"bool\",\n\"value\":%2\n}", PX_STRINGFORMAT_STRING(pname), PX_STRINGFORMAT_INT(_bool)))
+			{
+				return PX_FALSE;
+			}
+		}
+		break;
+		case PX_ABI_TYPE_DATA:
+		{
+			if(!PX_StringCatFormat2(pjson, "\"%1\":\n{\n\"type\":\"data\",\n\"value\":\"%2\"\n}", PX_STRINGFORMAT_STRING(pname), PX_STRINGFORMAT_INT(datasize - PX_strlen(pname) - 1)))
+			{
+				return PX_FALSE;
+			}
+		}
+		break;
+		case PX_ABI_TYPE_ABI:
+		{
+			px_abi abi;
+			if (!PX_StringCatFormat1(pjson, "\"%1\":\n", PX_STRINGFORMAT_STRING(pname)))
+			{
+				return PX_FALSE;
+			}
+			PX_AbiCreateStaticReader(&abi, pdata, datasize - PX_strlen(pname) - 1);
+			if (!PX_Abi2Json(&abi, pjson))
+			{
+				return PX_FALSE;
+			}
+		}
+		break;
+		default:
+			break;
+
+		}
+		if (offset >= size)
+		{
+			break;
+		}
+		else
+		{
+			if(!PX_StringCat(pjson, ",\n"))
+			{
+				return PX_FALSE;
+			}
+		}
+	}
+	if(!PX_StringCat(pjson, "\n}"))
+	{
+		return PX_FALSE;
+	}
+	return PX_TRUE;
+	
 }
 
 

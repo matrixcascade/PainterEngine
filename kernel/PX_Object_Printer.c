@@ -29,7 +29,7 @@ px_void PX_Object_PrinterUpdateLines(PX_Object* pObject)
 	}
 	PX_ObjectSetPosition(pDesc->Input, 0, (px_float)y, 0);
 }
-PX_Object* PX_Object_PrinterPrintText(PX_Object* pObject, const px_char* text)
+PX_Object* PX_Object_PrinterPrintTextWithColor(PX_Object* pObject, const px_char* text,px_color color)
 {
 	PX_Object_PrinterLine obj;
 	PX_Object_Printer* pDesc = PX_Object_GetPrinter(pObject);
@@ -39,7 +39,7 @@ PX_Object* PX_Object_PrinterPrintText(PX_Object* pObject, const px_char* text)
 	{
 		obj.pObject = pAutoObject;
 		obj.id = pDesc->id++;
-		PX_Object_AutoTextSetTextColor(pAutoObject, pDesc->fontColor);
+		PX_Object_AutoTextSetTextColor(pAutoObject, color);
 		PX_Object_AutoTextSetText(pAutoObject, text);
 		PX_VectorPushback(&pDesc->pObjects, &obj);
 		PX_Object_PrinterUpdateLines(pObject);
@@ -48,6 +48,12 @@ PX_Object* PX_Object_PrinterPrintText(PX_Object* pObject, const px_char* text)
 		PX_Object_ScrollAreaMoveToBottom(pDesc->Area);
 	}
 	return pAutoObject;
+}
+
+PX_Object* PX_Object_PrinterPrintText(PX_Object* pObject, const px_char* text)
+{
+	PX_Object_Printer* pDesc = PX_Object_GetPrinter(pObject);
+	return PX_Object_PrinterPrintTextWithColor(pObject, text, pDesc->fontColor);
 }
 
 

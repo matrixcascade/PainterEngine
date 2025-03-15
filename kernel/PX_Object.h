@@ -120,7 +120,9 @@ enum PX_OBJECT_TYPE
   PX_OBJECT_TYPE_DRAG,
   PX_OBJECT_TYPE_SCOREPANEL		,
   PX_OBJECT_TYPE_COLLAPSE		,
-  PX_OBJECT_TYPE_GRID			,		
+  PX_OBJECT_TYPE_GRID			,	
+  PX_OBJECT_TYPE_CLOCKPAN       ,
+  PX_OBJECT_TYPE_CLOCKNUMERIC   ,
 };
 
 
@@ -642,6 +644,10 @@ px_void PX_ObjectCollisionTestFree(PX_Object_CollisionTest* ptest);
 //////////////////////////////////////////////////////////////////////////
 //Grid
 #include "PX_Object_Grid.h"
+
+//////////////////////////////////////////////////////////////////////////
+//clockpan
+#include "PX_Object_ClockPan.h"
 
 #endif
 

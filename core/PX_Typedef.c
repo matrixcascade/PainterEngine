@@ -234,11 +234,40 @@ px_int PX_itoa(px_int num,px_char *str,px_int MaxStrSize,px_int radix)
 			str[i]=temp; 
 		} 
 	}
-	
-	
 
 	return l; 
 } 
+
+px_int PX_utoa(px_uint num, px_char* str, px_int MaxStrSize, px_int radix)
+{
+	px_char index[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+	px_uint unum;
+	px_char temp;
+	px_int i = 0, j, l;
+	if (MaxStrSize == 0)
+	{
+		return 0;
+	}
+	unum = num;
+	do
+	{
+		if (MaxStrSize <= i + 1)
+		{
+			return 0;
+		}
+		str[i++] = index[unum % (unsigned)radix];
+		unum /= radix;
+	} while (unum);
+	str[i] = '\0';
+	l = i;
+	for (j = 0, i--; j < i; j++, i--)
+	{
+		temp = str[j];
+		str[j] = str[i];
+		str[i] = temp;
+	}
+	return l;
+}
 
 
 
@@ -2549,6 +2578,11 @@ px_bool PX_isPointXYInRect(px_float x,px_float y,px_float rectx,px_float recty,p
 px_bool PX_isPointXYInRegion(px_float x, px_float y, px_region region)
 {
 	return PX_isPointXYInRect(x, y, region.left, region.top, region.right - region.left, region.bottom - region.top);
+}
+
+px_bool PX_isXYInRegion(px_float x, px_float y, px_float rectx, px_float recty, px_float width, px_float height)
+{
+	return PX_isPointXYInRect(x, y, rectx, recty, width, height);
 }
 
 px_bool PX_isLineCrossRect(px_point p1,px_point p2,px_rect rect,px_point *cp1,px_point *cp2)

@@ -5,7 +5,7 @@
 #define PX_MENU_CONTENT_MAX_LEN 48
 #define PX_MENU_ITEM_SPACER_SIZE 2
 
-#define PX_MENU_ITEM_EXECUTE_FUNCTION(name) void name(px_void *userPtr)
+#define PX_OBJECT_MENU_EXECUTE_FUNCTION(name) void name(px_void *userPtr)
 typedef px_void (*PX_MenuExecuteFunc)(px_void *userPtr);
 
 

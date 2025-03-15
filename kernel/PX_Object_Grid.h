@@ -35,4 +35,10 @@ PX_Object* PX_Object_GridSetCheckBox(PX_Object* pObject, px_int x, px_int y, px_
 PX_Object* PX_Object_GridSetImage(PX_Object *pObject, px_int x, px_int y, px_int xsize, px_int ysize);
 PX_Object* PX_Object_GridSetEmpty(PX_Object* pObject, px_int x, px_int y, px_int xsize, px_int ysize);
 PX_Object* PX_Object_GridGetObject(PX_Object* pObject, px_int x, px_int y);
+const px_char* PX_Object_GridGetText(PX_Object* pObject, px_int x, px_int y);
+px_void PX_Object_GridSetText(PX_Object* pObject, px_int x, px_int y, const px_char text[]);
+px_void PX_Object_GridSetIndex(PX_Object* pObject, px_int x, px_int y, px_int index);
+px_int PX_Object_GridGetSelectIndex(PX_Object* pObject, px_int x, px_int y);
+px_bool PX_Object_GridExportToAbi(PX_Object* pObject, px_abi* pAbi);
+px_bool PX_Object_GridImportFromAbi(PX_Object* pObject, px_abi* pAbi);
 #endif // !PX_OBJECT_GRID_H

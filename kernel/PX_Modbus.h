@@ -5,57 +5,14 @@
 #define PX_MODBUS_H
 #include "../core/PX_Core.h"
 
+px_bool PX_ModbusRTU_WriteCoilFrame(px_memory *pframe, px_byte slaveAddr, px_word startAddr, px_bool b);
+px_bool PX_ModbusRTU_WriteRegFrame(px_memory* pframe, px_byte slaveAddr, px_word startAddr, px_word regdata);
+px_bool PX_ModbusRTU_ReadCoilFrame(px_memory* pframe, px_byte slaveAddr, px_word startAddr, px_word count);
+px_bool PX_ModbusRTU_ReadRegFrame(px_memory* pframe, px_byte slaveAddr, px_word startAddr, px_word count);
 
-typedef struct
-{
-	px_word  counter;
-	px_word  magic;
-	px_byte  size[2];
-	px_byte unit;
-	px_byte opcode;
-	px_byte startAddress[2];
-	px_byte regcount[2];
-}PX_ModbusTCP_Read;
-
-typedef struct
-{
-	px_word  counter;
-	px_word  magic;
-	px_byte  size[2];//5
-	px_byte unit;
-	px_byte opcode;//03
-	px_byte bytesize;//02
-}PX_ModbusTCP_ReadResponse;
-
-
-
-typedef struct
-{
-	px_word  counter;
-	px_word  magic;
-	px_byte  size[2];
-	px_byte unit;
-	px_byte opcode;
-	px_byte startAddress[2];
-	px_byte regcount[2];
-}PX_ModbusTCP_ReadBoolResponse;
-
-
-
-typedef struct
-{
-	px_word  counter;
-	px_word  magic;
-	px_byte  size[2];
-	px_byte unit;
-	px_byte opcode;
-	px_byte startAddress[2];
-	px_byte regdata[2];
-}PX_ModbusTCP_Write;
-
-PX_ModbusTCP_Write PX_ModbusTCPWriteSingleReg(px_word counter,px_byte unit,px_word startAddr,px_word regdata);
-PX_ModbusTCP_Write PX_ModbusTCPWriteSingleBool(px_word counter, px_byte unit, px_word startAddr, px_bool b);
-PX_ModbusTCP_Read PX_ModbusTCPReadReg(px_word counter, px_byte unit, px_word startAddr,px_int count);
-PX_ModbusTCP_Read PX_ModbusTCPReadBool(px_word counter, px_byte unit, px_word startAddr, px_int count);
+px_bool PX_ModbusASCII_WriteCoilFrame(px_memory* pframe, px_byte slaveAddr, px_word startAddr, px_bool b);
+px_bool PX_ModbusASCII_WriteRegFrame(px_memory* pframe, px_byte slaveAddr, px_word startAddr, px_word regdata);
+px_bool PX_ModbusASCII_ReadCoilFrame(px_memory* pframe, px_byte slaveAddr, px_word startAddr, px_word count);
+px_bool PX_ModbusASCII_ReadRegFrame(px_memory* pframe, px_byte slaveAddr, px_word startAddr, px_word count);
 #endif
 

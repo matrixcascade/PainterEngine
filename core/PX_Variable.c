@@ -90,3 +90,83 @@ px_void PX_VariableFree(px_variable* var)
 	var->_int = 0;
 }
 
+px_variable PX_VariableCopy(px_memorypool* mp, px_variable* pvar, px_bool* bOutOfMemory)
+{
+	px_variable cpyVar;
+	cpyVar = *pvar;
+	if (bOutOfMemory)
+		*bOutOfMemory = PX_FALSE;
+
+	if (pvar->type == PX_VARIABLE_TYPE_STRING)
+	{
+		if (!PX_StringInitialize(mp, &cpyVar._string))
+		{
+			cpyVar.type = PX_VARIABLE_TYPE_INT;
+			if (bOutOfMemory)
+				*bOutOfMemory = PX_TRUE;
+		}
+		else
+		{
+			if (!PX_StringCopy(&cpyVar._string, &pvar->_string))
+			{
+				cpyVar.type = PX_VARIABLE_TYPE_INT;
+				if (bOutOfMemory)
+					*bOutOfMemory = PX_TRUE;
+			}
+		}
+	}
+	else if (pvar->type == PX_VARIABLE_TYPE_MEMORY)
+	{
+		PX_MemoryInitialize(mp, &cpyVar._memory);
+		if (!PX_MemoryCat(&cpyVar._memory, pvar->_memory.buffer, pvar->_memory.usedsize))
+		{
+			cpyVar.type = PX_VARIABLE_TYPE_INT;
+			if (bOutOfMemory)
+				*bOutOfMemory = PX_TRUE;
+		}
+	}
+	return cpyVar;
+}
+
+px_bool PX_VariableSetInt(px_variable* var, px_int _int)
+{
+	PX_VariableFree(var);
+	var->type = PX_VARIABLE_TYPE_INT;
+	var->_int = _int;
+	return PX_TRUE;
+}
+px_bool PX_VariableSetFloat(px_variable* var, px_float _float)
+{
+	PX_VariableFree(var);
+	var->type = PX_VARIABLE_TYPE_FLOAT;
+	var->_float = _float;
+	return PX_TRUE;
+}
+px_bool PX_VariableSetString(px_memorypool* mp, px_variable* var, const px_char* string)
+{
+	PX_VariableFree(var);
+	var->type = PX_VARIABLE_TYPE_STRING;
+	PX_StringInitialize(mp, &var->_string);
+	PX_StringCat(&var->_string, string);
+	return PX_TRUE;
+
+}
+px_bool PX_VariableSetMemory(px_memorypool* mp, px_variable* var, px_byte* buffer, px_int _size)
+{
+	PX_VariableFree(var);
+	var->type = PX_VARIABLE_TYPE_MEMORY;
+	PX_MemoryInitialize(mp, &var->_memory);
+	PX_MemoryCat(&var->_memory, buffer, _size);
+	return PX_TRUE;
+}
+px_bool PX_VariableSetHandle(px_variable* var, px_void* _ptr)
+{
+	PX_VariableFree(var);
+	var->type = PX_VARIABLE_TYPE_HANDLE;
+	var->_userptr = _ptr;
+	return PX_TRUE;
+}
+px_bool PX_VariableSetPtr(px_variable* var, px_void* _ptr)
+{
+	return PX_VariableSetHandle(var, _ptr);
+}

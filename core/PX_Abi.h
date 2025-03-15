@@ -1,6 +1,7 @@
 #ifndef __PX_ABI_H
 #define __PX_ABI_H
 #include "PX_Memory.h"
+#include "PX_String.h"
 
 typedef enum
 {
@@ -17,6 +18,7 @@ typedef enum
 	PX_ABI_TYPE_COLOR,
 	PX_ABI_TYPE_BOOL,
 	PX_ABI_TYPE_DATA,
+	PX_ABI_TYPE_ABI,
 }PX_ABI_TYPE;
 
 typedef struct
@@ -50,6 +52,7 @@ px_bool PX_AbiWrite_point(px_abi* pabi,const px_char name[],px_point point);
 px_bool PX_AbiWrite_color(px_abi* pabi,const px_char name[],px_color color);
 px_bool PX_AbiWrite_bool(px_abi* pabi,const px_char name[],px_bool _bool);
 px_bool PX_AbiWrite_data(px_abi* pabi,const px_char name[],px_void *data,px_int size);
+px_bool PX_AbiWrite_Abi(px_abi* pabi, const px_char name[], px_abi* pStoreAbi);
 
 px_bool PX_AbiSet_int(px_abi* pabi, const px_char name[], px_int _int);
 px_bool PX_AbiSet_dword(px_abi* pabi, const px_char name[], px_dword _dword);
@@ -63,6 +66,7 @@ px_bool PX_AbiSet_point(px_abi* pabi, const px_char name[], px_point point);
 px_bool PX_AbiSet_color(px_abi* pabi, const px_char name[], px_color color);
 px_bool PX_AbiSet_bool(px_abi* pabi, const px_char name[], px_bool _bool);
 px_bool PX_AbiSet_data(px_abi* pabi, const px_char name[], px_void* data, px_int size);
+px_bool PX_AbiSet_Abi(px_abi* pabi, const px_char name[], px_abi* pStoreAbi);
 
 px_bool PX_AbiMemoryWrite_int(px_memory* pmem, const px_char name[], px_int _int);
 px_bool PX_AbiMemoryWrite_dword(px_memory* pmem, const px_char name[], px_dword _dword);
@@ -76,6 +80,7 @@ px_bool PX_AbiMemoryWrite_point(px_memory* pmem, const px_char name[], px_point 
 px_bool PX_AbiMemoryWrite_color(px_memory* pmem, const px_char name[], px_color color);
 px_bool PX_AbiMemoryWrite_bool(px_memory* pmem, const px_char name[], px_bool _bool);
 px_bool PX_AbiMemoryWrite_data(px_memory* pmem, const px_char name[], px_void* data, px_int size);
+px_bool PX_AbiMemoryWrite_Abi(px_memory* pmem, const px_char name[], px_abi* pAbi);
 
 
 
@@ -92,6 +97,7 @@ px_int PX_AbiRead_point(px_abi* pabi,const px_char name[],px_point *point);
 px_int PX_AbiRead_color(px_abi* pabi,const px_char name[],px_color *color);
 px_int PX_AbiRead_bool(px_abi* pabi,const px_char name[],px_bool *_bool);
 px_int PX_AbiRead_data(px_abi* pabi,const px_char name[],px_void *data,px_int size);
+px_int PX_AbiRead_Abi(px_abi* pabi, const px_char name[], px_abi* pAbi);
 
 px_int *PX_AbiGet_int(px_abi* pabi, const px_char name[]);
 px_dword *PX_AbiGet_dword(px_abi* pabi, const px_char name[]);
@@ -105,6 +111,8 @@ px_point* PX_AbiGet_point(px_abi* pabi, const px_char name[]);
 px_color* PX_AbiGet_color(px_abi* pabi, const px_char name[]);
 px_bool* PX_AbiGet_bool(px_abi* pabi, const px_char name[]);
 px_void* PX_AbiGet_data(px_abi* pabi, const px_char name[], px_int *size);
+px_bool PX_AbiGet_Abi(px_abi* pabi, px_abi* pgetabi, const px_char _payload[]);
+px_bool PX_Abi2Json(px_abi* pabi, px_string* pjson);
 
 px_void PX_AbiDynamicFree(px_abi* pabi);
 px_void PX_AbiFree(px_abi* pabi);

@@ -573,6 +573,7 @@ PX_RETURN_STRING PX_itos(px_int num,px_int radix);
 px_void PX_AscToWord(const px_char *asc,px_word *u16);
 px_int PX_ftoa(px_float f, px_char *outbuf, px_int maxlen, px_int precision);
 px_int PX_itoa(px_int num,px_char *str,px_int MaxStrSize,px_int radix);
+px_int PX_utoa(px_uint num, px_char* str, px_int MaxStrSize, px_int radix);
 px_dword PX_SwapEndian(px_dword val);
 px_char *PX_strchr(const px_char *s,px_int ch);
 px_char* PX_strstr(const px_char* dest, const px_char* src);
@@ -586,6 +587,7 @@ px_bool PX_isPoint2DInCircle(px_point2D p,px_point2D circle,px_float radius);
 px_bool PX_isPointInRect(px_point p,px_rect rect);
 px_bool PX_isPointXYInRect(px_float x,px_float y,px_float rectx,px_float recty,px_float width,px_float height);
 px_bool PX_isPointXYInRegion(px_float x, px_float y, px_region region);
+px_bool PX_isXYInRegion(px_float x, px_float y, px_float rectx, px_float recty, px_float width, px_float height);
 px_bool PX_isPointInRegion(px_point p, px_region region);
 //////////////////////////////////////////////////////////////////////////
 
