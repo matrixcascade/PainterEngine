@@ -405,7 +405,7 @@ px_bool PX_ApplicationInitialize(PX_Application *pApp,px_int _screen_width,px_in
 	screen_width = _screen_width;
 	screen_height = _screen_height;
 	PainterEngine_SetBackgroundColor(PX_COLOR_BACKGROUNDCOLOR);
-
+	PX_srand(314159);
 	px_main();
 	
 	if (pApp->runtime.window_height&&pApp->runtime.window_width&& pApp->runtime.surface_height&& pApp->runtime.surface_width)

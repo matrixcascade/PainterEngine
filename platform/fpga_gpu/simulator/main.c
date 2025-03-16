@@ -112,7 +112,6 @@ PX_OBJECT_RENDER_FUNCTION(MyRender)
         PX_GeoRasterizeTriangle(&surface, (px_int)_p1.x, (px_int)_p1.y, (px_int)_p2.x, (px_int)_p2.y, \
             (px_int)_p3.x, (px_int)_p3.y, PX_COLOR(128, 255 - gclr, gclr++, 64));
 
-
     }
     else if (switcher < 600)
     {

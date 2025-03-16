@@ -33,6 +33,9 @@
 #include "PX_Syntax_bcontainer.h"
 #include "PX_Syntax_identifier.h"
 #include "PX_Syntax_numeric.h"
+#include "PX_Syntax_tuple.h"
 #include "PX_Syntax_const_string_list.h"
 #include "PX_Syntax_const_int_list.h"
+#include "PX_Syntax_const_float_list.h"
+#include "PX_Syntax_const_numeric_list.h"
 #endif

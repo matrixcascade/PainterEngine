@@ -24,7 +24,7 @@ PX_SYNTAX_FUNCTION(PX_Syntax_Parse_int)
 			return PX_FALSE;
 		}
 		PX_strcat_s(build_number, sizeof(build_number), plexeme);
-		next_char_is_dot = PX_Syntax_GetNextChar(past);
+		next_char_is_dot = PX_Syntax_PreviewNextChar(past);
 		if (next_char_is_dot == '.')
 		{
 			return PX_FALSE;
@@ -36,7 +36,7 @@ PX_SYNTAX_FUNCTION(PX_Syntax_Parse_int)
 			PX_Syntax_Terminate(pSyntax, past, "Numeric too long");
 			return PX_FALSE;
 		}
-		if (!(pnewabi = PX_Syntax_PushNewAbi(pSyntax, "int", pSyntax->lifetime)))
+		if (!(pnewabi = PX_Syntax_PushNewAbi(pSyntax, "const_int", pSyntax->lifetime)))
 		{
 			PX_Syntax_Terminate(pSyntax, past, "Memory Error");
 			return PX_FALSE;
@@ -46,7 +46,7 @@ PX_SYNTAX_FUNCTION(PX_Syntax_Parse_int)
 			PX_Syntax_Terminate(pSyntax, past, "Memory Error");
 			return PX_FALSE;
 		}
-		PX_Syntax_AstMessage(pSyntax, "int:");
+		PX_Syntax_AstMessage(pSyntax, "const_int:");
 		PX_Syntax_AstMessage(pSyntax, build_number);
 		PX_Syntax_AstMessage(pSyntax, "\n");
 		return PX_TRUE;
@@ -94,7 +94,7 @@ PX_SYNTAX_FUNCTION(PX_Syntax_Parse_int)
 			{
 				PX_strcat_s(build_number, sizeof(build_number), "0");
 			}
-			if (!(pnewabi = PX_Syntax_PushNewAbi(pSyntax, "int", pSyntax->lifetime)))
+			if (!(pnewabi = PX_Syntax_PushNewAbi(pSyntax, "const_int", pSyntax->lifetime)))
 			{
 				PX_Syntax_Terminate(pSyntax, past, "Memory Error");
 				return PX_FALSE;
@@ -109,7 +109,7 @@ PX_SYNTAX_FUNCTION(PX_Syntax_Parse_int)
 				PX_Syntax_Terminate(pSyntax, past, "Memory Error");
 				return PX_FALSE;
 			}
-			PX_Syntax_AstMessage(pSyntax, "int:");
+			PX_Syntax_AstMessage(pSyntax, "const_int:");
 			PX_Syntax_AstMessage(pSyntax, build_number);
 			PX_Syntax_AstMessage(pSyntax, "\n");
 			return PX_TRUE;
@@ -143,7 +143,7 @@ PX_SYNTAX_FUNCTION(PX_Syntax_Parse_int)
 			PX_Syntax_Terminate(pSyntax, past, "Memory Error");
 			return PX_FALSE;
 		}
-		PX_Syntax_AstMessage(pSyntax, "uint:");
+		PX_Syntax_AstMessage(pSyntax, "const_uint:");
 		PX_Syntax_AstMessage(pSyntax, build_number);
 		PX_Syntax_AstMessage(pSyntax, "\n");
 		return PX_TRUE;
@@ -173,7 +173,7 @@ PX_SYNTAX_FUNCTION(PX_Syntax_Parse_int)
 			return PX_FALSE;
 		}
 		build_number[PX_strlen(build_number) - 1] = '\0';
-		if (!(pnewabi = PX_Syntax_PushNewAbi(pSyntax, "int", pSyntax->lifetime)))
+		if (!(pnewabi = PX_Syntax_PushNewAbi(pSyntax, "const_int", pSyntax->lifetime)))
 		{
 			PX_Syntax_Terminate(pSyntax, past, "Memory Error");
 			return PX_FALSE;
@@ -200,7 +200,7 @@ PX_SYNTAX_FUNCTION(PX_Syntax_Parse_int)
 			}
 		}
 		
-		PX_Syntax_AstMessage(pSyntax, "uint:");
+		PX_Syntax_AstMessage(pSyntax, "const_uint:");
 		PX_Syntax_AstMessage(pSyntax, build_number);
 		PX_Syntax_AstMessage(pSyntax, "\n");
 		return PX_TRUE;

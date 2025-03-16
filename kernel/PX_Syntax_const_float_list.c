@@ -1,9 +1,9 @@
-#include "PX_Syntax_const_int_list.h"
+#include "PX_Syntax_const_float_list.h"
 
-PX_SYNTAX_FUNCTION(PX_Syntax_Parse_const_int_list_begin)
+PX_SYNTAX_FUNCTION(PX_Syntax_Parse_const_float_list_begin)
 {
 	px_abi* pnewabi;
-	if (!(pnewabi=PX_Syntax_PushNewAbi(pSyntax,"const_int_list",pSyntax->lifetime)))
+	if (!(pnewabi=PX_Syntax_PushNewAbi(pSyntax,"const_float_list",pSyntax->lifetime)))
 	{
 		PX_Syntax_Terminate(pSyntax, past, "out of memory!");
 		return PX_FALSE;
@@ -12,7 +12,7 @@ PX_SYNTAX_FUNCTION(PX_Syntax_Parse_const_int_list_begin)
 	return PX_TRUE;
 }
 
-PX_SYNTAX_FUNCTION(PX_Syntax_Parse_const_int_list_new)
+PX_SYNTAX_FUNCTION(PX_Syntax_Parse_const_float_list_new)
 {
 	px_char index_named[16] = { 0 };
 	px_abi* plastabi = PX_Syntax_GetAbiStackLast(pSyntax);
@@ -21,13 +21,13 @@ PX_SYNTAX_FUNCTION(PX_Syntax_Parse_const_int_list_new)
 	const px_int* plistcount;
 	px_int listcount;
 	pname = PX_AbiGet_string(plastabi, "name");
-	if (!PX_strequ(pname, "const_int"))
+	if (!PX_strequ(pname, "const_float"))
 	{
 		return PX_FALSE;
 	}
 
 	pname = PX_AbiGet_string(psecondlastabi, "name");
-	PX_ASSERTIFX(!pname || !PX_strequ(pname, "const_int_list"), "unexpected logic!");
+	PX_ASSERTIFX(!pname || !PX_strequ(pname, "const_float_list"), "unexpected logic!");
 	plistcount = PX_AbiGet_int(psecondlastabi, "list_count");
 	PX_ASSERTIFX(!plistcount, "unexpected logic!");
 	listcount = *plistcount;
@@ -42,18 +42,18 @@ PX_SYNTAX_FUNCTION(PX_Syntax_Parse_const_int_list_new)
 	return PX_TRUE;
 }
 
-PX_SYNTAX_FUNCTION(PX_Syntax_Parse_const_int_list_end)
+PX_SYNTAX_FUNCTION(PX_Syntax_Parse_const_float_list_end)
 {
 	return PX_TRUE;
 }
 
-px_bool PX_Syntax_Load_const_int_list(PX_Syntax* pSyntax)
+px_bool PX_Syntax_Load_const_float_list(PX_Syntax* pSyntax)
 {
-	PX_Syntax_Parse_PEBNF(pSyntax, "const_int_list", PX_Syntax_Parse_const_int_list_begin);
-	PX_Syntax_Parse_PEBNF(pSyntax, "const_int_list = const_int", PX_Syntax_Parse_const_int_list_new);
-	PX_Syntax_Parse_PEBNF(pSyntax, "const_int_list = const_int ',' ...", 0);
-	PX_Syntax_Parse_PEBNF(pSyntax, "const_int_list = const_int ',' *", PX_Syntax_Parse_const_int_list_end);
-	PX_Syntax_Parse_PEBNF(pSyntax, "const_int_list = const_int *", PX_Syntax_Parse_const_int_list_end);
+	PX_Syntax_Parse_PEBNF(pSyntax, "const_float_list", PX_Syntax_Parse_const_float_list_begin);
+	PX_Syntax_Parse_PEBNF(pSyntax, "const_float_list = const_float", PX_Syntax_Parse_const_float_list_new);
+	PX_Syntax_Parse_PEBNF(pSyntax, "const_float_list = const_float ',' ...", 0);
+	PX_Syntax_Parse_PEBNF(pSyntax, "const_float_list = const_float ',' *", PX_Syntax_Parse_const_float_list_end);
+	PX_Syntax_Parse_PEBNF(pSyntax, "const_float_list = const_float *", PX_Syntax_Parse_const_float_list_end);
 	
 	return PX_TRUE;
 }

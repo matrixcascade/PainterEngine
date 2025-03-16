@@ -475,6 +475,18 @@ px_void PX_Syntax_PopAbiStack(PX_Syntax* pSyntax)
 	PX_VectorPop(&pSyntax->abistack);
 }
 
+px_void PX_Syntax_PopSecondAbiStack(PX_Syntax* pSyntax)
+{
+	px_abi* pabi;
+	if (pSyntax->abistack.size < 2)
+	{
+		PX_ASSERT();
+	}
+	pabi = PX_VECTORAT(px_abi, &pSyntax->abistack, pSyntax->abistack.size - 2);
+	PX_AbiFree(pabi);
+	PX_VectorErase(&pSyntax->abistack, pSyntax->abistack.size - 2);
+}
+
 
 px_void PX_Syntax_PopAbiStackN(PX_Syntax* pSyntax, px_int N)
 {
@@ -1073,4 +1085,20 @@ px_char PX_Syntax_GetNextChar(PX_Syntax_ast* past)
 		return ch;
 	}
 	 
+}
+
+px_char PX_Syntax_PreviewNextChar(PX_Syntax_ast* past)
+{
+	PX_LEXER_STATE state = PX_LexerGetState(past->lexer_state.plexer);
+	while (PX_TRUE)
+	{
+		px_char ch = PX_LexerGetNextChar(past->lexer_state.plexer);
+		if (ch == '\\' && PX_LexerPreviewNextChar(past->lexer_state.plexer) == '\n')
+		{
+			PX_LexerGetNextChar(past->lexer_state.plexer);
+			continue;
+		}
+		PX_LexerSetState(state);
+		return ch;
+	}
 }

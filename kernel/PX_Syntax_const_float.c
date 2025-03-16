@@ -91,7 +91,7 @@ PX_SYNTAX_FUNCTION(PX_Syntax_Parse_float)
 				j++;
 			}
 		}
-		if(!(pnewabi=PX_Syntax_PushNewAbi(pSyntax, "float",pSyntax->lifetime)))
+		if(!(pnewabi=PX_Syntax_PushNewAbi(pSyntax, "const_float",pSyntax->lifetime)))
 		{
 			PX_Syntax_Terminate(pSyntax, past, "Memory Error");
 			return PX_FALSE;
@@ -101,7 +101,7 @@ PX_SYNTAX_FUNCTION(PX_Syntax_Parse_float)
 			PX_Syntax_Terminate(pSyntax, past, "Memory Error");
 			return PX_FALSE;
 		}
-		PX_Syntax_AstMessage(pSyntax, "float:");
+		PX_Syntax_AstMessage(pSyntax, "const_float:");
 		PX_Syntax_AstMessage(pSyntax, build_number);
 		PX_Syntax_AstMessage(pSyntax, "\n");
 		return PX_TRUE;
@@ -146,7 +146,7 @@ PX_SYNTAX_FUNCTION(PX_Syntax_Parse_float)
 			PX_Syntax_Terminate(pSyntax, past, "Numeric too long");
 			return PX_FALSE;
 		}
-		if (!(pnewabi = PX_Syntax_PushNewAbi(pSyntax, "float", pSyntax->lifetime)))
+		if (!(pnewabi = PX_Syntax_PushNewAbi(pSyntax, "const_float", pSyntax->lifetime)))
 		{
 			PX_Syntax_Terminate(pSyntax, past, "Memory Error");
 			return PX_FALSE;
@@ -156,7 +156,7 @@ PX_SYNTAX_FUNCTION(PX_Syntax_Parse_float)
 			PX_Syntax_Terminate(pSyntax, past, "Memory Error");
 			return PX_FALSE;
 		}
-		PX_Syntax_AstMessage(pSyntax, "float:");
+		PX_Syntax_AstMessage(pSyntax, "const_float:");
 		PX_Syntax_AstMessage(pSyntax, build_number);
 		PX_Syntax_AstMessage(pSyntax, "\n");
 		return PX_TRUE;
@@ -180,7 +180,7 @@ PX_SYNTAX_FUNCTION(PX_Syntax_Parse_float)
 			PX_Syntax_Terminate(pSyntax, past, "Numeric too long");
 			return PX_FALSE;
 		}
-		if (!(pnewabi = PX_Syntax_PushNewAbi(pSyntax, "float", pSyntax->lifetime)))
+		if (!(pnewabi = PX_Syntax_PushNewAbi(pSyntax, "const_float", pSyntax->lifetime)))
 		{
 			PX_Syntax_Terminate(pSyntax, past, "Memory Error");
 			return PX_FALSE;
@@ -190,7 +190,7 @@ PX_SYNTAX_FUNCTION(PX_Syntax_Parse_float)
 			PX_Syntax_Terminate(pSyntax, past, "Memory Error");
 			return PX_FALSE;
 		}
-		PX_Syntax_AstMessage(pSyntax, "float:");
+		PX_Syntax_AstMessage(pSyntax, "const_float:");
 		PX_Syntax_AstMessage(pSyntax, build_number);
 		PX_Syntax_AstMessage(pSyntax, "\n");
 		return PX_TRUE;
@@ -205,7 +205,7 @@ PX_SYNTAX_FUNCTION(PX_Syntax_Parse_float)
 			PX_Syntax_Terminate(pSyntax, past, "Numeric too long");
 			return PX_FALSE;
 		}
-		if (!(pnewabi = PX_Syntax_PushNewAbi(pSyntax, "float", pSyntax->lifetime)))
+		if (!(pnewabi = PX_Syntax_PushNewAbi(pSyntax, "const_float", pSyntax->lifetime)))
 		{
 			PX_Syntax_Terminate(pSyntax, past, "Memory Error");
 			return PX_FALSE;
@@ -215,7 +215,7 @@ PX_SYNTAX_FUNCTION(PX_Syntax_Parse_float)
 			PX_Syntax_Terminate(pSyntax, past, "Memory Error");
 			return PX_FALSE;
 		}
-		PX_Syntax_AstMessage(pSyntax, "float:");
+		PX_Syntax_AstMessage(pSyntax, "const_float:");
 		PX_Syntax_AstMessage(pSyntax, build_number);
 		PX_Syntax_AstMessage(pSyntax, "\n");
 		return PX_TRUE;

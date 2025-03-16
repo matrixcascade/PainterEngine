@@ -78,6 +78,7 @@ px_abi* PX_Syntax_GetAbi(PX_Syntax* pSyntax, const px_char name[], px_int lifeti
 px_abi* PX_Syntax_GetAbiStack(PX_Syntax* pSyntax, px_int index);
 px_bool PX_Syntax_PushAbiStack(PX_Syntax* pSyntax, px_abi* pabi);
 px_void PX_Syntax_PopAbiStack(PX_Syntax* pSyntax);
+px_void PX_Syntax_PopSecondAbiStack(PX_Syntax* pSyntax);
 px_abi* PX_Syntax_CreateNewIr(PX_Syntax* pSyntax);
 px_abi* PX_Syntax_PushNewAbi(PX_Syntax* pSyntax, const px_char name[], px_int lifetime);
 px_abi* PX_Syntax_GetAbiStackLast(PX_Syntax* pSyntax);
@@ -88,6 +89,7 @@ px_void PX_Syntax_Terminate(PX_Syntax* pSyntax, PX_Syntax_ast *past,const px_cha
 px_void PX_Syntax_AstMessage(PX_Syntax* pSyntax, const px_char message[]);
 px_int PX_Syntax_GetAbiStackCount(PX_Syntax* pSyntax);
 px_char PX_Syntax_GetNextChar(PX_Syntax_ast* past);
+px_char PX_Syntax_PreviewNextChar(PX_Syntax_ast* past);
 px_bool PX_SyntaxInitialize(px_memorypool* mp, PX_Syntax* pSyntax);
 px_void PX_SyntaxFree(PX_Syntax* pSyntax);
 px_void PX_SyntaxClear(PX_Syntax* pSyntax);
