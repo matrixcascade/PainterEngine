@@ -85,6 +85,7 @@ int main()
   px_int i;
   px_int routeY=0;
   mp=MP_Create(cache,1024*1024*64);
+   PX_srand(12345);  
   //check GPU available
   if(!PX_GPU_Initialize())
   {
@@ -99,6 +100,7 @@ int main()
   
   PX_MemoryInitialize(&mp, &objdata);
   PX_RFC1951Inflate(bunny_inflate_data, sizeof(bunny_inflate_data), &objdata);
+  PX_MemoryCatByte(&objdata, 0);
   PX_3D_ObjectDataInitialize(&mp, &data);
   if (!PX_3D_ObjectDataLoad(&data, objdata.buffer, objdata.usedsize))return PX_FALSE;
 
