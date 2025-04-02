@@ -1,0 +1,3 @@
+[submodule "depend/freeglut"]
+	path = depend/freeglut
+	url = git@github.com:freeglut/freeglut.git
