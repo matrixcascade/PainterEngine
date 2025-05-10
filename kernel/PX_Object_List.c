@@ -384,7 +384,7 @@ PX_OBJECT_RENDER_FUNCTION(PX_Object_ListRender)
 		}
 	}
 	PX_GeoDrawBorder(&pList->renderSurface,0,0,pList->renderSurface.width-1,pList->renderSurface.height-1,1,pList->BorderColor);
-	PX_SurfaceCover(psurface,&pList->renderSurface,(px_int)objx,(px_int)objy,PX_ALIGN_LEFTTOP);
+	PX_TextureRender(psurface,&pList->renderSurface,(px_int)objx,(px_int)objy,PX_ALIGN_LEFTTOP,0);
 
 }
 

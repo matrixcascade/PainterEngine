@@ -152,7 +152,7 @@ int main()
   PX_RFC1951Inflate(bunny_inflate_data, sizeof(bunny_inflate_data), &objdata);
   PX_3D_ObjectDataInitialize(mp, &data);
   if (!PX_3D_ObjectDataLoad(&data, objdata.buffer, objdata.usedsize))return PX_FALSE;
-
+  px_dword crc = PX_crc32(objdata.buffer, objdata.usedsize);
   p3DObject = PX_Object_3DModelCreate(mp, 0, 400, 240, 480, 480, &data);
   particalRoot=PX_ObjectCreate(mp,0,0,0,0,0,0,0);
   switcher=0;

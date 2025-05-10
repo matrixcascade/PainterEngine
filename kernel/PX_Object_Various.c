@@ -31,7 +31,7 @@ PX_OBJECT_RENDER_FUNCTION(PX_Object_VariousRender)
 
 px_void PX_Object_VariousEditSetMaxLength(PX_Object* pObject, px_int len)
 {
-	PX_Object_Various* pDesc = PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_VARIOUS);
+	PX_Object_Various* pDesc = (PX_Object_Various*)PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_VARIOUS);
 	PX_ASSERTIF(pDesc == PX_NULL);
 	PX_Object_EditSetMaxTextLength(pDesc->various, len);
 
@@ -102,7 +102,7 @@ PX_Object* PX_Object_VariousCreate(px_memorypool* mp, PX_Object* Parent, px_int 
 
 PX_Object_Various* PX_Object_GetVarious(PX_Object* pObject)
 {
-	PX_Object_Various* pDesc = PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_VARIOUS);
+	PX_Object_Various* pDesc = (PX_Object_Various*)PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_VARIOUS);
 	PX_ASSERTIF(pDesc == PX_NULL);
 	return pDesc;
 }

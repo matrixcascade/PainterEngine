@@ -456,6 +456,7 @@ px_void PX_WebsocketServer_linkerthread_recv(px_void* ptr)
 
 	while (PX_TRUE)
 	{
+		PX_WEBSOCKET_HANDER_RETURN ret;
 		if (pInstance->websocket_Instance.state == PX_WEBSOCKET_STATE_CLOSE)
 		{
 			break;
@@ -465,8 +466,37 @@ px_void PX_WebsocketServer_linkerthread_recv(px_void* ptr)
 			break;
 		}
 		
-
-		PX_WebSocketUpdate_Recv(&pInstance->websocket_Instance);
+		ret=	PX_WebSocketUpdate_Recv(&pInstance->websocket_Instance);
+		switch (ret)
+		{
+			case PX_WEBSOCKET_HANDER_RETURN_CONTINUE:
+			{
+				break;
+			}
+			case PX_WEBSOCKET_HANDER_RETURN_PROTOCAL_ERROR:
+			{
+				printf("Disconnect session:%d by protocol error!\n", PX_crc32(pInstance->recv_cache, 16));
+				break;
+			}
+			case PX_WEBSOCKET_HANDER_RETURN_TARGETCLOSE_ERROR:
+			{
+				printf("Disconnect session:%d by socket close error!\n", PX_crc32(pInstance->recv_cache, 16));
+				break;
+			}
+			case PX_WEBSOCKET_HANDER_RETURN_CACHE_ERROR:
+			{
+				printf("Disconnect session:%d by cache error!\n", PX_crc32(pInstance->recv_cache, 16));
+				break;
+			}
+			case PX_WEBSOCKET_HANDER_RETURN_DONE:
+			{
+				break;
+			}
+			default:
+			{
+				break;
+			}
+		}
 	}
 	while (pInstance->pSocketHub->websocket_connect_lock);
 	while (pInstance->send_thread.isRun);

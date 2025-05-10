@@ -690,6 +690,11 @@ px_void PX_StringInitFromConst(px_string *str,const px_char *constchar)
 
 }
 
+px_void PX_StringFixUncompleteCode(px_string* text)
+{
+	PX_FontTrimUncompletedUTF8String(text->buffer);
+	PX_StringUpdateExReg(text);
+}
 
 px_void PX_StringUpdateExReg(px_string *text)
 {

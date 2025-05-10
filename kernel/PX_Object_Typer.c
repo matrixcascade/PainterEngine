@@ -257,7 +257,7 @@ PX_OBJECT_FREE_FUNCTION(PX_Object_TyperFree)
 
 PX_Object_Typer* PX_Object_GetTyper(PX_Object* pObject)
 {
-	PX_Object_Typer* pDesc = PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_TYPER);
+	PX_Object_Typer* pDesc = (PX_Object_Typer*)PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_TYPER);
 	PX_ASSERTIF(pDesc == PX_NULL);
 	return pDesc;
 }

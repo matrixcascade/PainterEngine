@@ -24,14 +24,14 @@ PX_OBJECT_EVENT_FUNCTION(PX_Object_RadioBoxOnMouseMove)
 			{
 				if (pcb->state!=PX_OBJECT_PUSHBUTTON_STATE_ONCURSOR)
 				{
-					PX_Object_Event e;
-					e.Event=PX_OBJECT_EVENT_CURSOROVER;
-					e.Param_uint[0]=0;
-					e.Param_uint[1]=0;
-					e.Param_uint[2]=0;
-					e.Param_uint[3]=0;
-					e.Param_ptr[0]=PX_NULL;
-					PX_ObjectExecuteEvent(pObject,e);
+					PX_Object_Event ne;
+					ne.Event=PX_OBJECT_EVENT_CURSOROVER;
+					ne.Param_uint[0]=0;
+					ne.Param_uint[1]=0;
+					ne.Param_uint[2]=0;
+					ne.Param_uint[3]=0;
+					ne.Param_ptr[0]=PX_NULL;
+					PX_ObjectExecuteEvent(pObject, ne);
 				}
 				pcb->state=PX_OBJECT_RADIOBOX_STATE_ONCURSOR;
 			}
@@ -40,13 +40,13 @@ PX_OBJECT_EVENT_FUNCTION(PX_Object_RadioBoxOnMouseMove)
 		{
 			if (pcb->state!=PX_OBJECT_PUSHBUTTON_STATE_NORMAL)
 			{
-				PX_Object_Event e;
-				e.Event=PX_OBJECT_EVENT_CURSOROUT;
-				e.Param_uint[0]=0;
-				e.Param_uint[1]=0;
-				e.Param_uint[2]=0;
-				e.Param_uint[3]=0;
-				PX_ObjectExecuteEvent(pObject,e);
+				PX_Object_Event ne;
+				ne.Event=PX_OBJECT_EVENT_CURSOROUT;
+				ne.Param_uint[0]=0;
+				ne.Param_uint[1]=0;
+				ne.Param_uint[2]=0;
+				ne.Param_uint[3]=0;
+				PX_ObjectExecuteEvent(pObject, ne);
 			}
 			pcb->state=PX_OBJECT_RADIOBOX_STATE_NORMAL;
 		}

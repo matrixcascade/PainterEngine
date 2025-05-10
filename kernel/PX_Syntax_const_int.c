@@ -5,15 +5,17 @@ PX_SYNTAX_FUNCTION(PX_Syntax_Parse_int)
 	PX_LEXER_LEXEME_TYPE type;
 	const px_char* plexeme;
 	px_abi* pnewabi;
-	px_int i,len;
+	px_int i, len, begin, end;
 	px_bool unsigned_flag = PX_FALSE;
 	px_char build_number[32] = { 0 };
-	type = PX_SyntaxGetNextAstFilter(past);
+	type = PX_Syntax_GetNextLexeme(pSyntax);
 	if (type != PX_LEXER_LEXEME_TYPE_TOKEN)
 	{
 		return PX_FALSE;
 	}
-	plexeme = PX_SyntaxGetCurrentLexeme(past);
+	plexeme = PX_Syntax_GetCurrentLexeme(pSyntax);
+	begin = PX_Syntax_GetCurrentLexemeBegin(pSyntax);
+	end = PX_Syntax_GetCurrentLexemeEnd(pSyntax);
 
 	//xxxx
 	if (PX_strIsInteger(plexeme))
@@ -24,7 +26,7 @@ PX_SYNTAX_FUNCTION(PX_Syntax_Parse_int)
 			return PX_FALSE;
 		}
 		PX_strcat_s(build_number, sizeof(build_number), plexeme);
-		next_char_is_dot = PX_Syntax_PreviewNextChar(past);
+		next_char_is_dot = PX_Syntax_PreviewNextChar(pSyntax);
 		if (next_char_is_dot == '.')
 		{
 			return PX_FALSE;
@@ -33,22 +35,42 @@ PX_SYNTAX_FUNCTION(PX_Syntax_Parse_int)
 		if (PX_strlen(build_number) == sizeof(build_number) - 1)
 		{
 			//numeric too long
-			PX_Syntax_Terminate(pSyntax, past, "Numeric too long");
+			PX_Syntax_Terminate(pSyntax, "Numeric too long");
 			return PX_FALSE;
 		}
-		if (!(pnewabi = PX_Syntax_PushNewAbi(pSyntax, "const_int", pSyntax->lifetime)))
+		if (!(pnewabi = PX_Syntax_NewAbi(pSyntax, "const_int", pSyntax->reg_lifetime)))
 		{
-			PX_Syntax_Terminate(pSyntax, past, "Memory Error");
+			PX_Syntax_Terminate(pSyntax, "Memory Error");
 			return PX_FALSE;
 		}
-		if (!PX_AbiWrite_string(pnewabi, "value", build_number))
+		if (!PX_AbiSet_string(pnewabi, "value", build_number))
 		{
-			PX_Syntax_Terminate(pSyntax, past, "Memory Error");
+			PX_Syntax_Terminate(pSyntax, "Memory Error");
 			return PX_FALSE;
 		}
-		PX_Syntax_AstMessage(pSyntax, "const_int:");
-		PX_Syntax_AstMessage(pSyntax, build_number);
-		PX_Syntax_AstMessage(pSyntax, "\n");
+
+		if (!PX_AbiSet_bool(pnewabi, "unsigned", PX_FALSE))
+		{
+			PX_Syntax_Terminate(pSyntax, "Memory Error");
+			return PX_FALSE;
+		}
+
+		if (!PX_AbiSet_int(pnewabi, "begin", begin))
+		{
+			PX_Syntax_Terminate(pSyntax, "Memory Error");
+			return PX_FALSE;
+		}
+
+		if (!PX_AbiSet_int(pnewabi, "end", end))
+		{
+			PX_Syntax_Terminate(pSyntax, "Memory Error");
+			return PX_FALSE;
+		}
+
+
+		PX_Syntax_Message(pSyntax, "const_int:");
+		PX_Syntax_Message(pSyntax, build_number);
+		PX_Syntax_Message(pSyntax, "\n");
 		return PX_TRUE;
 	}
 
@@ -80,12 +102,12 @@ PX_SYNTAX_FUNCTION(PX_Syntax_Parse_int)
 			}
 			if (e > 12)
 			{
-				PX_Syntax_Terminate(pSyntax, past, "Numeric too long");
+				PX_Syntax_Terminate(pSyntax, "Numeric too long");
 				return PX_FALSE;
 			}
 			if (PX_strlen(build_number1)>=12)
 			{
-				PX_Syntax_Terminate(pSyntax, past, "Numeric too long");
+				PX_Syntax_Terminate(pSyntax, "Numeric too long");
 				return PX_FALSE;
 			}
 
@@ -94,24 +116,38 @@ PX_SYNTAX_FUNCTION(PX_Syntax_Parse_int)
 			{
 				PX_strcat_s(build_number, sizeof(build_number), "0");
 			}
-			if (!(pnewabi = PX_Syntax_PushNewAbi(pSyntax, "const_int", pSyntax->lifetime)))
+
+			if (!(pnewabi = PX_Syntax_NewAbi(pSyntax, "const_int", pSyntax->reg_lifetime)))
 			{
-				PX_Syntax_Terminate(pSyntax, past, "Memory Error");
+				PX_Syntax_Terminate(pSyntax, "Memory Error");
 				return PX_FALSE;
 			}
-			if (!PX_AbiWrite_string(pnewabi, "value", build_number))
+			if (!PX_AbiSet_string(pnewabi, "value", build_number))
 			{
-				PX_Syntax_Terminate(pSyntax, past, "Memory Error");
+				PX_Syntax_Terminate(pSyntax, "Memory Error");
 				return PX_FALSE;
 			}
-			if (!PX_AbiWrite_bool(pnewabi, "unsigned", PX_FALSE))
+			if (!PX_AbiSet_bool(pnewabi, "unsigned", PX_FALSE))
 			{
-				PX_Syntax_Terminate(pSyntax, past, "Memory Error");
+				PX_Syntax_Terminate(pSyntax, "Memory Error");
 				return PX_FALSE;
 			}
-			PX_Syntax_AstMessage(pSyntax, "const_int:");
-			PX_Syntax_AstMessage(pSyntax, build_number);
-			PX_Syntax_AstMessage(pSyntax, "\n");
+
+			if (!PX_AbiSet_int(pnewabi, "begin", begin))
+			{
+				PX_Syntax_Terminate(pSyntax, "Memory Error");
+				return PX_FALSE;
+			}
+
+			if (!PX_AbiSet_int(pnewabi, "end", end))
+			{
+				PX_Syntax_Terminate(pSyntax, "Memory Error");
+				return PX_FALSE;
+			}
+
+			PX_Syntax_Message(pSyntax, "const_int:");
+			PX_Syntax_Message(pSyntax, build_number);
+			PX_Syntax_Message(pSyntax, "\n");
 			return PX_TRUE;
 
 		}
@@ -121,31 +157,43 @@ PX_SYNTAX_FUNCTION(PX_Syntax_Parse_int)
 	if (plexeme[0] == '0' && (plexeme[1] == 'x' || plexeme[1] == 'X'))
 	{
 		px_dword value;
-		if (!(pnewabi = PX_Syntax_PushNewAbi(pSyntax, "int", pSyntax->lifetime)))
+		if (!(pnewabi = PX_Syntax_NewAbi(pSyntax, "int", pSyntax->reg_lifetime)))
 		{
-			PX_Syntax_Terminate(pSyntax, past, "Memory Error");
+			PX_Syntax_Terminate(pSyntax, "Memory Error");
 			return PX_FALSE;
 		}
 		if (PX_strlen(plexeme+2)>8|| PX_strlen(plexeme + 2)==0)
 		{
-			PX_Syntax_Terminate(pSyntax, past, "illegal hex number");
+			PX_Syntax_Terminate(pSyntax, "illegal hex number");
 			return PX_FALSE;
 		}
 		value = PX_htoi(plexeme + 2);
 		PX_utoa(value, build_number, sizeof(build_number), 10);
-		if (!PX_AbiWrite_string(pnewabi, "value", build_number))
+		if (!PX_AbiSet_string(pnewabi, "value", build_number))
 		{
-			PX_Syntax_Terminate(pSyntax, past, "Memory Error");
+			PX_Syntax_Terminate(pSyntax, "Memory Error");
 			return PX_FALSE;
 		}
-		if (!PX_AbiWrite_bool(pnewabi, "unsigned", PX_TRUE))
+		if (!PX_AbiSet_bool(pnewabi, "unsigned", PX_TRUE))
 		{
-			PX_Syntax_Terminate(pSyntax, past, "Memory Error");
+			PX_Syntax_Terminate(pSyntax, "Memory Error");
 			return PX_FALSE;
 		}
-		PX_Syntax_AstMessage(pSyntax, "const_uint:");
-		PX_Syntax_AstMessage(pSyntax, build_number);
-		PX_Syntax_AstMessage(pSyntax, "\n");
+
+		if (!PX_AbiSet_int(pnewabi, "begin", begin))
+		{
+			PX_Syntax_Terminate(pSyntax, "Memory Error");
+			return PX_FALSE;
+		}
+
+		if (!PX_AbiSet_int(pnewabi, "end", end))
+		{
+			PX_Syntax_Terminate(pSyntax, "Memory Error");
+			return PX_FALSE;
+		}
+		PX_Syntax_Message(pSyntax, "const_uint:");
+		PX_Syntax_Message(pSyntax, build_number);
+		PX_Syntax_Message(pSyntax, "\n");
 		return PX_TRUE;
 	}
 
@@ -160,7 +208,7 @@ PX_SYNTAX_FUNCTION(PX_Syntax_Parse_int)
 	}
 	if (PX_strlen(plexeme)>20)
 	{
-		PX_Syntax_Terminate(pSyntax, past, "Numeric too long");
+		PX_Syntax_Terminate(pSyntax, "Numeric too long");
 		return PX_FALSE;
 	}
 	//last char is u or l
@@ -169,40 +217,52 @@ PX_SYNTAX_FUNCTION(PX_Syntax_Parse_int)
 		PX_strcat_s(build_number, sizeof(build_number), plexeme);
 		if (PX_strlen(build_number) == sizeof(build_number) - 1)
 		{
-			PX_Syntax_Terminate(pSyntax, past, "Numeric too long");
+			PX_Syntax_Terminate(pSyntax, "Numeric too long");
 			return PX_FALSE;
 		}
 		build_number[PX_strlen(build_number) - 1] = '\0';
-		if (!(pnewabi = PX_Syntax_PushNewAbi(pSyntax, "const_int", pSyntax->lifetime)))
+		if (!(pnewabi = PX_Syntax_NewAbi(pSyntax, "const_int", pSyntax->reg_lifetime)))
 		{
-			PX_Syntax_Terminate(pSyntax, past, "Memory Error");
+			PX_Syntax_Terminate(pSyntax, "Memory Error");
 			return PX_FALSE;
 		}
-		if (!PX_AbiWrite_string(pnewabi, "value", build_number))
+		if (!PX_AbiSet_string(pnewabi, "value", build_number))
 		{
-			PX_Syntax_Terminate(pSyntax, past, "Memory Error");
+			PX_Syntax_Terminate(pSyntax, "Memory Error");
 			return PX_FALSE;
 		}
 		if (plexeme[len - 1] == 'U' || plexeme[len - 1] == 'u')
 		{
-			if (!PX_AbiWrite_bool(pnewabi, "unsigned", PX_TRUE))
+			if (!PX_AbiSet_bool(pnewabi, "unsigned", PX_TRUE))
 			{
-				PX_Syntax_Terminate(pSyntax, past, "Memory Error");
+				PX_Syntax_Terminate(pSyntax, "Memory Error");
 				return PX_FALSE;
 			}
 		}
 		else
 		{
-			if (!PX_AbiWrite_bool(pnewabi, "unsigned", PX_FALSE))
+			if (!PX_AbiSet_bool(pnewabi, "unsigned", PX_FALSE))
 			{
-				PX_Syntax_Terminate(pSyntax, past, "Memory Error");
+				PX_Syntax_Terminate(pSyntax, "Memory Error");
 				return PX_FALSE;
 			}
 		}
+
+		if (!PX_AbiSet_int(pnewabi, "begin", begin))
+		{
+			PX_Syntax_Terminate(pSyntax, "Memory Error");
+			return PX_FALSE;
+		}
+
+		if (!PX_AbiSet_int(pnewabi, "end", end))
+		{
+			PX_Syntax_Terminate(pSyntax, "Memory Error");
+			return PX_FALSE;
+		}
 		
-		PX_Syntax_AstMessage(pSyntax, "const_uint:");
-		PX_Syntax_AstMessage(pSyntax, build_number);
-		PX_Syntax_AstMessage(pSyntax, "\n");
+		PX_Syntax_Message(pSyntax, "const_uint:");
+		PX_Syntax_Message(pSyntax, build_number);
+		PX_Syntax_Message(pSyntax, "\n");
 		return PX_TRUE;
 	}
 
@@ -210,7 +270,7 @@ PX_SYNTAX_FUNCTION(PX_Syntax_Parse_int)
 	return PX_FALSE;
 }
 
-px_bool PX_Syntax_Load_const_int(PX_Syntax* pSyntax)
+px_bool PX_Syntax_load_const_int(PX_Syntax* pSyntax)
 {
 	if (!PX_Syntax_Parse_PEBNF(pSyntax, "const_int = *", PX_Syntax_Parse_int))
 		return PX_FALSE;

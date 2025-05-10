@@ -24,9 +24,9 @@ PX_OBJECT_EVENT_FUNCTION(PX_Object_ButtonOnMouseMove)
 			{
 				if (pButton->state!=PX_OBJECT_BUTTON_STATE_ONCURSOR)
 				{
-					PX_Object_Event e = {0};
-					e.Event=PX_OBJECT_EVENT_CURSOROVER;
-					PX_ObjectExecuteEvent(pObject,e);
+					PX_Object_Event ne = {0};
+					ne.Event=PX_OBJECT_EVENT_CURSOROVER;
+					PX_ObjectExecuteEvent(pObject,ne);
 				}
 				pButton->state=PX_OBJECT_BUTTON_STATE_ONCURSOR;
 			}
@@ -35,9 +35,9 @@ PX_OBJECT_EVENT_FUNCTION(PX_Object_ButtonOnMouseMove)
 		{
 			if (pButton->state!=PX_OBJECT_BUTTON_STATE_NORMAL)
 			{
-				PX_Object_Event e = {0};
-				e.Event=PX_OBJECT_EVENT_CURSOROUT;
-				PX_ObjectExecuteEvent(pObject,e);
+				PX_Object_Event ne = {0};
+				ne.Event=PX_OBJECT_EVENT_CURSOROUT;
+				PX_ObjectExecuteEvent(pObject,ne);
 			}
 			pButton->state=PX_OBJECT_BUTTON_STATE_NORMAL;
 		}

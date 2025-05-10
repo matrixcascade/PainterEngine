@@ -819,6 +819,7 @@ px_void PX_Object_EditAddString(PX_Object *pObject,px_char *Text)
 				{
 					if (PX_StringLen(&pEdit->text)>=pEdit->max_length)
 					{
+						PX_StringFixUncompleteCode(&pEdit->text);
 						return;
 					}
 				}
@@ -1184,32 +1185,29 @@ px_void PX_Object_EditForward(PX_Object* pObject)
 		break;
 		case PX_FONTMODULE_CODEPAGE_UTF8:
 		{
-			px_int i;
-			for (i = 0; i < 6; i++)
+			if (pText[pEdit->cursor_index] == 0)
 			{
-				if (pEdit->cursor_index == PX_strlen(pText))
-				{
-					break;
-				}
-
-				if ((pText[pEdit->cursor_index] & 0x80) == 0x00)
-				{
-					pEdit->cursor_index++;
-					break;
-				}
-
-				if ((pText[pEdit->cursor_index] & 0xc0) == 0x80)
-				{
-					pEdit->cursor_index++;
-					continue;
-				}
-
-				if ((pText[pEdit->cursor_index] & 0xc0) == 0xc0)
-				{
-					pEdit->cursor_index++;
-					break;
-				}
-
+				break;
+			}
+			else if ((pText[pEdit->cursor_index] & 0x80) == 0x00)
+			{
+				pEdit->cursor_index++;
+			}
+			else if ((pText[pEdit->cursor_index] & 0xf8) == 0xf0)
+			{
+				pEdit->cursor_index += 4;
+			}
+			else if ((pText[pEdit->cursor_index] & 0xf0) == 0xe0)
+			{
+				pEdit->cursor_index += 3;
+			}
+			else if ((pText[pEdit->cursor_index] & 0xe0) == 0xc0)
+			{
+				pEdit->cursor_index += 2;
+			}
+			else
+			{
+				pEdit->cursor_index++;
 			}
 		}
 		break;

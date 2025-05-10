@@ -259,6 +259,21 @@ px_void PX_Object_MessageBoxAlertYesNo(PX_Object *pObject,const char *Message,PX
 	PX_ObjectSetFocus(pObject);
 }
 
+px_void PX_Object_MessageBoxInputMaxLength(PX_Object* pObject,px_int maxlen)
+{
+	PX_Object_MessageBox* pm = PX_Object_GetMessageBox(pObject);
+	PX_ASSERTIFX(pm == PX_NULL, "PX_Object_MessageBoxInputMaxLength failed");
+	if (pm->edit_inputbox)
+	{
+		PX_Object_EditSetMaxTextLength(pm->edit_inputbox, maxlen);
+	}
+	else
+	{
+		PX_ASSERTIFX(PX_FALSE, "PX_Object_MessageBoxInputMaxLength failed");
+	}
+
+}
+
 px_void PX_Object_MessageBoxInputBox(PX_Object *pObject,const char *Message,PX_Object_MessageBoxCallBack func_yescallback,px_void *yesptr,PX_Object_MessageBoxCallBack func_cancelcallback,px_void *cancelptr)
 {
 	PX_Object_MessageBox *pm=PX_Object_GetMessageBox(pObject);

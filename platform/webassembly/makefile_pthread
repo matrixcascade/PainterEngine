@@ -1,56 +1,84 @@
+
 #emscripten makefile
 #####################################################
 target :=PainterEngine.html
-project_path := ../../../project
-painterengine_path := ../..
+CC := emcc
+AR := emar
 #####################################################
-
 project_build := $(wildcard $(project_path)/*.c)
+project_build_cpp = $(wildcard $(project_path)/*.cpp)
+
 project_build_o := $(patsubst %.c,%.o,$(project_build))
+project_build_o += $(patsubst %.cpp,%.o,$(project_build_cpp))
 
 painterengine_build_core := $(wildcard $(painterengine_path)/core/*.c)
-painterengine_build_painterengine_o := $(patsubst %.c,%.o,$(painterengine_build_core))
+painterengine_build_painterengine_core_o := $(patsubst %.c,%.o,$(painterengine_build_core))
 
 painterengine_build_kernel := $(wildcard $(painterengine_path)/kernel/*.c)
-painterengine_build_painterengine_o += $(patsubst %.c,%.o,$(painterengine_build_kernel))
+painterengine_build_painterengine_kernel_o += $(patsubst %.c,%.o,$(painterengine_build_kernel))
 
 painterengine_build_runtime := $(wildcard $(painterengine_path)/runtime/*.c)
-painterengine_build_painterengine_o += $(patsubst %.c,%.o,$(painterengine_build_runtime))
+painterengine_build_painterengine_runtime_o += $(patsubst %.c,%.o,$(painterengine_build_runtime))
 
 painterengine_build_platform := $(wildcard $(painterengine_path)/platform/webassembly/*.c)
-painterengine_build_painterengine_o += $(patsubst %.c,%.o,$(painterengine_build_platform))
+painterengine_build_painterengine_platform_o += $(patsubst %.c,%.o,$(painterengine_build_platform))
 
 painterengine_build_platform := $(wildcard $(painterengine_path)/platform/webassembly/*.cpp)
-painterengine_build_painterengine_o += $(patsubst %.cpp,%.o,$(painterengine_build_platform))
+painterengine_build_painterengine_platform_o += $(patsubst %.cpp,%.o,$(painterengine_build_platform))
 
-all:$(project_build_o)  $(painterengine_build_painterengine_o) 
-	emcc $(project_build_o) $(painterengine_build_painterengine_o) \
+libcore := core.a
+libkernel := kernel.a
+libruntime := runtime.a
+libplatform := platform.a
+
+
+all:$(project_build_o)  $(libcore) $(libkernel) $(libruntime) $(libplatform)
+	$(CC) $(project_build_o) $(libcore) $(libkernel) $(libruntime) $(libplatform) \
 	-O3 \
-	-o $(target) \
+	-o "$(project_path)/$(target)" \
 	-I "$(painterengine_path)" \
 	-I "$(project_path)" \
-	-I "$(painterengine_path)/platform/webassembly" \
+	-lwebsocket.js \
 	-pthread \
 	-s USE_PTHREADS=1 -s PTHREAD_POOL_SIZE=16 \
 	-s EXPORTED_RUNTIME_METHODS="['cwrap','ccall']" \
-	--preload-file assets
-	emrun --no_browser --port 8080 PainterEngine.html
-	
+	-s WEBSOCKET_SUBPROTOCOL='binary' \
+	-s SOCKET_DEBUG=1 \
+	-I "$(painterengine_path)/platform/webassembly" \
+	--preload-file "$(project_path)/assets@assets"
+	copy "$(painterengine_path)\platform\webassembly\index.html" "$(project_path)"
+	make clean
+
+$(libcore): $(painterengine_build_painterengine_core_o)
+	$(AR) rcs $@ $^
+
+$(libkernel): $(painterengine_build_painterengine_kernel_o)
+	$(AR) rcs $@ $^
+
+$(libruntime): $(painterengine_build_painterengine_runtime_o)
+	$(AR) rcs $@ $^
+
+$(libplatform): $(painterengine_build_painterengine_platform_o)
+	$(AR) rcs $@ $^
 
 $(project_path)/%.o:$(project_path)/%.c
-	emcc -O3 -c $^ -o $@ -I "$(painterengine_path)" -I "$(painterengine_path)/platform/webassembly"
+	$(CC) -O3 -c $^ -o $@ -I "$(painterengine_path)" -I "$(painterengine_path)/platform/webassembly"
+
+$(project_path)/%.o:$(project_path)/%.cpp
+	$(CC) -O3 -c $^ -o $@ -I "$(painterengine_path)" -I "$(painterengine_path)/platform/webassembly"
 
 $(painterengine_path)/runtime/%.o:$(painterengine_path)/runtime/%.c 
-	emcc -O3 -c $^ -o $@ -I "$(painterengine_path)"
+	$(CC) -O3 -c $^ -o $@ -I "$(painterengine_path)"
 
 $(painterengine_path)/kernel/%.o:$(painterengine_path)/kernel/%.c
-	emcc -O3 -c $^ -o $@
+	$(CC) -O3 -c $^ -o $@
 
 $(painterengine_path)/core/%.o:$(painterengine_path)/core/%.c
-	emcc -O3 -c $^ -o $@
+	$(CC) -O3 -c $^ -o $@
 
 $(painterengine_path)/platform/webassembly/%.o:$(painterengine_path)/platform/webassembly/%.c
-	emcc -O3 -c $^ -o $@ -I "$(project_path)" -I "$(painterengine_path)" -I "$(painterengine_path)/platform/webassembly"
+	$(CC) -O3 -c $^ -o $@ -I "$(project_path)" -I "$(painterengine_path)" -I "$(painterengine_path)/platform/webassembly" -I "$(painterengine_path)/runtime"
+
 
 .PHONY:clean
 clean:
@@ -58,8 +86,5 @@ clean:
 	-del "$(painterengine_path)\kernel\*.o"
 	-del "$(painterengine_path)\runtime\*.o"
 	-del "$(painterengine_path)\platform\webassembly\*.o"
+	-del $(libcore) $(libkernel) $(libruntime) $(libplatform)
 	-del "$(project_path)\*.o"
-	-del "$(project_path)\PainterEngine.data"
-	-del "$(project_path)\PainterEngine.html"
-	-del "$(project_path)\PainterEngine.js"
-	-del "$(project_path)\PainterEngine.wasm"

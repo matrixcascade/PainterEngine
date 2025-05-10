@@ -196,7 +196,7 @@ px_bool PX_DelaunaryPointsBuild(px_memorypool *mp,px_point2D pt[],px_int count,p
 		pAtoms[i].pData=pt+i;
 		pAtoms[i].weight=pt[i].x;
 	}
-	PX_Quicksort_MinToMax(pAtoms,0,count-1);
+	PX_Quicksort_ArrayMinToMax(pAtoms,0,count-1);
 	for (i=0;i<count;i++)
 	{
 		sortPt[i]=*(px_point2D *)pAtoms[i].pData;

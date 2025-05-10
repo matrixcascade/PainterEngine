@@ -57,5 +57,6 @@ px_char * PX_Object_MessageBoxGetInput(PX_Object *pObject);
 PX_Object * PX_Object_MessageBoxCreate(px_memorypool *mp,PX_Object *parent,PX_FontModule *fontmodule);
 px_void PX_Object_MessageBoxSetMode(PX_Object* pObject, PX_MESSAGEBOX_COLORMOD mode);
 px_void PX_Object_MessageBoxSetFillColor(PX_Object* pObject, px_color color);
+px_void PX_Object_MessageBoxInputMaxLength(PX_Object* pObject, px_int maxlen);
 #endif
 

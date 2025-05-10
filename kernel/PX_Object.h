@@ -123,6 +123,8 @@ enum PX_OBJECT_TYPE
   PX_OBJECT_TYPE_GRID			,	
   PX_OBJECT_TYPE_CLOCKPAN       ,
   PX_OBJECT_TYPE_CLOCKNUMERIC   ,
+  PX_OBJECT_TYPE_TINYCANVAS     ,
+  PX_OBJECT_TYPE_STAMP			,
 };
 
 
@@ -256,6 +258,7 @@ PX_Object_Event PX_OBJECT_BUILD_EVENT(px_uint Event);
 PX_Object_Event PX_OBJECT_BUILD_EVENT_STRING(px_uint Event,const px_char *content);
 PX_Object_Event PX_OBJECT_BUILD_EVENT_INT(px_uint Event, px_int i);
 PX_Object_Event PX_Object_Event_CursorOffset(PX_Object_Event e, px_point offset);
+PX_Object_Event PX_Object_Event_ObjectCursorOffset(PX_Object* pObject, PX_Object_Event e);
 
 px_float PX_Object_Event_GetCursorX(PX_Object_Event e);
 px_float PX_Object_Event_GetCursorY(PX_Object_Event e);
@@ -328,7 +331,7 @@ px_int	   PX_ObjectSetRenderFunction(PX_Object* pObject, Function_ObjectRender F
 px_int	   PX_ObjectSetUpdateFunction(PX_Object* pObject, Function_ObjectUpdate Func_ObjectUpdate, px_int index);
 px_int	   PX_ObjectSetFreeFunction(PX_Object* pObject, Function_ObjectFree Func_ObjectFree, px_int index);
 px_void    PX_ObjectSetAlign(PX_Object *pObject,PX_ALIGN align);
-
+px_void    PX_ObjectGetReferenceXY(PX_Object* pObject, PX_Object_Event e);
 px_void    PX_ObjectGetInheritXY(PX_Object *pObject,px_float *x,px_float *y);
 px_void	   PX_ObjectInitialize(px_memorypool *mp,PX_Object *pObject,PX_Object *Parent,px_float x,px_float y,px_float z,px_float Width,px_float Height,px_float Length);
 px_void    PX_ObjectSetId(PX_Object *pObject,const px_char id[]);
@@ -648,6 +651,14 @@ px_void PX_ObjectCollisionTestFree(PX_Object_CollisionTest* ptest);
 //////////////////////////////////////////////////////////////////////////
 //clockpan
 #include "PX_Object_ClockPan.h"
+
+//////////////////////////////////////////////////////////////////////////
+//tinycamvas
+#include "PX_Object_TinyCanvas.h"
+
+//////////////////////////////////////////////////////////////////////////
+//stamp
+#include "PX_Object_Stamp.h"
 
 #endif
 

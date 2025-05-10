@@ -1,4 +1,5 @@
 #include "PX_Memory.h"
+
 px_void PX_MemoryInitialize(px_memorypool *mp,px_memory *memory)
 {
 	PX_memset(memory, 0, sizeof(px_memory));
@@ -177,7 +178,40 @@ px_bool PX_MemoryAlloc(px_memory *memory,px_int size)
 
 px_bool PX_MemoryResize(px_memory *memory,px_int size)
 {
-	return PX_MemoryAlloc(memory,size);
+	if (size==0)
+	{
+		PX_MemoryFree(memory);
+		return PX_TRUE;
+	}
+	else
+	{
+		if (size<memory->allocsize)
+		{
+			memory->usedsize = size;
+			return PX_TRUE;
+		}
+		else
+		{
+			px_byte* old;
+			px_int length, shl;
+			shl = 0;
+			old = memory->buffer;
+			length =size;
+			while ((px_int)(1 << ++shl) <= length);
+			memory->allocsize = (1 << shl);
+			memory->buffer = (px_byte*)MP_Malloc(memory->mp, memory->allocsize);
+			if (!memory->buffer) return PX_FALSE;
+			if (old)
+			{
+				PX_memcpy(memory->buffer, old, memory->usedsize);
+				MP_Free(memory->mp, old);
+			}
+			memory->usedsize = size;
+
+			return PX_TRUE;
+		}
+	}
+	return PX_FALSE;;
 }
 
 

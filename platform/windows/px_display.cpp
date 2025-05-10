@@ -1,7 +1,9 @@
 ﻿#include <d2d1.h>
 #include <d2d1helper.h>
 #include <WindowsX.h>
+//#include "immdev.h"
 #pragma comment(lib,"d2d1.lib")
+#pragma comment(lib,"Imm32.lib")
 
 typedef struct
 {
@@ -33,7 +35,7 @@ extern "C"
 	BOOL PX_SystemRender(void* raw, int width, int height);
 	BOOL PX_SystemisAvtivated();
 	BOOL PX_KeyboardDown(unsigned char X);
-	char* PX_KeyboardString();
+	const char* PX_KeyboardString();
 	char* PX_DragfileString();
 	BOOL PX_MouseLButtonDown();
 	BOOL PX_MouseRButtonDown();
@@ -258,7 +260,7 @@ BOOL PX_CreateWindow( int surfaceWidth,int surfaceHeight,int windowWidth,int win
 	}
 	break;
 	default:
-		style = WS_OVERLAPPED | WS_SYSMENU | WS_SIZEBOX;
+		style = WS_OVERLAPPED | WS_SYSMENU | WS_SIZEBOX | WS_MINIMIZEBOX;
 		window_x = CW_USEDEFAULT;
 		window_y = CW_USEDEFAULT;
 		break;
@@ -397,14 +399,38 @@ char			Win_Str[WIN_MAX_INPUT_STRING_LEN]={0};
 char			Win_SpecKey[WIN_MAX_INPUT_SPECKEY_LEN]={0};
 int				Win_CurrentIndex=0;
 #include "stdio.h"
+
+int PX_FontUnicodeToUTF8(unsigned int unicode, char utf8[4])
+{
+	int len = 0;
+	if (unicode < 0x80) {
+		len = 1;
+		utf8[0] = unicode;
+	}
+	else if (unicode < 0x800) {
+		len = 2;
+		utf8[0] = 0xC0 | (unicode >> 6);
+		utf8[1] = 0x80 | (unicode & 0x3F);
+	}
+	else if (unicode < 0x10000) {
+		len = 3;
+		utf8[0] = 0xE0 | (unicode >> 12);
+		utf8[1] = 0x80 | ((unicode >> 6) & 0x3F);
+		utf8[2] = 0x80 | (unicode & 0x3F);
+	}
+	else if (unicode < 0x200000) {
+		len = 4;
+		utf8[0] = 0xF0 | (unicode >> 18);
+		utf8[1] = 0x80 | ((unicode >> 12) & 0x3F);
+		utf8[2] = 0x80 | ((unicode >> 6) & 0x3F);
+		utf8[3] = 0x80 | (unicode & 0x3F);
+	}
+	return len;
+}
+
 LRESULT CALLBACK AppWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-
-// 	if(uMsg==0x246)
-// 	printf("%x\n",uMsg);
 	WM_MESSAGE message;
-
-
 	switch(uMsg) 
 	{
 	case WM_MOUSEMOVE:
@@ -439,13 +465,39 @@ LRESULT CALLBACK AppWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 		}
 		break;
 	case WM_CHAR:
+	{
+		if (Win_CurrentIndex < sizeof(Win_Str) - 1)
 		{
-			if(Win_CurrentIndex<WIN_MAX_INPUT_STRING_LEN-1)
+			Win_Str[Win_CurrentIndex] = (char)wParam;
+			Win_Str[Win_CurrentIndex + 1] = 0;
+			Win_CurrentIndex++;
+		}
+	}
+	break;
+	case WM_IME_COMPOSITION:
+		{
+			if (lParam & GCS_RESULTSTR)
 			{
-				if(wParam>=32||wParam==8)
-				{
-				Win_Str[Win_CurrentIndex++]=(char)wParam;
-				Win_Str[Win_CurrentIndex]='\0';
+				HIMC hIMC = ImmGetContext(Win_Hwnd);
+				if (hIMC) {
+					int i,l;
+					WCHAR buffer[64] = {};
+					LONG len = ImmGetCompositionStringW(hIMC, GCS_RESULTSTR, buffer, sizeof(buffer));
+					buffer[len / sizeof(WCHAR)] = 0; 
+					ImmReleaseContext(Win_Hwnd, hIMC);
+					for ( i = 0; i < len/2; i++)
+					{
+						char content[5] = { 0 };
+						int offset = 0;
+						if (0!=(l=PX_FontUnicodeToUTF8(buffer[i], content)))
+						{
+							while (l--)
+							{
+								Win_Str[Win_CurrentIndex++] = content[offset++];
+								Win_Str[Win_CurrentIndex] = 0;
+							}
+						}
+					}
 				}
 			}
 		}
@@ -505,10 +557,6 @@ BOOL PX_SystemLoop()
 		TranslateMessage(&Msg);
 		DispatchMessage(&Msg);
 	} 
-	else
-	{
-		Sleep(10);
-	}
 	return TRUE;
 }
 
@@ -580,17 +628,19 @@ POINT PX_MousePosition()
 	return DInput_MousePosition;
 }
 
-char * PX_KeyboardString()
+const char * PX_KeyboardString()
 {
+
 	if(Win_CurrentIndex!=0)
 	{
-	Win_CurrentIndex=0;
-	return Win_Str;
+		Win_CurrentIndex=0;
+		return Win_Str;
 	}
 	else
 	{
 		return 0;
 	}
+
 }
 
 VOID PX_SystemReadDeviceState()

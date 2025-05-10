@@ -952,7 +952,7 @@ px_bool PX_LoadVMFromScriptFile(px_memorypool *mp,const px_char path[], PX_VM *p
 	if(!PX_CompilerInitialize(mp,&compiler))
 		goto _ERROR;
 	
-	if (!PX_CompilerAddSource(&compiler, io.buffer))
+	if (!PX_CompilerAddSource(&compiler, (const px_char *)io.buffer))
 		goto _ERROR;
 
 	if (!PX_CompilerCompile(&compiler, &bin, 0, entry))

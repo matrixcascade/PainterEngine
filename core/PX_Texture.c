@@ -1625,7 +1625,7 @@ px_bool PX_TextureDiffUnzip(px_memorypool* mp,px_void *buffer,px_int size, px_te
 	p2 = (px_byte*)tex->surfaceBuffer;
 	count = srctex->width * srctex->height;
 	PX_MemoryInitialize(mp, &rleout);
-	if (!PX_ArleDecompress(buffer, size, &rleout))
+	if (!PX_ArleDecompress((px_byte *)buffer, size, &rleout))
 	{
 		PX_MemoryFree(&rleout);
 		return PX_FALSE;

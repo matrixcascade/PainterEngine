@@ -2105,11 +2105,6 @@ PX_Object* PX_CDA_CreateClassObjectEx(PX_CDA* pCDA, px_char classname[], px_floa
 				PX_VMRegisterHostFunction(&pDesc->vm, "setobjectvelocity", PX_CDA_ObjectVM_SetObjectVelocity, pObject);//setobjectvelocity
 				PX_VMRegisterHostFunction(&pDesc->vm, "setobjectforce", PX_CDA_ObjectVM_SetObjectForce, pObject);//setobjectforce
 				PX_VMRegisterHostFunction(&pDesc->vm, "setobjectresistance", PX_CDA_ObjectVM_SetObjectResistance, pObject);//setobjectresistance
-				PX_VMRegisterHostFunction(&pDesc->vm, "abi_int", PX_CDA_ObjectVM_Abi_int, pObject);//abi_int
-				PX_VMRegisterHostFunction(&pDesc->vm, "abi_float", PX_CDA_ObjectVM_Abi_float, pObject);//abi_float
-				PX_VMRegisterHostFunction(&pDesc->vm, "abi_string", PX_CDA_ObjectVM_Abi_string, pObject);//abi_string
-				PX_VMRegisterHostFunction(&pDesc->vm, "abi_point", PX_CDA_ObjectVM_Abi_point, pObject);//abi_point
-				PX_VMRegisterHostFunction(&pDesc->vm, "abi_color", PX_CDA_ObjectVM_Abi_color, pObject);//abi_color
 				PX_VMRegisterHostFunction(&pDesc->vm, "createthread", PX_CDA_ObjectVM_CreateThread, pObject);//createthread
 				PX_VMRegisterHostFunction(&pDesc->vm, "getportinteger", PX_CDA_ObjectVM_GetPortInteger, pObject);//getportinteger
 				PX_VMRegisterHostFunction(&pDesc->vm, "setportinteger", PX_CDA_ObjectVM_SetPortInteger, pObject);//setportinteger
@@ -2276,7 +2271,7 @@ px_bool PX_CDA_ExecutePayload_CreateRoute(PX_CDA* pcda, PX_Json* pjson)
 		while (pNode)
 		{
 			PX_CDA_RouteLine line;
-			PX_Json_Value* pValue = PX_LIST_NODEDATA(pNode);
+			PX_Json_Value* pValue = (PX_Json_Value*)PX_LIST_NODEDATA(pNode);
 			if (pValue->type!=PX_JSON_VALUE_TYPE_NUMBER)
 			{
 				return PX_FALSE;
@@ -2287,7 +2282,7 @@ px_bool PX_CDA_ExecutePayload_CreateRoute(PX_CDA* pcda, PX_Json* pjson)
 			{
 				return PX_FALSE;
 			}
-			pValue = PX_LIST_NODEDATA(pNode);
+			pValue = (PX_Json_Value*)PX_LIST_NODEDATA(pNode);
 			if (pValue->type != PX_JSON_VALUE_TYPE_NUMBER)
 			{
 				return PX_FALSE;
@@ -2958,7 +2953,7 @@ px_variable* PX_CDA_ObjectGetPortVariable(PX_Object* pCDAObject, px_int port)
 	return PX_NULL;
 }
 
-const px_char* PX_CDA_ObjectGetPropertyValue(PX_Object* pCDAObject, px_char name[])
+const px_char* PX_CDA_ObjectGetPropertyValue(PX_Object* pCDAObject,const px_char name[])
 {
 	PX_CDA_Object* pDesc = PX_Object_GetCDAObject(pCDAObject);
 	px_int i;

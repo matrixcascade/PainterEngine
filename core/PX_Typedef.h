@@ -234,7 +234,7 @@ typedef struct
 #include	"PX_Log.h"
 
 
-#define PX_STRUCT_OFFSET(t,m)    ((((t *)0)->m-(px_byte *)0))
+#define PX_STRUCT_OFFSET(t,m)    ((px_byte *)&((t *)0)->m-(px_byte *)0)
 #define BigLittleSwap16(A)  ((((px_word)(A) & 0xff00) >> 8)|(((px_word)(A) & 0x00ff) << 8))
 #define BigLittleSwap32(A)  ((((px_dword)(A) & 0xff000000) >> 24)|(((px_dword)(A) & 0x00ff0000) >> 8)|(((px_dword)(A) & 0x0000ff00) << 8)|(((px_dword)(A) & 0x000000ff)<<24))
 
@@ -550,6 +550,7 @@ px_float PX_tan_angle(px_float angle);
 px_double PX_atan(px_double x);
 px_double PX_atan2(px_double y, px_double x);
 
+
 px_double PX_asin(px_double x);
 px_double PX_acos(px_double x);
 px_float PX_Point2D_sin(px_point2D v);
@@ -563,6 +564,11 @@ px_float PX_Point2D_cos(px_point2D v);
 
 //////////////////////////////////////////////////////////////////////////
 //string to others
+px_int PX_strsub(const px_char* str, px_char delim);
+px_bool PX_strsubi(const px_char* in,px_char *out, px_char delim,px_int index);
+px_bool PX_strsubn(const px_char* in, px_char* out, px_char delim, px_int count);
+
+
 px_void PX_BufferToHexString(px_byte data[],px_int size,px_char hex_str[]);
 px_int PX_HexStringToBuffer(const px_char hex_str[],px_byte data[]);
 px_uint PX_htoi(const px_char hex_str[]);
@@ -658,6 +664,8 @@ px_stringformat PX_STRINGFORMAT_FLOAT(px_float _f);
 px_stringformat PX_STRINGFORMAT_FLOAT_ALIGN(px_float _f, px_int align);
 px_stringformat PX_STRINGFORMAT_STRING(const px_char *_s);
 px_stringformat PX_STRINGFORMAT_STRING_ALIGN(const px_char *_s, px_int align);
+
+
 px_int PX_sprintf8(px_char *str,px_int str_size,const px_char fmt[],\
 	px_stringformat _1,\
 	px_stringformat _2,\

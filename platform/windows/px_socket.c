@@ -1,9 +1,9 @@
-#include "platform/modules/px_socket.h"
-#include "platform/modules/px_tcp.h"
-#include "platform/modules/px_udp.h"
-#include "platform/modules/px_time.h"
-#include "platform/modules/px_sysmemory.h"
-#include "platform/modules/px_thread.h"
+#include "../modules/px_socket.h"
+#include "../modules/px_tcp.h"
+#include "../modules/px_udp.h"
+#include "../modules/px_time.h"
+#include "../modules/px_sysmemory.h"
+#include "../modules/px_thread.h"
 
 typedef struct
 {
@@ -249,7 +249,7 @@ px_bool PX_SocketInitialize(PX_Socket* pSocket, px_dword cache_size, \
 	pSocket->port = port;
 	pSocket->isConnecting = PX_FALSE;
 
-	pSocket->precv_buffer = malloc(cache_size);
+	pSocket->precv_buffer = (px_byte *)malloc(cache_size);
 	if (pSocket->precv_buffer == PX_NULL)
 	{
 		free(pSocket->handler);
@@ -258,7 +258,7 @@ px_bool PX_SocketInitialize(PX_Socket* pSocket, px_dword cache_size, \
 	pSocket->recv_buffer_size = cache_size;
 	pSocket->recv_buffer_offset = 0;
 
-	pSocket->psend_buffer = malloc(cache_size);
+	pSocket->psend_buffer = (px_byte *)malloc(cache_size);
 	if (pSocket->psend_buffer == PX_NULL)
 	{
 		free(pSocket->handler);
@@ -277,7 +277,7 @@ px_bool PX_SocketInitialize(PX_Socket* pSocket, px_dword cache_size, \
 
 px_bool PX_SocketSend(PX_Socket* pSocket,px_byte* data, px_dword send_data_size)
 {
-	if(PX_SocketCircularBufferGetSpaceSize(pSocket->send_buffer_size, &pSocket->send_buffer_wcursor, pSocket->send_buffer_rcursor)<send_data_size+sizeof(px_dword))
+	if(PX_SocketCircularBufferGetSpaceSize(pSocket->send_buffer_size, &pSocket->send_buffer_wcursor, pSocket->send_buffer_rcursor)< (px_int)send_data_size+ (px_int)sizeof(px_dword))
 	{
 		return PX_FALSE;
 	}

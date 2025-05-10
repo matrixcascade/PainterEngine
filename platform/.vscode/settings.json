@@ -1,5 +1,15 @@
 {
     "files.associations": {
-        "painterengine.h": "c"
+        "painterengine.h": "c",
+        "px_kernel.h": "c",
+        "painterengine_application.h": "c",
+        "px_time.h": "c",
+        "px_audio.h": "c",
+        "px_request.h": "c",
+        "px_tcp.h": "c",
+        "px_udp.h": "c",
+        "px_file.h": "c",
+        "px_sysmemory.h": "c",
+        "px_thread.h": "c"
     }
 }

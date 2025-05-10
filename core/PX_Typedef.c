@@ -833,6 +833,106 @@ px_float PX_Point2D_cos(px_point2D v)
 	return v.x/PX_sqrt(v.x*v.x+v.y*v.y);
 }
 
+
+
+px_int PX_strsub(const px_char* str, px_char delim)
+{
+	px_int i = 0;
+	px_int count = 1;
+	while (str[i])
+	{
+		if (str[i] == delim)
+		{
+			count++;
+		}
+		i++;
+	}
+	return count;
+}
+
+px_bool PX_strsubi(const px_char* in, px_char* out, px_char delim, px_int index)
+{
+	px_int current_index = 0;
+	px_int offset = 0;
+	out[0] = 0;
+	while (PX_TRUE)
+	{
+		if (index==current_index)
+		{
+			break;
+		}
+		while (PX_TRUE)
+		{
+			if (in[offset]== delim)
+			{
+				current_index++;
+				offset++;
+				break;
+			}
+			if (in[offset]==0)
+			{
+				return PX_FALSE;
+			}
+			offset++;
+		}
+	}
+	if (in[offset] == 0)
+	{
+		return PX_FALSE;
+	}
+	current_index = 0;
+	while (PX_TRUE)
+	{
+		if (in[offset] == delim ||
+			in[offset] == 0)
+		{
+			break;
+		}
+		out[current_index] = in[offset];
+		offset++;
+		current_index++;
+	}
+	out[current_index] = 0;
+	return PX_TRUE;
+}
+
+px_bool PX_strsubn(const px_char* in, px_char* out, px_char delim, px_int count)
+{
+	px_int current_index = 0;
+	px_int offset = 0;
+	out[0] = 0;
+	if (count<=0)
+	{
+		return PX_TRUE;
+	}
+	while (PX_TRUE)
+	{
+		if (in[offset] == delim)
+		{
+			out[offset] = in[offset];
+			current_index++;
+			if (current_index >= count)
+			{
+				out[offset] = 0;
+				return PX_TRUE;
+			}
+			offset++;
+		}
+		else if (in[offset] == 0)
+		{
+			out[offset] = 0;
+			return PX_TRUE;
+		}
+		else
+		{
+			out[offset] = in[offset];
+			offset++;
+		}
+		
+	}
+	
+}
+
 px_void PX_BufferToHexString(px_byte data[],px_int size,px_char hex_str[])
 {
 	px_int i;

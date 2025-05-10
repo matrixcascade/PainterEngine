@@ -18,7 +18,6 @@ PX_OBJECT_RENDER_FUNCTION(PX_Object_CanvasOnRender)
 	PX_SurfaceUnlimit(psurface);
 }
 
-
 px_void PX_Object_CanvasUpdateSliderBar(PX_Object* pObject)
 {
 	PX_Object_Canvas* pdesc = (PX_Object_Canvas *)PX_ObjectGetDescByType(pObject,PX_OBJECT_TYPE_CANVAS);
@@ -63,6 +62,10 @@ PX_OBJECT_EVENT_FUNCTION(PX_Object_CanvasOnCursorWheeling)
 	px_float cx, cy, cz;
 	px_int x, y;
 	px_rect rect;
+	if (!pdesc->enable_scale)
+	{
+		return;
+	}
 	rect = PX_ObjectGetRect(pObject);
 	x = (px_int)rect.x;
 	y = (px_int)rect.y;
@@ -263,6 +266,8 @@ PX_OBJECT_EVENT_FUNCTION(PX_Object_CanvasOnCursorUp)
 	}
 	
 }
+
+
 PX_Object* PX_Object_CanvasAttachObject(PX_Object* pObject, px_int attachIndex, px_int x, px_int y, PX_CanvasVM* pCanvasVM)
 {
 	px_memorypool* mp=pObject->mp;
@@ -276,7 +281,7 @@ PX_Object* PX_Object_CanvasAttachObject(PX_Object* pObject, px_int attachIndex, 
 
 	pdesc->mp = mp;
 	pdesc->pCanvasVM = pCanvasVM;
-
+	pdesc->enable_scale = PX_TRUE;
 	pdesc->pHSliderBar = PX_Object_SliderBarCreate(mp, pObject, 0, pCanvasVM->view_surface.height, pCanvasVM->view_surface.width, 24, PX_OBJECT_SLIDERBAR_TYPE_HORIZONTAL, PX_OBJECT_SLIDERBAR_STYLE_BOX);
 	pdesc->pVSliderBar = PX_Object_SliderBarCreate(mp, pObject, pCanvasVM->view_surface.width, 0, 24, pCanvasVM->view_surface.height, PX_OBJECT_SLIDERBAR_TYPE_VERTICAL, PX_OBJECT_SLIDERBAR_STYLE_BOX);
 	PX_Object_SliderBarSetBackgroundColor(pdesc->pHSliderBar, PX_COLOR_WHITE);
@@ -318,4 +323,10 @@ PX_Object_Canvas* PX_Object_GetCanvas(PX_Object* pObject)
 	return (PX_Object_Canvas*)PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_CANVAS);
 }
 
+px_void PX_Object_CanvasSetEnableScale(PX_Object* pObject, px_bool enable)
+{
+	PX_Object_Canvas* pdesc = (PX_Object_Canvas*)PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_CANVAS);
+	PX_ASSERTIF(!pdesc);
+	pdesc->enable_scale = enable;
+}
 

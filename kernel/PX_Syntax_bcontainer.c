@@ -5,50 +5,57 @@ PX_SYNTAX_FUNCTION(PX_Syntax_Parse_bcontainer)
 	px_abi* pnewabi;
 	px_string str;
 	px_char nextchar;
-	px_int line, column;
-	const px_char* pstr = PX_SyntaxGetCurrentLexeme(past);
-	PX_LEXER_LEXEME_TYPE type = PX_SyntaxGetNextAstFilter(past);
-	line = PX_LexerGetCurrentLine(past->lexer_state.plexer);
-	column = PX_LexerGetCurrentColumn(past->lexer_state.plexer);
+	px_int begin, end;
+	const px_char* pstr = PX_Syntax_GetCurrentLexeme(pSyntax);
+	PX_LEXER_LEXEME_TYPE type = PX_Syntax_GetNextLexeme(pSyntax);
 	if (type != PX_LEXER_LEXEME_TYPE_DELIMITER)
 	{
 		return PX_FALSE;
 	}
-	pstr = PX_SyntaxGetCurrentLexeme(past);
+	pstr = PX_Syntax_GetCurrentLexeme(pSyntax);
 	if (pstr[0] != '<')
 	{
-		PX_StringCatFormat2(&pSyntax->message, "%1:%2 Error:Incorrect container syntax.\n", PX_STRINGFORMAT_INT(line), PX_STRINGFORMAT_INT(column));
 		return PX_FALSE;
 	}
+	begin = PX_Syntax_GetCurrentLexemeBegin(pSyntax);
+	
 	PX_StringInitialize(pSyntax->mp, &str);
 
 	while (PX_TRUE)
 	{
-		nextchar = PX_Syntax_GetNextChar(past);
+		nextchar = PX_Syntax_GetNextChar(pSyntax);
 		if (nextchar == '\0' || nextchar == '\n')
 		{
-			PX_StringCatFormat2(&pSyntax->message, "%1:%2 Error:Unexpected end of file.\n", PX_STRINGFORMAT_INT(line), PX_STRINGFORMAT_INT(column));
 			PX_StringFree(&str);
 			return PX_FALSE;
 		}
 		if (nextchar == '>')
 		{
+			end = PX_Syntax_GetCurrentLexemeEnd(pSyntax);
 			break;
 		}
 
 		PX_StringCatChar(&str, nextchar);
 	}
 
-	pnewabi = PX_Syntax_PushNewAbi(pSyntax, "bcontainer", pSyntax->lifetime);
+	pnewabi = PX_Syntax_NewAbi(pSyntax, "bcontainer", pSyntax->reg_lifetime);
 	if (!pnewabi)
 	{
-		PX_StringCatFormat2(&pSyntax->message, "%1:%2 Error:Memory allocation failed.\n", PX_STRINGFORMAT_INT(line), PX_STRINGFORMAT_INT(column));
 		PX_StringFree(&str);
 		return PX_FALSE;
 	}
 	if (!PX_AbiSet_string(pnewabi, "value", str.buffer))
 	{
-		PX_StringCatFormat2(&pSyntax->message, "%1:%2 Error:Memory allocation failed.\n", PX_STRINGFORMAT_INT(line), PX_STRINGFORMAT_INT(column));
+		PX_StringFree(&str);
+		return PX_FALSE;
+	}
+	if (!PX_AbiSet_int(pnewabi, "begin", begin))
+	{
+		PX_StringFree(&str);
+		return PX_FALSE;
+	}
+	if (!PX_AbiSet_int(pnewabi, "end", end))
+	{
 		PX_StringFree(&str);
 		return PX_FALSE;
 	}
@@ -57,7 +64,7 @@ PX_SYNTAX_FUNCTION(PX_Syntax_Parse_bcontainer)
 }
 
 
-px_bool PX_Syntax_Load_bcontainer(PX_Syntax* pSyntax)
+px_bool PX_Syntax_load_bcontainer(PX_Syntax* pSyntax)
 {
 	PX_Syntax_Parse_PEBNF(pSyntax, "bcontainer = *", PX_Syntax_Parse_bcontainer);
 	return PX_TRUE;

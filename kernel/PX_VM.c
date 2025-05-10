@@ -4827,3 +4827,12 @@ px_int PX_VMDebuggerMapLineToIp(PX_VM_DebuggerMap* pDebugMap, px_int line)
 	return -1;
 }
 
+PX_VM_HOST_FUNCTION(PX_VM_STD_Sleep)
+{
+	if (PX_VM_HOSTPARAM(Ins,0).type!=PX_VARIABLE_TYPE_INT)
+	{
+		return PX_FALSE;
+	}
+	PX_VM_Sleep(Ins, PX_VM_HOSTPARAM(Ins, 0)._int);
+	return PX_TRUE;
+}

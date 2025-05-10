@@ -1,9 +1,9 @@
 #ifndef PX_SocketHub_H
-#include "platform/modules/px_tcp.h"
-#include "platform/modules/px_thread.h"
-#include "platform/modules/px_sysmemory.h"
-#include "platform/modules/px_time.h"
-#include "kernel/PX_Kernel.h"
+#include "px_tcp.h"
+#include "px_thread.h"
+#include "px_sysmemory.h"
+#include "px_time.h"
+#include "../../kernel/PX_Kernel.h"
 
 
 
@@ -39,8 +39,8 @@ typedef struct
 	px_dword  recv_cache_offset;
 
 	px_byte*  send_cache;
-	px_dword  send_cache_wcursor;
-	px_dword  send_cache_rcursor;
+	volatile px_int  send_cache_wcursor;
+	volatile px_int  send_cache_rcursor;
 
 	struct _PX_SocketHub * pSocketHub;
 	px_void* userptr;

@@ -2216,6 +2216,34 @@ px_ushort PX_FontGBKtoUnicode(px_ushort gbkcode)
 	return 0;
 }
 
+px_int PX_FontUnicodeToUTF8(px_dword unicode, px_byte utf8[4])
+{
+	px_int len = 0;
+	if (unicode < 0x80) {
+		len = 1;
+		utf8[0] = unicode;
+	}
+	else if (unicode < 0x800) {
+		len = 2;
+		utf8[0] = 0xC0 | (unicode >> 6);
+		utf8[1] = 0x80 | (unicode & 0x3F);
+	}
+	else if (unicode < 0x10000) {
+		len = 3;
+		utf8[0] = 0xE0 | (unicode >> 12);
+		utf8[1] = 0x80 | ((unicode >> 6) & 0x3F);
+		utf8[2] = 0x80 | (unicode & 0x3F);
+	}
+	else if (unicode < 0x200000) {
+		len = 4;
+		utf8[0] = 0xF0 | (unicode >> 18);
+		utf8[1] = 0x80 | ((unicode >> 12) & 0x3F);
+		utf8[2] = 0x80 | ((unicode >> 6) & 0x3F);
+		utf8[3] = 0x80 | (unicode & 0x3F);
+	}
+	return len;
+}
+
 px_dword PX_FontGBKRawtoUnicode(px_dword raw_code)
 {
 	return PX_FontGBKtoUnicode(raw_code);
@@ -2291,6 +2319,50 @@ px_void PX_GetASCIICode(px_uchar* pBuffer,px_uchar ASCII)
 	PX_memset(pBuffer,0xff,16);
 }
 
+
+px_int PX_FontTrimUncompletedUTF8String(px_char* pstr)
+{
+	px_int length = PX_strlen(pstr);
+	if ((pstr[length-1]&0x80)==0)
+	{
+		return length;
+	}
+	else
+	{
+		if ((pstr[length - 1] & 0xc0) == 0x80)
+		{
+			//uncomplete
+			while (length)
+			{
+				if ((pstr[length - 1] & 0xc0) == 0xc0)
+				{
+					//remove first byte
+					pstr[length - 1] = 0;
+					return length - 1;
+				}
+				else if ((pstr[length - 1] & 0x80) == 0)
+				{
+					return length;
+				}
+				else
+				{
+					pstr[length - 1] = 0;
+				}
+				length--;
+			}
+			return 0;
+		}
+		else if((pstr[length - 1] & 0xc0) == 0xc0)
+		{
+			pstr[length - 1] = 0;
+			return length - 1;
+		}
+		else
+		{
+			return length;
+		}
+	}
+}
 
 px_int PX_FontDrawChar(px_surface *psurface, px_int x,px_int y,px_uchar ASCI,px_color Color )
 {

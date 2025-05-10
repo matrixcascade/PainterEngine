@@ -335,178 +335,6 @@ px_bool PX_World_VM_GetWorldSize(PX_VM* Ins, px_void* userptr)
 	return PX_TRUE;
 }
 
-px_bool PX_World_VM_Abi_int(PX_VM* Ins, px_void* userptr)
-{
-	PX_World* pWorld = (PX_World*)userptr;
-	px_int ptr;
-	if (PX_VM_STACK(Ins, 0).type != PX_VM_VARIABLE_TYPE_PTR)
-	{
-		PX_VM_RET(Ins, PX_Variable_int(0));
-		return PX_FALSE;
-	}
-	if (PX_VM_STACK(Ins, 1).type != PX_VM_VARIABLE_TYPE_STRING)
-	{
-		PX_VM_RET(Ins, PX_Variable_int(0));
-		return PX_FALSE;
-	}
-	if (PX_VM_STACK(Ins, 2).type != PX_VM_VARIABLE_TYPE_INT)
-	{
-		PX_VM_RET(Ins, PX_Variable_int(0));
-		return PX_FALSE;
-	}
-	ptr = PX_VM_STACK(Ins, 0)._int;
-	if (PX_VM_GLOBAL(Ins, ptr).type != PX_VM_VARIABLE_TYPE_MEMORY)
-	{
-		return PX_FALSE;
-	}
-	PX_AbiMemoryWrite_int(&(PX_VM_GLOBAL(Ins, ptr)._memory), PX_VM_STACK(Ins, 1)._string.buffer, PX_VM_STACK(Ins, 2)._int);
-	return PX_TRUE;
-}
-px_bool PX_World_VM_Abi_float(PX_VM* Ins, px_void* userptr)
-{
-	PX_World* pWorld = (PX_World*)userptr;
-	px_int ptr;
-	if (PX_VM_STACK(Ins, 0).type != PX_VM_VARIABLE_TYPE_PTR)
-	{
-		PX_VM_RET(Ins, PX_Variable_int(0));
-		return PX_FALSE;
-	}
-	if (PX_VM_STACK(Ins, 1).type != PX_VM_VARIABLE_TYPE_STRING)
-	{
-		PX_VM_RET(Ins, PX_Variable_int(0));
-		return PX_FALSE;
-	}
-	if (PX_VM_STACK(Ins, 2).type != PX_VM_VARIABLE_TYPE_FLOAT)
-	{
-		PX_VM_RET(Ins, PX_Variable_int(0));
-		return PX_FALSE;
-	}
-	ptr = PX_VM_STACK(Ins, 0)._int;
-	if (PX_VM_GLOBAL(Ins, ptr).type != PX_VM_VARIABLE_TYPE_MEMORY)
-	{
-		return PX_FALSE;
-	}
-
-	PX_AbiMemoryWrite_float(&(PX_VM_GLOBAL(Ins, ptr)._memory), PX_VM_STACK(Ins, 1)._string.buffer, PX_VM_STACK(Ins, 2)._float);
-	return PX_TRUE;
-}
-px_bool PX_World_VM_Abi_string(PX_VM* Ins, px_void* userptr)
-{
-	PX_World* pWorld = (PX_World*)userptr;
-	px_int ptr;
-	if (PX_VM_STACK(Ins, 0).type != PX_VM_VARIABLE_TYPE_PTR)
-	{
-		PX_VM_RET(Ins, PX_Variable_int(0));
-		return PX_FALSE;
-	}
-	if (PX_VM_STACK(Ins, 1).type != PX_VM_VARIABLE_TYPE_STRING)
-	{
-		PX_VM_RET(Ins, PX_Variable_int(0));
-		return PX_FALSE;
-	}
-	if (PX_VM_STACK(Ins, 2).type != PX_VM_VARIABLE_TYPE_STRING)
-	{
-		PX_VM_RET(Ins, PX_Variable_int(0));
-		return PX_FALSE;
-	}
-	ptr = PX_VM_STACK(Ins, 0)._int;
-	if (PX_VM_GLOBAL(Ins, ptr).type != PX_VM_VARIABLE_TYPE_MEMORY)
-	{
-		return PX_FALSE;
-	}
-	PX_AbiMemoryWrite_string(&(PX_VM_GLOBAL(Ins, ptr)._memory), PX_VM_STACK(Ins, 1)._string.buffer, PX_VM_STACK(Ins, 2)._string.buffer);
-	return PX_TRUE;
-}
-px_bool PX_World_VM_Abi_point(PX_VM* Ins, px_void* userptr)
-{
-	PX_World* pWorld = (PX_World*)userptr;
-	px_int ptr;
-	px_float x, y, z;
-	if (PX_VM_STACK(Ins, 0).type != PX_VM_VARIABLE_TYPE_PTR)
-	{
-		PX_VM_RET(Ins, PX_Variable_int(0));
-		return PX_FALSE;
-	}
-	if (PX_VM_STACK(Ins, 1).type != PX_VM_VARIABLE_TYPE_STRING)
-	{
-		PX_VM_RET(Ins, PX_Variable_int(0));
-		return PX_FALSE;
-	}
-	if (PX_VM_STACK(Ins, 2).type != PX_VM_VARIABLE_TYPE_FLOAT)
-	{
-		PX_VM_RET(Ins, PX_Variable_int(0));
-		return PX_FALSE;
-	}
-	if (PX_VM_STACK(Ins, 3).type != PX_VM_VARIABLE_TYPE_FLOAT)
-	{
-		PX_VM_RET(Ins, PX_Variable_int(0));
-		return PX_FALSE;
-	}
-	if (PX_VM_STACK(Ins, 4).type != PX_VM_VARIABLE_TYPE_FLOAT)
-	{
-		PX_VM_RET(Ins, PX_Variable_int(0));
-		return PX_FALSE;
-	}
-	ptr = PX_VM_STACK(Ins, 0)._int;
-	x = PX_VM_STACK(Ins, 2)._float;
-	y = PX_VM_STACK(Ins, 3)._float;
-	z = PX_VM_STACK(Ins, 4)._float;
-	if (PX_VM_GLOBAL(Ins, ptr).type != PX_VM_VARIABLE_TYPE_MEMORY)
-	{
-		return PX_FALSE;
-	}
-	PX_AbiMemoryWrite_point(&(PX_VM_GLOBAL(Ins, ptr)._memory), PX_VM_STACK(Ins, 1)._string.buffer, PX_POINT(x,y,z));
-	return PX_TRUE;
-}
-px_bool PX_World_VM_Abi_color(PX_VM* Ins, px_void* userptr)
-{
-	PX_World* pWorld = (PX_World*)userptr;
-	px_int ptr;
-	px_float x, y, z,w;
-	if (PX_VM_STACK(Ins, 0).type != PX_VM_VARIABLE_TYPE_PTR)
-	{
-		PX_VM_RET(Ins, PX_Variable_int(0));
-		return PX_FALSE;
-	}
-	if (PX_VM_STACK(Ins, 1).type != PX_VM_VARIABLE_TYPE_STRING)
-	{
-		PX_VM_RET(Ins, PX_Variable_int(0));
-		return PX_FALSE;
-	}
-	if (PX_VM_STACK(Ins, 2).type != PX_VM_VARIABLE_TYPE_FLOAT)
-	{
-		PX_VM_RET(Ins, PX_Variable_int(0));
-		return PX_FALSE;
-	}
-	if (PX_VM_STACK(Ins, 3).type != PX_VM_VARIABLE_TYPE_FLOAT)
-	{
-		PX_VM_RET(Ins, PX_Variable_int(0));
-		return PX_FALSE;
-	}
-	if (PX_VM_STACK(Ins, 4).type != PX_VM_VARIABLE_TYPE_FLOAT)
-	{
-		PX_VM_RET(Ins, PX_Variable_int(0));
-		return PX_FALSE;
-	}
-	if (PX_VM_STACK(Ins, 5).type != PX_VM_VARIABLE_TYPE_FLOAT)
-	{
-		PX_VM_RET(Ins, PX_Variable_int(0));
-		return PX_FALSE;
-	}
-	ptr = PX_VM_STACK(Ins, 0)._int;
-	x = PX_VM_STACK(Ins, 2)._float;
-	y = PX_VM_STACK(Ins, 3)._float;
-	z = PX_VM_STACK(Ins, 4)._float;
-	w = PX_VM_STACK(Ins, 5)._float;
-	if (PX_VM_GLOBAL(Ins, ptr).type != PX_VM_VARIABLE_TYPE_MEMORY)
-	{
-		return PX_FALSE;
-	}
-	PX_AbiMemoryWrite_color(&(PX_VM_GLOBAL(Ins, ptr)._memory), PX_VM_STACK(Ins, 1)._string.buffer, PX_COLORF(x, y, z,w));
-	return PX_TRUE;
-}
-
-
 
 px_bool PX_World_VM_CreateThread(PX_VM* Ins, px_void* userptr)
 {	
@@ -611,11 +439,6 @@ host int createthread(string callname);\n\
 		PX_VMRegisterHostFunction(&pWorld->vm, "setobjectresistance", PX_World_VM_SetObjectResistance, pWorld);//setobjectresistance
 		PX_VMRegisterHostFunction(&pWorld->vm, "setobjecttype", PX_World_VM_SetObjectType, pWorld);//setobjecttype
 		PX_VMRegisterHostFunction(&pWorld->vm, "setobjectimpacttargettype", PX_World_VM_SetObjectImpactTargetType, pWorld);//setobjectimpacttargettype
-		PX_VMRegisterHostFunction(&pWorld->vm, "abi_int", PX_World_VM_Abi_int, pWorld);//abi_int
-		PX_VMRegisterHostFunction(&pWorld->vm, "abi_float", PX_World_VM_Abi_float, pWorld);//abi_float
-		PX_VMRegisterHostFunction(&pWorld->vm, "abi_string", PX_World_VM_Abi_string, pWorld);//abi_string
-		PX_VMRegisterHostFunction(&pWorld->vm, "abi_point", PX_World_VM_Abi_point, pWorld);//abi_point
-		PX_VMRegisterHostFunction(&pWorld->vm, "abi_color", PX_World_VM_Abi_color, pWorld);//abi_color
 		PX_VMRegisterHostFunction(&pWorld->vm, "createthread", PX_World_VM_CreateThread, pWorld);//createthread
 		PX_VMBeginThreadFunction(&pWorld->vm, 0, "main", 0, 0);
 	}
@@ -1132,7 +955,7 @@ px_void PX_WorldRender(px_surface *psurface,PX_World *pw,px_dword elapsed)
 			j++;
 		}
 
-		PX_Quicksort_MaxToMin(ArrayIndex, 0, pw->aliveCount - 1);
+		PX_Quicksort_ArrayMaxToMin(ArrayIndex, 0, pw->aliveCount - 1);
 
 		for (i = 0; i < pw->aliveCount; i++)
 		{

@@ -98,3 +98,8 @@ void PX_Sleep(unsigned int ms)
 {
 	usleep(ms*1000);
 }
+
+unsigned long long PX_Time()
+{
+	return time(0);
+}

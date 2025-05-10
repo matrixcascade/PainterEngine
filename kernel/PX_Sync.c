@@ -19,7 +19,7 @@ px_bool PX_SyncFrameServerInitialize(PX_SyncFrameServer *sync,px_memorypool *mp,
 	PX_VectorInitialize(mp,&sync->stampsIndexTable,sizeof(PX_SyncFrame_InstrStream_StampIndex),PX_SYNC_INSTRS_SIZE);
 	PX_MemoryInitialize(mp,&sync->stampsInstrStream);
 	PX_MemoryInitialize(mp, &sync->data);
-	return PX_MemoryResize(&sync->stampsInstrStream,PX_SYNC_INSTRS_BYTES_SIZE);
+	return PX_MemoryAlloc(&sync->stampsInstrStream,PX_SYNC_INSTRS_BYTES_SIZE);
 }
 
 px_void PX_SyncFrameServerSetVersion(PX_SyncFrameServer *sync,px_dword version)
@@ -550,7 +550,7 @@ px_bool PX_SyncFrameClientInitialize(PX_SyncFrameClient *client,px_memorypool *m
 	PX_VectorInitialize(mp,&client->stampsIndexTable,sizeof(PX_SyncFrame_InstrStream_StampIndex),PX_SYNC_INSTRS_SIZE);
 	PX_MemoryInitialize(mp,&client->Input_InstrStream);
 	PX_MemoryInitialize(mp,&client->stampsInstrStream);
-	return PX_MemoryResize(&client->stampsInstrStream,2*PX_SYNC_INSTRS_SIZE);
+	return PX_MemoryAlloc(&client->stampsInstrStream,2*PX_SYNC_INSTRS_SIZE);
 
 }
 static px_bool PX_SyncFrameClient_Read(PX_SyncFrameClient *client)
@@ -616,7 +616,7 @@ static px_void PX_SyncFrame_ClientHandle_StatusQueryData(PX_SyncFrameClient* cli
 
 	while (PX_SyncFrameClient_Read(client))
 	{
-		PX_Sync_IO_Packet* packet = (PX_Sync_IO_Packet*)(client->recv_cache_buffer);
+		packet = (PX_Sync_IO_Packet*)(client->recv_cache_buffer);
 		if (packet->type == PX_SYNC_IO_TYPE_QUERYDATAACK)
 		{
 			px_dword sumsize = packet->param1;
@@ -658,7 +658,7 @@ static px_void PX_SyncFrame_ClientHandle_StatusConneting(PX_SyncFrameClient *cli
 
 	while (PX_SyncFrameClient_Read(client))
 	{
-		PX_Sync_IO_Packet *packet=(PX_Sync_IO_Packet *)(client->recv_cache_buffer);
+		packet=(PX_Sync_IO_Packet *)(client->recv_cache_buffer);
 		if (packet->type==PX_SYNC_IO_TYPE_CONNECTACK)
 		{
 			client->status=PX_SYNC_CLIENT_STATUS_WAITING;

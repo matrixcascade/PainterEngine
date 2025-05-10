@@ -5,16 +5,16 @@
 
 #define PX_APPLICATION_MEMORYPOOL_STATIC_SIZE (1024*1024*64)
 #define PX_APPLICATION_MEMORYPOOL_DYNAMIC_SIZE (1024*1024*64)
-#define PX_APPLICATION_MEMORYPOOL_SPACE_SIZE (1024*1024*64)
+#define PX_APPLICATION_MEMORYPOOL_SPACE_SIZE (1024*1024*32)
 
 #define PX_APPLICATION_MEMORYPOOL_ALL_SIZE (PX_APPLICATION_MEMORYPOOL_STATIC_SIZE+PX_APPLICATION_MEMORYPOOL_DYNAMIC_SIZE+PX_APPLICATION_MEMORYPOOL_SPACE_SIZE)
 #include "PainterEngine_Runtime.h"
-#include "platform/modules/px_file.h"
-#include "platform/modules/px_time.h"
-#include "platform/modules/px_audio.h"
-#include "platform/modules/px_request.h"
-#include "platform/modules/px_tcp.h"
-#include "platform/modules/px_udp.h"
+#include "../platform/modules/px_file.h"
+#include "../platform/modules/px_time.h"
+#include "../platform/modules/px_audio.h"
+#include "../platform/modules/px_request.h"
+#include "../platform/modules/px_tcp.h"
+#include "../platform/modules/px_udp.h"
 extern px_char PX_APPLICATION_NAME[];
 	typedef struct
 	{
@@ -64,6 +64,7 @@ extern px_char PX_APPLICATION_NAME[];
 	px_int PainterEngine_GetSurfaceHeight();
 	px_int PainterEngine_GetScreenWidth();
 	px_int PainterEngine_GetScreenHeight();
+	px_void PainterEngine_SetWindowSize(PX_Application* App, px_int window_Width, px_int window_Height);
 	px_bool PainterEngine_LoadFontModule(const px_char path[], PX_FONTMODULE_CODEPAGE codepage, px_int size);
 	px_void PainterEngine_DrawTexture(px_texture* ptexture, px_int x, px_int y, PX_ALIGN align);
 	px_void PainterEngine_DrawLine(px_int x1, px_int y1, px_int x2, px_int y2, px_int linewidth, px_color color);

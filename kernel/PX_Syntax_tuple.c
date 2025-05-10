@@ -4,7 +4,7 @@ PX_SYNTAX_FUNCTION(PX_Syntax_Parse_tuple)
 {
 	px_abi* plastabi;
 	const px_char* pname;
-	plastabi = PX_Syntax_GetAbiStack(pSyntax, -1);
+	plastabi = PX_Syntax_GetAbiByIndex(pSyntax, -1);
 	if (!plastabi)
 	{
 		PX_ASSERT();
@@ -19,18 +19,11 @@ PX_SYNTAX_FUNCTION(PX_Syntax_Parse_tuple)
 
 	if (PX_strequ(pname, "const_int")|| PX_strequ(pname, "const_float") || PX_strequ(pname, "const_string"))
 	{
-		px_abi* pnewabi = PX_Syntax_PushNewAbi(pSyntax, "const_tuple", pSyntax->lifetime);
-		if (!pnewabi)
+		if (!PX_Syntax_MergeLastAbi(pSyntax, "const_tuple"))
 		{
-			PX_Syntax_Terminate(pSyntax, past, "Memory Error");
+			PX_Syntax_Terminate(pSyntax, "Memory Error");
 			return PX_FALSE;
 		}
-		if (!PX_AbiSet_Abi(pnewabi, "value", plastabi))
-		{
-			PX_Syntax_Terminate(pSyntax, past, "Memory Error");
-			return PX_FALSE;
-		}
-		PX_Syntax_PopSecondAbiStack(pSyntax);
 		return PX_TRUE;
 	}
 	
@@ -38,7 +31,7 @@ PX_SYNTAX_FUNCTION(PX_Syntax_Parse_tuple)
 	return PX_FALSE;
 }
 
-px_bool PX_Syntax_Load_tuple(PX_Syntax* pSyntax)
+px_bool PX_Syntax_load_tuple(PX_Syntax* pSyntax)
 {
 
 	if (!PX_Syntax_Parse_PEBNF(pSyntax, "const_tuple = const_int", PX_Syntax_Parse_tuple))

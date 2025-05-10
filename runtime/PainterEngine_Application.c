@@ -121,6 +121,15 @@ px_int PainterEngine_GetScreenHeight()
 	return screen_height;
 }
 
+px_void PainterEngine_SetWindowSize(PX_Application* pApp, px_int window_Width, px_int window_Height)
+{
+	if (window_Width == 0 || window_Height == 0)
+	{
+		return;
+	}
+	pApp->runtime.window_width = window_Width;
+	pApp->runtime.window_height = window_Height;
+}
 px_void PainterEngine_DrawTexture(px_texture *ptexture,px_int x,px_int y,PX_ALIGN align)
 {
 	if (App.object_printer->Visible == PX_FALSE)
@@ -322,8 +331,8 @@ px_bool PainterEngine_Initialize(px_int _screen_width,px_int _screen_height)
 	root = App.object_root;
 	mp = &runtime->mp_dynamic;
 	mp_static=&runtime->mp_static;
-	screen_width = _screen_width;
-	screen_height = _screen_height;
+	//screen_width = _screen_width;
+	//screen_height = _screen_height;
 	surface_width = App.runtime.surface_width;
 	surface_height = App.runtime.surface_height;
 	render_surface=&App.runtime.RenderSurface;
@@ -414,6 +423,8 @@ px_bool PX_ApplicationInitialize(PX_Application *pApp,px_int _screen_width,px_in
 	}
 	return PX_FALSE;
 }
+
+
 
 px_void PX_ApplicationUpdate(PX_Application *pApp,px_dword elapsed)
 {

@@ -16,6 +16,15 @@ typedef enum
 	PX_WEBSOCKET_STATE_CONNECTING,
 	PX_WEBSOCKET_STATE_ERROR
 }PX_WEBSOCKET_STATE;
+
+typedef enum
+{
+	PX_WEBSOCKET_HANDER_RETURN_CONTINUE,
+	PX_WEBSOCKET_HANDER_RETURN_PROTOCAL_ERROR,
+	PX_WEBSOCKET_HANDER_RETURN_TARGETCLOSE_ERROR,
+	PX_WEBSOCKET_HANDER_RETURN_CACHE_ERROR,
+	PX_WEBSOCKET_HANDER_RETURN_DONE,
+}PX_WEBSOCKET_HANDER_RETURN;
 struct _PX_WebSocket;
 typedef  px_void(*PX_PX_WebSocket_OnConnectCallback)(struct _PX_WebSocket* pSocket,px_void* ptr);
 #define PX_WEBSOCKET_CONNECT_CALLBACK_FUNCTION(name) px_void name(struct _PX_WebSocket* pSocket,px_void* ptr)
@@ -60,7 +69,7 @@ px_void PX_WebSocketInitialize(PX_WebSocket *pInstance, PX_Linker *pLinker,\
 px_bool PX_WebSocketConnect(PX_WebSocket* pInstance);
 px_bool PX_WebSocketListen(PX_WebSocket* pInstance);
 px_void PX_WebSocketUpdate_Send(PX_WebSocket* pInstance);
-px_void PX_WebSocketUpdate_Recv(PX_WebSocket* pInstance);
+PX_WEBSOCKET_HANDER_RETURN PX_WebSocketUpdate_Recv(PX_WebSocket* pInstance);
 px_bool PX_WebSocketWrite(PX_WebSocket* pInstance, const px_byte* data, px_int size);
 px_bool PX_WebSocketIsAlive(PX_WebSocket* pInstance);
 px_void PX_WebSocketFree(PX_WebSocket* pInstance);

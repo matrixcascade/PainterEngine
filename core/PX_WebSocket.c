@@ -84,7 +84,7 @@ px_bool PX_WebSocketClientWrite(PX_WebSocket* pInstance, const px_byte* data, px
 		header.payloadLength = 127;
 		header.mask = 1;
 		header.payloadTrueSize = PX_htonl(size);
-		if (PX_WebSocketGetSendCacheSpaceSize(pInstance)< sizeof(header)+ size)
+		if (PX_WebSocketGetSendCacheSpaceSize(pInstance)< (px_int)sizeof(header)+ size)
 		{
 			return PX_FALSE;
 		}
@@ -131,7 +131,7 @@ px_bool PX_WebSocketClientWrite(PX_WebSocket* pInstance, const px_byte* data, px
 		header.payloadLength = 126;
 		header.payloadTrueSize = PX_htons(size);
 		header.mask = 1;
-		if (PX_WebSocketGetSendCacheSpaceSize(pInstance) < sizeof(header) + size)
+		if (PX_WebSocketGetSendCacheSpaceSize(pInstance) < (px_int)sizeof(header) + size)
 		{
 			return PX_FALSE;
 		}
@@ -175,7 +175,7 @@ px_bool PX_WebSocketClientWrite(PX_WebSocket* pInstance, const px_byte* data, px
 		header.opcode = 2;
 		header.payloadLength = size;
 		header.mask = 1;
-		if (PX_WebSocketGetSendCacheSpaceSize(pInstance) < sizeof(header) + size)
+		if (PX_WebSocketGetSendCacheSpaceSize(pInstance) < (px_int)sizeof(header) + size)
 		{
 			return PX_FALSE;
 		}
@@ -228,7 +228,7 @@ px_bool PX_WebSocketServerWrite(PX_WebSocket* pInstance, const px_byte* data, px
 		header.opcode = 2;
 		header.payloadLength = 127;
 		header.payloadTrueSize = PX_htonl(size);
-		if (PX_WebSocketGetSendCacheSpaceSize(pInstance) < sizeof(header) + size)
+		if (PX_WebSocketGetSendCacheSpaceSize(pInstance) < (px_int)sizeof(header) + size)
 		{
 			return PX_FALSE;
 		}
@@ -237,7 +237,7 @@ px_bool PX_WebSocketServerWrite(PX_WebSocket* pInstance, const px_byte* data, px
 		{
 			return PX_FALSE;
 		}
-		if (!PX_WebSocketWriteSendCache(pInstance, (px_void*)data, size))
+		if (!PX_WebSocketWriteSendCache(pInstance, (px_byte*)data, size))
 		{
 			return PX_FALSE;
 		}
@@ -261,7 +261,7 @@ px_bool PX_WebSocketServerWrite(PX_WebSocket* pInstance, const px_byte* data, px
 		header.opcode = 2;
 		header.payloadLength = 126;
 		header.payloadTrueSize = PX_htons(size);
-		if (PX_WebSocketGetSendCacheSpaceSize(pInstance) < sizeof(header) + size)
+		if (PX_WebSocketGetSendCacheSpaceSize(pInstance) < (px_int)sizeof(header) + size)
 		{
 			return PX_FALSE;
 		}
@@ -269,7 +269,7 @@ px_bool PX_WebSocketServerWrite(PX_WebSocket* pInstance, const px_byte* data, px
 		{
 			return PX_FALSE;
 		}
-		if (!PX_WebSocketWriteSendCache(pInstance, (px_void*)data, size))
+		if (!PX_WebSocketWriteSendCache(pInstance, (px_byte*)data, size))
 		{
 			return PX_FALSE;
 		}
@@ -291,7 +291,7 @@ px_bool PX_WebSocketServerWrite(PX_WebSocket* pInstance, const px_byte* data, px
 		header.fin = 1;
 		header.opcode = 2;
 		header.payloadLength = size;
-		if (PX_WebSocketGetSendCacheSpaceSize(pInstance) < sizeof(header) + size)
+		if (PX_WebSocketGetSendCacheSpaceSize(pInstance) < (px_int)sizeof(header) + size)
 		{
 			return PX_FALSE;
 		}
@@ -299,7 +299,7 @@ px_bool PX_WebSocketServerWrite(PX_WebSocket* pInstance, const px_byte* data, px
 		{
 			return PX_FALSE;
 		}
-		if (!PX_WebSocketWriteSendCache(pInstance, (px_void*)data, size))
+		if (!PX_WebSocketWriteSendCache(pInstance, (px_byte*)data, size))
 		{
 			return PX_FALSE;
 		}
@@ -342,12 +342,7 @@ px_void PX_WebSocketUpdate_Send(PX_WebSocket* pInstance)
 	}while(sendblocksize);
 }
 
-typedef enum
-{
-	PX_WEBSOCKET_HANDER_RETURN_CONTINUE,
-	PX_WEBSOCKET_HANDER_RETURN_ERROR,
-	PX_WEBSOCKET_HANDER_RETURN_DONE,
-}PX_WEBSOCKET_HANDER_RETURN;
+
 
 static PX_WEBSOCKET_HANDER_RETURN PX_WebSocketUpdate_RecvHandleData(PX_WebSocket* pInstance)
 {
@@ -382,11 +377,12 @@ static PX_WEBSOCKET_HANDER_RETURN PX_WebSocketUpdate_RecvHandleData(PX_WebSocket
 				px_char payload[128] = { 0 };
 				if (PX_HttpGetContent((const px_char*)pInstance->recv_cache, "Sec-WebSocket-Key", payload, sizeof(payload)))
 				{
-					px_char response[280] = "HTTP/1.1 101 Switching Protocols\r\nConnection:Upgrade\r\n\
-Upgrade : websocket\r\n\
-Access - Control - Allow - Credentials : true\r\nAccess - Control - Allow - Headers : content - type\r\n\
-Sec-WebSocket-Protocol : binary\r\n\
-Sec-WebSocket-Accept:";
+					px_char response[280] = "HTTP/1.1 101 Switching Protocols\r\n\Connection: Upgrade\r\n\
+Upgrade: websocket\r\n\
+Access-Control-Allow-Credentials: true\r\n\
+Access-Control-Allow-Headers: content-type\r\n\
+Sec-WebSocket-Protocol: binary\r\n\
+Sec-WebSocket-Accept: ";
 					PX_SHA1_HASH hash;
 					PX_strcat_s(payload, sizeof(payload), "258EAFA5-E914-47DA-95CA-C5AB0DC85B11");
 					PX_Sha1Calculate(payload, PX_strlen(payload), &hash);
@@ -409,14 +405,14 @@ Sec-WebSocket-Accept:";
 					}
 					else
 					{
-						return PX_WEBSOCKET_HANDER_RETURN_ERROR;
+						return PX_WEBSOCKET_HANDER_RETURN_PROTOCAL_ERROR;
 					}
 				}
 				return PX_WEBSOCKET_HANDER_RETURN_CONTINUE;
 			}
 			else
 			{
-				return PX_WEBSOCKET_HANDER_RETURN_ERROR;
+				return PX_WEBSOCKET_HANDER_RETURN_PROTOCAL_ERROR;
 			}
 		}
 	}
@@ -482,11 +478,11 @@ Sec-WebSocket-Accept:";
 
 				if (payloadLen > sizeof(pInstance->recv_cache))
 				{
-					return PX_WEBSOCKET_HANDER_RETURN_ERROR;
+					return PX_WEBSOCKET_HANDER_RETURN_PROTOCAL_ERROR;
 				}
 				else if (sizeof(pInstance->recv_cache) < payloadLen + headersize + maskkey_size)
 				{
-					return PX_WEBSOCKET_HANDER_RETURN_ERROR;
+					return PX_WEBSOCKET_HANDER_RETURN_PROTOCAL_ERROR;
 				}
 				else if (pInstance->recv_cache_offset >= payloadLen + headersize + maskkey_size)
 				{
@@ -525,7 +521,7 @@ Sec-WebSocket-Accept:";
 						if (!PX_WebSocketWriteSendCache(pInstance, (px_byte*)pheader, sizeof(PX_WebSocketMessageHeader)))
 						{
 							//out of cache
-							return PX_WEBSOCKET_HANDER_RETURN_ERROR;
+							return PX_WEBSOCKET_HANDER_RETURN_PROTOCAL_ERROR;
 						}
 						break;
 					case 10://pong
@@ -558,8 +554,9 @@ Sec-WebSocket-Accept:";
 	return PX_WEBSOCKET_HANDER_RETURN_DONE;
 }
 
-px_void PX_WebSocketUpdate_Recv(PX_WebSocket* pInstance)
+PX_WEBSOCKET_HANDER_RETURN PX_WebSocketUpdate_Recv(PX_WebSocket* pInstance)
 {
+	PX_WEBSOCKET_HANDER_RETURN ret= PX_WEBSOCKET_HANDER_RETURN_CONTINUE;
 	while (PX_TRUE)
 	{
 		px_int readsize;
@@ -567,6 +564,7 @@ px_void PX_WebSocketUpdate_Recv(PX_WebSocket* pInstance)
 		px_byte* pDataPtr = pInstance->recv_cache + pInstance->recv_cache_offset;
 		if (spacesize == 0)
 		{
+			ret = PX_WEBSOCKET_HANDER_RETURN_CACHE_ERROR;
 			break;
 		}
 		readsize = PX_LinkerRead(pInstance->plinker, pDataPtr, spacesize);
@@ -578,10 +576,12 @@ px_void PX_WebSocketUpdate_Recv(PX_WebSocket* pInstance)
 				PX_WEBSOCKET_HANDER_RETURN ret = PX_WebSocketUpdate_RecvHandleData(pInstance);
 				if (ret == PX_WEBSOCKET_HANDER_RETURN_DONE)
 				{
+					ret = PX_WEBSOCKET_HANDER_RETURN_DONE;
 					break;
 				}
-				else if (ret == PX_WEBSOCKET_HANDER_RETURN_ERROR)
+				else if (ret == PX_WEBSOCKET_HANDER_RETURN_PROTOCAL_ERROR)
 				{
+					ret = PX_WEBSOCKET_HANDER_RETURN_PROTOCAL_ERROR;
 					goto DISCONNECT;
 				}
 				else if (ret == PX_WEBSOCKET_HANDER_RETURN_CONTINUE)
@@ -597,11 +597,12 @@ px_void PX_WebSocketUpdate_Recv(PX_WebSocket* pInstance)
 		}
 		else if (readsize <= 0)
 		{
+			ret = PX_WEBSOCKET_HANDER_RETURN_TARGETCLOSE_ERROR;
 			goto DISCONNECT;
 		}
 	}
 
-	return;
+	return ret;
 DISCONNECT:
 	pInstance->state = PX_WEBSOCKET_STATE_CLOSE;
 	PX_LinkerClose(pInstance->plinker);
@@ -611,7 +612,7 @@ DISCONNECT:
 	}
 	
 	
-	return;
+	return ret;
 }
 
 

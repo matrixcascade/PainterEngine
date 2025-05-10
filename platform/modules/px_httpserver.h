@@ -1,10 +1,10 @@
 #ifndef PX_HTTPSERVER_H
 #define PX_HTTPSERVER_H
-#include "platform/modules/px_time.h"
-#include "platform/modules/px_tcp.h"
-#include "platform/modules/px_thread.h"
-#include "platform/modules/px_sysmemory.h"
-#include "kernel/PX_Kernel.h"
+#include "px_time.h"
+#include "px_tcp.h"
+#include "px_thread.h"
+#include "px_sysmemory.h"
+#include "../../kernel/PX_Kernel.h"
 
 #define PX_HTTPSERVER_MAX_REQUEST 64
 typedef struct

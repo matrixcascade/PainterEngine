@@ -20,7 +20,7 @@ static px_bool PX_SocketConnectToServer(PX_Socket* pSocket, const px_char host[]
 	px_char _build_host[256];
 	PX_EMWebSocket_Handle* pem = (PX_EMWebSocket_Handle*)pSocket->handler;
 	EmscriptenWebSocketCreateAttributes ws_attrs;
-	PX_sprintf2(_build_host, 256, "ws://%1:%2", PX_STRINGFORMAT_STRING(host), PX_STRINGFORMAT_INT(port));
+	PX_sprintf2(_build_host, 256, "%1:%2", PX_STRINGFORMAT_STRING(host), PX_STRINGFORMAT_INT(port));
 	ws_attrs.url = _build_host;
 	ws_attrs.protocols = "binary";
 	ws_attrs.createOnMainThread = EM_TRUE;
@@ -248,4 +248,8 @@ px_void* PX_SocketGetUserPtr(PX_Socket* pSocket)
 px_void PX_SocketClose(PX_Socket* pSocket)
 {
 	pSocket->enable = PX_FALSE;
+}
+px_bool PX_SocketIsConnecting(PX_Socket* pSocket)
+{
+	return pSocket->isConnecting;
 }

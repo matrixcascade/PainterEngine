@@ -1,5 +1,5 @@
-#include "runtime/PainterEngine_Application.h"
-#include "platform/modules/px_thread.h"
+#include "../../runtime/PainterEngine_Application.h"
+#include "../../platform/modules/px_thread.h"
 #include "px_display.h"
 
 //mouse informations
@@ -41,7 +41,7 @@ DWORD WINAPI DEMO_RenderThreadFunc(LPVOID p)
 
 		while (PX_GetWinMessage(&msg))
 		{
-			px_char text[2]={0};
+			px_char text[5]={0};
 			e.Event=PX_OBJECT_EVENT_ANY;
 			switch(msg.uMsg)
 			{
@@ -173,13 +173,27 @@ DWORD WINAPI DEMO_RenderThreadFunc(LPVOID p)
 
 				}
 				break;
+			/*
 			case WM_CHAR:
+			{
+				e.Event = PX_OBJECT_EVENT_STRING;
+				text[0] = (px_char)msg.wparam;
+				PX_Object_Event_SetStringPtr(&e, (px_void*)text);
+			}
+			break;
+			case WM_IME_COMPOSITION:
+			{
+				if (msg.lparam & GCS_RESULTSTR)
 				{
-					text[0]=(px_char)msg.wparam;
-					e.Event=PX_OBJECT_EVENT_STRING;
-					PX_Object_Event_SetStringPtr(&e,text);
+					const px_char* pcontent = PX_KeyboardString();
+					if (pcontent)
+					{
+						e.Event = PX_OBJECT_EVENT_STRING;
+						PX_Object_Event_SetStringPtr(&e, (px_void*)pcontent);
+					}
 				}
-				break;
+			}
+			break;
 			/*
 			case WM_GESTURE:
 				{
@@ -251,13 +265,20 @@ DWORD WINAPI DEMO_RenderThreadFunc(LPVOID p)
 			{
 				PX_ApplicationPostEvent(&App,e);
 			}
-
+		}
+		const px_char* pcontent = PX_KeyboardString();
+		if (pcontent)
+		{
+			e.Event = PX_OBJECT_EVENT_STRING;
+			PX_Object_Event_SetStringPtr(&e, (px_void*)pcontent);
+			PX_ApplicationPostEvent(&App, e);
 		}
 		PX_ApplicationUpdate(&App,elapsed);
 		PX_ApplicationRender(&App,elapsed);
 		PX_MutexLock(&main_surface_mutex);
 		memcpy(main_surface,App.runtime.RenderSurface.surfaceBuffer, App.runtime.RenderSurface.width* App.runtime.RenderSurface.height*4);
 		PX_MutexUnlock(&main_surface_mutex);
+		PX_Sleep(10);
 	}
 	return 0;
 }
@@ -310,6 +331,7 @@ void setCurrentDirectory()
 		PX_MutexLock(&main_surface_mutex);
 		PX_SystemRender(main_surface, App.runtime.surface_width, App.runtime.surface_height);
 		PX_MutexUnlock(&main_surface_mutex);
+		PX_Sleep(10);
 	};
 
 	return 0;

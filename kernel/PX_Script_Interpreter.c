@@ -8377,7 +8377,6 @@ static px_bool PX_ScriptParseStruct(PX_ScriptInterpreter *analysis)
 
 		if (analysis->functionInside)
 		{
-			PX_SCRIPT_VARIABLES *pvar;
 			for (i=0;i<analysis->v_variablesStackTable.size;i++)
 			{
 				if (PX_strequ(variable.Mnemonic.buffer,PX_VECTORAT(PX_SCRIPT_VARIABLES,&analysis->v_variablesStackTable,i)->Mnemonic.buffer))

@@ -231,7 +231,7 @@ px_void * MP_Malloc(px_memorypool *MP, px_uint Size )
 	px_int DEBUG_i;
 	if (MP==PX_NULL)
 	{
-		PX_ASSERT();
+		PX_ASSERTX("MemoryPool is NULL");
 		return PX_NULL;
 	}
 	for (DEBUG_i=0;DEBUG_i<sizeof(MP->DEBUG_allocdata)/sizeof(MP->DEBUG_allocdata[0]);DEBUG_i++)
@@ -243,7 +243,7 @@ px_void * MP_Malloc(px_memorypool *MP, px_uint Size )
 			itNode=(MemoryNode *)((px_uchar *)MP->DEBUG_allocdata[DEBUG_i].startAddr -sizeof(MemoryNode));
 			if(MP->DEBUG_allocdata[DEBUG_i].startAddr!=itNode->StartAddr) 
 			{
-					PX_ASSERT();
+				    PX_ASSERTX("MemoryPool Memory Corruption");
 					return PX_NULL;
 			}
 			if(MP->DEBUG_allocdata[DEBUG_i].endAddr!=itNode->EndAddr) 
@@ -253,7 +253,7 @@ px_void * MP_Malloc(px_memorypool *MP, px_uint Size )
 			}
 			if(pAppend->append!=MP_APPENDDATA_MAGIC)
 			{
-				PX_ASSERT();
+				PX_ASSERTX("MAGIC check error:MemoryPool Memory Corruption");
 				return PX_NULL;
 			}
 		}
@@ -305,7 +305,7 @@ px_void * MP_Malloc(px_memorypool *MP, px_uint Size )
 				{
 					break;
 				}
-				PX_ASSERTIF(MP->DEBUG_allocdata_catch[i] == (px_byte *)MemNode->StartAddr- (px_byte*)MP->StartAddr);
+				PX_ASSERTIFX(MP->DEBUG_allocdata_catch[i] == (px_byte*)MemNode->StartAddr - (px_byte*)MP->StartAddr, "MemoryPool Memory cache");
 			}
 		} while (0);
 	#endif
@@ -347,7 +347,7 @@ px_void * MP_Malloc(px_memorypool *MP, px_uint Size )
 				{
 					break;
 				}
-				PX_ASSERTIF(MP->DEBUG_allocdata_catch[i] == (px_byte*)MemNode->StartAddr - (px_byte*)MP->StartAddr);
+				PX_ASSERTIFX(MP->DEBUG_allocdata_catch[i] == (px_byte*)MemNode->StartAddr - (px_byte*)MP->StartAddr, "MemoryPool Memory cache");
 			}
 		} while (0);
 		#endif

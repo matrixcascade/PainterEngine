@@ -3,7 +3,7 @@
 
 PX_OBJECT_EVENT_FUNCTION(PX_Object_DragOnCursorDown)
 {
-	PX_Object_Drag* pPX_Object_Drag = PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_DRAG);
+	PX_Object_Drag* pPX_Object_Drag = (PX_Object_Drag*)PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_DRAG);
 	if (PX_ObjectIsCursorInRegion(pObject, e))
 	{
 		pPX_Object_Drag->bselect = PX_TRUE;
@@ -14,13 +14,13 @@ PX_OBJECT_EVENT_FUNCTION(PX_Object_DragOnCursorDown)
 
 PX_OBJECT_EVENT_FUNCTION(PX_Object_DragOnCursorRelease)
 {
-	PX_Object_Drag* pPX_Object_Drag = PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_DRAG);
+	PX_Object_Drag* pPX_Object_Drag = (PX_Object_Drag*)PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_DRAG);
 	pPX_Object_Drag->bselect = PX_FALSE;
 }
 
 PX_OBJECT_EVENT_FUNCTION(PX_Object_DragOnCursorDrag)
 {
-	PX_Object_Drag* pPX_Object_Drag = PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_DRAG);
+	PX_Object_Drag* pPX_Object_Drag = (PX_Object_Drag*)PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_DRAG);
 	px_float x = PX_Object_Event_GetCursorX(e);
 	px_float y = PX_Object_Event_GetCursorY(e);
 	if (pPX_Object_Drag->bselect)

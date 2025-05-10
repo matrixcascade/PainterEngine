@@ -26,6 +26,7 @@
 #include "PX_CanvasVM.h"
 #include "PX_CDA.h"
 #include "PX_World.h"
+//syntax
 #include "PX_Syntax_const_int.h"
 #include "PX_Syntax_const_float.h"
 #include "PX_Syntax_const_string.h"
@@ -38,4 +39,15 @@
 #include "PX_Syntax_const_int_list.h"
 #include "PX_Syntax_const_float_list.h"
 #include "PX_Syntax_const_numeric_list.h"
+#include "PX_Syntax_const_tuple_list.h"
+#include "PX_Syntax_const_set.h"
+#include "PX_Syntax_define.h"
+#include "PX_Syntax_define_struct.h"
+#include "PX_Syntax_opcode_base.h"
+#include "PX_Syntax_declare_prefix.h"
+#include "PX_Syntax_base_type.h"
+#include "PX_Syntax_declare_variable.h"
+#include "PX_Syntax_declare_token_suffix.h"
+#include "PX_Syntax_declare_token_prefix.h"
+
 #endif

@@ -39,7 +39,7 @@ PX_SOCKET_RECEIVE_CALLBACK_FUNCTION(PX_VisualOSOnSocketReceive)
 	px_abi abi;
 	const px_char* ptype;
 	
-	PX_AbiCreateStaticReader(&abi, data, datasize);
+	PX_AbiCreate_StaticReader(&abi, data, datasize);
 	ptype=PX_AbiGet_string(&abi,"type");
 	if (!ptype)
 	{
@@ -50,7 +50,7 @@ PX_SOCKET_RECEIVE_CALLBACK_FUNCTION(PX_VisualOSOnSocketReceive)
 		px_int* pframewidth;
 		px_int* pframeheight;
 		px_byte* framedata;
-		px_int framedatasize;
+		px_dword framedatasize;
 		pframewidth = PX_AbiGet_int(&abi, "width");
 		pframeheight = PX_AbiGet_int(&abi, "height");
 
@@ -58,7 +58,7 @@ PX_SOCKET_RECEIVE_CALLBACK_FUNCTION(PX_VisualOSOnSocketReceive)
 		{
 			return;
 		}
-		framedata = PX_AbiGet_data(&abi, "data",&framedatasize);
+		framedata = (px_byte *)PX_AbiGet_data(&abi, "data",&framedatasize);
 		if (!framedata)
 		{
 			return;
@@ -102,7 +102,7 @@ PX_SOCKET_RECEIVE_CALLBACK_FUNCTION(PX_VisualOSOnSocketReceive)
 		pObject->Height = (px_float)pClient->surface_height;
 
 		PX_MutexLock(&pClient->surface_lock);
-		if (!PX_TextureDiffUnzip(&pClient->mp, framedata, framedatasize, &pClient->pre_surface, &pClient->cur_surface))
+		if (!PX_TextureDiffUnzip(&pClient->mp, framedata, (px_int)framedatasize, &pClient->pre_surface, &pClient->cur_surface))
 			printf("unzip error\n");
 		else
 			PX_TextureCover(&pClient->pre_surface, &pClient->cur_surface, 0, 0, PX_ALIGN_LEFTTOP);
@@ -123,7 +123,10 @@ PX_SOCKET_RECEIVE_CALLBACK_FUNCTION(PX_VisualOSOnSocketReceive)
 	}
 }
 
-PX_SOCKET_DISCONNECT_CALLBACK_FUNCTION(PX_VisualOSOnSocketDisconnect){}
+PX_SOCKET_DISCONNECT_CALLBACK_FUNCTION(PX_VisualOSOnSocketDisconnect)
+{
+
+}
 
 PX_OBJECT_EVENT_FUNCTION(PX_VisualOSOnEvent)
 {
@@ -253,6 +256,16 @@ px_bool PX_Object_VisualOSLogin(PX_Object* pObject, px_int target_x, px_int targ
 	login.y = target_y;
 	login.width = width;
 	login.height = height;
+	if (pClient->pre_surface.MP)
+	{
+		PX_TextureFree(&pClient->pre_surface);
+		PX_memset(&pClient->pre_surface, 0, sizeof(pClient->pre_surface));
+	}
+	if (pClient->cur_surface.MP)
+	{
+		PX_TextureFree(&pClient->cur_surface);
+		PX_memset(&pClient->cur_surface, 0, sizeof(pClient->cur_surface));
+	}
 	return PX_SocketSend(&pClient->socket, (px_byte*)&login, sizeof(login));
 }
 

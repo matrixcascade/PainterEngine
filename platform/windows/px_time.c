@@ -19,6 +19,11 @@ px_timem PX_LocalTime(long long timet)
 	return t;
 }
 
+unsigned long long PX_Time()
+{
+	return time(0);
+}
+
 int PX_TimeGetYear()
 {
 

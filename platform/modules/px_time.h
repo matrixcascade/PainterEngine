@@ -19,6 +19,7 @@ int PX_TimeGetMinute();
 int PX_TimeGetSecond();
 unsigned int PX_TimeGetTime();
 unsigned int PX_TimeGetTimeUs();
+unsigned long long PX_Time();
 px_timem PX_LocalTime(long long timet);
 void PX_Sleep(unsigned int ms);
 #endif

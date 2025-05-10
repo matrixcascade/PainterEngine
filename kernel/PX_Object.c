@@ -230,6 +230,13 @@ PX_Object_Event PX_Object_Event_CursorOffset(PX_Object_Event e,px_point offset)
 	}
 }
 
+PX_Object_Event PX_Object_Event_ObjectCursorOffset(PX_Object *pObject,PX_Object_Event e)
+{
+	px_rect region = PX_ObjectGetRect(pObject);
+	px_point offset = PX_POINT(-region.x, -region.y, 0);
+	return PX_Object_Event_CursorOffset(e, offset);
+}
+
 px_float PX_Object_Event_GetCursorX(PX_Object_Event e)
 {
 	return e.Param_float[0];
@@ -577,6 +584,18 @@ px_int PX_ObjectSetFreeFunction(PX_Object* pObject, Function_ObjectFree Func_Obj
 px_void PX_ObjectSetAlign(PX_Object* pObject, PX_ALIGN align)
 {
 	pObject->align = align;
+}
+
+px_void PX_ObjectGetReferenceXY(PX_Object* pObject, PX_Object_Event e)
+{
+	px_float x, y;
+	px_rect rect;
+	rect = PX_ObjectGetRect(pObject);
+	x = rect.x;
+	y = rect.y;
+	pObject->x = PX_Object_Event_GetCursorX(e) - x;
+	pObject->y = PX_Object_Event_GetCursorY(e) - y;
+	
 }
 
 
@@ -1363,7 +1382,7 @@ px_void PX_ObjectCollisionTestFree(PX_Object_CollisionTest* ptest)
 px_bool PX_ObjectCollisionTestCreate(px_memorypool* mp, PX_Object_CollisionTest* ptest,px_int width,px_int height, px_vector* pObjects)
 {
 	px_int allocSize = 1024 * 1024;
-	px_byte* cache = MP_Malloc(mp, allocSize);
+	px_byte* cache = (px_byte*)MP_Malloc(mp, allocSize);
 	px_memorypool testcalc;
 	px_int i;
 	if (cache)

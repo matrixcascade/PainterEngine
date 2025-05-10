@@ -70,8 +70,9 @@ typedef struct
 	PX_FONTMODULE_CODEPAGE codePage;
 }PX_FontModule;
 
+px_int PX_FontUnicodeToUTF8(px_dword unicode, px_byte utf8[4]);
 
-
+px_int PX_FontTrimUncompletedUTF8String(px_char* pstr);
 px_int PX_FontDrawChar(px_surface *psurface, px_int x,px_int y,px_uchar chr,px_color Color );
 px_int PX_FontDrawText(px_surface *psurface,px_int x,px_int y,PX_ALIGN align,const px_char *Text,px_color Color);
 px_void PX_FontTextGetRenderWidthHeight(const px_char *Text,px_int *width,px_int *height);

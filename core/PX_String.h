@@ -1,7 +1,7 @@
 #ifndef __PX_STRING_H
 #define __PX_STRING_H
 #include "PX_MemoryPool.h"
-
+#include "PX_Font.h"
 typedef struct __px_string
 {
 	px_char *buffer;
@@ -37,7 +37,7 @@ px_int PX_StringFind(px_string* str, const px_char find[]);
 px_int PX_StringFindCharCount(px_string* str, px_char find);
 px_bool PX_StringRead(const px_char content[],px_int readsize,px_char out[]);
 px_int PX_StringReadUntil(const px_char content[], px_char until, px_char out[], px_int max_out_size);
-
+px_void PX_StringFixUncompleteCode(px_string* text);
 px_bool PX_StringIsNumeric(px_string *str);
 px_bool PX_StringIsFloat(px_string *str);
 

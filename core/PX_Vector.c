@@ -47,6 +47,23 @@ px_bool PX_VectorSet(px_vector *vec,px_uint index,px_void *data)
 	return PX_TRUE;
 }
 
+px_bool PX_VectorInsert(px_vector* vec, px_int insert_before_index, px_void* data)
+{
+	if (insert_before_index < 0 || insert_before_index > vec->size)
+	{
+		return PX_FALSE;
+	}
+	if (!PX_VectorPushback(vec, PX_NULL))
+	{
+		return PX_FALSE;
+	}
+	if (insert_before_index < vec->size - 1)
+	{
+		PX_memcpy((px_byte*)vec->data + (insert_before_index + 1) * vec->nodesize, (px_byte*)vec->data + insert_before_index * vec->nodesize, (vec->size - insert_before_index - 1) * vec->nodesize);
+	}
+	PX_memcpy((px_byte*)vec->data + insert_before_index * vec->nodesize, data, vec->nodesize);
+	return PX_TRUE;
+}
 
 px_bool PX_VectorPushback(px_vector *vec,px_void *data)
 {
@@ -99,6 +116,26 @@ px_bool PX_VectorPushback(px_vector *vec,px_void *data)
 	}
 	return PX_TRUE;
 }
+
+
+
+px_void PX_VectorReorder_MaxToMin(px_vector* vec, px_int weight_offset, PX_QUICKSORT_REORDER_TYPE type)
+{
+	if (vec->size > 0)
+	{
+		PX_Quicksort_MaxToMin(vec->data, vec->nodesize, weight_offset, type, 0, vec->size - 1);
+	}
+}
+
+px_void PX_VectorReorder_MinToMax(px_vector* vec, px_int weight_offset, PX_QUICKSORT_REORDER_TYPE type)
+{
+	if (vec->size > 0)
+	{
+		PX_Quicksort_MinToMax(vec->data, vec->nodesize, weight_offset, type, 0, vec->size - 1);
+	}
+}
+
+
 
 
 px_bool PX_VectorPushTo(px_vector *vec,px_void *data,px_int index)

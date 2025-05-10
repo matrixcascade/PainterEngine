@@ -10,8 +10,8 @@ PX_SYNTAX_FUNCTION(PX_Syntax_Parse_keyword)
 		"restrict","_Alignas","_Alignof","_Atomic","_Generic","_Noreturn",\
 		"_Static_assert","_Thread_local" };
 
-	PX_LEXER_LEXEME_TYPE type = PX_SyntaxGetNextAstFilter(past);
-	const px_char* pstr = PX_SyntaxGetCurrentLexeme(past);
+	PX_LEXER_LEXEME_TYPE type = PX_Syntax_GetNextLexeme(pSyntax);
+	const px_char* pstr = PX_Syntax_GetCurrentLexeme(pSyntax);
 	px_int i;
 	if (type != PX_LEXER_LEXEME_TYPE_TOKEN)
 	{
@@ -27,7 +27,7 @@ PX_SYNTAX_FUNCTION(PX_Syntax_Parse_keyword)
 	return PX_FALSE;
 }
 
-px_bool PX_Syntax_Load_keyword(PX_Syntax* pSyntax)
+px_bool PX_Syntax_load_keyword(PX_Syntax* pSyntax)
 {
 	PX_Syntax_Parse_PEBNF(pSyntax, "keyword= *", PX_Syntax_Parse_keyword);
 	return PX_TRUE;

@@ -1326,7 +1326,7 @@ px_void PX_LiveFrameworkRender(px_surface *psurface,PX_LiveFramework *plive,px_i
 			}
 		}
 		count=i;
-		PX_Quicksort_MaxToMin(sAtom,0,count-1);
+		PX_Quicksort_ArrayMaxToMin(sAtom,0,count-1);
 
 		for (i=0;i<count;i++)
 		{

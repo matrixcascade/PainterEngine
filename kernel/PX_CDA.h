@@ -324,7 +324,7 @@ px_void PX_CDA_ObjectSetPortVariable(PX_Object* pCDAObject, px_int port, px_vari
 
 px_variable *PX_CDA_ObjectGetPortVariable(PX_Object* pCDAObject, px_int port);
 
-const px_char *PX_CDA_ObjectGetPropertyValue(PX_Object* pCDAObject, px_char name[]);
+const px_char *PX_CDA_ObjectGetPropertyValue(PX_Object* pCDAObject, const px_char name[]);
 
 const px_char* PX_CDA_ObjectGetPropertyValueIndex  (PX_Object* pCDAObject, px_int index);
 

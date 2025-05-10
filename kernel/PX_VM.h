@@ -155,4 +155,6 @@ px_int				PX_VMDebuggerMapLineToIp(PX_VM_DebuggerMap* pDebugMap, px_int line);
 px_bool				PX_VMDebuggerGetVarParamName(PX_VM* Ins, px_char optype, px_int param, px_char content[], px_int size);
 px_void				PX_VMDebuggerGetParamName(PX_VM* Ins, px_char optype, px_int param, px_char content[], px_int size);
 px_int				PX_VMDebuggerInstruction(PX_VM* Ins, px_int IP, px_char* opcode, px_char opcode_name[16], px_int* paramCount, px_char opType[3], px_int param[3]);
+
+PX_VM_HOST_FUNCTION(PX_VM_STD_Sleep);
 #endif

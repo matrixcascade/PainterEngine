@@ -135,7 +135,7 @@ px_int PX_LexerRegisterDelimiter(px_lexer *lexer,px_char Delimiter)
 	return -1;
 }
 
-px_int PX_LexerRegisterDiscard(px_lexer* lexer, px_char discard[8])
+px_int PX_LexerRegisterDiscard(px_lexer* lexer, const px_char discard[8])
 {
 	px_int i;
 	if (lexer->DiscardCount < PX_LEXER_CA_DISCARD_MAX_COUNT)
@@ -597,6 +597,8 @@ PX_LEXER_LEXEME_TYPE PX_LexerGetNextLexeme(px_lexer *lexer)
 		if (PX_LexerIsSourcsEnd(lexer))
 		{
 			//printf("<End>\n");
+			lexer->lexeme_begin = lexer->SourceOffset;
+			lexer->lexeme_end = lexer->SourceOffset;
 			lexer->Symbol = '0';
 			PX_StringCatChar(&lexer->CurLexeme, '\0');
 			lexer->CurrentLexemeFlag = PX_LEXER_LEXEME_TYPE_END;
@@ -606,6 +608,7 @@ PX_LEXER_LEXEME_TYPE PX_LexerGetNextLexeme(px_lexer *lexer)
 		//comment
 		if ((chrst = PX_LexerIsCommentStart(lexer, &lexer->Sources[lexer->SourceOffset])) != 0)
 		{
+			lexer->lexeme_begin = lexer->SourceOffset;
 			PX_StringCat(&lexer->CurLexeme, chrst);
 			lexer->SourceOffset += PX_strlen(chrst);
 			while (PX_TRUE)
@@ -613,6 +616,7 @@ PX_LEXER_LEXEME_TYPE PX_LexerGetNextLexeme(px_lexer *lexer)
 				px_char* pdiscard;
 				if (PX_LexerIsSourcsEnd(lexer))
 				{
+					lexer->lexeme_end = lexer->SourceOffset;
 					return PX_LEXER_LEXEME_TYPE_COMMENT;
 				}
 
@@ -625,13 +629,16 @@ PX_LEXER_LEXEME_TYPE PX_LexerGetNextLexeme(px_lexer *lexer)
 
 				if ((chred = PX_LexerIsCommentEnd(lexer, chrst, &lexer->Sources[lexer->SourceOffset]))!=PX_NULL)
 				{
+					lexer->lexeme_end = lexer->SourceOffset;
 					break;
 				}
 				if (PX_LexerIsSourcsEnd(lexer))
 				{
+					lexer->lexeme_end = lexer->SourceOffset;
 					return PX_LEXER_LEXEME_TYPE_ERR;
 				}
 				PX_StringCatChar(&lexer->CurLexeme, lexer->Sources[lexer->SourceOffset]);
+				
 				lexer->SourceOffset++;
 			}
 			PX_StringCat(&lexer->CurLexeme, chred);
@@ -644,6 +651,7 @@ PX_LEXER_LEXEME_TYPE PX_LexerGetNextLexeme(px_lexer *lexer)
 		//container
 		if ((chrst = PX_LexerIsContainerStart(lexer, (&lexer->Sources[lexer->SourceOffset]))) != 0)
 		{
+			lexer->lexeme_begin = lexer->SourceOffset;
 			PX_StringCat(&lexer->CurLexeme, chrst);
 			lexer->SourceOffset += PX_strlen(chrst);
 			while (PX_TRUE)
@@ -651,6 +659,7 @@ PX_LEXER_LEXEME_TYPE PX_LexerGetNextLexeme(px_lexer *lexer)
 				px_char* pdiscard;
 				if (PX_LexerIsSourcsEnd(lexer))
 				{
+					lexer->lexeme_end = lexer->SourceOffset;
 					return PX_LEXER_LEXEME_TYPE_ERR;
 				}
 
@@ -663,6 +672,7 @@ PX_LEXER_LEXEME_TYPE PX_LexerGetNextLexeme(px_lexer *lexer)
 
 				if (PX_NULL!=(chred = PX_LexerIsContainerEnd(lexer, chrst, &lexer->Sources[lexer->SourceOffset])))
 				{
+					lexer->lexeme_end = lexer->SourceOffset;
 					break;
 				}
 				
@@ -672,7 +682,10 @@ PX_LEXER_LEXEME_TYPE PX_LexerGetNextLexeme(px_lexer *lexer)
 					PX_StringCatChar(&lexer->CurLexeme, lexer->Sources[lexer->SourceOffset++]);
 				}
 				else
-					PX_StringCatChar(&lexer->CurLexeme, lexer->Sources[lexer->SourceOffset++]);
+				{
+					PX_StringCatChar(&lexer->CurLexeme, lexer->Sources[lexer->SourceOffset]);
+					lexer->SourceOffset++;
+				}
 			}
 			PX_StringCat(&lexer->CurLexeme, chred);
 			lexer->SourceOffset += PX_strlen(chred);
@@ -685,6 +698,8 @@ PX_LEXER_LEXEME_TYPE PX_LexerGetNextLexeme(px_lexer *lexer)
 
 		if (PX_LexerIsSpacer(lexer, lexer->Sources[lexer->SourceOffset]))
 		{
+			lexer->lexeme_begin = lexer->SourceOffset;
+			lexer->lexeme_end = lexer->SourceOffset;
 			lexer->Symbol = lexer->Sources[lexer->SourceOffset];
 			PX_StringCatChar(&lexer->CurLexeme, lexer->Sources[lexer->SourceOffset]);
 			lexer->SourceOffset++;
@@ -693,8 +708,10 @@ PX_LEXER_LEXEME_TYPE PX_LexerGetNextLexeme(px_lexer *lexer)
 			return PX_LEXER_LEXEME_TYPE_SPACER;
 		}
 
-		if (PX_LexerIsNewLine(lexer->Sources[lexer->SourceOffset]))
+		if ( PX_LexerIsNewLine(lexer->Sources[lexer->SourceOffset]))
 		{
+			lexer->lexeme_begin = lexer->SourceOffset;
+			lexer->lexeme_end = lexer->SourceOffset;
 			lexer->Symbol = lexer->Sources[lexer->SourceOffset];
 			PX_StringCatChar(&lexer->CurLexeme, lexer->Sources[lexer->SourceOffset]);
 			lexer->SourceOffset++;
@@ -705,6 +722,8 @@ PX_LEXER_LEXEME_TYPE PX_LexerGetNextLexeme(px_lexer *lexer)
 
 		if (PX_LexerIsDelimiter(lexer, lexer->Sources[lexer->SourceOffset]))
 		{
+			lexer->lexeme_begin = lexer->SourceOffset;
+			lexer->lexeme_end = lexer->SourceOffset;
 			lexer->Symbol = lexer->Sources[lexer->SourceOffset];
 			for (i = 0; (px_int)i < lexer->DelimiterCount; i++)
 			{
@@ -725,27 +744,33 @@ PX_LEXER_LEXEME_TYPE PX_LexerGetNextLexeme(px_lexer *lexer)
 		//token
 		PX_StringClear(&lexer->CurLexeme);
 		lexer->Symbol = '\0';
+		lexer->lexeme_begin = lexer->SourceOffset;
+		lexer->lexeme_end = lexer->SourceOffset;
 		while (PX_TRUE)
 		{
 			px_char* pdiscard;
 			if (PX_LexerIsSourcsEnd(lexer))
 				break;
 
-			if ((pdiscard = PX_LexerIsDiscard(lexer, &lexer->Sources[lexer->SourceOffset])) != 0)
+			if ( (pdiscard = PX_LexerIsDiscard(lexer, &lexer->Sources[lexer->SourceOffset])) != 0)
 			{
 				lexer->SourceOffset += PX_strlen(pdiscard);
 				continue;
 			}
-			if (PX_LexerIsDelimiter(lexer, lexer->Sources[lexer->SourceOffset]))
+
+			if ( PX_LexerIsDelimiter(lexer, lexer->Sources[lexer->SourceOffset]))
 				break;
-			if (PX_LexerIsSpacer(lexer, lexer->Sources[lexer->SourceOffset]))
+			if ( PX_LexerIsSpacer(lexer, lexer->Sources[lexer->SourceOffset]))
 				break;
-			if (PX_LexerIsNewLine(lexer->Sources[lexer->SourceOffset]))
+			if ( PX_LexerIsNewLine(lexer->Sources[lexer->SourceOffset]))
 				break;
-			if (PX_LexerIsContainerStart(lexer, &lexer->Sources[lexer->SourceOffset]))
+			if ( PX_LexerIsContainerStart(lexer, &lexer->Sources[lexer->SourceOffset]))
 				break;
 
-			PX_StringCatChar(&lexer->CurLexeme, lexer->Sources[lexer->SourceOffset++]);
+			PX_StringCatChar(&lexer->CurLexeme, lexer->Sources[lexer->SourceOffset]);
+			lexer->lexeme_end = lexer->SourceOffset;
+	
+			lexer->SourceOffset++;
 			oft = lexer->SourceOffset;
 
 			if (lexer->NumericMath && lexer->Sources[lexer->SourceOffset] == '.' && PX_LexerIsDelimiter(lexer, '.'))
@@ -775,6 +800,7 @@ PX_LEXER_LEXEME_TYPE PX_LexerGetNextLexeme(px_lexer *lexer)
 
 						if (lexer->Sources[lexer->SourceOffset] >= '0' && lexer->Sources[lexer->SourceOffset] <= '9')
 						{
+							lexer->lexeme_end = lexer->SourceOffset;
 							lexer->SourceOffset++;
 							continue;
 						}
@@ -796,6 +822,7 @@ PX_LEXER_LEXEME_TYPE PX_LexerGetNextLexeme(px_lexer *lexer)
 				lexer->SourceOffset = oft;
 				if (match)
 				{
+					lexer->lexeme_end = lexer->SourceOffset;
 					PX_StringCatChar(&lexer->CurLexeme, lexer->Sources[lexer->SourceOffset++]);
 					while (PX_TRUE)
 					{
@@ -926,6 +953,22 @@ px_bool PX_LexerLoadSource(px_lexer* lexer, const px_char* SourceText)
 	return PX_TRUE;
 }
 
+px_int  PX_LexerGetOffset(px_lexer* lexer)
+{
+	return lexer->SourceOffset;
+}
+
+px_bool PX_LexerSetOffset(px_lexer* lexer, px_int offset)
+{
+	if (offset < PX_strlen(lexer->Sources))
+	{
+		lexer->SourceOffset = offset;
+		
+		return PX_TRUE;
+	}
+	return PX_FALSE;
+}
+
 
 px_void PX_LexerFree(px_lexer *lexer)
 {
@@ -1006,7 +1049,10 @@ px_char PX_LexerGetNextChar(px_lexer *lexer)
 	px_char ch;
 	PX_StringClear(&lexer->CurLexeme);
 	ch=lexer->Sources[lexer->SourceOffset];
-	lexer->SourceOffset++;
+	lexer->lexeme_begin = lexer->SourceOffset;
+	lexer->lexeme_end = lexer->SourceOffset;
+	if(ch!=0)
+		lexer->SourceOffset++;
 	return ch;
 }
 
@@ -1016,6 +1062,14 @@ px_char PX_LexerPreviewNextChar(px_lexer* lexer)
 	PX_StringClear(&lexer->CurLexeme);
 	ch = lexer->Sources[lexer->SourceOffset];
 	return ch;
+}
+px_int  PX_LexerGetLexemeBegin(px_lexer* lexer)
+{
+	return lexer->lexeme_begin;
+}
+px_int  PX_LexerGetLexemeEnd(px_lexer* lexer)
+{
+	return lexer->lexeme_end;
 }
 
 px_bool PX_LexerIsLememeIsNumeric(px_lexer *lexer)
@@ -1057,14 +1111,6 @@ const px_char* PX_LexerGetLexeme(px_lexer* lexer)
 px_void PX_LexerReset(px_lexer* lexer)
 {
 	lexer->SourceOffset = 0;
-}
-
-px_void PX_LexerSetOffset(px_lexer* lexer, px_int offset)
-{
-	if (offset < PX_strlen(lexer->Sources))
-	{
-		lexer->SourceOffset = offset;
-	}
 }
 
 px_char PX_LexerGetDelimiter(px_lexer* lexer)

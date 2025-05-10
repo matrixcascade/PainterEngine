@@ -80,7 +80,7 @@ PX_Object* PX_Object_GridCreate(px_memorypool* mp, PX_Object* Parent, px_int x, 
 
 px_void PX_Object_GridClear(PX_Object* pObject)
 {
-	PX_Object_grid* pGrid = PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_GRID);
+	PX_Object_grid* pGrid = (PX_Object_grid*)PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_GRID);
 	px_int i;
 	for (i = 0; i < pGrid->objects.size; i++)
 	{
@@ -100,7 +100,7 @@ px_void PX_Object_GridClear(PX_Object* pObject)
 
 px_void PX_Object_GridClearRange(PX_Object* pObject, px_int x, px_int y, px_int xcount, px_int ycount)
 {
-	PX_Object_grid* pGrid = PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_GRID);
+	PX_Object_grid* pGrid = (PX_Object_grid*)PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_GRID);
 	px_int i, j;
 	for (i = 0; i < xcount; i++)
 	{
@@ -135,7 +135,7 @@ px_void PX_Object_GridClearRange(PX_Object* pObject, px_int x, px_int y, px_int 
 
 px_void PX_Object_GridVisibleRange(PX_Object* pObject, px_int x, px_int y, px_int xcount, px_int ycount,px_bool visible)
 {
-	PX_Object_grid* pGrid = PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_GRID);
+	PX_Object_grid* pGrid = (PX_Object_grid*)PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_GRID);
 	px_int i, j;
 	for (i = 0; i < xcount; i++)
 	{
@@ -385,7 +385,7 @@ px_bool PX_Object_GridExportToAbi(PX_Object* pObject, px_abi* pAbi)
 					px_abi abitoken;
 					PX_itoa(count, countcontent, 8, 10);
 					count++;
-					PX_AbiCreateDynamicWriter(&abitoken, pGrid->mp);
+					PX_AbiCreate_DynamicWriter(&abitoken, pGrid->mp);
 
 					PX_AbiSet_int(&abitoken, "x",j);
 					PX_AbiSet_int(&abitoken, "y", i);
@@ -440,7 +440,7 @@ px_bool PX_Object_GridImportFromAbi( PX_Object* pObject, px_abi* pAbi)
 		px_int *px, *py;
 		PX_itoa(count, countcontent, 8, 10);
 		count++;
-		if (!PX_AbiRead_Abi(pAbi, countcontent, &grid_abi))
+		if (!PX_AbiGet_Abi(pAbi, &grid_abi, countcontent))
 		{
 			break;
 		}

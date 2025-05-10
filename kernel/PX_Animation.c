@@ -382,7 +382,7 @@ px_bool PX_AnimationLibrary_CreateEffect_JumpVertical(px_memorypool *mp,PX_Anima
 
 	PX_VectorInitialize(mp,&panimation->frames,sizeof(px_texture),6);
 	PX_MemoryInitialize(mp,&panimation->code);
-	PX_MemoryResize(&panimation->code,sizeof(PX_2DX_INSTR)*13);
+	PX_MemoryAlloc(&panimation->code,sizeof(PX_2DX_INSTR)*13);
 
 	PX_AnimationLibraryAddInstr(panimation,PX_2DX_OPCODE_FRAME,0);
 	PX_AnimationLibraryAddInstr(panimation,PX_2DX_OPCODE_SLEEP,50);

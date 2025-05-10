@@ -67,6 +67,8 @@ typedef struct __Pt_Lexer
 	px_char		*Sources;
 	px_char      SortComment;
 	px_int      SourceOffset;
+	px_int      lexeme_begin;
+	px_int      lexeme_end;
 	px_int		SpacerCount;
 	px_char		Symbol;
 	px_bool     NumericMath;
@@ -104,7 +106,7 @@ px_void PX_LexerRegisterContainerTransfer(px_lexer *lexer,px_uint containerIndex
 
 px_void PX_LexerRegisterSpacer(px_lexer *lexer,px_char Spacer);
 px_int PX_LexerRegisterDelimiter(px_lexer *lexer,px_char Delimiter);
-px_int PX_LexerRegisterDiscard(px_lexer* lexer, px_char discard[8]);
+px_int PX_LexerRegisterDiscard(px_lexer* lexer,const px_char discard[8]);
 px_int PX_LexerGetDelimiterType(px_lexer *lexer,px_char Delimiter);
 px_int PX_LexerGetContainerType(px_lexer *lexer,px_char *pContainerText);
 px_int PX_LexerGetCurrentContainerType(px_lexer *lexer);
@@ -114,6 +116,10 @@ px_bool PX_LexerSortTextMap(px_lexer* lexer, const px_char* SourceText, px_bool 
 px_bool PX_LexerSortText(px_lexer* lexer, const px_char* SourceText);
 px_bool  PX_LexerLoadSourceWithPresort(px_lexer *lexer,const px_char *buffer);
 px_bool  PX_LexerLoadSource(px_lexer *lexer,const px_char *buffer);
+px_int  PX_LexerGetOffset(px_lexer* lexer);
+px_bool PX_LexerSetOffset(px_lexer* lexer, px_int offset);
+
+
 px_bool  PX_LexerSetSourcePointer(px_lexer *lexer,const px_char *buffer);
 px_bool PX_LexerReadString(px_lexer *lexer,px_string *str,px_uint size);
 px_char	PX_LexerGetSymbol(px_lexer *lexer);
@@ -126,13 +132,14 @@ px_int  PX_LexerGetCurrentLine(px_lexer *lexer);
 px_int  PX_LexerGetCurrentColumn(px_lexer *lexer);
 const px_char * PX_LexerGetLexeme(px_lexer *lexer);
 px_void PX_LexerReset(px_lexer *lexer);
-px_void PX_LexerSetOffset(px_lexer *lexer,px_int offset);
 
 PX_LEXER_STATE PX_LexerGetState(px_lexer *lexer);
 px_void PX_LexerSetState(PX_LEXER_STATE state);
 px_bool PX_LexerIsLememeIsNumeric(px_lexer *lexer);
 px_char PX_LexerGetNextChar(px_lexer *lexer);
 px_char PX_LexerPreviewNextChar(px_lexer* lexer);
+px_int  PX_LexerGetLexemeBegin(px_lexer* lexer);
+px_int  PX_LexerGetLexemeEnd(px_lexer* lexer);
 PX_LEXER_LEXEME_TYPE PX_LexerGetNextLexeme(px_lexer *lexer);
 PX_LEXER_LEXEME_TYPE PX_LexerPreviewNextLexeme(px_lexer* lexer);
 PX_LEXER_LEXEME_TYPE PX_LexerGetCurrentLexeme(px_lexer *lexer);

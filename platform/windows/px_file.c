@@ -550,7 +550,7 @@ char* PX_SaveFileDialog(const char Filter[], const char ext[])
 	ofn.lpstrFile = szFile;
 	ofn.lpstrFile[0] = TEXT('\0');
 	ofn.nMaxFile = sizeof(szFile);
-	ofn.lpstrFilter = Filter;//TEXT("MirrorÎÄ¼þ(.mirror)\0*.mirror");
+	ofn.lpstrFilter = Filter;//TEXT("Mirror(.mirror)\0*.mirror");
 	ofn.nFilterIndex = 1;
 	ofn.lpstrFileTitle = NULL;
 	ofn.nMaxFileTitle = 0;
@@ -582,9 +582,16 @@ px_char PX_RequestData_Extern[128] = {0};
 
 void PX_RequestData(const char url[], void* buffer, int size, void* ptr, void (*func_callback)(void* buffer, int size, void* ptr))
 {
+	px_char filter[128] = { 0 };
+	char* ppath;
+	
 	if (strstr(url,"open"))
 	{
-		char* ppath = PX_OpenFileDialog("");
+		PX_strcat(filter, url + 5);
+		PX_strcat(filter, "\0");
+		PX_strcat(filter + PX_strlen(filter) + 1, "*");
+		PX_strcat(filter + PX_strlen(filter) + 1, url + 5);
+		char* ppath = PX_OpenFileDialog(filter);
 		if (ppath&&ppath[0])
 		{
 			PX_IO_Data io = PX_LoadFileToIOData(ppath);
@@ -610,7 +617,11 @@ void PX_RequestData(const char url[], void* buffer, int size, void* ptr, void (*
 	}
 	else if (memcmp(url, "save:", 5) == 0)
 	{
-		char* ppath = PX_SaveFileDialog("", url+5);
+		PX_strcat(filter, url + 5);
+		PX_strcat(filter, "\0");
+		PX_strcat(filter + PX_strlen(filter) + 1, "*");
+		PX_strcat(filter + PX_strlen(filter) + 1, url + 5);
+		ppath = PX_SaveFileDialog(filter, url + 5);
 		if (ppath && ppath[0])
 		{
 			PX_SaveDataToFile(buffer, size, ppath);

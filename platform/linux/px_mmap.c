@@ -32,7 +32,7 @@ px_void *PX_mmap(px_mmap_handle *handle, px_void* phy_address, px_dword size)
             (DWORD)(((UINT64)phy_address) >> 32),
             (DWORD)(((UINT64)phy_address) & 0xffffffff),
             size);
-        if (handle->data[i] == NULL)
+        if (handle->data[i] == INVALID_HANDLE_VALUE)
         {
             return PX_NULL;
         }

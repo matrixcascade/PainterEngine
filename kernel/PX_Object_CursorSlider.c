@@ -120,6 +120,7 @@ PX_Object* PX_Object_CursorSliderAttachObject(PX_Object* pObject,px_int attachIn
 		pDesc->sliderpoints[i].y = y;
 	}
 	PX_ObjectRegisterEvent(pObject, PX_OBJECT_EVENT_CURSORMOVE, PX_Object_CursorSliderOnMove, 0);
+	PX_ObjectRegisterEvent(pObject, PX_OBJECT_EVENT_CURSORDRAG, PX_Object_CursorSliderOnMove, 0);
 	return pObject;
 }
 

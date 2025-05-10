@@ -367,7 +367,7 @@ PX_Object* PX_Object_PainterBoxCreate(px_memorypool* mp, PX_Object* Parent, px_i
 	PX_Object_SliderBarSetBackgroundColor(pdesc->sliderbar_size, PX_COLOR_WHITE);
 	PX_Object_SliderBarSetColor(pdesc->sliderbar_size, PX_COLOR_BLACK);
 	PX_Object_SliderBarSetRange(pdesc->sliderbar_size, 1, 128);
-	PX_Object_SliderBarSetValue(pdesc->sliderbar_size, 6);
+	PX_Object_SliderBarSetValue(pdesc->sliderbar_size, 5);
 	PX_Object_SliderBarSetShowValue(pdesc->sliderbar_size, PX_TRUE,PX_COLOR_RED);
 
 	pdesc->sliderbar_alpha = PX_Object_SliderBarCreate(mp, pdesc->widget, 10, 324, 172, 28, PX_OBJECT_SLIDERBAR_TYPE_HORIZONTAL, PX_OBJECT_SLIDERBAR_STYLE_BOX);
@@ -381,7 +381,7 @@ PX_Object* PX_Object_PainterBoxCreate(px_memorypool* mp, PX_Object* Parent, px_i
 	PX_Object_SliderBarSetBackgroundColor(pdesc->sliderbar_smooth, PX_COLOR_WHITE);
 	PX_Object_SliderBarSetColor(pdesc->sliderbar_smooth, PX_COLOR_BLACK);
 	PX_Object_SliderBarSetRange(pdesc->sliderbar_smooth, 1, 50);
-	PX_Object_SliderBarSetValue(pdesc->sliderbar_smooth, 8);
+	PX_Object_SliderBarSetValue(pdesc->sliderbar_smooth, 1);
 	PX_Object_SliderBarSetShowValue(pdesc->sliderbar_smooth, PX_TRUE, PX_COLOR_RED);
 
 	PX_ObjectRegisterEvent(pdesc->sliderbar_alpha, PX_OBJECT_EVENT_VALUECHANGED, PX_Object_PainterBoxOnParamsChanged, pObject);

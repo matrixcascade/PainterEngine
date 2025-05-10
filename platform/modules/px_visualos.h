@@ -3,7 +3,7 @@
 #include "px_socket.h"
 #include "px_sysmemory.h"
 #include "px_thread.h"
-#include "kernel/PX_Kernel.h"
+#include "../../kernel/PX_Kernel.h"
 
 typedef px_void(*PX_Object_VisualOS_init)(PX_Object* pObject, px_int width, px_int height);
 #define PX_VISUALOS_INIT_FUNCTION(func) px_void func(PX_Object* pObject, px_int width, px_int height)

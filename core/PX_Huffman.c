@@ -292,7 +292,9 @@ static px_void PX_HuffmanBuildDymanicTable(px_dword *symbol_counter,px_uint symb
 			 s_Atom[i].weight=(px_float)s_nodes[i].weight;
 			 s_Atom[i].pData=&s_nodes[i];
 		 }
-		 PX_Quicksort_MaxToMin(s_Atom,0, symbol_count-1);
+
+		 PX_Quicksort_ArrayMaxToMin(s_Atom,0, symbol_count-1);
+
 		 for(i=0;i< symbol_count;i++)
 		 {
 			 nodes[i]=*(px_huffman_node *)s_Atom[i].pData;

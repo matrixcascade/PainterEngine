@@ -4,12 +4,13 @@
 #ifdef PX_DEBUG_MODE
 #define PX_ASSERTIF(x) do{if(!(x))break; PX_ASSERT();}while (1);
 #define PX_ASSERTIFX(x,log) do{if(!(x))break; PX_ASSERT();}while (1);
+#define PX_ASSERTX(log) PX_ASSERT()
 #else
 #define PX_ASSERTIF(x)
 #define PX_ASSERTIFX(x,log)
+#define PX_ASSERTX(x)
 #endif
 
-#include "stdio.h"
 #define PX_printf printf
 
 px_void PX_LOG(const px_char fmt[]);
