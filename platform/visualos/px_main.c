@@ -2,7 +2,10 @@
 #include "platform/modules/px_time.h"
 #include "platform/modules/px_sockethub.h"
 #include "platform/modules/px_httpserver.h"
-#include "px_visualos_webruntime.h"
+#include "index_html.h"
+#include "PainterEngine_data.h"
+#include "PainterEngine_js.h"
+#include "PainterEngine_wasm.h"
 
 #define PX_VISUALOS_OPEN		1
 #define PX_VISUALOS_PAUSE		2
@@ -94,11 +97,11 @@ PX_SOCKETHUB_CONNECT_CALLBACK_FUNCTION(OnSocketHubConnect)
 	do
 	{
 		px_abi abi;
-		PX_AbiCreateDynamicWriter(&abi, &pNewClient->mp);
-		PX_AbiWrite_string(&abi, "type", "init");
-		PX_AbiWrite_int(&abi, "width", App.runtime.surface_width);
-		PX_AbiWrite_int(&abi, "height", App.runtime.surface_height);
-		PX_SocketHubSend(pSocketHub, session, PX_AbiGetPtr(&abi), PX_AbiGetPtrSize(&abi));
+		PX_AbiCreate_DynamicWriter(&abi, &pNewClient->mp);
+		PX_AbiSet_string(&abi, "type", "init");
+		PX_AbiSet_int(&abi, "width", App.runtime.surface_width);
+		PX_AbiSet_int(&abi, "height", App.runtime.surface_height);
+		PX_SocketHubSend(pSocketHub, session, PX_AbiGet_Pointer(&abi), PX_AbiGet_Size(&abi));
 		PX_AbiFree(&abi);
 	} while (0);
 }
@@ -203,10 +206,10 @@ PX_SOCKETHUB_RECEIVE_CALLBACK_FUNCTION(OnSocketHubRecv)
 		PX_VisualOS_Packet_Ping *pPing=(PX_VisualOS_Packet_Ping *)data;
 		pPing->time=PX_TimeGetTime();
 		px_abi abi;
-		PX_AbiCreateDynamicWriter(&abi, &pClient->mp);
-		if(PX_AbiWrite_dword(&abi, "time", pPing->time))
-			if(PX_AbiWrite_string(&abi, "type", "ping"))
-				PX_SocketHubSend(pSocketHub, session, PX_AbiGetPtr(&abi), PX_AbiGetPtrSize(&abi));
+		PX_AbiCreate_DynamicWriter(&abi, &pClient->mp);
+		if(PX_AbiSet_dword(&abi, "time", pPing->time))
+			if(PX_AbiSet_string(&abi, "type", "ping"))
+				PX_SocketHubSend(pSocketHub, session, PX_AbiGet_Pointer(&abi), PX_AbiGet_Size(&abi));
 		PX_AbiFree(&abi);
 	}
 	break;
@@ -249,13 +252,13 @@ PX_SOCKETHUB_SEND_CALLBACK_FUNCTION(OnSocketHubSend)
 			if (PX_TextureDiffZip(&pClient->mp, &pClient->pre_texture, &pClient->cur_texture, &pClient->zip_data))
 			{
 				px_abi senddata_abi;
-				PX_AbiCreateDynamicWriter(&senddata_abi, &pClient->mp);
+				PX_AbiCreate_DynamicWriter(&senddata_abi, &pClient->mp);
 				PX_TextureCover(&pClient->pre_texture, &pClient->cur_texture, 0, 0, PX_ALIGN_LEFTTOP);
-				PX_AbiWrite_string(&senddata_abi, "type","frame");
-				PX_AbiWrite_int(&senddata_abi, "width", pClient->cur_texture.width);
-				PX_AbiWrite_int(&senddata_abi, "height", pClient->cur_texture.height);
-				PX_AbiWrite_data(&senddata_abi, "data", pClient->zip_data.buffer, pClient->zip_data.usedsize);
-				PX_SocketHubSend(pSocketHub, session, PX_AbiGetPtr(&senddata_abi), PX_AbiGetPtrSize(&senddata_abi));
+				PX_AbiSet_string(&senddata_abi, "type","frame");
+				PX_AbiSet_int(&senddata_abi, "width", pClient->cur_texture.width);
+				PX_AbiSet_int(&senddata_abi, "height", pClient->cur_texture.height);
+				PX_AbiSet_data(&senddata_abi, "data", pClient->zip_data.buffer, pClient->zip_data.usedsize);
+				PX_SocketHubSend(pSocketHub, session, PX_AbiGet_Pointer(&senddata_abi), PX_AbiGet_Size(&senddata_abi));
 				PX_AbiFree(&senddata_abi);
 				
 			}

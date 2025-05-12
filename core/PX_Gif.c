@@ -597,15 +597,23 @@ px_void px_gif_render_to_frame_texture(px_gif* gif, px_texture* ptexture)
         {
             if (j>= gif->fh|| k>= gif->fw)
             {
-                PX_SurfaceSetPixel(ptexture, k, j, PX_COLOR_NONE);
+                if (gif->gce.disposal == 2)
+                 PX_SurfaceSetPixel(ptexture, k, j, PX_COLOR_NONE);
             }
             else
             {
                 index = gif->frame[(gif->fy + j) * gif->width + gif->fx + k];
                 color = &gif->palette->colors[index * 3];
-                if (!gif->gce.transparency|| index != gif->gce.tindex)
+                if (!gif->gce.transparency)
                 {
                     PX_SurfaceSetPixel(ptexture, k, j, PX_COLOR(255, color[0], color[1], color[2]));
+                }
+                else
+                {
+                    if (index != gif->gce.tindex)
+                    {
+                        PX_SurfaceSetPixel(ptexture, k, j, PX_COLOR(255, color[0], color[1], color[2]));
+                    }
                 }
             }
         }

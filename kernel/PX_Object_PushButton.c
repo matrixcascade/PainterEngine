@@ -118,61 +118,9 @@ PX_OBJECT_RENDER_FUNCTION(PX_Object_PushButtonRender)
 		pPushButton->bCursorShowTipsElapsed += elapsed;
 	}
 
-	switch (pPushButton->style)
-	{
-	case PX_OBJECT_PUSHBUTTON_STYLE_RECT:
-		PX_GeoDrawRect(psurface, (px_int)objx, (px_int)objy, (px_int)objx + (px_int)objWidth - 1, (px_int)objy + (px_int)objHeight - 1, pPushButton->BackgroundColor);
-		switch (pPushButton->state)
-		{
-		case PX_OBJECT_PUSHBUTTON_STATE_NORMAL:
-			PX_GeoDrawRect(psurface, (px_int)objx, (px_int)objy, (px_int)objx + (px_int)objWidth - 1, (px_int)objy + (px_int)objHeight - 1, pPushButton->BackgroundColor);
-			break;
-		case PX_OBJECT_PUSHBUTTON_STATE_ONPUSH:
-			PX_GeoDrawRect(psurface, (px_int)objx, (px_int)objy, (px_int)objx + (px_int)objWidth - 1, (px_int)objy + (px_int)objHeight - 1, pPushButton->PushColor);
-			break;
-		case PX_OBJECT_PUSHBUTTON_STATE_ONCURSOR:
-
-			PX_GeoDrawRect(psurface, (px_int)objx, (px_int)objy, (px_int)objx + (px_int)objWidth - 1, (px_int)objy + (px_int)objHeight - 1, pPushButton->CursorColor);
-			break;
-		}
-		break;
-	case PX_OBJECT_PUSHBUTTON_STYLE_ROUNDRECT:
-		PX_GeoDrawSolidRoundRect(psurface, (px_int)objx, (px_int)objy, (px_int)objx + (px_int)objWidth - 1, (px_int)objy + (px_int)objHeight - 1, pPushButton->roundradius, pPushButton->BackgroundColor);
-		switch (pPushButton->state)
-		{
-		case PX_OBJECT_PUSHBUTTON_STATE_NORMAL:
-			PX_GeoDrawSolidRoundRect(psurface, (px_int)objx, (px_int)objy, (px_int)objx + (px_int)objWidth - 1, (px_int)objy + (px_int)objHeight - 1, pPushButton->roundradius, pPushButton->BackgroundColor);
-			break;
-		case PX_OBJECT_PUSHBUTTON_STATE_ONPUSH:
-			PX_GeoDrawSolidRoundRect(psurface, (px_int)objx, (px_int)objy, (px_int)objx + (px_int)objWidth - 1, (px_int)objy + (px_int)objHeight - 1, pPushButton->roundradius, pPushButton->PushColor);
-			break;
-		case PX_OBJECT_PUSHBUTTON_STATE_ONCURSOR:
-			PX_GeoDrawSolidRoundRect(psurface, (px_int)objx, (px_int)objy, (px_int)objx + (px_int)objWidth - 1, (px_int)objy + (px_int)objHeight - 1, pPushButton->roundradius, pPushButton->CursorColor);
-			break;
-		}
-		break;
-	case PX_OBJECT_PUSHBUTTON_STYLE_CIRCLE:
-	{
-		PX_GeoDrawSolidCircle(psurface, (px_int)objx, (px_int)objy, (px_int)(pObject->diameter / 2), pPushButton->BackgroundColor);
-		switch (pPushButton->state)
-		{
-		case PX_OBJECT_PUSHBUTTON_STATE_NORMAL:
-			PX_GeoDrawBall(psurface, objx, objy, (pObject->diameter / 2), pPushButton->BackgroundColor);
-			break;
-		case PX_OBJECT_PUSHBUTTON_STATE_ONPUSH:
-			PX_GeoDrawBall(psurface, objx, objy, (pObject->diameter / 2), pPushButton->PushColor);
-			break;
-		case PX_OBJECT_PUSHBUTTON_STATE_ONCURSOR:
-			PX_GeoDrawBall(psurface, objx, objy, (pObject->diameter / 2), pPushButton->CursorColor);
-			break;
-		}
-	}
-	break;
-	}
-
-
 	if (pPushButton->gif)
 	{
+		
 		switch (pPushButton->state)
 		{
 		case PX_OBJECT_PUSHBUTTON_STATE_NORMAL:
@@ -191,11 +139,90 @@ PX_OBJECT_RENDER_FUNCTION(PX_Object_PushButtonRender)
 
 	if (pPushButton->Texture)
 	{
-		PX_TextureRender(psurface, pPushButton->Texture, (px_int)objx + (px_int)objWidth / 2, (px_int)objy + (px_int)objHeight / 2, PX_ALIGN_CENTER, PX_NULL);
+		PX_TEXTURERENDER_BLEND blend;
+		switch (pPushButton->state)
+		{
+		case PX_OBJECT_PUSHBUTTON_STATE_NORMAL:
+			PX_TextureRender(psurface, pPushButton->Texture, (px_int)objx + (px_int)objWidth / 2, (px_int)objy + (px_int)objHeight / 2, PX_ALIGN_CENTER, PX_NULL);
+			break;
+		case PX_OBJECT_PUSHBUTTON_STATE_ONPUSH:
+		{
+			blend.alpha = 1;
+			blend.hdr_B = 0.6f;
+			blend.hdr_G = 0.6f;
+			blend.hdr_R = 0.6f;
+			PX_TextureRender(psurface, pPushButton->Texture, (px_int)objx + (px_int)objWidth / 2, (px_int)objy + (px_int)objHeight / 2, PX_ALIGN_CENTER, &blend);
+		}
+		break;
+		case PX_OBJECT_PUSHBUTTON_STATE_ONCURSOR:
+		{
+			blend.alpha = 1;
+			blend.hdr_B = 0.8f;
+			blend.hdr_G = 0.8f;
+			blend.hdr_R = 0.8f;
+			PX_TextureRender(psurface, pPushButton->Texture, (px_int)objx + (px_int)objWidth / 2, (px_int)objy + (px_int)objHeight / 2, PX_ALIGN_CENTER, &blend);
+		}
+		break;
+		}
 	}
 	else if (pPushButton->shape)
 	{
 		PX_ShapeRender(psurface, pPushButton->shape, (px_int)objx + (px_int)objWidth / 2, (px_int)objy + (px_int)objHeight / 2, PX_ALIGN_CENTER, pPushButton->TextColor);
+	}
+	else
+	{
+		switch (pPushButton->style)
+		{
+		case PX_OBJECT_PUSHBUTTON_STYLE_RECT:
+			PX_GeoDrawRect(psurface, (px_int)objx, (px_int)objy, (px_int)objx + (px_int)objWidth - 1, (px_int)objy + (px_int)objHeight - 1, pPushButton->BackgroundColor);
+			switch (pPushButton->state)
+			{
+			case PX_OBJECT_PUSHBUTTON_STATE_NORMAL:
+				PX_GeoDrawRect(psurface, (px_int)objx, (px_int)objy, (px_int)objx + (px_int)objWidth - 1, (px_int)objy + (px_int)objHeight - 1, pPushButton->BackgroundColor);
+				break;
+			case PX_OBJECT_PUSHBUTTON_STATE_ONPUSH:
+				PX_GeoDrawRect(psurface, (px_int)objx, (px_int)objy, (px_int)objx + (px_int)objWidth - 1, (px_int)objy + (px_int)objHeight - 1, pPushButton->PushColor);
+				break;
+			case PX_OBJECT_PUSHBUTTON_STATE_ONCURSOR:
+
+				PX_GeoDrawRect(psurface, (px_int)objx, (px_int)objy, (px_int)objx + (px_int)objWidth - 1, (px_int)objy + (px_int)objHeight - 1, pPushButton->CursorColor);
+				break;
+			}
+			break;
+		case PX_OBJECT_PUSHBUTTON_STYLE_ROUNDRECT:
+			PX_GeoDrawSolidRoundRect(psurface, (px_int)objx, (px_int)objy, (px_int)objx + (px_int)objWidth - 1, (px_int)objy + (px_int)objHeight - 1, pPushButton->roundradius, pPushButton->BackgroundColor);
+			switch (pPushButton->state)
+			{
+			case PX_OBJECT_PUSHBUTTON_STATE_NORMAL:
+				PX_GeoDrawSolidRoundRect(psurface, (px_int)objx, (px_int)objy, (px_int)objx + (px_int)objWidth - 1, (px_int)objy + (px_int)objHeight - 1, pPushButton->roundradius, pPushButton->BackgroundColor);
+				break;
+			case PX_OBJECT_PUSHBUTTON_STATE_ONPUSH:
+				PX_GeoDrawSolidRoundRect(psurface, (px_int)objx, (px_int)objy, (px_int)objx + (px_int)objWidth - 1, (px_int)objy + (px_int)objHeight - 1, pPushButton->roundradius, pPushButton->PushColor);
+				break;
+			case PX_OBJECT_PUSHBUTTON_STATE_ONCURSOR:
+				PX_GeoDrawSolidRoundRect(psurface, (px_int)objx, (px_int)objy, (px_int)objx + (px_int)objWidth - 1, (px_int)objy + (px_int)objHeight - 1, pPushButton->roundradius, pPushButton->CursorColor);
+				break;
+			}
+			break;
+		case PX_OBJECT_PUSHBUTTON_STYLE_CIRCLE:
+		{
+			PX_GeoDrawSolidCircle(psurface, (px_int)objx, (px_int)objy, (px_int)(pObject->diameter / 2), pPushButton->BackgroundColor);
+			switch (pPushButton->state)
+			{
+			case PX_OBJECT_PUSHBUTTON_STATE_NORMAL:
+				PX_GeoDrawBall(psurface, objx, objy, (pObject->diameter / 2), pPushButton->BackgroundColor);
+				break;
+			case PX_OBJECT_PUSHBUTTON_STATE_ONPUSH:
+				PX_GeoDrawBall(psurface, objx, objy, (pObject->diameter / 2), pPushButton->PushColor);
+				break;
+			case PX_OBJECT_PUSHBUTTON_STATE_ONCURSOR:
+				PX_GeoDrawBall(psurface, objx, objy, (pObject->diameter / 2), pPushButton->CursorColor);
+				break;
+			}
+		}
+		break;
+		}
+
 	}
 
 	if (pPushButton->Border)

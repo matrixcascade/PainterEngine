@@ -377,7 +377,8 @@ static PX_WEBSOCKET_HANDER_RETURN PX_WebSocketUpdate_RecvHandleData(PX_WebSocket
 				px_char payload[128] = { 0 };
 				if (PX_HttpGetContent((const px_char*)pInstance->recv_cache, "Sec-WebSocket-Key", payload, sizeof(payload)))
 				{
-					px_char response[280] = "HTTP/1.1 101 Switching Protocols\r\n\Connection: Upgrade\r\n\
+					px_char response[280] = "HTTP/1.1 101 Switching Protocols\r\n\
+Connection: Upgrade\r\n\
 Upgrade: websocket\r\n\
 Access-Control-Allow-Credentials: true\r\n\
 Access-Control-Allow-Headers: content-type\r\n\
