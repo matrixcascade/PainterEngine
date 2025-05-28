@@ -6,7 +6,7 @@
 
 [![ENGLISH](https://img.shields.io/badge/language-English-red.svg)](https://github.com/QuantumCipherMaster/PainterEngine/blob/master/README(ENGLISH).md)
 
-PainterEngine 是一个由 C 语言编写的跨平台图形引擎, 支持 Windows/Linux/iOS/Android/WebAssembly 甚至无操作系统的裸嵌入式平台, 它基于组件化的设计模式, 即使是 C 语言初学者, 也可以在几分钟内掌握它的使用, [PainterEngine Make](https://www.painterengine.com/) 允许您一键将您的 PainterEngine 项目编译到多个平台.
+PainterEngine 是一个由 C 语言编写的跨平台图形引擎, 支持 Windows/Linux/iOS/Android/WebAssembly/HarmonyOS 甚至无操作系统的裸嵌入式平台, 它基于组件化的设计模式, 即使是 C 语言初学者, 也可以在几分钟内掌握它的使用, [PainterEngine Make](https://www.painterengine.com/) 允许您一键将您的 PainterEngine 项目编译到多个平台.
 它涵盖了基础数据结构、图形学、声学、数字信号处理、编译原理、虚拟机系统、密码学、人机交互、游戏引擎、神经网络、FPGA-GPU 图形 IP 设计等多个领域, 你既可以用它制作微应用, 也可以将它作为学习项目。
 
 ## 30 秒速览 PainterEngine
