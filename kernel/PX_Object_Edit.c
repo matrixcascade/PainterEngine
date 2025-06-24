@@ -210,7 +210,7 @@ PX_OBJECT_EVENT_FUNCTION( PX_Object_EditOnKeyboardDown)
 	{
 		px_char key[2]= { 0 };
 		key[0] = (px_char)PX_Object_Event_GetKeyDown(e);
-		if(key[0]==PX_VK_LEFT||key[0]==PX_VK_RIGHT||key[0]==PX_VK_TAB)
+		if(key[0]==PX_VK_LEFT||key[0]==PX_VK_RIGHT||key[0]==PX_VK_TAB||key[0]==PX_VK_BACK)
 		{
 			PX_Object_EditAddString(pObject,key);
 		}
