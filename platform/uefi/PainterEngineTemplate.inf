@@ -1,0 +1,225 @@
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = PainterEngineTemplate
+  FILE_GUID                      = 71090002-3087-4EB7-9D61-8D5226B4F099
+  MODULE_TYPE                    = UEFI_APPLICATION
+  VERSION_STRING                 = 1.0
+  ENTRY_POINT                    = PainterEngineUefiMain
+
+[Sources]
+  UefiAppTemplate.c
+
+  # platform
+  px_main.c
+  px_time.c
+  px_file.c
+  px_mouse_cursor.c
+
+  # core
+  ../../core/PX_3D.c
+  ../../core/PX_Abi.c
+  ../../core/PX_AES.c
+  ../../core/PX_ANN.c
+  ../../core/PX_Arle.c
+  ../../core/PX_Base64.c
+  ../../core/PX_BaseGeo.c
+  ../../core/PX_Bitmap.c
+  ../../core/PX_curve25519.c
+  ../../core/PX_Delaunay.c
+  ../../core/PX_Effect.c
+  ../../core/PX_Font.c
+  ../../core/PX_Gif.c
+  ../../core/PX_GPU.c
+  ../../core/PX_Hashmap.c
+  ../../core/PX_Http.c
+  ../../core/PX_Huffman.c
+  ../../core/PX_ImageFilter.c
+  ../../core/PX_jpg.c
+  ../../core/PX_Json.c
+  ../../core/PX_KalmanFilter.c
+  ../../core/PX_KarplusStrong.c
+  ../../core/PX_Keyboard.c
+  ../../core/PX_Lagrange.c
+  ../../core/PX_Lexer.c
+  ../../core/PX_Linker.c
+  ../../core/PX_List.c
+  ../../core/PX_Log.c
+  ../../core/PX_LTI.c
+  ../../core/PX_LZ77.c
+  ../../core/PX_Memory.c
+  ../../core/PX_MemoryPool.c
+  ../../core/PX_MFCC.c
+  ../../core/PX_Midi.c
+  ../../core/PX_Mp3.c
+  ../../core/PX_Murmur.c
+  ../../core/PX_Packet.c
+  ../../core/PX_Piano.c
+  ../../core/PX_Png.c
+  ../../core/PX_PointsMesh.c
+  ../../core/PX_Quadtree.c
+  ../../core/PX_Quicksort.c
+  ../../core/PX_RedBlackTree.c
+  ../../core/PX_RFC1951.c
+  ../../core/PX_Sha1.c
+  ../../core/PX_Sha256.c
+  ../../core/PX_Signal.c
+  ../../core/PX_Sound.c
+  ../../core/PX_SoundModule.c
+  ../../core/PX_String.c
+  ../../core/PX_Surface.c
+  ../../core/PX_Texture.c
+  ../../core/PX_TRaw.c
+  ../../core/PX_TriangleCross.c
+  ../../core/PX_Truetype.c
+  ../../core/PX_Tuning.c
+  ../../core/PX_Typedef.c
+  ../../core/PX_Variable.c
+  ../../core/PX_Vector.c
+  ../../core/PX_Wave.c
+  ../../core/PX_Wavelet.c
+  ../../core/PX_WebSocket.c
+
+  # kernel
+  ../../kernel/PX_3D_ObjData.c
+  ../../kernel/PX_Animation.c
+  ../../kernel/PX_CanvasVM.c
+  ../../kernel/PX_CDA.c
+  ../../kernel/PX_Compiler.c
+  ../../kernel/PX_LiveFramework.c
+  ../../kernel/PX_Modbus.c
+  ../../kernel/PX_MQTT.c
+  ../../kernel/PX_Object.c
+  ../../kernel/PX_Object_3D.c
+  ../../kernel/PX_Object_Animation.c
+  ../../kernel/PX_Object_AsmDebugger.c
+  ../../kernel/PX_Object_AutoText.c
+  ../../kernel/PX_Object_Button.c
+  ../../kernel/PX_Object_Canvas.c
+  ../../kernel/PX_Object_CheckBox.c
+  ../../kernel/PX_Object_ClockPan.c
+  ../../kernel/PX_Object_Collapse.c
+  ../../kernel/PX_Object_ColorPanel.c
+  ../../kernel/PX_Object_COMBox.c
+  ../../kernel/PX_Object_CounterDown.c
+  ../../kernel/PX_Object_CursorButton.c
+  ../../kernel/PX_Object_CursorSlider.c
+  ../../kernel/PX_Object_DesignerBox.c
+  ../../kernel/PX_Object_Drag.c
+  ../../kernel/PX_Object_Edit.c
+  ../../kernel/PX_Object_Executer.c
+  ../../kernel/PX_Object_Explorer.c
+  ../../kernel/PX_Object_Explosion.c
+  ../../kernel/PX_Object_Firework.c
+  ../../kernel/PX_Object_Grid.c
+  ../../kernel/PX_Object_Image.c
+  ../../kernel/PX_Object_IPBox.c
+  ../../kernel/PX_Object_Joystick.c
+  ../../kernel/PX_Object_Label.c
+  ../../kernel/PX_Object_LayerBox.c
+  ../../kernel/PX_Object_List.c
+  ../../kernel/PX_Object_Live2D.c
+  ../../kernel/PX_Object_MatrixEffect.c
+  ../../kernel/PX_Object_MemoryView.c
+  ../../kernel/PX_Object_Menu.c
+  ../../kernel/PX_Object_MessageBox.c
+  ../../kernel/PX_Object_ModbusVarBox.c
+  ../../kernel/PX_Object_Oscilloscope.c
+  ../../kernel/PX_Object_PainterBox.c
+  ../../kernel/PX_Object_Panc.c
+  ../../kernel/PX_Object_Panel.c
+  ../../kernel/PX_Object_Partical.c
+  ../../kernel/PX_Object_Piano.c
+  ../../kernel/PX_Object_Printer.c
+  ../../kernel/PX_Object_Processbar.c
+  ../../kernel/PX_Object_Protractor.c
+  ../../kernel/PX_Object_PushButton.c
+  ../../kernel/PX_Object_RadioBox.c
+  ../../kernel/PX_Object_RankPanel.c
+  ../../kernel/PX_Object_RingProcessbar.c
+  ../../kernel/PX_Object_RingProgress.c
+  ../../kernel/PX_Object_ScaleBox.c
+  ../../kernel/PX_Object_ScorePanel.c
+  ../../kernel/PX_Object_ScrollArea.c
+  ../../kernel/PX_Object_Selectbar.c
+  ../../kernel/PX_Object_Sliderbar.c
+  ../../kernel/PX_Object_SoundView.c
+  ../../kernel/PX_Object_Stamp.c
+  ../../kernel/PX_Object_Timer.c
+  ../../kernel/PX_Object_TinyCanvas.c
+  ../../kernel/PX_Object_TransformAdapter.c
+  ../../kernel/PX_Object_Typer.c
+  ../../kernel/PX_Object_VarBox.c
+  ../../kernel/PX_Object_Various.c
+  ../../kernel/PX_Object_VirtualKeyboard.c
+  ../../kernel/PX_Object_Widget.c
+  ../../kernel/PX_Partical.c
+  ../../kernel/PX_Resource.c
+  ../../kernel/PX_Script_ASMCompiler.c
+  ../../kernel/PX_Script_Interpreter.c
+  ../../kernel/PX_Sync.c
+  ../../kernel/PX_Syntax.c
+  ../../kernel/PX_Syntax_base_type.c
+  ../../kernel/PX_Syntax_bcontainer.c
+  ../../kernel/PX_Syntax_block.c
+  ../../kernel/PX_Syntax_const_float.c
+  ../../kernel/PX_Syntax_const_float_list.c
+  ../../kernel/PX_Syntax_const_int.c
+  ../../kernel/PX_Syntax_const_int_list.c
+  ../../kernel/PX_Syntax_const_numeric_list.c
+  ../../kernel/PX_Syntax_const_set.c
+  ../../kernel/PX_Syntax_const_string.c
+  ../../kernel/PX_Syntax_const_string_list.c
+  ../../kernel/PX_Syntax_const_tuple_list.c
+  ../../kernel/PX_Syntax_declare_prefix.c
+  ../../kernel/PX_Syntax_declare_token_prefix.c
+  ../../kernel/PX_Syntax_declare_token_suffix.c
+  ../../kernel/PX_Syntax_declare_variable.c
+  ../../kernel/PX_Syntax_define.c
+  ../../kernel/PX_Syntax_define_struct.c
+  ../../kernel/PX_Syntax_identifier.c
+  ../../kernel/PX_Syntax_keyword.c
+  ../../kernel/PX_Syntax_numeric.c
+  ../../kernel/PX_Syntax_opcode_base.c
+  ../../kernel/PX_Syntax_tuple.c
+  ../../kernel/PX_UI.c
+  ../../kernel/PX_VM.c
+  ../../kernel/PX_World.c
+
+  # runtime
+  ../../runtime/PainterEngine_Application.c
+  ../../runtime/PainterEngine_Runtime.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+
+[LibraryClasses]
+  UefiApplicationEntryPoint
+  UefiLib
+  UefiBootServicesTableLib
+  UefiRuntimeServicesTableLib
+  DebugLib
+  BaseLib
+  TimerLib
+  DevicePathLib
+  MemoryAllocationLib
+  BaseMemoryLib
+
+[Protocols]
+  gEfiGraphicsOutputProtocolGuid
+  gEfiLoadedImageProtocolGuid
+  gEfiSimplePointerProtocolGuid
+  gEfiAbsolutePointerProtocolGuid
+  gEfiSimpleTextInputExProtocolGuid
+
+[Guids]
+  gEfiFileInfoGuid
+
+[BuildOptions]
+  MSFT:*_*_*_CC_FLAGS = /wd4201 /wd4244 /wd4456 /wd4189 /wd4310 /wd4389 /wd4005 /wd4245 /wd4457 /wd4702 /wd4706 /wd4204 /wd4054 /wd4055
+
+  # __chkstk need this
+  # MSFT:*_*_*_CC_FLAGS = /GL-
+
+  GCC:*_*_*_CC_FLAGS = -Wno-error
