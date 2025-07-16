@@ -133,7 +133,6 @@
 
   PainterEngine/platform/uefi/PainterEngineTemplate.inf {
     <LibraryClasses>
-      NULL|MdePkg/Library/CompilerIntrinsicsLib/CompilerIntrinsicsLib.inf
       !if $(REAL_TIMER_LIB) == TRUE
       # TimerLib|[PATH-TO-SPECIFIC-TIMER-LIB]/xxxTimerLib.inf
       !endif
