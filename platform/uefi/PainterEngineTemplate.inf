@@ -225,4 +225,6 @@
 
   MSFT:*_*_*_CC_FLAGS = /GL-
 
+  MSFT:RELEASE_*_*_DLINK_FLAGS = /SECTION:.bss,ERW
+
   GCC:*_*_*_CC_FLAGS = -Wno-error
