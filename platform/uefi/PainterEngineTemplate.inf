@@ -194,6 +194,8 @@
   # MemIntrinsicWrapper
   MemIntrinsicMs.c | MSFT
 
+  ChkStk.c | MSFT
+
 [Packages]
   MdePkg/MdePkg.dec
   MdeModulePkg/MdeModulePkg.dec
