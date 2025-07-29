@@ -329,7 +329,7 @@ PainterEngineUefiMain (
   px_dword timelasttime = 0;
 #endif
   EFI_STATUS  Status;
-  EFI_EVENT   MouseEvent;
+  EFI_EVENT   EfiInputEvent;
 
   Status = gBS->LocateProtocol (&gEfiGraphicsOutputProtocolGuid, NULL, (VOID **) &mEfiGop);
   if (!EFI_ERROR(Status)) {
@@ -352,10 +352,10 @@ PainterEngineUefiMain (
                   TPL_NOTIFY,
                   (EFI_EVENT_NOTIFY) CheckEfiInputEvent,
                   (VOID*)NULL,
-                  &MouseEvent
+                  &EfiInputEvent
                   );
 
-  Status = gBS->SetTimer (MouseEvent, TimerPeriodic, 10 * 10000); // 10ms
+  Status = gBS->SetTimer (EfiInputEvent, TimerPeriodic, 10 * 10000); // 10ms
 
 #ifdef REAL_TIMER_LIB
   timelasttime=PX_TimeGetTime();

@@ -190,6 +190,12 @@
   ../../runtime/PainterEngine_Application.c
   ../../runtime/PainterEngine_Runtime.c
 
+[Sources.X64]
+  # MemIntrinsicWrapper
+  MemIntrinsicMs.c | MSFT
+
+  ChkStk.c | MSFT
+
 [Packages]
   MdePkg/MdePkg.dec
   MdeModulePkg/MdeModulePkg.dec
@@ -219,7 +225,8 @@
 [BuildOptions]
   MSFT:*_*_*_CC_FLAGS = /wd4201 /wd4244 /wd4456 /wd4189 /wd4310 /wd4389 /wd4005 /wd4245 /wd4457 /wd4702 /wd4706 /wd4204 /wd4054 /wd4055
 
-  # __chkstk need this
-  # MSFT:*_*_*_CC_FLAGS = /GL-
+  MSFT:*_*_*_CC_FLAGS = /GL-
+
+  MSFT:RELEASE_*_*_DLINK_FLAGS = /SECTION:.bss,ERW
 
   GCC:*_*_*_CC_FLAGS = -Wno-error

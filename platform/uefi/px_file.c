@@ -104,6 +104,9 @@ PX_IO_Data PX_LoadFileToIOData(const char path[])
         io.size = FileBufferSize;
       }
     }
+    if (Char16Path != NULL) {
+      FreePool (Char16Path);
+    }
   }
 
   return io;
