@@ -3,7 +3,12 @@
 
 #include	"PX_MathTable.h"
 
+#if !defined(PX_COLOR_FORMAT_RGBA) && \
+    !defined(PX_COLOR_FORMAT_BGRA) && \
+    !defined (PX_COLOR_FORMAT_ARGB) && \
+    !defined (PX_COLOR_FORMAT_ABGR)
 #define PX_COLOR_FORMAT_RGBA
+#endif
 
 
 #define PX_DBL_POSITIVE_MAX 1.7976931348623158e+308
