@@ -46,20 +46,19 @@ int main()
 
 <p align="center">
   <a href="https://cdn.painterengine.com/PainterEngine_make.zip" target="_blank" rel="noopener noreferrer">
-  	<img src="images/pemake.png" alt="PainterEngine make">
+    <img src="images/pemake.png" alt="PainterEngine make">
   </a>
 </p>
-
 
 ## 快速开发, 无缝迁移
 
 如果您不需要 PainterEngine Make 提供的一键编译功能, 希望使用自己常用的 IDE 开发 PainterEngine 程序或组件, 您只需要:
 
-1. 将 "PainterEngine/core", "PainterEngine/kernel", "PainterEngine/runtime" 的所有代码, 添加到您的项目中. 
+1. 将 "PainterEngine/core", "PainterEngine/kernel", "PainterEngine/runtime" 的所有代码, 添加到您的项目中.
 
 2. 在 "PainterEngine/platform" 中选择您的工作平台(例如 Windows 中选择 "PainterEngine/platform/windows"), 并将对应文件夹中的所有代码添加到您的项目中.
 
-3. 将 PainterEngine 所在目录, 添加到包含目录中. 
+3. 将 PainterEngine 所在目录, 添加到包含目录中.
 
 4. 将您的代码添加进项目中.
 
@@ -111,7 +110,7 @@ int main()
 
 <p align="center"><img width="600" src="images/l2d.png" alt="PainterEngine market"></p>
 
-### 现在, 访问 PainterEngine.com, 参与建设
+## 现在, 访问 PainterEngine.com, 参与建设
 
 <p align="center">
 <img src="documents/assets/mini/1.png" alt="logo">
@@ -148,4 +147,3 @@ int main()
 <img src="documents/assets/mini/23.png" alt="logo">
 <img src="documents/assets/mini/24.png" alt="logo">
 </p>
-

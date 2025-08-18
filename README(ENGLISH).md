@@ -12,11 +12,13 @@ It covers various fields including basic data structures, graphics, acoustics, d
 ## 30-Second Quick Start Guide to PainterEngine
 
 To incorporate PainterEngine into your project, all you need is:
+
 ```c
 #include "PainterEngine.h"
 ```
 
 Utilize `PainterEngine_Initialize` to swiftly create a graphical interactive interface:
+
 ```c
 #include "PainterEngine.h"
 int main()
@@ -46,8 +48,6 @@ int main()
 
 Use ["PainterEngine Make"](https://www.painterengine.com/) to quickly compile and deploy your project to various platforms such as Windows, Linux, WebAssembly, Android, and more. One-click compilation and deployment, with no need to modify the source code, enabling seamless portability at zero cost.
 
-
-
 <p align="center">
   <a href="https://cdn.painterengine.com/PainterEngine_make_en.zip" target="_blank" rel="noopener noreferrer">
     <img src="images/pemakeen.png" alt="PainterEngine make">
@@ -66,7 +66,7 @@ If you don't need the one-key compilation feature provided by PainterEngine Make
 
 4. Add your code to the project.
 
-## Not just a graphics library but also an application framework.
+## Not just a graphics library but also an application framework
 
 | Functions             | Support                                                      | Description                                                                       |
 | --------------------- | ------------------------------------------------------------ | ------------------------------------------------------------------------          |
@@ -84,7 +84,7 @@ If you don't need the one-key compilation feature provided by PainterEngine Make
 | Animation             | 2dx/live2D                                                   | 2D frame-by-frame animation and a Live2D-style animation system                  |
 | PainterScript         | Compiler/VM/Debugger                                         | A complete scripting engine, including a compiler, virtual machine, and debugger |
 | UI                    | button/radio/image/edit/label/list/...                       | Implementation of common UI controls                                             |
-| protocals             | MQTT/MODBUS/Game-network-synchronization                     | Common communication protocols                                                   |
+| protocols             | MQTT/MODBUS/Game-network-synchronization                     | Common communication protocols                                                   |
 | Game framework        |                                                              | PainterEngine Game Framework                                                      |
 | FPGA-GPU             | 2D accelerator                                               | Implemented an FPGA-based GPU graphics accelerator that provides at least 50 million pixels per second (Mpps) 2D Blender acceleration for PainterEngine and supports HDMI output. Validation has been completed on the Zynq-7000 series SoC|
 
@@ -102,7 +102,7 @@ A GPU IP core based on FPGA has been developed and functionally verified on the 
 
 <p align="center"><img src="images/designer.png" alt="PainterEngine designer"></p>
 
-## An abundance of components to unleash your creativity without limitations.
+## An abundance of components to unleash your creativity without limitations
 
 <p align="center"><img width="600" src="images/market.png" alt="PainterEngine market"></p>
 
@@ -112,7 +112,7 @@ A GPU IP core based on FPGA has been developed and functionally verified on the 
 
 <p align="center"><img width="600" src="images/l2d.png" alt="PainterEngine market"></p>
 
-### Now, join the PainterEngine.com contribute to its development.
+## Now, join the PainterEngine.com contribute to its development
 
 <p align="center">
 <img src="documents/assets/mini/1.png" alt="logo">
