@@ -146,7 +146,7 @@ int PX_FileGetDirectoryFileCount(const char path[], PX_FILEENUM_TYPE type, const
 }
 
 // ------------------------------------
-int PX_FileGetDirectoryFileName(const char path[], int count, char* FileName[260], PX_FILEENUM_TYPE type, const char* filter) {
+int PX_FileGetDirectoryFileName(const char path[], int count, char FileName[][260], PX_FILEENUM_TYPE type, const char* filter) {
     struct dirent* ent = NULL;
     int index = 0;
     DIR* pDir;
