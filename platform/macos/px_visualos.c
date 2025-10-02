@@ -25,6 +25,7 @@ typedef struct
 	px_float avg_fps;
 	PX_Socket socket;
 	px_byte cookie[16];
+	PX_Object_VisualOS_init init_func;
 }PX_VisualOS_Client;
 
 PX_SOCKET_CONNECT_CALLBACK_FUNCTION(PX_VisualOSOnSocketConnect)
@@ -136,7 +137,7 @@ PX_OBJECT_FREE_FUNCTION(PX_VisualOSOnFree)
 	PX_SocketClose(&pClient->socket);
 }
 
-PX_Object* PX_Object_VisualOSAttachObject(PX_Object* pObject, px_int attachIndex, px_float x, px_float y, px_float target_x, px_float target_y, px_float width, px_float height)
+PX_Object* PX_Object_VisualOSAttachObject(PX_Object* pObject, px_int attachIndex)
 {
 	px_memorypool* mp = pObject->mp;
 	PX_VisualOS_Client* pdesc;
@@ -145,12 +146,8 @@ PX_Object* PX_Object_VisualOSAttachObject(PX_Object* pObject, px_int attachIndex
 	PX_ASSERTIF(pObject->pObjectDesc[attachIndex] != PX_NULL);
 	pdesc = (PX_VisualOS_Client*)PX_ObjectCreateDesc(pObject, attachIndex, 0x24101601, 0, PX_VisualOSOnRender, 0,0, sizeof(PX_VisualOS_Client));
 	PX_ASSERTIF(pdesc == PX_NULL);
-	pdesc->x = (px_int)target_x;
-	pdesc->y = (px_int)target_y;
-	pdesc->surface_width = (px_int)width;
-	pdesc->surface_height = (px_int)height;
-
-
+	PX_MutexInitialize(&pdesc->surface_lock);
+	pdesc->mp = PX_MemorypoolCreate(pdesc->VisualOS_Runtime, sizeof(pdesc->VisualOS_Runtime));
 	PX_ObjectRegisterEvent(pObject, PX_OBJECT_EVENT_CURSORDOWN, PX_VisualOSOnEvent, 0);
 	PX_ObjectRegisterEvent(pObject, PX_OBJECT_EVENT_CURSORMOVE, PX_VisualOSOnEvent, 0);
 	PX_ObjectRegisterEvent(pObject, PX_OBJECT_EVENT_CURSORRDOWN, PX_VisualOSOnEvent, 0);
@@ -163,22 +160,27 @@ PX_Object* PX_Object_VisualOSAttachObject(PX_Object* pObject, px_int attachIndex
 }
 
 
-PX_Object* PX_Object_VisualOSCreate(px_memorypool* mp, PX_Object* Parent, const px_char host[], px_word port,const px_byte cookie[16], px_float x, px_float y, px_float target_x, px_float target_y, px_float width, px_float height)
+PX_Object* PX_Object_VisualOSCreate(px_memorypool* mp, PX_Object* Parent, const px_char host[], px_word port,const px_byte cookie[16], px_float x, px_float y, PX_Object_VisualOS_init init)
 {
 	PX_Object* pObject;
 	PX_VisualOS_Client* pClient;
-	pObject = PX_ObjectCreate(mp, Parent, x, y, 0, width, height, 0);
+	pObject = PX_ObjectCreate(mp, Parent, x, y, 0, 0, 0, 0);
 	if (!pObject)
 	{
 		return PX_NULL;
 	}
-	if (!PX_Object_VisualOSAttachObject(pObject, 0, x, y,target_x,target_y, width, height))
+	if (!PX_Object_VisualOSAttachObject(pObject, 0))
 	{
 		PX_ObjectDelete(pObject);
 		return PX_NULL;
 	}
 	pClient = (PX_VisualOS_Client*)PX_ObjectGetDescByType(pObject, 0x24101601);
 	memcpy(pClient->cookie, cookie, sizeof(pClient->cookie));
-	PX_SocketInitialize(&pClient->socket, 8 * 1024 * 1024, host, port, PX_VisualOSOnSocketConnect, PX_VisualOSOnSocketReceive, PX_NULL, PX_VisualOSOnSocketDisconnect, pClient);
+    pClient->init_func = init;
+    if(!PX_SocketInitialize(&pClient->socket, 8 * 1024 * 1024, host, port, PX_VisualOSOnSocketConnect, PX_VisualOSOnSocketReceive, PX_NULL, PX_VisualOSOnSocketDisconnect, pObject))
+    {
+        PX_ObjectDelete(pObject);
+        return PX_NULL;
+    }
 	return pObject;
 }
