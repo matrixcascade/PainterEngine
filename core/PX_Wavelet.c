@@ -466,4 +466,6 @@ px_void PX_DWTFree(PX_DWT* dwt)
 {
 	PX_LTIFree(&dwt->h1);
 	PX_LTIFree(&dwt->h0);
+	PX_LTIFree(&dwt->g0);
+	PX_LTIFree(&dwt->g1);
 }

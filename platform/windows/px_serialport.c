@@ -41,7 +41,7 @@ const  char* PX_SerialPortEnumComName(int index)
 	return NULL;
 }
 
-const BOOL PX_SerialPortInitialize(PX_SerialPort *com,const char *name,unsigned int baudRate,unsigned int DataBits,char ParityType,unsigned int stopBit)
+const BOOL PX_SerialPortInitialize(PX_SerialPort *com,const char *name)
 {
 	COMMTIMEOUTS  CommTimeouts;  
 	DCB  dcb; 
@@ -98,45 +98,11 @@ const BOOL PX_SerialPortInitialize(PX_SerialPort *com,const char *name,unsigned 
 		goto _ERROR;
 	}
 
-	//Setup BCD
-	dcb.DCBlength = sizeof(DCB);
-	dcb.ByteSize=DataBits;
-	dcb.BaudRate=baudRate;
-	dcb.StopBits=stopBit-1;
-	switch (ParityType)
-	{
-	default:
-	case 'N':
-	case 'n':
-		dcb.Parity=NOPARITY ;
-		break;
-	case 'O':
-	case 'o':
-		dcb.Parity=ODDPARITY;
-		break;
-	case 'E':
-	case 'e':
-		dcb.Parity=EVENPARITY;
-		break;
-	case 'M':
-	case 'm':
-		dcb.Parity=MARKPARITY;
-		break;
-	}
+	com->BaudRate= dcb.BaudRate;
+	com->DataBits= dcb.ByteSize;
+	com->ParityType= dcb.Parity;
+	com->StopBit= dcb.StopBits;
 	
-	dcb.fRtsControl = RTS_CONTROL_ENABLE;   
-
-	com->BaudRate=baudRate;
-	com->DataBits=DataBits;
-	com->ParityType=ParityType;
-	com->StopBit=stopBit;
-	
-
-	if(!SetCommState((HANDLE)com->Handle, &dcb))
-	{
-		goto _ERROR;
-	}
-
 	return 1;
 _ERROR:
 	com->Handle = 0;
@@ -144,7 +110,7 @@ _ERROR:
 	return 0;
 }
 
-const int PX_SerialPortReset(PX_SerialPort *com,unsigned int baudRate,unsigned int DataBits,char ParityType,unsigned int stopBit)
+const int PX_SerialPortSet(PX_SerialPort *com,unsigned int baudRate,unsigned int DataBits,char ParityType,unsigned int stopBit)
 {
 	DCB  dcb; 
 

@@ -125,6 +125,13 @@ enum PX_OBJECT_TYPE
   PX_OBJECT_TYPE_CLOCKNUMERIC   ,
   PX_OBJECT_TYPE_TINYCANVAS     ,
   PX_OBJECT_TYPE_STAMP			,
+  PX_OBJECT_TYPE_WAITING        ,
+  PX_OBJECT_TYPE_TREE           ,
+  PX_OBJECT_TYPE_SYNTAX            ,	
+  PX_OBJECT_TYPE_MACHINE        ,
+  PX_OBJECT_TYPE_TEXTVIEWER		,
+  PX_OBJECT_TYPE_DEBUG			,
+  PX_OBJECT_TYPE_CODE			,
 };
 
 
@@ -215,7 +222,7 @@ struct _PX_Object
 	Function_ObjectFree   Func_ObjectFree[PX_OBJECT_MAX_DESC_COUNT];
 
 	px_memorypool *mp;
-	struct _PX_Object *pChilds;
+	struct _PX_Object *pChildren;
 	struct _PX_Object *pParent;
 	struct _PX_Object *pPreBrother;
 	struct _PX_Object *pNextBrother;
@@ -257,6 +264,7 @@ typedef struct _PX_Object_Event
 PX_Object_Event PX_OBJECT_BUILD_EVENT(px_uint Event);
 PX_Object_Event PX_OBJECT_BUILD_EVENT_STRING(px_uint Event,const px_char *content);
 PX_Object_Event PX_OBJECT_BUILD_EVENT_INT(px_uint Event, px_int i);
+PX_Object_Event PX_OBJECT_BUILD_EVENT_DATA(px_uint Event, px_void* ptr,px_int size);
 PX_Object_Event PX_Object_Event_CursorOffset(PX_Object_Event e, px_point offset);
 PX_Object_Event PX_Object_Event_ObjectCursorOffset(PX_Object* pObject, PX_Object_Event e);
 
@@ -296,8 +304,10 @@ px_void PX_Object_Event_SetKeyDown(PX_Object_Event *e,px_uint key);
 px_void PX_Object_Event_SetKeyUp(PX_Object_Event *e,px_uint key);
 px_char* PX_Object_Event_GetStringPtr(PX_Object_Event e);
 px_void* PX_Object_Event_GetDataPtr(PX_Object_Event e);
+px_int PX_Object_Event_GetDataSize(PX_Object_Event e);
 px_void PX_Object_Event_SetStringPtr(PX_Object_Event *e,px_void *ptr);
 px_void PX_Object_Event_SetDataPtr(PX_Object_Event *e,px_void *ptr);
+px_void PX_Object_Event_SetDataSize(PX_Object_Event* e, px_int size);
 px_void PX_Object_Event_SetIndex(PX_Object_Event *e,px_int index);
 struct _PX_Object_EventAction
 {
@@ -314,6 +324,15 @@ typedef struct _PX_Object_EventAction PX_Object_EventAction;
 
 #define    PX_ObjectGetDescIndex(type,pobject,index) ((type *)((pobject)->pObjectDesc[index]))
 #define    PX_ObjectGetDesc(type,pobject) PX_ObjectGetDescIndex(type,pobject,idesc)
+#define	   PX_ObjectGetDesc0(type,pobject) PX_ObjectGetDescIndex(type,pobject,0)
+#define	   PX_ObjectGetDesc1(type,pobject) PX_ObjectGetDescIndex(type,pobject,1)
+#define	   PX_ObjectGetDesc2(type,pobject) PX_ObjectGetDescIndex(type,pobject,2)
+#define	   PX_ObjectGetDesc3(type,pobject) PX_ObjectGetDescIndex(type,pobject,3)
+
+px_bool		PX_ObjectCheckType0(PX_Object* pObject, px_int type);
+px_bool		PX_ObjectCheckType1(PX_Object* pObject, px_int type);
+px_bool		PX_ObjectCheckType2(PX_Object* pObject, px_int type);
+px_bool		PX_ObjectCheckType3(PX_Object* pObject, px_int type);
 
 px_int     PX_ObjectGetFreeDescIndex(PX_Object *pObject);
 px_bool    PX_ObjectCheckType(PX_Object* pObject, px_int type);
@@ -328,8 +347,11 @@ PX_Object* PX_ObjectCreateRoot(px_memorypool* mp);
 PX_Object* PX_ObjectCreateEx(px_memorypool* mp, PX_Object* Parent, px_float x, px_float y, px_float z, px_float Width, px_float Height, px_float Lenght, px_int type, Function_ObjectUpdate Func_ObjectUpdate, Function_ObjectRender Func_ObjectRender, Function_ObjectFree Func_ObjectFree, px_void* desc, px_int size);
 px_void    PX_ObjectDetach(PX_Object *pObject,px_int type);
 px_int	   PX_ObjectSetRenderFunction(PX_Object* pObject, Function_ObjectRender Func_ObjectRender, px_int index);
+px_int	   PX_ObjectSetRenderFunction0(PX_Object* pObject, Function_ObjectRender Func_ObjectRender);
 px_int	   PX_ObjectSetUpdateFunction(PX_Object* pObject, Function_ObjectUpdate Func_ObjectUpdate, px_int index);
+px_int     PX_ObjectSetUpdateFunction0(PX_Object* pObject, Function_ObjectUpdate Func_ObjectUpdate);
 px_int	   PX_ObjectSetFreeFunction(PX_Object* pObject, Function_ObjectFree Func_ObjectFree, px_int index);
+px_int	   PX_ObjectSetFreeFunction0(PX_Object* pObject, Function_ObjectFree Func_ObjectFree);
 px_void    PX_ObjectSetAlign(PX_Object *pObject,PX_ALIGN align);
 px_void    PX_ObjectGetReferenceXY(PX_Object* pObject, PX_Object_Event e);
 px_void    PX_ObjectGetInheritXY(PX_Object *pObject,px_float *x,px_float *y);
@@ -341,11 +363,12 @@ px_void	   PX_ObjectSetParent(PX_Object* pObject, PX_Object* Parent);
 px_void    PX_ObjectDelete(PX_Object *pObject);
 px_void    PX_ObjectDelayDelete(PX_Object* pObject);
 px_void	   PX_ObjectDeleteChilds( PX_Object *pObject );
+px_void	   PX_Object_ObjectLinkerUpdate(PX_Object* pObject, px_uint elapsed);
 px_void	   PX_ObjectSetPosition(PX_Object *pObject,px_float x,px_float y,px_float z);
 px_void	   PX_ObjectSetForce(PX_Object* pObject, px_float x, px_float y, px_float z);
 px_void	   PX_ObjectSetVelocity(PX_Object* pObject, px_float x, px_float y, px_float z);
 px_void	   PX_ObjectSetResistance(PX_Object* pObject, px_float ak);
-px_void    PX_ObjectSetSize(PX_Object *pObject,px_float Width,px_float Height,px_float length);
+px_void    PX_ObjectSetSize(PX_Object *pObject,px_float Width,px_float Height,px_float radius);
 px_void	   PX_ObjectSetVisible(PX_Object *pObject,px_bool visible);
 px_void    PX_ObjectSetEnabled(PX_Object *pObject,px_bool enabled);
 px_void    PX_ObjectEnable(PX_Object *pObject);
@@ -356,6 +379,8 @@ px_void     PX_ObjectSetFocus(PX_Object *pObject);
 px_bool		PX_ObjectIsOnFocus(PX_Object* pObject);
 px_void     PX_ObjectClearFocus(PX_Object *pObject);
 px_rect		PX_ObjectGetRect(PX_Object* pObject);
+px_void PX_ObjectSetImpactType(PX_Object* pObject, px_dword impact_type);
+px_void PX_ObjectSetImpactTargetType(PX_Object* pObject, px_dword impact_target_type);
 px_region	PX_ObjectGetRegion(PX_Object* pObject);
 
 #define		PX_ObjectReleaseFocus PX_ObjectClearFocus
@@ -367,6 +392,7 @@ px_float	PX_ObjectGetWidth(PX_Object *pObject);
 
 px_void PX_ObjectAddChild(PX_Object *Parent,PX_Object *child);
 px_void PX_ObjectUpdate(PX_Object *pObject,px_uint elapsed );
+px_void PX_ObjectUpdateDelayDelete(PX_Object* pObject);
 px_void PX_ObjectUpdatePhysics(PX_Object* pObject, px_uint elapsed);
 px_void PX_ObjectRender(px_surface *pSurface,PX_Object *pObject,px_uint elapsed);
 
@@ -514,10 +540,6 @@ px_void PX_ObjectCollisionTestFree(PX_Object_CollisionTest* ptest);
 #include "PX_Object_Joystick.h"
 
 //////////////////////////////////////////////////////////////////////////
-//ringprocessbar
-#include "PX_Object_RingProcessbar.h"
-
-//////////////////////////////////////////////////////////////////////////
 //memoryview
 #include "PX_Object_MemoryView.h"
 
@@ -527,8 +549,8 @@ px_void PX_ObjectCollisionTestFree(PX_Object_CollisionTest* ptest);
 
 
 //////////////////////////////////////////////////////////////////////////
-//ipbox
-#include "PX_Object_IPBox.h"
+//box
+#include "PX_Object_Box.h"
 
 //////////////////////////////////////////////////////////////////////////
 //varbox
@@ -536,17 +558,8 @@ px_void PX_ObjectCollisionTestFree(PX_Object_CollisionTest* ptest);
 #include "PX_Object_ModbusVarBox.h"
 
 //////////////////////////////////////////////////////////////////////////
-//combox
-#include "PX_Object_COMBox.h"
-
-//////////////////////////////////////////////////////////////////////////
 //RankPanel
 #include "PX_Object_RankPanel.h"
-
-//////////////////////////////////////////////////////////////////////////
-//ring progress
-#include "PX_Object_RingProgress.h"
-
 
 //////////////////////////////////////////////////////////////////////////
 //piano
@@ -575,14 +588,6 @@ px_void PX_ObjectCollisionTestFree(PX_Object_CollisionTest* ptest);
 //////////////////////////////////////////////////////////////////////////
 //color panel
 #include "PX_Object_ColorPanel.h"
-
-//////////////////////////////////////////////////////////////////////////
-//PainterBox
-#include "PX_Object_PainterBox.h"
-
-//////////////////////////////////////////////////////////////////////////
-//LayerBox
-#include "PX_Object_LayerBox.h"
 
 //////////////////////////////////////////////////////////////////////////
 //Canvas
@@ -625,8 +630,8 @@ px_void PX_ObjectCollisionTestFree(PX_Object_CollisionTest* ptest);
 #include "PX_Object_Firework.h"
 
 //////////////////////////////////////////////////////////////////////////
-//MatrixEffect
-#include "PX_Object_MatrixEffect.h"
+//Effect
+#include "PX_Object_Effect.h"
 
 //////////////////////////////////////////////////////////////////////////
 //Button
@@ -659,6 +664,34 @@ px_void PX_ObjectCollisionTestFree(PX_Object_CollisionTest* ptest);
 //////////////////////////////////////////////////////////////////////////
 //stamp
 #include "PX_Object_Stamp.h"
+
+/////////////////////////////////////////////////////////////////////////////
+//Waiting
+#include "PX_Object_Waiting.h"
+
+/////////////////////////////////////////////////////////////////////////////
+//tree
+#include "PX_Object_Tree.h"
+
+/////////////////////////////////////////////////////////////////////////////
+//Syntax
+#include "PX_Object_Syntax.h"
+
+/////////////////////////////////////////////////////////////////////////////
+//Machine
+#include "PX_Object_Machine.h"
+
+/////////////////////////////////////////////////////////////////////////////
+//Textview
+#include "PX_Object_TextViewer.h"
+
+////////////////////////////////////////////////////////////////////////////
+//code viewer
+#include "PX_Object_Code.h"
+
+////////////////////////////////////////////////////////////////////////////
+//debug
+#include "PX_Object_Debug.h"
 
 #endif
 

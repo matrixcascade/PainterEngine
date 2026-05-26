@@ -45,26 +45,26 @@ PX_Object* PX_Object_Explosion01Create(px_memorypool* mp,PX_Object *parent, px_f
 
 	PX_ParticalLauncherInitializeDefaultInfo(&info);
 	info.velocity = power*100;
-	info.deviation_velocity_max = 0;
-	info.deviation_velocity_min = -80*power;
-	info.direction = PX_POINT(0, -1, 0);
+	info.velocity_deviation_max = 0;
+	info.velocity_deviation_min = -80*power;
+	info.toward = PX_POINT(0, -1, 0);
 	info.ak = 0.65f;
 	info.alpha = 1;
-	info.launchCount = count;
+	info.generate_remain_count = count;
 	info.generateDuration = 0;
 	info.maxCount = count;
-	info.alphaincrease = -1.0f/(alive/1000.f);
+	info.alpha_increase = -1.0f/(alive/1000.f);
 	info.alive = alive;
-	info.sizeincrease = 0.25f;
+	info.size_increase = 0.25f;
 	info.rotation = 180;
-	info.deviation_rotation = 90;
-	info.deviation_atomsize_max = 0;
-	info.deviation_atomsize_min = -0.8f;
-	info.deviation_rangAngle = 360;
+	info.rotation_deviation = 90;
+	info.size_deviation_max = 0;
+	info.size_deviation_min = -0.8f;
+	info.direction_deviation_rangAngle_max = 360;
 	info.deviation_position_distanceRange = size * 32;
 	info.position = PX_POINT(x, y, 0);
 	info.tex = ptexture;
-	info.atomsize = size;
+	info.size = size;
 
 	PX_ParticalLauncherInitialize(&desc.launcher,mp, info);
 	pObject= PX_ObjectCreate(mp, parent, x, y, 0, 0, 0, 0);
@@ -84,7 +84,8 @@ PX_OBJECT_RENDER_FUNCTION(PX_Object_Explosion02Render)
 	px_float a;
 	px_float size;
 	px_float angle;
-	
+	px_float x, y, w, h;
+	PX_OBJECT_INHERIT_CODE(pObject, x, y, w, h);
 	pDesc->elapsed += elapsed;
 	if (pDesc->elapsed > 500.f)
 	{
@@ -95,13 +96,13 @@ PX_OBJECT_RENDER_FUNCTION(PX_Object_Explosion02Render)
 	a = 1 - pDesc->elapsed / 500.f;
 	size = 100 + pDesc->elapsed / 10.0f;
 	angle = pDesc->elapsed / 500.f * 90.f;
-	PX_GeoDrawBorder(psurface, (px_int)(pObject->x - size / 2), (px_int)(pObject->y - size / 2), \
-		(px_int)(pObject->x + size / 2), (px_int)(pObject->y + size / 2), 3, \
+	PX_GeoDrawBorder(psurface, (px_int)(x - size / 2), (px_int)(y - size / 2), \
+		(px_int)(x + size / 2), (px_int)(y + size / 2), 3, \
 		PX_COLOR((px_byte)(a * 255), pDesc->color._argb.r, pDesc->color._argb.g, pDesc->color._argb.b)\
 	);
-	PX_GeoDrawRing(psurface, (px_int)pObject->x, (px_int)pObject->y, 50, 5, PX_COLOR((px_byte)(a * 255), pDesc->color._argb.r, pDesc->color._argb.g, pDesc->color._argb.b), -90 + (px_int)angle, (px_int)angle);
-	PX_GeoDrawRing(psurface, (px_int)pObject->x, (px_int)pObject->y, 50, 5, PX_COLOR((px_byte)(a * 255), pDesc->color._argb.r, pDesc->color._argb.g, pDesc->color._argb.b), 90 + (px_int)angle, (px_int)angle + 180);
-	//PX_GeoDrawSolidCircle(psurface, (px_int)pObject->x, (px_int)pObject->y, 5, PX_COLOR((px_byte)(a * 255), pDesc->color._argb.r, pDesc->color._argb.g, pDesc->color._argb.b));
+	PX_GeoDrawRing(psurface, (px_int)x, (px_int)y, 50, 5, PX_COLOR((px_byte)(a * 255), pDesc->color._argb.r, pDesc->color._argb.g, pDesc->color._argb.b), -90 + (px_int)angle, (px_int)angle);
+	PX_GeoDrawRing(psurface, (px_int)x, (px_int)y, 50, 5, PX_COLOR((px_byte)(a * 255), pDesc->color._argb.r, pDesc->color._argb.g, pDesc->color._argb.b), 90 + (px_int)angle, (px_int)angle + 180);
+	//PX_GeoDrawSolidCircle(psurface, (px_int)x, (px_int)y, 5, PX_COLOR((px_byte)(a * 255), pDesc->color._argb.r, pDesc->color._argb.g, pDesc->color._argb.b));
 	PX_ParticalLauncherRender(psurface, &pDesc->launcher, elapsed);
 
 	
@@ -137,18 +138,18 @@ PX_Object* PX_Object_Explosion02Create(px_memorypool *mp,PX_Object *parent, px_f
 
 	PX_ParticalLauncherInitializeDefaultInfo(&info);
 	info.velocity = 600;
-	info.deviation_velocity_max = 0;
-	info.deviation_velocity_min = -580;
-	info.direction = PX_POINT(0, -1, 0);
+	info.velocity_deviation_max = 0;
+	info.velocity_deviation_min = -580;
+	info.toward = PX_POINT(0, -1, 0);
 	info.ak = 3;
-	info.launchCount = 8;
+	info.generate_remain_count = 8;
 	info.generateDuration = 0;
 	info.maxCount = 8;
-	info.alphaincrease = -2;
+	info.alpha_increase = -2;
 	info.alive = 500;
-	info.deviation_atomsize_max = 0;
-	info.deviation_atomsize_min = -0.8f;
-	info.deviation_rangAngle = 180;
+	info.size_deviation_max = 0;
+	info.size_deviation_min = -0.8f;
+	info.direction_deviation_rangAngle_max = 180;
 	info.position = PX_POINT(x, y, 0);
 	info.tex = &pDesc->rect;
 	PX_ParticalLauncherInitialize(&pDesc->launcher,mp, info);
@@ -345,27 +346,37 @@ PX_OBJECT_UPDATE_FUNCTION(PX_Object_FireExplosionUpdate)
 
 	if (pFire->alive == 0)
 	{
-		PX_ObjectDelayDelete(pObject);
+		if (pFire->auto_delete)
+		{
+			PX_ObjectDelayDelete(pObject);
+		}
+		else
+		{
+			pObject->Enabled = PX_FALSE;
+			pObject->Visible = PX_FALSE;
+		}
+		
 	}
 }
 
 PX_OBJECT_RENDER_FUNCTION(PX_Object_FireExplosionRender)
 {
+	px_float x, y, width, height;
 	PX_Object_FireExplosion* pfe = PX_ObjectGetDesc(PX_Object_FireExplosion, pObject);
-
+	PX_OBJECT_INHERIT_CODE(pObject, x, y, width, height);
 	if (pfe->ring)
 	{
 		px_float size = pfe->range * 2;
 		px_float fr = (PX_OBJECT_FIREEXPLOSION_DEFAULT_TIME - pfe->alive) * 1.0f / PX_OBJECT_FIREEXPLOSION_DEFAULT_TIME;
-		PX_GeoDrawCircle(psurface, (px_int)pObject->x, (px_int)pObject->y, (px_int)(PX_sqrt(fr) * size * 4), (px_int)(fr * size * 0.25f), PX_COLOR((px_uchar)(255 * (1 - fr)), 255, (px_uchar)(255 * (1 - fr)), 0));
+		PX_GeoDrawCircle(psurface, (px_int)x, (px_int)y, (px_int)(PX_sqrt(fr) * size * 4), (px_int)(fr * size * 0.25f), PX_COLOR((px_uchar)(255 * (1 - fr)), 255, (px_uchar)(255 * (1 - fr)), 0));
 	}
 
-	pfe->launcher.InitInfo.position = PX_POINT(pObject->x, pObject->y, pObject->z);
+	pfe->launcher.LauncherInfo.position = PX_POINT(x, y, 0);
 	PX_ParticalLauncherRender(psurface, &pfe->launcher, elapsed);
 }
 
 
-PX_Object* PX_Object_Explosion05Create(px_memorypool* mp, PX_Object* Parent, px_float x, px_float y, px_float power, px_bool ring)
+PX_Object* PX_Object_Explosion05Create(px_memorypool* mp, PX_Object* Parent, px_float x, px_float y, px_float power, px_bool ring, px_bool auto_delete)
 {
 
 	PX_ParticalLauncher_InitializeInfo info = { 0 };
@@ -381,6 +392,7 @@ PX_Object* PX_Object_Explosion05Create(px_memorypool* mp, PX_Object* Parent, px_
 	pFireExplosion->launcher.InitInfo.position = PX_POINT(0, 0, 0);
 	pFireExplosion->ring = ring;
 	pFireExplosion->launcher.InitInfo.userptr = pFireExplosion;
+	pFireExplosion->auto_delete = auto_delete;
 	PX_TextureCreate(mp, &pFireExplosion->particaltex, 8, 8);
 	PX_SurfaceClearAll(&pFireExplosion->particaltex, PX_COLOR_WHITE);
 
@@ -388,26 +400,26 @@ PX_Object* PX_Object_Explosion05Create(px_memorypool* mp, PX_Object* Parent, px_
 
 	PX_ParticalLauncherInitializeDefaultInfo(&info);
 	info.velocity = power * 80;
-	info.deviation_velocity_max = 0;
-	info.deviation_velocity_min = -60 * power;
-	info.direction = PX_POINT(0, -1, 0);
+	info.velocity_deviation_max = 0;
+	info.velocity_deviation_min = -60 * power;
+	info.toward = PX_POINT(0, -1, 0);
 	info.ak = 0.65f;
 	info.alpha = 1;
-	info.launchCount = 32;
+	info.generate_remain_count = 32;
 	info.generateDuration = 0;
 	info.maxCount = 32;
-	info.alphaincrease = -1.0f / (PX_OBJECT_FIREEXPLOSION_DEFAULT_TIME / 1000.f);
+	info.alpha_increase = -1.0f / (PX_OBJECT_FIREEXPLOSION_DEFAULT_TIME / 1000.f);
 	info.alive = PX_OBJECT_FIREEXPLOSION_DEFAULT_TIME;
-	info.sizeincrease = -0.25f;
+	info.size_increase = -0.25f;
 	info.rotation = 180;
-	info.deviation_rotation = 90;
-	info.deviation_atomsize_max = 0;
-	info.deviation_atomsize_min = -0.8f;
-	info.deviation_rangAngle = 360;
+	info.rotation_deviation = 90;
+	info.size_deviation_max = 0;
+	info.size_deviation_min = -0.8f;
+	info.direction_deviation_rangAngle_max = 360;
 	info.deviation_position_distanceRange = 0;
 	info.position = PX_POINT(x, y, 0);
 	info.tex = &pFireExplosion->particaltex;
-	info.atomsize = power / 50 + 1;
+	info.size = power / 50 + 1;
 
 	PX_ParticalLauncherInitialize(&pFireExplosion->launcher, mp, info);
 

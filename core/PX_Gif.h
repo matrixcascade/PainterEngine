@@ -2,6 +2,7 @@
 #define GIFDEC_H
 
 #include "PX_Texture.h"
+#include "PX_Typedef.h"
 
 
 typedef struct px_gif_Palette 
@@ -49,5 +50,16 @@ px_void PX_GifFree(px_gif *gif);
 px_void PX_GifSetLoop(px_gif *gif,px_bool loop);
 px_texture *PX_GifGetTexture(px_gif *gif);
 
+typedef struct
+{
+  px_memorypool* mp;
+  px_vector frames;//px_textures
+  px_vector delays;//px_ushort
+}px_gif_encoder;
+
+px_bool PX_GifEncoder_Initialize(px_memorypool* mp, px_gif_encoder* encoder);
+px_bool PX_GifEncoder_AddFrame(px_gif_encoder* encoder, px_texture* frame, px_ushort delay);
+px_bool PX_GifEncoder_Finalize(px_gif_encoder* encoder, px_memory* output);
+px_void PX_GifEncoder_Free(px_gif_encoder* encoder);
 
 #endif /* GIFDEC_H */

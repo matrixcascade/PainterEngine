@@ -84,7 +84,7 @@ typedef struct
 	px_texture* pplace_texture;
 	px_texture* pico_texture;
 
-	PX_CDA_ROUTE_DIRECTION direction;
+	PX_CDA_ROUTE_DIRECTION toward;
 }PX_CDA_RouteClass;
 
 typedef enum
@@ -96,16 +96,16 @@ typedef enum
 typedef struct
 {
 	px_variable var;
-	PX_CDA_SIGNAL_DIRECTION direction;
+	PX_CDA_SIGNAL_DIRECTION toward;
 	px_dword timestamp;
 	px_float x;
 }PX_CDA_Signal;
 
 typedef struct
 {
-	px_byte direction;
+	px_byte toward;
 	px_byte type;
-	px_word length;
+	px_word radius;
 }PX_CDA_RouteLine;
 
 typedef enum
@@ -120,7 +120,7 @@ typedef struct
 {
 	px_int start_grid_x, start_grid_y;
 	px_int end_grid_x, end_grid_y;
-	px_float length;
+	px_float radius;
 	PX_CDA_ROUTE_MODE mode;
 	PX_CDA_RouteClass *prouteClass;
 	px_dword start_timestamp, end_timestamp;

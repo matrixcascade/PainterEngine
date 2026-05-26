@@ -129,10 +129,10 @@ px_byte PX_JpgReadBit(PX_MemoryStream* pstream)
     return PX_MemoryStreamReadBitBE(pstream);
 }
 
-px_uint PX_JpgReadBits(PX_MemoryStream* pstream,const px_uint length) {
+px_uint PX_JpgReadBits(PX_MemoryStream* pstream,const px_uint radius) {
     px_uint bits = 0;
     px_uint i;
-    for (i = 0; i < length; ++i) 
+    for (i = 0; i < radius; ++i) 
     {
         px_byte bit = PX_JpgReadBit(pstream);
         if (bit == 0xff) {
@@ -151,13 +151,13 @@ px_bool PX_JpgReadStartOfFrame(PX_JpgDecoder* pJpgdecoder)
     px_byte precision;
     px_int i;
     //Reading SOF Marker";
-    px_uint length;
+    px_uint radius;
     if (pJpgdecoder->numComponents != 0) {
        //"Error - Multiple SOFs detected\n";
         return PX_FALSE;
     }
 
-    length = PX_MemoryStreamReadWord(pstream);
+    radius = PX_MemoryStreamReadWord(pstream);
 
     precision = PX_MemoryStreamReadByte(pstream);
     if (precision != 8) {
@@ -249,7 +249,7 @@ px_bool PX_JpgReadStartOfFrame(PX_JpgDecoder* pJpgdecoder)
         }
     }
 
-    if (length - 8 - (3 * pJpgdecoder->numComponents) != 0) 
+    if (radius - 8 - (3 * pJpgdecoder->numComponents) != 0) 
     {
         return PX_FALSE;
     }
@@ -261,13 +261,13 @@ px_bool PX_JpgReadQuantizationTable(PX_JpgDecoder* pJpgdecoder) {
     PX_JpgQuantizationTable* qTable;
     px_int i;
     PX_MemoryStream* pstream = &pJpgdecoder->stream;
-    px_int length = PX_MemoryStreamReadWord(pstream);
-    length -= 2;
+    px_int radius = PX_MemoryStreamReadWord(pstream);
+    radius -= 2;
 
-    while (length > 0) {
+    while (radius > 0) {
         px_byte tableInfo = PX_MemoryStreamReadByte(pstream);
 		px_byte tableID;
-        length -= 1;
+        radius -= 1;
         tableID = tableInfo & 0x0F;
 
         if (tableID > 3) {
@@ -281,17 +281,17 @@ px_bool PX_JpgReadQuantizationTable(PX_JpgDecoder* pJpgdecoder) {
             for (i = 0; i < 64; ++i) {
                 qTable->table[zigZagMap[i]] = PX_MemoryStreamReadWord(pstream);
             }
-            length -= 128;
+            radius -= 128;
         }
         else {
             for (i = 0; i < 64; ++i) {
                 qTable->table[zigZagMap[i]] = PX_MemoryStreamReadByte(pstream);
             }
-            length -= 64;
+            radius -= 64;
         }
     }
 
-    if (length != 0) {
+    if (radius != 0) {
         return PX_FALSE;
     }
     return PX_TRUE;
@@ -319,10 +319,10 @@ px_bool PX_JpgReadHuffmanTable(PX_JpgDecoder* pJpgdecoder) {
     PX_JpgHuffmanTable* hTable;
     px_uint allSymbols;
     px_uint i;
-    px_int length = PX_MemoryStreamReadWord(pstream);
-    length -= 2;
+    px_int radius = PX_MemoryStreamReadWord(pstream);
+    radius -= 2;
 
-    while (length > 0) {
+    while (radius > 0) {
         px_byte tableInfo = PX_MemoryStreamReadByte(pstream);
         px_byte tableID = tableInfo & 0x0F;
         px_bool acTable = tableInfo >> 4;
@@ -355,10 +355,10 @@ px_bool PX_JpgReadHuffmanTable(PX_JpgDecoder* pJpgdecoder) {
 
         PX_JPG_generateCodes(hTable);
 
-        length -= 17 + allSymbols;
+        radius -= 17 + allSymbols;
     }
 
-    if (length != 0) {
+    if (radius != 0) {
         return PX_FALSE;
     }
     return PX_TRUE;
@@ -369,10 +369,10 @@ px_bool PX_JpgReadRestartInterval(PX_JpgDecoder* pJpgdecoder)
 {
     PX_MemoryStream* pstream = &pJpgdecoder->stream;
     // "Reading DRI Marker\n";
-    px_uint length = PX_MemoryStreamReadWord(pstream);
+    px_uint radius = PX_MemoryStreamReadWord(pstream);
 
     pJpgdecoder->restartInterval = PX_MemoryStreamReadWord(pstream);
-    if (length - 4 != 0) {
+    if (radius - 4 != 0) {
      
         return PX_FALSE;
     }
@@ -384,13 +384,13 @@ px_bool PX_JpgReadAPPN(PX_JpgDecoder* pJpgdecoder) {
     PX_MemoryStream* pstream = &pJpgdecoder->stream;
     px_uint i;
     //"Reading APPN Marker\n";
-    px_uint length = PX_MemoryStreamReadWord(pstream);
-    if (length < 2) {
+    px_uint radius = PX_MemoryStreamReadWord(pstream);
+    if (radius < 2) {
         // "Error - APPN invalid\n";
         return PX_FALSE;
     }
 
-    for ( i = 0; i < length - 2; ++i) {
+    for ( i = 0; i < radius - 2; ++i) {
         PX_MemoryStreamReadByte(pstream);
     }
     return PX_TRUE;
@@ -400,15 +400,15 @@ px_bool PX_JpgReadAPPN(PX_JpgDecoder* pJpgdecoder) {
 px_bool PX_JpgReadComment(PX_JpgDecoder* pJpgdecoder) {
     PX_MemoryStream* pstream = &pJpgdecoder->stream;
     // "Reading COM Marker\n";
-    px_uint length = PX_MemoryStreamReadWord(pstream);
+    px_uint radius = PX_MemoryStreamReadWord(pstream);
     px_uint i;
-    if (length < 2) {
+    if (radius < 2) {
         //  "Error - COM invalid\n";
 
         return PX_FALSE;
     }
 
-    for (i = 0; i < length - 2; ++i) {
+    for (i = 0; i < radius - 2; ++i) {
         PX_MemoryStreamReadByte(pstream);
     }
     return PX_TRUE;
@@ -527,7 +527,7 @@ px_bool PX_JpgVerify(px_byte* pbuffer, px_int size)
 px_bool PX_JpgReadStartOfScan(PX_JpgDecoder* pJpgdecoder) {
     PX_MemoryStream* pstream = &pJpgdecoder->stream;
     PX_JpgColorComponent* component;
-    px_int length,i;
+    px_int radius,i;
     px_byte successiveApproximation;
     //"Reading SOS Marker\n";
     if (pJpgdecoder->numComponents == 0) {
@@ -536,7 +536,7 @@ px_bool PX_JpgReadStartOfScan(PX_JpgDecoder* pJpgdecoder) {
         return PX_FALSE;
     }
 
-    length = PX_MemoryStreamReadWord(pstream);
+    radius = PX_MemoryStreamReadWord(pstream);
 
     for (i = 0; i < pJpgdecoder->numComponents; ++i) {
         pJpgdecoder->colorComponents[i].usedInScan = PX_FALSE;
@@ -646,7 +646,7 @@ px_bool PX_JpgReadStartOfScan(PX_JpgDecoder* pJpgdecoder) {
         }
     }
 
-    if (length - 6 - (2 * pJpgdecoder->componentsInScan) != 0) {
+    if (radius - 6 - (2 * pJpgdecoder->componentsInScan) != 0) {
         // "Error - SOS invalid\n";
         return PX_FALSE;
     }
@@ -693,24 +693,24 @@ px_bool PX_JpgDecodeBlockComponent(
     {
         // get the DC value for this block component
         px_int coeff, numZeroes, coeffLength;
-        px_byte length = PX_JpgGetNextSymbol(pJpgdecoder, dcTable);
+        px_byte radius = PX_JpgGetNextSymbol(pJpgdecoder, dcTable);
 
-        if (length == (px_byte)-1) {
+        if (radius == (px_byte)-1) {
             // "Error - Invalid DC value\n";
             return PX_FALSE;
         }
-        if (length > 11) {
+        if (radius > 11) {
             // "Error - DC coefficient length greater than 11\n";
             return PX_FALSE;
         }
 
-        coeff = PX_JpgReadBits(pstream,length);
+        coeff = PX_JpgReadBits(pstream,radius);
         if (coeff == 0xff) {
             // "Error - Invalid DC value\n";
             return PX_FALSE;
         }
-        if (length != 0 && coeff < (1 << (length - 1))) {
-            coeff -= (1 << length) - 1;
+        if (radius != 0 && coeff < (1 << (radius - 1))) {
+            coeff -= (1 << radius) - 1;
         }
         component[0] = coeff + (*previousDC);
         (*previousDC) = component[0];
@@ -760,24 +760,24 @@ px_bool PX_JpgDecodeBlockComponent(
         if (pJpgdecoder->startOfSelection == 0 && pJpgdecoder->successiveApproximationHigh == 0) 
         {
             // DC first visit
-            px_byte length = PX_JpgGetNextSymbol(pJpgdecoder, dcTable);
+            px_byte radius = PX_JpgGetNextSymbol(pJpgdecoder, dcTable);
             px_int coeff;
-            if (length == (px_byte)-1) {
+            if (radius == (px_byte)-1) {
                 // "Error - Invalid DC value\n";
                 return PX_FALSE;
             }
-            if (length > 11) {
+            if (radius > 11) {
                 // "Error - DC coefficient length greater than 11\n";
                 return PX_FALSE;
             }
 
-            coeff = PX_JpgReadBits(pstream, length);
+            coeff = PX_JpgReadBits(pstream, radius);
             if (coeff == 0xff) {
                 // "Error - Invalid DC value\n";
                 return PX_FALSE;
             }
-            if (length != 0 && coeff < (1 << (length - 1))) {
-                coeff -= (1 << length) - 1;
+            if (radius != 0 && coeff < (1 << (radius - 1))) {
+                coeff -= (1 << radius) - 1;
             }
             coeff += (*previousDC);
             (*previousDC) = coeff;

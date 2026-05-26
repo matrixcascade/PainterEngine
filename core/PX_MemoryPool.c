@@ -8,7 +8,7 @@ px_void MP_UnreleaseInfo(px_memorypool *mp)
 	for (i=0;i<sizeof(mp->DEBUG_allocdata)/sizeof(mp->DEBUG_allocdata[0]);i++)
 	{
 		if(mp->DEBUG_allocdata[i].offset) 
-			printf("Warning:Unreleased memory in MID 0x%x\n",mp->DEBUG_allocdata[i].offset);
+			printf("Warning:Unreleased memory in MID 0x%x offset:%d\n", mp->DEBUG_allocdata[i].mid,mp->DEBUG_allocdata[i].offset);
 	}
 }
 
@@ -17,14 +17,18 @@ px_void MP_Catch(px_memorypool* mp, px_dword MID)
 	px_int i;
 	for (i = 0; i < sizeof(mp->DEBUG_allocdata_catch) / sizeof(mp->DEBUG_allocdata_catch[0]); i++)
 	{
-		if (mp->DEBUG_allocdata_catch[i]==-1)
+		if (mp->DEBUG_allocdata_catch[i] == -1)
 		{
-			mp->DEBUG_allocdata_catch[i]= MID;
+			mp->DEBUG_allocdata_catch[i] = MID;
 			break;
 		}
 	}
 }
 
+
+#else
+px_void MP_UnreleaseInfo(px_memorypool* mp)
+{}
 #endif
 
 
@@ -187,10 +191,9 @@ px_memorypool MP_Create( px_void *MemoryAddr,px_uint MemorySize )
 
 	MP.StartAddr=MemoryAddr;
 	MP.AllocAddr=MemoryAddr;
-	if(MemorySize)
+
 	MP.EndAddr=((px_uchar*)MemoryAddr)+MemorySize-1;
-	else
-	MP.EndAddr=MP.StartAddr;
+
 
 	MP.Size=MemorySize;
 	MP.FreeSize=MemorySize;
@@ -202,6 +205,7 @@ px_memorypool MP_Create( px_void *MemoryAddr,px_uint MemorySize )
 	PX_memset(MemoryAddr, 0, MemorySize);
 	for (DEBUG_i=0;DEBUG_i<sizeof(MP.DEBUG_allocdata)/sizeof(MP.DEBUG_allocdata[0]);DEBUG_i++)
 	{
+		MP.DEBUG_allocdata[DEBUG_i].mid = 0;
 		MP.DEBUG_allocdata[DEBUG_i].offset=0;
 		MP.DEBUG_allocdata[DEBUG_i].startAddr=PX_NULL;
 		MP.DEBUG_allocdata[DEBUG_i].endAddr=PX_NULL;
@@ -229,6 +233,7 @@ px_void * MP_Malloc(px_memorypool *MP, px_uint Size )
 	MP_Append_data *pAppend;
 	MemoryNode *itNode;
 	px_int DEBUG_i;
+	MP->DEBUG_MID_counter++;
 	if (MP==PX_NULL)
 	{
 		PX_ASSERTX("MemoryPool is NULL");
@@ -285,7 +290,7 @@ px_void * MP_Malloc(px_memorypool *MP, px_uint Size )
 				MP->DEBUG_allocdata[DEBUG_i].offset=(px_dword)((px_byte *)MemNode->StartAddr- (px_byte*)MP->StartAddr);
 				MP->DEBUG_allocdata[DEBUG_i].startAddr=MemNode->StartAddr;
 				MP->DEBUG_allocdata[DEBUG_i].endAddr=MemNode->EndAddr;
-
+				MP->DEBUG_allocdata[DEBUG_i].mid = (MP->DEBUG_MID_counter << 24) + MP->DEBUG_allocdata[DEBUG_i].offset;
 				break;
 			}
 		}
@@ -305,7 +310,13 @@ px_void * MP_Malloc(px_memorypool *MP, px_uint Size )
 				{
 					break;
 				}
-				PX_ASSERTIFX(MP->DEBUG_allocdata_catch[i] == (px_byte*)MemNode->StartAddr - (px_byte*)MP->StartAddr, "MemoryPool Memory cache");
+				else
+				{
+					if (MP->DEBUG_allocdata_catch[i] == (MP->DEBUG_MID_counter<<24)+(px_dword)((px_byte*)MemNode->StartAddr - (px_byte*)MP->StartAddr))
+					{
+						PX_ASSERTX("MemoryPool Memory catch");
+					}
+				}
 			}
 		} while (0);
 	#endif
@@ -327,7 +338,7 @@ px_void * MP_Malloc(px_memorypool *MP, px_uint Size )
 				MP->DEBUG_allocdata[DEBUG_i].offset = (px_dword)((px_byte*)MemNode->StartAddr - (px_byte*)MP->StartAddr);
 				MP->DEBUG_allocdata[DEBUG_i].startAddr=MemNode->StartAddr;
 				MP->DEBUG_allocdata[DEBUG_i].endAddr=MemNode->EndAddr;
-
+				MP->DEBUG_allocdata[DEBUG_i].mid= (MP->DEBUG_MID_counter << 24) + MP->DEBUG_allocdata[DEBUG_i].offset;
 				break;
 			}
 		}
@@ -347,7 +358,14 @@ px_void * MP_Malloc(px_memorypool *MP, px_uint Size )
 				{
 					break;
 				}
-				PX_ASSERTIFX(MP->DEBUG_allocdata_catch[i] == (px_byte*)MemNode->StartAddr - (px_byte*)MP->StartAddr, "MemoryPool Memory cache");
+				else
+				{
+					if (MP->DEBUG_allocdata_catch[i] ==(MP->DEBUG_MID_counter<<24)+(px_dword)((px_byte*)MemNode->StartAddr - (px_byte*)MP->StartAddr))
+					{
+						PX_ASSERTX("MemoryPool Memory cache");
+
+					}
+				}
 			}
 		} while (0);
 		#endif
@@ -410,7 +428,15 @@ px_void MP_Free(px_memorypool *MP, px_void *pAddress )
 			{
 				break;
 			}
-			PX_ASSERTIF(MP->DEBUG_allocdata_catch[i] == (px_byte*)pAddress - (px_byte*)MP->StartAddr);
+
+			else
+			{
+				if (MP->DEBUG_allocdata_catch[i] ==(MP->DEBUG_MID_counter<<24)+(px_dword)((px_byte*)pAddress - (px_byte*)MP->StartAddr))
+				{
+					PX_ASSERTX("MemoryPool Memory cache");
+				}
+			}
+
 		}
 	} while (0);
 
@@ -428,6 +454,7 @@ px_void MP_Free(px_memorypool *MP, px_void *pAddress )
 			MP->DEBUG_allocdata[DEBUG_i].offset=0;
 			MP->DEBUG_allocdata[DEBUG_i].startAddr=PX_NULL;
 			MP->DEBUG_allocdata[DEBUG_i].endAddr=PX_NULL;
+			MP->DEBUG_allocdata[DEBUG_i].mid = 0;
 			break;
 		}
 	}
@@ -495,26 +522,27 @@ px_void MP_Free(px_memorypool *MP, px_void *pAddress )
 
 		if (pcTempStart==(px_uchar *)FreeNode.EndAddr+1)
 		{
+			bExist = 1;
 			if(sIndex==0xffffffff)
 			{
-			sIndex=i;
-			//Refresh this node
-			itNode->StartAddr=FreeNode.StartAddr;
-			FreeNode=*itNode;
-			MP->FreeSize+=sizeof(MemoryNode);
+				sIndex=i;
+				//Refresh this node
+				itNode->StartAddr=FreeNode.StartAddr;
+				FreeNode=*itNode;
+				MP->FreeSize+=sizeof(MemoryNode);
 			}
 			else
 			{
 				MP->FreeSize+=sizeof(MemoryNode);
 				itNode->StartAddr=FreeNode.StartAddr;
 				PX_MemoryPoolRemoveFreeNode(MP,sIndex);
+				break;
 			}
-			bExist=1;
+			
 		}
-
-
-		if (pcTempEnd+1==(px_uchar *)FreeNode.StartAddr)
+		else if (pcTempEnd+1==(px_uchar *)FreeNode.StartAddr)
 		{
+			bExist = 1;
 			if(sIndex==0xffffffff)
 			{
 				sIndex=i;
@@ -528,11 +556,11 @@ px_void MP_Free(px_memorypool *MP, px_void *pAddress )
 				itNode->EndAddr=FreeNode.EndAddr;
 				MP->FreeSize+=sizeof(MemoryNode);
 				PX_MemoryPoolRemoveFreeNode(MP,sIndex);
-				
+				break;
 			}
-			bExist=1;
 		}
 	}
+
 	if(bExist==0)
 	{
 #if defined(PX_DEBUG_MODE) && defined(PX_MEMORYPOOL_DEBUG_CHECK)
@@ -541,13 +569,13 @@ px_void MP_Free(px_memorypool *MP, px_void *pAddress )
 			itNode=PX_MemoryPool_GetFreeTable(MP,i);
 			if (FreeNode.StartAddr>=itNode->StartAddr&&FreeNode.StartAddr<=itNode->EndAddr)
 			{
-				//alloc error
-				PX_ASSERT();
+				px_qword offset = (px_qword)((px_uchar*)FreeNode.StartAddr - (px_uchar*)MP->StartAddr);
+				PX_ASSERTX("double free error");
 				goto _END;
 			}
 			if (FreeNode.EndAddr>=itNode->StartAddr&&FreeNode.EndAddr<=itNode->EndAddr)
 			{
-				PX_ASSERT();
+				PX_ASSERTX("double free error");
 				goto _END;
 			}
 		}
@@ -570,11 +598,11 @@ _END:
 				if (MP->DEBUG_allocdata[DEBUG_i].startAddr>=itNode->StartAddr&&MP->DEBUG_allocdata[DEBUG_i].startAddr<=itNode->EndAddr)
 				{
 					//error free
-					PX_ASSERT();
+					PX_ASSERTX("MemoryPool Memory Address Corruption");
 				}
 				if (MP->DEBUG_allocdata[DEBUG_i].endAddr>=itNode->StartAddr&&MP->DEBUG_allocdata[DEBUG_i].endAddr<=itNode->EndAddr)
 				{
-					PX_ASSERT();
+					PX_ASSERTX("MemoryPool Memory Address Corruption");
 				}
 			}
 		}

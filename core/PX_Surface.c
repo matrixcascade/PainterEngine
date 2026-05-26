@@ -1,5 +1,35 @@
 #include "PX_Surface.h"
 
+/* ---- SIMD alpha-blend helpers ------------------------------------------ */
+#if defined(__SSE2__) || (defined(_MSC_VER) && (defined(_M_X64) || (_M_IX86_FP >= 2)))
+#  define PX_SURFACE_SSE2 1
+#  include <emmintrin.h>
+#else
+#  define PX_SURFACE_SSE2 0
+#endif
+
+#if defined(__ARM_NEON) || defined(__ARM_NEON__)
+#  define PX_SURFACE_NEON 1
+#  include <arm_neon.h>
+#else
+#  define PX_SURFACE_NEON 0
+#endif
+
+/*
+ * Alpha byte index inside a 32-bit pixel (byte offset 0-3):
+ *   RGBA / BGRA : alpha is byte 3  -> after _mm_unpacklo_epi8 it becomes word 3 or 7
+ *   ARGB / ABGR : alpha is byte 0  -> after _mm_unpacklo_epi8 it becomes word 0 or 4
+ */
+#if defined(PX_COLOR_FORMAT_RGBA) || defined(PX_COLOR_FORMAT_BGRA)
+#  define PX_ALPHA_BYTE_IDX  3
+#  define PX_ALPHA_SHUFFLE   _MM_SHUFFLE(3,3,3,3)   /* SSE2: broadcast word 3 */
+#  define PX_ALPHA_NEON_IDX  3                       /* NEON vtbl byte index within 8-byte half */
+#else  /* ARGB / ABGR */
+#  define PX_ALPHA_BYTE_IDX  0
+#  define PX_ALPHA_SHUFFLE   _MM_SHUFFLE(0,0,0,0)
+#  define PX_ALPHA_NEON_IDX  0
+#endif
+
 px_bool PX_SurfaceCreate(px_memorypool *mp,px_int width,px_int height,px_surface *surface)
 {
 	if (width>0&&height>0)
@@ -10,7 +40,7 @@ px_bool PX_SurfaceCreate(px_memorypool *mp,px_int width,px_int height,px_surface
 			surface->height = height;
 			surface->width = width;
 			surface->surfaceBuffer = (px_color*)p;
-			surface->MP = mp;
+			surface->mp = mp;
 			surface->limit_left = 0;
 			surface->limit_top = 0;
 			surface->limit_right = width - 1;
@@ -33,12 +63,12 @@ px_void PX_SurfaceUnlimit(px_surface* psurface)
 
 px_void PX_SurfaceFree(px_surface *psurface)
 {
-	if (psurface->surfaceBuffer==PX_NULL|| psurface->MP==PX_NULL)
+	if (psurface->surfaceBuffer==PX_NULL|| psurface->mp==PX_NULL)
 	{
 		PX_ASSERT();
 		return;
 	}
-	MP_Free(psurface->MP,psurface->surfaceBuffer);
+	MP_Free(psurface->mp,psurface->surfaceBuffer);
 	PX_memset(psurface, 0, sizeof(px_surface));
 
 }
@@ -167,11 +197,6 @@ px_void PX_SurfaceClear(px_surface *psurface, px_int left, px_int top, px_int ri
 	if (top<0)
 	{
 		top=0;
-	}
-
-	if (left>psurface->width-1)
-	{
-		return;
 	}
 
 	if (bottom<0)

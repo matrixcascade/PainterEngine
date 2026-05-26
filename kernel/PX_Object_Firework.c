@@ -167,21 +167,27 @@ PX_OBJECT_RENDER_FUNCTION(PX_Object_Firework01Render)
 PX_Object* PX_Object_Firework01Create(px_memorypool* mp, PX_Object* Parent, px_float x, px_float y)
 {
 	px_int i;
-	PX_Object_Firework01 desc;
-	PX_memset(&desc, 0, sizeof(desc));
-	desc.state = PX_FIREWORK01_STATE_RAISING;
-	desc.elapsed = 0;
-	for (i=0;i<PX_COUNTOF(desc.particals[0].array);i++)
+	PX_Object* pObject;
+	PX_Object_Firework01* pdesc;
+	pObject = PX_ObjectCreateEx(mp, Parent, x, y, 0, 0, 0, 0, PX_OBJECT_TYPE_FIREWORK, 0, PX_Object_Firework01Render, 0, 0, sizeof(PX_Object_Firework01));
+	if (!pObject)
 	{
-		desc.particals[0].array[i].x = x;
-		desc.particals[0].array[i].y = y;
+		return pObject;
 	}
-	desc.particals[0].vx = 0;
-	desc.particals[0].vy = -400;
-	desc.particals[0].size = 3;
-	desc.raisingTime=800+PX_rand()%800;
-	desc.particals[0].clr = PX_COLOR(255, 128 + (PX_rand() % 128), 128 + (PX_rand() % 128), 128 + (PX_rand() % 128));
-	return PX_ObjectCreateEx(mp, Parent, x, y, 0, 0, 0, 0, PX_OBJECT_TYPE_FIREWORK, 0, PX_Object_Firework01Render, 0, &desc, sizeof(desc));
+	pdesc = PX_ObjectGetDesc0(PX_Object_Firework01, pObject);
+	pdesc->state = PX_FIREWORK01_STATE_RAISING;
+	pdesc->elapsed = 0;
+	for (i=0;i<PX_COUNTOF(pdesc->particals[0].array);i++)
+	{
+		pdesc->particals[0].array[i].x = x;
+		pdesc->particals[0].array[i].y = y;
+	}
+	pdesc->particals[0].vx = 0;
+	pdesc->particals[0].vy = -400;
+	pdesc->particals[0].size = 3;
+	pdesc->raisingTime=800+PX_rand()%800;
+	pdesc->particals[0].clr = PX_COLOR(255, 128 + (PX_rand() % 128), 128 + (PX_rand() % 128), 128 + (PX_rand() % 128));
+	return pObject;
 }
 
 
@@ -339,50 +345,57 @@ PX_OBJECT_RENDER_FUNCTION(PX_Object_Firework02Render)
 
 PX_Object* PX_Object_Firework02Create(px_memorypool* mp, PX_Object* Parent, px_float x, px_float y)
 {
-	PX_Object_Firework02 desc;
+	PX_Object* pObject;
+	PX_Object_Firework02* pdesc;
 	px_int i, j;
-	for (i = 0; i < PX_FIREWORK02_ParticleNum; i++) 
+	pObject = PX_ObjectCreateEx(mp, Parent, x, y, 0, 0, 0, 0, 0, 0, PX_Object_Firework02Render, 0, 0, sizeof(PX_Object_Firework02));
+	if (!pObject)
 	{
-		desc.particleList[i].x = x;
-		desc.particleList[i].y = y;
-		desc.particleList[i].vx = 0;
-		desc.particleList[i].vy = -500;
+		return pObject;
+	}
+	pdesc = PX_ObjectGetDesc0(PX_Object_Firework02, pObject);
+	for (i = 0; i < PX_FIREWORK02_ParticleNum; i++)
+	{
+		pdesc->particleList[i].x = x;
+		pdesc->particleList[i].y = y;
+		pdesc->particleList[i].vx = 0;
+		pdesc->particleList[i].vy = -500;
 		for (j = 0; j < PX_FIREWORK02_PointNum; j++) {
-			desc.particleList[i].pointList[j].x = (px_int)x;
-			desc.particleList[i].pointList[j].y = (px_int)y;
+			pdesc->particleList[i].pointList[j].x = (px_int)x;
+			pdesc->particleList[i].pointList[j].y = (px_int)y;
 		}
 	}
-	desc.state = RISE;
-	desc.livingTime = 0;
-	desc.particleTime = 0;
-	//COLOR  
-	desc.type =(COLORTYPE)(PX_rand() % PX_FIREWORK02_CLRNUM);
-	switch (desc.type) {
+	pdesc->state = RISE;
+	pdesc->livingTime = 0;
+	pdesc->particleTime = 0;
+	//COLOR
+	pdesc->type =(COLORTYPE)(PX_rand() % PX_FIREWORK02_CLRNUM);
+	switch (pdesc->type) {
 	case FIRE:
-		desc.boomClr.ar = 0xff;
-		desc.boomClr.ab = 0x00;
-		desc.boomClr.ag = 0x00;
-		desc.boomClr.br = 0xff;
-		desc.boomClr.bg = 0xff;
-		desc.boomClr.bb = 0x00; break;
+		pdesc->boomClr.ar = 0xff;
+		pdesc->boomClr.ab = 0x00;
+		pdesc->boomClr.ag = 0x00;
+		pdesc->boomClr.br = 0xff;
+		pdesc->boomClr.bg = 0xff;
+		pdesc->boomClr.bb = 0x00; break;
 	case PINK:
-		desc.boomClr.ar = 0x29;
-		desc.boomClr.ab = 0xb3;
-		desc.boomClr.ag = 0x36;
-		desc.boomClr.br = 0xa5;
-		desc.boomClr.bg = 0xff;
-		desc.boomClr.bb = 0xad; break;
+		pdesc->boomClr.ar = 0x29;
+		pdesc->boomClr.ab = 0xb3;
+		pdesc->boomClr.ag = 0x36;
+		pdesc->boomClr.br = 0xa5;
+		pdesc->boomClr.bg = 0xff;
+		pdesc->boomClr.bb = 0xad; break;
 	case BULE:
-		desc.boomClr.ar = 0xf0;
-		desc.boomClr.ab = 0x00;
-		desc.boomClr.ag = 0xff;
-		desc.boomClr.br = 0xfa;
-		desc.boomClr.bg = 0xab;
-		desc.boomClr.bb = 0xff; break;
+		pdesc->boomClr.ar = 0xf0;
+		pdesc->boomClr.ab = 0x00;
+		pdesc->boomClr.ag = 0xff;
+		pdesc->boomClr.br = 0xfa;
+		pdesc->boomClr.bg = 0xab;
+		pdesc->boomClr.bb = 0xff; break;
 	default:
 		break;
 	}
-	return PX_ObjectCreateEx(mp, Parent, x, y, 0, 0, 0, 0, 0, 0, PX_Object_Firework02Render, 0, &desc, sizeof(desc));
+	return pObject;
 }
 
 typedef struct {
@@ -449,8 +462,8 @@ px_void ParticleUpdate(PX_Object_Firework03* pdesc, px_uint elapsed)
 		{
 			for (j = 0; j < PX_FIREWORK02_PointNum - 1; j++) 
 			{
-				pdesc->particleList[i].pointList[j].x = pdesc->particleList[i].pointList[j + 1].x + (PX_rand() % 2) - 1;
-				pdesc->particleList[i].pointList[j].y = pdesc->particleList[i].pointList[j + 1].y + (PX_rand() % 2) - 1;
+				pdesc->particleList[i].pointList[j].x = pdesc->particleList[i].pointList[j + 1].x + ((px_int)(PX_rand() % 2)) - 1;
+				pdesc->particleList[i].pointList[j].y = pdesc->particleList[i].pointList[j + 1].y + ((px_int)(PX_rand() % 2)) - 1;
 			}
 		}
 	}
@@ -505,57 +518,618 @@ PX_OBJECT_RENDER_FUNCTION(PX_Object_Firework03Render)
 
 PX_Object* PX_Object_Firework03Create(px_memorypool* mp, PX_Object* Parent, px_float x, px_float y)
 {
-	PX_Object_Firework03 desc = {0};
+	PX_Object* pObject;
+	PX_Object_Firework03* pdesc;
 	px_int i, j;
-	for (i = 0; i < PX_FIREWORK02_ParticleNum; i++) 
+	pObject = PX_ObjectCreateEx(mp, Parent, x, y, 0, 0, 0, 0, 0, 0, PX_Object_Firework03Render, 0, 0, sizeof(PX_Object_Firework03));
+	if (!pObject)
 	{
-		desc.particleList[i].x = x;
-		desc.particleList[i].y = y;
-		desc.particleList[i].vx = 0;
-		desc.particleList[i].vy = -500;
-		for (j = 0; j < PX_FIREWORK02_PointNum; j++) 
+		return pObject;
+	}
+	pdesc = PX_ObjectGetDesc0(PX_Object_Firework03, pObject);
+	for (i = 0; i < PX_FIREWORK02_ParticleNum; i++)
+	{
+		pdesc->particleList[i].x = x;
+		pdesc->particleList[i].y = y;
+		pdesc->particleList[i].vx = 0;
+		pdesc->particleList[i].vy = -500;
+		for (j = 0; j < PX_FIREWORK02_PointNum; j++)
 		{
-			desc.particleList[i].pointList[j].x = (px_int)x;
-			desc.particleList[i].pointList[j].y = (px_int)y;
+			pdesc->particleList[i].pointList[j].x = (px_int)x;
+			pdesc->particleList[i].pointList[j].y = (px_int)y;
 		}
 	}
-	desc.state = RISE;
-	desc.livingTime = 0;
-	desc.boomTime = 1000 - PX_rand() % 600;
-	desc.particleTime = 0;
-	desc.type = (COLORTYPE)(PX_rand() % 4);
-	switch (desc.type) 
+	pdesc->state = RISE;
+	pdesc->livingTime = 0;
+	pdesc->boomTime = 1000 - PX_rand() % 600;
+	pdesc->particleTime = 0;
+	pdesc->type = (COLORTYPE)(PX_rand() % 4);
+	switch (pdesc->type)
 	{
 	case FIRE:
-		desc.boomClr.ar = 0x00;
-		desc.boomClr.ag = 0xc8;
-		desc.boomClr.ab = 0x00;
-		desc.boomClr.br = 0xff;
-		desc.boomClr.bg = 0xff;
-		desc.boomClr.bb = 0xff; break;
+		pdesc->boomClr.ar = 0x00;
+		pdesc->boomClr.ag = 0xc8;
+		pdesc->boomClr.ab = 0x00;
+		pdesc->boomClr.br = 0xff;
+		pdesc->boomClr.bg = 0xff;
+		pdesc->boomClr.bb = 0xff; break;
 	case PINK:
-		desc.boomClr.ar = 0x00;
-		desc.boomClr.ag = 0xff;
-		desc.boomClr.ab = 0xb2;
-		desc.boomClr.br = 0xff;
-		desc.boomClr.bg = 0xff;
-		desc.boomClr.bb = 0xff; break;
+		pdesc->boomClr.ar = 0x00;
+		pdesc->boomClr.ag = 0xff;
+		pdesc->boomClr.ab = 0xb2;
+		pdesc->boomClr.br = 0xff;
+		pdesc->boomClr.bg = 0xff;
+		pdesc->boomClr.bb = 0xff; break;
 	case BULE:
-		desc.boomClr.ar = 0xf0;
-		desc.boomClr.ag = 0x00;
-		desc.boomClr.ab = 0xff;
-		desc.boomClr.br = 0xff;
-		desc.boomClr.bg = 0xff;
-		desc.boomClr.bb = 0xff; break;
+		pdesc->boomClr.ar = 0xf0;
+		pdesc->boomClr.ag = 0x00;
+		pdesc->boomClr.ab = 0xff;
+		pdesc->boomClr.br = 0xff;
+		pdesc->boomClr.bg = 0xff;
+		pdesc->boomClr.bb = 0xff; break;
 	case YELL:
-		desc.boomClr.ar = 0xff;
-		desc.boomClr.ag = 0xd0;
-		desc.boomClr.ab = 0x00;
-		desc.boomClr.br = 0xff;
-		desc.boomClr.bg = 0xff;
-		desc.boomClr.bb = 0xff; break;
+		pdesc->boomClr.ar = 0xff;
+		pdesc->boomClr.ag = 0xd0;
+		pdesc->boomClr.ab = 0x00;
+		pdesc->boomClr.br = 0xff;
+		pdesc->boomClr.bg = 0xff;
+		pdesc->boomClr.bb = 0xff; break;
 	default:
 		break;
 	}
-	return PX_ObjectCreateEx(mp, Parent, x, y, 0, 0, 0, 0, 0, 0, PX_Object_Firework03Render, 0, &desc, sizeof(desc));
+	return pObject;
+}
+
+
+/////////////////////////////////////////////////////////////////////////
+// Firework04: Double burst - first explosion triggers secondary explosions
+/////////////////////////////////////////////////////////////////////////
+
+#define PX_FIREWORK04_TRAIL_LEN 32
+#define PX_FIREWORK04_PRIMARY_NUM 16
+#define PX_FIREWORK04_SECONDARY_NUM 12
+#define PX_FIREWORK04_TOTAL_NUM (PX_FIREWORK04_PRIMARY_NUM * (1 + PX_FIREWORK04_SECONDARY_NUM))
+
+typedef enum {
+	PX_FIREWORK04_STATE_RAISING,
+	PX_FIREWORK04_STATE_BLOOM1,
+	PX_FIREWORK04_STATE_BLOOM2,
+}PX_FIREWORK04_STATE;
+
+typedef struct {
+	px_point trail[PX_FIREWORK04_TRAIL_LEN];
+	px_float vx, vy;
+	px_float size;
+	px_color clr;
+	px_dword trailDelay;
+}PX_Firework04_Particle;
+
+typedef struct {
+	PX_Firework04_Particle raising;
+	PX_Firework04_Particle primary[PX_FIREWORK04_PRIMARY_NUM];
+	PX_Firework04_Particle secondary[PX_FIREWORK04_PRIMARY_NUM * PX_FIREWORK04_SECONDARY_NUM];
+	PX_FIREWORK04_STATE state;
+	px_dword elapsed;
+	px_dword raisingTime;
+	px_color clr1;
+	px_color clr2;
+}PX_Object_Firework04;
+
+static void PX_Firework04_ParticleUpdate(PX_Firework04_Particle* p, px_float gravity, px_float drag, px_dword elapsed)
+{
+	px_dword atom;
+	px_int i;
+	while (elapsed)
+	{
+		atom = elapsed > 10 ? 10 : elapsed;
+		elapsed -= atom;
+
+		p->trail[0].x += p->vx * atom / 1000.f;
+		p->trail[0].y += p->vy * atom / 1000.f;
+		p->vx -= p->vx * drag * atom / 1000.f;
+		p->vy -= p->vy * drag * atom / 1000.f;
+		p->vy += gravity * atom / 1000.f;
+
+		p->trailDelay += atom;
+		while (p->trailDelay > 20)
+		{
+			p->trailDelay -= 20;
+			for (i = PX_FIREWORK04_TRAIL_LEN - 1; i > 0; i--)
+				p->trail[i] = p->trail[i - 1];
+		}
+	}
+}
+
+static void PX_Firework04_ParticleRender(PX_Firework04_Particle* p, px_surface* psurface, px_float alphaScale)
+{
+	px_int i;
+	for (i = PX_FIREWORK04_TRAIL_LEN - 1; i >= 0; i--)
+	{
+		px_float scale = (PX_FIREWORK04_TRAIL_LEN - i) * 1.0f / PX_FIREWORK04_TRAIL_LEN;
+		px_color c = p->clr;
+		c._argb.a = (px_uchar)(c._argb.a * scale * alphaScale);
+		PX_GeoDrawPenCircleDecay(psurface, p->trail[i].x, p->trail[i].y, p->size * scale, c, 1);
+	}
+}
+
+PX_OBJECT_RENDER_FUNCTION(PX_Object_Firework04Render)
+{
+	px_int i, j, k;
+	PX_Object_Firework04* pdesc = PX_ObjectGetDesc(PX_Object_Firework04, pObject);
+	pdesc->elapsed += elapsed;
+
+	if (pdesc->state == PX_FIREWORK04_STATE_RAISING)
+	{
+		PX_Firework04_ParticleUpdate(&pdesc->raising, 0, 0.5f, elapsed);
+		PX_Firework04_ParticleRender(&pdesc->raising, psurface, 1.0f);
+
+		if (pdesc->elapsed >= pdesc->raisingTime)
+		{
+			px_float cx = pdesc->raising.trail[0].x;
+			px_float cy = pdesc->raising.trail[0].y;
+			pdesc->state = PX_FIREWORK04_STATE_BLOOM1;
+			pdesc->elapsed = 0;
+
+			for (i = 0; i < PX_FIREWORK04_PRIMARY_NUM; i++)
+			{
+				px_float angle = 360.0f * i / PX_FIREWORK04_PRIMARY_NUM + ((px_int)(PX_rand() % 30) - 15);
+				px_float speed = 200.0f + PX_rand() % 150;
+				for (j = 0; j < PX_FIREWORK04_TRAIL_LEN; j++)
+				{
+					pdesc->primary[i].trail[j].x = cx;
+					pdesc->primary[i].trail[j].y = cy;
+				}
+				pdesc->primary[i].vx = speed * PX_sin_angle(angle);
+				pdesc->primary[i].vy = speed * PX_cos_angle(angle);
+				pdesc->primary[i].size = 5.0f + (PX_rand() % 30) / 10.0f;
+				pdesc->primary[i].clr = pdesc->clr1;
+				pdesc->primary[i].clr._argb.r = (px_uchar)(pdesc->clr1._argb.r - (px_int)(PX_rand() % 40));
+				pdesc->primary[i].clr._argb.g = (px_uchar)(pdesc->clr1._argb.g - (px_int)(PX_rand() % 40));
+				pdesc->primary[i].trailDelay = 0;
+			}
+		}
+	}
+	else if (pdesc->state == PX_FIREWORK04_STATE_BLOOM1)
+	{
+		px_float alpha = 1.0f;
+		if (pdesc->elapsed > 600)
+			alpha = (1000.0f - pdesc->elapsed) / 400.0f;
+		if (alpha < 0) alpha = 0;
+
+		for (i = 0; i < PX_FIREWORK04_PRIMARY_NUM; i++)
+		{
+			PX_Firework04_ParticleUpdate(&pdesc->primary[i], 50, 1.5f, elapsed);
+			PX_Firework04_ParticleRender(&pdesc->primary[i], psurface, alpha);
+		}
+
+		if (pdesc->elapsed >= 500)
+		{
+			pdesc->state = PX_FIREWORK04_STATE_BLOOM2;
+			pdesc->elapsed = 0;
+
+			for (i = 0; i < PX_FIREWORK04_PRIMARY_NUM; i++)
+			{
+				px_float cx = pdesc->primary[i].trail[0].x;
+				px_float cy = pdesc->primary[i].trail[0].y;
+				px_color subClr = PX_COLOR(255, 128 + PX_rand() % 128, 128 + PX_rand() % 128, 128 + PX_rand() % 128);
+				for (k = 0; k < PX_FIREWORK04_SECONDARY_NUM; k++)
+				{
+					px_int idx = i * PX_FIREWORK04_SECONDARY_NUM + k;
+					px_float angle = 360.0f * k / PX_FIREWORK04_SECONDARY_NUM + ((px_int)(PX_rand() % 40) - 20);
+					px_float speed = 80.0f + PX_rand() % 160;
+					for (j = 0; j < PX_FIREWORK04_TRAIL_LEN; j++)
+					{
+						pdesc->secondary[idx].trail[j].x = cx;
+						pdesc->secondary[idx].trail[j].y = cy;
+					}
+					pdesc->secondary[idx].vx = speed * PX_sin_angle(angle);
+					pdesc->secondary[idx].vy = speed * PX_cos_angle(angle);
+					pdesc->secondary[idx].size = 2.0f + (PX_rand() % 20) / 10.0f;
+					pdesc->secondary[idx].clr = subClr;
+					pdesc->secondary[idx].clr._argb.r = (px_uchar)(subClr._argb.r - (px_int)(PX_rand() % 30));
+					pdesc->secondary[idx].clr._argb.g = (px_uchar)(subClr._argb.g - (px_int)(PX_rand() % 30));
+					pdesc->secondary[idx].trailDelay = 0;
+				}
+			}
+		}
+	}
+	else if (pdesc->state == PX_FIREWORK04_STATE_BLOOM2)
+	{
+		px_float alpha;
+		if (pdesc->elapsed > 2000) pdesc->elapsed = 2000;
+		alpha = (2000.0f - pdesc->elapsed) / 2000.0f;
+
+		for (i = 0; i < PX_FIREWORK04_PRIMARY_NUM * PX_FIREWORK04_SECONDARY_NUM; i++)
+		{
+			PX_Firework04_ParticleUpdate(&pdesc->secondary[i], 80, 1.2f, elapsed);
+			PX_Firework04_ParticleRender(&pdesc->secondary[i], psurface, alpha);
+		}
+
+		if (pdesc->elapsed >= 2000)
+		{
+			PX_ObjectDelayDelete(pObject);
+		}
+	}
+}
+
+PX_Object* PX_Object_Firework04Create(px_memorypool* mp, PX_Object* Parent, px_float x, px_float y)
+{
+	px_int i;
+	PX_Object* pObject;
+	PX_Object_Firework04 *pdesc;
+	pObject = PX_ObjectCreateEx(mp, Parent, x, y, 0, 0, 0, 0, 0, 0, PX_Object_Firework04Render, 0, 0, sizeof(PX_Object_Firework04));
+	if (!pObject)
+	{
+		return pObject;
+	}
+	pdesc = PX_ObjectGetDesc0(PX_Object_Firework04, pObject);
+	pdesc->state = PX_FIREWORK04_STATE_RAISING;
+	pdesc->elapsed = 0;
+	pdesc->raisingTime = 700 + PX_rand() % 600;
+
+	for (i = 0; i < PX_FIREWORK04_TRAIL_LEN; i++)
+	{
+		pdesc->raising.trail[i].x = x;
+		pdesc->raising.trail[i].y = y;
+	}
+	pdesc->raising.vx = ((px_int)(PX_rand() % 60) - 30) * 1.0f;
+	pdesc->raising.vy = -450;
+	pdesc->raising.size = 3;
+	pdesc->raising.clr = PX_COLOR(255, 255, 200, 100);
+
+	pdesc->clr1 = PX_COLOR(255, 128 + PX_rand() % 128, 128 + PX_rand() % 128, 128 + PX_rand() % 128);
+	pdesc->clr2 = PX_COLOR(255, 128 + PX_rand() % 128, 128 + PX_rand() % 128, 128 + PX_rand() % 128);
+	return pObject;
+	 
+}
+
+
+/////////////////////////////////////////////////////////////////////////
+// Firework05: Spiral helix - particles travel in spiral/helix pattern
+/////////////////////////////////////////////////////////////////////////
+
+#define PX_FIREWORK05_TRAIL_LEN 48
+#define PX_FIREWORK05_ARM_NUM 6
+#define PX_FIREWORK05_PARTICLES_PER_ARM 8
+#define PX_FIREWORK05_TOTAL (PX_FIREWORK05_ARM_NUM * PX_FIREWORK05_PARTICLES_PER_ARM)
+
+typedef enum {
+	PX_FIREWORK05_STATE_RAISING,
+	PX_FIREWORK05_STATE_SPIRAL,
+}PX_FIREWORK05_STATE;
+
+typedef struct {
+	px_point trail[PX_FIREWORK05_TRAIL_LEN];
+	px_float angle;
+	px_float radius;
+	px_float radialSpeed;
+	px_float angularSpeed;
+	px_float size;
+	px_color clr;
+	px_dword trailDelay;
+}PX_Firework05_Particle;
+
+typedef struct {
+	PX_Firework05_Particle raising;
+	PX_Firework05_Particle particles[PX_FIREWORK05_TOTAL];
+	PX_FIREWORK05_STATE state;
+	px_dword elapsed;
+	px_dword raisingTime;
+	px_float centerX, centerY;
+}PX_Object_Firework05;
+
+static void PX_Firework05_RaisingUpdate(PX_Firework05_Particle* p, px_dword elapsed)
+{
+	px_dword atom;
+	px_int i;
+	while (elapsed)
+	{
+		atom = elapsed > 10 ? 10 : elapsed;
+		elapsed -= atom;
+
+		p->trail[0].x += 0;
+		p->trail[0].y += p->angularSpeed * atom / 1000.f;
+		p->angularSpeed += 200 * atom / 1000.f;
+
+		p->trailDelay += atom;
+		while (p->trailDelay > 20)
+		{
+			p->trailDelay -= 20;
+			for (i = PX_FIREWORK05_TRAIL_LEN - 1; i > 0; i--)
+				p->trail[i] = p->trail[i - 1];
+		}
+	}
+}
+
+static void PX_Firework05_SpiralUpdate(PX_Firework05_Particle* p, px_float cx, px_float cy, px_dword elapsed)
+{
+	px_dword atom;
+	px_int i;
+	while (elapsed)
+	{
+		atom = elapsed > 10 ? 10 : elapsed;
+		elapsed -= atom;
+
+		p->angle += p->angularSpeed * atom / 1000.f;
+		p->radius += p->radialSpeed * atom / 1000.f;
+		p->radialSpeed -= p->radialSpeed * 0.3f * atom / 1000.f;
+
+		p->trail[0].x = cx + p->radius * PX_sin_angle(p->angle);
+		p->trail[0].y = cy + p->radius * PX_cos_angle(p->angle);
+
+		p->trailDelay += atom;
+		while (p->trailDelay > 15)
+		{
+			p->trailDelay -= 15;
+			for (i = PX_FIREWORK05_TRAIL_LEN - 1; i > 0; i--)
+				p->trail[i] = p->trail[i - 1];
+		}
+	}
+}
+
+static void PX_Firework05_TrailRender(PX_Firework05_Particle* p, px_surface* psurface, px_float alphaScale)
+{
+	px_int i;
+	for (i = PX_FIREWORK05_TRAIL_LEN - 1; i >= 0; i--)
+	{
+		px_float scale = (PX_FIREWORK05_TRAIL_LEN - i) * 1.0f / PX_FIREWORK05_TRAIL_LEN;
+		px_color c = p->clr;
+		c._argb.a = (px_uchar)(c._argb.a * scale * alphaScale);
+		PX_GeoDrawPenCircleDecay(psurface, p->trail[i].x, p->trail[i].y, p->size * scale, c, 1);
+	}
+}
+
+PX_OBJECT_RENDER_FUNCTION(PX_Object_Firework05Render)
+{
+	px_int i;
+	PX_Object_Firework05* pdesc = PX_ObjectGetDesc(PX_Object_Firework05, pObject);
+	pdesc->elapsed += elapsed;
+
+	if (pdesc->state == PX_FIREWORK05_STATE_RAISING)
+	{
+		PX_Firework05_RaisingUpdate(&pdesc->raising, elapsed);
+		PX_Firework05_TrailRender(&pdesc->raising, psurface, 1.0f);
+
+		if (pdesc->elapsed >= pdesc->raisingTime)
+		{
+			px_int arm, p_idx;
+			px_color armColors[PX_FIREWORK05_ARM_NUM];
+			pdesc->centerX = pdesc->raising.trail[0].x;
+			pdesc->centerY = pdesc->raising.trail[0].y;
+			pdesc->state = PX_FIREWORK05_STATE_SPIRAL;
+			pdesc->elapsed = 0;
+
+			for (i = 0; i < PX_FIREWORK05_ARM_NUM; i++)
+			{
+				armColors[i] = PX_COLOR(255, 128 + PX_rand() % 128, 128 + PX_rand() % 128, 128 + PX_rand() % 128);
+			}
+
+			for (arm = 0; arm < PX_FIREWORK05_ARM_NUM; arm++)
+			{
+				px_float baseAngle = 360.0f * arm / PX_FIREWORK05_ARM_NUM;
+				for (p_idx = 0; p_idx < PX_FIREWORK05_PARTICLES_PER_ARM; p_idx++)
+				{
+					px_int idx = arm * PX_FIREWORK05_PARTICLES_PER_ARM + p_idx;
+					px_int j;
+					for (j = 0; j < PX_FIREWORK05_TRAIL_LEN; j++)
+					{
+						pdesc->particles[idx].trail[j].x = pdesc->centerX;
+						pdesc->particles[idx].trail[j].y = pdesc->centerY;
+					}
+					pdesc->particles[idx].angle = baseAngle;
+					pdesc->particles[idx].radius = 0;
+					pdesc->particles[idx].radialSpeed = 100.0f + p_idx * 30.0f + PX_rand() % 30;
+					pdesc->particles[idx].angularSpeed = 200.0f + PX_rand() % 100;
+					pdesc->particles[idx].size = 5.0f - p_idx * 0.4f;
+					pdesc->particles[idx].clr = armColors[arm];
+					pdesc->particles[idx].trailDelay = 0;
+				}
+			}
+		}
+	}
+	else
+	{
+		px_float alpha;
+		if (pdesc->elapsed > 3500) pdesc->elapsed = 3500;
+		alpha = pdesc->elapsed < 2500 ? 1.0f : (3500.0f - pdesc->elapsed) / 1000.0f;
+		if (alpha < 0) alpha = 0;
+
+		for (i = 0; i < PX_FIREWORK05_TOTAL; i++)
+		{
+			PX_Firework05_SpiralUpdate(&pdesc->particles[i], pdesc->centerX, pdesc->centerY, elapsed);
+			PX_Firework05_TrailRender(&pdesc->particles[i], psurface, alpha);
+		}
+
+		if (pdesc->elapsed >= 3500)
+		{
+			PX_ObjectDelayDelete(pObject);
+		}
+	}
+}
+
+PX_Object* PX_Object_Firework05Create(px_memorypool* mp, PX_Object* Parent, px_float x, px_float y)
+{
+	px_int i;
+	PX_Object* pObject;
+	PX_Object_Firework05* pdesc;
+	pObject = PX_ObjectCreateEx(mp, Parent, x, y, 0, 0, 0, 0, 0, 0, PX_Object_Firework05Render, 0, 0, sizeof(PX_Object_Firework05));
+	if (!pObject)
+	{
+		return pObject;
+	}
+	pdesc = PX_ObjectGetDesc0(PX_Object_Firework05, pObject);
+	pdesc->state = PX_FIREWORK05_STATE_RAISING;
+	pdesc->elapsed = 0;
+	pdesc->raisingTime = 700 + PX_rand() % 600;
+
+	for (i = 0; i < PX_FIREWORK05_TRAIL_LEN; i++)
+	{
+		pdesc->raising.trail[i].x = x;
+		pdesc->raising.trail[i].y = y;
+	}
+	pdesc->raising.angularSpeed = -500;
+	pdesc->raising.size = 3;
+	pdesc->raising.clr = PX_COLOR(255, 255, 220, 128);
+
+	return pObject;
+}
+
+
+/////////////////////////////////////////////////////////////////////////
+// Firework06: Willow/waterfall - particles burst then droop downward
+/////////////////////////////////////////////////////////////////////////
+
+#define PX_FIREWORK06_TRAIL_LEN 40
+#define PX_FIREWORK06_PARTICLE_NUM 128
+
+typedef enum {
+	PX_FIREWORK06_STATE_RAISING,
+	PX_FIREWORK06_STATE_BLOOMING,
+}PX_FIREWORK06_STATE;
+
+typedef struct {
+	px_point trail[PX_FIREWORK06_TRAIL_LEN];
+	px_float vx, vy;
+	px_float size;
+	px_color clr;
+	px_dword trailDelay;
+}PX_Firework06_Particle;
+
+typedef struct {
+	PX_Firework06_Particle raising;
+	PX_Firework06_Particle particles[PX_FIREWORK06_PARTICLE_NUM];
+	PX_FIREWORK06_STATE state;
+	px_dword elapsed;
+	px_dword raisingTime;
+}PX_Object_Firework06;
+
+static void PX_Firework06_ParticlePhysics(PX_Firework06_Particle* p, px_float gravity, px_float drag, px_dword elapsed)
+{
+	px_dword atom;
+	px_int i;
+	while (elapsed)
+	{
+		atom = elapsed > 10 ? 10 : elapsed;
+		elapsed -= atom;
+
+		p->trail[0].x += p->vx * atom / 1000.f;
+		p->trail[0].y += p->vy * atom / 1000.f;
+		p->vx -= p->vx * drag * atom / 1000.f;
+		p->vy -= p->vy * drag * atom / 1000.f;
+		p->vy += gravity * atom / 1000.f;
+
+		p->trailDelay += atom;
+		while (p->trailDelay > 25)
+		{
+			p->trailDelay -= 25;
+			for (i = PX_FIREWORK06_TRAIL_LEN - 1; i > 0; i--)
+				p->trail[i] = p->trail[i - 1];
+		}
+	}
+}
+
+static void PX_Firework06_TrailRender(PX_Firework06_Particle* p, px_surface* psurface, px_float alphaScale)
+{
+	px_int i;
+	for (i = PX_FIREWORK06_TRAIL_LEN - 1; i >= 0; i--)
+	{
+		px_float scale = (PX_FIREWORK06_TRAIL_LEN - i) * 1.0f / PX_FIREWORK06_TRAIL_LEN;
+		px_color c = p->clr;
+		px_uchar a = (px_uchar)(c._argb.a * scale * alphaScale);
+		c._argb.a = a;
+		PX_GeoDrawPenCircleDecay(psurface, p->trail[i].x, p->trail[i].y, p->size * (0.3f + 0.7f * scale), c, 1);
+	}
+}
+
+PX_OBJECT_RENDER_FUNCTION(PX_Object_Firework06Render)
+{
+	px_int i;
+	PX_Object_Firework06* pdesc = PX_ObjectGetDesc(PX_Object_Firework06, pObject);
+	pdesc->elapsed += elapsed;
+
+	if (pdesc->state == PX_FIREWORK06_STATE_RAISING)
+	{
+		PX_Firework06_ParticlePhysics(&pdesc->raising, 0, 0.5f, elapsed);
+		PX_Firework06_TrailRender(&pdesc->raising, psurface, 1.0f);
+
+		if (pdesc->elapsed >= pdesc->raisingTime)
+		{
+			px_float cx = pdesc->raising.trail[0].x;
+			px_float cy = pdesc->raising.trail[0].y;
+			px_color baseClr1 = PX_COLOR(255, 180 + PX_rand() % 76, 140 + PX_rand() % 116, 60 + PX_rand() % 100);
+			px_color baseClr2 = PX_COLOR(255, 180 + PX_rand() % 76, 140 + PX_rand() % 116, 60 + PX_rand() % 100);
+			pdesc->state = PX_FIREWORK06_STATE_BLOOMING;
+			pdesc->elapsed = 0;
+
+			for (i = 0; i < PX_FIREWORK06_PARTICLE_NUM; i++)
+			{
+				px_int j;
+				px_float angle = (PX_rand() % 3600) / 10.0f;
+				px_float speed = 100.0f + PX_rand() % 250;
+				px_float t = (PX_rand() % 100) / 100.0f;
+				px_color pclr;
+				for (j = 0; j < PX_FIREWORK06_TRAIL_LEN; j++)
+				{
+					pdesc->particles[i].trail[j].x = cx;
+					pdesc->particles[i].trail[j].y = cy;
+				}
+				pdesc->particles[i].vx = speed * PX_sin_angle(angle) + ((px_int)(PX_rand() % 40) - 20);
+				pdesc->particles[i].vy = speed * PX_cos_angle(angle) - 30 - (px_int)(PX_rand() % 40);
+				pdesc->particles[i].size = 2.0f + (PX_rand() % 40) / 10.0f;
+				pclr._argb.a = 255;
+				pclr._argb.r = (px_uchar)(baseClr1._argb.r * (1 - t) + baseClr2._argb.r * t);
+				pclr._argb.g = (px_uchar)(baseClr1._argb.g * (1 - t) + baseClr2._argb.g * t);
+				pclr._argb.b = (px_uchar)(baseClr1._argb.b * (1 - t) + baseClr2._argb.b * t);
+				pdesc->particles[i].clr = pclr;
+				pdesc->particles[i].trailDelay = 0;
+			}
+		}
+	}
+	else
+	{
+		px_float alpha;
+		px_dword bloomElapsed = pdesc->elapsed;
+		if (bloomElapsed > 4000) bloomElapsed = 4000;
+		alpha = bloomElapsed < 2500 ? 1.0f : (4000.0f - bloomElapsed) / 1500.0f;
+		if (alpha < 0) alpha = 0;
+
+		for (i = 0; i < PX_FIREWORK06_PARTICLE_NUM; i++)
+		{
+			PX_Firework06_ParticlePhysics(&pdesc->particles[i], 150, 0.6f, elapsed);
+			PX_Firework06_TrailRender(&pdesc->particles[i], psurface, alpha);
+		}
+
+		if (pdesc->elapsed >= 4000)
+		{
+			PX_ObjectDelayDelete(pObject);
+		}
+	}
+}
+
+PX_Object* PX_Object_Firework06Create(px_memorypool* mp, PX_Object* Parent, px_float x, px_float y)
+{
+	px_int i;
+	PX_Object* pObject;
+	PX_Object_Firework06* pdesc;
+	pObject = PX_ObjectCreateEx(mp, Parent, x, y, 0, 0, 0, 0, 0, 0, PX_Object_Firework06Render, 0, 0, sizeof(PX_Object_Firework06));
+	if (!pObject)
+	{
+		return pObject;
+	}
+	pdesc = PX_ObjectGetDesc0(PX_Object_Firework06, pObject);
+	pdesc->state = PX_FIREWORK06_STATE_RAISING;
+	pdesc->elapsed = 0;
+	pdesc->raisingTime = 800 + PX_rand() % 500;
+
+	for (i = 0; i < PX_FIREWORK06_TRAIL_LEN; i++)
+	{
+		pdesc->raising.trail[i].x = x;
+		pdesc->raising.trail[i].y = y;
+	}
+	pdesc->raising.vx = 0;
+	pdesc->raising.vy = -420;
+	pdesc->raising.size = 3;
+	pdesc->raising.clr = PX_COLOR(255, 255, 200, 100);
+
+	return pObject;
 }

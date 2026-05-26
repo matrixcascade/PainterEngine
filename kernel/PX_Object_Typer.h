@@ -33,6 +33,7 @@ typedef struct
 	px_dword reg_delay;
 	px_double reg_elapsed;
 	px_double reg_speed;
+	px_bool reg_isend;
 	PX_OBJECT_TYPER_STATE state;
 }PX_Object_Typer;
 
@@ -42,8 +43,11 @@ PX_Object_Typer* PX_Object_GetTyper(PX_Object* pObject);
 px_void PX_Object_TyperPlay(PX_Object* pObject);
 px_void PX_Object_TyperPause(PX_Object* pObject);
 px_void PX_Object_TyperReset(PX_Object* pObject);
+px_bool PX_Object_TyperIsEnd(PX_Object* pObject);
 px_void PX_Object_TyperSetSpeed(PX_Object* pObject, px_double reg_speed);
 px_bool PX_Object_TyperPrintPayload(PX_Object *pObject, const px_char * payload);
 px_void PX_Object_TyperClear(PX_Object* pObject);
+px_void PX_Object_TyperSetYSpacer(PX_Object* pObject, px_int y_spacer);
+px_void PX_Object_TyperSetXSpacer(PX_Object* pObject, px_int x_spacer);
 #endif
 

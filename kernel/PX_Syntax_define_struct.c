@@ -1,124 +1,58 @@
 #include "PX_Syntax_define_struct.h"
-PX_SYNTAX_FUNCTION(PX_Syntax_define_struct_begin)
+
+static px_int unnamed_struct_count = 0;
+
+PX_SYNTAX_FUNCTION(PX_Syntax_define_struct_identifier_to_struct_name)
 {
-	px_abi* pabi = PX_Syntax_NewAbi(pSyntax, "define_struct", pSyntax->reg_lifetime);
-	if (!pabi)
-	{
-		PX_Syntax_Terminate(pSyntax, "Memory Error");
-		return PX_FALSE;
-	}
-
-	if (!PX_AbiSet_int(pabi, "member_count", 0))
-	{
-		PX_AbiFree(pabi);
-		PX_Syntax_Terminate(pSyntax, "Memory Error");
-		return PX_FALSE;
-	}
-
-	if (!PX_AbiSet_int(pabi, "size", 0))
-	{
-		PX_AbiFree(pabi);
-		PX_Syntax_Terminate(pSyntax, "Memory Error");
-		return PX_FALSE;
-	}
-	return PX_TRUE;
-
-}
-
-PX_SYNTAX_FUNCTION(PX_Syntax_define_struct_name)
-{
+	px_abi *pidentifier_abi;
+	px_int source_index,begin,end;
+	PX_ASSERTIFX(!PX_Syntax_CheckLastAbiName(pSyntax, "identifier"), "Error: struct name should be identifier");
 	if (!PX_Syntax_RenameLastAbi(pSyntax, "struct_name"))
-		return PX_FALSE;
-	return PX_TRUE;
-}
-
-PX_SYNTAX_FUNCTION(PX_Syntax_define_struct_unname)
-{
-	px_abi* pnewabi = PX_Syntax_NewAbi(pSyntax, "struct_name", pSyntax->reg_lifetime);
-	if (!pnewabi)
 	{
-		PX_Syntax_Terminate(pSyntax, "Memory Error");
+		PX_Syntax_Terminate(pSyntax, "ast:error:unexpected struct name");
 		return PX_FALSE;
 	}
-	if (!PX_AbiSet_string(pnewabi, "value", PX_Syntax_AllocUnnamed(pSyntax)))
+	pidentifier_abi = PX_Syntax_GetAbiLast(pSyntax);
+	source_index = PX_AbiGetValue_int(pidentifier_abi, "source_index");
+	begin = PX_AbiGetValue_int(pidentifier_abi, "begin");
+	end = PX_AbiGetValue_int(pidentifier_abi, "end");
+	if(!PX_Syntax_NewMapToken(pSyntax, source_index, begin,source_index, end, PX_Syntax_GetRandomColor(1232), "struct_name"))
 	{
-		PX_Syntax_Terminate(pSyntax, "Memory Error");
+		PX_Syntax_Terminate(pSyntax, "ast:error:out of memory");
 		return PX_FALSE;
 	}
 	return PX_TRUE;
-}
-
-PX_SYNTAX_FUNCTION(PX_Syntax_define_struct_merge_name)
-{
-	if (!PX_Syntax_MergeLast2AbiToSecondLast(pSyntax))
-	{
-		PX_Syntax_Terminate(pSyntax, "Memory Error");
-		return PX_FALSE;
-	}
-	return PX_TRUE;
-}
-
-PX_SYNTAX_FUNCTION(PX_Syntax_define_struct_merge_unnamed)
-{
-	px_abi* plastabi;
-	plastabi = PX_Syntax_GetAbiLast(pSyntax);
-	if (!plastabi)
-	{
-		PX_Syntax_Terminate(pSyntax, "Memory Error");
-		return PX_FALSE;
-	}
-	if (!PX_AbiSet_string(plastabi, "struct_name.value", PX_Syntax_AllocUnnamed(pSyntax)))
-	{
-		PX_Syntax_Terminate(pSyntax, "Memory Error");
-		return PX_FALSE;
-	}
-	return PX_TRUE;
-}
-
-PX_SYNTAX_FUNCTION(PX_Syntax_define_struct_merge_declare_variable)
-{
-	px_int* pmember_count,*pvariable_size,*pstruct_size;
-	px_abi* plastabi = PX_Syntax_GetAbiLast(pSyntax);
-	px_int  define_struct_index = PX_Syntax_FindAbiIndexFromBackward(pSyntax, "define_struct");
-	px_abi* psecondlastabi = PX_Syntax_GetAbiByIndex(pSyntax, define_struct_index);
-	
-	PX_ASSERTIFX(plastabi == PX_NULL, "Error: last abi not found");
-	PX_ASSERTIFX(psecondlastabi == PX_NULL, "Error: second last abi not found");
-	PX_ASSERTIFX(!PX_Syntax_CheckAbiName(plastabi, "variable"), "Error: last abi is not variable");
-	PX_ASSERTIFX(!PX_Syntax_CheckAbiName(psecondlastabi, "define_struct"), "Error: second last abi is not define_struct");
-	pmember_count = PX_AbiGet_int(psecondlastabi, "member_count");
-	PX_ASSERTIFX(!pmember_count, "Error: member count not found");
-	pvariable_size = PX_AbiGet_int(plastabi, "size");
-	PX_ASSERTIFX(pvariable_size == PX_NULL, "Error: last abi not found");
-	pstruct_size = PX_AbiGet_int(psecondlastabi, "size");
-	PX_ASSERTIFX(pstruct_size == PX_NULL, "Error: second last abi not found");
-
-	if (!PX_Syntax_MergeLastToIndexWithName(pSyntax, define_struct_index, PX_itos(*pmember_count, 10).data))
-	{
-		PX_Syntax_Terminate(pSyntax, "Memory Error");
-		return PX_FALSE;
-	}
-	define_struct_index = PX_Syntax_FindAbiIndexFromBackward(pSyntax, "define_struct");
-	psecondlastabi = PX_Syntax_GetAbiByIndex(pSyntax, define_struct_index);
-	if (!PX_AbiSet_int(psecondlastabi, "member_count", (*pmember_count)+1))
-	{
-		PX_Syntax_Terminate(pSyntax, "Memory Error");
-		return PX_FALSE;
-	}
-	if (!PX_AbiSet_int(psecondlastabi, "size",*pstruct_size+ *pvariable_size))
-	{
-		PX_Syntax_Terminate(pSyntax, "Memory Error");
-		return PX_FALSE;
-	}
-	return PX_TRUE;
-
 }
 
 PX_SYNTAX_FUNCTION(PX_Syntax_define_struct_enter_scope)
 {
+	px_int struct_name_index = PX_Syntax_GetAbiIndexFromBackward(pSyntax, "struct_name");
+	if (struct_name_index == -1)
+	{
+		//create unnamed struct name
+		px_abi *pnew_abi;
+		const px_char *punnamed =PX_Syntax_AllocUnnamed(pSyntax);
+		if (!punnamed)
+		{
+			PX_Syntax_Terminate(pSyntax, "ast:error:out of memory");
+			return PX_FALSE;
+		}
+		pnew_abi= PX_Syntax_NewAbi(pSyntax, "struct_name", pSyntax->reg_lifetime);
+		if (!pnew_abi)
+		{
+			PX_Syntax_Terminate(pSyntax, "ast:error:out of memory");
+			return PX_FALSE;
+		}
+		if (!PX_AbiSet_string(pnew_abi, "value", punnamed))
+		{
+			PX_Syntax_Terminate(pSyntax, "ast:error:out of memory");
+			return PX_FALSE;
+		}
+	}
+	
 	if (!PX_Syntax_EnterScope(pSyntax))
 	{
-		PX_Syntax_Terminate(pSyntax, "Enter struct scope error");
+		PX_Syntax_Terminate(pSyntax, "ast:error:enter struct scope failed");
 		return PX_FALSE;
 	}
 	return PX_TRUE;
@@ -126,133 +60,177 @@ PX_SYNTAX_FUNCTION(PX_Syntax_define_struct_enter_scope)
 
 PX_SYNTAX_FUNCTION(PX_Syntax_define_struct_leave_scope)
 {
-	px_abi* newabi;
-	px_abi* plastabi;
-	px_int* p, struct_size;
-	const px_char* pstructname;
-	if (!PX_Syntax_LeaveScope(pSyntax))
-	{
-		PX_Syntax_Terminate(pSyntax, "Leave struct scope error");
-		return PX_FALSE;
-	}
-	plastabi = PX_Syntax_GetAbiLast(pSyntax);
-	PX_ASSERTIFX(plastabi == PX_NULL, "Error: last abi not found");
-	PX_ASSERTIFX(!PX_Syntax_CheckAbiName(plastabi, "define_struct"),"define_struct expected.");
-	pstructname = PX_AbiGet_string(plastabi, "struct_name.value");
-	PX_ASSERTIFX(pstructname == PX_NULL, "Error: struct name not found");
-	p = PX_AbiGet_int(plastabi, "size");
-	PX_ASSERTIFX(p == PX_NULL, "Error: struct size not found");
-	struct_size = *p;
-	if (PX_NULL== (newabi=PX_Syntax_NewTypeDefine(pSyntax, pstructname, "struct", struct_size, pSyntax->reg_lifetime)))
-	{
-		PX_Syntax_Terminate(pSyntax, "Error: type define already exist");
-		return PX_FALSE;
-	}
-	if (!PX_Syntax_MergeLast2AbiToLast(pSyntax))
-	{
-		PX_Syntax_Terminate(pSyntax, "Memory Error");
-		return PX_FALSE;
-	}
-	
-	return PX_TRUE;
-}
+	//'struct' [struct_name] '{'<---(scope) define_struct_list '}'
+	px_int total_size = 0;
+	px_int last_scope_index = PX_Syntax_GetAbiIndexFromBackward(pSyntax, "scope");
+	px_int secondlast_scope_index = PX_Syntax_GetSecondAbiIndexFromBackward(pSyntax, "scope");
+	const px_char* pstruct_name = PX_NULL;
+	px_int struct_name_index = PX_Syntax_GetAbiIndexFromBackward(pSyntax, "struct_name");
+	px_string struct_payload;
+	px_abi *plastsecond_scope_abi;
+	px_abi *plast_scope_abi;
+	px_abi variables_abi;
+	PX_StringInitialize(pSyntax->mp, &struct_payload);
+	PX_ASSERTIFX(last_scope_index == -1, "Error: struct should be defined in a scope");
+	PX_ASSERTIFX(secondlast_scope_index == -1, "Error: struct should be merge in second last scope");
+	PX_ASSERTIFX(struct_name_index == -1, "Error: struct name not found");
+	//get struct name
+	pstruct_name = PX_AbiGetValue_string(PX_Syntax_GetAbiByIndex(pSyntax, struct_name_index), "value");
 
-PX_SYNTAX_FUNCTION(PX_Syntax_define_uncomplete_struct)
-{
-	px_int index;
-	px_abi* plastabi;
-	const px_char* pstructname;
-	plastabi = PX_Syntax_GetAbiLast(pSyntax);
-	PX_ASSERTIFX(plastabi == PX_NULL, "Error: last abi not found");
-	PX_ASSERTIFX(!PX_Syntax_CheckAbiName(plastabi, "define_struct"), "define_struct expected.");
-	pstructname = PX_AbiGet_string(plastabi, "struct_name.value");
-	PX_ASSERTIFX(pstructname == PX_NULL, "Error: struct name not found");
+	plastsecond_scope_abi = PX_Syntax_GetAbiByIndex(pSyntax, secondlast_scope_index);
+	plast_scope_abi = PX_Syntax_GetAbiByIndex(pSyntax, last_scope_index);
 
-	index=PX_Syntax_FindTypeDefine(pSyntax, pstructname, pSyntax->reg_lifetime);
-	if (index==-1)
+	//get total size from scope alloc
+	total_size = PX_AbiGetValue_int(plast_scope_abi, "alloc");
+
+	//new struct type_define abi in secondlast scope
+	PX_StringFormat1(&struct_payload, "type_defines.struct.%1", PX_STRINGFORMAT_STRING(pstruct_name));
+	if (PX_AbiExist_abi(plastsecond_scope_abi, struct_payload.buffer))
 	{
-		px_abi* newabi;
-		if (PX_NULL == (newabi = PX_Syntax_NewTypeDefine(pSyntax, pstructname, "struct", 0, pSyntax->reg_lifetime)))
+		PX_StringFormat1(&struct_payload, "type_defines.struct.%1.size", PX_STRINGFORMAT_STRING(pstruct_name));
+		if (PX_AbiGetValue_int(plastsecond_scope_abi, struct_payload.buffer) !=0)
 		{
-			PX_Syntax_Terminate(pSyntax, "Memory Error");
-			return PX_FALSE;
+			PX_Syntax_Terminate(pSyntax, "ast:error:redefine struct");
+			goto _ERROR;
 		}
-		if (!PX_Syntax_MergeLast2AbiToLast(pSyntax))
+		//fill in size for forward declared struct
+		if (!PX_AbiSet_int(plastsecond_scope_abi, struct_payload.buffer, total_size))
 		{
-			PX_Syntax_Terminate(pSyntax, "Memory Error");
-			return PX_FALSE;
+			PX_Syntax_Terminate(pSyntax, "ast:error:PX_Syntax_define_struct_leave_scope out of memory 1");
+			goto _ERROR;
 		}
 	}
 	else
 	{
-		px_int* p, struct_size;
-		px_abi* newabi;
-		px_abi* pstruct_abi = PX_Syntax_GetAbiByIndex(pSyntax, index);
-		PX_ASSERTIFX(pstruct_abi == PX_NULL, "Error: struct abi not found");
-		PX_ASSERTIFX(!PX_Syntax_CheckAbiName(pstruct_abi, "type_define"), "Error: struct abi not found");
-		p = PX_AbiGet_int(pstruct_abi, "size");
-		PX_ASSERTIFX(p == PX_NULL, "Error: struct size not found");
-		struct_size = *p;
-		if (PX_NULL == (newabi = PX_Syntax_NewTypeDefine(pSyntax, pstructname, "struct", struct_size, pSyntax->reg_lifetime)))
+		PX_StringFormat1(&struct_payload, "struct.%1", PX_STRINGFORMAT_STRING(pstruct_name));
+		if(!PX_Syntax_NewTypeDefine(pSyntax, struct_payload.buffer, pstruct_name, total_size, pSyntax->reg_lifetime-1))
 		{
-			PX_Syntax_Terminate(pSyntax, "Error: type define already exist");
+			PX_Syntax_Terminate(pSyntax, "ast:error:PX_Syntax_define_struct_leave_scope out of memory 1");
+			goto _ERROR;
+		}
+	}
+
+	//merge scope variables to struct type_define members
+	if (PX_AbiGet_AbiReadOnly(plast_scope_abi, &variables_abi, "variables"))
+	{
+		PX_StringFormat1(&struct_payload, "type_defines.struct.%1.members", PX_STRINGFORMAT_STRING(pstruct_name));
+		if(!PX_AbiSet_Abi(plastsecond_scope_abi, struct_payload.buffer, &variables_abi))
+		{
+			PX_Syntax_Terminate(pSyntax, "ast:error:PX_Syntax_define_struct_leave_scope out of memory 2");
+			goto _ERROR;
+		}
+	}
+	//leave scope
+	if (!PX_Syntax_LeaveScope(pSyntax))
+	{
+		PX_Syntax_Terminate(pSyntax, "ast:error:leave struct scope failed");
+		goto _ERROR;
+	}
+
+
+	PX_StringFree(&struct_payload);
+	return PX_TRUE;
+
+_ERROR:
+	PX_StringFree(&struct_payload);
+	return PX_FALSE;
+}
+
+PX_SYNTAX_FUNCTION(PX_Syntax_define_struct_type)
+{
+	px_int struct_name_index = PX_Syntax_GetAbiIndexFromBackward(pSyntax, "struct_name");
+	const px_char* pstruct_name = PX_NULL;
+	px_string struct_payload;
+	//check struct name
+
+	do
+	{
+		px_abi* new_type = PX_Syntax_NewAbi(pSyntax, "type", pSyntax->reg_lifetime);
+		if (!new_type)
+		{
+			PX_Syntax_Terminate(pSyntax, "ast:error:PX_Syntax_define_struct_leave_scope out of memory 3");
 			return PX_FALSE;
 		}
-		if (!PX_Syntax_CopyAbiToLast(pSyntax, index))
+		pstruct_name = PX_AbiGetValue_string(PX_Syntax_GetAbiByIndex(pSyntax, struct_name_index), "value");
+		PX_StringInitialize(pSyntax->mp, &struct_payload);
+		if (!PX_StringFormat1(&struct_payload, "struct.%1", PX_STRINGFORMAT_STRING(pstruct_name)))
 		{
-			PX_Syntax_Terminate(pSyntax, "Memory Error");
+			PX_Syntax_Terminate(pSyntax, "ast:error:PX_Syntax_define_struct_leave_scope out of memory 4");
+			PX_StringFree(&struct_payload);
 			return PX_FALSE;
 		}
+		if (!PX_AbiSet_string(new_type, "value", struct_payload.buffer))
+		{
+			PX_Syntax_Terminate(pSyntax, "ast:error:PX_Syntax_define_struct_leave_scope out of memory 5");
+			PX_StringFree(&struct_payload);
+			return PX_FALSE;
+		}
+		PX_StringFree(&struct_payload);
+		PX_Syntax_PopAbiIndex(pSyntax, struct_name_index);
+		return PX_TRUE;
+	} while (0);
+	
+	
+}
+
+PX_SYNTAX_FUNCTION(PX_Syntax_define_struct_begin_color)
+{
+	px_int source_index = PX_Syntax_GetCurrentLexemeBeginSourceIndex(pSyntax);
+	px_int begin = PX_Syntax_GetCurrentLexemeBegin(pSyntax);
+	px_int end = PX_Syntax_GetCurrentLexemeEnd(pSyntax);
+	if(!PX_Syntax_NewMapToken(pSyntax, source_index, begin, source_index, end, PX_Syntax_GetRandomColor(9991), 0))
+	{
+		PX_Syntax_Terminate(pSyntax, "ast:error:out of memory");
+		return PX_FALSE;
 	}
 	return PX_TRUE;
 }
 
 PX_SYNTAX_FUNCTION(PX_Syntax_define_struct_error)
 {
-	PX_Syntax_Terminate(pSyntax, "Syntax Error:unexpected define_struct");
+	PX_Syntax_Terminate(pSyntax, "ast:error:unexpected define_struct");
 	return PX_FALSE;
 }
 
 
 px_bool PX_Syntax_load_define_struct(PX_Syntax* pSyntax)
 {
-	if (!PX_Syntax_Parse_PEBNF(pSyntax, "define_struct_list = declare_variable", PX_Syntax_define_struct_merge_declare_variable))
+	//'struct' [struct_name] '{'<---(scope) define_struct_list '}' 
+	if (!PX_Syntax_Parse_PEBNF(pSyntax, "define_struct_list = declare_variable", 0,0, 0))
 		return PX_FALSE;
 
-	if (!PX_Syntax_Parse_PEBNF(pSyntax, "define_struct_list = declare_variable  ...", 0))
+	if (!PX_Syntax_Parse_PEBNF(pSyntax, "define_struct_list = declare_variable  ...",0, 0, 0))
 		return PX_FALSE;
 
-	if (!PX_Syntax_Parse_PEBNF(pSyntax, "define_struct_list = declare_variable *", 0))
+	if (!PX_Syntax_Parse_PEBNF(pSyntax, "define_struct_list = declare_variable *", 0,0, 0))
 		return PX_FALSE;
 
-	if (!PX_Syntax_Parse_PEBNF(pSyntax, "define_struct = 'struct'", PX_Syntax_define_struct_begin))
+	if (!PX_Syntax_Parse_PEBNF(pSyntax, "struct_name = identifier",0, PX_Syntax_define_struct_identifier_to_struct_name, 0))
 		return PX_FALSE;
 
-	if (!PX_Syntax_Parse_PEBNF(pSyntax, "struct_name = identifier", PX_Syntax_define_struct_name))
+	if (!PX_Syntax_Parse_PEBNF(pSyntax, "struct_name = *",0, 0, 0))
 		return PX_FALSE;
 
-	if (!PX_Syntax_Parse_PEBNF(pSyntax, "struct_name = *", PX_Syntax_define_struct_unname))
+	if (!PX_Syntax_Parse_PEBNF(pSyntax, "define_struct",0, PX_Syntax_define_struct_type,0))
 		return PX_FALSE;
 
-	if (!PX_Syntax_Parse_PEBNF(pSyntax, "define_struct = 'struct' struct_name", PX_Syntax_define_struct_merge_name))
+	if (!PX_Syntax_Parse_PEBNF(pSyntax, "define_struct = 'struct'",0, PX_Syntax_define_struct_begin_color,0))
 		return PX_FALSE;
 
-	if (!PX_Syntax_Parse_PEBNF(pSyntax, "define_struct = 'struct' struct_name '{' ", PX_Syntax_define_struct_enter_scope))
+	if (!PX_Syntax_Parse_PEBNF(pSyntax, "define_struct = 'struct' struct_name '{' ",0, PX_Syntax_define_struct_enter_scope, 0))
 		return PX_FALSE;
 
-	if (!PX_Syntax_Parse_PEBNF(pSyntax, "define_struct = 'struct' struct_name '{' define_struct_list '}' ", PX_Syntax_define_struct_leave_scope))
+	if (!PX_Syntax_Parse_PEBNF(pSyntax, "define_struct = 'struct' struct_name '{' define_struct_list '}' ", 0,PX_Syntax_define_struct_leave_scope, 0))
 		return PX_FALSE;
 
-	if (!PX_Syntax_Parse_PEBNF(pSyntax, "define_struct = 'struct' struct_name '{' *", PX_Syntax_define_struct_error))
+	if (!PX_Syntax_Parse_PEBNF(pSyntax, "define_struct = 'struct' struct_name '{' *",0, PX_Syntax_define_struct_error, 0))
 		return PX_FALSE;
 
-	if (!PX_Syntax_Parse_PEBNF(pSyntax, "define_struct = 'struct' struct_name '{' define_struct_list *", PX_Syntax_define_struct_error))
+	if (!PX_Syntax_Parse_PEBNF(pSyntax, "define_struct = 'struct' struct_name '{' define_struct_list *",0, PX_Syntax_define_struct_error, 0))
 		return PX_FALSE;
 
-	if (!PX_Syntax_Parse_PEBNF(pSyntax, "define_struct = 'struct' struct_name *", PX_Syntax_define_uncomplete_struct))
+	if (!PX_Syntax_Parse_PEBNF(pSyntax, "define_struct = 'struct' struct_name *",0, 0, 0))
 		return PX_FALSE;
-
-
 
 
 	return PX_TRUE;

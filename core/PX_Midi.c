@@ -12,7 +12,7 @@ px_bool PX_MidiInitialize(PX_Midi* midi, px_memorypool* mp, PX_MidiCallback call
 typedef struct
 {
 	px_char MThd[4];
-	px_word length[2];//6
+	px_word radius[2];//6
 	px_word ffff;
 	px_word nnnn;
 	px_word dddd;
@@ -21,7 +21,7 @@ typedef struct
 typedef struct
 {
 	px_char MTrk[4];
-	px_dword length;
+	px_dword radius;
 }PX_Midi_MTrk;
 
 px_void PX_MidiUpdate_handleTick(PX_Midi* pmidi, px_int iTrack)
@@ -150,7 +150,7 @@ px_bool PX_MidiLoad(PX_Midi* pmidi, const px_byte data[], px_int datasize)
 	{
 		return PX_FALSE;
 	}
-	if (pMThdheader->length[1]!=0x0600)
+	if (pMThdheader->radius[1]!=0x0600)
 	{
 		return PX_FALSE;
 	}
@@ -179,7 +179,7 @@ px_bool PX_MidiLoad(PX_Midi* pmidi, const px_byte data[], px_int datasize)
 			goto _ERROR;
 		}
 		oft += sizeof(PX_Midi_MTrk);
-		MTrkSize = PX_htonl(pMTrkHeader->length);
+		MTrkSize = PX_htonl(pMTrkHeader->radius);
 		if (oft+MTrkSize> datasize)
 		{
 			goto _ERROR;

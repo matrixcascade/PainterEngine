@@ -117,42 +117,42 @@ px_void PX_AES_AddRoundKey(PX_AES *aesStruct, px_int round )
 
 px_void PX_AES_KeyExpansion(PX_AES *aesStruct)
 {
-	px_int row;
+	px_int line_begin_cell_index_map;
 	AES_BYTE temp[4];
-	for (row = 0; row < aesStruct->Nk; ++row)
+	for (line_begin_cell_index_map = 0; line_begin_cell_index_map < aesStruct->Nk; ++line_begin_cell_index_map)
 	{
-		aesStruct->w[row][0] = aesStruct->key[4*row];
-		aesStruct->w[row][1] = aesStruct->key[4*row+1];
-		aesStruct->w[row][2] = aesStruct->key[4*row+2];
-		aesStruct->w[row][3] = aesStruct->key[4*row+3];
+		aesStruct->w[line_begin_cell_index_map][0] = aesStruct->key[4*line_begin_cell_index_map];
+		aesStruct->w[line_begin_cell_index_map][1] = aesStruct->key[4*line_begin_cell_index_map+1];
+		aesStruct->w[line_begin_cell_index_map][2] = aesStruct->key[4*line_begin_cell_index_map+2];
+		aesStruct->w[line_begin_cell_index_map][3] = aesStruct->key[4*line_begin_cell_index_map+3];
 	}
 
 	
 
-	for (row = aesStruct->Nk; row < aesStruct->Nb * (aesStruct->Nr+1); ++row)
+	for (line_begin_cell_index_map = aesStruct->Nk; line_begin_cell_index_map < aesStruct->Nb * (aesStruct->Nr+1); ++line_begin_cell_index_map)
 	{
-		temp[0] = aesStruct->w[row-1][0]; temp[1] = aesStruct->w[row-1][1];
-		temp[2] = aesStruct->w[row-1][2]; temp[3] = aesStruct->w[row-1][3];
+		temp[0] = aesStruct->w[line_begin_cell_index_map-1][0]; temp[1] = aesStruct->w[line_begin_cell_index_map-1][1];
+		temp[2] = aesStruct->w[line_begin_cell_index_map-1][2]; temp[3] = aesStruct->w[line_begin_cell_index_map-1][3];
 
-		if (row % aesStruct->Nk == 0)  
+		if (line_begin_cell_index_map % aesStruct->Nk == 0)  
 		{
 			PX_memcpy(temp ,PX_AES_SubWord(aesStruct,PX_AES_RotWord(aesStruct,temp)),4);
 
-			temp[0] = (AES_BYTE)( (px_int)temp[0] ^ (px_int)Rcon[row/aesStruct->Nk][0] );
-			temp[1] = (AES_BYTE)( (px_int)temp[1] ^ (px_int)Rcon[row/aesStruct->Nk][1] );
-			temp[2] = (AES_BYTE)( (px_int)temp[2] ^ (px_int)Rcon[row/aesStruct->Nk][2] );
-			temp[3] = (AES_BYTE)( (px_int)temp[3] ^ (px_int)Rcon[row/aesStruct->Nk][3] );
+			temp[0] = (AES_BYTE)( (px_int)temp[0] ^ (px_int)Rcon[line_begin_cell_index_map/aesStruct->Nk][0] );
+			temp[1] = (AES_BYTE)( (px_int)temp[1] ^ (px_int)Rcon[line_begin_cell_index_map/aesStruct->Nk][1] );
+			temp[2] = (AES_BYTE)( (px_int)temp[2] ^ (px_int)Rcon[line_begin_cell_index_map/aesStruct->Nk][2] );
+			temp[3] = (AES_BYTE)( (px_int)temp[3] ^ (px_int)Rcon[line_begin_cell_index_map/aesStruct->Nk][3] );
 		}
-		else if ( aesStruct->Nk > 6 && (row % aesStruct->Nk == 4) )  
+		else if ( aesStruct->Nk > 6 && (line_begin_cell_index_map % aesStruct->Nk == 4) )  
 		{
 			PX_memcpy(temp,PX_AES_SubWord(aesStruct,temp),4);
 		}
 
 		// w[row] = w[row-Nk] xor temp
-		aesStruct->w[row][0] = (AES_BYTE) ( (px_int)aesStruct->w[row-aesStruct->Nk][0] ^ (px_int)temp[0] );
-		aesStruct->w[row][1] = (AES_BYTE) ( (px_int)aesStruct->w[row-aesStruct->Nk][1] ^ (px_int)temp[1] );
-		aesStruct->w[row][2] = (AES_BYTE) ( (px_int)aesStruct->w[row-aesStruct->Nk][2] ^ (px_int)temp[2] );
-		aesStruct->w[row][3] = (AES_BYTE) ( (px_int)aesStruct->w[row-aesStruct->Nk][3] ^ (px_int)temp[3] );
+		aesStruct->w[line_begin_cell_index_map][0] = (AES_BYTE) ( (px_int)aesStruct->w[line_begin_cell_index_map-aesStruct->Nk][0] ^ (px_int)temp[0] );
+		aesStruct->w[line_begin_cell_index_map][1] = (AES_BYTE) ( (px_int)aesStruct->w[line_begin_cell_index_map-aesStruct->Nk][1] ^ (px_int)temp[1] );
+		aesStruct->w[line_begin_cell_index_map][2] = (AES_BYTE) ( (px_int)aesStruct->w[line_begin_cell_index_map-aesStruct->Nk][2] ^ (px_int)temp[2] );
+		aesStruct->w[line_begin_cell_index_map][3] = (AES_BYTE) ( (px_int)aesStruct->w[line_begin_cell_index_map-aesStruct->Nk][3] ^ (px_int)temp[3] );
 
 	}  // for loop
 }

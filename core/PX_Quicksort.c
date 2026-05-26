@@ -9,7 +9,7 @@ static void PX_Quicksort_swap(px_byte *array,px_int size, px_int left, px_int ri
 	pdw1 = (px_dword*)(array + left * size);
 	pdw2 = (px_dword*)(array + right * size);
 	pbyte1 = array + left*size+(size>>2)*4;
-	pbyte2 = array + right*size+(size&3);
+	pbyte2 = array + right*size+(size>>2)*4;
 	
 	for (i = 0; i < (size>>2); i++)
 	{

@@ -148,7 +148,7 @@ PX_OBJECT_RENDER_FUNCTION(PX_Object_ButtonRender)
 	}
 }
 
-PX_Object* PX_Object_ButtonAttachObject( PX_Object* pObject,px_int attachIndex,px_color cursor_color, px_color push_color)
+PX_Object* PX_Object_ButtonAttachObject( PX_Object* pObject,px_int attachIndex,px_color select_color, px_color push_color)
 {
 	px_memorypool* mp=pObject->mp;
 
@@ -160,7 +160,7 @@ PX_Object* PX_Object_ButtonAttachObject( PX_Object* pObject,px_int attachIndex,p
 	pButton = (PX_Object_Button*)PX_ObjectCreateDesc(pObject, attachIndex, PX_OBJECT_TYPE_BUTTON, 0, PX_Object_ButtonRender, 0, 0, sizeof(PX_Object_Button));
 	PX_ASSERTIF(pButton == PX_NULL);
 
-	pButton->CursorColor = cursor_color;
+	pButton->CursorColor = select_color;
 	pButton->PushColor = push_color;
 	pButton->state = PX_OBJECT_BUTTON_STATE_NORMAL;
 

@@ -639,7 +639,7 @@ static px_void PX_3D_RenderListRasterization(px_surface *psurface,PX_3D_RenderLi
 
 			iy=(px_int)y;
 
-			if (ix>0&&ix<view_width&&iy>=0&&iy<view_height)
+			if (ix>=0&&ix<view_width&&iy>=0&&iy<view_height)
 			{
 				if (zbuffer[ix+iy*zw]!=0&&zbuffer[ix+iy*zw]<originalZ)
 				{
@@ -830,7 +830,7 @@ static px_void PX_3D_RenderListRasterization(px_surface *psurface,PX_3D_RenderLi
 
 			iy=(px_int)y;
 
-			if (ix>0&&ix<view_width&&iy>=0&&iy<view_height)
+			if (ix>=0&&ix<view_width&&iy>=0&&iy<view_height)
 			{
 				if (zbuffer[ix+iy*zw]!=0&&zbuffer[ix+iy*zw]<originalZ)
 				{
@@ -919,11 +919,11 @@ px_void PX_3D_Present(px_surface *psurface, PX_3D_RenderList *list,PX_3D_Camera 
 		for (i=0;i<list->facestream.size;i++)
 		{
 			pface=PX_VECTORAT(PX_3D_Face,&list->facestream,i);
-			if (!PX_isPointInRect(PX_POINT(pface->transform_vertex[0].position.x, pface->transform_vertex[0].position.y,0),PX_RECT(0,0,1.f*psurface->width, 1.f * psurface->width)))
+			if (!PX_isPointInRect(PX_POINT(pface->transform_vertex[0].position.x, pface->transform_vertex[0].position.y,0),PX_RECT(0,0,1.f*psurface->width, 1.f * psurface->height)))
 			{
 				continue;
 			}
-			if (!PX_isPointInRect(PX_POINT(pface->transform_vertex[1].position.x, pface->transform_vertex[1].position.y, 0), PX_RECT(0, 0, 1.f * psurface->width, 1.f * psurface->width)))
+			if (!PX_isPointInRect(PX_POINT(pface->transform_vertex[1].position.x, pface->transform_vertex[1].position.y, 0), PX_RECT(0, 0, 1.f * psurface->width, 1.f * psurface->height)))
 			{
 				continue;
 			}
@@ -939,28 +939,21 @@ px_void PX_3D_Present(px_surface *psurface, PX_3D_RenderList *list,PX_3D_Camera 
 
 				if (1)
 				{
+					px_int x0, y0, x1, y1, x2, y2;
+					px_float alpha;
 					px_float cosv = PX_Point4DDot(PX_Point4DUnit(pface->transform_vertex[0].normal), PX_POINT4D(0, 0, 1));
-
-					if (cosv < 0)
+					x0 = (px_int)pface->transform_vertex[0].position.x;
+					y0 = (px_int)pface->transform_vertex[0].position.y;
+					x1 = (px_int)pface->transform_vertex[1].position.x;
+					y1 = (px_int)pface->transform_vertex[1].position.y;
+					x2 = (px_int)pface->transform_vertex[2].position.x;
+					y2 = (px_int)pface->transform_vertex[2].position.y;
+					
+					cosv = -cosv;
+					if (cosv > 0)
 					{
-						px_int x0, y0, x1, y1, x2, y2;
-						px_int z0, z1, z2;
-						px_float alpha;
-
-						x0 = (px_int)pface->transform_vertex[0].position.x;
-						y0 = (px_int)pface->transform_vertex[0].position.y;
-						x1 = (px_int)pface->transform_vertex[1].position.x;
-						y1 = (px_int)pface->transform_vertex[1].position.y;
-						x2 = (px_int)pface->transform_vertex[2].position.x;
-						y2 = (px_int)pface->transform_vertex[2].position.y;
-
-						z0 = (px_int)pface->transform_vertex[0].position.z;
-						z1 = (px_int)pface->transform_vertex[1].position.z;
-						z2 = (px_int)pface->transform_vertex[2].position.z;
-
-						cosv = -cosv;
 						alpha = (1 - cosv) * 128;
-						PX_GeoRasterizeTriangle(psurface,x0,y0,x1,y1,x2,y2,  PX_COLOR(255, (px_uchar)(128 + alpha), (px_uchar)(128 + alpha), (px_uchar)(128 + alpha)), (px_int)camera->viewport_width, (px_int)camera->viewport_height, camera->zbuffer, (px_int)camera->viewport_width, z0, z1, z2);
+						PX_GeoRasterizeTriangle(psurface,x0,y0,x1,y1,x2,y2,  PX_COLOR(255, (px_uchar)(128 + alpha), (px_uchar)(128 + alpha), (px_uchar)(128 + alpha)));
 					}
 
 				}

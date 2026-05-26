@@ -101,7 +101,7 @@ _ERROR:
 	if(newLayer->net) MP_Free(pAnn->mp,newLayer->net);
 	if(newLayer->w) MP_Free(pAnn->mp,newLayer->w);
 	if(newLayer->back) MP_Free(pAnn->mp,newLayer->back);
-	if(newLayer->back) MP_Free(pAnn->mp,newLayer->bias);
+	if(newLayer->bias) MP_Free(pAnn->mp,newLayer->bias);
 	return PX_FALSE;
 	
 }
@@ -348,7 +348,7 @@ px_bool PX_ANNExport(PX_ANN *pAnn,px_void *buffer,px_int *size)
 	pLayer=pAnn->Layer;
 
 	dataheader.LayerCount=pAnn->LayerCount;
-	dataheader.learningRate=pAnn->LayerCount;
+	dataheader.learningRate=pAnn->learningRate;
 	dataheader.regularization_rate=pAnn->regularization_rate;
 	dataheader.regularzation=pAnn->regularzation;
 	

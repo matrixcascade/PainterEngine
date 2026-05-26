@@ -278,6 +278,7 @@ DWORD WINAPI DEMO_RenderThreadFunc(LPVOID p)
 		PX_MutexLock(&main_surface_mutex);
 		memcpy(main_surface,App.runtime.RenderSurface.surfaceBuffer, App.runtime.RenderSurface.width* App.runtime.RenderSurface.height*4);
 		PX_MutexUnlock(&main_surface_mutex);
+		PX_SystemRender(main_surface, App.runtime.surface_width, App.runtime.surface_height);
 		PX_Sleep(10);
 	}
 	return 0;
@@ -328,9 +329,8 @@ void setCurrentDirectory()
 
 	while(PX_SystemLoop()&&!main_exit)
 	{
-		PX_MutexLock(&main_surface_mutex);
-		PX_SystemRender(main_surface, App.runtime.surface_width, App.runtime.surface_height);
-		PX_MutexUnlock(&main_surface_mutex);
+		//PX_MutexLock(&main_surface_mutex);
+		//PX_MutexUnlock(&main_surface_mutex);
 		PX_Sleep(10);
 	};
 

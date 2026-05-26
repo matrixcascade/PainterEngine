@@ -210,7 +210,7 @@ PX_OBJECT_EVENT_FUNCTION( PX_Object_EditOnKeyboardDown)
 	{
 		px_char key[2]= { 0 };
 		key[0] = (px_char)PX_Object_Event_GetKeyDown(e);
-		if(key[0]==PX_VK_LEFT||key[0]==PX_VK_RIGHT||key[0]==PX_VK_TAB||key[0]==PX_VK_BACK)
+		if(key[0]==PX_VK_LEFT||key[0]==PX_VK_RIGHT||key[0]==PX_VK_TAB)
 		{
 			PX_Object_EditAddString(pObject,key);
 		}
@@ -299,108 +299,121 @@ PX_OBJECT_RENDER_FUNCTION(PX_Object_EditRender)
 
 	cursor = 0;
 
-	while (PX_TRUE)
+	if (!pEdit->onFocus&&PX_StringLen(&pEdit->text)==0&& PX_StringLen(&pEdit->tips))
 	{
-		fsize = 0;
+		px_color clr = pEdit->TextColor;
+		clr._argb.a >>= 1;
 		x_draw_oft = x - pEdit->XOffset;
 		y_draw_oft = y - pEdit->YOffset;
-
-		//Draw Cursor
-		if (pEdit->onFocus && pEdit->cursor_index == cursor)
+		PX_FontModuleDrawText(&pEdit->EditSurface, pEdit->fontModule, x_draw_oft, y_draw_oft, PX_ALIGN_LEFTTOP, pEdit->tips.buffer, clr);
+	}
+	else
+	{
+		while (PX_TRUE)
 		{
-			pEdit->elapsed += elapsed;
-			if ((pEdit->elapsed / 200) & 1)
+			fsize = 0;
+			x_draw_oft = x - pEdit->XOffset;
+			y_draw_oft = y - pEdit->YOffset;
+
+			//Draw Cursor
+			if (pEdit->onFocus && pEdit->cursor_index == cursor)
 			{
-				if (pEdit->fontModule)
+				pEdit->elapsed += elapsed;
+				if ((pEdit->elapsed / 200) & 1)
 				{
-					PX_GeoDrawRect(&pEdit->EditSurface, x_draw_oft + 1, y_draw_oft, x_draw_oft, y_draw_oft + pEdit->fontModule->max_Height - 1, pEdit->TextColor);
+					if (pEdit->fontModule)
+					{
+						PX_GeoDrawRect(&pEdit->EditSurface, x_draw_oft + 1, y_draw_oft, x_draw_oft, y_draw_oft + pEdit->fontModule->max_Height - 1, pEdit->TextColor);
+					}
+					else
+					{
+						PX_GeoDrawRect(&pEdit->EditSurface, x_draw_oft + 1, y_draw_oft, x_draw_oft, y_draw_oft + __PX_FONT_HEIGHT - 1, pEdit->TextColor);
+					}
+
 				}
-				else
+			}
+
+
+			if (pEdit->fontModule)
+			{
+				px_dword code;
+				px_int width, height;
+				fsize = PX_FontModuleGetOneCharacterDesc(pEdit->fontModule, Text + cursor, &code, &width, &height);
+				if (!fsize)
 				{
-					PX_GeoDrawRect(&pEdit->EditSurface, x_draw_oft + 1, y_draw_oft, x_draw_oft, y_draw_oft + __PX_FONT_HEIGHT - 1, pEdit->TextColor);
+					break;
 				}
-
-			}
-		}
-
-
-		if (pEdit->fontModule)
-		{
-			px_dword code;
-			px_int width, height;
-			fsize = PX_FontModuleGetOneCharacterDesc(pEdit->fontModule, Text + cursor, &code, &width, &height);
-			if (!fsize)
-			{
-				break;
-			}
-			if (code == '\r')
-			{
-				//skip
-			}
-			else if (code == '\n')
-			{
-				x = pEdit->HorizontalOffset;
-				y += pEdit->fontModule->max_Height + pEdit->yFontSpacing;
-			}
-			else
-			{
-				PX_FontModuleDrawCharacter(&pEdit->EditSurface, pEdit->fontModule, x_draw_oft, y_draw_oft, code, pEdit->TextColor);
-				x += width + pEdit->xFontSpacing;
-			}
-
-			if (pEdit->AutoNewline)
-			{
-				if (x > objWidth - pEdit->AutoNewLineSpacing)
+				if (code == '\r')
 				{
-					x = 0;
+					//skip
+				}
+				else if (code == '\n')
+				{
+					x = pEdit->HorizontalOffset;
 					y += pEdit->fontModule->max_Height + pEdit->yFontSpacing;
 				}
-			}
-
-		}
-		else
-		{
-			fsize = 1;
-
-			if (Text[cursor] == '\r')
-			{
-				//skip
-			}
-			else if (Text[cursor] == '\n')
-			{
-				x = pEdit->HorizontalOffset;
-				y += __PX_FONT_HEIGHT + pEdit->yFontSpacing;
-			}
-			else if (Text[cursor])
-			{
-				if (pEdit->Password)
-				{
-					PX_FontDrawChar(&pEdit->EditSurface, x_draw_oft, y_draw_oft, '*', pEdit->TextColor);
-					x += __PX_FONT_ASCSIZE;
-				}
 				else
 				{
-					PX_FontDrawChar(&pEdit->EditSurface, x_draw_oft, y_draw_oft, Text[cursor], pEdit->TextColor);
-					x += __PX_FONT_ASCSIZE;
+					PX_FontModuleDrawCharacterEx(&pEdit->EditSurface, pEdit->fontModule, x_draw_oft, y_draw_oft, code, pEdit->TextColor);
+					x += width + pEdit->xFontSpacing;
+				}
+
+				if (pEdit->AutoNewline)
+				{
+					if (x > objWidth - pEdit->AutoNewLineSpacing)
+					{
+						x = 0;
+						y += pEdit->fontModule->max_Height + pEdit->yFontSpacing;
+					}
 				}
 
 			}
 			else
 			{
-				break;
-			}
+				fsize = 1;
 
-			if (pEdit->AutoNewline)
-			{
-				if (x > objWidth - pEdit->AutoNewLineSpacing)
+				if (Text[cursor] == '\r')
+				{
+					//skip
+				}
+				else if (Text[cursor] == '\n')
 				{
 					x = pEdit->HorizontalOffset;
 					y += __PX_FONT_HEIGHT + pEdit->yFontSpacing;
 				}
+				else if (Text[cursor])
+				{
+					if (pEdit->Password)
+					{
+						PX_FontDrawChar(&pEdit->EditSurface, x_draw_oft, y_draw_oft, '*', pEdit->TextColor);
+						x += __PX_FONT_ASCSIZE;
+					}
+					else
+					{
+						PX_FontDrawChar(&pEdit->EditSurface, x_draw_oft, y_draw_oft, Text[cursor], pEdit->TextColor);
+						x += __PX_FONT_ASCSIZE;
+					}
+
+				}
+				else
+				{
+					break;
+				}
+
+				if (pEdit->AutoNewline)
+				{
+					if (x > objWidth - pEdit->AutoNewLineSpacing)
+					{
+						x = pEdit->HorizontalOffset;
+						y += __PX_FONT_HEIGHT + pEdit->yFontSpacing;
+					}
+				}
 			}
+			cursor += fsize;
 		}
-		cursor += fsize;
 	}
+
+	
 
 	PX_SurfaceRender(psurface, &pEdit->EditSurface, (px_int)objx, (px_int)objy, PX_ALIGN_LEFTTOP, PX_NULL);
 }
@@ -411,6 +424,7 @@ PX_OBJECT_FREE_FUNCTION(PX_Object_EditFree)
 	if (pObject != PX_NULL)
 	{
 		PX_StringFree(&pEdit->text);
+		PX_StringFree(&pEdit->tips);
 		PX_TextureFree(&pEdit->EditSurface);
 	}
 }
@@ -433,6 +447,7 @@ PX_Object* PX_Object_EditAttachObject( PX_Object* pObject,px_int attachIndex, px
 	}
 
 	PX_StringInitialize(mp, &pEdit->text);
+	PX_StringInitialize(mp, &pEdit->tips);
 
 	pEdit->TextColor = PX_OBJECT_UI_DEFAULT_FONTCOLOR;
 	pEdit->CursorColor = PX_COLOR_FORCECOLOR;
@@ -533,6 +548,17 @@ px_bool PX_Object_EditIsOnFocus(PX_Object* pObject)
 	if (pEdit)
 	{
 		return pEdit->onFocus;
+	}
+	return PX_FALSE;
+}
+
+px_bool PX_Object_EditSetTips(PX_Object* pObject, const px_char* tips)
+{
+	PX_Object_Edit* pEdit = PX_Object_GetEdit(pObject);
+	if (pEdit)
+	{
+		PX_StringClear(&pEdit->tips);
+		return PX_StringCat(&pEdit->tips, tips);
 	}
 	return PX_FALSE;
 }

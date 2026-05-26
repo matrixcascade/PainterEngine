@@ -21,10 +21,10 @@ PX_SYNTAX_FUNCTION(PX_Syntax_Parse_numeric)
 	{
 		if (!PX_Syntax_MergeLastAbi(pSyntax, "const_numeric"))
 		{
-			PX_Syntax_Terminate(pSyntax, "Memory Error");
+			PX_Syntax_Terminate(pSyntax, "runtime:error:PX_Syntax_Parse_numeric Memory Error");
 			return PX_FALSE;
 		}
-		return PX_TRUE;
+		return PX_TRUE; 
 	}
 	
 	PX_ASSERT();
@@ -34,10 +34,10 @@ PX_SYNTAX_FUNCTION(PX_Syntax_Parse_numeric)
 px_bool PX_Syntax_load_numeric(PX_Syntax* pSyntax)
 {
 
-	if (!PX_Syntax_Parse_PEBNF(pSyntax, "const_numeric = const_int", PX_Syntax_Parse_numeric))
+	if (!PX_Syntax_Parse_PEBNF(pSyntax, "const_numeric = const_int",0, PX_Syntax_Parse_numeric, 0))
 		return PX_FALSE;
 
-	if (!PX_Syntax_Parse_PEBNF(pSyntax, "const_numeric = const_float", PX_Syntax_Parse_numeric))
+	if (!PX_Syntax_Parse_PEBNF(pSyntax, "const_numeric = const_float",0, PX_Syntax_Parse_numeric, 0))
 		return PX_FALSE;
 
 	return PX_TRUE;

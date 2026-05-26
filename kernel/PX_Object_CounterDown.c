@@ -40,7 +40,7 @@ PX_OBJECT_RENDER_FUNCTION(PX_Object_CounterDownRender)
 		
 		a = 1 - (pdesc->ms_down % 1000) / 1000.f;
 		clr._argb.a = (px_byte)((1-a) * 255);
-		PX_GeoDrawCircle(psurface, (px_int)objx, (px_int)objy, (px_int)( pObject->diameter / 2 + (pObject->diameter * (a))), (px_int)(16 * a), clr);
+		PX_GeoDrawCircle(psurface, (px_int)objx, (px_int)objy, (px_int)( pObject->diameter / 2 + (pObject->diameter * (a))), (px_int)(12 * (1-a)), clr);
 
 		if (pdesc->ms_down>500)
 		{

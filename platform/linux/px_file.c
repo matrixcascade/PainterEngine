@@ -522,24 +522,21 @@ int PX_FileGetDirectoryFileName(const char path[], int count, char FileName[][26
     return  index;
 }
 
-void PX_RequestData(const char url[], void* buffer, int size, void* ptr, void (*func_callback)(void* buffer, int size, void* ptr))
-{
-    PX_IO_Data io= PX_LoadFileToIOData(url);
-    if (io.size>0&&io.buffer&&io.size<=(unsigned int)size)
-    {
-        memcpy(buffer,io.buffer,io.size);
-        func_callback(buffer,io.size,ptr);
-    }
-    else
-    {
-        func_callback(buffer,0,ptr);
-    }
-    PX_FreeIOData(&io);
-}
 
 
 //////////////////////////////////////////////////////////////////////////
 //commons
+
+px_bool PX_LoadFontModuleToResource(PX_ResourceLibrary* presourcelib, const px_char Path[], const px_char key[], PX_FONTMODULE_CODEPAGE codepage, px_int fontsize)
+{
+	PX_FontModule fm;
+	if (!PX_LoadFontModuleFromTTF(presourcelib->mp, &fm, Path, codepage, fontsize))goto _ERROR;
+	if (!PX_ResourceLibraryLoad(presourcelib,PX_RESOURCE_TYPE_FONTMODULE,(px_byte*) &fm, sizeof(fm), key))goto _ERROR;
+	return PX_TRUE;
+_ERROR:
+	return PX_FALSE;
+}
+
 
 px_bool PX_LoadTextureFromFile(px_memorypool *mp,px_texture *tex,const px_char path[])
 {
@@ -923,6 +920,19 @@ _ERROR:
     return PX_FALSE;
 }
 
+px_bool PX_LoadGifToResource(PX_ResourceLibrary* presourcelib, const px_char Path[], const px_char key[])
+{
+    PX_Resource res;
+    res.Type = PX_RESOURCE_TYPE_GIF;
+    if (!PX_LoadGifFromFile(presourcelib->mp, &res.gif, Path)) return PX_FALSE;
+    if (!PX_ResourceLibraryAdd(presourcelib, res, key))
+    {
+        PX_GifFree(&res.gif);
+        return PX_FALSE;
+    }
+    return PX_TRUE;
+}
+
 px_bool PX_LoadLive2DFromFile(px_memorypool* mp, PX_LiveFramework* liveframework, const px_char path[])
 {
     PX_IO_Data io = PX_LoadFileToIOData((px_char*)path);
@@ -969,6 +979,7 @@ _ERROR:
 	return PX_FALSE;
 }
 
+
 px_bool PX_LoadJsonToResource(PX_ResourceLibrary* ResourceLibrary, const px_char Path[], const px_char key[])
 {
 	PX_IO_Data io;
@@ -1006,14 +1017,21 @@ px_bool PX_LoadVMFromScriptFile(px_memorypool *mp,const px_char path[], PX_VM *p
 	}
 	PX_MemoryInitialize(mp, &bin);
 	
-	if(!PX_CompilerInitialize(mp,&compiler))
-		goto _ERROR;
+	if (!PX_CompilerInitialize(mp, &compiler))
+	{
+		PX_FreeIOData(&io);
+		return PX_FALSE;
+	}
 	
 	if (!PX_CompilerAddSource(&compiler, (const px_char *)io.buffer))
 		goto _ERROR;
 
 	if (!PX_CompilerCompile(&compiler, &bin, 0, entry))
+	{
+		printf("%s", compiler.error);
 		goto _ERROR;
+	}
+		
 
 	if (!PX_VMInitialize(pvm, mp, bin.buffer, bin.usedsize))
 		goto _ERROR;
@@ -1023,6 +1041,9 @@ px_bool PX_LoadVMFromScriptFile(px_memorypool *mp,const px_char path[], PX_VM *p
 	PX_FreeIOData(&io);
 	return PX_TRUE;
 _ERROR:
+	PX_MemoryFree(&bin);
+	PX_CompilerFree(&compiler);
+	PX_FreeIOData(&io);
 	return PX_FALSE;
 }
 
@@ -1037,7 +1058,7 @@ int PX_FileSelfUpgrade(const void *new_program_data, size_t size)
     }
     self_path[len] = '\0';
 
-    char temp_path[1024];
+    char temp_path[1024 + 8];
     snprintf(temp_path, sizeof(temp_path), "%s.tmp", self_path);
     int fd = open(temp_path, O_WRONLY | O_CREAT | O_TRUNC, 0755);
     if (fd == -1) {
@@ -1054,6 +1075,19 @@ int PX_FileSelfUpgrade(const void *new_program_data, size_t size)
     if (rename(temp_path, self_path) == -1) {
         return 0;
     }
+
+    execl(self_path, self_path, (char *)NULL); 
+    return 1;
+}
+
+int PX_FileRebot()
+{
+    char self_path[1024];
+    ssize_t len = readlink("/proc/self/exe", self_path, sizeof(self_path) - 1);
+    if (len == -1) {
+        return 0;
+    }
+    self_path[len] = '\0';
 
     execl(self_path, self_path, (char *)NULL); 
     return 1;

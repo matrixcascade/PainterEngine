@@ -17,7 +17,7 @@ typedef enum
 typedef struct
 {
 	px_char id[32];
-	px_float x,y,z,height,width,length;
+	px_float x,y,z,height,width,radius;
 	PX_UI_HALIGN halign;
 	PX_UI_VALIGN valign;
 }PX_UiBaseInfo;
@@ -55,7 +55,7 @@ PX_UiBaseInfo PX_UIGetBaseInfo(PX_Json_Value *json_value,px_int width,px_int hei
 	pSubValue=PX_JsonGetObjectValue(json_value,"length");
 	if (pSubValue&&pSubValue->type==PX_JSON_VALUE_TYPE_NUMBER)
 	{
-		baseInfo.length=(px_float)pSubValue->_number;
+		baseInfo.radius=(px_float)pSubValue->_number;
 	}
 	pSubValue=PX_JsonGetObjectValue(json_value,"id");
 	if (pSubValue&&pSubValue->type==PX_JSON_VALUE_TYPE_STRING)
@@ -957,7 +957,7 @@ PX_Object * PX_UICreate(PX_UI *ui,PX_Object *parent,PX_Json_Value *json_value,px
 		PX_UiBaseInfo baseInfo;
 		baseInfo=PX_UIGetBaseInfo(json_value,width,height);
 
-		pNewObject=PX_ObjectCreate(ui->ui_mp,parent,baseInfo.x,baseInfo.y,baseInfo.z,baseInfo.width,baseInfo.height,baseInfo.length);
+		pNewObject=PX_ObjectCreate(ui->ui_mp,parent,baseInfo.x,baseInfo.y,baseInfo.z,baseInfo.width,baseInfo.height,baseInfo.radius);
 		if (!pNewObject)
 		{
 			goto _ERROR;

@@ -45,7 +45,7 @@ px_bool PX_SocketInitialize(PX_Socket* pSocket, px_dword cache_size, \
 	PX_Socket_DisconnectCallback disconnect_callback, \
 	px_void* userptr
 );
-px_bool PX_SocketSend(PX_Socket* pSocket, px_byte* data, px_dword send_data_size);
+px_bool PX_SocketSend(PX_Socket* pSocket,const px_byte* data, px_dword send_data_size);
 px_void PX_SocketConnect(PX_Socket* pSocket,px_bool connecting);
 px_void PX_SocketSetUserPtr(PX_Socket* pSocket, px_void* ptr);
 px_void *PX_SocketGetUserPtr(PX_Socket* pSocket);

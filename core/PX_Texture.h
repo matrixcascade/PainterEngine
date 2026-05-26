@@ -30,12 +30,13 @@ typedef enum
 
 typedef struct _px_shape
 {
+	px_memorypool* mp;
 	px_uchar *alpha;
 	px_int height;
 	px_int width;
-	px_memorypool *MP;
 }px_shape;
 
+px_bool PX_TextureIsValid(px_texture* tex);
 PX_TEXTURERENDER_BLEND PX_TEXTURERENDER_BLEND_BUILD(px_float hdr_R,px_float hdr_G,px_float hdr_B,px_float alpha);
 px_bool PX_TextureCreate(px_memorypool *mp,px_texture *tex,px_int width,px_int height);
 px_bool PX_TextureCreateFromMemory(px_memorypool *mp,px_void *data,px_int size,px_texture *tex);

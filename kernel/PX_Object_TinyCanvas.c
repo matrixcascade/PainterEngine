@@ -299,7 +299,7 @@ PX_OBJECT_EVENT_FUNCTION(PX_Object_TinyCanvasOnCursorDown)
 		{
 			PX_ObjectExecuteEvent(pObject, PX_OBJECT_BUILD_EVENT(PX_OBJECT_EVENT_TINYCANVAS_PAINTBEGIN));
 		}
-		if (pdesc->reg_state == PX_CanvasVM_State_Painting)
+		if (pdesc->reg_state == PX_TinyCanvasVM_State_Painting)
 		{
 			PX_TinyCanvasVMOnMove(pdesc, pdesc->reg_x, pdesc->reg_y, 1);
 		}
@@ -316,7 +316,7 @@ PX_OBJECT_EVENT_FUNCTION(PX_Object_TinyCanvasOnCursorMove)
 		pdesc->reg_y = PX_Object_Event_GetCursorY(e) - region.y;
 	}
 
-	if (pdesc->reg_state == PX_CanvasVM_State_Painting)
+	if (pdesc->reg_state == PX_TinyCanvasVM_State_Painting)
 	{
 		PX_TinyCanvasVMOnEnd(pdesc);
 	}
@@ -341,7 +341,7 @@ PX_OBJECT_EVENT_FUNCTION(PX_Object_TinyCanvasOnCursorDrag)
 		pdesc->reg_x = PX_Object_Event_GetCursorX(e) - x;
 		pdesc->reg_y = PX_Object_Event_GetCursorY(e) - y;
 
-		if (pdesc->reg_state == PX_CanvasVM_State_Painting)
+		if (pdesc->reg_state == PX_TinyCanvasVM_State_Painting)
 		{
 			PX_TinyCanvasVMOnMove(pdesc, pdesc->reg_x, pdesc->reg_y, 1);
 		}
@@ -356,7 +356,7 @@ PX_OBJECT_EVENT_FUNCTION(PX_Object_TinyCanvasOnCursorUp)
 {
 	PX_Object_TinyCanvas* pdesc = (PX_Object_TinyCanvas*)PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_TINYCANVAS);
 	PX_ASSERTIF(!pdesc);
-	if (pdesc->reg_state == PX_CanvasVM_State_Painting)
+	if (pdesc->reg_state == PX_TinyCanvasVM_State_Painting)
 	{
 		PX_ObjectExecuteEvent(pObject, PX_OBJECT_BUILD_EVENT(PX_OBJECT_EVENT_TINYCANVAS_PAINTEND));
 		PX_TinyCanvasVMOnEnd(pdesc);
@@ -410,7 +410,7 @@ PX_OBJECT_FREE_FUNCTION(PX_Object_TinyCanvasFree)
 }
 
 
-px_void PX_Object_TinyCanvasRegisterTool(PX_Object*pObject, const px_char name[PX_TINYCANVASVM_MAX_TOOL_NAME], pfun_PX_TinyCanvasVMOnPaint paint, px_bool store, px_void* ptr)
+px_void PX_Object_TinyCanvasRegisterTool(PX_Object*pObject, const px_char *name, pfun_PX_TinyCanvasVMOnPaint paint, px_bool store, px_void* ptr)
 {
 	px_int i;
 	PX_Object_TinyCanvas* pDesc = PX_ObjectGetDescIndex(PX_Object_TinyCanvas, pObject, 0);
@@ -507,7 +507,7 @@ px_void PX_Object_TinyCanvasSetColor(PX_Object* pObject, px_color color)
 	pDesc->reg_color = color;
 }
 
-px_void PX_Object_TinyCanvasSetTool(PX_Object* pObject, const px_char name[PX_TINYCANVASVM_MAX_TOOL_NAME])
+px_void PX_Object_TinyCanvasSetTool(PX_Object* pObject, const px_char *name)
 {
 	PX_Object_TinyCanvas* pDesc = (PX_Object_TinyCanvas*)PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_TINYCANVAS);
 	PX_ASSERTIF(pDesc == PX_NULL);

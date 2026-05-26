@@ -8,7 +8,7 @@ px_bool PX_EffectShine(px_surface *s,px_int radius,px_color color,px_float inten
 	px_surface ns;
 	px_int alpha;
 	px_color bindColor;
-	if(!PX_SurfaceCreate(s->MP,s->width,s->height,&ns))
+	if(!PX_SurfaceCreate(s->mp,s->width,s->height,&ns))
 		return PX_FALSE;
 
 	for(y=0;y<s->height;y++)
@@ -51,7 +51,7 @@ px_bool PX_EffectOutline(px_surface *s,px_int radius,px_color color)
 	px_surface ns;
 	px_int alpha;
 	px_color bindColor;
-	if(!PX_SurfaceCreate(s->MP,s->width,s->height,&ns))
+	if(!PX_SurfaceCreate(s->mp,s->width,s->height,&ns))
 		return PX_FALSE;
 
 	for(y=0;y<s->height;y++)
@@ -68,7 +68,7 @@ px_bool PX_EffectOutline(px_surface *s,px_int radius,px_color color)
 							alpha+=PX_SurfaceGetPixel(s,sampleX,sampleY)._argb.a;
 					}
 				}
-				alpha/=((radius*2-1)*(radius-1));
+				alpha/=((radius*2-1)*(radius*2-1));
 				alpha=alpha>255?255:alpha;
 				bindColor=color;
 				if(alpha!=0)

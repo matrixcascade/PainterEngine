@@ -811,15 +811,15 @@ px_bool PX_PianoInitializeEx(px_memorypool* mp, PX_Piano* pPiano, PX_PianoKey_Pa
 px_int PX_PianoKeyNameToIndex(const px_char keyName[])
 {
 	const px_char* incstep[] = { "A","#A","bB","B","C","#C","bD","D","#D","bE","E","F","#F","bG","G","#G","bA" };
-	const px_char map[] = { 0,1,1,2,3,4,4,5,6,6,7,8,9,9,10,11,11 };
-	px_int column = 0, row = 0, i, oft, index = 0;
+	const px_char bin_map_to_source[] = { 0,1,1,2,3,4,4,5,6,6,7,8,9,9,10,11,11 };
+	px_int column = 0, line_begin_cell_index_map = 0, i, oft, index = 0;
 	for (i = 0; i < 17; i++)
 		if (PX_memequ(incstep[i], keyName, oft = PX_strlen(incstep[i])))
 			break;
-	if (i == 17)return -1; else row = map[i];
+	if (i == 17)return -1; else line_begin_cell_index_map = bin_map_to_source[i];
 	column = keyName[oft] - '1';
 	if (i <= 3) column++;
-	if (column >= 0 && column < 8 && row + column * 12 < 88)	index = row + column * 12; else return -1;
+	if (column >= 0 && column < 8 && line_begin_cell_index_map + column * 12 < 88)	index = line_begin_cell_index_map + column * 12; else return -1;
 	return index;
 }
 

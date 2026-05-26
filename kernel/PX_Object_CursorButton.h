@@ -10,7 +10,7 @@ typedef struct
 	px_float c_distance_near;
 	px_color c_color;
 	px_int c_width;
-	px_bool enter;
+	px_bool sources_enter;
 }PX_Object_CursorButton;
 
 //use pushbutton function to operate cursor-button

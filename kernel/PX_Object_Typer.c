@@ -36,9 +36,10 @@ PX_OBJECT_RENDER_FUNCTION(PX_Object_TyperRender)
 
 		if (ip>=pDesc->payload.usedsize)
 		{
+			pDesc->reg_isend = PX_TRUE;
 			break;
 		}
-		
+		pDesc->reg_isend = PX_FALSE;
 		opcode = pDesc->payload.buffer[ip];
 
 		if (opcode==0x12)
@@ -140,7 +141,7 @@ PX_OBJECT_RENDER_FUNCTION(PX_Object_TyperRender)
 			else
 			{
 				if (psurface)
-					PX_FontModuleDrawCharacter(psurface, pDesc->fontModule, x_draw_oft, y_draw_oft, code, pDesc->reg_color);
+					PX_FontModuleDrawCharacterEx(psurface, pDesc->fontModule, x_draw_oft, y_draw_oft, code, pDesc->reg_color);
 				if(pDesc->x_spacer==0)
 					x_draw_oft += width;
 				else
@@ -401,6 +402,16 @@ px_void PX_Object_TyperReset(PX_Object* pObject)
 	pDesc->reg_elapsed = 0;
 }
 
+px_bool PX_Object_TyperIsEnd(PX_Object* pObject)
+{
+	PX_Object_Typer* pDesc = PX_Object_GetTyper(pObject);
+	if (!pDesc) {
+		PX_ASSERT();
+		return PX_FALSE;
+	}
+	return pDesc->reg_isend;
+}
+
 px_void PX_Object_TyperSetSpeed(PX_Object* pObject, px_double reg_speed)
 {
 	PX_Object_Typer* pDesc = PX_Object_GetTyper(pObject);
@@ -423,12 +434,34 @@ px_void PX_Object_TyperClear(PX_Object* pObject)
 	pDesc->reg_elapsed = 0;
 }
 
+px_void PX_Object_TyperSetYSpacer(PX_Object* pObject, px_int y_spacer)
+{
+	PX_Object_Typer* pDesc = PX_Object_GetTyper(pObject);
+	if (!pDesc) {
+		PX_ASSERT();
+		return;
+	}
+	pDesc->y_spacer = y_spacer;
+	
+}
+
+px_void PX_Object_TyperSetXSpacer(PX_Object* pObject, px_int x_spacer)
+{
+	PX_Object_Typer* pDesc = PX_Object_GetTyper(pObject);
+	if (!pDesc) {
+		PX_ASSERT();
+		return;
+	}
+	pDesc->x_spacer = x_spacer;
+	
+}
+
 px_bool PX_Object_TyperPrintPayload(PX_Object* pObject, const px_char* payload)
 {
 	px_int strlen_size=PX_strlen(payload);
 	px_int cursor=0;
 	PX_Object_Typer* pDesc = PX_Object_GetTyper(pObject);
-
+	pDesc->reg_isend = PX_FALSE;
 	if (strlen_size<=0)
 	{
 		return PX_FALSE;

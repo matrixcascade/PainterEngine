@@ -43,7 +43,7 @@ px_bool PX_RuntimeInitialize(PX_Runtime *pe,px_int surface_width,px_int surface_
 		pe->RenderSurface.height=0;
 		pe->RenderSurface.width=0;
 		pe->RenderSurface.surfaceBuffer=PX_NULL;
-		pe->RenderSurface.MP=PX_NULL;
+		pe->RenderSurface.mp=PX_NULL;
 	}
 	else
 	{

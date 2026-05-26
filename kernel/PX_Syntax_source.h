@@ -1,0 +1,32 @@
+#ifndef PX_SYNTAX_SOURCE_H
+#define PX_SYNTAX_SOURCE_H
+#include "PX_Syntax.h"
+#include "PX_Syntax_include.h"
+#include "PX_Syntax_const_int.h"
+#include "PX_Syntax_const_float.h"
+#include "PX_Syntax_const_string.h"
+#include "PX_Syntax_keyword.h"
+#include "PX_Syntax_bcontainer.h"
+#include "PX_Syntax_identifier.h"
+#include "PX_Syntax_numeric.h"
+#include "PX_Syntax_tuple.h"
+#include "PX_Syntax_const_string_list.h"
+#include "PX_Syntax_const_int_list.h"
+#include "PX_Syntax_const_float_list.h"
+#include "PX_Syntax_const_numeric_list.h"
+#include "PX_Syntax_const_tuple_list.h"
+#include "PX_Syntax_const_set.h"
+#include "PX_Syntax_define.h"
+#include "PX_Syntax_define_struct.h"
+#include "PX_Syntax_declare_prefix.h"
+#include "PX_Syntax_base_type.h"
+#include "PX_Syntax_declare_variable.h"
+#include "PX_Syntax_declare_token_suffix.h"
+#include "PX_Syntax_declare_token_prefix.h"
+#include "PX_Syntax_function.h"
+#include "PX_Syntax_expr.h"
+#include "PX_Syntax_eof.h"
+#include "PX_Syntax_comment.h"
+
+px_bool PX_Syntax_load_sources(PX_Syntax* pSyntax);
+#endif

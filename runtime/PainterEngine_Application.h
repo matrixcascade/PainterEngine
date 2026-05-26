@@ -3,7 +3,7 @@
 
 
 
-#define PX_APPLICATION_MEMORYPOOL_STATIC_SIZE (1024*1024*64)
+#define PX_APPLICATION_MEMORYPOOL_STATIC_SIZE (1024*1024*192)
 #define PX_APPLICATION_MEMORYPOOL_DYNAMIC_SIZE (1024*1024*64)
 #define PX_APPLICATION_MEMORYPOOL_SPACE_SIZE (1024*1024*32)
 
@@ -15,6 +15,7 @@
 #include "../platform/modules/px_request.h"
 #include "../platform/modules/px_tcp.h"
 #include "../platform/modules/px_udp.h"
+#include "../platform/modules/px_keyboard.h"
 extern px_char PX_APPLICATION_NAME[];
 	typedef struct
 	{
@@ -30,6 +31,7 @@ extern px_char PX_APPLICATION_NAME[];
 
 	extern PX_Application App;
 	px_bool PainterEngine_Initialize(px_int screen_width, px_int screen_height);
+	px_bool PainterEngine_InitializeEx(px_int _screen_width, px_int _screen_height, px_int window_width, px_int window_height);
 	px_bool PainterEngine_InitializeAudio();
 	px_void PainterEngine_SetWindowText(const px_char text[]);
 
@@ -66,6 +68,17 @@ extern px_char PX_APPLICATION_NAME[];
 	px_int PainterEngine_GetScreenHeight();
 	px_void PainterEngine_SetWindowSize(PX_Application* App, px_int window_Width, px_int window_Height);
 	px_bool PainterEngine_LoadFontModule(const px_char path[], PX_FONTMODULE_CODEPAGE codepage, px_int size);
+
+	px_bool PainterEngine_LoadFontModuleToResourceLibrary(const px_char path[], const px_char key[], PX_FONTMODULE_CODEPAGE codepage, px_int size);
+	px_bool PainterEngine_LoadTextureToResourceLibrary(const px_char path[], const px_char key[]);
+	px_bool PainterEngine_LoadSoundToResourceLibrary(const px_char path[], const px_char key[]);
+	px_bool PainterEngine_LoadShapeToResourceLibrary(const px_char path[], const px_char key[]);
+	px_bool PainterEngine_LoadAnimationToResourceLibrary(const px_char path[], const px_char key[]);
+	px_bool PainterEngine_LoadStringToResourceLibrary(const px_char path[], const px_char key[]);
+	px_bool PainterEngine_LoadScriptToResourceLibrary(const px_char path[], const px_char key[]);
+	px_bool PainterEngine_LoadJsonToResourceLibrary(const px_char path[], const px_char key[]);
+	px_bool PainterEngine_LoadDataToResourceLibrary(const px_char path[], const px_char key[]);
+	px_bool PainterEngine_LoadGifToResourceLibrary(const px_char path[], const px_char key[]);
 	px_void PainterEngine_DrawTexture(px_texture* ptexture, px_int x, px_int y, PX_ALIGN align);
 	px_void PainterEngine_DrawLine(px_int x1, px_int y1, px_int x2, px_int y2, px_int linewidth, px_color color);
 	px_void PainterEngine_DrawRect(px_int x, px_int y, px_int width, px_int height, px_color color);

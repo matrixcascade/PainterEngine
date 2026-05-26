@@ -29,7 +29,10 @@ px_bool PX_CompilerCompile(PX_Compiler *compiler,px_memory *bin, PX_VM_DebuggerM
 	
 	if(PX_ScriptCompilerCompile(&compiler->lib,entryScript,&asmcodeString, PX_COMPILER_DEFAULT_STACK_SIZE,compiler->error,sizeof(compiler->error)))
 	{
-		PX_ScriptAsmOptimization(&asmcodeString);
+		if (!PX_ScriptAsmOptimization(&asmcodeString))
+		{
+			return PX_FALSE;
+		}
 
 		if(!PX_ScriptAsmCompile(compiler->mp,asmcodeString.buffer,bin, pdebugmap))
 		{

@@ -448,6 +448,24 @@ px_int PX_Object_ListAdd(PX_Object *pObject,px_void *ptr)
 	return -1;
 }
 
+px_bool PX_Object_ListCopyFromVector(PX_Object* pListObject, px_vector* pVector)
+{
+	PX_Object_List* pList = PX_Object_GetList(pListObject);
+	px_int i;
+	if (!pList)
+	{
+		PX_ASSERT();
+		return PX_FALSE;
+	}
+	PX_Object_ListClear(pListObject);
+	for (i = 0; i < pVector->size; i++)
+	{
+		if(PX_Object_ListAdd(pListObject, PX_VectorIndex(pVector, i))==-1)
+			return PX_FALSE;
+	}
+	return PX_TRUE;
+}
+
 PX_OBJECT_FREE_FUNCTION(PX_Object_ListFree)
 {
 	px_int i;

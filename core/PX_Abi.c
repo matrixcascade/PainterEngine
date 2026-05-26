@@ -1,9 +1,9 @@
 #include "PX_Abi.h"
 
 // px_dword  PX_ABI_TYPE   px_char*    px_byte*
-//   size
+//   size=sizeof(dword) + sizeof(PX_ABI_TYPE) + name + data
 //|----------------------------------------------|
-//|           type  |   name   |   data          |
+//|   size   |  type  |   name \0|   data        |
 //|----------------------------------------------|
 px_void PX_AbiCreate_StaticWriter(px_abi* pabi, px_void* pbuffer, px_int size)
 {
@@ -24,6 +24,88 @@ px_void PX_AbiCreate_DynamicWriter(px_abi* pabi, px_memorypool* mp)
 {
 	PX_memset(pabi, 0, sizeof(px_abi));
 	PX_MemoryInitialize(mp, &pabi->dynamic);
+}
+
+px_void PX_AbiCreate_MemoryWriter(px_abi* pabi, px_memory* mem)
+{
+	pabi->dynamic = *mem;
+}
+
+px_void PX_AbiClear(px_abi* pabi)
+{
+	if (!pabi)
+	{
+		return;
+	}
+	if (pabi->dynamic.mp)
+	{
+		PX_MemoryClear(&pabi->dynamic);
+	}
+	else
+	{
+		pabi->static_used_size = 0;
+	}
+	
+}
+
+px_bool PX_AbiCopy_FromBuffer(px_abi* pabi, const px_void* pbuffer, px_int size)
+{
+	if (!pabi || !pbuffer || size <= 0)
+	{
+		return PX_FALSE;
+	}
+	if (pabi->dynamic.mp)
+	{
+		if (!PX_MemoryResize(&pabi->dynamic, size))
+		{
+			return PX_FALSE;
+		}
+		PX_memcpy(pabi->dynamic.buffer, pbuffer, size);
+		pabi->dynamic.usedsize = size;
+	}
+	else
+	{
+		if (size > pabi->static_size)
+		{
+			return PX_FALSE;
+		}
+		PX_memcpy(pabi->pstatic_buffer, pbuffer, size);
+		pabi->static_used_size = size;
+	}
+	return PX_TRUE;
+}
+
+px_bool PX_AbiCopy_FromAbi(px_abi* pabi,px_abi *pCopyFrom)
+{
+	if (!pabi || !pCopyFrom)
+	{
+		return PX_FALSE;
+	}
+	return PX_AbiCopy_FromBuffer(pabi, PX_AbiGet_Pointer(pCopyFrom), PX_AbiGet_Size(pCopyFrom));
+
+}
+
+px_bool PX_AbiCopy_FromAbiMember(px_abi* pabi, px_abi* pCopyFrom, const px_char payload[])
+{
+	PX_ABI_TYPE type;
+	px_dword datasize;
+	const px_byte* payloaddata;
+	if (!pabi || !pCopyFrom || !payload)
+	{
+		return PX_FALSE;
+	}
+	payloaddata=PX_AbiGet(pCopyFrom, &type, &datasize, payload);
+	if (!payloaddata)
+	{
+		return PX_FALSE;
+	}
+	return PX_AbiSet(pabi, type, payload, (px_void*)payloaddata, datasize);
+	
+}
+
+px_bool PX_AbiCopy_FromAbiMemberAll(px_abi* pabi, px_abi* pCopyFrom)
+{
+	return PX_AbiCopy_FromBuffer(pabi, PX_AbiGet_Pointer(pCopyFrom), PX_AbiGet_Size(pCopyFrom));
 }
 
 px_int  PX_AbiGet_Size(px_abi* pabi)
@@ -61,7 +143,10 @@ px_byte* PX_AbiPointer_GetDataPointer(px_byte* pStartBuffer)
 	return pStartBuffer + PX_AbiPointer_GetDataOffset(pStartBuffer);
 }
 
-
+const px_char* PX_AbiPointer_GetName(px_byte* pStartBuffer)
+{
+	return (const px_char*)(pStartBuffer + sizeof(px_dword) + sizeof(PX_ABI_TYPE));
+}
 
 px_dword PX_AbiPointer_GetDataSize(px_byte* pStartBuffer)
 {
@@ -83,6 +168,70 @@ PX_ABI_TYPE PX_AbiPointer_GetType(px_byte* pStartBuffer)
 	return *(PX_ABI_TYPE*)(pStartBuffer + sizeof(px_dword));
 }
 
+static px_int PX_AbiGet_AbiMemberOffsetWithType(px_abi* pabi, const px_char name[],PX_ABI_TYPE type)
+{
+	px_dword readoffset = 0;
+	px_dword readsize;
+	px_byte* pbuffer;
+	if (!pabi)
+	{
+		PX_ASSERTX("pabi is null");
+		return -1;
+	}
+	pbuffer = PX_AbiGet_Pointer(pabi);
+	readsize = PX_AbiGet_Size(pabi);
+
+	while (readoffset < readsize)
+	{
+		px_dword size;
+		const px_char* pname;
+		PX_ABI_TYPE current_type;
+		px_int current_abi_offset = readoffset;
+
+		//size
+		PX_memcpy(&size, pbuffer + readoffset, sizeof(size));
+		if (size == 0 || readoffset + size > readsize)
+		{
+			return -1;
+		}
+		readoffset += sizeof(px_dword);
+		if (readoffset >= readsize)
+			return -1;
+
+		//type
+		current_type = *(PX_ABI_TYPE*)(pbuffer + readoffset);
+		readoffset += sizeof(PX_ABI_TYPE);
+		if (readoffset >= readsize)
+			return -1;
+
+		//name
+		pname = (px_char*)(pbuffer + readoffset);
+		
+		if (PX_strequ(pname, name)&& current_type==type)
+		{
+			px_int _strlen = PX_strlen(name) + 1;
+			if (_strlen == 1)
+			{
+				return -1;
+			}
+			if (readoffset + _strlen > readsize)
+			{
+				return -1;
+			}
+			return  current_abi_offset;
+		}
+		else
+		{
+			readoffset = current_abi_offset + size;
+			if (readoffset >= readsize)
+			{
+				return -1;
+			}
+		}
+	}
+	return -1;
+}
+
 static px_int PX_AbiGet_AbiMemberOffset(px_abi* pabi, const px_char name[])
 {
 	px_dword readoffset = 0;
@@ -90,7 +239,8 @@ static px_int PX_AbiGet_AbiMemberOffset(px_abi* pabi, const px_char name[])
 	px_byte* pbuffer;
 	if (!pabi)
 	{
-		return PX_NULL;
+		PX_ASSERTX("pabi is null");
+		return -1;
 	}
 	pbuffer = PX_AbiGet_Pointer(pabi);
 	readsize = PX_AbiGet_Size(pabi);
@@ -180,7 +330,7 @@ static px_byte* PX_AbiGet_AbiMemberDataPointer(px_abi* pabi, PX_ABI_TYPE* ptype,
 		return pmemberdataptr;
 }
 
-px_int PX_AbiGet_PayloadOffset(px_abi* pabi, PX_ABI_TYPE* ptype, px_dword* pdatasize, const px_char _payload[])
+px_int PX_AbiGet_PayloadOffsetWithType(px_abi* pabi, PX_ABI_TYPE type, px_dword* pdatasize, const px_char _payload[])
 {
 	px_int r_offset = 0;
 	px_int s_offset = 0;
@@ -196,7 +346,100 @@ px_int PX_AbiGet_PayloadOffset(px_abi* pabi, PX_ABI_TYPE* ptype, px_dword* pdata
 	{
 		return PX_FALSE;
 	}
-	PX_strset(payload, _payload);
+
+	if (_payload[0] == '.')
+	{
+		PX_strset(payload, _payload + 1);
+	}
+	else
+	{
+		PX_strset(payload, _payload);
+	}
+
+
+	while (payload[r_offset] != 0)
+	{
+		px_int ref_offset;
+
+		while (PX_TRUE)
+		{
+			if (payload[s_offset] == '.')
+			{
+				payload[s_offset] = '\0';
+				s_offset++;
+				break;
+			}
+			if (payload[s_offset] == '\0')
+			{
+				lexeme = payload + r_offset;
+				ref_offset = PX_AbiGet_AbiMemberOffsetWithType(&current_abi, lexeme,type);
+				if (ref_offset == -1)
+				{
+					return -1;
+				}
+
+				if (pdatasize)
+				{
+					*pdatasize = PX_AbiPointer_GetDataSize(abs_ptr + abs_offset + ref_offset);
+				}
+				return abs_offset + ref_offset;
+			}
+			s_offset++;
+		}
+
+		lexeme = payload + r_offset;
+
+		ref_offset = PX_AbiGet_AbiMemberOffsetWithType(&current_abi, lexeme, PX_ABI_TYPE_ABI);
+		if (ref_offset != -1)
+		{
+			px_dword datasize;
+			px_byte* pdata;
+			abs_offset += ref_offset;
+			datasize = PX_AbiPointer_GetDataSize(abs_ptr + abs_offset);
+			if (datasize == 0)
+			{
+				return -1;
+			}
+			pdata = PX_AbiPointer_GetDataPointer(abs_ptr + abs_offset);
+			ref_offset = PX_AbiPointer_GetDataOffset(abs_ptr + abs_offset);
+			abs_offset += ref_offset;
+			PX_AbiCreate_StaticReader(&current_abi, pdata, datasize);
+		}
+		else
+		{
+			return -1;
+		}
+		r_offset = s_offset;
+	}
+	return -1;
+}
+
+px_int PX_AbiGet_PayloadOffset(px_abi* pabi, PX_ABI_TYPE* ptype, px_dword* pdatasize, const px_char _payload[])
+{
+	px_int r_offset = 0;
+	px_int s_offset = 0;
+	px_int abs_offset = 0;
+	px_char payload[512] = { 0 };
+	px_char* lexeme = PX_NULL;
+	px_int   i = 0;
+	px_abi   current_abi;
+	px_byte* abs_ptr = PX_AbiGet_Pointer(pabi);
+	current_abi = *pabi;
+	
+	if (PX_strlen(_payload) >= sizeof(payload))
+	{
+		return PX_FALSE;
+	}
+
+	if (_payload[0] == '.')
+	{
+		PX_strset(payload, _payload+1);
+	}
+	else
+	{
+		PX_strset(payload, _payload);
+	}
+	
 
 	while (payload[r_offset] != 0)
 	{
@@ -276,10 +519,20 @@ px_int PX_AbiGet_PayloadDataOffset(px_abi* pabi, PX_ABI_TYPE* ptype, px_dword* p
 	return offset + sizeof(px_dword) + sizeof(PX_ABI_TYPE) + PX_strlen((px_char*)(PX_AbiGet_Pointer(pabi) + offset + sizeof(px_dword) + sizeof(PX_ABI_TYPE))) + 1;
 }
 
-px_byte* PX_AbiGet_PayloadPointer(px_abi* pabi, PX_ABI_TYPE* ptype, px_dword* psize, const px_char _payload[])
+px_int PX_AbiGet_PayloadDataOffsetWithType(px_abi* pabi, PX_ABI_TYPE type, px_dword* psize, const px_char _payload[])
+{
+	px_int offset = PX_AbiGet_PayloadOffsetWithType(pabi, type, psize, _payload);
+	if (offset == -1)
+	{
+		return -1;
+	}
+	return offset + sizeof(px_dword) + sizeof(PX_ABI_TYPE) + PX_strlen((px_char*)(PX_AbiGet_Pointer(pabi) + offset + sizeof(px_dword) + sizeof(PX_ABI_TYPE))) + 1;
+}
+
+px_byte* PX_AbiGet_PayloadPointer(px_abi* pabi, PX_ABI_TYPE* ptype, px_dword* pdatasize, const px_char _payload[])
 {
 	px_byte* ptr = PX_AbiGet_Pointer(pabi);
-	px_int offset = PX_AbiGet_PayloadOffset(pabi, ptype, psize, _payload);
+	px_int offset = PX_AbiGet_PayloadOffset(pabi, ptype, pdatasize, _payload);
 	if (offset == -1)
 	{
 		return PX_NULL;
@@ -287,7 +540,18 @@ px_byte* PX_AbiGet_PayloadPointer(px_abi* pabi, PX_ABI_TYPE* ptype, px_dword* ps
 	return ptr + offset;
 }
 
-static px_byte* PX_AbiGet_PayloadDataPointer(px_abi* pabi, PX_ABI_TYPE* ptype, px_dword* psize, const px_char _payload[])
+px_byte* PX_AbiGet_PayloadPointerWithType(px_abi* pabi, PX_ABI_TYPE type, px_dword* pdatasize, const px_char _payload[])
+{
+	px_byte* ptr = PX_AbiGet_Pointer(pabi);
+	px_int offset = PX_AbiGet_PayloadOffsetWithType(pabi, type, pdatasize, _payload);
+	if (offset == -1)
+	{
+		return PX_NULL;
+	}
+	return ptr + offset;
+}
+
+ px_byte* PX_AbiGet_PayloadDataPointer(px_abi* pabi, PX_ABI_TYPE* ptype, px_dword* psize, const px_char _payload[])
 {
 	px_byte* ptr = PX_AbiGet_Pointer(pabi);
 	px_int offset = PX_AbiGet_PayloadDataOffset(pabi, ptype, psize, _payload);
@@ -298,18 +562,34 @@ static px_byte* PX_AbiGet_PayloadDataPointer(px_abi* pabi, PX_ABI_TYPE* ptype, p
 	return ptr + offset;
 }
 
+ px_byte* PX_AbiGet_PayloadDataPointerWithType(px_abi* pabi, PX_ABI_TYPE type, px_dword* psize, const px_char _payload[])
+ {
+	 px_byte* ptr = PX_AbiGet_Pointer(pabi);
+	 px_int offset = PX_AbiGet_PayloadDataOffsetWithType(pabi, type, psize, _payload);
+	 if (offset == -1)
+	 {
+		 return PX_NULL;
+	 }
+	 return ptr + offset;
+ }
+
 px_byte* PX_AbiGet(px_abi* pabi, PX_ABI_TYPE* ptype, px_dword* psize, const px_char _payload[])
 {
 	return PX_AbiGet_PayloadDataPointer(pabi, ptype, psize, _payload);
 }
 
+px_byte* PX_AbiGetWithType(px_abi* pabi, PX_ABI_TYPE type, px_dword* psize, const px_char _payload[])
+{
+	return PX_AbiGet_PayloadDataPointerWithType(pabi, type, psize, _payload);
+}
+
+
 px_int* PX_AbiGet_int(px_abi* pabi, const px_char payload[])
 {
 	px_dword datasize;
 	px_void* pdata;
-	PX_ABI_TYPE type;
-	pdata = PX_AbiGet_PayloadDataPointer(pabi, &type, &datasize, payload);
-	if (pdata && type == PX_ABI_TYPE_INT)
+	pdata = PX_AbiGet_PayloadDataPointerWithType(pabi, PX_ABI_TYPE_INT, &datasize, payload);
+	if (pdata)
 	{
 		return (px_int*)pdata;
 	}
@@ -320,9 +600,8 @@ px_dword* PX_AbiGet_dword(px_abi* pabi, const px_char payload[])
 {
 	px_dword datasize;
 	px_void* pdata;
-	PX_ABI_TYPE type;
-	pdata = PX_AbiGet_PayloadDataPointer(pabi, &type, &datasize, payload);
-	if (pdata && type == PX_ABI_TYPE_DWORD)
+	pdata = PX_AbiGet_PayloadDataPointerWithType(pabi, PX_ABI_TYPE_DWORD, &datasize, payload);
+	if (pdata)
 	{
 		return (px_dword*)pdata;
 	}
@@ -333,9 +612,9 @@ px_word* PX_AbiGet_word(px_abi* pabi, const px_char payload[])
 {
 	px_dword datasize;
 	px_void* pdata;
-	PX_ABI_TYPE type;
-	pdata = PX_AbiGet_PayloadDataPointer(pabi, &type, &datasize, payload);
-	if (pdata && type == PX_ABI_TYPE_WORD)
+
+	pdata = PX_AbiGet_PayloadDataPointerWithType(pabi, PX_ABI_TYPE_WORD, &datasize, payload);
+	if (pdata)
 	{
 		return (px_word*)pdata;
 	}
@@ -346,9 +625,9 @@ px_byte* PX_AbiGet_byte(px_abi* pabi, const px_char payload[])
 {
 	px_dword datasize;
 	px_void* pdata;
-	PX_ABI_TYPE type;
-	pdata = PX_AbiGet_PayloadDataPointer(pabi, &type, &datasize, payload);
-	if (pdata && type == PX_ABI_TYPE_BYTE)
+
+	pdata = PX_AbiGet_PayloadDataPointerWithType(pabi, PX_ABI_TYPE_BYTE, &datasize, payload);
+	if (pdata )
 	{
 		return (px_byte*)pdata;
 	}
@@ -359,9 +638,9 @@ px_void** PX_AbiGet_ptr(px_abi* pabi, const px_char payload[])
 {
 	px_dword datasize;
 	px_void* pdata;
-	PX_ABI_TYPE type;
-	pdata = PX_AbiGet_PayloadDataPointer(pabi, &type, &datasize, payload);
-	if (pdata && type == PX_ABI_TYPE_PTR)
+
+	pdata = PX_AbiGet_PayloadDataPointerWithType(pabi, PX_ABI_TYPE_PTR, &datasize, payload);
+	if (pdata)
 	{
 		return (px_void**)pdata;
 	}
@@ -372,9 +651,9 @@ px_float* PX_AbiGet_float(px_abi* pabi, const px_char payload[])
 {
 	px_dword datasize;
 	px_void* pdata;
-	PX_ABI_TYPE type;
-	pdata = PX_AbiGet_PayloadDataPointer(pabi, &type, &datasize, payload);
-	if (pdata && type == PX_ABI_TYPE_FLOAT)
+
+	pdata = PX_AbiGet_PayloadDataPointerWithType(pabi, PX_ABI_TYPE_FLOAT, &datasize, payload);
+	if (pdata)
 	{
 		return (px_float*)pdata;
 	}
@@ -385,25 +664,174 @@ px_double* PX_AbiGet_double(px_abi* pabi, const px_char payload[])
 {
 	px_dword datasize;
 	px_void* pdata;
-	PX_ABI_TYPE type;
-	pdata = PX_AbiGet_PayloadDataPointer(pabi, &type, &datasize, payload);
-	if (pdata && type == PX_ABI_TYPE_DOUBLE)
+
+	pdata = PX_AbiGet_PayloadDataPointerWithType(pabi, PX_ABI_TYPE_DOUBLE, &datasize, payload);
+	if (pdata)
 	{
 		return (px_double*)pdata;
 	}
 	return 0;
 }
 
+px_int PX_AbiGetValue_int(px_abi* pabi, const px_char payload[])
+{
+	px_int* pvalue = PX_AbiGet_int(pabi, payload);
+	if (!pvalue)
+	{
+		PX_TERMINATE("AbiGetValue_int failed, payload not found");
+		return 0;
+	}
+	return *pvalue;
+}
+
+const px_char* PX_AbiGetValue_string(px_abi* pabi, const px_char payload[])
+{
+	const px_char* pvalue = PX_AbiGet_string(pabi, payload);
+	if (!pvalue)
+	{
+		PX_TERMINATE("AbiGetValue_string failed, payload not found");
+		return 0;
+	}
+	return pvalue;
+}
+
+px_dword PX_AbiGetValue_dword(px_abi* pabi, const px_char payload[]) 
+{
+	px_dword* pvalue = PX_AbiGet_dword(pabi, payload);
+	if (!pvalue)
+	{
+		PX_TERMINATE("AbiGetValue_dword failed, payload not found");
+		return 0;
+	}
+	return *pvalue;
+
+}
+px_word PX_AbiGetValue_word(px_abi* pabi, const px_char payload[])
+{
+	px_word* pvalue = PX_AbiGet_word(pabi, payload);
+	if (!pvalue)
+	{
+		PX_TERMINATE("AbiGetValue_word failed, payload not found");
+		return 0;
+	}
+	return *pvalue;
+}
+px_byte PX_AbiGetValue_byte(px_abi* pabi, const px_char payload[])
+{
+	px_byte* pvalue = PX_AbiGet_byte(pabi, payload);
+	if (!pvalue)
+	{
+		PX_TERMINATE("AbiGetValue_byte failed, payload not found");
+		return 0;
+	}
+	return *pvalue;
+}
+px_void* PX_AbiGetValue_ptr(px_abi* pabi, const px_char payload[])
+{
+	px_void** pvalue = PX_AbiGet_ptr(pabi, payload);
+	if (!pvalue)
+	{
+		PX_TERMINATE("AbiGetValue_ptr failed, payload not found");
+		return 0;
+	}
+	return *pvalue;
+}
+px_float PX_AbiGetValue_float(px_abi* pabi, const px_char payload[])
+{
+	px_float* pvalue = PX_AbiGet_float(pabi, payload);
+	if (!pvalue)
+	{
+		PX_TERMINATE("AbiGetValue_float failed, payload not found");
+		return 0;
+	}
+	return *pvalue;
+}
+px_double PX_AbiGetValue_double(px_abi* pabi, const px_char payload[])
+{
+	px_double* pvalue = PX_AbiGet_double(pabi, payload);
+	if (!pvalue)
+	{
+		PX_TERMINATE("AbiGetValue_double failed, payload not found");
+		return 0;
+	}
+	return *pvalue;
+}
+px_point PX_AbiGetValue_point(px_abi* pabi, const px_char payload[])
+{
+	px_point* pvalue = PX_AbiGet_point(pabi, payload);
+	if (!pvalue)
+	{
+		PX_TERMINATE("AbiGetValue_point failed, payload not found");
+		return PX_POINT(0, 0, 0);
+	}
+	return *pvalue;
+}
+px_color PX_AbiGetValue_color(px_abi* pabi, const px_char payload[])
+{
+	px_color* pvalue = PX_AbiGet_color(pabi, payload);
+	if (!pvalue)
+	{
+		PX_TERMINATE("AbiGetValue_color failed, payload not found");
+		return PX_COLOR(0, 0, 0, 0);
+	}
+	return *pvalue;
+}
+px_bool PX_AbiGetValue_bool(px_abi* pabi, const px_char payload[])
+{
+	px_bool* pvalue = PX_AbiGet_bool(pabi, payload);
+	if (!pvalue)
+	{
+		PX_TERMINATE("AbiGetValue_bool failed, payload not found");
+		return PX_FALSE;
+	}
+	return *pvalue;
+}
+
+px_abi PX_AbiGetValue_abireadonly(px_abi* pabi,  const px_char payload[])
+{
+	px_abi rabi = {0};
+	px_bool result = PX_AbiGet_AbiReadOnly(pabi, &rabi, payload);
+	if (!result)
+	{
+		PX_TERMINATE("AbiGetValue_abi failed, payload not found");
+		return rabi;
+	}
+	return rabi;
+}
+
 const px_char* PX_AbiGet_string(px_abi* pabi, const px_char payload[])
 {
 	px_dword datasize;
 	px_void* pdata;
-	PX_ABI_TYPE type;
-	pdata = PX_AbiGet_PayloadDataPointer(pabi, &type, &datasize, payload);
-	if (pdata && type == PX_ABI_TYPE_STRING)
+
+	pdata = PX_AbiGet_PayloadDataPointerWithType(pabi, PX_ABI_TYPE_STRING, &datasize, payload);
+	if (pdata)
 	{
 		return (const px_char*)pdata;
 	}
+	return 0;
+}
+
+px_int PX_AbiGet_string_to_int(px_abi* pabi, const px_char payload[])
+{
+	const px_char* pstring = PX_AbiGet_string(pabi, payload);
+	if (pstring)
+	{
+		return PX_atoi(pstring);
+	}
+	PX_ERROR("AbiGet_string_to_int failed, payload not found");
+	return 0;
+	
+}
+
+px_float PX_AbiGet_string_to_float(px_abi* pabi, const px_char payload[])
+{
+	const px_char* pstring = PX_AbiGet_string(pabi, payload);
+	if (pstring)
+	{
+		return PX_atof(pstring);
+	}
+	PX_ERROR("AbiGet_string_to_float failed, payload not found");
 	return 0;
 }
 
@@ -411,9 +839,8 @@ px_point* PX_AbiGet_point(px_abi* pabi, const px_char payload[])
 {
 	px_dword datasize;
 	px_void* pdata;
-	PX_ABI_TYPE type;
-	pdata = PX_AbiGet_PayloadDataPointer(pabi, &type, &datasize, payload);
-	if (pdata && type == PX_ABI_TYPE_POINT)
+	pdata = PX_AbiGet_PayloadDataPointerWithType(pabi, PX_ABI_TYPE_POINT, &datasize, payload);
+	if (pdata)
 	{
 		return (px_point*)pdata;
 	}
@@ -424,9 +851,8 @@ px_color* PX_AbiGet_color(px_abi* pabi, const px_char payload[])
 {
 	px_dword datasize;
 	px_void* pdata;
-	PX_ABI_TYPE type;
-	pdata = PX_AbiGet_PayloadDataPointer(pabi, &type, &datasize, payload);
-	if (pdata && type == PX_ABI_TYPE_COLOR)
+	pdata = PX_AbiGet_PayloadDataPointerWithType(pabi, PX_ABI_TYPE_COLOR, &datasize, payload);
+	if (pdata)
 	{
 		return (px_color*)pdata;
 	}
@@ -437,9 +863,9 @@ px_bool* PX_AbiGet_bool(px_abi* pabi, const px_char payload[])
 {
 	px_dword datasize;
 	px_void* pdata;
-	PX_ABI_TYPE type;
-	pdata = PX_AbiGet_PayloadDataPointer(pabi, &type, &datasize, payload);
-	if (pdata && type == PX_ABI_TYPE_BOOL)
+
+	pdata = PX_AbiGet_PayloadDataPointerWithType(pabi, PX_ABI_TYPE_BOOL, &datasize, payload);
+	if (pdata )
 	{
 		return (px_bool*)pdata;
 	}
@@ -449,21 +875,20 @@ px_bool* PX_AbiGet_bool(px_abi* pabi, const px_char payload[])
 px_void* PX_AbiGet_data(px_abi* pabi, const px_char payload[], px_dword* size)
 {
 	px_void* pdata;
-	PX_ABI_TYPE type;
-	pdata = PX_AbiGet_PayloadDataPointer(pabi, &type, size, payload);
-	if (pdata && type == PX_ABI_TYPE_DATA)
+
+	pdata = PX_AbiGet_PayloadDataPointerWithType(pabi, PX_ABI_TYPE_DATA, size, payload);
+	if (pdata)
 	{
 		return (px_void*)pdata;
 	}
 	return 0;
 }
 
-px_bool PX_AbiGet_Abi(px_abi* pabi, px_abi* prabi, const px_char name[])
+px_bool PX_AbiGet_AbiReadOnly(px_abi* pabi, px_abi* prabi, const px_char name[])
 {
 	px_dword size;
-	PX_ABI_TYPE type;
-	px_void* ptr = PX_AbiGet_PayloadDataPointer(pabi, &type, &size, name);
-	if (ptr && type == PX_ABI_TYPE_ABI)
+	px_void* ptr = PX_AbiGet_PayloadDataPointerWithType(pabi, PX_ABI_TYPE_ABI, &size, name);
+	if (ptr )
 	{
 		PX_AbiCreate_StaticReader(prabi, ptr, size);
 		return PX_TRUE;
@@ -479,6 +904,11 @@ px_bool PX_AbiCheck(px_abi* pabi)
 	PX_ABI_TYPE type;
 	px_byte* ptr,*target_data_ptr;
 	abi_size = PX_AbiGet_Size(pabi);
+	if (abi_size<=sizeof(px_dword) + sizeof(PX_ABI_TYPE))
+	{
+		return PX_FALSE;
+	}
+	
 	ptr = PX_AbiGet_Pointer(pabi);
 	while (offset<abi_size)
 	{
@@ -489,10 +919,15 @@ px_bool PX_AbiCheck(px_abi* pabi)
 			return PX_FALSE;
 		}
 		target_abi_size = *(px_dword*)(ptr+offset);
+		if (target_abi_size<=sizeof(px_dword) + sizeof(PX_ABI_TYPE))
+		{
+			return PX_FALSE;
+		}
+		
 		type = *(PX_ABI_TYPE*)(ptr + offset+sizeof(px_dword));
 		pname = (px_char*)(ptr + offset + sizeof(px_dword) + sizeof(PX_ABI_TYPE));
 		namelen = PX_strlen(pname) + 1;
-		if (namelen>target_abi_size- sizeof(px_dword) + sizeof(PX_ABI_TYPE))
+		if (namelen>target_abi_size- sizeof(px_dword) - sizeof(PX_ABI_TYPE))
 		{
 			return PX_FALSE;
 		}
@@ -521,6 +956,20 @@ px_bool PX_AbiCheck(px_abi* pabi)
 	return PX_TRUE;
 }
 
+
+
+PX_ABI_TYPE PX_AbiType(px_abi* pabi)
+{
+	return *(PX_ABI_TYPE*)(PX_AbiGet_Pointer(pabi) + sizeof(px_dword));
+}
+
+px_bool PX_AbiCheckBufferReady(const px_byte pdata[], px_int size)
+{
+	px_abi abi;
+	PX_AbiCreate_StaticReader(&abi, pdata, size);
+	return PX_AbiCheck(&abi);
+}
+
 px_bool PX_AbiExist(px_abi* pabi, const px_char payload[])
 {
 	px_dword size;
@@ -536,16 +985,18 @@ px_bool PX_AbiExist(px_abi* pabi, const px_char payload[])
 px_bool PX_AbiExist_Type(px_abi* pabi, const px_char payload[], PX_ABI_TYPE type)
 {
 	px_dword size;
-	PX_ABI_TYPE rtype;
-	px_void* ptr = PX_AbiGet_PayloadDataPointer(pabi, &rtype, &size, payload);
-	if (ptr && rtype == type)
+	px_void* ptr = PX_AbiGet_PayloadDataPointerWithType(pabi, type, &size, payload);
+	if (ptr)
 	{
 		return PX_TRUE;
 	}
 	return PX_FALSE;
 }
 
-
+px_bool PX_AbiExist_abi(px_abi* pabi, const px_char payload[])
+{
+	return PX_AbiExist_Type(pabi, payload, PX_ABI_TYPE_ABI);
+}
 
 px_bool PX_AbiExist_string(px_abi* pabi, const px_char payload[], const px_char check[])
 {
@@ -559,6 +1010,22 @@ px_bool PX_AbiExist_string(px_abi* pabi, const px_char payload[], const px_char 
 	}
 	return PX_FALSE;
 }
+
+px_bool PX_AbiExist_data(px_abi* pabi, const px_char payload[], const px_byte data[], px_int datasize)
+{
+	px_dword size;
+	const px_byte* pdata = PX_AbiGet_data(pabi, payload, &size);
+	if (pdata&&(px_dword)datasize==size)
+	{
+		if (PX_memequ(data, pdata, datasize))
+		{
+			return PX_TRUE;
+		}
+	}
+	return PX_FALSE;
+}
+
+
 px_bool PX_AbiExist_int(px_abi* pabi, const px_char payload[], px_int check)
 {
 	px_int* pint = PX_AbiGet_int(pabi, payload);
@@ -689,14 +1156,29 @@ px_int PX_AbiGet_MemberCount(px_abi* pabi)
 	while (offset < abi_size)
 	{
 		px_dword size = PX_AbiPointer_GetAbiSize(ptr + offset);
+		if (size==0)
+		{
+			//invalid abi, size should not be 0
+			return 0;
+		}
+
 		offset += size;
 		count++;
 	}
 	return count;
-	
 }
 
-px_byte* PX_AbiGet_Member(px_abi* pabi, px_int index)
+px_int PX_AbiGet_PayloadMemberCount(px_abi* pabi, const px_char payload[])
+{
+	px_abi subabi;
+	if (!PX_AbiGet_AbiReadOnly(pabi, &subabi, payload))
+	{
+		return 0;
+	}
+	return PX_AbiGet_MemberCount(&subabi);
+}
+
+px_byte* PX_AbiGet_MemberByIndex(px_abi* pabi, px_int index)
 {
 	px_int offset = 0;
 	px_int count = 0;
@@ -710,10 +1192,19 @@ px_byte* PX_AbiGet_Member(px_abi* pabi, px_int index)
 			return ptr + offset;
 		}
 		size = PX_AbiPointer_GetAbiSize(ptr + offset);
+		if(size==0)
+		{
+			return PX_NULL;
+		}
 		offset += size;
 		count++;
 	}
 	return PX_NULL;
+}
+
+px_byte* PX_AbiGet_Start(px_abi* pabi)
+{
+	return PX_AbiGet_Pointer(pabi);
 }
 
 px_byte* PX_AbiGet_First(px_abi* pabi)
@@ -722,26 +1213,19 @@ px_byte* PX_AbiGet_First(px_abi* pabi)
 	{
 		return PX_NULL;
 	}
-	if (pabi->static_used_size)
-	{
-		return PX_AbiGet_Pointer(pabi);
-	}
-	else
-	{
-		return PX_NULL;
-	}
-	
+	return PX_AbiGet_Pointer(pabi);
 }
 
 px_byte* PX_AbiGet_Next(px_abi* pabi, px_byte* pstart)
 {
 	px_int offset = (px_int)(pstart - PX_AbiGet_Pointer(pabi));
-	PX_ASSERTIF(offset < 0);
-	if (offset<PX_AbiGet_Size(pabi))
+	px_int abisize = PX_AbiGet_Size(pabi);
+	px_int current_abi_size = PX_AbiPointer_GetAbiSize(pstart);
+	PX_ASSERTIFX(offset < 0, "Abi offset < 0");
+	if (offset+ current_abi_size < abisize)
 	{
 		px_byte* ptr = PX_AbiGet_Pointer(pabi);
-		px_dword size = PX_AbiPointer_GetAbiSize(ptr + offset);
-		return ptr + offset + size;
+		return ptr + offset + current_abi_size;
 	}
 	else
 	{
@@ -749,7 +1233,7 @@ px_byte* PX_AbiGet_Next(px_abi* pabi, px_byte* pstart)
 	}
 }
 
-static px_bool PX_AbiNew_Member(px_abi* pabi,const px_char payload[], PX_ABI_TYPE newtype,px_void *buffer,px_int datasize)
+static px_bool PX_AbiNew_Member(px_abi* pabi,const px_char payload[], PX_ABI_TYPE newtype, const px_void *buffer,px_int datasize)
 {
 	px_char abi_payload[512] = { 0 };
 	px_int abi_count;
@@ -761,14 +1245,13 @@ static px_bool PX_AbiNew_Member(px_abi* pabi,const px_char payload[], PX_ABI_TYP
 	px_byte* abiptr;
 
 	abi_count = PX_strsub(payload, '.');
-	PX_strsubi(payload, abi_payload, '.', abi_count - 1);
+	PX_strsubi(payload, abi_payload,sizeof(abi_payload), '.', abi_count - 1);
 	new_alloc_size = sizeof(px_dword) + sizeof(PX_ABI_TYPE) + PX_strlen(abi_payload) + 1 + datasize;
-	PX_strsubn(payload, abi_payload, '.', abi_count - 1);
+	PX_strsubn(payload, abi_payload, sizeof(abi_payload), '.', abi_count - 1);
 	if (abi_payload[0])
 	{
-		PX_ABI_TYPE type;
-		old_target_abi_data_offset = PX_AbiGet_PayloadDataOffset(pabi, &type, &old_target_abi_data_size, abi_payload);
-		if (old_target_abi_data_offset == -1 || type != PX_ABI_TYPE_ABI)
+		old_target_abi_data_offset = PX_AbiGet_PayloadDataOffsetWithType(pabi, PX_ABI_TYPE_ABI, &old_target_abi_data_size, abi_payload);
+		if (old_target_abi_data_offset == -1)
 		{
 			return PX_FALSE;
 		}
@@ -801,14 +1284,13 @@ static px_bool PX_AbiNew_Member(px_abi* pabi,const px_char payload[], PX_ABI_TYP
 	for (i = 0; i < abi_count-1; i++)
 	{
 		px_byte* ptr;
-		PX_ABI_TYPE type;
 		px_dword idatasize;
-		if (!PX_strsubn( payload, abi_payload, '.', i+1))
+		if (!PX_strsubn( payload, abi_payload, sizeof(abi_payload), '.', i+1))
 		{
 			return PX_FALSE;
 		}
-		ptr = PX_AbiGet_PayloadPointer(pabi, &type, &idatasize, abi_payload);
-		if (!ptr||type!=PX_ABI_TYPE_ABI)
+		ptr = PX_AbiGet_PayloadPointerWithType(pabi, PX_ABI_TYPE_ABI, &idatasize, abi_payload);
+		if (!ptr)
 		{
 			return PX_FALSE;
 		}
@@ -826,16 +1308,23 @@ static px_bool PX_AbiNew_Member(px_abi* pabi,const px_char payload[], PX_ABI_TYP
 	);
 
 	//rebuild abi member
-	PX_strsubi(payload, abi_payload, '.', abi_count - 1);
+	PX_strsubi(payload, abi_payload, sizeof(abi_payload), '.', abi_count - 1);
 
 	PX_memcpy(abiptr + old_target_abi_data_offset + old_target_abi_data_size, &new_alloc_size, sizeof(px_dword));
 	PX_memcpy(abiptr + old_target_abi_data_offset + old_target_abi_data_size + sizeof(px_dword), &newtype, sizeof(PX_ABI_TYPE));
 	PX_memcpy(abiptr + old_target_abi_data_offset + old_target_abi_data_size + sizeof(px_dword) + sizeof(PX_ABI_TYPE), abi_payload, PX_strlen(abi_payload) + 1);
-	PX_memcpy(abiptr + old_target_abi_data_offset + old_target_abi_data_size + sizeof(px_dword) + sizeof(PX_ABI_TYPE) + PX_strlen(abi_payload) + 1, buffer, datasize);
+	if (buffer)
+	{
+		PX_memcpy(abiptr + old_target_abi_data_offset + old_target_abi_data_size + sizeof(px_dword) + sizeof(PX_ABI_TYPE) + PX_strlen(abi_payload) + 1, buffer, datasize);
+	}
+	else
+	{
+		PX_memset(abiptr + old_target_abi_data_offset + old_target_abi_data_size + sizeof(px_dword) + sizeof(PX_ABI_TYPE) + PX_strlen(abi_payload) + 1, 0, datasize);
+	}
 	return PX_TRUE;
 }
 
-static px_bool PX_AbiReset_Member(px_abi* pabi, const px_char payload[], PX_ABI_TYPE newtype, px_void* buffer, px_int datasize)
+static px_bool PX_AbiResize_Member(px_abi* pabi, const px_char payload[], px_int datasize)
 {
 	px_char abi_payload[512] = { 0 };
 	px_int namelen;
@@ -844,25 +1333,24 @@ static px_bool PX_AbiReset_Member(px_abi* pabi, const px_char payload[], PX_ABI_
 	PX_ABI_TYPE type;
 	px_int   inc_data_size;
 	px_int old_abi_size = PX_AbiGet_Size(pabi);
-	px_dword old_target_abi_offset,old_target_data_offset, old_target_data_size;
+	px_dword old_target_abi_offset, old_target_data_offset, old_target_data_size;
 	px_byte* abiptr;
 	abi_count = PX_strsub(payload, '.');
-	PX_strsubi(payload, abi_payload, '.', abi_count - 1);
+	PX_strsubi(payload, abi_payload, sizeof(abi_payload), '.', abi_count - 1);
 	namelen = PX_strlen(abi_payload) + 1;
 	old_target_abi_offset = PX_AbiGet_PayloadOffset(pabi, &type, &old_target_data_size, payload);
 	old_target_data_offset = PX_AbiGet_PayloadDataOffset(pabi, &type, &old_target_data_size, payload);
 
-	if (old_target_abi_offset==-1||old_target_data_offset == -1 )
+	if (old_target_abi_offset == -1 || old_target_data_offset == -1)
 	{
 		return PX_FALSE;
 	}
 	inc_data_size = datasize - old_target_data_size;
 	//resize abi size member
-
-	for (i = abi_count; i >0; i--)
+	for (i = abi_count; i > 0; i--)
 	{
 		px_byte* ptr;
-		if (!PX_strsubn( payload, abi_payload, '.', i))
+		if (!PX_strsubn(payload, abi_payload, sizeof(abi_payload), '.', i))
 		{
 			return PX_FALSE;
 		}
@@ -879,6 +1367,8 @@ static px_bool PX_AbiReset_Member(px_abi* pabi, const px_char payload[], PX_ABI_
 	{
 		if (!PX_MemoryResize(&pabi->dynamic, pabi->dynamic.usedsize + inc_data_size))
 		{
+			PX_ASSERTX( "AbiResize_Member failed, memory resize failed,crash");
+			PX_memset(pabi->dynamic.buffer, 0, pabi->dynamic.usedsize);
 			return PX_FALSE;
 		}
 	}
@@ -901,11 +1391,31 @@ static px_bool PX_AbiReset_Member(px_abi* pabi, const px_char payload[], PX_ABI_
 		old_abi_size - old_target_data_offset - old_target_data_size\
 	);
 
+	return PX_TRUE;
+}
+
+static px_bool PX_AbiReset_Member(px_abi* pabi, const px_char payload[], PX_ABI_TYPE newtype, const  px_void* buffer, px_int datasize)
+{
+	PX_ABI_TYPE type;
+	px_int old_abi_size = PX_AbiGet_Size(pabi);
+	px_dword old_target_abi_offset,old_target_data_offset, old_target_data_size;
+	px_byte* abiptr;
+
+	PX_ASSERTIFX(datasize<0, "AbiReset_Member failed, datasize < 0");
+
+	old_target_abi_offset = PX_AbiGet_PayloadOffset(pabi, &type, &old_target_data_size, payload);
+	old_target_data_offset = PX_AbiGet_PayloadDataOffset(pabi, &type, &old_target_data_size, payload);
+	
+	if(PX_AbiResize_Member(pabi, payload, datasize)==PX_FALSE)
+		return PX_FALSE;
+
+	abiptr = PX_AbiGet_Pointer(pabi);
 	//rebuild abi type
 	PX_memcpy(abiptr + old_target_abi_offset + sizeof(px_dword), &newtype, sizeof(PX_ABI_TYPE));
 
 	//rebuild abi data
-	PX_memcpy(abiptr + old_target_data_offset, buffer, datasize);
+	if(datasize)
+		PX_memcpy(abiptr + old_target_data_offset, buffer, datasize);
 	return PX_TRUE;
 }
 
@@ -934,7 +1444,7 @@ px_bool PX_AbiDelete(px_abi* pabi, const px_char payload[])
 		px_byte* ptr;
 		PX_ABI_TYPE type;
 		px_dword datasize;
-		if (!PX_strsubn(payload, abi_payload, '.', i + 1))
+		if (!PX_strsubn(payload, abi_payload, sizeof(abi_payload), '.', i + 1))
 		{
 			return PX_FALSE;
 		}
@@ -963,179 +1473,176 @@ px_bool PX_AbiDelete(px_abi* pabi, const px_char payload[])
 	return PX_TRUE;
 }
 
-static px_bool PX_AbiSet_Member(px_abi* pabi, PX_ABI_TYPE type,px_void *buffer, px_dword size, const px_char payload[])
-{
-	px_int abs_offset;
-	abs_offset = PX_AbiGet_PayloadOffset(pabi,0,0, payload);
-	if (abs_offset==-1)
-	{
-		return PX_AbiNew_Member(pabi, payload, type, buffer, size);
-	}
-	else
-	{
-		return PX_AbiReset_Member(pabi, payload, type, buffer, size);
-	}
-}
 
-px_bool PX_AbiSet(px_abi* pabi, PX_ABI_TYPE type, const px_char payload[], px_void* buffer, px_dword buffersize)
+px_bool PX_AbiSet(px_abi* pabi, PX_ABI_TYPE type, const px_char payload[], const  px_void* buffer, px_dword buffersize)
 {
 	px_dword datasize;
-	PX_ABI_TYPE readtype;
 	switch (type)
 	{
 	case PX_ABI_TYPE_INT:
 	{
-		px_int* pint = (px_int *)PX_AbiGet_PayloadDataPointer(pabi, &readtype, &datasize, payload);
+		px_int* pint = (px_int *)PX_AbiGet_PayloadDataPointerWithType(pabi, PX_ABI_TYPE_INT, &datasize, payload);
 		if (pint)
 		{
-			if (readtype == type)
-			{
-				*pint = *(px_int*)buffer;
-				return PX_TRUE;
-			}
-			return PX_AbiSet_Member(pabi, type, buffer, buffersize, payload);
+			*pint = *(px_int*)buffer;
+			return PX_TRUE;
 		}
 	}
 	break;
 	case PX_ABI_TYPE_DWORD:
 	{
-		px_dword* pdword = (px_dword*)PX_AbiGet_PayloadDataPointer(pabi, &readtype, &datasize, payload);
+		px_dword* pdword = (px_dword*)PX_AbiGet_PayloadDataPointerWithType(pabi, PX_ABI_TYPE_DWORD, &datasize, payload);
 		if (pdword)
 		{
-			if (readtype == type)
-			{
-				*pdword = *(px_dword*)buffer;
-				return PX_TRUE;
-			}
-			return PX_AbiSet_Member(pabi, type, buffer, buffersize, payload);
+			*pdword = *(px_dword*)buffer;
+			return PX_TRUE;
 		}
 	}
 	break;
 	case PX_ABI_TYPE_WORD:
 	{
-		px_word* pword = (px_word*)PX_AbiGet_PayloadDataPointer(pabi, &readtype, &datasize, payload);
+		px_word* pword = (px_word*)PX_AbiGet_PayloadDataPointerWithType(pabi, PX_ABI_TYPE_WORD, &datasize, payload);
 		if (pword)
 		{
-			if (readtype == type)
-			{
-				*pword = *(px_word*)buffer;
-				return PX_TRUE;
-			}
-			return PX_AbiSet_Member(pabi, type, buffer, buffersize, payload);
+			*pword = *(px_word*)buffer;
+			return PX_TRUE;
 		}
 	}
 	break;
 	case PX_ABI_TYPE_BYTE:
 	{
-		px_byte* pbyte = (px_byte*)PX_AbiGet_PayloadDataPointer(pabi, &readtype, &datasize, payload);
+		px_byte* pbyte = (px_byte*)PX_AbiGet_PayloadDataPointerWithType(pabi, PX_ABI_TYPE_BYTE, &datasize, payload);
 		if (pbyte)
 		{
-			if (readtype == type)
-			{
-				*pbyte = *(px_byte*)buffer;
-				return PX_TRUE;
-			}
-			return PX_AbiSet_Member(pabi, type, buffer, buffersize, payload);
+			*pbyte = *(px_byte*)buffer;
+			return PX_TRUE;
 		}
 	}
 	break;
 	case PX_ABI_TYPE_PTR:
 	{
-		px_void** pptr = (px_void**)PX_AbiGet_PayloadDataPointer(pabi, &readtype, &datasize, payload);
+		px_void** pptr = (px_void**)PX_AbiGet_PayloadDataPointerWithType(pabi, PX_ABI_TYPE_PTR, &datasize, payload);
 		if (pptr)
 		{
-			if (readtype == type)
-			{
-				*pptr = *(px_void**)buffer;
-				return PX_TRUE;
-			}
-			return PX_AbiSet_Member(pabi, type, buffer, buffersize, payload);
+			*pptr = *(px_void**)buffer;
+			return PX_TRUE;
 		}
 	}
 	break;
 	case PX_ABI_TYPE_FLOAT:
 	{
-		px_float* pfloat = (px_float*)PX_AbiGet_PayloadDataPointer(pabi, &readtype, &datasize, payload);
+		px_float* pfloat = (px_float*)PX_AbiGet_PayloadDataPointerWithType(pabi, PX_ABI_TYPE_FLOAT, &datasize, payload);
 		if (pfloat)
 		{
-			if (readtype == type)
-			{
-				*pfloat = *(px_float*)buffer;
-				return PX_TRUE;
-			}
-			return PX_AbiSet_Member(pabi, type, buffer, buffersize, payload);
+			*pfloat = *(px_float*)buffer;
+			return PX_TRUE;
 		}
 	}
 	break;
 	case PX_ABI_TYPE_DOUBLE:
 	{
-		px_double* pdouble = (px_double*)PX_AbiGet_PayloadDataPointer(pabi, &readtype, &datasize, payload);
+		px_double* pdouble = (px_double*)PX_AbiGet_PayloadDataPointerWithType(pabi, PX_ABI_TYPE_DOUBLE, &datasize, payload);
 		if (pdouble)
 		{
-			if (readtype == type)
-			{
-				*pdouble = *(px_double*)buffer;
-				return PX_TRUE;
-			}
-			return PX_AbiSet_Member(pabi, type, buffer, buffersize, payload);
+			*pdouble = *(px_double*)buffer;
+			return PX_TRUE;
 		}
 	}
 	break;
 	case PX_ABI_TYPE_POINT:
 	{
-		px_point* ppoint = (px_point*)PX_AbiGet_PayloadDataPointer(pabi, &readtype, &datasize, payload);
+		px_point* ppoint = (px_point*)PX_AbiGet_PayloadDataPointerWithType(pabi, PX_ABI_TYPE_POINT, &datasize, payload);
 		if (ppoint )
 		{
-			if (readtype == type)
-			{
-				*ppoint = *(px_point*)buffer;
-				return PX_TRUE;
-			}
-			return PX_AbiSet_Member(pabi, type, buffer, buffersize, payload);
+			*ppoint = *(px_point*)buffer;
+			return PX_TRUE;
 		}
 	}
 	break;
 	case PX_ABI_TYPE_COLOR:
 	{
-		px_color* pcolor = (px_color*)PX_AbiGet_PayloadDataPointer(pabi, &readtype, &datasize, payload);
+		px_color* pcolor = (px_color*)PX_AbiGet_PayloadDataPointerWithType(pabi, PX_ABI_TYPE_COLOR, &datasize, payload);
 		if (pcolor)
 		{
-			if (readtype == type)
-			{
-				*pcolor = *(px_color*)buffer;
-				return PX_TRUE;
-			}
-			return  PX_AbiSet_Member(pabi, type, buffer, buffersize, payload);
+			*pcolor = *(px_color*)buffer;
+			return PX_TRUE;
 		}
 	}
 	break;
 	case PX_ABI_TYPE_BOOL:
 	{
-		px_bool* pbool = (px_bool*)PX_AbiGet_PayloadDataPointer(pabi, &readtype, &datasize, payload);
+		px_bool* pbool = (px_bool*)PX_AbiGet_PayloadDataPointerWithType(pabi, PX_ABI_TYPE_BOOL, &datasize, payload);
 		if (pbool)
 		{
-			if (readtype == type)
-			{
-				*pbool = *(px_bool*)buffer;
-				return PX_TRUE;
-			}
-			return PX_AbiSet_Member(pabi, type, buffer, buffersize, payload);
+			*pbool = *(px_bool*)buffer;
+			return PX_TRUE;
 		}
 	}
 	break;
 	case PX_ABI_TYPE_STRING:
-	case PX_ABI_TYPE_ABI:
-	case PX_ABI_TYPE_DATA:
 	{
-		px_void* pdata = PX_AbiGet_PayloadPointer(pabi, &readtype, &datasize, payload);
+		px_void* pdata = PX_AbiGet_PayloadDataPointerWithType(pabi, PX_ABI_TYPE_STRING, &datasize, payload);
 		if (pdata)
 		{
-			if (readtype == type && buffersize == datasize)
+			if (buffersize == datasize)
 			{
 				PX_memcpy(pdata, buffer, buffersize);
 				return PX_TRUE;
 			}
-			return PX_AbiSet_Member(pabi, type, buffer, buffersize, payload);
+			else
+			{
+				//reset string
+				if (!PX_AbiReset_Member(pabi, payload, PX_ABI_TYPE_STRING, buffer, buffersize))
+				{
+					return PX_FALSE;
+				}
+			}
+		}
+	}
+	break;
+	case PX_ABI_TYPE_ABI:
+	{
+		px_void* pdata = PX_AbiGet_PayloadDataPointerWithType(pabi, PX_ABI_TYPE_ABI, &datasize, payload);
+		if (pdata)
+		{
+			if (buffersize == datasize)
+			{
+				PX_memcpy(pdata, buffer, buffersize);
+				return PX_TRUE;
+			}
+			else
+			{
+				//reset abi
+				if (!PX_AbiReset_Member(pabi, payload, PX_ABI_TYPE_ABI, buffer, buffersize))
+				{
+					return PX_FALSE;
+				}
+			}
+		}
+	}
+	break;
+	case PX_ABI_TYPE_DATA:
+	{
+		px_void* pdata = PX_AbiGet_PayloadDataPointerWithType(pabi, PX_ABI_TYPE_DATA, &datasize, payload);
+		if (pdata)
+		{
+			if (buffersize == datasize)
+			{
+				if(buffer)
+					PX_memcpy(pdata, buffer, buffersize);
+				else
+					PX_memset(pdata,0,buffersize);
+
+				return PX_TRUE;
+			}
+			else
+			{
+				//reset data
+				if (!PX_AbiReset_Member(pabi, payload, PX_ABI_TYPE_DATA, buffer, buffersize))
+				{
+					return PX_FALSE;
+				}
+			}
 		}
 	}
 	break;
@@ -1150,41 +1657,23 @@ px_bool PX_AbiSet(px_abi* pabi, PX_ABI_TYPE type, const px_char payload[], px_vo
 		abi_count = PX_strsub(payload, '.');
 		for (i = 0; i < abi_count; i++)
 		{
-			if (PX_strsubn(payload, abi_payload, '.', i + 1))
+			if (PX_strsubn(payload, abi_payload, sizeof(abi_payload), '.', i + 1))
 			{
-				px_dword size;
-				PX_ABI_TYPE rtype;
-				px_void* ptr = PX_AbiGet_PayloadDataPointer(pabi, &rtype, &size, abi_payload);
-				if (!ptr)
+				if (i != abi_count - 1)
 				{
-					if (i!= abi_count-1)
+					if (!PX_AbiExist_Type(pabi, abi_payload, PX_ABI_TYPE_ABI))
 					{
 						if (!PX_AbiNew_Member(pabi, abi_payload, PX_ABI_TYPE_ABI, 0, 0))
 						{
 							return PX_FALSE;
 						}
 					}
-					else
-					{
-						if (!PX_AbiNew_Member(pabi, abi_payload, type, buffer, buffersize))
-						{
-							return PX_FALSE;
-						}
-					}
-					
 				}
 				else
 				{
-					if (i != abi_count - 1)
+					if (!PX_AbiExist_Type(pabi, abi_payload, type))
 					{
-						if (rtype != PX_ABI_TYPE_ABI)
-						{
-							return PX_FALSE;
-						}
-					}
-					else
-					{
-						if (!PX_AbiReset_Member(pabi, abi_payload, type, buffer, buffersize))
+						if (!PX_AbiNew_Member(pabi, abi_payload, type, buffer, buffersize))
 						{
 							return PX_FALSE;
 						}
@@ -1233,6 +1722,47 @@ px_bool PX_AbiSet_string(px_abi* pabi, const px_char payload[], const px_char _s
 {
 	return PX_AbiSet(pabi, PX_ABI_TYPE_STRING, payload, (px_void*)_string, PX_strlen(_string) + 1);
 }
+px_bool PX_AbiAppend_string(px_abi* pabi, const px_char payload[], const px_char _string[])
+{
+	px_char* pstring = (px_char*)PX_AbiGet_string(pabi, payload);
+	if (!pstring)
+	{
+		return PX_AbiSet_string(pabi, payload, _string);
+	}
+	else
+	{
+		if(!PX_AbiResize_Member(pabi, payload, PX_strlen(pstring) + PX_strlen(_string) + 1))
+			return PX_FALSE;
+		pstring = (px_char*)PX_AbiGet_string(pabi, payload);
+		PX_strcat(pstring, _string);
+		return PX_TRUE;
+	}
+
+}
+px_bool PX_AbiInsert_string(px_abi* pabi, const px_char payload[],px_int insert_pos, const px_char _string[])
+{
+	px_char* pstring = (px_char*)PX_AbiGet_string(pabi, payload);
+	if (!pstring)
+	{
+		return PX_AbiSet_string(pabi, payload, _string);
+	}
+	else
+	{
+		px_int old_len = PX_strlen(pstring);
+		px_int ins_len = PX_strlen(_string);
+		px_int new_len = old_len + ins_len;
+		if (insert_pos < 0) insert_pos = 0;
+		if (insert_pos > old_len) insert_pos = old_len;
+		if (!PX_AbiResize_Member(pabi, payload, new_len + 1))
+			return PX_FALSE;
+		pstring = (px_char*)PX_AbiGet_string(pabi, payload);
+		/* shift tail right to make room */
+		PX_memcpy(pstring + insert_pos + ins_len, pstring + insert_pos, old_len - insert_pos + 1);
+		/* copy new string into gap */
+		PX_memcpy(pstring + insert_pos, _string, ins_len);
+		return PX_TRUE;
+	}
+}
 px_bool PX_AbiSet_point(px_abi* pabi, const px_char payload[], px_point point)
 {
 	return PX_AbiSet(pabi, PX_ABI_TYPE_POINT, payload, &point, sizeof(point));
@@ -1245,14 +1775,34 @@ px_bool PX_AbiSet_bool(px_abi* pabi, const px_char payload[], px_bool _bool)
 {
 	return PX_AbiSet(pabi, PX_ABI_TYPE_BOOL, payload, &_bool, sizeof(_bool));
 }
-px_bool PX_AbiSet_data(px_abi* pabi, const px_char payload[], px_void* data, px_int size)
+px_bool PX_AbiSet_data(px_abi* pabi, const px_char payload[],const px_void* data, px_int size)
 {
 	return PX_AbiSet(pabi, PX_ABI_TYPE_DATA, payload, data, size);
 }
-
+px_bool PX_AbiAppend_data(px_abi* pabi, const px_char payload[], const px_void* data, px_int size)
+{
+	px_dword oldsize,newsize;
+	px_byte* pdata = PX_AbiGet_data(pabi, payload, &oldsize);
+	if (!pdata)
+	{
+		return PX_AbiSet_data(pabi, payload, data, size);
+	}
+	else
+	{
+		if (!PX_AbiResize_Member(pabi, payload, oldsize + size))
+			return PX_FALSE;
+		pdata = PX_AbiGet_data(pabi, payload, &newsize);
+		if(data)
+			PX_memcpy(pdata + oldsize, data, size);
+		return PX_TRUE;
+	}
+}
 px_bool PX_AbiSet_Abi(px_abi* pabi, const px_char payload[], px_abi* pAbi)
 {
-	return PX_AbiSet(pabi, PX_ABI_TYPE_ABI, payload, PX_AbiGet_Pointer(pAbi), PX_AbiGet_Size(pAbi));
+	if(pAbi)
+		return PX_AbiSet(pabi, PX_ABI_TYPE_ABI, payload, PX_AbiGet_Pointer(pAbi), PX_AbiGet_Size(pAbi));
+	else
+		return PX_AbiSet(pabi, PX_ABI_TYPE_ABI, payload, PX_NULL, 0);//empty abi
 }
 
 px_byte* PX_AbiGetDataPtr(px_abi* pabi, const px_char name[])
@@ -1266,15 +1816,14 @@ px_byte* PX_AbiGetDataPtr(px_abi* pabi, const px_char name[])
 		px_dword size;
 		const px_char* pname;
 		px_byte* databuffer;
-		PX_ABI_TYPE type = *(PX_ABI_TYPE*)(pbuffer);
-		pbuffer += sizeof(PX_ABI_TYPE);
 		PX_memcpy(&size, pbuffer, sizeof(size));
-		pbuffer += sizeof(size);
+		pbuffer += sizeof(px_dword);
+		pbuffer += sizeof(PX_ABI_TYPE);
 		pname = (px_char*)(pbuffer);
 		databuffer = pbuffer + PX_strlen(pname) + 1;
-		pbuffer += size;
+		pbuffer = databuffer + size - PX_strlen(pname) - 1 - sizeof(px_dword) - sizeof(PX_ABI_TYPE);
 
-		if (pbuffer - pstart > PX_AbiGet_Size(pabi))
+		if (pbuffer - pstart >= PX_AbiGet_Size(pabi))
 		{
 			break;
 		}
@@ -1303,11 +1852,9 @@ px_bool PX_Abi2Json(px_abi* pabi, px_string* pjson)
 		px_byte* pdata;
 		PX_ABI_TYPE type;
 		PX_memcpy(&datasize, pbuffer + offset, sizeof(datasize));
-		offset += sizeof(datasize);
-		PX_memcpy(&type, pbuffer + offset, sizeof(type));
-		offset += sizeof(type);
-		pname = (px_char*)(pbuffer + offset);
-		pdata = pbuffer + offset+ PX_strlen(pname) + 1;
+		PX_memcpy(&type, pbuffer + offset+ sizeof(datasize), sizeof(type));
+		pname = (px_char*)(pbuffer + offset + sizeof(datasize) + sizeof(type));
+		pdata = pbuffer + offset+ PX_strlen(pname) + sizeof(datasize) + sizeof(type) + 1;
 		offset += datasize;
 		switch (type)
 		{

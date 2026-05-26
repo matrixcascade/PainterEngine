@@ -21,7 +21,7 @@ px_int PX_HttpReadToken(const px_char content[], px_char token[],px_int token_si
 	}
 	*token = 0;
 
-	while (*content == '\0' || *content == ' ' || *content == '\r' || *content == '\n')
+	while (*content != '\0' && (*content == ' ' || *content == '\r' || *content == '\n'))
 	{
 		content++;
 		size++;
@@ -36,7 +36,7 @@ px_int PX_HttpGetLineDistance(const px_char content[])
 	{
 		return 0;
 	}
-	while (PX_TRUE)
+	while (content[i] != '\0')
 	{
 		if (content[i] == '\r')
 		{
@@ -216,7 +216,7 @@ px_bool PX_HttpGetRequestPath(const px_char content[],px_int content_size, px_ch
 		return PX_FALSE;
 
 	oft = 0;
-	while(content[oft] != ' ')
+	while(oft < content_size && content[oft] != ' ')
 	{
 		oft++;
 	}

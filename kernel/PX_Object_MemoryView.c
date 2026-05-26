@@ -9,7 +9,7 @@ static px_int PX_Object_MemoryViewGetCursorMapIndex(PX_Object *pObject,px_float 
 	PX_Object_MemoryView *pdesc;
 	px_int x,y,w,h;
 	px_rect rect;
-	px_int row;
+	px_int line_begin_cell_index_map;
 	px_int columnoffset;
 	px_int rel_address_offset;
 	px_int xIndex,yIndex,Index;
@@ -21,23 +21,23 @@ static px_int PX_Object_MemoryViewGetCursorMapIndex(PX_Object *pObject,px_float 
 	h = (px_int)rect.height;
 
 
-	row=(w-(16+64+16+8+16))/32;
+	line_begin_cell_index_map=(w-(16+64+16+8+16))/32;
 
 	cx-=x;
 	cy-=y;
 
 	columnoffset=PX_Object_SliderBarGetValue(pdesc->scrollbar);
-	rel_address_offset=row*columnoffset;
+	rel_address_offset=line_begin_cell_index_map*columnoffset;
 
-	if (cx<96+row*24)
+	if (cx<96+line_begin_cell_index_map*24)
 	{
 		xIndex=(px_int)((cx-96)/8-(cx-96)/24);
 		if(xIndex<0)xIndex=0;
 	}
 	else if(cx<w-16)
 	{
-		xIndex=(px_int)((cx-96-row*24)/8)*2;
-		if(xIndex>=row*2) xIndex=row*2-2;
+		xIndex=(px_int)((cx-96-line_begin_cell_index_map*24)/8)*2;
+		if(xIndex>=line_begin_cell_index_map*2) xIndex=line_begin_cell_index_map*2-2;
 	}
 	else
 	{
@@ -46,7 +46,7 @@ static px_int PX_Object_MemoryViewGetCursorMapIndex(PX_Object *pObject,px_float 
 
 	yIndex=(px_int)(cy/16);
 
-	Index=yIndex*row*2+rel_address_offset*2+xIndex;
+	Index=yIndex*line_begin_cell_index_map*2+rel_address_offset*2+xIndex;
 	if (Index<0)
 	{
 		Index=0;
@@ -62,7 +62,7 @@ static px_int PX_Object_MemoryViewGetCursorMapIndex(PX_Object *pObject,px_float 
 
 PX_OBJECT_RENDER_FUNCTION(PX_Object_MemoryViewRender)
 {
-	px_int row,column,i,j;
+	px_int line_begin_cell_index_map,column,i,j;
 	px_int rel_address_offset;
 	px_int mst,med;
 	PX_Object_MemoryView *pdesc;
@@ -90,9 +90,9 @@ PX_OBJECT_RENDER_FUNCTION(PX_Object_MemoryViewRender)
 	pdesc->scrollbar->Width=16.f;
 	pdesc->scrollbar->Height=(px_float)h;
 
-	row=(w-(16+64+16+8+16))/32;
+	line_begin_cell_index_map=(w-(16+64+16+8+16))/32;
 
-	if (row<1)
+	if (line_begin_cell_index_map<1)
 	{
 		return;
 	}
@@ -124,7 +124,7 @@ PX_OBJECT_RENDER_FUNCTION(PX_Object_MemoryViewRender)
 	//render border
 	PX_GeoDrawBorder(psurface, x, y, x + w, y + h, 1,pdesc->bordercolor);
 
-	rel_address_offset=row*columnoffset;
+	rel_address_offset=line_begin_cell_index_map*columnoffset;
 
 	drawy=y;
 	for (j=0;j<column;j++)
@@ -156,7 +156,7 @@ PX_OBJECT_RENDER_FUNCTION(PX_Object_MemoryViewRender)
 
 		drawx+=16;
 
-		for (i=0;i<row;i++)
+		for (i=0;i<line_begin_cell_index_map;i++)
 		{
 			px_char hex[3];
 			px_byte b;
@@ -176,7 +176,7 @@ PX_OBJECT_RENDER_FUNCTION(PX_Object_MemoryViewRender)
 
 			if ((rel_address_offset*2>=mst&&rel_address_offset*2<=med)||(rel_address_offset*2+1>=mst&&rel_address_offset*2+1<=med))
 			{
-				PX_GeoDrawRect(psurface,x+96+row*24+8*i,drawy,x+96+row*24+8*i+7,drawy+15,pdesc->selectcolor);
+				PX_GeoDrawRect(psurface,x+96+line_begin_cell_index_map*24+8*i,drawy,x+96+line_begin_cell_index_map*24+8*i+7,drawy+15,pdesc->selectcolor);
 			}
 
 			if (rel_address_offset*2==pdesc->cursor)
@@ -188,14 +188,14 @@ PX_OBJECT_RENDER_FUNCTION(PX_Object_MemoryViewRender)
 			}
 			if (rel_address_offset*2==pdesc->cursor||rel_address_offset*2+1==pdesc->cursor)
 			{
-				PX_GeoDrawRect(psurface, x + 96+row*24+8*i,drawy, x + 96+row*24+8*i+7,drawy+15,pdesc->selectcolor);
+				PX_GeoDrawRect(psurface, x + 96+line_begin_cell_index_map*24+8*i,drawy, x + 96+line_begin_cell_index_map*24+8*i+7,drawy+15,pdesc->selectcolor);
 			}
 			
 
 			PX_FontDrawChar(psurface,drawx,drawy,hex[0],pdesc->fontcolor);
 			if (b>=32&&b<=126)
 			{
-				PX_FontDrawChar(psurface, x + 96+row*24+8*i,drawy,b,pdesc->fontcolor);
+				PX_FontDrawChar(psurface, x + 96+line_begin_cell_index_map*24+8*i,drawy,b,pdesc->fontcolor);
 			}
 
 			drawx+=8;
@@ -402,7 +402,7 @@ px_void PX_Object_MemoryViewSetData(PX_Object *pObject,px_void *pdata,px_dword s
 	PX_Object_MemoryView *pdesc=PX_Object_GetMemoryView(pObject);
 	if(pdesc)
 	{
-		px_int row,column,cc;
+		px_int line_begin_cell_index_map,column,cc;
 		pdesc->pdata=pdata;
 		pdesc->size=size;
 		pdesc->cursor=-1;
@@ -411,9 +411,9 @@ px_void PX_Object_MemoryViewSetData(PX_Object *pObject,px_void *pdata,px_dword s
 
 		//////////////////////////////////////////////////////////////////////////
 		//scrollbar
-		row=(px_int)(pObject->Width-(16+64+16+8+16))/32;
+		line_begin_cell_index_map=(px_int)(pObject->Width-(16+64+16+8+16))/32;
 		column=(px_int)pObject->Height/(15+3);
-		cc=(pdesc->size+row/2)/row;
+		cc=(pdesc->size+line_begin_cell_index_map/2)/line_begin_cell_index_map;
 		if (cc>column)
 		{
 			PX_Object_SliderBarSetRange(pdesc->scrollbar,0,cc-column);

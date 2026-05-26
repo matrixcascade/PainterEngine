@@ -130,6 +130,7 @@ px_bool PX_GPU_Present(px_void* texture_addr, px_int width, px_int height)
 		pDst = (px_byte *)PX_GPU_FRAME_BUFFER_1;
 	}
     px_dword latency;
+	(px_void)latency;
 	if (width==PX_GPU_HDMI_OUT_WIDTH&&height==PX_GPU_HDMI_OUT_HEIGHT)
 	{
 		PX_GPU_ColorConvert(texture_addr, pDst, PX_GPU_HDMI_OUT_WIDTH * PX_GPU_HDMI_OUT_HEIGHT );
@@ -166,6 +167,7 @@ px_bool PX_GPU_Present(px_void* texture_addr, px_int width, px_int height)
 	}
 	Xil_DCacheFlush();
 	PX_GPU_Out32((PX_GPU_VDMA_BASE_ADDRESS + 0x028), PARK_PTR_REG);
+	return PX_TRUE;
 }
 
 px_dword PX_GPU_TimeGetTime_us()

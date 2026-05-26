@@ -1192,7 +1192,7 @@ px_bool PX_SyncDataClientInitialize(PX_SyncDataClient *syncdata_client,px_memory
 
 px_bool PX_SyncDataClientIsCompleted(PX_SyncDataClient *syncdata_client)
 {
-	return (syncdata_client->status==PX_SYNC_SERVERCLIENT_STATUS_END);
+	return (syncdata_client->status== PX_SYNCDATA_CLIENT_STATUS_SYNCHRONIZED);
 }
 
 px_bool PX_SyncDataClient_ReadBlock(PX_SyncDataClient *s,px_byte *data,px_int bufferSize,px_int *readsize)

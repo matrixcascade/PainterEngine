@@ -19,9 +19,17 @@ px_void PX_StringUpdateExReg(px_string* text);
 px_int PX_StringToInteger(px_string* str);
 px_float PX_StringToFloat(px_string *str);
 px_void PX_StringTrim(px_string *str);
-px_bool PX_StringCat(px_string *str,const px_char *str2);
-px_char PX_StringLastChar(px_string* str);
+px_void PX_StringTrimLeft(px_string *str,px_int leftCount);
+px_void PX_StringTrimRight(px_string *str,px_int RightCount);
+px_void PX_StringTrimBackwardUntil(px_string *str,px_char until_char);
+px_void PX_StringTrimForwardUntil(px_string *str,px_char until_char);
 
+px_bool PX_StringCat(px_string *str,const px_char *str2);
+px_bool PX_StringCatInt(px_string* str, px_int value);
+px_bool PX_StringAppend(px_string* str, const px_char* str2);
+px_char PX_StringLastChar(px_string* str);
+px_void PX_StringRemoveRight(px_string* str, px_int remove_begin_index);
+px_void PX_StringRemoveLeft(px_string* str, px_int remove_begin_index);
 px_void PX_StringClear(px_string* str);
 px_bool PX_StringCatChar(px_string *str,px_char ch);
 px_bool PX_StringCatLength(px_string* str, const px_char* str2, px_int cat_length);
@@ -31,8 +39,7 @@ px_bool PX_StringCopy(px_string *dest,px_string *res);
 px_bool PX_StringInsertChar(px_string *str,px_int index,px_char ch);
 px_bool PX_StringRemoveChar(px_string *str,px_int index);
 px_void PX_StringReplaceRange(px_string *str,px_int startindex,px_int endindex, const px_char *replaceto);
-px_void PX_StringTrimLeft(px_string *str,px_int leftCount);
-px_void PX_StringTrimRight(px_string *str,px_int RightCount);
+
 px_int PX_StringFind(px_string* str, const px_char find[]);
 px_int PX_StringFindCharCount(px_string* str, px_char find);
 px_bool PX_StringRead(const px_char content[],px_int readsize,px_char out[]);
@@ -40,9 +47,11 @@ px_int PX_StringReadUntil(const px_char content[], px_char until, px_char out[],
 px_void PX_StringFixUncompleteCode(px_string* text);
 px_bool PX_StringIsNumeric(px_string *str);
 px_bool PX_StringIsFloat(px_string *str);
+px_bool PX_StringReadLine(const px_char content[],px_string *pout);
+px_void PX_StringCut(px_string* str, px_int left, px_int right);
 
 //px_void PX_StringFormat(px_string *str,px_char fmt[],...);
-px_void PX_StringReplace(px_string *str, const px_char *source, const px_char *replaceto);
+px_bool PX_StringReplace(px_string *str, const px_char *source, const px_char *replaceto);
 px_bool PX_StringInsert(px_string *str,px_int insertIndex,const px_char *InstrString);
 px_bool PX_StringTrimer_Solve(px_string *pstring, const px_char *parseCode, const px_char *ReplaceCode);
 px_void PX_StringInitAlloc(px_memorypool *mp,px_string *str,px_int allocSize);
@@ -58,10 +67,9 @@ px_bool PX_StringFormat1(px_string *str,const px_char fmt[],px_stringformat _1);
 px_bool PX_StringSet(px_string *str,const px_char fmt[]);
 px_void PX_StringSetStatic(px_string* str, const px_char fmt[]);
 
-px_bool PX_StringCatEx(px_string *text,const px_char *str2);
+
 px_void PX_StringBackspace(px_string *text);
 px_void PX_StringBackspaceEx(px_string* text);
-px_bool PX_StringCatCharEx(px_string* text, px_char ch);
 px_bool PX_StringCatFormat(px_string *text,const px_char fmt[],px_stringformat _1, px_stringformat _2, px_stringformat _3, px_stringformat _4,px_stringformat _5, px_stringformat _6, px_stringformat _7, px_stringformat _8);
 px_bool PX_StringCatFormat7(px_string *text,const px_char fmt[],px_stringformat _1, px_stringformat _2, px_stringformat _3, px_stringformat _4,px_stringformat _5, px_stringformat _6, px_stringformat _7);
 px_bool PX_StringCatFormat6(px_string *text,const px_char fmt[],px_stringformat _1, px_stringformat _2, px_stringformat _3, px_stringformat _4,px_stringformat _5, px_stringformat _6);
@@ -71,6 +79,20 @@ px_bool PX_StringCatFormat3(px_string *text,const px_char fmt[],px_stringformat 
 px_bool PX_StringCatFormat2(px_string *text,const px_char fmt[],px_stringformat _1, px_stringformat _2);
 px_bool PX_StringCatFormat1(px_string *text,const px_char fmt[],px_stringformat _1);
 
-
-
+//const operate
+px_bool PX_StringNumeric_add(const px_char oprand1[], const px_char oprand2[], px_char result[], px_int outsize);
+px_bool PX_StringNumeric_sub(const px_char oprand1[], const px_char oprand2[], px_char result[], px_int outsize);
+px_bool PX_StringNumeric_mul(const px_char oprand1[], const px_char oprand2[], px_char result[], px_int outsize);
+px_bool PX_StringNumeric_div(const px_char oprand1[], const px_char oprand2[], px_char out[], px_int outsize);
+px_bool PX_StringNumeric_div2(const px_char oprand1[], const px_char oprand2[], px_char out[], px_int outsize);
+/*
+px_bool PX_StringNumeric_mul(const px_char oprand1[32], const px_char oprand2[32], const px_char result[64]);
+px_bool PX_StringNumeric_div(const px_char oprand1[32], const px_char oprand2[32], const px_char result[64]);
+px_bool PX_StringNumeric_and(const px_char oprand1[32], const px_char oprand2[32], const px_char result[33]);
+px_bool PX_StringNumeric_or(const px_char oprand1[32], const px_char oprand2[32], const px_char result[33]);
+px_bool PX_StringNumeric_xor(const px_char oprand1[32], const px_char oprand2[32], const px_char result[33]);
+px_bool PX_StringNumeric_shl(const px_char oprand1[32], const px_char oprand2[32], const px_char result[33]);
+px_bool PX_StringNumeric_shr(const px_char oprand1[], const px_char oprand2[], px_char result[], px_int outsize);
+px_bool PX_StringNumeric_neg(const px_char oprand1[], const px_char result[], px_int outsize);
+*/
 #endif

@@ -2,7 +2,7 @@
 #define PX_THREAD
 
 typedef void (*func_thread)(void *ptr);
-
+#define PX_THREAD_FUNCTION(funcname) void funcname(void *ptr)
 typedef struct
 {
 	union

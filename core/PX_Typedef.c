@@ -1,5 +1,14 @@
 #include "PX_Typedef.h"
 
+#if defined(__STDC_HOSTED__) && __STDC_HOSTED__ == 1
+#include <string.h>
+#define PX_HAS_LIBC 1
+#elif defined(_MSC_VER) || defined(_WIN32) || defined(__linux__) || defined(__APPLE__)
+#include <string.h>
+#define PX_HAS_LIBC 1
+#endif
+
+
 static px_bool PX_isBigEndianCPU()
 {
 	union{
@@ -37,64 +46,79 @@ px_int PX_atoi(const px_char s[])
 	return sign *n;
 }
 
-
-px_float PX_atof(const px_char fstr[])
+px_uint PX_atoui(const px_char str[])
 {
-	px_double temp=10;
-	px_bool ispnum=PX_TRUE;
-	px_double ans=0;
-	px_bool be=PX_FALSE;
-	if(*fstr=='-')
+	px_uint n = 0;
+	px_int i = 0;
+	while (str[i] == ' ') i++;
+	if (str[i] == '+') i++;
+	for (; str[i] >= '0' && str[i] <= '9'; i++)
+		n = 10 * n + (px_uint)(str[i] - '0');
+	return n;
+}
+
+px_double PX_atof64(const px_char fstr[])
+{
+	px_double temp = 10;
+	px_bool ispnum = PX_TRUE;
+	px_double ans = 0;
+	px_bool be = PX_FALSE;
+	if (*fstr == '-')
 	{
-		ispnum=PX_FALSE;
+		ispnum = PX_FALSE;
 		fstr++;
 	}
-	else if(*fstr=='+')
+	else if (*fstr == '+')
 	{
 		fstr++;
 	}
 
-	while(*fstr!='\0')
+	while (*fstr != '\0')
 	{
-		if(*fstr=='.'){ fstr++;break;}
-		if(*fstr=='e'||*fstr=='E'){ fstr++;be=PX_TRUE;break;}
-		ans=ans*10+(*fstr-'0');
+		if (*fstr == '.') { fstr++; break; }
+		if (*fstr == 'e' || *fstr == 'E') { fstr++; be = PX_TRUE; break; }
+		ans = ans * 10 + (*fstr - '0');
 		fstr++;
 	}
 	if (be)
 	{
-		px_int e=PX_atoi(fstr);
-		px_float e10=1;
-		if (e>0)
+		px_int e = PX_atoi(fstr);
+		px_double e10 = 1;
+		if (e > 0)
 		{
 			while (e)
 			{
-				e10*=10;
+				e10 *= 10;
 				e--;
 			}
 		}
 		else
 		{
-			while(e)
+			while (e)
 			{
-				e10/=10;
+				e10 /= 10;
 				e++;
 			}
 		}
-		ans*=e10;
+		ans *= e10;
 	}
 	else
 	{
-		while(*fstr!='\0')
+		while (*fstr != '\0')
 		{
-			ans=ans+(*fstr-'0')/temp;
-			temp*=10;
+			ans = ans + (*fstr - '0') / temp;
+			temp *= 10;
 			fstr++;
 		}
 	}
-	
-	if(ispnum) return (px_float)ans;
-	else return (px_float)ans*(-1);
+
+	if (ispnum) return ans;
+	else return ans * (-1);
+}
+
+px_float PX_atof(const px_char fstr[])
+{
+	return (px_float)PX_atof64(fstr);
 }
 
 
@@ -113,6 +137,14 @@ PX_RETURN_STRING PX_itos(px_int num,px_int radix)
 	return str;
 }
 
+PX_RETURN_STRING PX_utos(px_uint num, px_int radix)
+{
+	PX_RETURN_STRING str;
+	PX_utoa(num, str.data, sizeof(str.data), radix);
+	return str;
+	
+}
+
 
 px_void PX_AscToWord(const px_char *asc,px_word *u16)
 {
@@ -126,21 +158,111 @@ px_void PX_AscToWord(const px_char *asc,px_word *u16)
 	*u16=0;
 }
 
+px_int PX_ftoa64(px_double f, px_char* outbuf, px_int maxlen, px_int precision)
+{
+	px_char f_cache[32] = { 0 };
+	px_char i_cache[32] = { 0 };
+	px_bool positive = PX_TRUE;
+	px_uint64 u_value;
+	px_int uszie;
+	px_double f_value;
+	px_int fsize;
+	px_int index,i,windex;
+	PX_memset(outbuf, 0, maxlen);
+	if (precision>=sizeof(f_cache))
+	{
+		precision = sizeof(f_cache);
+	}
+	if (f<0)
+	{
+		positive = PX_FALSE;
+		f = -f;
+	}
+	u_value = (px_uint64)f;
+	f_value = f - (px_double)u_value;
+	index = 0;
+	while (precision)
+	{
+		if (f_value == 0)
+			break;
+		f_value *= 10;
+		f_cache[index++] = ((px_uchar)f_value) + '0';
+		f_value = f_value - (px_uchar)f_value;
+		
+		precision--;
+	}
+	fsize = index;
+	f_cache[index] = '\0';
+	index = 30;
+	while(index)
+	{
+		i_cache[index--] = (u_value % 10) + '0';
+		u_value /= 10;
+		if (u_value==0)
+		{
+			break;
+		}
+	}
+	uszie = sizeof(i_cache) - index - 2;
+	windex = 0;
+	if (!positive)
+	{
+		outbuf[windex++] = '-';
+		if (windex>= maxlen)
+		{
+			outbuf[0] = '\0';
+			return 0;
+		}
+	}
+	if (uszie==0)
+	{
+		outbuf[windex++] = '0';
+		if (windex >= maxlen)
+		{
+			outbuf[0] = '\0';
+			return 0;
+		}
+	}
+	else
+	{
+		for (i = sizeof(i_cache) - uszie-1; i < sizeof(i_cache)-1; i++)
+		{
+			outbuf[windex++] = i_cache[i];
+			if (windex >= maxlen)
+			{
+				outbuf[0] = '\0';
+				return 0;
+			}
+		}
+	}
+	if (fsize != 0)
+	{
+		outbuf[windex++] = '.';
+		if (windex >= maxlen)
+		{
+			outbuf[0] = '\0';
+			return 0;
+		}
+		PX_memcpy(outbuf + windex, f_cache, fsize > maxlen - windex ? maxlen - windex : fsize);
+	}
+	return 1;
+}
+
 px_int  PX_ftoa(px_float f, px_char *outbuf, px_int maxlen, px_int precision)   
 {  
 	px_int i_value;
 	px_int f_value;
-	px_int shl=10;
+	px_int shl = 10;
 	px_int len;
-	px_int zero_oft=0;
-	if (maxlen==0)
+	px_int zero_oft = 0;
+	if (maxlen == 0)
 	{
 		return 0;
 	}
-	shl=PX_pow_ii(shl,precision);
-	i_value=(px_int)f;
-	f_value=(px_int)PX_ABS(shl*(f-(px_int)f));
-	if (f_value<0)
+	shl = PX_pow_ii(shl, precision);
+	i_value = (px_int64)f;
+	f_value = (px_int64)PX_ABS(shl * (f - (px_int64)f));
+	if (f_value < 0)
 	{
 		outbuf[0] = 'N';
 		outbuf[1] = 'a';
@@ -148,44 +270,42 @@ px_int  PX_ftoa(px_float f, px_char *outbuf, px_int maxlen, px_int precision)
 		outbuf[3] = '\0';
 		return 0;
 	}
-	if (i_value==0&&f<0)
+	if (i_value == 0 && f < 0)
 	{
-		outbuf[0]='-';
-		PX_itoa(i_value,outbuf+1,maxlen-1,10);
+		outbuf[0] = '-';
+		PX_itoa(i_value, outbuf + 1, maxlen - 1, 10);
 	}
 	else
 	{
-		PX_itoa(i_value,outbuf,maxlen,10);
-	}
-	
-	len=PX_strlen(outbuf);
-
-	if (precision==0)
-	{
-		return len; 
+		PX_itoa(i_value, outbuf, maxlen, 10);
 	}
 
-	if (len>maxlen-3)
+	len = PX_strlen(outbuf);
+
+	if (precision == 0)
 	{
-		return len; 
+		return len;
 	}
-	outbuf[len]='.';
-	outbuf[len+1]='\0';
-	
-	while (f_value<shl)
+
+	if (len > maxlen - 3)
 	{
-		*(outbuf+len+1+zero_oft)='0';
-		shl/=10;
+		return len;
+	}
+	outbuf[len] = '.';
+	outbuf[len + 1] = '\0';
+
+	while (f_value < shl)
+	{
+		*(outbuf + len + 1 + zero_oft) = '0';
+		shl /= 10;
 		zero_oft++;
 	}
 
-	PX_itoa(f_value,outbuf+len+zero_oft,maxlen-len-1,10);
-	*(outbuf+len+1+precision)='\0';
-	len+=PX_strlen(outbuf+len);
+	PX_itoa(f_value, outbuf + len + zero_oft, maxlen - len - 1, 10);
+	*(outbuf + len + 1 + precision) = '\0';
+	len += PX_strlen(outbuf + len);
 	return len;
 }  
-
-
 
 px_int PX_itoa(px_int num,px_char *str,px_int MaxStrSize,px_int radix) 
 {  
@@ -234,7 +354,6 @@ px_int PX_itoa(px_int num,px_char *str,px_int MaxStrSize,px_int radix)
 			str[i]=temp; 
 		} 
 	}
-
 	return l; 
 } 
 
@@ -689,17 +808,34 @@ px_double PX_floor(px_double num) {
 
 px_int PX_ceil(px_double num) 
 {
-	px_int inum = (px_int)num;
-	if (num == (px_double)inum) 
-	{
-		return inum;
-	}
-	return inum + 1;
+	px_int64 n = (px_int64)num;
+	px_double d = (px_double)n;
+	if (d == num || num <= 0)
+		return (px_int)d;
+	else
+		return (px_int)(d + 1);
+	
 }
 
 px_double PX_exp(px_double x)
 {
 	return __px_pow_dd(PX_e, x);
+}
+
+px_int PX_clampi(px_int v, px_int min, px_int max)
+{
+	if (v < min) return min;
+	if (v > max) return max;
+	return v;
+	
+}
+
+px_float PX_clampf(px_float v, px_float min, px_float max)
+{
+	if (v < min) return min;
+	if (v > max) return max;
+	return v;
+	
 }
 
 px_double PX_tanh(px_double x)
@@ -850,10 +986,14 @@ px_int PX_strsub(const px_char* str, px_char delim)
 	return count;
 }
 
-px_bool PX_strsubi(const px_char* in, px_char* out, px_char delim, px_int index)
+px_bool PX_strsubi(const px_char* in, px_char* out,px_int outsize, px_char delim, px_int index)
 {
 	px_int current_index = 0;
 	px_int offset = 0;
+	if (current_index >= outsize)
+	{
+		return PX_FALSE;
+	}
 	out[0] = 0;
 	while (PX_TRUE)
 	{
@@ -888,20 +1028,32 @@ px_bool PX_strsubi(const px_char* in, px_char* out, px_char delim, px_int index)
 		{
 			break;
 		}
+		if (current_index>= outsize)
+		{
+			return PX_FALSE;
+		}
 		out[current_index] = in[offset];
 		offset++;
 		current_index++;
+	}
+	if (current_index >= outsize)
+	{
+		return PX_FALSE;
 	}
 	out[current_index] = 0;
 	return PX_TRUE;
 }
 
-px_bool PX_strsubn(const px_char* in, px_char* out, px_char delim, px_int count)
+px_bool PX_strsubx(const px_char* in, px_char* out,px_int out_size, px_char delim, px_int begin_index, px_int end_index)
 {
 	px_int current_index = 0;
-	px_int offset = 0;
+	px_int offset = 0,woffset = 0;
+	if (out_size==0)
+	{
+		return PX_FALSE;
+	}
 	out[0] = 0;
-	if (count<=0)
+	if (end_index- begin_index < 0)
 	{
 		return PX_TRUE;
 	}
@@ -909,28 +1061,51 @@ px_bool PX_strsubn(const px_char* in, px_char* out, px_char delim, px_int count)
 	{
 		if (in[offset] == delim)
 		{
-			out[offset] = in[offset];
-			current_index++;
-			if (current_index >= count)
+			if (current_index< begin_index)
 			{
-				out[offset] = 0;
+				current_index++;
+				offset++;
+				continue;
+			}
+			if (woffset >= out_size)
+			{
+				return PX_FALSE;
+			}
+			out[woffset++] = in[offset];
+			current_index++;
+			if (current_index > end_index)
+			{
+				out[woffset-1] = 0;
 				return PX_TRUE;
 			}
 			offset++;
 		}
 		else if (in[offset] == 0)
 		{
-			out[offset] = 0;
+			if (woffset >= out_size)
+			{
+				return PX_FALSE;
+			}
+			out[woffset++] = 0;
 			return PX_TRUE;
 		}
 		else
 		{
-			out[offset] = in[offset];
+			if (woffset >= out_size)
+			{
+				return PX_FALSE;
+			}
+			if(current_index>=begin_index&&current_index<=end_index)
+				out[woffset++] = in[offset];
 			offset++;
 		}
-		
+
 	}
-	
+}
+
+px_bool PX_strsubn(const px_char* in, px_char* out,px_int out_size, px_char delim, px_int count)
+{
+	return PX_strsubx(in, out, out_size, delim, 0, count-1);
 }
 
 px_void PX_BufferToHexString(px_byte data[],px_int size,px_char hex_str[])
@@ -1379,10 +1554,10 @@ px_stringformat PX_STRINGFORMAT_STRING_ALIGN(const px_char *_s,px_int align)
 
 px_int PX_sprintf8(px_char *_out_str,px_int str_size,const px_char fmt[], px_stringformat _1, px_stringformat _2, px_stringformat _3, px_stringformat _4,px_stringformat _5, px_stringformat _6, px_stringformat _7, px_stringformat _8)
 {
-	px_int length=0;
+	px_int radius=0;
 	const px_char *p=PX_NULL;
 	PX_RETURN_STRING tret;
-	px_stringformat pstringfmt;
+	px_stringformat pstringfmt = {0};
 	px_int precision=3;
 
 	if (!_out_str||!str_size)
@@ -1390,7 +1565,7 @@ px_int PX_sprintf8(px_char *_out_str,px_int str_size,const px_char fmt[], px_str
 		for (p = fmt;*p; p++) 
 		{
 			if(*p != '%') {
-				length++;
+				radius++;
 				continue;
 			}
 			switch(*(p+1)) 
@@ -1404,7 +1579,8 @@ px_int PX_sprintf8(px_char *_out_str,px_int str_size,const px_char fmt[], px_str
 			case '7': pstringfmt=_7; break;
 			case '8': pstringfmt=_8; break;
 			default:
-				length++;
+				p++;
+				radius++;
 				continue;
 			}
 
@@ -1423,32 +1599,79 @@ px_int PX_sprintf8(px_char *_out_str,px_int str_size,const px_char fmt[], px_str
 			case PX_STRINGFORMAT_TYPE_INT:
 			{
 				PX_RETURN_STRING s = PX_itos(pstringfmt._int, 10);
-				length += PX_strlen(s.data);
+				if(pstringfmt.align)
+				{
+					px_int slen = PX_strlen(s.data);
+					if (slen < pstringfmt.align)
+					{
+						radius += pstringfmt.align;
+					}
+					else
+					{
+						radius += slen;
+					}
+				}
+				else
+					radius += PX_strlen(s.data);
 			}
 				break;
 			case PX_STRINGFORMAT_TYPE_FLOAT:
 			{
 				PX_RETURN_STRING s = PX_ftos(pstringfmt._float, precision);
-				length += PX_strlen(s.data);
+				if (pstringfmt.align)
+				{
+					px_int slen = PX_strlen(s.data);
+					if (slen < pstringfmt.align)
+					{
+						radius += pstringfmt.align;
+					}
+					else
+					{
+						radius += slen;
+					}
+
+				}
+				else
+				{
+					radius += PX_strlen(s.data);
+				}
 			}
 				break;
 			case PX_STRINGFORMAT_TYPE_STRING:
-				length+=PX_strlen(pstringfmt._pstring);
-				break;
+			{
+				if (pstringfmt.align)
+				{
+					px_int slen = PX_strlen(pstringfmt._pstring);
+					if (slen < pstringfmt.align)
+					{
+						radius += pstringfmt.align;
+					}
+					else
+					{
+						radius += slen;
+					}
+				}
+				else
+				{
+					radius += PX_strlen(pstringfmt._pstring);
+				}
+			}
+			break;
 			default:
 				return 0;
 			}
 			
 		}
-		return length<pstringfmt.align?pstringfmt.align: length ;
+		return radius;
 	}
 	PX_memset(_out_str,0,str_size);
 	for (p = fmt;*p; p++) 
 	{
-		if(*p != '%') {
-			_out_str[length]=*p;
-			length++;
-			if (length >= str_size)
+		if(*p != '%') 
+		{
+			_out_str[radius]=*p;
+			radius++;
+			if (radius >= str_size)
 			{
 				PX_ASSERT();
 			}
@@ -1465,9 +1688,10 @@ px_int PX_sprintf8(px_char *_out_str,px_int str_size,const px_char fmt[], px_str
 		case '7': pstringfmt=_7; break;
 		case '8': pstringfmt=_8; break;
 		default:
-			_out_str[length]=*p;
-			length++;
-			if (length >= str_size)
+			_out_str[radius]=*p;
+			radius++;
+			p++;
+			if (radius >= str_size)
 			{
 				PX_ASSERT();
 			}
@@ -1496,23 +1720,25 @@ px_int PX_sprintf8(px_char *_out_str,px_int str_size,const px_char fmt[], px_str
 				px_int i;
 				for (i = 0; i < pstringfmt.align - slen; i++)
 				{
-					if (length + 1 < str_size)
+					if (radius + 1 < str_size)
 					{
-						_out_str[length] = '0';
-						length++;
+						_out_str[radius] = '0';
+						radius++;
 					}
 					else
-						return length;
+					{
+						return radius;
+					}
 				}
 			}
-			if (length + slen < str_size)
+			if (radius + slen < str_size)
 			{
 				PX_strcat(_out_str, tret.data);
-				length += slen;
+				radius += slen;
 			}
 			else
 			{
-				return length;
+				return radius;
 			}
 		}	
 		break;
@@ -1521,28 +1747,28 @@ px_int PX_sprintf8(px_char *_out_str,px_int str_size,const px_char fmt[], px_str
 			px_int slen;
 			tret = PX_ftos(pstringfmt._float, precision);
 			slen=PX_strlen(tret.data);
-			if (length + slen < str_size)
+			if (radius + slen < str_size)
 			{
 				PX_strcat(_out_str, tret.data);
-				length += slen;
+				radius += slen;
 			}
 			else
 			{
-				return length;
+				return radius;
 			}
 			if (precision&&slen < pstringfmt.align)
 			{
 				px_int i;
 				for (i = 0; i < pstringfmt.align - slen; i++)
 				{
-					if (length + 1 < str_size)
+					if (radius + 1 < str_size)
 					{
-						_out_str[length] = '0';
+						_out_str[radius] = '0';
 
-						length++;
+						radius++;
 					}
 					else
-						return length;
+						return radius;
 				}
 			}
 
@@ -1553,27 +1779,27 @@ px_int PX_sprintf8(px_char *_out_str,px_int str_size,const px_char fmt[], px_str
 			px_int slen;
 			slen=PX_strlen(pstringfmt._pstring);
 			
-			if (length + slen < str_size)
+			if (radius + slen < str_size)
 			{
 				PX_strcat(_out_str, pstringfmt._pstring);
-				length += slen;
+				radius += slen;
 			}
 			else
 			{
-				return length;
+				return radius;
 			}
 			if (slen < pstringfmt.align)
 			{
 				px_int i;
 				for (i = 0; i < pstringfmt.align - slen; i++)
 				{
-					if (length + 1 < str_size)
+					if (radius + 1 < str_size)
 					{
-						_out_str[length] = ' ';
-						length++;
+						_out_str[radius] = ' ';
+						radius++;
 					}
 					else
-						return length;
+						return radius;
 				}
 			}
 		}
@@ -1582,11 +1808,11 @@ px_int PX_sprintf8(px_char *_out_str,px_int str_size,const px_char fmt[], px_str
 			return 0;
 		}
 	}
-	if (length >= str_size)
+	if (radius >= str_size)
 	{
 		PX_ASSERT();
 	}
-	return length;
+	return radius;
 }
 
 
@@ -2158,7 +2384,7 @@ px_color_hsv PX_ColorRGBToHSV( px_color rgb)
 	max = max < B ? B : max;
 
 	min = R;
-	min = min > G ? B : min;
+	min = min > G ? G : min;
 	min = min > B ? B : min;
 
 
@@ -2189,7 +2415,7 @@ px_color_hsv PX_ColorRGBToHSV( px_color rgb)
 px_color PX_ColorHSVToRGB(px_color_hsv hsv)
 {
 	px_color rgb;
-	px_float R, G, B;
+	px_float R=0, G=0, B=0;
 	px_float C = 0, X = 0, Y = 0, Z = 0;
 	px_int i = 0;
 	px_float H = hsv.H;
@@ -2595,7 +2821,7 @@ px_double PX_Covariance(px_double x[],px_double y[],px_int n)
 }
 
 
-px_double PX_Variance(px_double x[],px_int n)
+px_double PX_Varianced(px_double x[],px_int n)
 {
 	px_int i;
 	px_double average;
@@ -2614,6 +2840,7 @@ px_double PX_Variance(px_double x[],px_int n)
 	}
 	average=sum/(n);
 
+	sum=0;
 	for (i=0;i<n;i++)
 	{
 		sum+=(x[i]-average)*(x[i]-average);
@@ -2668,6 +2895,27 @@ px_bool PX_isPointXYInRect(px_float x,px_float y,px_float rectx,px_float recty,p
 		return PX_FALSE;
 	}
 	if (y>recty+height)
+	{
+		return PX_FALSE;
+	}
+	return PX_TRUE;
+}
+
+px_bool PX_isIntPointXYInRect(px_int x, px_int y, px_int rectx, px_int recty, px_int width, px_int height)
+{
+	if (x < rectx)
+	{
+		return PX_FALSE;
+	}
+	if (x > rectx + width)
+	{
+		return PX_FALSE;
+	}
+	if (y < recty)
+	{
+		return PX_FALSE;
+	}
+	if (y > recty + height)
 	{
 		return PX_FALSE;
 	}
@@ -2884,9 +3132,7 @@ px_bool PX_isLineCrossCircle(px_point2D p1, px_point2D p2, px_point2D c, px_floa
 {
 	px_bool flag1 = (p1.x - c.x) * (p1.x - c.x) + (p1.y - c.y) * (p1.y - c.y) <= r * r;
 	px_bool flag2 = (p2.x - c.x) * (p2.x - c.x) + (p2.y - c.y) * (p2.y - c.y) <= r * r;
-	if (flag1 && flag2)	
-		return PX_FALSE;
-	else if (flag1 || flag2) 
+	if (flag1 || flag2) 
 		return PX_TRUE;
 	else 
 	{
@@ -2982,53 +3228,41 @@ px_bool PX_memequ(const px_void *dst,const px_void *src,px_int size)
 	return PX_TRUE;
 }
 
+px_void PX_memcpy_volatile(px_void* dest,	volatile px_void* src,	px_int size)
+{
+	px_int i;
+	for (i = 0; i < size; i++) {
+		((px_byte *)dest)[i] = ((volatile px_byte *)src)[i];
+	}
+}
 
 px_void PX_memcpy(px_void *dst,const px_void *src,px_int size)
 {
-	typedef struct
+#ifdef PX_HAS_LIBC
+	if (size <= 0) return;
+	if (dst > src && (px_char*)dst < (px_char*)src + size)
 	{
-		px_byte m[16];
-	}PX_MEMCPY_16;
-
-	typedef struct
+		memmove(dst, src, (px_uint)size);
+	}
+	else if (src > dst && (px_char*)src < (px_char*)dst + size)
 	{
-		px_byte m[32];
-	}PX_MEMCPY_32;
-
-	typedef struct
+		memmove(dst, src, (px_uint)size);
+	}
+	else
 	{
-		px_byte m[64];
-	}PX_MEMCPY_64;
-
-	typedef struct
-	{
-		px_byte m[128];
-	}PX_MEMCPY_128;
-
-	typedef struct
-	{
-		px_byte m[256];
-	}PX_MEMCPY_256;
-
-	typedef struct
-	{
-		px_byte m[512];
-	}PX_MEMCPY_512;
-
-	typedef struct
-	{
-		px_byte m[1024];
-	}PX_MEMCPY_1024;
-
-	typedef struct
-	{
-		px_byte m[2048];
-	}PX_MEMCPY_2048;
-
-	typedef struct
-	{
-		px_byte m[4096];
-	}PX_MEMCPY_4096;
+		memcpy(dst, src, (px_uint)size);
+	}
+	
+#else
+	typedef struct { px_byte m[16];   } PX_MEMCPY_16;
+	typedef struct { px_byte m[32];   } PX_MEMCPY_32;
+	typedef struct { px_byte m[64];   } PX_MEMCPY_64;
+	typedef struct { px_byte m[128];  } PX_MEMCPY_128;
+	typedef struct { px_byte m[256];  } PX_MEMCPY_256;
+	typedef struct { px_byte m[512];  } PX_MEMCPY_512;
+	typedef struct { px_byte m[1024]; } PX_MEMCPY_1024;
+	typedef struct { px_byte m[2048]; } PX_MEMCPY_2048;
+	typedef struct { px_byte m[4096]; } PX_MEMCPY_4096;
 
 	px_dword *_4byteMovSrc;
 	px_dword *_4byteMovDst;
@@ -3037,12 +3271,12 @@ px_void PX_memcpy(px_void *dst,const px_void *src,px_int size)
 	PX_MEMCPY_4096 *_4kbyteMovSrc,*_4kbyteMovDst;
 	PX_MEMCPY_2048 *_2kbyteMovSrc,*_2kbyteMovDst;
 	PX_MEMCPY_1024 *_1kbyteMovSrc,*_1kbyteMovDst;
-	PX_MEMCPY_512 *_512byteMovSrc,*_512byteMovDst;
-	PX_MEMCPY_256 *_256byteMovSrc,*_256byteMovDst;
-	PX_MEMCPY_128 *_128byteMovSrc,*_128byteMovDst;
-	PX_MEMCPY_64 *_64byteMovSrc,*_64byteMovDst;
-	PX_MEMCPY_32 *_32byteMovSrc,*_32byteMovDst;
-	PX_MEMCPY_16 *_16byteMovSrc,*_16byteMovDst;
+	PX_MEMCPY_512  *_512byteMovSrc,*_512byteMovDst;
+	PX_MEMCPY_256  *_256byteMovSrc,*_256byteMovDst;
+	PX_MEMCPY_128  *_128byteMovSrc,*_128byteMovDst;
+	PX_MEMCPY_64   *_64byteMovSrc,*_64byteMovDst;
+	PX_MEMCPY_32   *_32byteMovSrc,*_32byteMovDst;
+	PX_MEMCPY_16   *_16byteMovSrc,*_16byteMovDst;
 	px_uint _movTs;
 
 	if (size<=0)
@@ -3238,8 +3472,18 @@ px_void PX_memcpy(px_void *dst,const px_void *src,px_int size)
 			pdst=(px_uchar *)dst;
 			while(_movTs--)*pdst++=*psrc++;
 		}
-		
 	}
+#endif
+}
+
+px_void PX_memmove(px_void *dst,const px_void *src,px_int size)
+{
+#ifdef PX_HAS_LIBC
+	if (size <= 0) return;
+	memmove(dst, src, (px_uint)size);
+#else
+	PX_memcpy(dst, src, size);
+#endif
 }
 
 px_int PX_memcmp(px_void* dst, const px_void* src, px_int size)
@@ -3304,6 +3548,13 @@ px_void PX_strcat(px_char *src,const px_char *cat)
 	*src='\0';
 }
 
+px_void PX_strcatchar(px_char *src,const px_char ch)
+{
+	while(*src)src++;
+	*src++=ch;
+	*src='\0';
+}
+
 px_void PX_strcatlen(px_char* src, const px_char* cat,px_int len)
 {
 	while (*src)src++;
@@ -3316,6 +3567,14 @@ px_void PX_strcat_s(px_char* src, px_int size, const px_char* cat)
 	if (PX_strlen(src)+PX_strlen(cat)<size)
 	{
 		PX_strcat(src, cat);
+	}
+}
+
+px_void PX_strcatchar_s(px_char* src, px_int size, const px_char ch)
+{
+	if (PX_strlen(src) + 1 < size)
+	{
+		PX_strcatchar(src, ch);
 	}
 }
 
@@ -3422,12 +3681,30 @@ px_void PX_strlwr(px_char *src)
 {
 	 while (*src != '\0')  
     {  
-        if (*src > 'A' && *src <= 'Z'){  
+        if (*src >= 'A' && *src <= 'Z'){  
             *src += 32;  
         }  
         src++;  
     } 
 }
+
+px_void PX_strgetline(const px_char* in, px_char* out, px_int size)
+{
+	px_int i=0;
+	while (in[i] != '\n' && in[i] != '\0' && i<size-1)
+	{
+		out[i] = in[i];
+		i++;
+	}
+	out[i] = '\0';
+}
+
+px_void PX_strreadline(const px_char* in, px_char* out, px_int size)
+{
+	PX_strgetline(in, out, size);
+}
+
+
 
 
 px_point2D PX_Point2DMulMatrix(px_point2D p,px_matrix mat)
@@ -3553,15 +3830,6 @@ px_complex PX_complexLog(px_complex a)
 	return ret;
 }
 
-px_complex PX_complexExp(px_complex a)
-{
-	px_double p;
-	px_complex ret;
-	p=PX_exp(a.re);
-	ret.re=p*PX_cosd(a.im);
-	ret.im=p*PX_cosd(a.re);
-	return ret;
-}
 
 px_complex PX_complexSin(px_complex a)
 {
@@ -3931,13 +4199,13 @@ px_void IFFT_Base2(_IN _OUT px_complex X[],px_int N)
 px_void PX_IFFT(_IN px_complex X[],_OUT px_complex x[],px_int N)
 {
 	px_int i;
-	PX_memcpy(X,x,sizeof(px_complex)*N);
-	IFFT_Base2(X,N);
+	PX_memcpy(x,X,sizeof(px_complex)*N);
+	IFFT_Base2(x,N);
 	// 1/N operate
 	for (i=0;i<N;i++)
 	{
-		X[i].re/=N;
-		X[i].im/=N;
+		x[i].re/=N;
+		x[i].im/=N;
 	}
 }
 
@@ -4033,7 +4301,7 @@ px_void PX_IFFT_2(_IN px_complex X[],_OUT px_complex x[],px_int N)
 
 	for(i=0;i<N;i++)
 	{
-		PX_IFFT(&x[i*N],&X[i*N],N);
+		PX_IFFT(&X[i*N],&x[i*N],N);
 	}
 
 	//Matrix transpose again
@@ -4041,15 +4309,15 @@ px_void PX_IFFT_2(_IN px_complex X[],_OUT px_complex x[],px_int N)
 	{
 		for (cx=cy+1;cx<N;cx++)
 		{
-			_t=X[cy*N+cx];
-			X[cy*N+cx]=X[cx*N+cy];
-			X[cx*N+cy]=_t;
+			_t=x[cy*N+cx];
+			x[cy*N+cx]= x[cx*N+cy];
+			x[cx*N+cy]=_t;
 		}
 	}
 
 	for (i=0;i<N;i++)
 	{
-		PX_IFFT(&X[i*N],&X[i*N],N);
+		PX_IFFT(&x[i*N],&x[i*N],N);
 	}
 }
 
@@ -4070,7 +4338,7 @@ px_void PX_IFDCT_2(_IN px_complex X[], _OUT px_complex x[], px_int N)
 
 	for (i = 0; i < N; i++)
 	{
-		PX_FIDCT(&x[i * N], &X[i * N], N);
+		PX_FIDCT(&X[i * N], &x[i * N], N);
 	}
 
 	//Matrix transpose again
@@ -4078,15 +4346,15 @@ px_void PX_IFDCT_2(_IN px_complex X[], _OUT px_complex x[], px_int N)
 	{
 		for (cx = cy + 1; cx < N; cx++)
 		{
-			_t = X[cy * N + cx];
-			X[cy * N + cx] = X[cx * N + cy];
-			X[cx * N + cy] = _t;
+			_t = x[cy * N + cx];
+			x[cy * N + cx] = x[cx * N + cy];
+			x[cx * N + cy] = _t;
 		}
 	}
 
 	for (i = 0; i < N; i++)
 	{
-		PX_FIDCT(&X[i * N], &X[i * N], N);
+		PX_FIDCT(&x[i * N], &x[i * N], N);
 	}
 }
 
@@ -4149,7 +4417,7 @@ px_void PX_DCT_2_Shift(_IN px_double _in[], _OUT px_double _out[], px_int N)
 px_void PX_FT_Symmetry(_IN px_complex x[],_OUT px_complex X[],px_int N)
 {
 	px_int l=1,r=N-1;
-	PX_memcpy(X,x,N/2*sizeof(px_complex)+1);
+	PX_memcpy(X,x,(N/2+1)*sizeof(px_complex));
 	while (l<r)
 	{
 		X[r]=X[l];
@@ -4348,6 +4616,33 @@ px_void PX_UpSampled(_IN px_complex x[],_OUT px_complex X[],px_int N,px_int L)
 	}
 }
 
+px_float PX_Variance(px_float x[], px_int n)
+{
+	px_int i;
+	px_float mean = 0, variance = 0;
+	if (n <= 1)
+	{
+		return 0;
+	}
+	for (i = 0; i < n; i++)
+	{
+		mean += x[i];
+	}
+	mean /= n;
+	for (i = 0; i < n; i++)
+	{
+		variance += (x[i] - mean) * (x[i] - mean);
+	}
+	variance /= n;
+	return variance;
+	
+}
+
+px_float PX_StandardDiviation(px_float x[], px_int n)
+{
+	return PX_sqrt(PX_Variance(x, n));
+}
+
 px_void PX_DownSampled(_IN px_complex x[],_OUT px_complex X[],px_int N,px_int M)
 {
 	px_int i;
@@ -4448,13 +4743,17 @@ px_bool PX_strequ(const px_char *src,const px_char *dst)
 px_bool PX_strequ3(const px_char* src, const px_char* dst,px_int src_size)
 {
 	px_int ret = 0;
-	while (src_size &&!(ret = *(px_uchar*)src - *(px_uchar*)dst) && *src)
+	while (src_size)
 	{
+		if (*src!=*dst)
+		{
+			return PX_FALSE;
+		}
 		src++;
 		dst++;
 		src_size--;
 	}
-	return !ret&& dst[0]=='\0';
+	return PX_TRUE;
 }
 
 
@@ -4855,6 +5154,11 @@ px_uint32 PX_rand()
 	return (px_uint32)px_mt_64_next(&g_px_mt19937,PX_RAND_MAX);
 }
 
+px_uint32 PX_rand_lcg(px_uint32 seed)
+{
+	return seed = (seed * 1664525u + 1013904223u) >>8;
+}
+
 
 px_float PX_randRange(px_float min, px_float max)
 {
@@ -4873,7 +5177,7 @@ px_uint32 PX_randEx(PX_MT19937* pmt)
 
 px_float PX_randRangeEx(PX_MT19937* pmt, px_float min, px_float max)
 {
-	return px_mt_64_rangef(&g_px_mt19937, min, max);
+	return px_mt_64_rangef(pmt, min, max);
 }
 
 
@@ -5576,7 +5880,7 @@ px_void PX_gainc(px_double b[],px_double a[],px_int n,px_int ns,px_double x[],px
 				re=ar;
 				im=ai;
 				ar=(re+a[j*nl+i])*zr-im*zi;
-				ai=(re+b[j*nl+i])*zi+im*zr;
+				ai=(re+a[j*nl+i])*zi+im*zr;
 			}
 			br=br+b[j*nl+0];
 			ar=ar+1.0;
@@ -5632,7 +5936,7 @@ px_void  PX_WindowFunction_blackMan(px_double data[],px_int N)
 	px_int n;
 	for(n=0;n<N;n++)
 	{
-		data[n]=0.42-0.5*PX_cosd((px_float)(2*PX_PI*(px_double)n/(N-1))+0.08f*PX_cos_radian((px_float)(4*PX_PI*(px_double)n/(N-1))));
+		data[n]=0.42-0.5*PX_cosd((px_float)(2*PX_PI*(px_double)n/(N-1)))+0.08f*PX_cos_radian((px_float)(4*PX_PI*(px_double)n/(N-1)));
 	}
 }
 
@@ -6070,7 +6374,7 @@ px_void PX_MemoryStreamInitialize(PX_MemoryStream* pStream, px_byte* bitstream,p
 }
 px_byte PX_MemoryStreamReadBitLE(PX_MemoryStream* pStream)
 {
-	if (pStream->bitpointer/8<=pStream->size*8)
+	if (pStream->bitpointer*8<pStream->size*8)
 	{
 		return PX_ReadBitLE((px_uint32 *)&pStream->bitpointer, pStream->bitstream);
 	}
@@ -6081,7 +6385,7 @@ px_byte PX_MemoryStreamReadBitLE(PX_MemoryStream* pStream)
 }
 px_byte PX_MemoryStreamReadBitBE(PX_MemoryStream* pStream)
 {
-	if (pStream->bitpointer / 8 <= pStream->size * 8)
+	if (pStream->bitpointer * 8 < pStream->size * 8)
 	{
 		return PX_ReadBitBE((px_uint32*)&pStream->bitpointer, pStream->bitstream);
 	}
@@ -6135,7 +6439,7 @@ px_void PX_MemoryStreamAlign(PX_MemoryStream* pStream)
 px_byte PX_MemoryStreamReadByte(PX_MemoryStream* pStream)
 {
 	PX_MemoryStreamAlign(pStream);
-	if (pStream->bitpointer / 8+8 <= pStream->size * 8)
+	if (pStream->bitpointer / 8+8 < pStream->size * 8)
 	{
 		px_byte result = (px_byte)PX_ReadBitsLE((px_uint32*)&pStream->bitpointer, pStream->bitstream, 8);
 		return result;
@@ -6147,7 +6451,7 @@ px_byte PX_MemoryStreamReadByte(PX_MemoryStream* pStream)
 }
 px_uint32 PX_MemoryStreamReadBitsLE(PX_MemoryStream* pStream, px_int nbits)
 {
-	if (pStream->bitpointer / 8 + nbits <= pStream->size * 8)
+	if (pStream->bitpointer / 8 + nbits < pStream->size * 8)
 	{
 		px_uint32 result = PX_ReadBitsLE((px_uint32*)&pStream->bitpointer, pStream->bitstream, nbits);
 		return result;
@@ -6159,7 +6463,7 @@ px_uint32 PX_MemoryStreamReadBitsLE(PX_MemoryStream* pStream, px_int nbits)
 }
 px_uint32 PX_MemoryStreamReadBitsBE(PX_MemoryStream* pStream, px_int nbits)
 {
-	if (pStream->bitpointer / 8 + nbits <= pStream->size * 8)
+	if (pStream->bitpointer / 8 + nbits < pStream->size * 8)
 	{
 		px_uint32 result = PX_ReadBitsBE((px_uint32*)&pStream->bitpointer, pStream->bitstream, nbits);
 		return result;
@@ -6261,4 +6565,284 @@ px_bool PX_SoundResamplerOut(PX_SoundResampler* pResampler, px_double* out)
 		return PX_TRUE;
 	}
 	return PX_FALSE;
+}
+
+
+static PX_KeyboardKey px_kbkeys[128];
+
+static px_void PX_KeyboardBuildScanCodeMap()
+{
+	px_int i;
+	px_int scan_code = 0;
+	PX_memset(px_kbkeys, 0, sizeof(px_kbkeys));
+	//no code
+	px_kbkeys[scan_code].content1[0] = (px_char)0xff;
+	scan_code++;
+
+	px_kbkeys[scan_code].vk_code = PX_VK_ESCAPE;
+	PX_strset(px_kbkeys[scan_code].content1, "esc");
+	scan_code++;
+
+	//1-9
+	for (i = 0; i < 9; i++)
+	{
+		const px_char table1[] = "123456789";
+		const px_char table2[] = "!@#$%^&*(";
+		px_kbkeys[scan_code].content1[0] = table1[i];
+		px_kbkeys[scan_code].content2[0] = table2[i];
+		px_kbkeys[scan_code].vk_code = table1[i];
+		scan_code++;
+	}
+
+	//0
+	px_kbkeys[scan_code].vk_code = '0';
+	PX_strset(px_kbkeys[scan_code].content1, "0");
+	PX_strset(px_kbkeys[scan_code].content2, ")");
+	scan_code++;
+
+	//-
+	px_kbkeys[scan_code].vk_code = 189;
+	PX_strset(px_kbkeys[scan_code].content1, "-");
+	PX_strset(px_kbkeys[scan_code].content2, "_");
+	scan_code++;
+
+	//=
+	px_kbkeys[scan_code].vk_code = 187;
+	PX_strset(px_kbkeys[scan_code].content1, "=");
+	PX_strset(px_kbkeys[scan_code].content2, "+");
+	scan_code++;
+
+	//backspace
+	px_kbkeys[scan_code].vk_code = PX_VK_BACK;
+	PX_strset(px_kbkeys[scan_code].content1, "back");
+	PX_strset(px_kbkeys[scan_code].content2, "");
+	scan_code++;
+
+	//Tab
+	px_kbkeys[scan_code].vk_code = PX_VK_TAB;
+	PX_strset(px_kbkeys[scan_code].content1, "tab");
+	PX_strset(px_kbkeys[scan_code].content2, "");
+	scan_code++;
+
+	for (i = 0; i < 10; i++)
+	{
+		const px_char table1[] = "qwertyuiop";
+		const px_char table2[] = "QWERTYUIOP";
+		px_kbkeys[scan_code].content1[0] = table1[i];
+		px_kbkeys[scan_code].content2[0] = table2[i];
+		px_kbkeys[scan_code].vk_code = table2[i];
+		scan_code++;
+	}
+
+	//[
+	px_kbkeys[scan_code].vk_code = 219;
+	PX_strset(px_kbkeys[scan_code].content1, "[");
+	PX_strset(px_kbkeys[scan_code].content2, "{");
+	scan_code++;
+
+	//]
+	px_kbkeys[scan_code].vk_code = 221;
+	PX_strset(px_kbkeys[scan_code].content1, "]");
+	PX_strset(px_kbkeys[scan_code].content2, "}");
+	scan_code++;
+
+	//Enter
+	px_kbkeys[scan_code].vk_code = PX_VK_RETURN;
+	PX_strset(px_kbkeys[scan_code].content1, "sources_enter");
+	PX_strset(px_kbkeys[scan_code].content2, "");
+	scan_code++;
+
+	//Ctrl
+	px_kbkeys[scan_code].vk_code = PX_VK_CONTROL;
+	PX_strset(px_kbkeys[scan_code].content1, "ctrl");
+	PX_strset(px_kbkeys[scan_code].content2, "");
+	scan_code++;
+
+	//a-l
+	for (i = 0; i < 9; i++)
+	{
+		const px_char table1[] = "asdfghjkl";
+		const px_char table2[] = "ASDFGHJKL";
+		px_kbkeys[scan_code].content1[0] = table1[i];
+		px_kbkeys[scan_code].content2[0] = table2[i];
+		px_kbkeys[scan_code].vk_code = table2[i];
+		scan_code++;
+	}
+
+	//;
+	px_kbkeys[scan_code].vk_code = 186;
+	PX_strset(px_kbkeys[scan_code].content1, ";");
+	PX_strset(px_kbkeys[scan_code].content2, ":");
+	scan_code++;
+
+	//'
+	px_kbkeys[scan_code].vk_code = 222;
+	PX_strset(px_kbkeys[scan_code].content1, "'");
+	PX_strset(px_kbkeys[scan_code].content2, "\"");
+	scan_code++;
+
+	//`
+	px_kbkeys[scan_code].vk_code = 192;
+	PX_strset(px_kbkeys[scan_code].content1, "`");
+	PX_strset(px_kbkeys[scan_code].content2, "~");
+	scan_code++;
+
+	//LSHIFT
+	px_kbkeys[scan_code].vk_code = PX_VK_LSHIFT;
+	PX_strset(px_kbkeys[scan_code].content1, "lshift");
+	PX_strset(px_kbkeys[scan_code].content2, "");
+	scan_code++;
+
+	//
+	px_kbkeys[scan_code].vk_code = 220;
+	PX_strset(px_kbkeys[scan_code].content1, "\\");
+	PX_strset(px_kbkeys[scan_code].content2, "|");
+	scan_code++;
+
+	//Z-M
+	for (i = 0; i < 7; i++)
+	{
+		const px_char table1[] = "zxcvbnm";
+		const px_char table2[] = "ZXCVBNM";
+		px_kbkeys[scan_code].content1[0] = table1[i];
+		px_kbkeys[scan_code].content2[0] = table2[i];
+		px_kbkeys[scan_code].vk_code = table2[i];
+		scan_code++;
+	}
+
+	//,
+	px_kbkeys[scan_code].vk_code = 188;
+	PX_strset(px_kbkeys[scan_code].content1, ",");
+	PX_strset(px_kbkeys[scan_code].content2, "<");
+	scan_code++;
+
+	//.
+	px_kbkeys[scan_code].vk_code = 190;
+	PX_strset(px_kbkeys[scan_code].content1, ".");
+	PX_strset(px_kbkeys[scan_code].content2, ">");
+	scan_code++;
+
+	//
+	px_kbkeys[scan_code].vk_code = 191;
+	PX_strset(px_kbkeys[scan_code].content1, "/");
+	PX_strset(px_kbkeys[scan_code].content2, "?");
+	scan_code++;
+
+	//RSHIFT
+	px_kbkeys[scan_code].vk_code = PX_VK_RSHIFT;
+	PX_strset(px_kbkeys[scan_code].content1, "rshift");
+	PX_strset(px_kbkeys[scan_code].content2, "");
+	scan_code++;
+
+	//grey
+	px_kbkeys[scan_code].vk_code = 0;
+	PX_strset(px_kbkeys[scan_code].content1, "grey");
+	PX_strset(px_kbkeys[scan_code].content2, "");
+	scan_code++;
+
+	//alt
+	px_kbkeys[scan_code].vk_code = 18;
+	PX_strset(px_kbkeys[scan_code].content1, "alt");
+	PX_strset(px_kbkeys[scan_code].content2, "");
+	scan_code++;
+
+	//space
+	px_kbkeys[scan_code].vk_code = PX_VK_SPACE;
+	PX_strset(px_kbkeys[scan_code].content1, "space");
+	PX_strset(px_kbkeys[scan_code].content2, "");
+	scan_code++;
+
+	//capsl
+	px_kbkeys[scan_code].vk_code = PX_VK_CAPITAL;
+	PX_strset(px_kbkeys[scan_code].content1, "caps");
+	PX_strset(px_kbkeys[scan_code].content2, "");
+	scan_code++;
+
+	//F1-F10
+	for (i = 1; i < 10; i++)
+	{
+		PX_sprintf1(px_kbkeys[scan_code].content1, 8, "F%1", PX_STRINGFORMAT_INT(i));
+		px_kbkeys[scan_code].vk_code = PX_VK_F1 + i - 1;
+		scan_code++;
+	}
+
+	scan_code = 0x48;
+	px_kbkeys[scan_code].vk_code = PX_VK_UP;
+	PX_strset(px_kbkeys[scan_code].content1, "up");
+	PX_strset(px_kbkeys[scan_code].content2, "");
+
+	scan_code = 0x4B;
+	px_kbkeys[scan_code].vk_code = PX_VK_LEFT;
+	PX_strset(px_kbkeys[scan_code].content1, "left");
+	PX_strset(px_kbkeys[scan_code].content2, "");
+
+	scan_code = 0x4D;
+	px_kbkeys[scan_code].vk_code = PX_VK_RIGHT;
+	PX_strset(px_kbkeys[scan_code].content1, "right");
+	PX_strset(px_kbkeys[scan_code].content2, "");
+
+	scan_code = 0x50;
+	px_kbkeys[scan_code].vk_code = PX_VK_DOWN;
+	PX_strset(px_kbkeys[scan_code].content1, "down");
+	PX_strset(px_kbkeys[scan_code].content2, "");
+
+	scan_code = 0x57;
+	px_kbkeys[scan_code].vk_code = PX_VK_F11;
+	PX_strset(px_kbkeys[scan_code].content1, "f11");
+	PX_strset(px_kbkeys[scan_code].content2, "");
+
+	scan_code = 0x58;
+	px_kbkeys[scan_code].vk_code = PX_VK_F12;
+	PX_strset(px_kbkeys[scan_code].content1, "f12");
+	PX_strset(px_kbkeys[scan_code].content2, "");
+
+	scan_code = 0x70;
+	px_kbkeys[scan_code].vk_code = PX_VK_DELETE;
+	PX_strset(px_kbkeys[scan_code].content1, "delete");
+	PX_strset(px_kbkeys[scan_code].content2, "");
+
+}
+
+px_byte PX_KeyboardGetScanCode(const px_char content[])
+{
+	px_int i;
+	if (!px_kbkeys[0].content1[0])
+	{
+		PX_KeyboardBuildScanCodeMap();
+	}
+	for (i = 0; i < PX_COUNTOF(px_kbkeys); i++)
+	{
+		if (PX_strequ2(content, px_kbkeys[i].content1) || PX_strequ2(content, px_kbkeys[i].content2))
+		{
+			return i;
+		}
+	}
+
+	return 0;
+}
+
+px_byte PX_KeyboardScanCodeToVK(px_byte scan_code)
+{
+	if (!px_kbkeys[0].content1[0])
+	{
+		PX_KeyboardBuildScanCodeMap();
+	}
+	return px_kbkeys[scan_code].vk_code;
+}
+
+px_byte PX_KeyboardVKToScanCode(px_byte vk)
+{
+	px_int i;
+	if (!px_kbkeys[0].content1[0])
+	{
+		PX_KeyboardBuildScanCodeMap();
+	}
+	for (i = 0; i < PX_COUNTOF(px_kbkeys); i++)
+	{
+		if (px_kbkeys[i].vk_code == vk)
+		{
+			return i;
+		}
+	}
+	return 0;
 }

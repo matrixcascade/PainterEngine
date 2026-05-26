@@ -14,7 +14,7 @@ typedef struct
 
 PX_Object* PX_Object_3DModelAttachObject(PX_Object* pAttachObject,px_int attachIndex, px_float x, px_float y, px_float width, px_float height, PX_3D_ObjectData* pdata);
 PX_Object* PX_Object_3DModelCreate(px_memorypool* mp, PX_Object* parent, px_float x, px_float y, px_float width, px_float height, PX_3D_ObjectData* pdata);
-px_void PX_Object_3DModelSetCamera(PX_Object* pObject, px_point4D pos, px_point4D direction);
+px_void PX_Object_3DModelSetCamera(PX_Object* pObject, px_point4D pos, px_point4D toward);
 px_void PX_Object_3DModelSetWorld(PX_Object* pObject, px_float x, px_float y, px_float z, px_float rotX, px_float rotY, px_float rotZ, px_float scale);
 #endif
 

@@ -143,39 +143,39 @@ static px_int PX_png_paeth_predictor(px_int a, px_int b, px_int c)
 		return c;
 }
 
-static px_bool PX_png_unfilter_scanline( px_byte* recon, const px_byte* scanline, const px_byte* precon, px_uint bytewidth, px_byte filterType, px_uint length)
+static px_bool PX_png_unfilter_scanline( px_byte* recon, const px_byte* scanline, const px_byte* precon, px_uint bytewidth, px_byte filterType, px_uint radius)
 {
 	px_uint i;
 	switch (filterType) {
 	case 0:
-		for (i = 0; i < length; i++)
+		for (i = 0; i < radius; i++)
 			recon[i] = scanline[i];
 		break;
 	case 1:
 		for (i = 0; i < bytewidth; i++)
 			recon[i] = scanline[i];
-		for (i = bytewidth; i < length; i++)
+		for (i = bytewidth; i < radius; i++)
 			recon[i] = scanline[i] + recon[i - bytewidth];
 		break;
 	case 2:
 		if (precon)
-			for (i = 0; i < length; i++)
+			for (i = 0; i < radius; i++)
 				recon[i] = scanline[i] + precon[i];
 		else
-			for (i = 0; i < length; i++)
+			for (i = 0; i < radius; i++)
 				recon[i] = scanline[i];
 		break;
 	case 3:
 		if (precon) {
 			for (i = 0; i < bytewidth; i++)
 				recon[i] = scanline[i] + precon[i] / 2;
-			for (i = bytewidth; i < length; i++)
+			for (i = bytewidth; i < radius; i++)
 				recon[i] = scanline[i] + ((recon[i - bytewidth] + precon[i]) / 2);
 		}
 		else {
 			for (i = 0; i < bytewidth; i++)
 				recon[i] = scanline[i];
-			for (i = bytewidth; i < length; i++)
+			for (i = bytewidth; i < radius; i++)
 				recon[i] = scanline[i] + recon[i - bytewidth] / 2;
 		}
 		break;
@@ -183,13 +183,13 @@ static px_bool PX_png_unfilter_scanline( px_byte* recon, const px_byte* scanline
 		if (precon) {
 			for (i = 0; i < bytewidth; i++)
 				recon[i] = (px_byte)(scanline[i] + PX_png_paeth_predictor(0, precon[i], 0));
-			for (i = bytewidth; i < length; i++)
+			for (i = bytewidth; i < radius; i++)
 				recon[i] = (px_byte)(scanline[i] + PX_png_paeth_predictor(recon[i - bytewidth], precon[i], precon[i - bytewidth]));
 		}
 		else {
 			for (i = 0; i < bytewidth; i++)
 				recon[i] = scanline[i];
-			for (i = bytewidth; i < length; i++)
+			for (i = bytewidth; i < radius; i++)
 				recon[i] = (px_byte)(scanline[i] + PX_png_paeth_predictor(recon[i - bytewidth], 0, 0));
 		}
 		break;

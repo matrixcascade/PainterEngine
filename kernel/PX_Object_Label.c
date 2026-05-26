@@ -146,6 +146,7 @@ px_void PX_Object_LabelSetText( PX_Object *pObject,const px_char *Text )
 	{
 		return;
 	}
+
 	pLabel = PX_Object_GetLabel(pObject);
 	PX_ASSERTIF(pLabel == PX_NULL);
 	

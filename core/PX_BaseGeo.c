@@ -1,21 +1,25 @@
 #include "PX_BaseGeo.h"
-static  px_int  st_symmetry_axis;
 
 #define PX_ABS_FRAC(x) ((x)>0?PX_FRAC(x):PX_FRAC(-(x)))
 
-static px_void PX_DrawLinePixel_RecK(px_surface *psurface,px_int x,px_int y,px_color color)
+static px_void PX_DrawLinePixel_Normal(px_surface *psurface,px_int x,px_int y,px_color color,px_int symmetry_axis)
+{
+	PX_SurfaceDrawPixel(psurface,x,y,color);
+}
+
+static px_void PX_DrawLinePixel_RecK(px_surface *psurface,px_int x,px_int y,px_color color,px_int symmetry_axis)
 {
 	PX_SurfaceDrawPixel(psurface,y,x,color);
 }
 
-static px_void PX_DrawLinePixel_InvK(px_surface *psurface,px_int x,px_int y,px_color color)
+static px_void PX_DrawLinePixel_InvK(px_surface *psurface,px_int x,px_int y,px_color color,px_int symmetry_axis)
 {
-	PX_SurfaceDrawPixel(psurface,2*st_symmetry_axis-x,y,color);
+	PX_SurfaceDrawPixel(psurface,2*symmetry_axis-x,y,color);
 }
 
-static px_void PX_DrawLinePixel_InvRecK(px_surface *psurface,px_int x,px_int y,px_color color)
+static px_void PX_DrawLinePixel_InvRecK(px_surface *psurface,px_int x,px_int y,px_color color,px_int symmetry_axis)
 {
-	PX_SurfaceDrawPixel(psurface,2*st_symmetry_axis-y,x,color);
+	PX_SurfaceDrawPixel(psurface,2*symmetry_axis-y,x,color);
 }
 px_void PX_GeoDrawLine(px_surface *psurface, px_int x0, px_int y0, px_int x1, px_int y1 ,px_int lineWidth, px_color color)
 {
@@ -23,7 +27,8 @@ px_void PX_GeoDrawLine(px_surface *psurface, px_int x0, px_int y0, px_int x1, px
 	px_float p0x,p0y,p1x,p1y,p2x,p2y,p3x,p3y,vx,vy,rx,ry,xlen,ylen,S,ftemp,ryL,ryR,rxL,rxR;
 	px_float k,recK;
 	px_color clr;
-	px_void (*func_DrawPixel)(px_surface *psurface,px_int x,px_int y,px_color color);
+	px_int symmetry_axis=0;
+	px_void (*func_DrawPixel)(px_surface *psurface,px_int x,px_int y,px_color color,px_int symmetry_axis);
 	
 	if (lineWidth==0)
 	{
@@ -88,8 +93,8 @@ px_void PX_GeoDrawLine(px_surface *psurface, px_int x0, px_int y0, px_int x1, px
 			step=(trimBottom-y0)*1.0f/vector_y;
 			if (step>0&&step<1)
 			{
-				x1=(px_int)(x1+vector_x*step);
-				y1=(px_int)(y1+vector_y*step);
+				x1=(px_int)(x0+vector_x*step);
+				y1=(px_int)(y0+vector_y*step);
 			}
 		}
 
@@ -249,7 +254,7 @@ px_void PX_GeoDrawLine(px_surface *psurface, px_int x0, px_int y0, px_int x1, px
 	{
 		if(k<1.f)
 		{
-			func_DrawPixel=PX_SurfaceDrawPixel;
+			func_DrawPixel=PX_DrawLinePixel_Normal;
 		}
 		else
 		{
@@ -279,7 +284,7 @@ px_void PX_GeoDrawLine(px_surface *psurface, px_int x0, px_int y0, px_int x1, px
 			y0=y1;
 			y1=lm;
 
-			st_symmetry_axis=x0;
+			symmetry_axis=x0;
 			x1=2*x0-x1;
 
 			k=((px_float)(y1-y0))/(x1-x0);
@@ -297,7 +302,7 @@ px_void PX_GeoDrawLine(px_surface *psurface, px_int x0, px_int y0, px_int x1, px
 			y0=y1;
 			y1=lm;
 
-			st_symmetry_axis=x0;
+			symmetry_axis=x0;
 			x1=2*x0-x1;
 
 			lm=x0;
@@ -346,7 +351,7 @@ px_void PX_GeoDrawLine(px_surface *psurface, px_int x0, px_int y0, px_int x1, px
 			//Draw full color
 			for (x=PX_TRUNC(rx)+1;x<=temp1;x++)
 			{
-				func_DrawPixel(psurface,x,y,color);
+				func_DrawPixel(psurface,x,y,color,symmetry_axis);
 			}
 			//Draw edge point
 			ftemp=PX_FRAC(rx);
@@ -357,7 +362,7 @@ px_void PX_GeoDrawLine(px_surface *psurface, px_int x0, px_int y0, px_int x1, px
 				S=1-(ftemp*ftemp/2/k);
 				clr=color;
 				clr._argb.a=(px_uchar)(clr._argb.a*S);
-				func_DrawPixel(psurface,x,y,clr);
+				func_DrawPixel(psurface,x,y,clr,symmetry_axis);
 
 
 				//left
@@ -365,7 +370,7 @@ px_void PX_GeoDrawLine(px_surface *psurface, px_int x0, px_int y0, px_int x1, px
 				S=ftemp*ftemp/2/xlen;
 				clr=color;
 				clr._argb.a=(px_uchar)(clr._argb.a*S);
-				func_DrawPixel(psurface,x-1,y,clr);
+				func_DrawPixel(psurface,x-1,y,clr,symmetry_axis);
 
 			}
 			else
@@ -374,9 +379,9 @@ px_void PX_GeoDrawLine(px_surface *psurface, px_int x0, px_int y0, px_int x1, px
 				ftemp+=xlen/2;
 
 				clr=color;
-				clr._argb.a=clr._argb.a=(px_uchar)(clr._argb.a*ftemp);;
+				clr._argb.a=(px_uchar)(clr._argb.a*ftemp);
 
-				func_DrawPixel(psurface,x,y,clr);
+				func_DrawPixel(psurface,x,y,clr,symmetry_axis);
 
 			}
 			rx-=xlen;
@@ -400,7 +405,7 @@ px_void PX_GeoDrawLine(px_surface *psurface, px_int x0, px_int y0, px_int x1, px
 				S=ftemp*ftemp/k/2;
 				clr=color;
 				clr._argb.a=(px_uchar)(clr._argb.a*S);
-				func_DrawPixel(psurface,x,y,clr);
+				func_DrawPixel(psurface,x,y,clr,symmetry_axis);
 
 				if (y<temp2)
 				{
@@ -409,12 +414,12 @@ px_void PX_GeoDrawLine(px_surface *psurface, px_int x0, px_int y0, px_int x1, px
 					S=1-ftemp*ftemp/k/2;
 					clr=color;
 					clr._argb.a=(px_uchar)(clr._argb.a*S);
-					func_DrawPixel(psurface,x,y+1,clr);
+					func_DrawPixel(psurface,x,y+1,clr,symmetry_axis);
 				}
 
 				for (y=PX_TRUNC(ry)+2;y<=temp2;y++)
 				{
-					func_DrawPixel(psurface,x,y,color);
+					func_DrawPixel(psurface,x,y,color,symmetry_axis);
 				}
 				
 				
@@ -428,11 +433,11 @@ px_void PX_GeoDrawLine(px_surface *psurface, px_int x0, px_int y0, px_int x1, px
 				clr=color;
 				clr._argb.a=(px_uchar)(clr._argb.a*ftemp);
 
-				func_DrawPixel(psurface,x,y,clr);
+				func_DrawPixel(psurface,x,y,clr,symmetry_axis);
 
 				for (y=PX_TRUNC(ry)+1;y<=temp2;y++)
 				{
-					func_DrawPixel(psurface,x,y,color);
+					func_DrawPixel(psurface,x,y,color,symmetry_axis);
 				}
 			}
 			ry+=ylen;
@@ -462,7 +467,7 @@ px_void PX_GeoDrawLine(px_surface *psurface, px_int x0, px_int y0, px_int x1, px
 			S=ftemp*ftemp/2/k;
 			clr=color;
 			clr._argb.a=(px_uchar)(clr._argb.a*S);
-			func_DrawPixel(psurface,xleft-1,y,clr);
+			func_DrawPixel(psurface,xleft-1,y,clr,symmetry_axis);
 
 			//draw left line
 			while (PX_TRUNC(ryL)==y)
@@ -472,7 +477,7 @@ px_void PX_GeoDrawLine(px_surface *psurface, px_int x0, px_int y0, px_int x1, px
 					S=PX_FRAC(ryL)+ylen/2;
 					clr=color;
 					clr._argb.a=(px_uchar)(clr._argb.a*S);
-					func_DrawPixel(psurface,xleft,y,clr);
+					func_DrawPixel(psurface,xleft,y,clr,symmetry_axis);
 				}
 				else
 				{
@@ -480,7 +485,7 @@ px_void PX_GeoDrawLine(px_surface *psurface, px_int x0, px_int y0, px_int x1, px
 					S=1-ftemp*ftemp/2/k;
 					clr=color;
 					clr._argb.a=(px_uchar)(clr._argb.a*S);
-					func_DrawPixel(psurface,xleft,y,clr);
+					func_DrawPixel(psurface,xleft,y,clr,symmetry_axis);
 				}
 				xleft++;
 				ryL+=ylen;
@@ -491,7 +496,7 @@ px_void PX_GeoDrawLine(px_surface *psurface, px_int x0, px_int y0, px_int x1, px
 			S=1-ftemp*ftemp/2/k;
 			clr=color;
 			clr._argb.a=(px_uchar)(clr._argb.a*S);
-			func_DrawPixel(psurface,xright-1,y,clr);
+			func_DrawPixel(psurface,xright-1,y,clr,symmetry_axis);
 			temp1=xright;
 			//draw right
 			if(y==PX_TRUNC(p2y))
@@ -508,7 +513,7 @@ px_void PX_GeoDrawLine(px_surface *psurface, px_int x0, px_int y0, px_int x1, px
 						S=1-PX_FRAC(ryR)-ylen/2;
 						clr=color;
 						clr._argb.a=(px_uchar)(clr._argb.a*S);
-						func_DrawPixel(psurface,xright,y,clr);
+						func_DrawPixel(psurface,xright,y,clr,symmetry_axis);
 					}
 					else
 					{
@@ -516,7 +521,7 @@ px_void PX_GeoDrawLine(px_surface *psurface, px_int x0, px_int y0, px_int x1, px
 						S=ftemp*ftemp/2/k;
 						clr=color;
 						clr._argb.a=(px_uchar)(clr._argb.a*S);
-						func_DrawPixel(psurface,xright,y,clr);
+						func_DrawPixel(psurface,xright,y,clr,symmetry_axis);
 					}
 					xright++;
 					ryR+=ylen;
@@ -532,7 +537,7 @@ px_void PX_GeoDrawLine(px_surface *psurface, px_int x0, px_int y0, px_int x1, px
 						S=1-PX_FRAC(ryR)-ylen/2;
 						clr=color;
 						clr._argb.a=(px_uchar)(clr._argb.a*S);
-						func_DrawPixel(psurface,xright,y,clr);
+						func_DrawPixel(psurface,xright,y,clr,symmetry_axis);
 					}
 					else
 					{
@@ -540,7 +545,7 @@ px_void PX_GeoDrawLine(px_surface *psurface, px_int x0, px_int y0, px_int x1, px
 						S=ftemp*ftemp/2/k;
 						clr=color;
 						clr._argb.a=(px_uchar)(clr._argb.a*S);
-						func_DrawPixel(psurface,xright,y,clr);
+						func_DrawPixel(psurface,xright,y,clr,symmetry_axis);
 					}
 					xright++;
 					ryR+=ylen;
@@ -551,7 +556,7 @@ px_void PX_GeoDrawLine(px_surface *psurface, px_int x0, px_int y0, px_int x1, px
 			//draw horizontal
 			for (x=xleft;x<temp1-1;x++)
 			{
-				func_DrawPixel(psurface,x,y,color);
+				func_DrawPixel(psurface,x,y,color,symmetry_axis);
 			}
 			y++;
 			}
@@ -575,18 +580,18 @@ px_void PX_GeoDrawLine(px_surface *psurface, px_int x0, px_int y0, px_int x1, px
 				S=ftemp*ftemp/k/2;
 				clr=color;
 				clr._argb.a=(px_uchar)(clr._argb.a*S);
-				func_DrawPixel(psurface,x,y,clr);
+				func_DrawPixel(psurface,x,y,clr,symmetry_axis);
 
 				//top
 				ftemp=1-PX_FRAC(ry-ylen);
 				S=1-ftemp*ftemp/k/2;
 				clr=color;
 				clr._argb.a=(px_uchar)(clr._argb.a*S);
-				func_DrawPixel(psurface,x,y-1,clr);
+				func_DrawPixel(psurface,x,y-1,clr,symmetry_axis);
 
 				for (i=y-2;i>temp2;i--)
 				{
-					func_DrawPixel(psurface,x,i,color);
+					func_DrawPixel(psurface,x,i,color,symmetry_axis);
 				}
 
 			}
@@ -598,11 +603,11 @@ px_void PX_GeoDrawLine(px_surface *psurface, px_int x0, px_int y0, px_int x1, px
 				clr=color;
 				clr._argb.a=(px_uchar)(clr._argb.a*ftemp);
 
-				func_DrawPixel(psurface,x,y,clr);
+				func_DrawPixel(psurface,x,y,clr,symmetry_axis);
 
 				for (i=y-1;i>temp2;i--)
 				{
-					func_DrawPixel(psurface,x,i,color);
+					func_DrawPixel(psurface,x,i,color,symmetry_axis);
 				}
 			}
 			ry-=ylen;
@@ -627,7 +632,7 @@ px_void PX_GeoDrawLine(px_surface *psurface, px_int x0, px_int y0, px_int x1, px
 			//Draw full color
 			for (x=PX_TRUNC(rx)-1;x>temp1-1;x--)
 			{
-				func_DrawPixel(psurface,x,y,color);
+				func_DrawPixel(psurface,x,y,color,symmetry_axis);
 
 			}
 			//Draw edge point
@@ -639,7 +644,7 @@ px_void PX_GeoDrawLine(px_surface *psurface, px_int x0, px_int y0, px_int x1, px
 				S=(ftemp*ftemp/2/k);
 				clr=color;
 				clr._argb.a=(px_uchar)(clr._argb.a*S);
-				func_DrawPixel(psurface,x,y,clr);
+				func_DrawPixel(psurface,x,y,clr,symmetry_axis);
 
 
 				//left
@@ -647,15 +652,15 @@ px_void PX_GeoDrawLine(px_surface *psurface, px_int x0, px_int y0, px_int x1, px
 				S=1-ftemp*ftemp/2/k;
 				clr=color;
 				clr._argb.a=(px_uchar)(clr._argb.a*S);
-				func_DrawPixel(psurface,x-1,y,clr);
+				func_DrawPixel(psurface,x-1,y,clr,symmetry_axis);
 
 			}
 			else
 			{
 				ftemp=PX_FRAC(rx)-xlen/2;
 				clr=color;
-				clr._argb.a=clr._argb.a=(px_uchar)(clr._argb.a*ftemp);;
-				func_DrawPixel(psurface,x,y,clr);
+				clr._argb.a=(px_uchar)(clr._argb.a*ftemp);
+				func_DrawPixel(psurface,x,y,clr,symmetry_axis);
 			}
 			rx-=xlen;
 			y++;
@@ -685,7 +690,7 @@ px_void PX_GeoDrawLine(px_surface *psurface, px_int x0, px_int y0, px_int x1, px
 				S=ftemp*ftemp/k/2;
 				clr=color;
 				clr._argb.a=(px_uchar)(clr._argb.a*S);
-				func_DrawPixel(psurface,x,y,clr);
+				func_DrawPixel(psurface,x,y,clr,symmetry_axis);
 
 				//bottom
 				if(y<temp2)
@@ -694,11 +699,11 @@ px_void PX_GeoDrawLine(px_surface *psurface, px_int x0, px_int y0, px_int x1, px
 				S=1-ftemp*ftemp/k/2;
 				clr=color;
 				clr._argb.a=(px_uchar)(clr._argb.a*S);
-				func_DrawPixel(psurface,x,y+1,clr);
+				func_DrawPixel(psurface,x,y+1,clr,symmetry_axis);
 				}
 				for (y=PX_TRUNC(ry)+2;y<=temp2;y++)
 				{
-					func_DrawPixel(psurface,x,y,color);
+					func_DrawPixel(psurface,x,y,color,symmetry_axis);
 				}
 
 			}
@@ -710,11 +715,11 @@ px_void PX_GeoDrawLine(px_surface *psurface, px_int x0, px_int y0, px_int x1, px
 				clr=color;
 				clr._argb.a=(px_uchar)(clr._argb.a*ftemp);
 
-				func_DrawPixel(psurface,x,y,clr);
+				func_DrawPixel(psurface,x,y,clr,symmetry_axis);
 
 				for (y=PX_TRUNC(ry)+1;y<=temp2;y++)
 				{
-					func_DrawPixel(psurface,x,y,color);
+					func_DrawPixel(psurface,x,y,color,symmetry_axis);
 				}
 			}
 			ry+=ylen;
@@ -737,7 +742,7 @@ px_void PX_GeoDrawLine(px_surface *psurface, px_int x0, px_int y0, px_int x1, px
 			//Draw full color
 			for (x=PX_TRUNC(rx)+1;x<=temp1;x++)
 			{
-				func_DrawPixel(psurface,x,y,color);
+				func_DrawPixel(psurface,x,y,color,symmetry_axis);
 
 			}
 			//Draw edge point
@@ -749,7 +754,7 @@ px_void PX_GeoDrawLine(px_surface *psurface, px_int x0, px_int y0, px_int x1, px
 				S=1-(ftemp*ftemp/2/k);
 				clr=color;
 				clr._argb.a=(px_uchar)(clr._argb.a*S);
-				func_DrawPixel(psurface,x,y,clr);
+				func_DrawPixel(psurface,x,y,clr,symmetry_axis);
 
 
 				//left
@@ -757,7 +762,7 @@ px_void PX_GeoDrawLine(px_surface *psurface, px_int x0, px_int y0, px_int x1, px
 				S=ftemp*ftemp/2/xlen;
 				clr=color;
 				clr._argb.a=(px_uchar)(clr._argb.a*S);
-				func_DrawPixel(psurface,x-1,y,clr);
+				func_DrawPixel(psurface,x-1,y,clr,symmetry_axis);
 
 			}
 			else
@@ -766,9 +771,9 @@ px_void PX_GeoDrawLine(px_surface *psurface, px_int x0, px_int y0, px_int x1, px
 				ftemp+=xlen/2;
 
 				clr=color;
-				clr._argb.a=clr._argb.a=(px_uchar)(clr._argb.a*ftemp);;
+				clr._argb.a=(px_uchar)(clr._argb.a*ftemp);
 
-				func_DrawPixel(psurface,x,y,clr);
+				func_DrawPixel(psurface,x,y,clr,symmetry_axis);
 
 			}
 			rx-=xlen;
@@ -795,7 +800,7 @@ px_void PX_GeoDrawLine(px_surface *psurface, px_int x0, px_int y0, px_int x1, px
 				S=1-(ftemp*ftemp/2/k);
 				clr=color;
 				clr._argb.a=(px_uchar)(clr._argb.a*S);
-				func_DrawPixel(psurface,x,y,clr);
+				func_DrawPixel(psurface,x,y,clr,symmetry_axis);
 
 
 				//left
@@ -803,7 +808,7 @@ px_void PX_GeoDrawLine(px_surface *psurface, px_int x0, px_int y0, px_int x1, px
 				S=ftemp*ftemp/2/xlen;
 				clr=color;
 				clr._argb.a=(px_uchar)(clr._argb.a*S);
-				func_DrawPixel(psurface,x-1,y,clr);
+				func_DrawPixel(psurface,x-1,y,clr,symmetry_axis);
 
 			}
 			else
@@ -812,9 +817,9 @@ px_void PX_GeoDrawLine(px_surface *psurface, px_int x0, px_int y0, px_int x1, px
 				ftemp+=xlen/2;
 
 				clr=color;
-				clr._argb.a=clr._argb.a=(px_uchar)(clr._argb.a*ftemp);;
+				clr._argb.a=(px_uchar)(clr._argb.a*ftemp);
 
-				func_DrawPixel(psurface,x,y,clr);
+				func_DrawPixel(psurface,x,y,clr,symmetry_axis);
 
 			}
 			rxL-=xlen;
@@ -827,7 +832,7 @@ px_void PX_GeoDrawLine(px_surface *psurface, px_int x0, px_int y0, px_int x1, px
 				S=PX_FRAC(rxR)-xlen/2;
 				clr=color;
 				clr._argb.a=(px_uchar)(clr._argb.a*S);
-				func_DrawPixel(psurface,xright,y,clr);
+				func_DrawPixel(psurface,xright,y,clr,symmetry_axis);
 
 			}
 			else
@@ -839,7 +844,7 @@ px_void PX_GeoDrawLine(px_surface *psurface, px_int x0, px_int y0, px_int x1, px
 				S=ftemp*ftemp/2/k;
 				clr=color;
 				clr._argb.a=(px_uchar)(clr._argb.a*S);
-				func_DrawPixel(psurface,xright,y,clr);
+				func_DrawPixel(psurface,xright,y,clr,symmetry_axis);
 
 				xright--;
 				//draw left pixel
@@ -847,14 +852,14 @@ px_void PX_GeoDrawLine(px_surface *psurface, px_int x0, px_int y0, px_int x1, px
 				S=1-ftemp*ftemp/2/k;
 				clr=color;
 				clr._argb.a=(px_uchar)(clr._argb.a*S);
-				func_DrawPixel(psurface,xright,y,clr);
+				func_DrawPixel(psurface,xright,y,clr,symmetry_axis);
 			}
 			rxR-=xlen;
 
 			//draw horizontal
 			for (x=xleft+1;x<xright;x++)
 			{
-				func_DrawPixel(psurface,x,y,color);
+				func_DrawPixel(psurface,x,y,color,symmetry_axis);
 			}
 
 			y++;
@@ -870,7 +875,7 @@ px_void PX_GeoDrawLine(px_surface *psurface, px_int x0, px_int y0, px_int x1, px
 				S=PX_FRAC(rxR)-xlen/2;
 				clr=color;
 				clr._argb.a=(px_uchar)(clr._argb.a*S);
-				func_DrawPixel(psurface,xright,y,clr);
+				func_DrawPixel(psurface,xright,y,clr,symmetry_axis);
 
 			}
 			else
@@ -882,7 +887,7 @@ px_void PX_GeoDrawLine(px_surface *psurface, px_int x0, px_int y0, px_int x1, px
 				S=ftemp*ftemp/2/k;
 				clr=color;
 				clr._argb.a=(px_uchar)(clr._argb.a*S);
-				func_DrawPixel(psurface,xright,y,clr);
+				func_DrawPixel(psurface,xright,y,clr,symmetry_axis);
 
 				xright--;
 				//draw left pixel
@@ -890,14 +895,14 @@ px_void PX_GeoDrawLine(px_surface *psurface, px_int x0, px_int y0, px_int x1, px
 				S=1-ftemp*ftemp/2/k;
 				clr=color;
 				clr._argb.a=(px_uchar)(clr._argb.a*S);
-				func_DrawPixel(psurface,xright,y,clr);
+				func_DrawPixel(psurface,xright,y,clr,symmetry_axis);
 			}
 			rxR-=xlen;
 
 			//draw horizontal
 			for (x=PX_TRUNC(p3x);x<xright;x++)
 			{
-				func_DrawPixel(psurface,x,y,color);
+				func_DrawPixel(psurface,x,y,color,symmetry_axis);
 			}
 
 			y++;
@@ -921,7 +926,7 @@ px_void PX_GeoDrawLine(px_surface *psurface, px_int x0, px_int y0, px_int x1, px
 				S=ftemp*ftemp/k/2;
 				clr=color;
 				clr._argb.a=(px_uchar)(clr._argb.a*S);
-				func_DrawPixel(psurface,x,y,clr);
+				func_DrawPixel(psurface,x,y,clr,symmetry_axis);
 
 				//top
 				if(y>temp2)
@@ -930,11 +935,11 @@ px_void PX_GeoDrawLine(px_surface *psurface, px_int x0, px_int y0, px_int x1, px
 				S=1-ftemp*ftemp/k/2;
 				clr=color;
 				clr._argb.a=(px_uchar)(clr._argb.a*S);
-				func_DrawPixel(psurface,x,y-1,clr);
+				func_DrawPixel(psurface,x,y-1,clr,symmetry_axis);
 				}
 				for (i=temp2;i<y-1;i++)
 				{
-					func_DrawPixel(psurface,x,i,color);
+					func_DrawPixel(psurface,x,i,color,symmetry_axis);
 				}
 
 			}
@@ -946,11 +951,11 @@ px_void PX_GeoDrawLine(px_surface *psurface, px_int x0, px_int y0, px_int x1, px
 				clr=color;
 				clr._argb.a=(px_uchar)(clr._argb.a*ftemp);
 
-				func_DrawPixel(psurface,x,y,clr);
+				func_DrawPixel(psurface,x,y,clr,symmetry_axis);
 
 				for (i=temp2;i<y;i++)
 				{
-					func_DrawPixel(psurface,x,i,color);
+					func_DrawPixel(psurface,x,i,color,symmetry_axis);
 				}
 			}
 			ry-=ylen;
@@ -965,7 +970,334 @@ px_void PX_GeoDrawLine(px_surface *psurface, px_int x0, px_int y0, px_int x1, px
 	}
 
 	
-} 
+}
+
+
+static px_float px_clampf(px_float v, px_float lo, px_float hi)
+{
+	return v < lo ? lo : (v > hi ? hi : v);
+}
+
+static px_float px_dist2_point_to_segment(px_float px, px_float py,
+	px_float ax, px_float ay,
+	px_float bx, px_float by) {
+	px_float abx = bx - ax;
+	px_float aby = by - ay;
+	px_float apx = px - ax;
+	px_float apy = py - ay;
+	px_float t, cx, cy, dx, dy;
+	px_float ab_len2 = abx * abx + aby * aby;
+	if (ab_len2 <= 1e-6f) {
+		return apx * apx + apy * apy;
+	}
+
+	t = (apx * abx + apy * aby) / ab_len2;
+	t = px_clampf(t, 0.0f, 1.0f);
+
+	cx = ax + t * abx;
+	cy = ay + t * aby;
+
+	dx = px - cx;
+	dy = py - cy;
+	return dx * dx + dy * dy;
+}
+
+static px_int px_interval_linear(px_float a, px_float b, px_float L, px_float U, px_float* out_l, px_float* out_r) {
+	const px_float eps = 1e-6f;
+	px_float x1, x2;
+	if (PX_ABS(a) < eps) {
+		if (b >= L && b <= U) {
+			*out_l = -1.0e30f;
+			*out_r = 1.0e30f;
+			return 1;
+		}
+		return 0;
+	}
+
+	x1 = (L - b) / a;
+	x2 = (U - b) / a;
+	if (x1 <= x2) {
+		*out_l = x1;
+		*out_r = x2;
+	}
+	else {
+		*out_l = x2;
+		*out_r = x1;
+	}
+	return 1;
+}
+
+static px_void px_add_interval(px_float l, px_float r, px_float* minx, px_float* maxx)
+{
+	if (l > r) return;
+	if (l < *minx) *minx = l;
+	if (r > *maxx) *maxx = r;
+}
+
+// Find x-interval of capsule (segment swept by radius R) for a fixed y.
+static px_int px_capsule_xrange_for_y(px_float y,
+	px_float ax, px_float ay,
+	px_float bx, px_float by,
+	px_float R,
+	px_float* out_minx,
+	px_float* out_maxx) {
+	px_float vx = bx - ax;
+	px_float vy = by - ay;
+	px_float len = PX_sqrt(vx * vx + vy * vy);
+
+	px_float minx = 1.0e30f;
+	px_float maxx = -1.0e30f;
+
+	if (len <= 1e-6f) {
+		px_float dx, dy = y - ay;
+		if (PX_ABS(dy) > R) return 0;
+		dx = PX_sqrt(R * R - dy * dy);
+		*out_minx = ax - dx;
+		*out_maxx = ax + dx;
+		return 1;
+	}
+
+	px_float ux = vx / len;
+	px_float uy = vy / len;
+	px_float nx = -uy;
+	px_float ny = ux;
+
+	// End cap at A
+	do {
+		px_float dy = y - ay;
+		if (PX_ABS(dy) <= R) {
+			px_float dx = PX_sqrt(R * R - dy * dy);
+			px_add_interval(ax - dx, ax + dx, &minx, &maxx);
+		}
+	} while (0);
+
+	// End cap at B
+	do {
+		px_float dy = y - by;
+		if (PX_ABS(dy) <= R) {
+			px_float dx = PX_sqrt(R * R - dy * dy);
+			px_add_interval(bx - dx, bx + dx, &minx, &maxx);
+		}
+	} while (0);
+
+	// Middle strip: |t| <= R and 0 <= s <= len
+	do {
+		px_float ct = ny * (y - ay) - nx * ax;
+		px_float cs = uy * (y - ay) - ux * ax;
+
+		px_float t_l, t_r, s_l, s_r;
+		if (px_interval_linear(nx, ct, -R, R, &t_l, &t_r) &&
+			px_interval_linear(ux, cs, 0.0f, len, &s_l, &s_r))
+		{
+			px_float l = (t_l > s_l) ? t_l : s_l;
+			px_float r = (t_r < s_r) ? t_r : s_r;
+			if (l <= r)
+			{
+				px_add_interval(l, r, &minx, &maxx);
+			}
+		}
+	} while (0);
+
+	if (minx > maxx) return 0;
+	*out_minx = minx;
+	*out_maxx = maxx;
+	return 1;
+}
+
+// Anti-aliased round-capped line (scanline-based).
+static px_void px_draw_round_line_aa(px_surface* psurface, px_float x1, px_float y1, px_float x2, px_float y2, px_float linewidth, px_byte a, px_byte r, px_byte g, px_byte b)
+{
+	if (linewidth <= 0.0f || a == 0) return;
+
+	px_float R = linewidth * 0.5f;
+	px_float aa = 0.5f; // 1-pixel wide smooth edge
+	px_float Rout = R + aa;
+	px_float Rin = R - aa;
+
+	px_float miny = PX_MIN((px_float)y1, (px_float)y2) - Rout;
+	px_float maxy = PX_MAX((px_float)y1, (px_float)y2) + Rout;
+
+	px_int y0 = (px_int)PX_floor(miny);
+	px_int y1i = (px_int)PX_ceil(maxy);
+
+	px_float Rout2 = Rout * Rout;
+	px_float Rin2 = (Rin > 0.0f) ? (Rin * Rin) : -1.0f;
+
+	px_color base;
+	base._argb.r = r;
+	base._argb.g = g;
+	base._argb.b = b;
+	base._argb.a = a;
+
+	for (px_int y = y0; y <= y1i; ++y) {
+		px_float cy = y + 0.5f;
+		px_float minx, maxx;
+		if (!px_capsule_xrange_for_y(cy,
+			(px_float)x1, (px_float)y1,
+			(px_float)x2, (px_float)y2,
+			Rout,
+			&minx, &maxx)) {
+			continue;
+		}
+
+		px_int x0 = (px_int)PX_ceil(minx - 0.5f);
+		px_int x1b = (px_int)PX_floor(maxx - 0.5f);
+		if (x0 > x1b) continue;
+
+		for (px_int x = x0; x <= x1b; ++x) {
+			px_float cx = x + 0.5f;
+			px_float d2 = px_dist2_point_to_segment(cx, cy, (px_float)x1, (px_float)y1, (px_float)x2, (px_float)y2);
+			px_color c;
+			if (d2 > Rout2) continue;
+
+			px_float cov;
+			if (Rin2 > 0.0f && d2 <= Rin2) {
+				cov = 1.0f;
+			}
+			else {
+				px_float d = PX_sqrt(d2);
+				cov = px_clampf(Rout - d, 0.0f, 1.0f);
+			}
+
+			if (cov <= 0.0f) continue;
+
+			c = base;
+			c._argb.a = (px_byte)(c._argb.a * cov + 0.5f);
+			if (c._argb.a) {
+				PX_SurfaceDrawPixel(psurface, x, y, c);
+			}
+		}
+	}
+}
+
+px_void PX_GeoDrawRoundLine(px_surface* psurface, px_float x0, px_float y0, px_float x1, px_float y1, px_float lineWidth, px_color color)
+{
+	if (lineWidth == 0)
+	{
+		return;
+	}
+
+	//////////////////////////////////////////////////////////////////////////
+	//Trim
+	do
+	{
+		px_float trimTop, trimRight, trimLeft, trimBottom;
+		px_float vector_x, vector_y;
+		px_float step;
+		trimTop = 0.f - lineWidth;
+		trimBottom = psurface->height + lineWidth*1.f;
+		trimLeft = 0 - lineWidth*1.f;
+		trimRight = psurface->width + lineWidth*1.f;
+
+		//////////////////////////////////////////////////////////////////////////
+		//Trim top/bottom
+		if (y0 > y1)
+		{
+			//swap p0<-->p1
+			px_float lm = x0;
+			x0 = x1;
+			x1 = lm;
+
+			lm = y0;
+			y0 = y1;
+			y1 = lm;
+		}
+		//trim top
+		if (y1 < trimTop)
+		{
+			return;
+		}
+
+		vector_x = x1 - x0;
+		vector_y = y1 - y0;
+
+		if (vector_y != 0)
+		{
+			step = (trimTop - y0) * 1.0f / vector_y;
+			if (step > 0 && step < 1)
+			{
+				x0 = (x0 + vector_x * step);
+				y0 = (y0 + vector_y * step);
+			}
+		}
+
+		//trim bottom
+		if (y0 > trimBottom)
+		{
+			return;
+		}
+
+		vector_x = x1 - x0;
+		vector_y = y1 - y0;
+
+		if (vector_y != 0)
+		{
+			step = (trimBottom - y0) * 1.0f / vector_y;
+			if (step > 0 && step < 1)
+			{
+				x1 = (x0 + vector_x * step);
+				y1 = (y0 + vector_y * step);
+			}
+		}
+
+		//////////////////////////////////////////////////////////////////////////
+		//Trim left/right
+		if (x0 > x1)
+		{
+			//swap p0<-->p1
+			px_float lm = x0;
+			x0 = x1;
+			x1 = lm;
+
+			lm = y0;
+			y0 = y1;
+			y1 = lm;
+		}
+
+		//trim left
+		if (x1 < trimLeft)
+		{
+			return;
+		}
+
+		vector_x = x1 - x0;
+		vector_y = y1 - y0;
+
+		if (vector_x != 0)
+		{
+			step = (trimLeft - x0) * 1.0f / vector_x;
+			if (step > 0 && step < 1)
+			{
+				x0 = (x0 + vector_x * step);
+				y0 = (y0 + vector_y * step);
+			}
+		}
+
+		//trim right
+		if (x0 > trimRight)
+		{
+			return;
+		}
+
+		vector_x = x1 - x0;
+		vector_y = y1 - y0;
+
+		if (vector_x != 0)
+		{
+			step = (trimRight - x0) * 1.0f / vector_x;
+			if (step > 0 && step < 1)
+			{
+				x1 = (x0 + vector_x * step);
+				y1 = (y0 + vector_y * step);
+			}
+		}
+
+	} while (0);
+
+	//////////////////////////////////////////////////////////////////////////
+	px_draw_round_line_aa(psurface, x0, y0, x1, y1, lineWidth, color._argb.a, color._argb.r, color._argb.g, color._argb.b);
+}
+
 
 
 px_void PX_GeoDrawBorder(px_surface *psurface, px_int left, px_int top, px_int right, px_int bottom ,px_int lineWidth,px_color color )
@@ -1179,22 +1511,19 @@ px_void PX_GeoDrawSolidCircle(px_surface* psurface, px_int x, px_int y, px_int R
 	{
 		for (_x = left; _x <= right; _x++)
 		{
-			if ((_x - x) * (_x - x) + (_y - y) * (_y - y) <= Radius * Radius)
+			px_int id = ((_y - y) * (_y - y) + (_x - x) * (_x - x));
+			if (id < Radius* Radius)
 			{
-				px_float d = PX_sqrt((px_float)((_y - y) * (_y - y) + (_x - x) * (_x - x)));
-				if (d < Radius)
+				px_float d = PX_sqrt((px_float)id);
+				if ((px_float)Radius - d < 2)
 				{
-					if ((px_float)Radius - d < 2)
-					{
-						px_color clr = color;
-						clr._argb.a = (px_uchar)(clr._argb.a * ((px_float)Radius - d) / 2);
-						PX_SurfaceDrawPixelWithoutLimit(psurface, _x, _y, clr);
-					}
-					else
-					{
-						PX_SurfaceDrawPixelWithoutLimit(psurface, _x, _y, color);
-					}
-
+					px_color clr = color;
+					clr._argb.a = (px_uchar)(clr._argb.a * ((px_float)Radius - d) / 2);
+					PX_SurfaceDrawPixelWithoutLimit(psurface, _x, _y, clr);
+				}
+				else
+				{
+					PX_SurfaceDrawPixelWithoutLimit(psurface, _x, _y, color);
 				}
 			}
 		}
@@ -1638,14 +1967,14 @@ px_void PX_GeoDrawPath(px_surface *psurface, px_point path[],px_int pathCount,px
 		for (i=0;i<pathCount-1;i++)
 		{
 			px_point path_unit_vector=PX_PointNormalization(PX_PointSub(path[i+1],path[i]));
-			px_int length=(px_int)PX_PointMod(PX_PointSub(path[i+1],path[i]));
+			px_int radius=(px_int)PX_PointMod(PX_PointSub(path[i+1],path[i]));
 			px_float step=0;
 			do 
 			{
 				px_point drawPoint=PX_PointAdd(path[i],PX_PointMul(path_unit_vector,step));
 				PX_GeoDrawPenCircle(psurface,drawPoint.x, drawPoint.y, linewidth/2,color);
 				step+=(linewidth/8)<0.5f?0.5f:(linewidth/8);
-			} while (step<length);
+			} while (step<radius);
 		}
 	}
 }
@@ -1662,14 +1991,14 @@ px_void PX_GeoDrawPath2D(px_surface* psurface, px_point2D path[], px_int pathCou
 		for (i = 0; i < pathCount - 1; i++)
 		{
 			px_point2D path_unit_vector = PX_Point2DNormalization(PX_Point2DSub(path[i + 1], path[i]));
-			px_int length = (px_int)PX_Point2DMod(PX_Point2DSub(path[i + 1], path[i]));
+			px_int radius = (px_int)PX_Point2DMod(PX_Point2DSub(path[i + 1], path[i]));
 			px_float step = 0;
 			do
 			{
 				px_point2D drawPoint = PX_Point2DAdd(path[i], PX_Point2DMul(path_unit_vector, step));
 				PX_GeoDrawSolidCircle(psurface, (px_int)drawPoint.x, (px_int)drawPoint.y, (px_int)linewidth / 2, color);
 				step += (linewidth / 4) < 0.5f ? 0.5f : (linewidth / 4);
-			} while (step < length);
+			} while (step < radius);
 		}
 	}
 }
@@ -1693,6 +2022,10 @@ px_void PX_GeoDrawDashLine(px_surface* psurface, px_int x0, px_int y0, px_int x1
 	px_int count = (px_int)(d / dash_width);
 	px_int i;
 	px_float dx0, dy0,dx1,dy1;
+	if (count <= 0)
+	{
+		return;
+	}
 	v = PX_Point2DNormalization(v);
 	v = PX_Point2DMul(v, d/count);
 	for (i=0;i<count;i++)
@@ -3001,16 +3334,9 @@ px_void PX_GeoDrawTriangle(px_surface *psurface,px_point2D p0,px_point2D p1,px_p
 
 
 
-	px_float x, y, xleft, xright; 
+	px_float y, xleft, xright; 
 	px_float btmy,midy;
 
-	px_float a,b,c;
-	a=(px_float)PX_sqrtd((p1.x-p2.x)*(p1.x-p2.x));
-	b=(px_float)PX_sqrtd((p0.x-p2.x)*(p0.x-p2.x));
-	c=(px_float)PX_sqrtd((p1.x-p0.x)*(p1.x-p0.x));
-
-	x=(a*p0.x+b*p1.x+c*p2.x)/(a+b+c);
-	y=(a*p0.y+b*p1.y+c*p2.y)/(a+b+c);
 
 	//    p0
 	// p1   p2
@@ -3113,7 +3439,7 @@ px_void PX_GeoDrawTriangle(px_surface *psurface,px_point2D p0,px_point2D p1,px_p
 	if (x1==x2)
 	{
 		k12infinite=PX_TRUE;
-		b12=x0;
+		b12=x1;
 	}
 	else
 	{
@@ -3148,23 +3474,23 @@ px_void PX_GeoDrawTriangle(px_surface *psurface,px_point2D p0,px_point2D p1,px_p
 
 		ix = (px_int)xleft;
 		iy=(px_int)y;
-		do 
+		do
 		{
 			px_color aClr=color;
 			aClr._argb.a=(px_byte)(aClr._argb.a*lAlpha);
-			PX_SurfaceDrawPixel(psurface,ix,iy,color);
+			PX_SurfaceDrawPixel(psurface,ix,iy,aClr);
 		} while (0);
-		
+
 		for(ix = (px_int)xleft+1;ix < (px_int)xright; ++ix)
 		{
 			PX_SurfaceDrawPixel(psurface,ix,iy,color);
 		}
 
-// 		do 
+// 		do
 // 		{
 // 			px_color aClr=color;
 // 			aClr._argb.a=(px_byte)(aClr._argb.a*rAlpha);
-// 			PX_SurfaceDrawPixel(psurface,ix,iy,color);
+// 			PX_SurfaceDrawPixel(psurface,ix,iy,aClr);
 // 		} while (0);
 	}
 
@@ -3268,7 +3594,7 @@ px_void PX_GeoDrawTriangle(px_surface *psurface,px_point2D p0,px_point2D p1,px_p
 	if (x1==x2)
 	{
 		k12infinite=PX_TRUE;
-		b12=x0;
+		b12=x1;
 	}
 	else
 	{
@@ -3303,11 +3629,11 @@ px_void PX_GeoDrawTriangle(px_surface *psurface,px_point2D p0,px_point2D p1,px_p
 
 		ix = (px_int)xleft;
 		iy=(px_int)y;
-		do 
+		do
 		{
 			px_color aClr=color;
 			aClr._argb.a=(px_byte)(aClr._argb.a*lAlpha);
-			PX_SurfaceDrawPixel(psurface,ix,iy,color);
+			PX_SurfaceDrawPixel(psurface,ix,iy,aClr);
 		} while (0);
 
 		for(ix = (px_int)xleft+1;ix < (px_int)xright; ++ix)
@@ -3315,17 +3641,11 @@ px_void PX_GeoDrawTriangle(px_surface *psurface,px_point2D p0,px_point2D p1,px_p
 			PX_SurfaceDrawPixel(psurface,ix,iy,color);
 		}
 
-// 		do 
-// 		{
-// 			px_color aClr=color;
-// 			aClr._argb.a=(px_byte)(aClr._argb.a*rAlpha);
-// 			PX_SurfaceDrawPixel(psurface,ix,iy,color);
-// 		} while (0);
 	}
-	
+
 }
 
-px_void PX_GeoRasterizeTriangle(px_surface* psurface,px_int x1, px_int y1, px_int x2, px_int y2, px_int x3, px_int y3,px_color color, px_int view_width, px_int view_height, px_float zbuffer[], px_int zw, px_float z0, px_float z1, px_float z2)
+px_void PX_GeoRasterizeTriangle(px_surface* psurface,px_int x1, px_int y1, px_int x2, px_int y2, px_int x3, px_int y3,px_color color)
 {
 	px_int minX = (x1 < x2) ? ((x1 < x3) ? x1 : x3) : ((x2 < x3) ? x2 : x3), maxX = (x1 > x2) ? ((x1 > x3) ? x1 : x3) : ((x2 > x3) ? x2 : x3);
 	px_int minY = (y1 < y2) ? ((y1 < y3) ? y1 : y3) : ((y2 < y3) ? y2 : y3), maxY = (y1 > y2) ? ((y1 > y3) ? y1 : y3) : ((y2 > y3) ? y2 : y3);
@@ -3375,57 +3695,1423 @@ px_void PX_GeoRasterizeTriangle(px_surface* psurface,px_int x1, px_int y1, px_in
 		px_color *pGPU_dst_addr= psurface->surfaceBuffer+minY*psurface->width+minX;
 		PX_GPU_RenderTriangleRasterizer(psurface->surfaceBuffer, xcount,xcount,ycount, pGPU_dst_addr, psurface->width, PX_COLOR_FORMAT,0x80808080, gpu_x1,gpu_y1,gpu_x2,gpu_y2,gpu_x3,gpu_y3, color,PX_COLOR(0,255,255,255));
 #else
-		px_float z = PX_MIN(z0, PX_MIN(z1, z2));
 		for (y = minY; y <= maxY; y++) for (x = minX; x <= maxX; x++)
 		{
 			px_int area1 = (x2 - x1) * (y - y1) - (y2 - y1) * (x - x1);
 			px_int area2 = (x3 - x2) * (y - y2) - (y3 - y2) * (x - x2);
 			px_int area3 = (x1 - x3) * (y - y3) - (y1 - y3) * (x - x3);
 			px_byte area1_32, area2_32, area3_32;
-			area1_32 = area1 < 0;
-			area2_32 = area2 < 0;
-			area3_32 = area3 < 0;
+			area1_32 = (area1 & 0x80000000)?1:0;
+			area2_32 = (area2 & 0x80000000) ? 1 : 0;
+			area3_32 = (area3 & 0x80000000) ? 1 : 0;
 			if (area1_32== area2_32&& area2_32== area3_32)
 			{
-				if (zbuffer[y * zw + x] != 0 && z > zbuffer[y * zw + x])
-				{
-					continue;
-				}
-				zbuffer[y * zw + x] = z;
-
 				PX_SurfaceDrawPixel(psurface,x, y, color);
 			}
 		}
 #endif
 	}
 }
-px_void PX_GeoDrawArrow(px_surface *psurface,px_point2D p0,px_point2D p1,px_float size,px_color color)
+// Signed distance from point to triangle (negative inside, positive outside)
+static px_float px_sd_triangle(px_float px, px_float py,
+	px_float ax, px_float ay, px_float bx, px_float by, px_float cx, px_float cy)
 {
-	px_point2D p0_5,v,vn;
-	px_float arrowsize,distance;
-	
-	if (size<1)
+	px_float e0x = bx - ax, e0y = by - ay;
+	px_float e1x = cx - bx, e1y = cy - by;
+	px_float e2x = ax - cx, e2y = ay - cy;
+	px_float v0x = px - ax, v0y = py - ay;
+	px_float v1x = px - bx, v1y = py - by;
+	px_float v2x = px - cx, v2y = py - cy;
+
+	px_float pq0x, pq0y, pq1x, pq1y, pq2x, pq2y;
+	px_float d0, d1, d2, d, s;
+	px_float t;
+
+	// edge 0: A->B
+	t = (v0x * e0x + v0y * e0y) / (e0x * e0x + e0y * e0y);
+	t = px_clampf(t, 0.0f, 1.0f);
+	pq0x = v0x - e0x * t; pq0y = v0y - e0y * t;
+	d0 = pq0x * pq0x + pq0y * pq0y;
+
+	// edge 1: B->C
+	t = (v1x * e1x + v1y * e1y) / (e1x * e1x + e1y * e1y);
+	t = px_clampf(t, 0.0f, 1.0f);
+	pq1x = v1x - e1x * t; pq1y = v1y - e1y * t;
+	d1 = pq1x * pq1x + pq1y * pq1y;
+
+	// edge 2: C->A
+	t = (v2x * e2x + v2y * e2y) / (e2x * e2x + e2y * e2y);
+	t = px_clampf(t, 0.0f, 1.0f);
+	pq2x = v2x - e2x * t; pq2y = v2y - e2y * t;
+	d2 = pq2x * pq2x + pq2y * pq2y;
+
+	// minimum squared distance
+	d = d0;
+	if (d1 < d) d = d1;
+	if (d2 < d) d = d2;
+
+	// sign: negative inside, positive outside (cross product winding)
+	s = (e0x * v0y - e0y * v0x > 0.0f &&
+		e1x * v1y - e1y * v1x > 0.0f &&
+		e2x * v2y - e2y * v2x > 0.0f) ? -1.0f : 1.0f;
+	if (s > 0.0f)
 	{
-		return;
+		// check opposite winding
+		if (e0x * v0y - e0y * v0x < 0.0f &&
+			e1x * v1y - e1y * v1x < 0.0f &&
+			e2x * v2y - e2y * v2x < 0.0f)
+			s = -1.0f;
 	}
 
-	arrowsize=size*5;
+	return s * PX_sqrt(d);
+}
 
+// Signed distance from point to line segment (capsule shape)
+static px_float px_sd_segment(px_float px, px_float py,
+	px_float ax, px_float ay, px_float bx, px_float by, px_float radius)
+{
+	px_float d2 = px_dist2_point_to_segment(px, py, ax, ay, bx, by);
+	return PX_sqrt(d2) - radius;
+}
 
+px_void PX_GeoDrawArrow(px_surface *psurface,px_point2D p0,px_point2D p1,px_float size,px_color color)
+{
+	px_float totalLen, headLen, headHalfW, shaftR, aa;
+	px_float dx, dy;
+	px_point2D v, vn, headBase, headLeft, headRight, shaftEnd;
+	px_float minx, miny, maxx, maxy;
+	px_int ix0, iy0, ix1, iy1, ix, iy;
 
-	//draw line
-	v=PX_Point2DNormalization(PX_Point2DSub(p1,p0));
-	distance=PX_Point2DMod(PX_Point2DSub(p1,p0));
-	distance-=arrowsize;
-	p0_5=PX_Point2DAdd(p0,PX_Point2DMul(v,distance));
-	PX_GeoDrawLine(psurface,(px_int)p0.x,(px_int)p0.y,(px_int)p0_5.x,(px_int)p0_5.y,(px_int)size,color);
+	if (size < 0.5f) return;
+	if (color._argb.a == 0) return;
 
-	//normal
-	vn.x=-v.y;
-	vn.y=v.x;
+	dx = p1.x - p0.x;
+	dy = p1.y - p0.y;
+	totalLen = PX_sqrt(dx * dx + dy * dy);
+	if (totalLen < 1e-4f) return;
 
-	PX_GeoDrawTriangle(psurface,p0_5,p1,PX_Point2DAdd(p0_5,PX_Point2DMul(vn,arrowsize)),color);
-	PX_GeoDrawTriangle(psurface,p0_5,p1,PX_Point2DAdd(p0_5,PX_Point2DMul(vn,-arrowsize)),color);
+	// direction and normal
+	v.x = dx / totalLen; v.y = dy / totalLen;
+	vn.x = -v.y; vn.y = v.x;
+
+	// proportions
+	shaftR = size * 0.5f;
+	if (size < 5.0f)
+	{
+		px_float scale = 1.0f + (5.0f - size) * 0.4f;
+		headLen = size * 3.0f * scale;
+		headHalfW = size * 1.5f * scale;
+	}
+	else
+	{
+		headLen = size * 3.0f;
+		headHalfW = size * 1.5f;
+	}
+	if (headLen > totalLen * 0.6f)
+	{
+		headLen = totalLen * 0.6f;
+		headHalfW = headLen * 0.5f;
+	}
+
+	// key points
+	headBase.x = p1.x - v.x * headLen;
+	headBase.y = p1.y - v.y * headLen;
+	shaftEnd.x = headBase.x + v.x * shaftR * 0.3f; // slight overlap to avoid gap
+	shaftEnd.y = headBase.y + v.y * shaftR * 0.3f;
+	headLeft.x = headBase.x + vn.x * headHalfW;
+	headLeft.y = headBase.y + vn.y * headHalfW;
+	headRight.x = headBase.x - vn.x * headHalfW;
+	headRight.y = headBase.y - vn.y * headHalfW;
+
+	aa = 0.7f; // anti-aliasing smoothing width
+
+	// bounding box
+	minx = p0.x; maxx = p0.x;
+	miny = p0.y; maxy = p0.y;
+
+	if (p1.x < minx) minx = p1.x; if (p1.x > maxx) maxx = p1.x;
+	if (p1.y < miny) miny = p1.y; if (p1.y > maxy) maxy = p1.y;
+	if (headLeft.x < minx) minx = headLeft.x; if (headLeft.x > maxx) maxx = headLeft.x;
+	if (headLeft.y < miny) miny = headLeft.y; if (headLeft.y > maxy) maxy = headLeft.y;
+	if (headRight.x < minx) minx = headRight.x; if (headRight.x > maxx) maxx = headRight.x;
+	if (headRight.y < miny) miny = headRight.y; if (headRight.y > maxy) maxy = headRight.y;
+
+	// expand by shaft radius + AA margin
+	minx -= shaftR + aa + 1.0f;
+	miny -= shaftR + aa + 1.0f;
+	maxx += shaftR + aa + 1.0f;
+	maxy += shaftR + aa + 1.0f;
+
+	// clip to surface
+	ix0 = (px_int)PX_floor(minx);
+	iy0 = (px_int)PX_floor(miny);
+	ix1 = (px_int)PX_ceil(maxx);
+	iy1 = (px_int)PX_ceil(maxy);
+
+	if (ix0 < psurface->limit_left) ix0 = psurface->limit_left;
+	if (iy0 < psurface->limit_top) iy0 = psurface->limit_top;
+	if (ix1 > psurface->limit_right) ix1 = psurface->limit_right;
+	if (iy1 > psurface->limit_bottom) iy1 = psurface->limit_bottom;
+
+	// rasterize: union of shaft capsule and arrowhead triangle
+	for (iy = iy0; iy <= iy1; ++iy)
+	{
+		px_float cy = iy + 0.5f;
+		for (ix = ix0; ix <= ix1; ++ix)
+		{
+			px_float cx = ix + 0.5f;
+			px_float dShaft, dHead, dMin, cov;
+			px_color c;
+
+			// signed distance to shaft (capsule: line segment + radius)
+			dShaft = px_sd_segment(cx, cy, p0.x, p0.y, shaftEnd.x, shaftEnd.y, shaftR);
+
+			// signed distance to arrowhead triangle
+			dHead = px_sd_triangle(cx, cy,
+				headLeft.x, headLeft.y,
+				p1.x, p1.y,
+				headRight.x, headRight.y);
+
+			// union: min of signed distances
+			dMin = (dShaft < dHead) ? dShaft : dHead;
+
+			if (dMin > aa) continue; // outside AA region
+
+			// coverage: smooth step from 1 (fully inside) to 0 (outside)
+			if (dMin < -aa)
+				cov = 1.0f;
+			else
+				cov = (aa - dMin) / (2.0f * aa);
+
+			if (cov <= 0.0f) continue;
+			if (cov > 1.0f) cov = 1.0f;
+
+			c = color;
+			c._argb.a = (px_byte)(color._argb.a * cov + 0.5f);
+			if (c._argb.a)
+				PX_SurfaceDrawPixel(psurface, ix, iy, c);
+		}
+	}
+}
+
+// Signed distance from point to a convex/concave polygon (negative inside, positive outside)
+// vertices must be ordered (CW or CCW)
+static px_float px_sd_polygon(px_float px, px_float py, px_float vx[], px_float vy[], px_int n)
+{
+	px_float d = (px - vx[0]) * (px - vx[0]) + (py - vy[0]) * (py - vy[0]);
+	px_float s = 1.0f;
+	px_int i, j;
+
+	for (i = 0, j = n - 1; i < n; j = i, i++)
+	{
+		px_float ex = vx[j] - vx[i];
+		px_float ey = vy[j] - vy[i];
+		px_float wx = px - vx[i];
+		px_float wy = py - vy[i];
+		px_float t, dd;
+		px_float bx, by;
+
+		t = (wx * ex + wy * ey) / (ex * ex + ey * ey);
+		t = px_clampf(t, 0.0f, 1.0f);
+		bx = wx - ex * t;
+		by = wy - ey * t;
+		dd = bx * bx + by * by;
+		if (dd < d) d = dd;
+
+		// winding number contribution
+		{
+			px_bool c1 = (py >= vy[i]);
+			px_bool c2 = (py < vy[j]);
+			px_bool c3 = (ex * wy - ey * wx > 0.0f);
+			if ( (c1 && c2 && c3) || (!c1 && !c2 && !c3) )
+				s = -s;
+		}
+	}
+
+	return s * PX_sqrt(d);
+}
+
+px_void PX_GeoDrawStar(px_surface *psurface,px_float x,px_float y,px_float radius,px_int n,px_float inside_angle,px_float angle,px_color color)
+{
+	px_float vx[64], vy[64]; // max 32-pointed star
+	px_float innerR, aa;
+	px_float minx, miny, maxx, maxy;
+	px_int ix0, iy0, ix1, iy1, ix, iy;
+	px_int i, vertexCount;
+	px_float angleRad, halfTipRad, stepRad;
+
+	if (n < 3) n = 3;
+	if (n > 32) n = 32;
+	if (radius < 1.0f) return;
+	if (color._argb.a == 0) return;
+	if (inside_angle <= 0.0f) inside_angle = 1.0f;
+	if (inside_angle >= 180.0f) inside_angle = 179.0f;
+
+	vertexCount = n * 2;
+	stepRad = 2.0f * (px_float)PX_PI / n;
+	halfTipRad = (px_float)PX_PI * inside_angle / 360.0f;
+
+	// compute inner radius from the inside angle at tips
+	// In the triangle formed by center, outer tip, and inner vertex:
+	// innerR = R * sin(halfTip) / sin(halfTip + pi/n)
+	innerR = radius * PX_sin_radian(halfTipRad) / PX_sin_radian(halfTipRad + stepRad * 0.5f);
+	if (innerR < 0.0f) innerR = 0.0f;
+
+	// convert rotation angle (degrees) to radians, first tip points up
+	angleRad = (px_float)PX_PI * angle / 180.0f - (px_float)PX_PI / 2.0f;
+
+	// compute 2*n vertices: alternating outer and inner
+	for (i = 0; i < n; i++)
+	{
+		px_float outerA = angleRad + i * stepRad;
+		px_float innerA = outerA + stepRad * 0.5f;
+
+		vx[i * 2]     = x + radius * PX_cos_radian(outerA);
+		vy[i * 2]     = y + radius * PX_sin_radian(outerA);
+		vx[i * 2 + 1] = x + innerR * PX_cos_radian(innerA);
+		vy[i * 2 + 1] = y + innerR * PX_sin_radian(innerA);
+	}
+
+	aa = 0.7f;
+
+	// bounding box
+	minx = x - radius - aa - 1.0f;
+	miny = y - radius - aa - 1.0f;
+	maxx = x + radius + aa + 1.0f;
+	maxy = y + radius + aa + 1.0f;
+
+	// clip to surface
+	ix0 = (px_int)PX_floor(minx);
+	iy0 = (px_int)PX_floor(miny);
+	ix1 = (px_int)PX_ceil(maxx);
+	iy1 = (px_int)PX_ceil(maxy);
+
+	if (ix0 < psurface->limit_left) ix0 = psurface->limit_left;
+	if (iy0 < psurface->limit_top) iy0 = psurface->limit_top;
+	if (ix1 > psurface->limit_right) ix1 = psurface->limit_right;
+	if (iy1 > psurface->limit_bottom) iy1 = psurface->limit_bottom;
+
+	for (iy = iy0; iy <= iy1; ++iy)
+	{
+		px_float cy = iy + 0.5f;
+		for (ix = ix0; ix <= ix1; ++ix)
+		{
+			px_float cx = ix + 0.5f;
+			px_float d, cov;
+			px_color c;
+
+			d = px_sd_polygon(cx, cy, vx, vy, vertexCount);
+
+			if (d > aa) continue;
+
+			if (d < -aa)
+				cov = 1.0f;
+			else
+				cov = (aa - d) / (2.0f * aa);
+
+			if (cov <= 0.0f) continue;
+			if (cov > 1.0f) cov = 1.0f;
+
+			c = color;
+			c._argb.a = (px_byte)(color._argb.a * cov + 0.5f);
+			if (c._argb.a)
+				PX_SurfaceDrawPixel(psurface, ix, iy, c);
+		}
+	}
+}
+
+px_void PX_GeoDrawFlare(px_surface *psurface,px_float x,px_float y,px_float radius,px_float strength,px_color color)
+{
+	px_int ix0, iy0, ix1, iy1, ix, iy;
+	px_float r2, inv_r2;
+
+	if (radius < 0.5f) return;
+	if (color._argb.a == 0) return;
+	if (strength <= 0.0f) return;
+	if (strength > 10.0f) strength = 10.0f;
+
+	r2 = radius * radius;
+	inv_r2 = 1.0f / r2;
+
+	// bounding box
+	ix0 = (px_int)PX_floor(x - radius - 1.0f);
+	iy0 = (px_int)PX_floor(y - radius - 1.0f);
+	ix1 = (px_int)PX_ceil(x + radius + 1.0f);
+	iy1 = (px_int)PX_ceil(y + radius + 1.0f);
+
+	// clip to surface
+	if (ix0 < psurface->limit_left) ix0 = psurface->limit_left;
+	if (iy0 < psurface->limit_top) iy0 = psurface->limit_top;
+	if (ix1 > psurface->limit_right) ix1 = psurface->limit_right;
+	if (iy1 > psurface->limit_bottom) iy1 = psurface->limit_bottom;
+
+	for (iy = iy0; iy <= iy1; ++iy)
+	{
+		px_float cy = iy + 0.5f - y;
+		px_float cy2 = cy * cy;
+		for (ix = ix0; ix <= ix1; ++ix)
+		{
+			px_float cx = ix + 0.5f - x;
+			px_float d2 = cx * cx + cy2;
+			px_float intensity;
+			px_int a;
+			px_color c;
+
+			if (d2 > r2) continue;
+
+			// Gaussian falloff: exp(-3 * d^2 / r^2)
+			// The constant 3.0 means intensity drops to ~5% at the edge
+			intensity = strength * (px_float)PX_exp(-3.0 * d2 * inv_r2);
+
+			if (intensity < (1.0f / 255.0f)) continue;
+
+			a = (px_int)(color._argb.a * intensity + 0.5f);
+			if (a > 255) a = 255;
+			if (a <= 0) continue;
+
+			c = color;
+			c._argb.a = (px_uchar)a;
+			PX_SurfaceDrawPixel(psurface, ix, iy, c);
+		}
+	}
+}
+
+px_void PX_GeoDrawRegularPolygon(px_surface *psurface,px_float x,px_float y,px_float radius,px_int n,px_float angle,px_color color)
+{
+	px_float vx[64], vy[64];
+	px_float aa, angleRad, stepRad;
+	px_float minx, miny, maxx, maxy;
+	px_int ix0, iy0, ix1, iy1, ix, iy, i;
+
+	if (n < 3) n = 3;
+	if (n > 64) n = 64;
+	if (radius < 1.0f) return;
+	if (color._argb.a == 0) return;
+
+	angleRad = (px_float)PX_PI * angle / 180.0f - (px_float)PX_PI / 2.0f;
+	stepRad = 2.0f * (px_float)PX_PI / n;
+
+	for (i = 0; i < n; i++)
+	{
+		px_float a = angleRad + i * stepRad;
+		vx[i] = x + radius * PX_cos_radian(a);
+		vy[i] = y + radius * PX_sin_radian(a);
+	}
+
+	aa = 0.7f;
+	minx = x - radius - aa - 1.0f;
+	miny = y - radius - aa - 1.0f;
+	maxx = x + radius + aa + 1.0f;
+	maxy = y + radius + aa + 1.0f;
+
+	ix0 = (px_int)PX_floor(minx);
+	iy0 = (px_int)PX_floor(miny);
+	ix1 = (px_int)PX_ceil(maxx);
+	iy1 = (px_int)PX_ceil(maxy);
+
+	if (ix0 < psurface->limit_left) ix0 = psurface->limit_left;
+	if (iy0 < psurface->limit_top) iy0 = psurface->limit_top;
+	if (ix1 > psurface->limit_right) ix1 = psurface->limit_right;
+	if (iy1 > psurface->limit_bottom) iy1 = psurface->limit_bottom;
+
+	for (iy = iy0; iy <= iy1; ++iy)
+	{
+		px_float cy = iy + 0.5f;
+		for (ix = ix0; ix <= ix1; ++ix)
+		{
+			px_float cx = ix + 0.5f;
+			px_float d, cov;
+			px_color c;
+
+			d = px_sd_polygon(cx, cy, vx, vy, n);
+			if (d > aa) continue;
+
+			if (d < -aa)
+				cov = 1.0f;
+			else
+				cov = (aa - d) / (2.0f * aa);
+
+			if (cov <= 0.0f) continue;
+			if (cov > 1.0f) cov = 1.0f;
+
+			c = color;
+			c._argb.a = (px_byte)(color._argb.a * cov + 0.5f);
+			if (c._argb.a)
+				PX_SurfaceDrawPixel(psurface, ix, iy, c);
+		}
+	}
+}
+
+px_void PX_GeoDrawEllipse(px_surface *psurface,px_float x,px_float y,px_float rx,px_float ry,px_float angle,px_color color)
+{
+	px_float aa;
+	px_float cosA, sinA;
+	px_float maxR;
+	px_float minx, miny, maxx, maxy;
+	px_int ix0, iy0, ix1, iy1, ix, iy;
+
+	if (rx < 0.5f || ry < 0.5f) return;
+	if (color._argb.a == 0) return;
+
+	aa = 0.7f;
+	cosA = PX_cos_radian((px_float)PX_PI * angle / 180.0f);
+	sinA = PX_sin_radian((px_float)PX_PI * angle / 180.0f);
+
+	maxR = (rx > ry ? rx : ry);
+	minx = x - maxR - aa - 1.0f;
+	miny = y - maxR - aa - 1.0f;
+	maxx = x + maxR + aa + 1.0f;
+	maxy = y + maxR + aa + 1.0f;
+
+	ix0 = (px_int)PX_floor(minx);
+	iy0 = (px_int)PX_floor(miny);
+	ix1 = (px_int)PX_ceil(maxx);
+	iy1 = (px_int)PX_ceil(maxy);
+
+	if (ix0 < psurface->limit_left) ix0 = psurface->limit_left;
+	if (iy0 < psurface->limit_top) iy0 = psurface->limit_top;
+	if (ix1 > psurface->limit_right) ix1 = psurface->limit_right;
+	if (iy1 > psurface->limit_bottom) iy1 = psurface->limit_bottom;
+
+	for (iy = iy0; iy <= iy1; ++iy)
+	{
+		px_float cy = iy + 0.5f - y;
+		for (ix = ix0; ix <= ix1; ++ix)
+		{
+			px_float cx = ix + 0.5f - x;
+			// rotate into ellipse-local frame
+			px_float lx = cx * cosA + cy * sinA;
+			px_float ly = -cx * sinA + cy * cosA;
+			// normalized distance in ellipse space
+			px_float ex = lx / rx;
+			px_float ey = ly / ry;
+			px_float e2 = ex * ex + ey * ey;
+			px_float e, d, cov;
+			px_color c;
+
+			if (e2 > 4.0f) continue; // fast reject
+
+			e = PX_sqrt(e2);
+			// approximate signed distance: (e - 1) * min(rx, ry)
+			// This is an approximation that works well for moderate eccentricity
+			d = (e - 1.0f) * (rx < ry ? rx : ry);
+
+			if (d > aa) continue;
+
+			if (d < -aa)
+				cov = 1.0f;
+			else
+				cov = (aa - d) / (2.0f * aa);
+
+			if (cov <= 0.0f) continue;
+			if (cov > 1.0f) cov = 1.0f;
+
+			c = color;
+			c._argb.a = (px_byte)(color._argb.a * cov + 0.5f);
+			if (c._argb.a)
+				PX_SurfaceDrawPixel(psurface, ix, iy, c);
+		}
+	}
+}
+
+px_void PX_GeoDrawCapsule(px_surface *psurface,px_float x,px_float y,px_float width,px_float height,px_float angle,px_color color)
+{
+	px_float aa, cosA, sinA, halfLen, R;
+	px_float maxR;
+	px_float minx, miny, maxx, maxy;
+	px_int ix0, iy0, ix1, iy1, ix, iy;
+
+	if (width < 1.0f || height < 1.0f) return;
+	if (color._argb.a == 0) return;
+
+	aa = 0.7f;
+	cosA = PX_cos_radian((px_float)PX_PI * angle / 180.0f);
+	sinA = PX_sin_radian((px_float)PX_PI * angle / 180.0f);
+
+	if (width >= height)
+	{
+		R = height * 0.5f;
+		halfLen = width * 0.5f - R;
+	}
+	else
+	{
+		R = width * 0.5f;
+		halfLen = height * 0.5f - R;
+	}
+	if (halfLen < 0.0f) halfLen = 0.0f;
+
+	maxR = (width > height ? width : height) * 0.5f;
+	minx = x - maxR - aa - 1.0f;
+	miny = y - maxR - aa - 1.0f;
+	maxx = x + maxR + aa + 1.0f;
+	maxy = y + maxR + aa + 1.0f;
+
+	ix0 = (px_int)PX_floor(minx);
+	iy0 = (px_int)PX_floor(miny);
+	ix1 = (px_int)PX_ceil(maxx);
+	iy1 = (px_int)PX_ceil(maxy);
+
+	if (ix0 < psurface->limit_left) ix0 = psurface->limit_left;
+	if (iy0 < psurface->limit_top) iy0 = psurface->limit_top;
+	if (ix1 > psurface->limit_right) ix1 = psurface->limit_right;
+	if (iy1 > psurface->limit_bottom) iy1 = psurface->limit_bottom;
+
+	for (iy = iy0; iy <= iy1; ++iy)
+	{
+		px_float cy = iy + 0.5f - y;
+		for (ix = ix0; ix <= ix1; ++ix)
+		{
+			px_float cx = ix + 0.5f - x;
+			px_float lx, ly, d, cov;
+			px_color c;
+
+			// rotate into local frame (capsule along x-axis if width>=height, y-axis otherwise)
+			if (width >= height)
+			{
+				lx = cx * cosA + cy * sinA;
+				ly = -cx * sinA + cy * cosA;
+			}
+			else
+			{
+				lx = cx * sinA - cy * cosA;
+				ly = cx * cosA + cy * sinA;
+			}
+
+			// capsule SDF: distance to line segment [-halfLen,0]->[halfLen,0] minus R
+			{
+				px_float clampX = lx;
+				if (clampX < -halfLen) clampX = -halfLen;
+				if (clampX > halfLen) clampX = halfLen;
+				d = PX_sqrt((lx - clampX) * (lx - clampX) + ly * ly) - R;
+			}
+
+			if (d > aa) continue;
+
+			if (d < -aa)
+				cov = 1.0f;
+			else
+				cov = (aa - d) / (2.0f * aa);
+
+			if (cov <= 0.0f) continue;
+			if (cov > 1.0f) cov = 1.0f;
+
+			c = color;
+			c._argb.a = (px_byte)(color._argb.a * cov + 0.5f);
+			if (c._argb.a)
+				PX_SurfaceDrawPixel(psurface, ix, iy, c);
+		}
+	}
+}
+
+px_void PX_GeoDrawCross(px_surface *psurface,px_float x,px_float y,px_float size,px_float linewidth,px_float angle,px_color color)
+{
+	px_float aa, cosA, sinA, halfSize, halfW;
+	px_float maxR;
+	px_float minx, miny, maxx, maxy;
+	px_int ix0, iy0, ix1, iy1, ix, iy;
+
+	if (size < 1.0f || linewidth < 0.5f) return;
+	if (color._argb.a == 0) return;
+
+	aa = 0.7f;
+	cosA = PX_cos_radian((px_float)PX_PI * angle / 180.0f);
+	sinA = PX_sin_radian((px_float)PX_PI * angle / 180.0f);
+	halfSize = size * 0.5f;
+	halfW = linewidth * 0.5f;
+
+	maxR = PX_sqrt(halfSize * halfSize + halfW * halfW) + aa + 1.0f;
+	minx = x - maxR; miny = y - maxR;
+	maxx = x + maxR; maxy = y + maxR;
+
+	ix0 = (px_int)PX_floor(minx);
+	iy0 = (px_int)PX_floor(miny);
+	ix1 = (px_int)PX_ceil(maxx);
+	iy1 = (px_int)PX_ceil(maxy);
+
+	if (ix0 < psurface->limit_left) ix0 = psurface->limit_left;
+	if (iy0 < psurface->limit_top) iy0 = psurface->limit_top;
+	if (ix1 > psurface->limit_right) ix1 = psurface->limit_right;
+	if (iy1 > psurface->limit_bottom) iy1 = psurface->limit_bottom;
+
+	for (iy = iy0; iy <= iy1; ++iy)
+	{
+		px_float cy = iy + 0.5f - y;
+		for (ix = ix0; ix <= ix1; ++ix)
+		{
+			px_float cx = ix + 0.5f - x;
+			px_float lx, ly, ax, ay;
+			px_float dH, dV, d, cov;
+			px_color c;
+
+			// rotate into local frame
+			lx = cx * cosA + cy * sinA;
+			ly = -cx * sinA + cy * cosA;
+
+			ax = PX_ABS(lx);
+			ay = PX_ABS(ly);
+
+			// SDF of horizontal bar: box [-halfSize, -halfW] to [halfSize, halfW]
+			{
+				px_float dx = ax - halfSize;
+				px_float dy = ay - halfW;
+				px_float odx = dx > 0.0f ? dx : 0.0f;
+				px_float ody = dy > 0.0f ? dy : 0.0f;
+				if (dx > 0.0f || dy > 0.0f)
+					dH = PX_sqrt(odx * odx + ody * ody);
+				else
+					dH = (dx > dy ? dx : dy);
+			}
+			// SDF of vertical bar: box [-halfW, -halfSize] to [halfW, halfSize]
+			{
+				px_float dx = ax - halfW;
+				px_float dy = ay - halfSize;
+				px_float odx = dx > 0.0f ? dx : 0.0f;
+				px_float ody = dy > 0.0f ? dy : 0.0f;
+				if (dx > 0.0f || dy > 0.0f)
+					dV = PX_sqrt(odx * odx + ody * ody);
+				else
+					dV = (dx > dy ? dx : dy);
+			}
+
+			// union
+			d = (dH < dV) ? dH : dV;
+
+			if (d > aa) continue;
+
+			if (d < -aa)
+				cov = 1.0f;
+			else
+				cov = (aa - d) / (2.0f * aa);
+
+			if (cov <= 0.0f) continue;
+			if (cov > 1.0f) cov = 1.0f;
+
+			c = color;
+			c._argb.a = (px_byte)(color._argb.a * cov + 0.5f);
+			if (c._argb.a)
+				PX_SurfaceDrawPixel(psurface, ix, iy, c);
+		}
+	}
+}
+
+px_void PX_GeoDrawHeart(px_surface *psurface,px_float x,px_float y,px_float size,px_color color)
+{
+	// Generate heart polygon from parametric curve:
+	// x(t) = sin(t)^3
+	// y(t) = (13cos(t) - 5cos(2t) - 2cos(3t) - cos(4t)) / 16
+	// t goes from 0 to 2*PI, 64 vertices
+	px_float vx[64], vy[64];
+	px_float aa, maxR;
+	px_int ix0, iy0, ix1, iy1, ix, iy, i;
+	px_float step;
+
+	if (size < 1.0f) return;
+	if (color._argb.a == 0) return;
+
+	aa = 0.7f;
+	step = 2.0f * (px_float)PX_PI / 64.0f;
+
+	for (i = 0; i < 64; i++)
+	{
+		px_float t = i * step;
+		px_float st = PX_sin_radian(t);
+		vx[i] = x + size * st * st * st;
+		vy[i] = y - size * (13.0f * PX_cos_radian(t) - 5.0f * PX_cos_radian(2.0f * t) - 2.0f * PX_cos_radian(3.0f * t) - PX_cos_radian(4.0f * t)) / 16.0f;
+	}
+
+	maxR = size * 1.2f + aa + 1.0f;
+	ix0 = (px_int)PX_floor(x - maxR);
+	iy0 = (px_int)PX_floor(y - maxR);
+	ix1 = (px_int)PX_ceil(x + maxR);
+	iy1 = (px_int)PX_ceil(y + maxR);
+
+	if (ix0 < psurface->limit_left) ix0 = psurface->limit_left;
+	if (iy0 < psurface->limit_top) iy0 = psurface->limit_top;
+	if (ix1 > psurface->limit_right) ix1 = psurface->limit_right;
+	if (iy1 > psurface->limit_bottom) iy1 = psurface->limit_bottom;
+
+	for (iy = iy0; iy <= iy1; ++iy)
+	{
+		px_float cy = iy + 0.5f;
+		for (ix = ix0; ix <= ix1; ++ix)
+		{
+			px_float cx = ix + 0.5f;
+			px_float d, cov;
+			px_color c;
+
+			d = px_sd_polygon(cx, cy, vx, vy, 64);
+
+			if (d > aa) continue;
+
+			if (d < -aa)
+				cov = 1.0f;
+			else
+				cov = (aa - d) / (2.0f * aa);
+
+			if (cov <= 0.0f) continue;
+			if (cov > 1.0f) cov = 1.0f;
+
+			c = color;
+			c._argb.a = (px_byte)(color._argb.a * cov + 0.5f);
+			if (c._argb.a)
+				PX_SurfaceDrawPixel(psurface, ix, iy, c);
+		}
+	}
+}
+
+px_void PX_GeoDrawCrescent(px_surface *psurface,px_float x,px_float y,px_float radius,px_float offset,px_float angle,px_color color)
+{
+	px_float aa, cosA, sinA;
+	px_float maxR;
+	px_float minx, miny, maxx, maxy;
+	px_int ix0, iy0, ix1, iy1, ix, iy;
+
+	if (radius < 1.0f) return;
+	if (color._argb.a == 0) return;
+
+	aa = 0.7f;
+	cosA = PX_cos_radian((px_float)PX_PI * angle / 180.0f);
+	sinA = PX_sin_radian((px_float)PX_PI * angle / 180.0f);
+
+	maxR = radius + PX_ABS(offset) + aa + 1.0f;
+	minx = x - maxR; miny = y - maxR;
+	maxx = x + maxR; maxy = y + maxR;
+
+	ix0 = (px_int)PX_floor(minx);
+	iy0 = (px_int)PX_floor(miny);
+	ix1 = (px_int)PX_ceil(maxx);
+	iy1 = (px_int)PX_ceil(maxy);
+
+	if (ix0 < psurface->limit_left) ix0 = psurface->limit_left;
+	if (iy0 < psurface->limit_top) iy0 = psurface->limit_top;
+	if (ix1 > psurface->limit_right) ix1 = psurface->limit_right;
+	if (iy1 > psurface->limit_bottom) iy1 = psurface->limit_bottom;
+
+	for (iy = iy0; iy <= iy1; ++iy)
+	{
+		px_float cy = iy + 0.5f - y;
+		for (ix = ix0; ix <= ix1; ++ix)
+		{
+			px_float cx = ix + 0.5f - x;
+			px_float lx, ly;
+			px_float d1, d2, d, cov;
+			px_color c;
+
+			// rotate into local frame (crescent opens along +x direction)
+			lx = cx * cosA + cy * sinA;
+			ly = -cx * sinA + cy * cosA;
+
+			// outer circle: centered at origin
+			d1 = PX_sqrt(lx * lx + ly * ly) - radius;
+
+			// inner circle (subtracted): shifted by offset along local x
+			d2 = PX_sqrt((lx - offset) * (lx - offset) + ly * ly) - radius;
+
+			// difference: outer minus inner => max(d1, -d2)
+			d = (d1 > -d2) ? d1 : -d2;
+
+			if (d > aa) continue;
+
+			if (d < -aa)
+				cov = 1.0f;
+			else
+				cov = (aa - d) / (2.0f * aa);
+
+			if (cov <= 0.0f) continue;
+			if (cov > 1.0f) cov = 1.0f;
+
+			c = color;
+			c._argb.a = (px_byte)(color._argb.a * cov + 0.5f);
+			if (c._argb.a)
+				PX_SurfaceDrawPixel(psurface, ix, iy, c);
+		}
+	}
+}
+
+px_void PX_GeoDrawGear(px_surface *psurface,px_float x,px_float y,px_float outerRadius,px_float innerRadius,px_int teeth,px_float toothDepth,px_color color)
+{
+	px_float vx[256], vy[256];
+	px_float aa, stepRad, halfTooth;
+	px_float rOuter, rInner;
+	px_float minx, miny, maxx, maxy;
+	px_int ix0, iy0, ix1, iy1, ix, iy, i, vertexCount;
+
+	if (teeth < 3) teeth = 3;
+	if (teeth > 64) teeth = 64;
+	if (outerRadius < 2.0f) return;
+	if (color._argb.a == 0) return;
+
+	aa = 0.7f;
+	rOuter = outerRadius;
+	rInner = outerRadius - toothDepth;
+	if (rInner < 1.0f) rInner = 1.0f;
+
+	stepRad = 2.0f * (px_float)PX_PI / teeth;
+	halfTooth = stepRad * 0.25f;
+
+	// each tooth: 4 vertices (inner-left, outer-left, outer-right, inner-right)
+	vertexCount = teeth * 4;
+	if (vertexCount > 256) return;
+
+	for (i = 0; i < teeth; i++)
+	{
+		px_float baseAngle = i * stepRad - (px_float)PX_PI / 2.0f;
+		px_int idx = i * 4;
+
+		vx[idx]     = x + rInner * PX_cos_radian(baseAngle - halfTooth * 2.0f);
+		vy[idx]     = y + rInner * PX_sin_radian(baseAngle - halfTooth * 2.0f);
+		vx[idx + 1] = x + rOuter * PX_cos_radian(baseAngle - halfTooth);
+		vy[idx + 1] = y + rOuter * PX_sin_radian(baseAngle - halfTooth);
+		vx[idx + 2] = x + rOuter * PX_cos_radian(baseAngle + halfTooth);
+		vy[idx + 2] = y + rOuter * PX_sin_radian(baseAngle + halfTooth);
+		vx[idx + 3] = x + rInner * PX_cos_radian(baseAngle + halfTooth * 2.0f);
+		vy[idx + 3] = y + rInner * PX_sin_radian(baseAngle + halfTooth * 2.0f);
+	}
+
+	// outer gear polygon SDF then subtract inner hole
+	minx = x - rOuter - aa - 1.0f;
+	miny = y - rOuter - aa - 1.0f;
+	maxx = x + rOuter + aa + 1.0f;
+	maxy = y + rOuter + aa + 1.0f;
+
+	ix0 = (px_int)PX_floor(minx);
+	iy0 = (px_int)PX_floor(miny);
+	ix1 = (px_int)PX_ceil(maxx);
+	iy1 = (px_int)PX_ceil(maxy);
+
+	if (ix0 < psurface->limit_left) ix0 = psurface->limit_left;
+	if (iy0 < psurface->limit_top) iy0 = psurface->limit_top;
+	if (ix1 > psurface->limit_right) ix1 = psurface->limit_right;
+	if (iy1 > psurface->limit_bottom) iy1 = psurface->limit_bottom;
+
+	for (iy = iy0; iy <= iy1; ++iy)
+	{
+		px_float cy = iy + 0.5f;
+		for (ix = ix0; ix <= ix1; ++ix)
+		{
+			px_float cx = ix + 0.5f;
+			px_float dOuter, dHole, d, cov;
+			px_color c;
+
+			// outer gear polygon
+			dOuter = px_sd_polygon(cx, cy, vx, vy, vertexCount);
+
+			// inner hole circle
+			dHole = PX_sqrt((cx - x) * (cx - x) + (cy - y) * (cy - y)) - innerRadius;
+
+			// difference: outer gear minus inner hole => max(dOuter, -dHole)
+			d = (dOuter > -dHole) ? dOuter : -dHole;
+
+			if (d > aa) continue;
+
+			if (d < -aa)
+				cov = 1.0f;
+			else
+				cov = (aa - d) / (2.0f * aa);
+
+			if (cov <= 0.0f) continue;
+			if (cov > 1.0f) cov = 1.0f;
+
+			c = color;
+			c._argb.a = (px_byte)(color._argb.a * cov + 0.5f);
+			if (c._argb.a)
+				PX_SurfaceDrawPixel(psurface, ix, iy, c);
+		}
+	}
+}
+
+px_void PX_GeoDrawRoundPolygon(px_surface *psurface,px_float vx[],px_float vy[],px_int n,px_float roundRadius,px_color color)
+{
+	px_float aa;
+	px_float minx, miny, maxx, maxy;
+	px_int ix0, iy0, ix1, iy1, ix, iy, i;
+
+	if (n < 3 || n > 256) return;
+	if (roundRadius < 0.0f) roundRadius = 0.0f;
+	if (color._argb.a == 0) return;
+
+	aa = 0.7f;
+
+	// compute bounding box from vertices
+	minx = vx[0]; maxx = vx[0];
+	miny = vy[0]; maxy = vy[0];
+	for (i = 1; i < n; i++)
+	{
+		if (vx[i] < minx) minx = vx[i];
+		if (vx[i] > maxx) maxx = vx[i];
+		if (vy[i] < miny) miny = vy[i];
+		if (vy[i] > maxy) maxy = vy[i];
+	}
+	minx -= roundRadius + aa + 1.0f;
+	miny -= roundRadius + aa + 1.0f;
+	maxx += roundRadius + aa + 1.0f;
+	maxy += roundRadius + aa + 1.0f;
+
+	ix0 = (px_int)PX_floor(minx);
+	iy0 = (px_int)PX_floor(miny);
+	ix1 = (px_int)PX_ceil(maxx);
+	iy1 = (px_int)PX_ceil(maxy);
+
+	if (ix0 < psurface->limit_left) ix0 = psurface->limit_left;
+	if (iy0 < psurface->limit_top) iy0 = psurface->limit_top;
+	if (ix1 > psurface->limit_right) ix1 = psurface->limit_right;
+	if (iy1 > psurface->limit_bottom) iy1 = psurface->limit_bottom;
+
+	for (iy = iy0; iy <= iy1; ++iy)
+	{
+		px_float cy = iy + 0.5f;
+		for (ix = ix0; ix <= ix1; ++ix)
+		{
+			px_float cx = ix + 0.5f;
+			px_float d, cov;
+			px_color c;
+
+			// polygon SDF minus round radius = rounded polygon
+			d = px_sd_polygon(cx, cy, vx, vy, n) - roundRadius;
+
+			if (d > aa) continue;
+
+			if (d < -aa)
+				cov = 1.0f;
+			else
+				cov = (aa - d) / (2.0f * aa);
+
+			if (cov <= 0.0f) continue;
+			if (cov > 1.0f) cov = 1.0f;
+
+			c = color;
+			c._argb.a = (px_byte)(color._argb.a * cov + 0.5f);
+			if (c._argb.a)
+				PX_SurfaceDrawPixel(psurface, ix, iy, c);
+		}
+	}
+}
+
+px_void PX_GeoDrawCheckMark(px_surface *psurface,px_float x,px_float y,px_float size,px_float linewidth,px_color color)
+{
+	px_float halfW;
+	px_float x0, y0, x1, y1, x2, y2;
+	px_float d0, d1, d, aa, cov;
+	px_float minx, miny, maxx, maxy;
+	px_int ix0, iy0, ix1, iy1, ix, iy;
+
+	if (size < 2.0f || linewidth < 0.5f) return;
+	if (color._argb.a == 0) return;
+
+	halfW = linewidth * 0.5f;
+	aa = 0.7f;
+
+	// check mark shape: two line segments
+	// left leg: from bottom-left going to bottom-center
+	// right leg: from bottom-center going to top-right
+	x0 = x - size * 0.4f;
+	y0 = y - size * 0.05f;
+	x1 = x - size * 0.1f;
+	y1 = y + size * 0.35f;
+	x2 = x + size * 0.45f;
+	y2 = y - size * 0.4f;
+
+	minx = x0; maxx = x0;
+	miny = y0; maxy = y0;
+	if (x1 < minx) minx = x1; if (x1 > maxx) maxx = x1;
+	if (y1 < miny) miny = y1; if (y1 > maxy) maxy = y1;
+	if (x2 < minx) minx = x2; if (x2 > maxx) maxx = x2;
+	if (y2 < miny) miny = y2; if (y2 > maxy) maxy = y2;
+	minx -= halfW + aa + 1.0f; miny -= halfW + aa + 1.0f;
+	maxx += halfW + aa + 1.0f; maxy += halfW + aa + 1.0f;
+
+	ix0 = (px_int)PX_floor(minx);
+	iy0 = (px_int)PX_floor(miny);
+	ix1 = (px_int)PX_ceil(maxx);
+	iy1 = (px_int)PX_ceil(maxy);
+
+	if (ix0 < psurface->limit_left) ix0 = psurface->limit_left;
+	if (iy0 < psurface->limit_top) iy0 = psurface->limit_top;
+	if (ix1 > psurface->limit_right) ix1 = psurface->limit_right;
+	if (iy1 > psurface->limit_bottom) iy1 = psurface->limit_bottom;
+
+	for (iy = iy0; iy <= iy1; ++iy)
+	{
+		px_float cy = iy + 0.5f;
+		for (ix = ix0; ix <= ix1; ++ix)
+		{
+			px_float cx = ix + 0.5f;
+			px_color c;
+
+			// distance to two segments, take min (union of two capsules)
+			d0 = PX_sqrt(px_dist2_point_to_segment(cx, cy, x0, y0, x1, y1)) - halfW;
+			d1 = PX_sqrt(px_dist2_point_to_segment(cx, cy, x1, y1, x2, y2)) - halfW;
+			d = (d0 < d1) ? d0 : d1;
+
+			if (d > aa) continue;
+
+			if (d < -aa)
+				cov = 1.0f;
+			else
+				cov = (aa - d) / (2.0f * aa);
+
+			if (cov <= 0.0f) continue;
+			if (cov > 1.0f) cov = 1.0f;
+
+			c = color;
+			c._argb.a = (px_byte)(color._argb.a * cov + 0.5f);
+			if (c._argb.a)
+				PX_SurfaceDrawPixel(psurface, ix, iy, c);
+		}
+	}
+}
+
+px_void PX_GeoDrawCrossMark(px_surface *psurface,px_float x,px_float y,px_float size,px_float linewidth,px_color color)
+{
+	px_float halfW, halfS;
+	px_float d0, d1, d, aa, cov;
+	px_float minx, miny, maxx, maxy;
+	px_int ix0, iy0, ix1, iy1, ix, iy;
+
+	if (size < 2.0f || linewidth < 0.5f) return;
+	if (color._argb.a == 0) return;
+
+	halfW = linewidth * 0.5f;
+	halfS = size * 0.5f;
+	aa = 0.7f;
+
+	minx = x - halfS - halfW - aa - 1.0f;
+	miny = y - halfS - halfW - aa - 1.0f;
+	maxx = x + halfS + halfW + aa + 1.0f;
+	maxy = y + halfS + halfW + aa + 1.0f;
+
+	ix0 = (px_int)PX_floor(minx);
+	iy0 = (px_int)PX_floor(miny);
+	ix1 = (px_int)PX_ceil(maxx);
+	iy1 = (px_int)PX_ceil(maxy);
+
+	if (ix0 < psurface->limit_left) ix0 = psurface->limit_left;
+	if (iy0 < psurface->limit_top) iy0 = psurface->limit_top;
+	if (ix1 > psurface->limit_right) ix1 = psurface->limit_right;
+	if (iy1 > psurface->limit_bottom) iy1 = psurface->limit_bottom;
+
+	for (iy = iy0; iy <= iy1; ++iy)
+	{
+		px_float cy = iy + 0.5f;
+		for (ix = ix0; ix <= ix1; ++ix)
+		{
+			px_float cx = ix + 0.5f;
+			px_color c;
+
+			// two diagonal segments
+			d0 = PX_sqrt(px_dist2_point_to_segment(cx, cy, x - halfS, y - halfS, x + halfS, y + halfS)) - halfW;
+			d1 = PX_sqrt(px_dist2_point_to_segment(cx, cy, x - halfS, y + halfS, x + halfS, y - halfS)) - halfW;
+			d = (d0 < d1) ? d0 : d1;
+
+			if (d > aa) continue;
+
+			if (d < -aa)
+				cov = 1.0f;
+			else
+				cov = (aa - d) / (2.0f * aa);
+
+			if (cov <= 0.0f) continue;
+			if (cov > 1.0f) cov = 1.0f;
+
+			c = color;
+			c._argb.a = (px_byte)(color._argb.a * cov + 0.5f);
+			if (c._argb.a)
+				PX_SurfaceDrawPixel(psurface, ix, iy, c);
+		}
+	}
+}
+
+px_void PX_GeoDrawDiamond(px_surface *psurface,px_float x,px_float y,px_float width,px_float height,px_color color)
+{
+	px_float vx[4], vy[4];
+	px_float aa;
+	px_float halfW, halfH;
+	px_float minx, miny, maxx, maxy;
+	px_int ix0, iy0, ix1, iy1, ix, iy;
+
+	if (width < 1.0f || height < 1.0f) return;
+	if (color._argb.a == 0) return;
+
+	halfW = width * 0.5f;
+	halfH = height * 0.5f;
+	aa = 0.7f;
+
+	// 4 vertices: top, right, bottom, left
+	vx[0] = x;          vy[0] = y - halfH;
+	vx[1] = x + halfW;  vy[1] = y;
+	vx[2] = x;          vy[2] = y + halfH;
+	vx[3] = x - halfW;  vy[3] = y;
+
+	minx = x - halfW - aa - 1.0f;
+	miny = y - halfH - aa - 1.0f;
+	maxx = x + halfW + aa + 1.0f;
+	maxy = y + halfH + aa + 1.0f;
+
+	ix0 = (px_int)PX_floor(minx);
+	iy0 = (px_int)PX_floor(miny);
+	ix1 = (px_int)PX_ceil(maxx);
+	iy1 = (px_int)PX_ceil(maxy);
+
+	if (ix0 < psurface->limit_left) ix0 = psurface->limit_left;
+	if (iy0 < psurface->limit_top) iy0 = psurface->limit_top;
+	if (ix1 > psurface->limit_right) ix1 = psurface->limit_right;
+	if (iy1 > psurface->limit_bottom) iy1 = psurface->limit_bottom;
+
+	for (iy = iy0; iy <= iy1; ++iy)
+	{
+		px_float cy = iy + 0.5f;
+		for (ix = ix0; ix <= ix1; ++ix)
+		{
+			px_float cx = ix + 0.5f;
+			px_float d, cov;
+			px_color c;
+
+			d = px_sd_polygon(cx, cy, vx, vy, 4);
+
+			if (d > aa) continue;
+
+			if (d < -aa)
+				cov = 1.0f;
+			else
+				cov = (aa - d) / (2.0f * aa);
+
+			if (cov <= 0.0f) continue;
+			if (cov > 1.0f) cov = 1.0f;
+
+			c = color;
+			c._argb.a = (px_byte)(color._argb.a * cov + 0.5f);
+			if (c._argb.a)
+				PX_SurfaceDrawPixel(psurface, ix, iy, c);
+		}
+	}
+}
+
+px_void PX_GeoDrawStrokeHeart(px_surface *psurface,px_float x,px_float y,px_float size,px_float linewidth,px_color color)
+{
+	px_float vx[64], vy[64];
+	px_float aa, maxR, halfW, step;
+	px_int ix0, iy0, ix1, iy1, ix, iy, i;
+
+	if (size < 1.0f || linewidth < 0.5f) return;
+	if (color._argb.a == 0) return;
+
+	aa = 0.7f;
+	halfW = linewidth * 0.5f;
+	step = 2.0f * (px_float)PX_PI / 64.0f;
+
+	for (i = 0; i < 64; i++)
+	{
+		px_float t = i * step;
+		px_float st = PX_sin_radian(t);
+		vx[i] = x + size * st * st * st;
+		vy[i] = y - size * (13.0f * PX_cos_radian(t) - 5.0f * PX_cos_radian(2.0f * t) - 2.0f * PX_cos_radian(3.0f * t) - PX_cos_radian(4.0f * t)) / 16.0f;
+	}
+
+	maxR = size * 1.2f + halfW + aa + 1.0f;
+	ix0 = (px_int)PX_floor(x - maxR); iy0 = (px_int)PX_floor(y - maxR);
+	ix1 = (px_int)PX_ceil(x + maxR);  iy1 = (px_int)PX_ceil(y + maxR);
+	if (ix0 < psurface->limit_left) ix0 = psurface->limit_left;
+	if (iy0 < psurface->limit_top) iy0 = psurface->limit_top;
+	if (ix1 > psurface->limit_right) ix1 = psurface->limit_right;
+	if (iy1 > psurface->limit_bottom) iy1 = psurface->limit_bottom;
+
+	for (iy = iy0; iy <= iy1; ++iy)
+	{
+		px_float cy = iy + 0.5f;
+		for (ix = ix0; ix <= ix1; ++ix)
+		{
+			px_float cx = ix + 0.5f;
+			px_float d, cov;
+			px_color c;
+			d = PX_ABS(px_sd_polygon(cx, cy, vx, vy, 64)) - halfW;
+			if (d > aa) continue;
+			cov = (d < -aa) ? 1.0f : (aa - d) / (2.0f * aa);
+			if (cov <= 0.0f) continue;
+			if (cov > 1.0f) cov = 1.0f;
+			c = color;
+			c._argb.a = (px_byte)(color._argb.a * cov + 0.5f);
+			if (c._argb.a) PX_SurfaceDrawPixel(psurface, ix, iy, c);
+		}
+	}
+}
+
+px_void PX_GeoDrawStrokeStar(px_surface *psurface,px_float x,px_float y,px_float radius,px_int n,px_float inside_angle,px_float angle,px_float linewidth,px_color color)
+{
+	px_float vx[64], vy[64];
+	px_float innerR, aa, halfW, angleRad, stepRad, halfTipRad;
+	px_float maxR;
+	px_int ix0, iy0, ix1, iy1, ix, iy, i, vertexCount;
+
+	if (n < 3) n = 3;
+	if (n > 32) n = 32;
+	if (radius < 1.0f || linewidth < 0.5f) return;
+	if (color._argb.a == 0) return;
+	if (inside_angle <= 0.0f) inside_angle = 1.0f;
+	if (inside_angle >= 180.0f) inside_angle = 179.0f;
+
+	aa = 0.7f;
+	halfW = linewidth * 0.5f;
+	vertexCount = n * 2;
+	stepRad = 2.0f * (px_float)PX_PI / n;
+	halfTipRad = (px_float)PX_PI * inside_angle / 360.0f;
+	innerR = radius * PX_sin_radian(halfTipRad) / PX_sin_radian(halfTipRad + stepRad * 0.5f);
+	if (innerR < 0.0f) innerR = 0.0f;
+	angleRad = (px_float)PX_PI * angle / 180.0f - (px_float)PX_PI / 2.0f;
+
+	for (i = 0; i < n; i++)
+	{
+		px_float outerA = angleRad + i * stepRad;
+		px_float innerA = outerA + stepRad * 0.5f;
+		vx[i * 2]     = x + radius * PX_cos_radian(outerA);
+		vy[i * 2]     = y + radius * PX_sin_radian(outerA);
+		vx[i * 2 + 1] = x + innerR * PX_cos_radian(innerA);
+		vy[i * 2 + 1] = y + innerR * PX_sin_radian(innerA);
+	}
+
+	maxR = radius + halfW + aa + 1.0f;
+	ix0 = (px_int)PX_floor(x - maxR); iy0 = (px_int)PX_floor(y - maxR);
+	ix1 = (px_int)PX_ceil(x + maxR);  iy1 = (px_int)PX_ceil(y + maxR);
+	if (ix0 < psurface->limit_left) ix0 = psurface->limit_left;
+	if (iy0 < psurface->limit_top) iy0 = psurface->limit_top;
+	if (ix1 > psurface->limit_right) ix1 = psurface->limit_right;
+	if (iy1 > psurface->limit_bottom) iy1 = psurface->limit_bottom;
+
+	for (iy = iy0; iy <= iy1; ++iy)
+	{
+		px_float cy = iy + 0.5f;
+		for (ix = ix0; ix <= ix1; ++ix)
+		{
+			px_float cx = ix + 0.5f;
+			px_float d, cov;
+			px_color c;
+			d = PX_ABS(px_sd_polygon(cx, cy, vx, vy, vertexCount)) - halfW;
+			if (d > aa) continue;
+			cov = (d < -aa) ? 1.0f : (aa - d) / (2.0f * aa);
+			if (cov <= 0.0f) continue;
+			if (cov > 1.0f) cov = 1.0f;
+			c = color;
+			c._argb.a = (px_byte)(color._argb.a * cov + 0.5f);
+			if (c._argb.a) PX_SurfaceDrawPixel(psurface, ix, iy, c);
+		}
+	}
+}
+
+px_void PX_GeoDrawStrokeGear(px_surface *psurface,px_float x,px_float y,px_float outerRadius,px_float innerRadius,px_int teeth,px_float toothDepth,px_float linewidth,px_color color)
+{
+	px_float vx[256], vy[256];
+	px_float aa, halfW, stepRad, halfTooth, rOuter, rInner;
+	px_int ix0, iy0, ix1, iy1, ix, iy, i, vertexCount;
+
+	if (teeth < 3) teeth = 3;
+	if (teeth > 64) teeth = 64;
+	if (outerRadius < 2.0f || linewidth < 0.5f) return;
+	if (color._argb.a == 0) return;
+
+	aa = 0.7f;
+	halfW = linewidth * 0.5f;
+	rOuter = outerRadius;
+	rInner = outerRadius - toothDepth;
+	if (rInner < 1.0f) rInner = 1.0f;
+	stepRad = 2.0f * (px_float)PX_PI / teeth;
+	halfTooth = stepRad * 0.25f;
+	vertexCount = teeth * 4;
+	if (vertexCount > 256) return;
+
+	for (i = 0; i < teeth; i++)
+	{
+		px_float baseAngle = i * stepRad - (px_float)PX_PI / 2.0f;
+		px_int idx = i * 4;
+		vx[idx]     = x + rInner * PX_cos_radian(baseAngle - halfTooth * 2.0f);
+		vy[idx]     = y + rInner * PX_sin_radian(baseAngle - halfTooth * 2.0f);
+		vx[idx + 1] = x + rOuter * PX_cos_radian(baseAngle - halfTooth);
+		vy[idx + 1] = y + rOuter * PX_sin_radian(baseAngle - halfTooth);
+		vx[idx + 2] = x + rOuter * PX_cos_radian(baseAngle + halfTooth);
+		vy[idx + 2] = y + rOuter * PX_sin_radian(baseAngle + halfTooth);
+		vx[idx + 3] = x + rInner * PX_cos_radian(baseAngle + halfTooth * 2.0f);
+		vy[idx + 3] = y + rInner * PX_sin_radian(baseAngle + halfTooth * 2.0f);
+	}
+
+	{
+		px_float maxR = rOuter + halfW + aa + 1.0f;
+		ix0 = (px_int)PX_floor(x - maxR); iy0 = (px_int)PX_floor(y - maxR);
+		ix1 = (px_int)PX_ceil(x + maxR);  iy1 = (px_int)PX_ceil(y + maxR);
+	}
+	if (ix0 < psurface->limit_left) ix0 = psurface->limit_left;
+	if (iy0 < psurface->limit_top) iy0 = psurface->limit_top;
+	if (ix1 > psurface->limit_right) ix1 = psurface->limit_right;
+	if (iy1 > psurface->limit_bottom) iy1 = psurface->limit_bottom;
+
+	for (iy = iy0; iy <= iy1; ++iy)
+	{
+		px_float cy = iy + 0.5f;
+		for (ix = ix0; ix <= ix1; ++ix)
+		{
+			px_float cx = ix + 0.5f;
+			px_float dOuter, dHole, dGear, d, cov;
+			px_color c;
+
+			dOuter = px_sd_polygon(cx, cy, vx, vy, vertexCount);
+			dHole = PX_sqrt((cx - x) * (cx - x) + (cy - y) * (cy - y)) - innerRadius;
+			dGear = (dOuter > -dHole) ? dOuter : -dHole;
+			d = PX_ABS(dGear) - halfW;
+
+			if (d > aa) continue;
+			cov = (d < -aa) ? 1.0f : (aa - d) / (2.0f * aa);
+			if (cov <= 0.0f) continue;
+			if (cov > 1.0f) cov = 1.0f;
+			c = color;
+			c._argb.a = (px_byte)(color._argb.a * cov + 0.5f);
+			if (c._argb.a) PX_SurfaceDrawPixel(psurface, ix, iy, c);
+		}
+	}
+}
+
+px_void PX_GeoDrawStrokeDiamond(px_surface *psurface,px_float x,px_float y,px_float width,px_float height,px_float linewidth,px_color color)
+{
+	px_float vx[4], vy[4];
+	px_float aa, halfW, halfWd, halfH;
+	px_float maxR;
+	px_int ix0, iy0, ix1, iy1, ix, iy;
+
+	if (width < 1.0f || height < 1.0f || linewidth < 0.5f) return;
+	if (color._argb.a == 0) return;
+
+	aa = 0.7f;
+	halfW = linewidth * 0.5f;
+	halfWd = width * 0.5f;
+	halfH = height * 0.5f;
+
+	vx[0] = x;          vy[0] = y - halfH;
+	vx[1] = x + halfWd; vy[1] = y;
+	vx[2] = x;          vy[2] = y + halfH;
+	vx[3] = x - halfWd; vy[3] = y;
+
+	maxR = (halfWd > halfH ? halfWd : halfH) + halfW + aa + 1.0f;
+	ix0 = (px_int)PX_floor(x - maxR); iy0 = (px_int)PX_floor(y - maxR);
+	ix1 = (px_int)PX_ceil(x + maxR);  iy1 = (px_int)PX_ceil(y + maxR);
+	if (ix0 < psurface->limit_left) ix0 = psurface->limit_left;
+	if (iy0 < psurface->limit_top) iy0 = psurface->limit_top;
+	if (ix1 > psurface->limit_right) ix1 = psurface->limit_right;
+	if (iy1 > psurface->limit_bottom) iy1 = psurface->limit_bottom;
+
+	for (iy = iy0; iy <= iy1; ++iy)
+	{
+		px_float cy = iy + 0.5f;
+		for (ix = ix0; ix <= ix1; ++ix)
+		{
+			px_float cx = ix + 0.5f;
+			px_float d, cov;
+			px_color c;
+			d = PX_ABS(px_sd_polygon(cx, cy, vx, vy, 4)) - halfW;
+			if (d > aa) continue;
+			cov = (d < -aa) ? 1.0f : (aa - d) / (2.0f * aa);
+			if (cov <= 0.0f) continue;
+			if (cov > 1.0f) cov = 1.0f;
+			c = color;
+			c._argb.a = (px_byte)(color._argb.a * cov + 0.5f);
+			if (c._argb.a) PX_SurfaceDrawPixel(psurface, ix, iy, c);
+		}
+	}
 }
 
 static px_point2D PX_GeoDeBoorCoxRecursion(px_int j,  px_int i, px_int k, px_float t, px_point2D controlPoints[], px_float knots[])
@@ -3504,7 +5190,7 @@ px_void PX_GeoDrawPenSamplesLine(px_surface* psurface, px_point _samples[], px_i
 
 		while (step_distance>0)
 		{
-			if ((dindex >= samplescount - 1)&&step_distance==0)
+			if (dindex >= samplescount - 1)
 			{
 				break;
 			}
@@ -3625,3 +5311,437 @@ px_void PX_GeoDrawPenSamplesLine(px_surface* psurface, px_point _samples[], px_i
 	}
 }
 
+
+px_void PX_GeoDrawRightTriangle(px_surface* psurface, px_float left, px_float top, px_float right, px_float bottom, px_color color)
+{
+	//y1=k1x+b1;
+	//y2=k2x+b2;
+	px_int i, j;
+	px_float mid;
+	px_float k1 = -((bottom - top) / 2) / (right - left);
+	px_float b1 = bottom - k1 * left;
+	px_float k2 = -k1;
+	px_float b2 = top - k2 * left;
+	px_float inv_len1 = 1.0f / PX_sqrt(k1 * k1 + 1);
+	px_float inv_len2 = 1.0f / PX_sqrt(k2 * k2 + 1);
+	if (color._argb.a == 0)
+	{
+		return;
+	}
+
+	if (left > right)
+	{
+		mid = left;
+		left = right;
+		right = mid;
+	}
+	if (top > bottom)
+	{
+		mid = top;
+		top = bottom;
+		bottom = mid;
+	}
+
+	if (left < psurface->limit_left)
+	{
+		left = (px_float)psurface->limit_left;
+	}
+	else if (left > psurface->limit_right)
+	{
+		return;
+	}
+
+	if (top < psurface->limit_top)
+	{
+		top = (px_float)psurface->limit_top;
+	}
+	else if (top > psurface->limit_bottom)
+	{
+		return;
+	}
+
+	if (right > psurface->limit_right)
+	{
+		right = (px_float)psurface->limit_right;
+	}
+	else if (right < psurface->limit_left)
+	{
+		return;
+	}
+
+	if (bottom > psurface->limit_bottom)
+	{
+		bottom = (px_float)psurface->limit_bottom;
+	}
+	else if (bottom < psurface->limit_top)
+	{
+		return;
+	}
+
+	//line 1
+	for (j = (px_int)top; j <= (px_int)bottom; j++)
+	{
+		for (i = (px_int)left; i <= (px_int)right; i++)
+		{
+			if (j < (bottom+top) / 2)
+			{
+				// signed distance from pixel center to upper edge line (positive = inside triangle)
+				px_float dist = ((j + 0.5f) - (k2 * (i + 0.5f) + b2)) * inv_len2;
+				px_float alpha = dist + 0.5f;
+				if (alpha > 0)
+				{
+					px_color drawColor = color;
+					alpha = alpha > 1 ? 1 : alpha;
+					drawColor._argb.a = (px_byte)(drawColor._argb.a * alpha);
+					PX_SurfaceDrawPixelWithoutLimit(psurface, i, j, drawColor);
+				}
+				else
+				{
+					break;
+				}
+
+			}
+			else
+			{
+				// signed distance from pixel center to lower edge line (positive = inside triangle)
+				px_float dist = ((k1 * (i + 0.5f) + b1) - (j + 0.5f)) * inv_len1;
+				px_float alpha = dist + 0.5f;
+				if (alpha > 0)
+				{
+					px_color drawColor = color;
+					alpha = alpha > 1 ? 1 : alpha;
+					drawColor._argb.a = (px_byte)(drawColor._argb.a * alpha);
+					PX_SurfaceDrawPixelWithoutLimit(psurface, i, j, drawColor);
+				}
+				else
+				{
+					break;
+				}
+
+			}
+		}
+	}
+}
+
+px_void PX_GeoDrawLeftTriangle(px_surface* psurface, px_float left, px_float top, px_float right, px_float bottom, px_color color)
+{
+	//y1=k1x+b1;
+	//y2=k2x+b2;
+	px_int i, j;
+	px_float mid;
+	px_float k1 = ((bottom - top) / 2) / (right - left);
+	px_float b1 = bottom - k1 * right;
+	px_float k2 = -k1;
+	px_float b2 = top - k2 * right;
+	px_float inv_len1 = 1.0f / PX_sqrt(k1 * k1 + 1);
+	px_float inv_len2 = 1.0f / PX_sqrt(k2 * k2 + 1);
+	if (color._argb.a == 0)
+	{
+		return;
+	}
+
+	if (left > right)
+	{
+		mid = left;
+		left = right;
+		right = mid;
+	}
+	if (top > bottom)
+	{
+		mid = top;
+		top = bottom;
+		bottom = mid;
+	}
+
+	if (left < psurface->limit_left)
+	{
+		left = (px_float)psurface->limit_left;
+	}
+	else if (left > psurface->limit_right)
+	{
+		return;
+	}
+
+	if (top < psurface->limit_top)
+	{
+		top = (px_float)psurface->limit_top;
+	}
+	else if (top > psurface->limit_bottom)
+	{
+		return;
+	}
+
+	if (right > psurface->limit_right)
+	{
+		right = (px_float)psurface->limit_right;
+	}
+	else if (right < psurface->limit_left)
+	{
+		return;
+	}
+
+	if (bottom > psurface->limit_bottom)
+	{
+		bottom = (px_float)psurface->limit_bottom;
+	}
+	else if (bottom < psurface->limit_top)
+	{
+		return;
+	}
+
+	//line 1
+	for (j = (px_int)top; j <= (px_int)bottom; j++)
+	{
+		for (i = (px_int)right; i >= (px_int)left; i--)
+		{
+			if (j < (bottom + top) / 2)
+			{
+				// signed distance from pixel center to upper edge line (positive = inside triangle)
+				px_float dist = ((j + 0.5f) - (k2 * (i + 0.5f) + b2)) * inv_len2;
+				px_float alpha = dist + 0.5f;
+				if (alpha > 0)
+				{
+					px_color drawColor = color;
+					alpha = alpha > 1 ? 1 : alpha;
+					drawColor._argb.a = (px_byte)(drawColor._argb.a * alpha);
+					PX_SurfaceDrawPixelWithoutLimit(psurface, i, j, drawColor);
+				}
+				else
+				{
+					break;
+				}
+
+			}
+			else
+			{
+				// signed distance from pixel center to lower edge line (positive = inside triangle)
+				px_float dist = ((k1 * (i + 0.5f) + b1) - (j + 0.5f)) * inv_len1;
+				px_float alpha = dist + 0.5f;
+				if (alpha > 0)
+				{
+					px_color drawColor = color;
+					alpha = alpha > 1 ? 1 : alpha;
+					drawColor._argb.a = (px_byte)(drawColor._argb.a * alpha);
+					PX_SurfaceDrawPixelWithoutLimit(psurface, i, j, drawColor);
+				}
+				else
+				{
+					break;
+				}
+
+			}
+		}
+	}
+
+}
+
+px_void PX_GeoDrawUpTriangle(px_surface* psurface, px_float left, px_float top, px_float right, px_float bottom, px_color color)
+{
+	//y1=k1x+b1;
+//y2=k2x+b2;
+	px_int i, j;
+	px_float mid;
+	px_float k1 = -(bottom - top) / ((right - left) / 2);
+	px_float b1 = bottom - k1 * left;
+	px_float k2 = -k1;
+	px_float b2 = bottom - k2 * right;
+	px_float inv_len1 = 1.0f / PX_sqrt(k1 * k1 + 1);
+	px_float inv_len2 = 1.0f / PX_sqrt(k2 * k2 + 1);
+	if (color._argb.a == 0)
+	{
+		return;
+	}
+
+	if (left > right)
+	{
+		mid = left;
+		left = right;
+		right = mid;
+	}
+	if (top > bottom)
+	{
+		mid = top;
+		top = bottom;
+		bottom = mid;
+	}
+
+	if (left < psurface->limit_left)
+	{
+		left = (px_float)psurface->limit_left;
+	}
+	else if (left > psurface->limit_right)
+	{
+		return;
+	}
+
+	if (top < psurface->limit_top)
+	{
+		top = (px_float)psurface->limit_top;
+	}
+	else if (top > psurface->limit_bottom)
+	{
+		return;
+	}
+
+	if (right > psurface->limit_right)
+	{
+		right = (px_float)psurface->limit_right;
+	}
+	else if (right < psurface->limit_left)
+	{
+		return;
+	}
+
+	if (bottom > psurface->limit_bottom)
+	{
+		bottom = (px_float)psurface->limit_bottom;
+	}
+	else if (bottom < psurface->limit_top)
+	{
+		return;
+	}
+
+	//line 1
+	for (j = (px_int)top; j <= (px_int)bottom; j++)
+	{
+		for (i = (px_int)left; i <= (px_int)right; i++)
+		{
+			if (i < (right + left) / 2)
+			{
+				// signed distance from pixel center to left edge line (positive = inside triangle)
+				px_float dist = ((j + 0.5f) - (k1 * (i + 0.5f) + b1)) * inv_len1;
+				px_float alpha = dist + 0.5f;
+				if (alpha > 0)
+				{
+					px_color drawColor = color;
+					alpha = alpha > 1 ? 1 : alpha;
+					drawColor._argb.a = (px_byte)(drawColor._argb.a * alpha);
+					PX_SurfaceDrawPixelWithoutLimit(psurface, i, j, drawColor);
+				}
+			}
+			else
+			{
+				// signed distance from pixel center to right edge line (positive = inside triangle)
+				px_float dist = ((j + 0.5f) - (k2 * (i + 0.5f) + b2)) * inv_len2;
+				px_float alpha = dist + 0.5f;
+				if (alpha > 0)
+				{
+					px_color drawColor = color;
+					alpha = alpha > 1 ? 1 : alpha;
+					drawColor._argb.a = (px_byte)(drawColor._argb.a * alpha);
+					PX_SurfaceDrawPixelWithoutLimit(psurface, i, j, drawColor);
+				}
+				else
+				{
+					break;
+				}
+
+			}
+		}
+	}
+}
+px_void PX_GeoDrawDownTriangle(px_surface* psurface, px_float left, px_float top, px_float right, px_float bottom, px_color color)
+{
+	//y1=k1x+b1;
+//y2=k2x+b2;
+	px_int i, j;
+	px_float mid;
+	px_float k1 = (bottom - top) / ((right - left) / 2);
+	px_float b1 = top - k1 * left;
+	px_float k2 = -k1;
+	px_float b2 = top - k2 * right;
+	px_float inv_len1 = 1.0f / PX_sqrt(k1 * k1 + 1);
+	px_float inv_len2 = 1.0f / PX_sqrt(k2 * k2 + 1);
+	if (color._argb.a == 0)
+	{
+		return;
+	}
+
+	if (left > right)
+	{
+		mid = left;
+		left = right;
+		right = mid;
+	}
+	if (top > bottom)
+	{
+		mid = top;
+		top = bottom;
+		bottom = mid;
+	}
+
+	if (left < psurface->limit_left)
+	{
+		left = (px_float)psurface->limit_left;
+	}
+	else if (left > psurface->limit_right)
+	{
+		return;
+	}
+
+	if (top < psurface->limit_top)
+	{
+		top = (px_float)psurface->limit_top;
+	}
+	else if (top > psurface->limit_bottom)
+	{
+		return;
+	}
+
+	if (right > psurface->limit_right)
+	{
+		right = (px_float)psurface->limit_right;
+	}
+	else if (right < psurface->limit_left)
+	{
+		return;
+	}
+
+	if (bottom > psurface->limit_bottom)
+	{
+		bottom = (px_float)psurface->limit_bottom;
+	}
+	else if (bottom < psurface->limit_top)
+	{
+		return;
+	}
+
+	//line 1
+	for (j = (px_int)top; j <= (px_int)bottom; j++)
+	{
+		for (i = (px_int)left; i <= (px_int)right; i++)
+		{
+			if (i < (right + left) / 2)
+			{
+				// signed distance from pixel center to left edge line (positive = inside triangle)
+				px_float dist = (k1 * (i + 0.5f) + b1 - (j + 0.5f)) * inv_len1;
+				px_float alpha = dist + 0.5f;
+				if (alpha > 0)
+				{
+					px_color drawColor = color;
+					alpha = alpha > 1 ? 1 : alpha;
+					drawColor._argb.a = (px_byte)(drawColor._argb.a * alpha);
+					PX_SurfaceDrawPixelWithoutLimit(psurface, i, j, drawColor);
+				}
+			}
+			else
+			{
+				// signed distance from pixel center to right edge line (positive = inside triangle)
+				px_float dist = (k2 * (i + 0.5f) + b2 - (j + 0.5f)) * inv_len2;
+				px_float alpha = dist + 0.5f;
+				if (alpha > 0)
+				{
+					px_color drawColor = color;
+					alpha = alpha > 1 ? 1 : alpha;
+					drawColor._argb.a = (px_byte)(drawColor._argb.a * alpha);
+					PX_SurfaceDrawPixelWithoutLimit(psurface, i, j, drawColor);
+				}
+				else
+				{
+					break;
+				}
+
+			}
+		}
+	}
+}

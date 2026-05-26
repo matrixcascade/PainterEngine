@@ -440,7 +440,7 @@ px_bool PX_Object_GridImportFromAbi( PX_Object* pObject, px_abi* pAbi)
 		px_int *px, *py;
 		PX_itoa(count, countcontent, 8, 10);
 		count++;
-		if (!PX_AbiGet_Abi(pAbi, &grid_abi, countcontent))
+		if (!PX_AbiGet_AbiReadOnly(pAbi, &grid_abi, countcontent))
 		{
 			break;
 		}

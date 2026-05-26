@@ -1,5 +1,8 @@
 // identifier--- value
-
+//           |
+//            -- begin
+//           |
+//            -- end
 #ifndef PX_SYNTAX_IDENTIFIER_H
 #define PX_SYNTAX_IDENTIFIER_H
 #include "PX_Syntax.h"

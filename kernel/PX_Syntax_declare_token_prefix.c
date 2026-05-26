@@ -2,8 +2,8 @@
 
 PX_SYNTAX_FUNCTION(PX_Syntax_declare_token_prefix)
 {
-	PX_LEXER_LEXEME_TYPE type = PX_Syntax_GetNextLexeme(pSyntax);
-	if (type== PX_LEXER_LEXEME_TYPE_DELIMITER)
+	PX_SYNTAXLEXER_LEXEME_TYPE type = PX_Syntax_GetNextLexeme(pSyntax);
+	if (type== PX_SYNTAXLEXER_LEXEME_TYPE_DELIMITER)
 	{
 		if (*PX_Syntax_GetCurrentLexeme(pSyntax) == '*')
 		{
@@ -26,19 +26,19 @@ PX_SYNTAX_FUNCTION(PX_Syntax_declare_token_prefix)
 			newabi= PX_Syntax_NewAbi(pSyntax, "declare_token_prefix", pSyntax->reg_lifetime);
 			if (!newabi)
 			{
-				PX_Syntax_Terminate(pSyntax, "Memory Error");
+				PX_Syntax_Terminate(pSyntax, "runtime:error:PX_Syntax_declare_token_prefix Memory Error1");
 				return PX_FALSE;
 			}
 			if (!PX_AbiSet_string(newabi, "type", "pointer"))
 			{
 				PX_AbiFree(newabi);
-				PX_Syntax_Terminate(pSyntax, "Memory Error");
+				PX_Syntax_Terminate(pSyntax, "runtime:error:PX_Syntax_declare_token_prefix Memory Error2");
 				return PX_FALSE;
 			}
 			if (!PX_AbiSet_int(newabi, "pointer_level", ptr_level))
 			{
 				PX_AbiFree(newabi);
-				PX_Syntax_Terminate(pSyntax, "Memory Error");
+				PX_Syntax_Terminate(pSyntax, "runtime:error:PX_Syntax_declare_token_prefix Memory Error3");
 				return PX_FALSE;
 			}
 			return PX_TRUE;
@@ -50,7 +50,7 @@ PX_SYNTAX_FUNCTION(PX_Syntax_declare_token_prefix)
 
 px_bool PX_Syntax_load_declare_token_prefix(PX_Syntax* pSyntax)
 {
-	if (!PX_Syntax_Parse_PEBNF(pSyntax, "declare_token_prefix = *", PX_Syntax_declare_token_prefix))
+	if (!PX_Syntax_Parse_PEBNF(pSyntax, "declare_token_prefix = *",0, PX_Syntax_declare_token_prefix, 0))
 		return PX_FALSE;
 
 	return PX_TRUE;

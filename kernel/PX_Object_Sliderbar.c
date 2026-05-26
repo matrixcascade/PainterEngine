@@ -4,7 +4,7 @@ PX_OBJECT_EVENT_FUNCTION(PX_Object_SliderBarOnMouseLButtonDown)
 {
 	PX_Object_SliderBar *pSliderBar=PX_Object_GetSliderBar(pObject);
 	px_float x,y;
-	px_int SliderBtnLen,Sx,Sy;
+	px_int Sx,Sy;
 	px_rect rect;
 	px_int Range,relValue;
 
@@ -25,6 +25,11 @@ PX_OBJECT_EVENT_FUNCTION(PX_Object_SliderBarOnMouseLButtonDown)
 		Range=pSliderBar->Max-pSliderBar->Min;
 		relValue=pSliderBar->Value-pSliderBar->Min;
 
+		if (Range==0)
+		{
+			return;
+		}
+
 		if(PX_ObjectIsPointInRegion(pObject,(px_float)x,(px_float)y))
 		{
 			if (pSliderBar==PX_NULL)
@@ -32,18 +37,15 @@ PX_OBJECT_EVENT_FUNCTION(PX_Object_SliderBarOnMouseLButtonDown)
 				return;
 			}
 
-			if (objw<=10)
+			if (objw<=6)
 			{
 				return;
 			}
 
-			if (objh<10)
+			if (objh<6)
 			{
 				return;
 			}
-
-			SliderBtnLen=pSliderBar->SliderButtonLength;
-
 
 			if(pSliderBar->Type==PX_OBJECT_SLIDERBAR_TYPE_HORIZONTAL)
 			{
@@ -99,9 +101,9 @@ PX_OBJECT_EVENT_FUNCTION(PX_Object_SliderBarOnMouseLButtonDown)
 						else
 						{
 							pSliderBar->Value-=Range*pSliderBar->SliderButtonLength/((px_int)objw);
-							if (pSliderBar->Value<0)
+							if (pSliderBar->Value<pSliderBar->Min)
 							{
-								pSliderBar->Value=0;
+								pSliderBar->Value=pSliderBar->Min;
 							}
 							if (pSliderBar->lastValue != pSliderBar->Value)
 							{
@@ -128,7 +130,7 @@ PX_OBJECT_EVENT_FUNCTION(PX_Object_SliderBarOnMouseLButtonDown)
 
 						rect.x=(px_float)Sx;
 						rect.y=(px_float)Sy;
-						rect.width=(px_float)objh;
+						rect.width=(px_float)objw;
 						rect.height=(px_float)pSliderBar->SliderButtonLength;
 
 						if (PX_isPointInRect(PX_POINT((px_float)x,(px_float)y,0),rect))
@@ -303,18 +305,24 @@ PX_OBJECT_RENDER_FUNCTION(PX_Object_SliderBarRender)
 		return;
 	}
 
-	if (objWidth <= 10)
+	if (objWidth <= 6)
 	{
 		return;
 	}
 
-	if (objHeight < 10)
+	if (objHeight < 6)
 	{
 		return;
 	}
+
 
 	Range = pSliderBar->Max - pSliderBar->Min;
 	SliderBtnLen = pSliderBar->SliderButtonLength;
+
+	if (Range <= 0)
+	{
+		return;
+	}
 
 	if (pSliderBar->Value >= pSliderBar->Max)
 	{
@@ -377,7 +385,8 @@ PX_OBJECT_RENDER_FUNCTION(PX_Object_SliderBarRender)
 					pSliderBar->color
 				);
 				//Draw Slider button
-				PX_GeoDrawRect(psurface, (px_int)Sx, (px_int)Sy, (px_int)(Sx + SliderBtnLen - 1), (px_int)(Sy + objHeight - 1), pSliderBar->color);
+				if(pSliderBar->Max!=pSliderBar->Min)
+					PX_GeoDrawRect(psurface, (px_int)Sx, (px_int)Sy, (px_int)(Sx + SliderBtnLen - 1), (px_int)(Sy + objHeight - 1), pSliderBar->color);
 
 				if (pSliderBar->showvalue)
 				{
@@ -396,7 +405,8 @@ PX_OBJECT_RENDER_FUNCTION(PX_Object_SliderBarRender)
 				pSliderBar->DargButtonX = Sx;
 				Sx += SliderBtnLen / 2;
 				//draw slider bar
-				PX_GeoDrawRect(psurface, (px_int)(objx + Sx - SliderBtnLen / 2 + 2), (px_int)(objy + 2), (px_int)(objx + Sx - SliderBtnLen / 2 + SliderBtnLen - 3), (px_int)(objy + objHeight - 3), pSliderBar->color);
+				if (pSliderBar->Max != pSliderBar->Min)
+					PX_GeoDrawRect(psurface, (px_int)(objx + Sx - SliderBtnLen / 2 + 2), (px_int)(objy + 2), (px_int)(objx + Sx - SliderBtnLen / 2 + SliderBtnLen - 3), (px_int)(objy + objHeight - 3), pSliderBar->color);
 
 				if (pSliderBar->showvalue && pSliderBar->status)
 				{
@@ -496,7 +506,7 @@ PX_OBJECT_RENDER_FUNCTION(PX_Object_SliderBarRender)
 				{
 					px_char text[16] = { 0 };
 					PX_itoa(pSliderBar->Value, text, sizeof(text), 10);
-					PX_FontModuleDrawText(psurface, 0, (px_int)Sx + SliderBtnLen / 2, (px_int)Sy - 1, PX_ALIGN_MIDBOTTOM, text, pSliderBar->showvalue_color);
+					PX_FontModuleDrawText(psurface, 0, (px_int)(objx + Sx) + SliderBtnLen / 2, (px_int)Sy - 1, PX_ALIGN_MIDBOTTOM, text, pSliderBar->showvalue_color);
 				}
 			}
 			break;
@@ -508,6 +518,7 @@ PX_OBJECT_RENDER_FUNCTION(PX_Object_SliderBarRender)
 				Sx = pSliderBar->DargButtonX;
 
 				pSliderBar->Value = (px_int)(pSliderBar->Min + Range * (Sx) / (objWidth - pSliderBar->SliderButtonLength));
+
 				if (pSliderBar->Value > pSliderBar->Max)
 				{
 					pSliderBar->Value = pSliderBar->Max;
@@ -519,6 +530,7 @@ PX_OBJECT_RENDER_FUNCTION(PX_Object_SliderBarRender)
 				if (pSliderBar->lastValue != pSliderBar->Value)
 				{
 					pSliderBar->lastValue = pSliderBar->Value;
+					
 					PX_ObjectExecuteEvent(pObject, PX_OBJECT_BUILD_EVENT(PX_OBJECT_EVENT_VALUECHANGED));
 				}
 				Sx += SliderBtnLen / 2;
@@ -702,6 +714,26 @@ px_void PX_Object_SliderBarSetValue( PX_Object *pSliderBar,px_int Value )
 	}
 }
 
+px_void PX_Object_SliderBarChangeValue( PX_Object *pSliderBar,px_int delta )
+{
+	PX_Object_SliderBar *SliderBar=PX_Object_GetSliderBar(pSliderBar);
+	if (SliderBar!=PX_NULL)
+	{
+		px_int newvalue=SliderBar->Value+delta;
+		if (newvalue>SliderBar->Max)
+		{
+			newvalue=SliderBar->Max;
+		}
+		if (newvalue<SliderBar->Min)
+		{
+			newvalue=SliderBar->Min;
+		}
+		SliderBar->Value=newvalue;
+		PX_ObjectExecuteEvent(pSliderBar, PX_OBJECT_BUILD_EVENT_INT(PX_OBJECT_EVENT_VALUECHANGED, SliderBar->Value));
+	}
+	
+}
+
 px_void PX_Object_SliderBarSetRange( PX_Object *pSliderBar,px_int Min,px_int Max )
 {
 	PX_Object_SliderBar *SliderBar=PX_Object_GetSliderBar(pSliderBar);
@@ -771,12 +803,16 @@ px_void PX_Object_SliderBarSetColor(PX_Object *pSliderBar,px_color color)
 	}
 }
 
-px_void PX_Object_SliderBarSetSliderButtonLength(PX_Object *pSliderBar,px_int length)
+px_void PX_Object_SliderBarSetSliderButtonLength(PX_Object *pSliderBar,px_int radius)
 {
 	PX_Object_SliderBar *SliderBar=PX_Object_GetSliderBar(pSliderBar);
 	if (SliderBar!=PX_NULL)
 	{
-		SliderBar->SliderButtonLength=length;
+		if (radius < 16&&pSliderBar->Width>16)
+		{
+			radius = 16;
+		}
+		SliderBar->SliderButtonLength=radius<1?1: radius;
 	}
 }
 

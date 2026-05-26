@@ -1,7 +1,9 @@
 #ifndef PX_SYNTAX_DECLARE_TYPE_H
 #define PX_SYNTAX_DECLARE_TYPE_H
 #include "PX_Syntax.h"
-// variable --- declare_array(abi)
+// variable --- type(abi) 
+//		   | 
+//			--- declare_array(abi)
 //         |
 //          --- declare_token_prefix(abi)
 //         |
@@ -12,6 +14,10 @@
 //          --- offset(int)
 //         |
 //          --- identifier(abi)
+//		   |
+//			--- scope(string global/local)
+//         |
+//          --- lifetime(int)
 px_bool PX_Syntax_load_declare_variable(PX_Syntax* pSyntax);
 
 #endif

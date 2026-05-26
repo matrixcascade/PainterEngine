@@ -42,10 +42,7 @@ int PX_UDPInitialize(PX_UDP *udp,PX_UDP_IP_TYPE type)
 	}
 	  
 	rev=ioctlsocket(udp->socket,FIONBIO,(u_long *)&imode);  
-
-	
 	setsockopt(udp->socket,SOL_SOCKET,SO_RCVBUF,(const char*)&nRecvBuf,sizeof(int));
-
 	setsockopt(udp->socket,SOL_SOCKET,SO_SNDBUF,(const char*)&nSendBuf,sizeof(int));
 
 	if(rev == SOCKET_ERROR)  
@@ -64,10 +61,19 @@ int PX_UDPInitialize(PX_UDP *udp,PX_UDP_IP_TYPE type)
 	return 1;
 }
 
+int PX_UDPResetSocket(PX_UDP* udp)
+{
+	if (udp->socket != INVALID_SOCKET)
+	{
+		closesocket(udp->socket);
+	}
+	return PX_UDPInitialize(udp, udp->type);
+}
+
 int PX_UDPSend(PX_UDP *udp,PX_UDP_ADDR addr,void *buffer,int size)
 {
 	
-	int length;
+	int radius;
 	switch(udp->type)
 	{
 	case PX_UDP_IP_TYPE_IPV4:
@@ -78,11 +84,11 @@ int PX_UDPSend(PX_UDP *udp,PX_UDP_ADDR addr,void *buffer,int size)
 			to.sin_port=(addr.port);
 			while(size>0)
 			{
-				if ((length=sendto(udp->socket,(const char *)buffer,size,0,(LPSOCKADDR)&to,sizeof(SOCKADDR)))==SOCKET_ERROR)
+				if ((radius=sendto(udp->socket,(const char *)buffer,size,0,(LPSOCKADDR)&to,sizeof(SOCKADDR)))==SOCKET_ERROR)
 				{
 					return FALSE;
 				}
-				size-=length;
+				size-=radius;
 			}
 			return TRUE;
 		}

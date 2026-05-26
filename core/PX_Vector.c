@@ -47,7 +47,7 @@ px_bool PX_VectorSet(px_vector *vec,px_uint index,px_void *data)
 	return PX_TRUE;
 }
 
-px_bool PX_VectorInsert(px_vector* vec, px_int insert_before_index, px_void* data)
+px_bool PX_VectorInsertBefore(px_vector* vec, px_int insert_before_index, px_void* data)
 {
 	if (insert_before_index < 0 || insert_before_index > vec->size)
 	{
@@ -62,6 +62,24 @@ px_bool PX_VectorInsert(px_vector* vec, px_int insert_before_index, px_void* dat
 		PX_memcpy((px_byte*)vec->data + (insert_before_index + 1) * vec->nodesize, (px_byte*)vec->data + insert_before_index * vec->nodesize, (vec->size - insert_before_index - 1) * vec->nodesize);
 	}
 	PX_memcpy((px_byte*)vec->data + insert_before_index * vec->nodesize, data, vec->nodesize);
+	return PX_TRUE;
+}
+
+px_bool PX_VectorInsertAfter(px_vector* vec, px_int insert_after_index, px_void* data)
+{
+	if (insert_after_index < -1 || insert_after_index >= vec->size)
+	{
+		return PX_FALSE;
+	}
+	if (!PX_VectorPushback(vec, PX_NULL))
+	{
+		return PX_FALSE;
+	}
+	if (insert_after_index < vec->size - 2)
+	{
+		PX_memcpy((px_byte*)vec->data + (insert_after_index + 2) * vec->nodesize, (px_byte*)vec->data + (insert_after_index + 1) * vec->nodesize, (vec->size - insert_after_index - 2) * vec->nodesize);
+	}
+	PX_memcpy((px_byte*)vec->data + (insert_after_index + 1) * vec->nodesize, data, vec->nodesize);
 	return PX_TRUE;
 }
 
@@ -222,6 +240,7 @@ px_bool PX_VectorCopy(px_vector *destvec,px_vector *resvec)
 {
 	if (destvec->nodesize!=resvec->nodesize)
 	{
+		PX_ASSERTX("Error: Vector Copy Error, nodesize not match");
 		return PX_FALSE;
 	}
 	if (destvec->allocsize<resvec->allocsize)
@@ -230,6 +249,26 @@ px_bool PX_VectorCopy(px_vector *destvec,px_vector *resvec)
 	}
 	PX_memcpy(destvec->data,resvec->data,resvec->nodesize*resvec->size);
 	destvec->size=resvec->size;
+	return PX_TRUE;
+}
+
+px_bool PX_VectorMoveMemberTo(px_vector* resvec, px_vector* destvec)
+{
+	px_int oldsize = destvec->size;
+	PX_ASSERTIFX(resvec->nodesize != destvec->nodesize, "Error: Vector MoveMemberTo Error, nodesize not match");
+	if (destvec->allocsize < destvec->size  + resvec->size)
+	{	
+		if (!PX_VectorResize(destvec, destvec->size + resvec->size))
+		{
+			return PX_FALSE;
+		}
+	}
+	else
+	{
+		destvec->size += resvec->size;
+	}
+	PX_memcpy((px_byte*)destvec->data + oldsize * destvec->nodesize, resvec->data, resvec->nodesize * resvec->size);
+	PX_VectorClear(resvec);
 	return PX_TRUE;
 }
 
@@ -245,13 +284,16 @@ px_bool PX_VectorResize(px_vector *vec,px_int size)
 {
 	if (size!=vec->size)
 	{
-		PX_VectorFree(vec);
+		px_void* pold = vec->data;
+		px_int oldsize = vec->size;
 		if(!PX_VectorInitialize(vec->mp,vec,vec->nodesize,size))return PX_FALSE;
 		PX_memset(vec->data,0,vec->nodesize*vec->allocsize);
+		PX_memcpy(vec->data, pold, vec->nodesize * (oldsize < size ? oldsize : size));
 		vec->size=size;
+		PX_Free(vec->mp, pold);
 		return PX_TRUE;
 	}
-	return PX_FALSE;
+	return PX_TRUE;
 }
 
 px_bool PX_VectorCheckIndex(px_vector *vec,px_int index)
@@ -261,6 +303,16 @@ px_bool PX_VectorCheckIndex(px_vector *vec,px_int index)
 		return PX_FALSE;
 	}
 	return PX_TRUE;
+}
+
+px_void *PX_VectorIndex(px_vector* vec, px_int index)
+{
+	if (index<0||index>=vec->size)
+	{
+		PX_ASSERTX("Error: Vector Index Error");
+		return PX_NULL;
+	}
+	return (px_void*)((px_byte*)vec->data + index * vec->nodesize);
 }
 
 

@@ -14,7 +14,7 @@ typedef struct
 }PX_TCP_Handle;
 
 
-px_int PX_SocketCircularBufferGetSpaceSize(px_int buffersize, volatile px_int* wCursor, volatile px_dword rCursor)
+px_int PX_SocketCircularBufferGetSpaceSize(px_int buffersize, volatile px_int* wCursor, volatile px_int rCursor)
 {
 	px_int spacesize, _WCursor = *wCursor;
 	px_int _RCursor = rCursor;
@@ -22,7 +22,7 @@ px_int PX_SocketCircularBufferGetSpaceSize(px_int buffersize, volatile px_int* w
 	return spacesize;
 }
 
-static px_bool PX_SocketWriteToCircularBuffer(px_byte* buffer, px_int buffersize, volatile px_int* wCursor, volatile px_dword rCursor, px_void* data, px_int datasize)
+static px_bool PX_SocketWriteToCircularBuffer(px_byte* buffer, px_int buffersize, volatile px_int* wCursor, volatile px_int rCursor, const px_void* data, px_int datasize)
 {
 	px_int spacesize, divsize;
 	px_int _WCursor = *wCursor;
@@ -67,12 +67,14 @@ static px_bool PX_SocketConnectToServer(PX_Socket* pSocket, const px_char host[]
 		addr.ipv4 = PX_UDPGetHostByName(host, 0x08080808);
 		if (addr.ipv4 == 0)
 		{
+			PX_TCPFree(pTCP);
 			return PX_FALSE;
 		}
 	}
 	printf("connecting to %s:%d:%d\n", host, port,PX_TimeGetTime());
-	if (!PX_TCPConnect((PX_TCP*)pSocket->handler, addr))
+	if (!PX_TCPConnect(pTCP, addr))
 	{
+		PX_TCPFree(pTCP);
 		return PX_FALSE;
 	}
 	printf("suceess to connect %s:%d:%d\n", host, port, PX_TimeGetTime());
@@ -102,10 +104,11 @@ px_void PX_SocketThread_Send(px_void *ptr)
 			pSocket->sendcallback(pSocket, pSocket->userptr);
 
 		//send cache
-		do
+		while (PX_TRUE)
 		{
 			px_int sendsize;
 			sendBlockSize=pSocket->send_buffer_wcursor>=pSocket->send_buffer_rcursor?pSocket->send_buffer_wcursor-pSocket->send_buffer_rcursor:pSocket->send_buffer_size-pSocket->send_buffer_rcursor;
+			if (sendBlockSize <= 0) break;
 			sendsize = PX_TCPSend(pTCP, pSocket->psend_buffer+ pSocket->send_buffer_rcursor, sendBlockSize);
 			if (sendsize > 0)
 			{
@@ -120,7 +123,7 @@ px_void PX_SocketThread_Send(px_void *ptr)
 			{
 				break;
 			}
-		} while (sendBlockSize);
+		}
 
 	}
 DISCONNECT:
@@ -183,7 +186,7 @@ px_void PX_SocketThread_Recv(px_void *ptr)
 				{
 					px_dword packsize = *(px_dword*)pSocket->precv_buffer;
 
-					if (packsize > pSocket->cache_size)
+					if (packsize > pSocket->cache_size - sizeof(px_dword))
 					{
 						goto DISCONNECT;
 					}
@@ -191,7 +194,7 @@ px_void PX_SocketThread_Recv(px_void *ptr)
 					{
 						if (pSocket->recvcallback)
 							pSocket->recvcallback(pSocket, pSocket->precv_buffer + sizeof(px_dword), packsize, pSocket->userptr);
-						memcpy(pSocket->precv_buffer, pSocket->precv_buffer + sizeof(px_dword) + packsize, pSocket->recv_buffer_offset - sizeof(px_dword) - packsize);
+						memmove(pSocket->precv_buffer, pSocket->precv_buffer + sizeof(px_dword) + packsize, pSocket->recv_buffer_offset - sizeof(px_dword) - packsize);
 						pSocket->recv_buffer_offset -= sizeof(px_dword) + packsize;
 					}
 					else
@@ -210,9 +213,9 @@ px_void PX_SocketThread_Recv(px_void *ptr)
 		pSocket->isConnecting = PX_FALSE;
 		if (pSocket->disconnectcallback)
 			pSocket->disconnectcallback(pSocket, pSocket->userptr);
-		PX_TCPSocketFree(((PX_TCP*)pSocket->handler)->socket);
 		pHandle->send_end = PX_TRUE;
 		while (pHandle->send_thread.isRun);
+		PX_TCPSocketFree(pTCP->socket);
 		printf("socket closed\nreconnecting....");
 	}
 }
@@ -230,7 +233,6 @@ px_bool PX_SocketInitialize(PX_Socket* pSocket, px_dword cache_size, \
 	PX_TCP_Handle* pHandle;
 	PX_memset(pSocket, 0, sizeof(PX_Socket));
 	pSocket->handler = (PX_TCP_Handle*)malloc(sizeof(PX_TCP_Handle));
-	PX_memset(pSocket->handler, 0, sizeof(PX_TCP_Handle));
 	if (pSocket->handler == PX_NULL)
 	{
 		return PX_FALSE;
@@ -275,9 +277,9 @@ px_bool PX_SocketInitialize(PX_Socket* pSocket, px_dword cache_size, \
 
 
 
-px_bool PX_SocketSend(PX_Socket* pSocket,px_byte* data, px_dword send_data_size)
+px_bool PX_SocketSend(PX_Socket* pSocket,const px_byte* data, px_dword send_data_size)
 {
-	if(PX_SocketCircularBufferGetSpaceSize(pSocket->send_buffer_size, &pSocket->send_buffer_wcursor, pSocket->send_buffer_rcursor)<send_data_size+sizeof(px_dword))
+	if(PX_SocketCircularBufferGetSpaceSize(pSocket->send_buffer_size, &pSocket->send_buffer_wcursor, pSocket->send_buffer_rcursor)< (px_int)send_data_size+ (px_int)sizeof(px_dword))
 	{
 		return PX_FALSE;
 	}
@@ -294,11 +296,12 @@ px_void PX_SocketFree(PX_Socket* pSocket)
 {
 	PX_TCP_Handle* pHandle = (PX_TCP_Handle*)pSocket->handler;
 	PX_TCP* pTCP = (PX_TCP*)&pHandle->tcp;
+	pSocket->exit = PX_TRUE;
+	while (pHandle->recv_thread.isRun);
 	PX_TCPFree(pTCP);
 	free(pSocket->handler);
 	free(pSocket->precv_buffer);
 	free(pSocket->psend_buffer);
-	pSocket->exit=PX_TRUE;
 }
 
 px_void PX_SocketSetUserPtr(PX_Socket* pSocket, px_void* ptr)

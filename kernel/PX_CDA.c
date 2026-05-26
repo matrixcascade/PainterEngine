@@ -209,11 +209,11 @@ px_void PX_CDA_Free(PX_CDA* pCDA)
 	PX_CDA_Clear(pCDA);
 	PX_VectorFree(&pCDA->pObjects);
 	PX_VectorFree(&pCDA->routes);
-	if (pCDA->snapshot_texture.MP)
+	if (pCDA->snapshot_texture.mp)
 	{
 		PX_TextureFree(&pCDA->snapshot_texture);
 	}
-	if (pCDA->background_texture.MP)
+	if (pCDA->background_texture.mp)
 	{
 		PX_TextureFree(&pCDA->background_texture);
 	}
@@ -328,10 +328,10 @@ static px_void PX_CDA_UpdateRouteSignal(PX_CDA* pCDA, PX_CDA_Route* proute, px_d
 		PX_ASSERTIF(psignal==PX_NULL);
 		PX_ASSERTIF(proute->prouteClass->busSpeed <= 0);
 		psignal->x += proute->prouteClass->busSpeed * elapsed / 1000.f;
-		if (psignal->x>=proute->length)
+		if (psignal->x>=proute->radius)
 		{
 			//copy signal to end grid
-			if (psignal->direction==PX_CDA_SIGNAL_DIRECTION_FORWARD)
+			if (psignal->toward==PX_CDA_SIGNAL_DIRECTION_FORWARD)
 			{
 				if ((proute->start_grid_x >= 0 && proute->start_grid_y >= 0) && (proute->start_grid_x < pCDA->grid_x_count && proute->start_grid_y < pCDA->grid_y_count))
 				{
@@ -407,7 +407,7 @@ static px_void PX_CDA_UpdateRoutes(PX_CDA* pCDA, px_dword elapsed)
 						{
 							//new signal
 							PX_CDA_Signal signal;
-							signal.direction = PX_CDA_SIGNAL_DIRECTION_FORWARD;
+							signal.toward = PX_CDA_SIGNAL_DIRECTION_FORWARD;
 							signal.timestamp = start_timestamp;
 							signal.var = PX_VariableCopy(pCDA->mp, &pst->var, 0);
 							signal.x = 0;
@@ -415,7 +415,7 @@ static px_void PX_CDA_UpdateRoutes(PX_CDA* pCDA, px_dword elapsed)
 						}
 					}
 
-					if (proute->prouteClass->direction == PX_CDA_ROUTE_DIRECTION_TWO_WAY)
+					if (proute->prouteClass->toward == PX_CDA_ROUTE_DIRECTION_TWO_WAY)
 					{
 						if (end_timestamp != proute->end_timestamp)
 						{
@@ -430,7 +430,7 @@ static px_void PX_CDA_UpdateRoutes(PX_CDA* pCDA, px_dword elapsed)
 							{
 								//new signal
 								PX_CDA_Signal signal;
-								signal.direction = PX_CDA_SIGNAL_DIRECTION_BACKWARD;
+								signal.toward = PX_CDA_SIGNAL_DIRECTION_BACKWARD;
 								signal.timestamp = end_timestamp;
 								signal.var = PX_VariableCopy(pCDA->mp, &ped->var, 0);
 								signal.x = 0;
@@ -466,7 +466,7 @@ px_void PX_CDA_RenderBackgroundTexture(px_surface* psurface, PX_CDA* pCDA)
 	if(!pCDA->psource_background_texture)
 		return;
 
-	if (!pCDA->background_texture.MP)
+	if (!pCDA->background_texture.mp)
 	{
 		if (!PX_TextureCreate(pCDA->mp, &pCDA->background_texture, grid_view_size_x, grid_view_size_y))
 			return;
@@ -491,7 +491,7 @@ px_void PX_CDA_RenderBackgroundTexture(px_surface* psurface, PX_CDA* pCDA)
 
 	offset_x = (px_int)(pCDA->camera_x - pCDA->view_width / 2);
 	offset_y = (px_int)(pCDA->camera_y - pCDA->view_height / 2);
-	if (pCDA->background_texture.MP)
+	if (pCDA->background_texture.mp)
 	{
 		PX_TextureRender(psurface, &pCDA->background_texture, -offset_x, -offset_y, PX_ALIGN_LEFTTOP, 0);
 	}
@@ -507,42 +507,42 @@ px_void PX_CDA_UpdateRouteStartEndGrid(PX_CDA* pCDA, PX_CDA_Route* proute)
 
 	for (i = 0; i < proute->routes.size; i++)
 	{
-		px_byte direction = p[i].direction;
-		px_short length = p[i].length;
+		px_byte toward = p[i].toward;
+		px_short radius = p[i].radius;
 
-		switch (direction)
+		switch (toward)
 		{
 		case 8:
-			ey = y - length;
+			ey = y - radius;
 			ex = x;
 			break;
 		case 2:
-			ey = y + length;
+			ey = y + radius;
 			ex = x;
 			break;
 		case 4:
 			ey = y;
-			ex = x - length;
+			ex = x - radius;
 			break;
 		case 6:
 			ey = y;
-			ex = x + length;
+			ex = x + radius;
 			break;
 		case 7:
-			ey = y - length;
-			ex = x - length;
+			ey = y - radius;
+			ex = x - radius;
 			break;
 		case 9:
-			ey = y - length;
-			ex = x + length;
+			ey = y - radius;
+			ex = x + radius;
 			break;
 		case 1:
-			ey = y + length;
-			ex = x - length;
+			ey = y + radius;
+			ex = x - radius;
 			break;
 		case 3:
-			ey = y + length;
-			ex = x + length;
+			ey = y + radius;
+			ex = x + radius;
 			break;
 		default:
 			PX_ERROR("Route data error");
@@ -565,50 +565,50 @@ px_point2D PX_CDA_SignalXToGridPosition(PX_CDA* pCDA, PX_CDA_Route* proute,px_fl
 
 	for (i = 0; i < proute->routes.size; i++)
 	{
-		px_byte direction = p[i].direction;
-		px_float length = p[i].length*1.f;
-		if (sx>length)
+		px_byte toward = p[i].toward;
+		px_float radius = p[i].radius*1.f;
+		if (sx>radius)
 		{
-			sx -= length * 1.f;
+			sx -= radius * 1.f;
 		}
 		else
 		{
-			length = sx;
+			radius = sx;
 			sx = 0;
 		}
-		switch (direction)
+		switch (toward)
 		{
 		case 8:
-			ey = y - length;
+			ey = y - radius;
 			ex = x;
 			break;
 		case 2:
-			ey = y + length;
+			ey = y + radius;
 			ex = x;
 			break;
 		case 4:
 			ey = y;
-			ex = x - length;
+			ex = x - radius;
 			break;
 		case 6:
 			ey = y;
-			ex = x + length;
+			ex = x + radius;
 			break;
 		case 7:
-			ey = y - length;
-			ex = x - length;
+			ey = y - radius;
+			ex = x - radius;
 			break;
 		case 9:
-			ey = y - length;
-			ex = x + length;
+			ey = y - radius;
+			ex = x + radius;
 			break;
 		case 1:
-			ey = y + length;
-			ex = x - length;
+			ey = y + radius;
+			ex = x - radius;
 			break;
 		case 3:
-			ey = y + length;
-			ex = x + length;
+			ey = y + radius;
+			ex = x + radius;
 			break;
 		default:
 			PX_ERROR("Route data error");
@@ -648,42 +648,42 @@ px_void PX_CDA_RenderRouteLines(px_surface* psurface, PX_CDA* pCDA, PX_CDA_Route
 	for (i = 0; i < proute->routes.size; i++)
 	{
 
-		px_byte direction = p[i].direction;
-		px_short length = p[i].length;
+		px_byte toward = p[i].toward;
+		px_short radius = p[i].radius;
 
-		switch (direction)
+		switch (toward)
 		{
 		case 8:
-			ey = y - length;
+			ey = y - radius;
 			ex = x;
 			break;
 		case 2:
-			ey = y + length;
+			ey = y + radius;
 			ex = x;
 			break;
 		case 4:
 			ey = y;
-			ex = x - length;
+			ex = x - radius;
 			break;
 		case 6:
 			ey = y;
-			ex = x + length;
+			ex = x + radius;
 			break;
 		case 7:
-			ey = y - length;
-			ex = x - length;
+			ey = y - radius;
+			ex = x - radius;
 			break;
 		case 9:
-			ey = y - length;
-			ex = x + length;
+			ey = y - radius;
+			ex = x + radius;
 			break;
 		case 1:
-			ey = y + length;
-			ex = x - length;
+			ey = y + radius;
+			ex = x - radius;
 			break;
 		case 3:
-			ey = y + length;
-			ex = x + length;
+			ey = y + radius;
+			ex = x + radius;
 			break;
 		default:
 			PX_ERROR("Route data error");
@@ -714,42 +714,42 @@ px_void PX_CDA_RenderPreviewRouteLines(px_surface* psurface, PX_CDA* pCDA, PX_CD
 	for (i = 0; i < proute->routes.size; i++)
 	{
 
-		px_byte direction = p[i].direction;
-		px_short length = p[i].length;
+		px_byte toward = p[i].toward;
+		px_short radius = p[i].radius;
 
-		switch (direction)
+		switch (toward)
 		{
 		case 8:
-			ey = y - length;
+			ey = y - radius;
 			ex = x;
 			break;
 		case 2:
-			ey = y + length;
+			ey = y + radius;
 			ex = x;
 			break;
 		case 4:
 			ey = y;
-			ex = x - length;
+			ex = x - radius;
 			break;
 		case 6:
 			ey = y;
-			ex = x + length;
+			ex = x + radius;
 			break;
 		case 7:
-			ey = y - length;
-			ex = x - length;
+			ey = y - radius;
+			ex = x - radius;
 			break;
 		case 9:
-			ey = y - length;
-			ex = x + length;
+			ey = y - radius;
+			ex = x + radius;
 			break;
 		case 1:
-			ey = y + length;
-			ex = x - length;
+			ey = y + radius;
+			ex = x - radius;
 			break;
 		case 3:
-			ey = y + length;
-			ex = x + length;
+			ey = y + radius;
+			ex = x + radius;
 			break;
 		default:
 			PX_ERROR("Route data error");
@@ -803,7 +803,7 @@ px_void PX_CDA_RenderRoute(px_surface* psurface, PX_CDA* pCDA, PX_CDA_Route* pro
 
 	
 	
-	if (proute->prouteClass->direction==PX_CDA_ROUTE_DIRECTION_ONE_WAY)
+	if (proute->prouteClass->toward==PX_CDA_ROUTE_DIRECTION_ONE_WAY)
 	{
 		if (proute->routes.size)
 		{
@@ -811,7 +811,7 @@ px_void PX_CDA_RenderRoute(px_surface* psurface, PX_CDA* pCDA, PX_CDA_Route* pro
 			plastline = PX_VECTORLAST(PX_CDA_RouteLine, &proute->routes);
 			if (plastline)
 			{
-				switch (plastline->direction)
+				switch (plastline->toward)
 				{
 				default:
 				case 8:
@@ -1220,25 +1220,25 @@ px_void PX_CDA_Optimize(PX_CDA* pCDA)
 		{
 			PX_CDA_RouteLine* pCurrent=PX_VECTORAT(PX_CDA_RouteLine, &pCDA->editing_route.routes, i);
 			PX_CDA_RouteLine* pLast = PX_VECTORAT(PX_CDA_RouteLine, &pCDA->editing_route.routes, i-1);
-			switch (pCurrent->direction)
+			switch (pCurrent->toward)
 			{
 				case 8:
 				{
-				    if (pLast->direction == 8)
+				    if (pLast->toward == 8)
 					{
-						pLast->length += pCurrent->length;
+						pLast->radius += pCurrent->radius;
 						PX_VectorErase(&pCDA->editing_route.routes, i);
 						i--;
 					}
-					else if (pLast->direction==2)
+					else if (pLast->toward==2)
 					{
-						if (pLast->length>pCurrent->length)
+						if (pLast->radius>pCurrent->radius)
 						{
-							pLast->length -= pCurrent->length;
+							pLast->radius -= pCurrent->radius;
 							PX_VectorErase(&pCDA->editing_route.routes, i);
 							i--;
 						}
-						else if (pLast->length == pCurrent->length)
+						else if (pLast->radius == pCurrent->radius)
 						{
 							PX_VectorErase(&pCDA->editing_route.routes, i);
 							PX_VectorErase(&pCDA->editing_route.routes, i-1);
@@ -1246,7 +1246,7 @@ px_void PX_CDA_Optimize(PX_CDA* pCDA)
 						}
 						else
 						{
-							pCurrent->length -= pLast->length;
+							pCurrent->radius -= pLast->radius;
 							PX_VectorErase(&pCDA->editing_route.routes, i-1);
 							i--;
 						}
@@ -1255,21 +1255,21 @@ px_void PX_CDA_Optimize(PX_CDA* pCDA)
 				break;
 				case 2:
 				{
-					if (pLast->direction == 2)
+					if (pLast->toward == 2)
 					{
-						pLast->length += pCurrent->length;
+						pLast->radius += pCurrent->radius;
 						PX_VectorErase(&pCDA->editing_route.routes, i);
 						i--;
 					}
-					else if (pLast->direction == 8)
+					else if (pLast->toward == 8)
 					{
-						if (pLast->length>pCurrent->length)
+						if (pLast->radius>pCurrent->radius)
 						{
-							pLast->length -= pCurrent->length;
+							pLast->radius -= pCurrent->radius;
 							PX_VectorErase(&pCDA->editing_route.routes, i);
 							i--;
 						}
-						else if (pLast->length == pCurrent->length)
+						else if (pLast->radius == pCurrent->radius)
 						{
 							PX_VectorErase(&pCDA->editing_route.routes, i);
 							PX_VectorErase(&pCDA->editing_route.routes, i - 1);
@@ -1277,7 +1277,7 @@ px_void PX_CDA_Optimize(PX_CDA* pCDA)
 						}
 						else
 						{
-							pCurrent->length -= pLast->length;
+							pCurrent->radius -= pLast->radius;
 							PX_VectorErase(&pCDA->editing_route.routes, i - 1);
 							i--;
 						}
@@ -1286,21 +1286,21 @@ px_void PX_CDA_Optimize(PX_CDA* pCDA)
 				break;
 				case 4:
 				{
-					if (pLast->direction == 4)
+					if (pLast->toward == 4)
 					{
-						pLast->length += pCurrent->length;
+						pLast->radius += pCurrent->radius;
 						PX_VectorErase(&pCDA->editing_route.routes, i);
 						i--;
 					}
-					else if (pLast->direction == 6)
+					else if (pLast->toward == 6)
 					{
-						if (pLast->length>pCurrent->length)
+						if (pLast->radius>pCurrent->radius)
 						{
-							pLast->length -= pCurrent->length;
+							pLast->radius -= pCurrent->radius;
 							PX_VectorErase(&pCDA->editing_route.routes, i);
 							i--;
 						}
-						else if (pLast->length == pCurrent->length)
+						else if (pLast->radius == pCurrent->radius)
 						{
 							PX_VectorErase(&pCDA->editing_route.routes, i);
 							PX_VectorErase(&pCDA->editing_route.routes, i - 1);
@@ -1308,7 +1308,7 @@ px_void PX_CDA_Optimize(PX_CDA* pCDA)
 						}
 						else
 						{
-							pCurrent->length -= pLast->length;
+							pCurrent->radius -= pLast->radius;
 							PX_VectorErase(&pCDA->editing_route.routes, i - 1);
 							i--;
 						}
@@ -1317,21 +1317,21 @@ px_void PX_CDA_Optimize(PX_CDA* pCDA)
 				break;
 				case 6:
 				{
-					if (pLast->direction == 6)
+					if (pLast->toward == 6)
 					{
-						pLast->length += pCurrent->length;
+						pLast->radius += pCurrent->radius;
 						PX_VectorErase(&pCDA->editing_route.routes, i);
 						i--;
 					}
-					else if (pLast->direction == 4)
+					else if (pLast->toward == 4)
 					{
-						if (pLast->length>pCurrent->length)
+						if (pLast->radius>pCurrent->radius)
 						{
-							pLast->length -= pCurrent->length;
+							pLast->radius -= pCurrent->radius;
 							PX_VectorErase(&pCDA->editing_route.routes, i);
 							i--;
 						}
-						else if (pLast->length == pCurrent->length)
+						else if (pLast->radius == pCurrent->radius)
 						{
 							PX_VectorErase(&pCDA->editing_route.routes, i);
 							PX_VectorErase(&pCDA->editing_route.routes, i - 1);
@@ -1339,7 +1339,7 @@ px_void PX_CDA_Optimize(PX_CDA* pCDA)
 						}
 						else
 						{
-							pCurrent->length -= pLast->length;
+							pCurrent->radius -= pLast->radius;
 							PX_VectorErase(&pCDA->editing_route.routes, i - 1);
 							i--;
 						}
@@ -1348,21 +1348,21 @@ px_void PX_CDA_Optimize(PX_CDA* pCDA)
 				break;
 				case 7:
 				{
-					if (pLast->direction == 7)
+					if (pLast->toward == 7)
 					{
-						pLast->length += pCurrent->length;
+						pLast->radius += pCurrent->radius;
 						PX_VectorErase(&pCDA->editing_route.routes, i);
 						i--;
 					}
-					else if (pLast->direction == 3)
+					else if (pLast->toward == 3)
 					{
-						if (pLast->length>pCurrent->length)
+						if (pLast->radius>pCurrent->radius)
 						{
-							pLast->length -= pCurrent->length;
+							pLast->radius -= pCurrent->radius;
 							PX_VectorErase(&pCDA->editing_route.routes, i);
 							i--;
 						}
-						else if (pLast->length == pCurrent->length)
+						else if (pLast->radius == pCurrent->radius)
 						{
 							PX_VectorErase(&pCDA->editing_route.routes, i);
 							PX_VectorErase(&pCDA->editing_route.routes, i - 1);
@@ -1370,7 +1370,7 @@ px_void PX_CDA_Optimize(PX_CDA* pCDA)
 						}
 						else
 						{
-							pCurrent->length -= pLast->length;
+							pCurrent->radius -= pLast->radius;
 							PX_VectorErase(&pCDA->editing_route.routes, i - 1);
 							i--;
 						}
@@ -1379,21 +1379,21 @@ px_void PX_CDA_Optimize(PX_CDA* pCDA)
 				break;
 				case 9:
 				{
-					if (pLast->direction == 9)
+					if (pLast->toward == 9)
 					{
-						pLast->length += pCurrent->length;
+						pLast->radius += pCurrent->radius;
 						PX_VectorErase(&pCDA->editing_route.routes, i);
 						i--;
 					}
-					else if (pLast->direction == 1)
+					else if (pLast->toward == 1)
 					{
-						if (pLast->length>pCurrent->length)
+						if (pLast->radius>pCurrent->radius)
 						{
-							pLast->length -= pCurrent->length;
+							pLast->radius -= pCurrent->radius;
 							PX_VectorErase(&pCDA->editing_route.routes, i);
 							i--;
 						}
-						else if (pLast->length == pCurrent->length)
+						else if (pLast->radius == pCurrent->radius)
 						{
 							PX_VectorErase(&pCDA->editing_route.routes, i);
 							PX_VectorErase(&pCDA->editing_route.routes, i - 1);
@@ -1401,7 +1401,7 @@ px_void PX_CDA_Optimize(PX_CDA* pCDA)
 						}
 						else
 						{
-							pCurrent->length -= pLast->length;
+							pCurrent->radius -= pLast->radius;
 							PX_VectorErase(&pCDA->editing_route.routes, i - 1);
 							i--;
 						}
@@ -1410,21 +1410,21 @@ px_void PX_CDA_Optimize(PX_CDA* pCDA)
 				break;
 				case 1:
 				{
-					if (pLast->direction == 1)
+					if (pLast->toward == 1)
 					{
-						pLast->length += pCurrent->length;
+						pLast->radius += pCurrent->radius;
 						PX_VectorErase(&pCDA->editing_route.routes, i);
 						i--;
 					}
-					else if (pLast->direction == 9)
+					else if (pLast->toward == 9)
 					{
-						if (pLast->length>pCurrent->length)
+						if (pLast->radius>pCurrent->radius)
 						{
-							pLast->length -= pCurrent->length;
+							pLast->radius -= pCurrent->radius;
 							PX_VectorErase(&pCDA->editing_route.routes, i);
 							i--;
 						}
-						else if (pLast->length == pCurrent->length)
+						else if (pLast->radius == pCurrent->radius)
 						{
 							PX_VectorErase(&pCDA->editing_route.routes, i);
 							PX_VectorErase(&pCDA->editing_route.routes, i - 1);
@@ -1432,7 +1432,7 @@ px_void PX_CDA_Optimize(PX_CDA* pCDA)
 						}
 						else
 						{
-							pCurrent->length -= pLast->length;
+							pCurrent->radius -= pLast->radius;
 							PX_VectorErase(&pCDA->editing_route.routes, i - 1);
 							i--;
 						}
@@ -1441,21 +1441,21 @@ px_void PX_CDA_Optimize(PX_CDA* pCDA)
 				break;
 				case 3:
 				{
-					if (pLast->direction == 3)
+					if (pLast->toward == 3)
 					{
-						pLast->length += pCurrent->length;
+						pLast->radius += pCurrent->radius;
 						PX_VectorErase(&pCDA->editing_route.routes, i);
 						i--;
 					}
-					else if (pLast->direction == 7)
+					else if (pLast->toward == 7)
 					{
-						if (pLast->length>pCurrent->length)
+						if (pLast->radius>pCurrent->radius)
 						{
-							pLast->length -= pCurrent->length;
+							pLast->radius -= pCurrent->radius;
 							PX_VectorErase(&pCDA->editing_route.routes, i);
 							i--;
 						}
-						else if (pLast->length == pCurrent->length)
+						else if (pLast->radius == pCurrent->radius)
 						{
 							PX_VectorErase(&pCDA->editing_route.routes, i);
 							PX_VectorErase(&pCDA->editing_route.routes, i - 1);
@@ -1463,7 +1463,7 @@ px_void PX_CDA_Optimize(PX_CDA* pCDA)
 						}
 						else
 						{
-							pCurrent->length -= pLast->length;
+							pCurrent->radius -= pLast->radius;
 							PX_VectorErase(&pCDA->editing_route.routes, i - 1);
 							i--;
 						}
@@ -1496,41 +1496,41 @@ px_bool PX_CDA_RouteMoving(PX_CDA* pCDA, px_int grid_x, px_int grid_y)
 
 			for (i = 0; i < pCDA->editing_route.routes.size; i++)
 			{
-				px_byte direction = p[i].direction;
-				px_short length = p[i].length;
-				switch (direction)
+				px_byte toward = p[i].toward;
+				px_short radius = p[i].radius;
+				switch (toward)
 				{
 				case 8:
-					y = y - length;
+					y = y - radius;
 					//x = x;
 					break;
 				case 2:
-					y = y + length;
+					y = y + radius;
 					//x = x;
 					break;
 				case 4:
 					//y = y;
-					x = x - length;
+					x = x - radius;
 					break;
 				case 6:
 					//y = y;
-					x = x + length;
+					x = x + radius;
 					break;
 				case 7:
-					y = y - length;
-					x = x - length;
+					y = y - radius;
+					x = x - radius;
 					break;
 				case 9:
-					y = y - length;
-					x = x + length;
+					y = y - radius;
+					x = x + radius;
 					break;
 				case 1:
-					y = y + length;
-					x = x - length;
+					y = y + radius;
+					x = x - radius;
 					break;
 				case 3:
-					y = y + length;
-					x = x + length;
+					y = y + radius;
+					x = x + radius;
 					break;
 				default:
 					PX_ERROR("Route data error");
@@ -1546,39 +1546,39 @@ px_bool PX_CDA_RouteMoving(PX_CDA* pCDA, px_int grid_x, px_int grid_y)
 				PX_CDA_RouteLine line;
 				if (PX_ABS(dx) == PX_ABS(dy))
 				{
-					if (dx < 0 && dy < 0)	line.direction = 7;
-					if (dx > 0 && dy < 0)	line.direction = 9;
-					if (dx < 0 && dy > 0)	line.direction = 1;
-					if (dx > 0 && dy > 0)	line.direction = 3;
-					line.length = PX_ABS(dx);
+					if (dx < 0 && dy < 0)	line.toward = 7;
+					if (dx > 0 && dy < 0)	line.toward = 9;
+					if (dx < 0 && dy > 0)	line.toward = 1;
+					if (dx > 0 && dy > 0)	line.toward = 3;
+					line.radius = PX_ABS(dx);
 					PX_VectorPushback(&pCDA->editing_route.routes, &line);
 				}
 				else if (PX_ABS(dx) > PX_ABS(dy))
 				{
-					if (dx < 0) line.direction = 4;
-					else line.direction = 6;
-					line.length = PX_ABS(dx);
+					if (dx < 0) line.toward = 4;
+					else line.toward = 6;
+					line.radius = PX_ABS(dx);
 					PX_VectorPushback(&pCDA->editing_route.routes, &line);
 					if (dy)
 					{
-						if (dy < 0) line.direction = 8;
-						else line.direction = 2;
-						line.length = PX_ABS(dy);
+						if (dy < 0) line.toward = 8;
+						else line.toward = 2;
+						line.radius = PX_ABS(dy);
 						PX_VectorPushback(&pCDA->editing_route.routes, &line);
 					}
 					
 				}
 				else
 				{
-					if (dy < 0) line.direction = 8;
-					else line.direction = 2;
-					line.length = PX_ABS(dy);
+					if (dy < 0) line.toward = 8;
+					else line.toward = 2;
+					line.radius = PX_ABS(dy);
 					PX_VectorPushback(&pCDA->editing_route.routes, &line);
 					if (dx)
 					{
-						if (dx < 0) line.direction = 4;
-						else line.direction = 6;
-						line.length = PX_ABS(dx);
+						if (dx < 0) line.toward = 4;
+						else line.toward = 6;
+						line.radius = PX_ABS(dx);
 						PX_VectorPushback(&pCDA->editing_route.routes, &line);
 					}
 					
@@ -1645,7 +1645,7 @@ px_texture * PX_CDA_TakeSnapShot(PX_CDA* pCDA)
 	px_float old_camera_y = pCDA->camera_y;
 	
 	//refresh snapshot texture
-	if (!pCDA->snapshot_texture.MP)
+	if (!pCDA->snapshot_texture.mp)
 	{
 		px_int snapshot_width = pCDA->grid_x_count * pCDA->grid_size;
 		px_int snapshot_height = pCDA->grid_y_count * pCDA->grid_size;
@@ -2276,7 +2276,7 @@ px_bool PX_CDA_ExecutePayload_CreateRoute(PX_CDA* pcda, PX_Json* pjson)
 			{
 				return PX_FALSE;
 			}
-			line.direction=(px_byte)pValue->_number;
+			line.toward=(px_byte)pValue->_number;
 			pNode = pNode->pnext;
 			if (!pNode)
 			{
@@ -2287,9 +2287,9 @@ px_bool PX_CDA_ExecutePayload_CreateRoute(PX_CDA* pcda, PX_Json* pjson)
 			{
 				return PX_FALSE;
 			}
-			line.length = (px_word)pValue->_number;
+			line.radius = (px_word)pValue->_number;
 			line.type = 0;
-			route.length += line.length;
+			route.radius += line.radius;
 			PX_VectorPushback(&route.routes, &line);
 			pNode = pNode->pnext;
 		}
@@ -2569,7 +2569,7 @@ px_void PX_CDA_DeleteSelectRoute(PX_CDA* pCDA)
 	for (i = 0; i < pCDA->routes.size; i++)
 	{
 		PX_CDA_Route* proute = PX_VECTORAT(PX_CDA_Route, &pCDA->routes, i);
-		if (proute->mode == PX_CDA_OBJECT_MODE_SELECT)
+		if (proute->mode == PX_CDA_ROUTE_MODE_SELECT)
 		{
 			break;
 		}
@@ -2629,10 +2629,10 @@ px_bool PX_CDA_EndRouteEdit(PX_CDA* pCDA, px_bool save)
 				for (i = 0; i < pCDA->editing_route.routes.size; i++)
 				{
 					PX_CDA_RouteLine* p = PX_VECTORAT(PX_CDA_RouteLine, &pCDA->editing_route.routes, i);
-					PX_itoa(p->direction, content, sizeof(content), 10);
+					PX_itoa(p->toward, content, sizeof(content), 10);
 					PX_MemoryCatString(&pCDA->payload, content);
 					PX_MemoryCatString(&pCDA->payload, ",");
-					PX_itoa(p->length, content, sizeof(content), 10);
+					PX_itoa(p->radius, content, sizeof(content), 10);
 					PX_MemoryCatString(&pCDA->payload, content);
 					if (i != pCDA->editing_route.routes.size - 1)
 					{
@@ -2758,42 +2758,42 @@ px_bool PX_CDA_isPositionSelectRoute(PX_CDA* pCDA, PX_CDA_Route* proute, px_floa
 	for (i = 0; i < proute->routes.size; i++)
 	{
 
-		px_byte direction = p[i].direction;
-		px_short length = p[i].length;
+		px_byte toward = p[i].toward;
+		px_short radius = p[i].radius;
 
-		switch (direction)
+		switch (toward)
 		{
 		case 8:
-			ey = y - length;
+			ey = y - radius;
 			ex = x;
 			break;
 		case 2:
-			ey = y + length;
+			ey = y + radius;
 			ex = x;
 			break;
 		case 4:
 			ey = y;
-			ex = x - length;
+			ex = x - radius;
 			break;
 		case 6:
 			ey = y;
-			ex = x + length;
+			ex = x + radius;
 			break;
 		case 7:
-			ey = y - length;
-			ex = x - length;
+			ey = y - radius;
+			ex = x - radius;
 			break;
 		case 9:
-			ey = y - length;
-			ex = x + length;
+			ey = y - radius;
+			ex = x + radius;
 			break;
 		case 1:
-			ey = y + length;
-			ex = x - length;
+			ey = y + radius;
+			ex = x - radius;
 			break;
 		case 3:
-			ey = y + length;
-			ex = x + length;
+			ey = y + radius;
+			ex = x + radius;
 			break;
 		default:
 			PX_ERROR("Route data error");
@@ -2837,7 +2837,7 @@ px_bool PX_CDA_HasSelectingRoute(PX_CDA* pCDA)
 	for (i = 0; i < pCDA->routes.size; i++)
 	{
 		PX_CDA_Route* proute = PX_VECTORAT(PX_CDA_Route, &pCDA->routes, i);
-		if (proute->mode == PX_CDA_OBJECT_MODE_SELECT)
+		if (proute->mode == PX_CDA_ROUTE_MODE_SELECT)
 		{
 			return PX_TRUE;
 		}

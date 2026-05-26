@@ -120,13 +120,25 @@ px_void				PX_VMThreadClear(PX_VM *Ins,px_int ThreadId);
 px_void				PX_VMThreadSuspend(PX_VM *Ins,px_int ThreadId);
 px_void				PX_VMThreadResume(PX_VM *Ins,px_int ThreadId);
 
-
+/*
+#name \"stdlib.h\"
+host void sleep(px_int ms);
+host int abiget_int(memory* pabi, string payload);
+host float abiget_float(memory* pabi, string payload);
+host string abiget_string(memory* pabi, string payload);
+host memory abiget_data(memory* pabi, string payload);
+host void abiset_int(memory* pabi, string payload, int value);
+host void abiset_float(memory* pabi, string payload, float value);
+host void abiset_string(memory* pabi, string payload, string value);
+host void abiset_data(memory* pabi, string payload, memory value);
+*/
 px_bool PX_VMIsRuning(PX_VM* Ins);
 px_bool PX_VMInitialize(PX_VM* Ins, px_memorypool* mp, const px_byte* code, px_int size);
 px_bool PX_VMLocalAlloc(PX_VM *Ins,px_int size,PX_VM_MEMORY_PTR *mem_ptr);
 px_bool PX_VMLocalFree(PX_VM *Ins,PX_VM_MEMORY_PTR *mem_ptr);
 px_bool PX_VMRegisterHostFunction(PX_VM *Ins,const px_char *name,PX_VM_Host_Function_Modules funcModules,px_void *userptr);
 px_bool PX_VMFree(PX_VM *Ins);
+px_bool PX_VMRegisterStandardFunctions(PX_VM* Ins, px_void* userptr);
 
 #define  PX_VM_STACK_THREAD(Ins,i,T) ((Ins)->_mem[(Ins)->pThread[T].SP+i])
 #define  PX_VM_STACK(Ins,i) ((Ins)->_mem[(Ins)->pThread[(Ins)->T].SP+i])
@@ -139,6 +151,7 @@ px_bool PX_VMFree(PX_VM *Ins);
 px_void  PX_VM_POPN(PX_VM *Ins,px_int n,px_int Threadid);
 px_void  PX_VM_RET(PX_VM *Ins,px_variable ret);
 px_void	 PX_VM_RET_String(PX_VM* Ins, const px_char* pstr);
+px_void PX_VM_RET_string(PX_VM* Ins, const px_char* pstr);
 px_void  PX_VM_RET_int(PX_VM* Ins, px_int _int);
 px_void PX_VM_RET_ptr(PX_VM* Ins, px_void* ptr);
 #define PX_VM_RET_handle(Ins,ptr) PX_VM_RET_ptr(Ins,ptr);

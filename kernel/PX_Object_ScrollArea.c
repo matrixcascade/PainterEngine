@@ -5,6 +5,10 @@ PX_OBJECT_EVENT_FUNCTION(PX_Object_ScrollArea_EventDispatcher)
 	PX_Object_ScrollArea *pSA=PX_Object_GetScrollArea(pObject);
 	px_float objx,objy,objWidth,objHeight;
 	px_rect rect;
+	if (!PX_ObjectIsCursorInRegion(pObject,e))
+	{
+		return;
+	}
 
 	rect = PX_ObjectGetRect(pObject);
 	objx = rect.x;
@@ -72,19 +76,8 @@ PX_OBJECT_EVENT_FUNCTION(PX_Object_ScrollAreaWheel)
 
 	if (PX_ObjectIsCursorInRegion(pObject, e))
 	{
-		px_float z = PX_Object_Event_GetCursorZ(e);
-		pSA->root->y += z / 5;
-		if (-pSA->root->y<minz)
-		{
-			pSA->root->y = -minz*1.f;
-		}
 
-		if (-pSA->root->y> maxz)
-		{
-			pSA->root->y = -maxz*1.f;
-		}
-
-		PX_Object_SliderBarSetValue(pSA->vscroll, -(px_int)pSA->root->y);
+		PX_Object_SliderBarChangeValue(pSA->vscroll, (px_int)(PX_Object_Event_GetCursorZ(e) / -5));
 		return;
 	}
 }
@@ -232,6 +225,26 @@ px_void PX_Object_ScrollAreaScrollEnable(PX_Object* pObj, px_bool bEnable)
 	pSA->scrollAction->enable=bEnable;
 }
 
+px_void PX_Object_ScrollAreaSetHSliderBarHeight(PX_Object* pObj, px_int height)
+{
+	PX_Object_ScrollArea* pSA;
+	pSA = PX_Object_GetScrollArea(pObj);
+	if (pSA->hscroll)
+	{
+		pSA->hscroll->Height = (px_float)height;
+	}
+}
+
+px_void PX_Object_ScrollAreaSetVSliderBarWidth(PX_Object* pObj, px_int width)
+{
+	PX_Object_ScrollArea* pSA;
+	pSA = PX_Object_GetScrollArea(pObj);
+	if (pSA->vscroll)
+	{
+		pSA->vscroll->Width = (px_float)width;
+	}
+}
+
 //get background color
 px_color PX_Object_ScrollAreaGetBackgroundColor(PX_Object* pObj)
 {
@@ -310,7 +323,7 @@ px_void PX_Object_ScrollAreaGetRegion(PX_Object *pObject,px_float *left,px_float
 	}
 
 	PX_Object_ScrollAreaGetRegion(pObject->pNextBrother, left, top, right, bottom);
-	PX_Object_ScrollAreaGetRegion(pObject->pChilds,left,top,right,bottom);
+	PX_Object_ScrollAreaGetRegion(pObject->pChildren,left,top,right,bottom);
 }
 
 px_void PX_Object_ScrollAreaUpdateRange( PX_Object *pObject)
@@ -337,9 +350,9 @@ px_void PX_Object_ScrollAreaUpdateRange( PX_Object *pObject)
 	{	
 		px_float rWidth=right-left;
 		pSA->hscroll->x=0;
-		pSA->hscroll->y=objHeight-16;
+		pSA->hscroll->y = objHeight - pSA->hscroll->Height;
 		pSA->hscroll->Width=pObject->Width;
-		pSA->hscroll->Height=16;
+
 		if (rWidth>pObject->Width)
 		{
 			if (pObject->Width!=0)
@@ -362,8 +375,8 @@ px_void PX_Object_ScrollAreaUpdateRange( PX_Object *pObject)
 	{	
 		px_float rHeight=bottom-top;
 
-		pSA->vscroll->x=objWidth-16;
-		pSA->vscroll->y=0;
+		pSA->vscroll->x=objWidth- pSA->vscroll->Width;
+		pSA->vscroll->y = 0;
 		pSA->vscroll->Width=16;
 		pSA->vscroll->Height=objHeight;
 		if (rHeight>pObject->Height)
@@ -400,7 +413,7 @@ px_void PX_Object_ScrollAreaVerticalReorder(PX_Object* pScrollAreaObject,px_int 
 		PX_ASSERT();
 		return;
 	}
-	pObject=pSA->root->pChilds;
+	pObject=pSA->root->pChildren;
 	while (pObject)
 	{
 		if (pObject->Visible)
@@ -424,7 +437,7 @@ px_void PX_Object_ScrollAreaHorizontalReorder(PX_Object* pObject, px_int spacer)
 		PX_ASSERT();
 		return;
 	}
-	pChild=pSA->root->pChilds;
+	pChild=pSA->root->pChildren;
 	while (pChild)
 	{
 		if (pChild->Visible)

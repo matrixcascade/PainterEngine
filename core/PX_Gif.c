@@ -3,10 +3,12 @@
 
 #define PX_GIF_MIN(A, B) ((A) < (B) ? (A) : (B))
 #define PX_GIF_MAX(A, B) ((A) > (B) ? (A) : (B))
+#define PX_GIF_CHECK_BOUND(gif, n) do { if ((gif)->roffset + (n) > (gif)->data.usedsize) return -1; } while(0)
+#define PX_GIF_CHECK_BOUND_VOID(gif, n) do { if ((gif)->roffset + (n) > (gif)->data.usedsize) return; } while(0)
 
 typedef struct 
 {
-    px_ushort length;
+    px_ushort radius;
     px_ushort prefix;
     px_byte  suffix;
 } px_gif_Entry;
@@ -97,7 +99,7 @@ px_bool PX_GifCreate(px_memorypool* mp, px_gif* gif, px_void* buffer, px_int siz
     gif->palette = &gif->gct;
     gif->bgindex = bgidx;
    
-    gif->frame = (px_byte *)MP_Malloc(mp,4* width * height);
+    gif->frame = (px_byte *)MP_Malloc(mp,(px_int)((px_int64)4 * width * height));
     if (!gif->frame) 
     {
         PX_MemoryFree(&gif->data);
@@ -133,20 +135,23 @@ static px_void px_gif_discard_sub_blocks(px_gif *gif)
     px_byte size;
 
     do {
+        PX_GIF_CHECK_BOUND_VOID(gif, 1);
         size = gif->data.buffer[gif->roffset];
         gif->roffset++;
+        PX_GIF_CHECK_BOUND_VOID(gif, size);
         gif->roffset += size;
     } while (size);
 }
 
 static px_void px_gif_read_plain_text_ext(px_gif *gif)
 {
-    if (gif->plain_text) 
+    if (gif->plain_text)
     {
         px_ushort tx=0, ty=0, tw=0, th=0;
         px_byte cw=0, ch=0, fg=0, bg=0;
         px_int sub_block;
         //lseek(gif->fd, 1, SEEK_CUR); /* block size = 12 */
+        PX_GIF_CHECK_BOUND_VOID(gif, 13);
         gif->roffset++;
         tx = px_gif_read_num(gif->data.buffer+gif->roffset);
         gif->roffset += 2;
@@ -173,9 +178,10 @@ static px_void px_gif_read_plain_text_ext(px_gif *gif)
 		gif->roffset = sub_block;
 
     } 
-    else 
+    else
     {
         /* Discard plain text metadata. */
+        PX_GIF_CHECK_BOUND_VOID(gif, 13);
         gif->roffset += 13;
     }
     /* Discard plain text sub-blocks. */
@@ -187,6 +193,7 @@ static px_void px_gif_read_graphic_control_ext(px_gif *gif)
     px_byte rdit=0;
 
     /* Discard block size (always 0x04). */
+    PX_GIF_CHECK_BOUND_VOID(gif, 6);
     gif->roffset++;
     //lseek(gif->fd, 1, SEEK_CUR);
     //read(gif->fd, &rdit, 1);
@@ -227,6 +234,7 @@ static px_void read_application_ext(px_gif *gif)
 
     /* Discard block size (always 0x0B). */
     //lseek(gif->fd, 1, SEEK_CUR);
+    PX_GIF_CHECK_BOUND_VOID(gif, 12);
     gif->roffset++;
     /* Application Identifier. */
     //read(gif->fd, app_id, 8);
@@ -237,10 +245,11 @@ static px_void read_application_ext(px_gif *gif)
 	PX_memcpy(app_auth_code, gif->data.buffer + gif->roffset, 3);
     gif->roffset += 3;
 
-    if (PX_memequ(app_id, "NETSCAPE", sizeof(app_id))) 
+    if (PX_memequ(app_id, "NETSCAPE", sizeof(app_id)))
     {
         /* Discard block size (0x03) and constant byte (0x01). */
         //lseek(gif->fd, 2, SEEK_CUR);
+        PX_GIF_CHECK_BOUND_VOID(gif, 5);
         gif->roffset += 2;
         gif->loop_count = px_gif_read_num(gif->data.buffer+gif->roffset);
         gif->roffset += 2;
@@ -266,6 +275,7 @@ static px_void read_ext(px_gif *gif)
     px_byte label;
 
     //read(gif->fd, &label, 1);
+    PX_GIF_CHECK_BOUND_VOID(gif, 1);
     PX_memcpy(&label, gif->data.buffer + gif->roffset, 1);
     gif->roffset++;
     switch (label) {
@@ -297,7 +307,7 @@ static px_gif_Table *new_table(px_gif* gif, px_int key_size)
         table->entries = (px_gif_Entry *) &table[1];
         for (key = 0; key < (1 << key_size); key++)
         {
-            table->entries[key].length = 1;
+            table->entries[key].radius = 1;
             table->entries[key].prefix = 0xFFF;
             table->entries[key].suffix = (px_byte) key;
         }
@@ -309,7 +319,7 @@ static px_gif_Table *new_table(px_gif* gif, px_int key_size)
  *  0 on success
  *  +1 if key size must be incremented after this addition
  *  -1 if could not realloc table */
-static px_int add_entry(px_memorypool *mp,px_gif_Table **tablep, px_ushort length, px_ushort prefix, px_byte suffix)
+static px_int add_entry(px_memorypool *mp,px_gif_Table **tablep, px_ushort radius, px_ushort prefix, px_byte suffix)
 {
     px_gif_Table *table = *tablep;
     px_gif_Table *new_table=PX_NULL;
@@ -326,7 +336,7 @@ static px_int add_entry(px_memorypool *mp,px_gif_Table **tablep, px_ushort lengt
         table->entries = (px_gif_Entry *) &table[1];
         *tablep = table;
     }
-    table->entries[table->nentries].length = length;
+    table->entries[table->nentries].radius = radius;
     table->entries[table->nentries].prefix = prefix;
     table->entries[table->nentries].suffix = suffix;
 
@@ -350,12 +360,16 @@ static px_ushort get_key(px_gif *gif, px_int key_size, px_byte *sub_len, px_byte
             /* Update byte. */
             if (*sub_len == 0) {
                 //read(gif->fd, sub_len, 1); /* Must be nonzero! */
+                if (gif->roffset + 1 > gif->data.usedsize)
+                    return 0x1000;
                 PX_memcpy(sub_len, gif->data.buffer + gif->roffset, 1);
                 gif->roffset++;
                 if (*sub_len == 0)
                     return 0x1000;
             }
             //read(gif->fd, byte, 1);
+            if (gif->roffset + 1 > gif->data.usedsize)
+                return 0x1000;
             PX_memcpy(byte, gif->data.buffer + gif->roffset, 1);
 			gif->roffset++;
             (*sub_len)--;
@@ -404,6 +418,7 @@ static px_int read_image_data(px_gif *gif, px_int interlace)
     px_int start, end;
 
     //read(gif->fd, &byte, 1);
+    PX_GIF_CHECK_BOUND(gif, 1);
     PX_memcpy(&byte, gif->data.buffer + gif->roffset, 1);
     gif->roffset++;
     
@@ -449,9 +464,9 @@ static px_int read_image_data(px_gif *gif, px_int interlace)
         if (key == stop || key == 0x1000) break;
         if (ret == 1) key_size++;
         entry = table->entries[key];
-        str_len = entry.length;
+        str_len = entry.radius;
         for (i = 0; i < str_len; i++) {
-            p = frm_off + entry.length - 1;
+            p = frm_off + entry.radius - 1;
             x = p % gif->fw;
             y = p / gif->fw;
             if (interlace)
@@ -470,6 +485,7 @@ static px_int read_image_data(px_gif *gif, px_int interlace)
     if (key == stop)
     {
         //read(gif->fd, &sub_len, 1); /* Must be zero! */
+        PX_GIF_CHECK_BOUND(gif, 1);
         PX_memcpy(&sub_len, gif->data.buffer + gif->roffset, 1);
         gif->roffset++;
 		if (sub_len != 0)
@@ -489,16 +505,17 @@ static px_int read_image(px_gif *gif)
 
     /* Image Descriptor. */
     //gif->fx = px_gif_read_num(gif->fd);
+    PX_GIF_CHECK_BOUND(gif, 9);
     PX_memcpy(&gif->fx, gif->data.buffer + gif->roffset, 2);
     gif->roffset += 2;
     //gif->fy = px_gif_read_num(gif->fd);
 	PX_memcpy(&gif->fy, gif->data.buffer + gif->roffset, 2);
     gif->roffset += 2;
 
-    
+
     if (gif->fx >= gif->width || gif->fy >= gif->height)
         return -1;
-    
+
     //gif->fw = px_gif_read_num(gif->fd);
     //gif->fh = px_gif_read_num(gif->fd);
     PX_memcpy(&gif->fw, gif->data.buffer + gif->roffset, 2);
@@ -506,21 +523,22 @@ static px_int read_image(px_gif *gif)
     PX_memcpy(&gif->fh, gif->data.buffer + gif->roffset, 2);
     gif->roffset += 2;
 
-    
+
     gif->fw = PX_GIF_MIN(gif->fw, gif->width - gif->fx);
     gif->fh = PX_GIF_MIN(gif->fh, gif->height - gif->fy);
-    
+
    // read(gif->fd, &fisrz, 1);
     PX_memcpy(&fisrz, gif->data.buffer + gif->roffset, 1);
 	gif->roffset++;
     interlace = fisrz & 0x40;
     /* Ignore Sort Flag. */
     /* Local Color Table? */
-    if (fisrz & 0x80) 
+    if (fisrz & 0x80)
     {
         /* Read LCT */
         gif->lct.size = 1 << ((fisrz & 0x07) + 1);
         //read(gif->fd, gif->lct.colors, 3 * gif->lct.size);
+        PX_GIF_CHECK_BOUND(gif, 3 * gif->lct.size);
         PX_memcpy(gif->lct.colors, gif->data.buffer + gif->roffset, 3 * gif->lct.size);
         gif->roffset += 3 * gif->lct.size;
         gif->palette = &gif->lct;
@@ -579,45 +597,32 @@ static px_void dispose(px_gif *gif)
 
 px_void px_gif_render_to_frame_texture(px_gif* gif, px_texture* ptexture)
 {
-    px_int i, j, k;
-    px_byte index, * color;  
+    px_int j, k;
+    px_byte index, *color;
 
-    if (gif->gce.disposal==2)
+    if (gif->gce.disposal == 2)
     {
-        if(gif->gce.transparency)
-		    PX_TextureClearAll(ptexture, PX_COLOR_NONE);
+        if (gif->gce.transparency)
+            PX_TextureClearAll(ptexture, PX_COLOR_NONE);
         else
-			PX_TextureClearAll(ptexture, PX_COLOR(255, gif->palette->colors[gif->bgindex * 3], gif->palette->colors[gif->bgindex * 3 + 1], gif->palette->colors[gif->bgindex * 3 + 2]));
+            PX_TextureClearAll(ptexture, PX_COLOR(255, gif->palette->colors[gif->bgindex * 3], gif->palette->colors[gif->bgindex * 3 + 1], gif->palette->colors[gif->bgindex * 3 + 2]));
     }
 
-    i = gif->fy * gif->width + gif->fx;
-    for (j = 0; j < gif->height; j++)
+    for (j = 0; j < gif->fh; j++)
     {
-        for (k = 0; k < gif->width ; k++)
+        for (k = 0; k < gif->fw; k++)
         {
-            if (j>= gif->fh|| k>= gif->fw)
+            index = gif->frame[(gif->fy + j) * gif->width + gif->fx + k];
+            color = &gif->palette->colors[index * 3];
+            if (!gif->gce.transparency)
             {
-                if (gif->gce.disposal == 2)
-                 PX_SurfaceSetPixel(ptexture, k, j, PX_COLOR_NONE);
+                PX_SurfaceSetPixel(ptexture, gif->fx + k, gif->fy + j, PX_COLOR(255, color[0], color[1], color[2]));
             }
-            else
+            else if (index != gif->gce.tindex)
             {
-                index = gif->frame[(gif->fy + j) * gif->width + gif->fx + k];
-                color = &gif->palette->colors[index * 3];
-                if (!gif->gce.transparency)
-                {
-                    PX_SurfaceSetPixel(ptexture, k, j, PX_COLOR(255, color[0], color[1], color[2]));
-                }
-                else
-                {
-                    if (index != gif->gce.tindex)
-                    {
-                        PX_SurfaceSetPixel(ptexture, k, j, PX_COLOR(255, color[0], color[1], color[2]));
-                    }
-                }
+                PX_SurfaceSetPixel(ptexture, gif->fx + k, gif->fy + j, PX_COLOR(255, color[0], color[1], color[2]));
             }
         }
-        i += gif->width;
     }
 }
 
@@ -629,6 +634,7 @@ px_int px_gif_get_frame(px_gif *gif)
 
     dispose(gif);
     //read(gif->fd, &sep, 1);
+    PX_GIF_CHECK_BOUND(gif, 1);
     sep = gif->data.buffer[gif->roffset];
     gif->roffset++;
     while (sep != ',') {
@@ -638,6 +644,7 @@ px_int px_gif_get_frame(px_gif *gif)
             read_ext(gif);
         else return -1;
         //read(gif->fd, &sep, 1);
+        PX_GIF_CHECK_BOUND(gif, 1);
         sep = gif->data.buffer[gif->roffset];
         gif->roffset++;
     }
@@ -663,11 +670,15 @@ px_void px_gif_rewind(px_gif* gif)
 
 px_void PX_GifUpdate(px_gif* gif, px_dword elapsed)
 {
+    px_dword delay;
     gif->elapsed += elapsed;
-    while (gif->elapsed>=(px_dword)gif->gce.delay*10)
+    delay = (px_dword)gif->gce.delay * 10;
+    if (delay == 0)
+        delay = 20;
+    while (gif->elapsed >= delay)
     {
         px_int ret;
-        gif->elapsed -= gif->gce.delay * 10;
+        gif->elapsed -= delay;
         ret = px_gif_get_frame(gif);
         if (ret== 0)
         {
@@ -678,7 +689,9 @@ px_void PX_GifUpdate(px_gif* gif, px_dword elapsed)
             gif->elapsed = 0;
             break;
         }
-            
+        delay = (px_dword)gif->gce.delay * 10;
+        if (delay == 0)
+            delay = 20;
     }
 }
 

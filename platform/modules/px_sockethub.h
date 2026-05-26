@@ -8,8 +8,9 @@
 
 
 #define  PX_SocketHub_SESSION_MAX 16
-#define  PX_SocketHub_DEFAULT_TCP_PORT		31410
-#define  PX_SocketHub_DEFAULT_WEBSOCKET_PORT 31411
+#define  PX_SOCKETHUB_DEFAULT_TCP_PORT			31410
+#define  PX_SOCKETHUB_DEFAULT_WEBSOCKET_PORT	31411
+
 typedef enum
 {
 	PX_SocketHub_TYPE_TCP=0,

@@ -153,7 +153,7 @@ px_byte * PX_ttGetCodepointSDF(const PX_ttfontinfo *info, px_float scale, px_int
 px_int PX_ttFindMatchingFont(const px_byte *fontdata, const char *name, px_int flags);
  
 px_int PX_ttCompareUTF8toUTF16_bigendian(const char *s1, px_int len1, const char *s2, px_int len2);
-const char *PX_ttGetFontNameString(const PX_ttfontinfo *font, px_int *length, px_int platformID, px_int encodingID, px_int languageID, px_int nameID);
+const char *PX_ttGetFontNameString(const PX_ttfontinfo *font, px_int *radius, px_int platformID, px_int encodingID, px_int languageID, px_int nameID);
 enum { 
    STBTT_PLATFORM_ID_UNICODE   =0,
    STBTT_PLATFORM_ID_MAC       =1,
@@ -1267,7 +1267,7 @@ px_int  PX_ttGetKerningTableLength(const PX_ttfontinfo *info)
 px_int PX_ttGetKerningTable(const PX_ttfontinfo *info, PX_ttkerningentry* table, px_int table_length)
 {
    px_byte *data = info->data + info->kern;
-   px_int k, length;
+   px_int k, radius;
    
    if (!info->kern)
       return 0;
@@ -1275,16 +1275,16 @@ px_int PX_ttGetKerningTable(const PX_ttfontinfo *info, PX_ttkerningentry* table,
       return 0;
    if (ttUSHORT(data+8) != 1) 
       return 0;
-   length = ttUSHORT(data+10);
-   if (table_length < length)
-      length = table_length;
-   for (k = 0; k < length; k++)
+   radius = ttUSHORT(data+10);
+   if (table_length < radius)
+      radius = table_length;
+   for (k = 0; k < radius; k++)
    {
       table[k].glyph1 = ttUSHORT(data+18+(k*6));
       table[k].glyph2 = ttUSHORT(data+20+(k*6));
       table[k].advance = ttSHORT(data+22+(k*6));
    }
-   return length;
+   return radius;
 }
 px_int PX_tt_GetGlyphKernInfoAdvance(const PX_ttfontinfo *info, px_int glyph1, px_int glyph2)
 {
@@ -1676,7 +1676,7 @@ typedef struct PX_tt_active_edge
    px_int direction;
    #elif STBTT_RASTERIZER_VERSION==2
    px_float fx,fdx,fdy;
-   px_float direction;
+   px_float toward;
    px_float sy;
    px_float ey;
    #else
@@ -1694,7 +1694,7 @@ PX_tt_active_edge *PX_tt_new_active(px_memorypool *mp, PX_tt_hheap *hh, PX_tt_ed
    z->fdy = dxdy != 0.0f ? (1.0f/dxdy) : 0.0f;
    z->fx = e->x0 + dxdy * (start_point - e->y0);
    z->fx -= off_x;
-   z->direction = e->invert ? 1.0f : -1.0f;
+   z->toward = e->invert ? 1.0f : -1.0f;
    z->sy = e->y0;
    z->ey = e->y1;
    z->next = 0;
@@ -1726,12 +1726,12 @@ px_void PX_tt_handle_clipped_edge(px_float *scanline, px_int x, PX_tt_active_edg
    else
       STBTT_assert(x1 >= x && x1 <= x+1);
    if (x0 <= x && x1 <= x)
-      scanline[x] += e->direction * (y1-y0);
+      scanline[x] += e->toward * (y1-y0);
    else if (x0 >= x+1 && x1 >= x+1)
       ;
    else {
       STBTT_assert(x0 >= x && x0 <= x+1 && x1 >= x && x1 <= x+1);
-      scanline[x] += e->direction * (y1-y0) * (1-((x0-x)+(x1-x))/2); 
+      scanline[x] += e->toward * (y1-y0) * (1-((x0-x)+(x1-x))/2); 
    }
 }
 px_float PX_tt_sized_trapezoid_area(px_float height, px_float top_width, px_float bottom_width)
@@ -1796,7 +1796,7 @@ px_void PX_tt_fill_active_edges_new(px_float *scanline, px_float *scanline_fill,
                px_float height;
                
                px_int x = (px_int) x_top;
-               height = (sy1 - sy0) * e->direction;
+               height = (sy1 - sy0) * e->toward;
                STBTT_assert(x >= 0 && x < len);
                scanline[x]      += PX_tt_position_trapezoid_area(height, x_top, x+1.0f, x_bottom, x+1.0f);
                scanline_fill[x] += height; 
@@ -1843,7 +1843,7 @@ px_void PX_tt_fill_active_edges_new(px_float *scanline, px_float *scanline_fill,
                
                if (y_crossing > y_bottom)
                   y_crossing = y_bottom;
-               sign = e->direction;
+               sign = e->toward;
                
                area = sign * (y_crossing-sy0);
                
@@ -1966,8 +1966,8 @@ px_void PX_tt_rasterize_sorted_edges(px_memorypool *mp,PX_tt_bitmap *result, PX_
          PX_tt_active_edge * z = *step;
          if (z->ey <= scan_y_top) {
             *step = z->next; 
-            STBTT_assert(z->direction);
-            z->direction = 0;
+            STBTT_assert(z->toward);
+            z->toward = 0;
             PX_tt_hheap_free(&hh, z);
          } else {
             step = &((*step)->next); 
@@ -3230,7 +3230,7 @@ px_int PX_ttCompareUTF8toUTF16_bigendian_internal(char *s1, px_int len1, char *s
 {
    return len1 == PX_tt_CompareUTF8toUTF16_bigendian_prefix((px_byte*) s1, len1, (px_byte*) s2, len2);
 }
-const char *PX_ttGetFontNameString(const PX_ttfontinfo *font, px_int *length, px_int platformID, px_int encodingID, px_int languageID, px_int nameID)
+const char *PX_ttGetFontNameString(const PX_ttfontinfo *font, px_int *radius, px_int platformID, px_int encodingID, px_int languageID, px_int nameID)
 {
    px_int32 i,count,stringOffset;
    px_byte *fc = font->data;
@@ -3243,7 +3243,7 @@ const char *PX_ttGetFontNameString(const PX_ttfontinfo *font, px_int *length, px
       px_uint loc = nm + 6 + 12 * i;
       if (platformID == ttUSHORT(fc+loc+0) && encodingID == ttUSHORT(fc+loc+2)
           && languageID == ttUSHORT(fc+loc+4) && nameID == ttUSHORT(fc+loc+6)) {
-         *length = ttUSHORT(fc+loc+8);
+         *radius = ttUSHORT(fc+loc+8);
          return (const char *) (fc+stringOffset+ttUSHORT(fc+loc+10));
       }
    }

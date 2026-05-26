@@ -27,7 +27,8 @@ px_void PX_SoundPlayPause(PX_SoundPlay *pSoundPlay,px_bool pause)
 
 px_void PX_SoundPlayPlayData(PX_SoundPlay* pSoundPlay, PX_SoundData* pdata)
 {
-	PX_SoundPlayAdd(pSoundPlay, PX_SoundCreate(pdata, 0));
+	if(pdata)
+		PX_SoundPlayAdd(pSoundPlay, PX_SoundCreate(pdata, 0));
 }
 
 px_void PX_SoundPlayRemove(PX_SoundPlay* pSoundPlay, px_int index)
@@ -119,7 +120,7 @@ px_bool PX_SoundPlayRead(PX_SoundPlay *pSoundPlay,px_byte *pBuffer,px_int readSi
 	for (j = 0; j < PX_COUNTOF(pSoundPlay->Sounds); j++)
 	{
 		pSound = pSoundPlay->Sounds + j;
-		if (!pSound->datasize || pSound->pause)
+		if (!pSound->data||!pSound->datasize || pSound->pause)
 		{
 			continue;
 		}
@@ -130,7 +131,7 @@ px_bool PX_SoundPlayRead(PX_SoundPlay *pSoundPlay,px_byte *pBuffer,px_int readSi
 	{
 		pSound=pSoundPlay->Sounds+j;
 
-		if (!pSound->datasize||pSound->pause)
+		if (!pSound->data||!pSound->datasize||pSound->pause)
 		{
 			continue;
 		}
@@ -262,7 +263,10 @@ px_void PX_SoundPlayFree(PX_SoundPlay *pSoundPlay)
 
 px_void PX_SoundPlayClear(PX_SoundPlay *pSoundPlay)
 {
+	while (pSoundPlay->bLock);
+	pSoundPlay->bLock = PX_TRUE;
 	PX_memset(pSoundPlay->Sounds,0,sizeof(pSoundPlay->Sounds));
+	pSoundPlay->bLock = PX_FALSE;
 }
 
 px_float PX_SoundPlayGetCurrentAmplitude(PX_SoundPlay* pSoundPlay)

@@ -49,7 +49,7 @@ px_void PX_BitmapRender(px_surface *psurface, void *BitmapBuffer,px_int BufferSi
 	}
 	else
 	{
-		if (x<-Width||y<Height)
+		if (x<-Width||y<-Height)
 		{
 			return;
 		}
@@ -62,7 +62,7 @@ px_void PX_BitmapRender(px_surface *psurface, void *BitmapBuffer,px_int BufferSi
 	if(bitCount==32)
 	{
 		rgb32=(PX_BITMAP_RGB32 *)ByteColor;
-		if (Height*Width>BufferSize-(px_int)PX_BitmapGetDataOffset(BitmapBuffer))
+		if ((px_int64)Height*Width*4>BufferSize-(px_int)PX_BitmapGetDataOffset(BitmapBuffer))
 		{
 			return;
 		}
@@ -109,7 +109,7 @@ px_void PX_BitmapRender(px_surface *psurface, void *BitmapBuffer,px_int BufferSi
 		else
 			RowBytes=Width*3;
 
-		if (Height*RowBytes>BufferSize-(px_int)PX_BitmapGetDataOffset(BitmapBuffer))
+		if ((px_int64)Height*RowBytes>BufferSize-(px_int)PX_BitmapGetDataOffset(BitmapBuffer))
 		{
 			return;
 		}
@@ -158,7 +158,7 @@ px_void PX_BitmapRender(px_surface *psurface, void *BitmapBuffer,px_int BufferSi
 		else
 			RowBytes=Width*2;
 
-		if (Height*RowBytes>BufferSize-(px_int)PX_BitmapGetDataOffset(BitmapBuffer))
+		if ((px_int64)Height*RowBytes>BufferSize-(px_int)PX_BitmapGetDataOffset(BitmapBuffer))
 		{
 			return;
 		}
@@ -282,7 +282,7 @@ px_bool PX_BitmapBuild(px_surface *psurface,px_char *BitmapBuffer,px_int *size)
 	rowAppendSize=psurface->width%4;
 
 
-	_outsize=psurface->height*psurface->width*3+sizeof(PX_BITMAPFILEHEADER)+sizeof(PX_BITMAPINFOHEADER)+rowAppendSize*psurface->height;
+	_outsize=(px_int)((px_int64)psurface->height*psurface->width*3+sizeof(PX_BITMAPFILEHEADER)+sizeof(PX_BITMAPINFOHEADER)+rowAppendSize*psurface->height);
 
 	*size=_outsize;
 	if (BitmapBuffer)

@@ -46,10 +46,10 @@ px_bool PX_ArleCompress(px_byte *_in,px_int input_size, px_memory* out)
 					}
 					else
 					{
-						data[len] = _in[read_offset];
+					data[len] = _in[read_offset];
 						read_offset++;
 						len++;
-						last_char = _in[read_offset];
+						last_char = (read_offset < input_size) ? _in[read_offset] : 0;
 					}
 				}
 			}

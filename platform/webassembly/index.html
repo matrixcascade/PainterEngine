@@ -3,7 +3,7 @@
 <html>
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
 		<style type="text/css">
 			* {
@@ -25,10 +25,61 @@
 				border: 1px solid #000;
 				padding: 1px;
 			}
+
+			#canvas {
+				display: block;
+			}
+
+			#rotateOverlay {
+				display: none;
+				position: fixed;
+				top: 0;
+				left: 0;
+				right: 0;
+				bottom: 0;
+				background: rgba(0, 0, 0, 0.88);
+				z-index: 9999;
+				flex-direction: column;
+				justify-content: center;
+				align-items: center;
+				color: #fff;
+				font-family: sans-serif;
+				text-align: center;
+				gap: 1.2em;
+			}
+
+			#rotateOverlay.visible {
+				display: flex;
+			}
+
+			#rotateOverlay .rotate-icon {
+				font-size: 4em;
+				animation: rotate-hint 1.8s ease-in-out infinite;
+				display: inline-block;
+			}
+
+			#rotateOverlay p {
+				font-size: 1.1em;
+				opacity: 0.9;
+				margin: 0;
+				padding: 0 2em;
+				line-height: 1.6;
+			}
+
+			@keyframes rotate-hint {
+				0%   { transform: rotate(0deg); }
+				40%  { transform: rotate(-90deg); }
+				60%  { transform: rotate(-90deg); }
+				100% { transform: rotate(0deg); }
+			}
 		</style>
 	</head>
 	<body>
 		<div class="container">
+			<div id="rotateOverlay">
+				<span class="rotate-icon">&#8635;</span>
+				<p>请旋转您的设备至横屏模式<br>Please rotate your device to landscape</p>
+			</div>
 			<canvas id="canvas" style="display: none;" oncontextmenu="event.preventDefault()" width="960"
 				height="480"></canvas>
 			<div id="progressBar">
@@ -82,13 +133,18 @@
 					if(e.precent === 100){
 						Module.canvas.style.display = 'block';
 						progressBar.style.display = 'none';
+						fitCanvasToViewport();
+						observeCanvas();
+						if (isMobileDevice() && isLandscapeCanvas()) {
+							tryLockLandscape();
+						}
 					}
 				});
 				
-				var open_file = function(e) 
+				var open_file = function(e)
 				{
   					const file_reader = new FileReader();
-  					file_reader.onload = (event) => 
+  					file_reader.onload = (event) =>
 					{
 						const uint8Arr = new Uint8Array(event.target.result);
     					const num_bytes = uint8Arr.length * uint8Arr.BYTES_PER_ELEMENT;
@@ -100,78 +156,121 @@
   				file_reader.readAsArrayBuffer(e.target.files[0]);
 				};
 
+				function fitCanvasToViewport() {
+					var c = Module.canvas;
+					if (c.style.display === 'none') return;
+					var cw = c.width;
+					var ch = c.height;
+					var vw, vh;
+					if (document.fullscreenElement || document.webkitFullscreenElement) {
+						vw = screen.width;
+						vh = screen.height;
+					} else {
+						vw = window.innerWidth;
+						vh = window.innerHeight;
+					}
+					var scale = Math.min(vw / cw, vh / ch);
+					c.style.width = Math.floor(cw * scale) + 'px';
+					c.style.height = Math.floor(ch * scale) + 'px';
+				}
+
+				function enterFullscreen() {
+					var docEl = document.documentElement;
+					var requestFS = docEl.requestFullscreen
+						|| docEl.webkitRequestFullscreen
+						|| docEl.mozRequestFullScreen;
+					if (requestFS) {
+						requestFS.call(docEl).then(function() {
+							if (screen.orientation && screen.orientation.lock) {
+								return screen.orientation.lock('landscape').catch(function(){});
+							}
+						}).then(function() {
+							fitCanvasToViewport();
+						}).catch(function(){});
+					}
+				}
+
+				function observeCanvas() {
+					var c = Module.canvas;
+					var lastW = c.width, lastH = c.height;
+					var observer = new MutationObserver(function(mutations) {
+						if (c.width !== lastW || c.height !== lastH) {
+							lastW = c.width;
+							lastH = c.height;
+							fitCanvasToViewport();
+						}
+					});
+					observer.observe(c, { attributes: true, attributeFilter: ['width', 'height'] });
+				}
+
+				function isMobileDevice() {
+					return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
+						|| (navigator.maxTouchPoints > 1 && window.innerWidth < 1024);
+				}
+
+				function isLandscapeCanvas() {
+					var c = Module.canvas;
+					return c.width > c.height;
+				}
+
+				function isDeviceLandscape() {
+					if (screen.orientation) {
+						return screen.orientation.type.startsWith('landscape');
+					}
+					return (window.orientation === 90 || window.orientation === -90);
+				}
+
+				var rotateOverlay = document.getElementById('rotateOverlay');
+
+				function showRotatePrompt() {
+					rotateOverlay.classList.add('visible');
+				}
+
+				function hideRotatePrompt() {
+					rotateOverlay.classList.remove('visible');
+				}
+
+				function tryLockLandscape() {
+					if (isDeviceLandscape()) {
+						enterFullscreen();
+					} else {
+						showRotatePrompt();
+					}
+				}
+
+				function handleOrientationChange() {
+					if (!isMobileDevice() || !isLandscapeCanvas()) return;
+					if (isDeviceLandscape()) {
+						hideRotatePrompt();
+						enterFullscreen();
+					} else {
+						showRotatePrompt();
+					}
+				}
+
+				if (screen.orientation) {
+					screen.orientation.addEventListener('change', function() {
+						handleOrientationChange();
+						fitCanvasToViewport();
+					});
+				} else {
+					window.addEventListener('orientationchange', function() {
+						handleOrientationChange();
+						fitCanvasToViewport();
+					});
+				}
+				window.addEventListener('resize', function() {
+					handleOrientationChange();
+					fitCanvasToViewport();
+				});
+
+				document.addEventListener('fullscreenchange', fitCanvasToViewport);
+				document.addEventListener('webkitfullscreenchange', fitCanvasToViewport);
+
 			</script>
 			<script src="PainterEngine.js"></script>
 			
 		</div>
-		<remove-web-limits-iqxin id="rwl-iqxin" class="rwl-exempt" style="position: fixed; top: 212px; left: 0px;">
-			<qxinbutton type="qxinbutton" id="rwl-setbtn"> set </qxinbutton>
-			<lalala style="cursor:move; font-size:12px;">限制解除</lalala> <input type="checkbox" name="" id="black_node">
-			<style type="text/css">
-				#rwl-iqxin {
-					position: fixed;
-					transform: translate(-95px, 0);
-					width: 85px;
-					height: 25px;
-					font-size: 12px;
-					font-weight: 500;
-					font-family: Verdana, Arial, '宋体';
-					color: #fff;
-					background: #333;
-					z-index: 2147483647;
-					margin: 0;
-					opacity: 0.05;
-					transition: 0.3s;
-					overflow: hidden;
-					user-select: none;
-					text-align: center;
-					white-space: nowrap;
-					line-height: 25px;
-					padding: 0 16px;
-					border: 1px solid #ccc;
-					border-width: 1px 1px 1px 0;
-					border-bottom-right-radius: 5px;
-					box-sizing: content-box;
-				}
-
-				#rwl-iqxin input {
-					margin: 0;
-					padding: 0;
-					vertical-align: middle;
-					-webkit-appearance: checkbox;
-					-moz-appearance: checkbox;
-					position: static;
-					clip: auto;
-					opacity: 1;
-					cursor: pointer;
-				}
-
-				#rwl-iqxin.rwl-active-iqxin {
-					left: 0px;
-					transform: translate(0, 0);
-					opacity: 0.9;
-					height: 32px;
-					line-height: 32px
-				}
-
-				#rwl-iqxin label {
-					margin: 0;
-					padding: 0;
-					font-weight: 500;
-				}
-
-				#rwl-iqxin #rwl-setbtn {
-					margin: 0 4px 0 0;
-					padding: 0 0 0 4px;
-					border: none;
-					border-radius: 2px;
-					cursor: pointer;
-					background: #fff;
-					color: #000;
-				}
-			</style>
-		</remove-web-limits-iqxin>
-
 
 	</body>
 </html>

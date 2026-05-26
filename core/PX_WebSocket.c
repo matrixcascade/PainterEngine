@@ -574,7 +574,7 @@ PX_WEBSOCKET_HANDER_RETURN PX_WebSocketUpdate_Recv(PX_WebSocket* pInstance)
 			pInstance->recv_cache_offset += readsize;
 			do
 			{
-				PX_WEBSOCKET_HANDER_RETURN ret = PX_WebSocketUpdate_RecvHandleData(pInstance);
+				ret = PX_WebSocketUpdate_RecvHandleData(pInstance);
 				if (ret == PX_WEBSOCKET_HANDER_RETURN_DONE)
 				{
 					ret = PX_WEBSOCKET_HANDER_RETURN_DONE;

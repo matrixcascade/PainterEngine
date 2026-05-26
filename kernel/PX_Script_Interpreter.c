@@ -462,11 +462,19 @@ _ERROR:
 static px_bool PX_ScriptParsePretreatment(PX_ScriptInterpreter *analysis,px_string *codes,PX_SCRIPT_LIBRARY *lib,const px_char *name)
 {
 	
-	if(!PX_ScriptParseInclude(analysis,codes,lib,name))
+	if (!PX_ScriptParseInclude(analysis, codes, lib, name))
+	{
+		//error message
+		PX_strcat(analysis->PX_Script_InterpreterError, "Failed to parse include.\n");
 		goto _ERROR;
+	}
+		
 
- 	if(!PX_ScriptParseDefine(analysis,codes,lib,name))
- 		goto _ERROR;
+	if (!PX_ScriptParseDefine(analysis, codes, lib, name))
+	{
+		PX_strcat(analysis->PX_Script_InterpreterError, "Failed to parse define.\n");
+		goto _ERROR;
+	}
 
 	return PX_TRUE;
 _ERROR:

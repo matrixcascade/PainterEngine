@@ -32,6 +32,10 @@ px_bool PX_MemoryCatBit(px_memory* memory, px_bool b);
 px_bool PX_MemoryCatBits(px_memory* memory, px_byte data[],px_int bit_count);
 px_void PX_MemoryAlignBits(px_memory* memory);
 px_void PX_MemoryLeft(px_memory* memory, px_int trimsize);
+px_int PX_MemoryGetUsedSize(px_memory* memory);
+px_int PX_MemoryGetAllocSize(px_memory* memory);
+px_void PX_MemoryTrimRight(px_memory* memory, px_int trimsize);
+px_void PX_MemoryTrimLeft(px_memory* memory, px_int trimsize);
 typedef struct  
 {
 	px_memorypool* mp;
@@ -54,6 +58,7 @@ typedef px_memory px_fifobuffer;
 px_void PX_FifoBufferInitialize(px_memorypool* mp, px_fifobuffer* pfifo, px_bool bAsynchronous);
 px_int PX_FifoBufferPop(px_fifobuffer* pfifo, px_void* data, px_int size);
 px_bool PX_FifoBufferPush(px_fifobuffer* pfifo, px_void* data, px_int size);
+px_bool PX_FifoBufferPush2(px_fifobuffer* pfifo, const px_void* data1, px_int size1, const px_void* data2, px_int size2);
 px_int PX_FifoBufferGetPopDataSize(px_fifobuffer* pfifo);
 px_void* PX_FifoBufferGetPopData(px_fifobuffer* pfifo);
 px_bool PX_FifoBufferIsEmpty(px_fifobuffer* pfifo);
@@ -70,6 +75,7 @@ px_int PX_StackGetPopSize(px_stack* pstack);
 px_int PX_StackGetCount(px_stack* pstack);
 px_void* PX_StackGetPopData(px_stack* pstack);
 px_void PX_StackFree(px_stack* pstack);
+const px_void* PX_StackGetTopData(px_stack* pstack);
 const px_byte* PX_StackGetBottomData(px_stack* pstack);
 px_void PX_StackRemoveBottom(px_stack* pstack);
 #endif

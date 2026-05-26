@@ -21,7 +21,7 @@ PX_SYNTAX_FUNCTION(PX_Syntax_Parse_tuple)
 	{
 		if (!PX_Syntax_MergeLastAbi(pSyntax, "const_tuple"))
 		{
-			PX_Syntax_Terminate(pSyntax, "Memory Error");
+			PX_Syntax_Terminate(pSyntax, "runtime:error:PX_Syntax_Parse_tuple Memory Error");
 			return PX_FALSE;
 		}
 		return PX_TRUE;
@@ -34,13 +34,13 @@ PX_SYNTAX_FUNCTION(PX_Syntax_Parse_tuple)
 px_bool PX_Syntax_load_tuple(PX_Syntax* pSyntax)
 {
 
-	if (!PX_Syntax_Parse_PEBNF(pSyntax, "const_tuple = const_int", PX_Syntax_Parse_tuple))
+	if (!PX_Syntax_Parse_PEBNF(pSyntax, "const_tuple = const_int", 0,PX_Syntax_Parse_tuple, 0))
 		return PX_FALSE;
 
-	if (!PX_Syntax_Parse_PEBNF(pSyntax, "const_tuple = const_float", PX_Syntax_Parse_tuple))
+	if (!PX_Syntax_Parse_PEBNF(pSyntax, "const_tuple = const_float",0, PX_Syntax_Parse_tuple, 0))
 		return PX_FALSE;
 
-	if (!PX_Syntax_Parse_PEBNF(pSyntax, "const_tuple = const_string", PX_Syntax_Parse_tuple))
+	if (!PX_Syntax_Parse_PEBNF(pSyntax, "const_tuple = const_string",0, PX_Syntax_Parse_tuple, 0))
 		return PX_FALSE;
 
 

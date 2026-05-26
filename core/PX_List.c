@@ -136,7 +136,8 @@ px_void PX_ListMove(px_list *list,px_int index,px_int moveto)
 	if (pNode==list->head)
 	{
 		list->head=pNode->pnext;
-		pNode->pnext->ppre=pNode->ppre;
+		if (pNode->pnext)
+			pNode->pnext->ppre=PX_NULL;
 	}
 	else if (pNode==list->end)
 	{

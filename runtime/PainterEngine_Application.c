@@ -290,15 +290,113 @@ px_bool PainterEngine_LoadFontModule(const px_char path[],PX_FONTMODULE_CODEPAGE
 	#endif
 }
 
+px_bool PainterEngine_LoadFontModuleToResourceLibrary(const px_char path[], const px_char key[], PX_FONTMODULE_CODEPAGE codepage, px_int size)
+{
+#ifdef PAINTERENGIN_FILE_SUPPORT
+	PX_ResourceLibrary* pResource = PainterEngine_GetResourceLibrary();
+	return PX_LoadFontModuleToResource(pResource, path, key, codepage, size);
+#else
+	return PX_FALSE;
+#endif
+}
+
+
+px_bool PainterEngine_LoadTextureToResourceLibrary(const px_char path[], const px_char key[])
+{
+#ifdef PAINTERENGIN_FILE_SUPPORT
+	PX_ResourceLibrary* pResource = PainterEngine_GetResourceLibrary();
+	return PX_LoadTextureToResource(pResource, path, key);
+#else
+	return PX_FALSE;
+#endif
+}
+
+px_bool PainterEngine_LoadSoundToResourceLibrary(const px_char path[], const px_char key[])
+{
+#ifdef PAINTERENGIN_FILE_SUPPORT
+	PX_ResourceLibrary* pResource = PainterEngine_GetResourceLibrary();
+	return PX_LoadSoundToResource(pResource, path, key);
+#else
+	return PX_FALSE;
+#endif
+}
+
+px_bool PainterEngine_LoadShapeToResourceLibrary(const px_char Path[], const px_char key[])
+{
+#ifdef PAINTERENGIN_FILE_SUPPORT
+	PX_ResourceLibrary* pResource = PainterEngine_GetResourceLibrary();
+	return PX_LoadShapeToResource(pResource, Path, key);
+#else
+	return PX_FALSE;
+#endif
+}
+px_bool PainterEngine_LoadAnimationToResourceLibrary(const px_char Path[], const px_char key[])
+{
+#ifdef PAINTERENGIN_FILE_SUPPORT
+	PX_ResourceLibrary* pResource = PainterEngine_GetResourceLibrary();
+	return PX_LoadAnimationToResource(pResource, Path, key);
+#else
+	return PX_FALSE;
+#endif
+}
+px_bool PainterEngine_LoadStringToResourceLibrary(const px_char Path[], const px_char key[])
+{
+#ifdef PAINTERENGIN_FILE_SUPPORT
+	PX_ResourceLibrary* pResource = PainterEngine_GetResourceLibrary();
+	return PX_LoadStringToResource(pResource, Path, key);
+#else
+	return PX_FALSE;
+#endif
+}
+px_bool PainterEngine_LoadScriptToResourceLibrary(const px_char Path[], const px_char key[])
+{
+#ifdef PAINTERENGIN_FILE_SUPPORT
+	PX_ResourceLibrary* pResource = PainterEngine_GetResourceLibrary();
+	return PX_LoadScriptToResource(pResource, Path, key);
+#else
+	return PX_FALSE;
+#endif
+}
+
+px_bool PainterEngine_LoadJsonToResourceLibrary( const px_char Path[], const px_char key[])
+{
+#ifdef PAINTERENGIN_FILE_SUPPORT
+	PX_ResourceLibrary* presourcelib = PainterEngine_GetResourceLibrary();
+	return PX_LoadJsonToResource(presourcelib, Path, key);
+#else
+	return PX_FALSE;
+#endif
+}
+px_bool PainterEngine_LoadDataToResourceLibrary(const px_char Path[], const px_char key[])
+{
+#ifdef PAINTERENGIN_FILE_SUPPORT
+	PX_ResourceLibrary* presourcelib = PainterEngine_GetResourceLibrary();
+	return PX_LoadDataToResource(presourcelib, Path, key);
+#else
+	return PX_FALSE;
+#endif
+}
+
+px_bool PainterEngine_LoadGifToResourceLibrary(const px_char path[], const px_char key[])
+{
+#ifdef PAINTERENGIN_FILE_SUPPORT
+	PX_ResourceLibrary* presourcelib = PainterEngine_GetResourceLibrary();
+	return PX_LoadGifToResource(presourcelib, path, key);
+#else
+	return PX_FALSE;
+#endif
+}
+
+
 px_void PainterEngine_SetWindowText(const px_char text[])
 {
 	PX_strcpy(PX_APPLICATION_NAME, text, sizeof(PX_APPLICATION_NAME));
 }
 
-px_bool PainterEngine_Initialize(px_int _screen_width,px_int _screen_height)
+px_bool PainterEngine_InitializeEx(px_int _screen_width, px_int _screen_height, px_int window_widht, px_int window_height)
 {
 	PX_Runtime* runtime = &App.runtime;
-	if (!PX_RuntimeInitialize(runtime, _screen_width, _screen_height, _screen_width, _screen_height, App.cache, sizeof(App.cache), PX_APPLICATION_MEMORYPOOL_STATIC_SIZE, PX_APPLICATION_MEMORYPOOL_DYNAMIC_SIZE))
+	if (!PX_RuntimeInitialize(runtime, _screen_width, _screen_height, window_widht, window_height, App.cache, sizeof(App.cache), PX_APPLICATION_MEMORYPOOL_STATIC_SIZE, PX_APPLICATION_MEMORYPOOL_DYNAMIC_SIZE))
 		return PX_FALSE;
 #ifdef PX_AUDIO_H
 	PX_SoundPlayInitialize(mp, &App.soundplay);
@@ -307,9 +405,9 @@ px_bool PainterEngine_Initialize(px_int _screen_width,px_int _screen_height)
 	if (_screen_width == 0 || _screen_height == 0)
 		return PX_TRUE;
 #ifdef PAINTERENGIN_FILE_SUPPORT
-	
+
 	App.pfontmodule = PX_NULL;
-	if(!PX_JsonInitialize(&runtime->mp_static, &App.language))
+	if (!PX_JsonInitialize(&runtime->mp_static, &App.language))
 	{
 		return PX_FALSE;
 	}
@@ -321,25 +419,31 @@ px_bool PainterEngine_Initialize(px_int _screen_width,px_int _screen_height)
 #endif
 
 	App.object_root = PX_ObjectCreateRoot(&runtime->mp_static);
-	App.object_printer=PX_Object_PrinterCreate(&runtime->mp, App.object_root, 0, 0, _screen_width, _screen_height, App.pfontmodule);
+	App.object_printer = PX_Object_PrinterCreate(&runtime->mp, App.object_root, 0, 0, _screen_width, _screen_height, App.pfontmodule);
 	PX_Object_PanelAttachObject(App.object_printer, PX_ObjectGetFreeDescIndex(App.object_printer));
 	PX_Object_PrinterSetBackgroundColor(App.object_printer, PX_COLOR_NONE);
 	App.object_printer->Visible = PX_FALSE;
-	
+
 
 	App.object_messagebox = PX_Object_MessageBoxCreate(&runtime->mp_static, App.object_root, 0);
 	root = App.object_root;
 	mp = &runtime->mp_dynamic;
-	mp_static=&runtime->mp_static;
+	mp_static = &runtime->mp_static;
 	//screen_width = _screen_width;
 	//screen_height = _screen_height;
 	surface_width = App.runtime.surface_width;
 	surface_height = App.runtime.surface_height;
-	render_surface=&App.runtime.RenderSurface;
-	resource_library =&App.runtime.ResourceLibrary;
+	render_surface = &App.runtime.RenderSurface;
+	resource_library = &App.runtime.ResourceLibrary;
 	soundplay = &App.soundplay;
 
 	return PX_TRUE;
+}
+
+
+px_bool PainterEngine_Initialize(px_int _screen_width,px_int _screen_height)
+{
+	return PainterEngine_InitializeEx(_screen_width, _screen_height, _screen_width, _screen_height);
 }
 
 

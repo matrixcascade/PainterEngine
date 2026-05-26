@@ -160,7 +160,7 @@ PX_OBJECT_RENDER_FUNCTION(PX_Object_ImageRender)
 PX_OBJECT_FREE_FUNCTION(PX_Object_ImageFree)
 {
 	PX_Object_Image *pImage=PX_Object_GetImage(pObject);
-	if (pImage->texture.MP)
+	if (pImage->texture.mp)
 	{
 		PX_TextureFree(&pImage->texture);
 	}
@@ -286,7 +286,7 @@ px_bool PX_Object_ImageLoadTexture(PX_Object* pObject, px_void* buffer, px_int s
 	PX_Object_Image* pImg = PX_Object_GetImage(pObject);
 	if (pImg)
 	{
-		if (pImg->texture.MP)
+		if (pImg->texture.mp)
 		{
 			PX_TextureFree(&pImg->texture);
 		}

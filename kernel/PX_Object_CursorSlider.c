@@ -1,14 +1,17 @@
 #include "PX_Object_CursorSlider.h"
 
-PX_OBJECT_UPDATE_FUNCTION(PX_Object_CursorSliderUpdate)
+PX_OBJECT_RENDER_FUNCTION(PX_Object_CursorSliderRender)
 {
-	PX_Object_CursorSlider	*pDesc= PX_ObjectGetDesc(PX_Object_CursorSlider, pObject);
-	px_point2D v;
-	px_float d, vd;
+	px_int i;
+	px_float d,vd;
+	px_float a=0,target_a;
+	px_dword update_elapsed=elapsed;
+	px_point2D current_p,target_p,v;
+	PX_Object_CursorSlider* pDesc = PX_ObjectGetDesc(PX_Object_CursorSlider, pObject);
 
 
 	vd = elapsed / 1000.0f * pDesc->reg_velocity;
-	v = PX_Point2DSub(PX_POINT2D(pDesc->reg_x, pDesc->reg_y), PX_POINT2D(pObject->x,pObject->y));
+	v = PX_Point2DSub(PX_POINT2D(pDesc->reg_x, pDesc->reg_y), PX_POINT2D(pObject->x, pObject->y));
 	d = PX_Point2DMod(v);
 	v = PX_Point2DNormalization(v);
 
@@ -22,16 +25,6 @@ PX_OBJECT_UPDATE_FUNCTION(PX_Object_CursorSliderUpdate)
 		pObject->x += v.x * vd;
 		pObject->y += v.y * vd;
 	}
-}
-
-PX_OBJECT_RENDER_FUNCTION(PX_Object_CursorSliderRender)
-{
-	px_int i;
-	px_float d;
-	px_float a=0,target_a;
-	px_dword update_elapsed=elapsed;
-	px_point2D current_p,target_p,v;
-	PX_Object_CursorSlider* pDesc = PX_ObjectGetDesc(PX_Object_CursorSlider, pObject);
 
 	while (update_elapsed)
 	{
@@ -77,10 +70,10 @@ PX_OBJECT_RENDER_FUNCTION(PX_Object_CursorSliderRender)
 		{
 			a += step_a;
 			current_p=PX_Point2DAdd(current_p, v);
-			PX_GeoDrawPenCircle(psurface, current_p.x, current_p.y, pObject->diameter / 2 * a, pDesc->color);
+			PX_GeoDrawPenCircle(psurface, current_p.x, current_p.y, pDesc->radius * a, pDesc->color);
 		}
 	}
-	PX_GeoDrawPenCircle(psurface, pDesc->sliderpoints[0].x, pDesc->sliderpoints[0].y, pObject->diameter / 2, pDesc->color);
+	PX_GeoDrawPenCircle(psurface, pDesc->sliderpoints[0].x, pDesc->sliderpoints[0].y,pDesc->radius, pDesc->color);
 }
 
 px_void PX_Object_CursorSliderSetXY(PX_Object* pObject, px_float x, px_float y)
@@ -91,9 +84,33 @@ px_void PX_Object_CursorSliderSetXY(PX_Object* pObject, px_float x, px_float y)
 	pDesc->reg_y = y;
 }
 
+px_void PX_Object_CursorSliderReset(PX_Object* pObject)
+{
+	px_rect rect = PX_ObjectGetRect(pObject);
+	px_int i;
+	PX_Object_CursorSlider* pDesc = (PX_Object_CursorSlider*)PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_CURSORSLIDER);
+	PX_ASSERTIF(!pDesc);
+	pDesc->reg_x = rect.x;
+	pDesc->reg_y = rect.x;
+	for (i =0;i< PX_COUNTOF(pDesc->sliderpoints); i++)
+	{
+		pDesc->sliderpoints[i].x = pDesc->reg_x;
+		pDesc->sliderpoints[i].y = pDesc->reg_y;
+	}
+}
+
+px_void PX_Object_CursorSliderDisableCursorTracking(PX_Object* pObject, px_bool disable)
+{
+	PX_Object_CursorSlider* pDesc = (PX_Object_CursorSlider*)PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_CURSORSLIDER);
+	PX_ASSERTIF(!pDesc);
+	pDesc->disable_cursor_tracking = disable;
+}
+
 px_void PX_Object_CursorSliderOnMove(PX_Object* pObject, PX_Object_Event e, px_void* ptr)
 {
-	PX_Object_CursorSliderSetXY(pObject, PX_Object_Event_GetCursorX(e), PX_Object_Event_GetCursorY(e));
+	PX_Object_CursorSlider* pDesc = (PX_Object_CursorSlider*)PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_CURSORSLIDER);
+	if(!pDesc->disable_cursor_tracking)
+		PX_Object_CursorSliderSetXY(pObject, PX_Object_Event_GetCursorX(e), PX_Object_Event_GetCursorY(e));
 }
 
 PX_Object* PX_Object_CursorSliderAttachObject(PX_Object* pObject,px_int attachIndex, px_float x, px_float y, px_float radius, px_color Color)
@@ -105,7 +122,7 @@ PX_Object* PX_Object_CursorSliderAttachObject(PX_Object* pObject,px_int attachIn
 	PX_ASSERTIF(pObject == PX_NULL);
 	PX_ASSERTIF(attachIndex < 0 || attachIndex >= PX_COUNTOF(pObject->pObjectDesc));
 	PX_ASSERTIF(pObject->pObjectDesc[attachIndex] != PX_NULL);
-	pDesc = (PX_Object_CursorSlider*)PX_ObjectCreateDesc(pObject, attachIndex, PX_OBJECT_TYPE_CURSORSLIDER, PX_Object_CursorSliderUpdate, PX_Object_CursorSliderRender, 0, 0, sizeof(PX_Object_CursorSlider));
+	pDesc = (PX_Object_CursorSlider*)PX_ObjectCreateDesc(pObject, attachIndex, PX_OBJECT_TYPE_CURSORSLIDER, 0, PX_Object_CursorSliderRender, 0, 0, sizeof(PX_Object_CursorSlider));
 	PX_ASSERTIF(pDesc == PX_NULL);
 
 	pDesc->reg_x = x;
@@ -113,7 +130,7 @@ PX_Object* PX_Object_CursorSliderAttachObject(PX_Object* pObject,px_int attachIn
 	pDesc->color = Color;
 	pDesc->atom_update_duration = 30;
 	pDesc->reg_velocity = 2000;
-	pObject->diameter = radius * 2;
+	pDesc->radius = radius;
 	for (i = 0; i < PX_COUNTOF(pDesc->sliderpoints); i++)
 	{
 		pDesc->sliderpoints[i].x = x;

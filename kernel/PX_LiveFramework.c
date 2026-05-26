@@ -313,7 +313,7 @@ static px_void PX_LiveFramework_RenderListRasterization(px_surface *psurface,PX_
 	if (x1==x2)
 	{
 		k12infinite=PX_TRUE;
-		b12=x0;
+		b12=x1;
 	}
 	else
 	{
@@ -495,7 +495,7 @@ static px_void PX_LiveFramework_RenderListRasterization(px_surface *psurface,PX_
 	if (x1==x2)
 	{
 		k12infinite=PX_TRUE;
-		b12=x0;
+		b12=x1;
 	}
 	else
 	{
@@ -856,7 +856,7 @@ static px_void PX_LiveFramework_UpdateLayerVertices(PX_LiveFramework *pLive,PX_L
 		}
 		else
 		{
-			px_point2D direction,direction_normal;
+			px_point2D toward,direction_normal;
 			px_float distance;
 			px_dword updateelapsed=elapsed+elapsed/2;
 			px_dword atomelapsed;
@@ -873,11 +873,11 @@ static px_void PX_LiveFramework_UpdateLayerVertices(PX_LiveFramework *pLive,PX_L
 					atomelapsed=updateelapsed;
 					updateelapsed=0;
 				}
-				direction.x=resultPosition.x-plv->currentPosition.x;
-				direction.y=resultPosition.y-plv->currentPosition.y;
+				toward.x=resultPosition.x-plv->currentPosition.x;
+				toward.y=resultPosition.y-plv->currentPosition.y;
 
-				direction_normal=PX_Point2DNormalization(direction);
-				distance=PX_Point2DMod(direction);
+				direction_normal=PX_Point2DNormalization(toward);
+				distance=PX_Point2DMod(toward);
 
 
 				if (distance>k)
@@ -893,7 +893,7 @@ static px_void PX_LiveFramework_UpdateLayerVertices(PX_LiveFramework *pLive,PX_L
 					px_point2D incv=PX_Point2DMul(direction_normal,distance*distance);
 					px_point2D  velocity;
 					px_point velocity_vx,velocity_vy;
-					px_float _cos,length;
+					px_float _cos,radius;
 					incv.x+=pLayer->rel_impulse.x;
 					incv.y+=pLayer->rel_impulse.y;
 					incv=PX_Point2DMul(incv,atomelapsed/1000.f);
@@ -902,9 +902,9 @@ static px_void PX_LiveFramework_UpdateLayerVertices(PX_LiveFramework *pLive,PX_L
 					{
 						//resistance
 						_cos=PX_Point2DDot(velocity,keyDirection)/PX_Point2DMod(velocity)/PX_Point2DMod(keyDirection);
-						length=_cos*PX_Point2DMod(velocity);
-						velocity_vx.x=length*keyDirection.x;
-						velocity_vx.y=length*keyDirection.y;
+						radius=_cos*PX_Point2DMod(velocity);
+						velocity_vx.x=radius*keyDirection.x;
+						velocity_vx.y=radius*keyDirection.y;
 						velocity_vx.z=0;
 
 						velocity_vy.x=velocity.x-velocity_vx.x;
@@ -1792,7 +1792,7 @@ px_void PX_LiveFrameworkLinkLayer(PX_LiveFramework *plive,PX_LiveLayer *pLayer,P
 		return;
 	}
 
-	if (PX_LiveFrameworkLinkLayerSearchSubLayer(plive,pLayer,pLayer))
+	if (PX_LiveFrameworkLinkLayerSearchSubLayer(plive,linkLayer,pLayer))
 	{
 		return;
 	}
@@ -1861,7 +1861,7 @@ px_void PX_LiveFrameworkDeleteLayer(PX_LiveFramework *plive,px_int index)
 				if (pSearchLayer->child_index[j]==index)
 				{
 					px_int k;
-					for (k=j;k<PX_COUNTOF(pLayer->child_index);k++)
+					for (k=j;k<PX_COUNTOF(pSearchLayer->child_index)-1;k++)
 					{
 						pSearchLayer->child_index[k]=pSearchLayer->child_index[k+1];
 						if (pSearchLayer->child_index[k]==-1)
@@ -1869,6 +1869,7 @@ px_void PX_LiveFrameworkDeleteLayer(PX_LiveFramework *plive,px_int index)
 							break;
 						}
 					}
+					pSearchLayer->child_index[PX_COUNTOF(pSearchLayer->child_index)-1]=-1;
 				}
 				
 				if (pSearchLayer->child_index[j] > index)
@@ -1939,7 +1940,7 @@ px_void PX_LiveFrameworkDeleteLiveAnimation(PX_LiveFramework *plive,px_int index
 		plive->currentEditAnimationIndex=-1;
 		plive->currentEditFrameIndex=-1;
 		plive->currentEditLayerIndex=-1;
-		plive->currentEditVertexIndex=1;
+		plive->currentEditVertexIndex=-1;
 	}
 }
 
@@ -1952,7 +1953,6 @@ px_void PX_LiveFrameworkDeleteLiveAnimationFrameByIndex(PX_LiveFramework *plive,
 		{
 			PX_LiveFrameworkDeleteLiveAnimationFrame(plive,pAnimation,frameIndex);
 		}
-		PX_VectorErase(&pAnimation->framesMemPtr,frameIndex);
 	}
 }
 
@@ -2174,7 +2174,7 @@ px_bool PX_LiveFrameworkNewEditFrame(PX_LiveFramework *plive,px_char id[],px_boo
 		if (newFramePtr)
 		{
 			PX_memcpy(newFramePtr,buffer,size);
-			PX_memcpy(pHeader->frameid,id,sizeof(pHeader->frameid));
+			PX_memcpy(((PX_LiveAnimationFrameHeader *)newFramePtr)->frameid,id,sizeof(pHeader->frameid));
 			if (bCopyFrame)
 			{
 				PX_VectorPushTo(&pAnimation->framesMemPtr,&newFramePtr,plive->currentEditFrameIndex+1);
@@ -2496,7 +2496,7 @@ px_bool PX_LiveFrameworkImport(px_memorypool *mp,PX_LiveFramework *plive,px_void
 		plive->liveAnimations.size=pReadLiveFrameworkAttributes->animationCount;
 
 		plive->reg_animation=0;
-		plive->reg_bp=0;
+		plive->reg_bp=-1;
 		plive->reg_duration=0;
 		plive->reg_elapsed=0;
 		plive->reg_ip=0;
@@ -2692,8 +2692,8 @@ _ERROR:
 px_bool PX_LiveCreate(px_memorypool *mp,PX_LiveFramework *pLiveFramework,PX_Live *pLive)
 {
 	px_int i;
-	pLive->mp=mp;
 	*pLive=*pLiveFramework;
+	pLive->mp=mp;
 	if(!PX_VectorInitialize(mp,&pLive->layers,sizeof(PX_LiveLayer),0))return PX_FALSE;
 	if(!PX_VectorCopy(&pLive->layers,&pLiveFramework->layers)) return PX_FALSE;
 	for (i=0;i<pLive->layers.size;i++)

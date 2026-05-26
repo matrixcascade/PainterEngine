@@ -3,7 +3,7 @@
 px_bool PX_ResourceLibraryInitialize(px_memorypool *mp,PX_ResourceLibrary *lib)
 {
 	lib->mp=mp;
-	PX_MapInitialize(mp,&lib->map);
+	PX_MapInitialize(mp,&lib->bin_map_to_source);
 	PX_ListInitialize(mp,&lib->resources);
 	return PX_TRUE;
 }
@@ -114,17 +114,27 @@ px_bool PX_ResourceLibraryLoad(PX_ResourceLibrary *lib,PX_RESOURCE_TYPE type,px_
 			}
 		}
 		break;
+	case PX_RESOURCE_TYPE_FONTMODULE:
+		{
+			PX_memcpy(&res.fontmodule, data, sizeof(PX_FontModule));
+		}
+		break;
+	case PX_RESOURCE_TYPE_GIF:
+		{
+			PX_memcpy(&res.gif, data, sizeof(px_gif));
+		}
+		break;
 	}
 	
-	PX_MapPut(&lib->map,(const px_byte *)key,PX_strlen(key), PX_ListPush(&lib->resources, &res, sizeof(res)));
+	PX_MapPut(&lib->bin_map_to_source,(const px_byte *)key,PX_strlen(key), PX_ListPush(&lib->resources, &res, sizeof(res)));
 	return PX_TRUE;
 }
 
 px_bool PX_ResourceLibraryAdd(PX_ResourceLibrary* lib, PX_Resource res,const px_char key[])
 {
-	if (PX_MapGet(&lib->map, (const px_byte *)key, PX_strlen(key))==PX_NULL)
+	if (PX_MapGet(&lib->bin_map_to_source, (const px_byte *)key, PX_strlen(key))==PX_NULL)
 	{
-		if (PX_MapPut(&lib->map, (const px_byte *)key, PX_strlen(key), PX_ListPush(&lib->resources, &res, sizeof(res))) == PX_HASHMAP_RETURN_OK)
+		if (PX_MapPut(&lib->bin_map_to_source, (const px_byte *)key, PX_strlen(key), PX_ListPush(&lib->resources, &res, sizeof(res))) == PX_HASHMAP_RETURN_OK)
 			return PX_TRUE;
 	}
 	
@@ -144,6 +154,12 @@ px_void PX_ResourceLibraryFree(PX_ResourceLibrary *lib)
 			break;
 		case PX_RESOURCE_TYPE_STRING:
 			PX_StringFree(&pres->stringdata);
+			break;
+		case PX_RESOURCE_TYPE_FONTMODULE:
+			PX_FontModuleFree(&pres->fontmodule);
+			break;
+		case PX_RESOURCE_TYPE_GIF:
+			PX_GifFree(&pres->gif);
 			break;
 		case PX_RESOURCE_TYPE_TEXTURE:
 			PX_TextureFree(&pres->texture);
@@ -172,13 +188,13 @@ px_void PX_ResourceLibraryFree(PX_ResourceLibrary *lib)
 		pNode=pNode->pnext;
 	}
 	PX_ListFree(&lib->resources);
-	PX_MapFree(&lib->map);
+	PX_MapFree(&lib->bin_map_to_source);
 	
 }
 
 PX_Resource *  PX_ResourceLibraryGet(PX_ResourceLibrary *lib,const px_char key[])
 {
-	return (PX_Resource *)PX_MapGet(&lib->map,(const px_byte *)key, PX_strlen(key));
+	return (PX_Resource *)PX_MapGet(&lib->bin_map_to_source,(const px_byte *)key, PX_strlen(key));
 }
 
 px_bool PX_ResourceLibraryAddTexture(PX_ResourceLibrary *lib,const px_char key[],px_texture *pTexture)
@@ -186,7 +202,7 @@ px_bool PX_ResourceLibraryAddTexture(PX_ResourceLibrary *lib,const px_char key[]
 	PX_Resource res;
 	res.Type=PX_RESOURCE_TYPE_TEXTURE;
 	if(!PX_TextureCopy(lib->mp,pTexture,&res.texture))return PX_FALSE;
-	PX_MapPut(&lib->map,(const px_byte *)key, PX_strlen(key),PX_ListPush(&lib->resources,&res,sizeof(res)));
+	PX_MapPut(&lib->bin_map_to_source,(const px_byte *)key, PX_strlen(key),PX_ListPush(&lib->resources,&res,sizeof(res)));
 	return PX_TRUE;
 }
 
@@ -195,7 +211,7 @@ px_texture *PX_ResourceLibraryCreateTexture(PX_ResourceLibrary* lib, const px_ch
 	PX_Resource res;
 	res.Type = PX_RESOURCE_TYPE_TEXTURE;
 	if (!PX_TextureCreate(lib->mp, &res.texture,width, height))return PX_NULL;
-	if(PX_MapPut(&lib->map, (const px_byte*)key, PX_strlen(key), PX_ListPush(&lib->resources, &res, sizeof(res)))!=PX_HASHMAP_RETURN_OK) 
+	if(PX_MapPut(&lib->bin_map_to_source, (const px_byte*)key, PX_strlen(key), PX_ListPush(&lib->resources, &res, sizeof(res)))!=PX_HASHMAP_RETURN_OK) 
 		return 0;
 	return PX_ResourceLibraryGetTexture(lib,key);
 }
@@ -205,9 +221,28 @@ px_memory* PX_ResourceLibraryCreateMemory(PX_ResourceLibrary* lib, const px_char
 	PX_Resource res;
 	res.Type = PX_RESOURCE_TYPE_DATA;
 	PX_MemoryInitialize(lib->mp, &res.data);
-	if (PX_MapPut(&lib->map, (const px_byte*)key, PX_strlen(key), PX_ListPush(&lib->resources, &res, sizeof(res))) != PX_HASHMAP_RETURN_OK)
+	if (PX_MapPut(&lib->bin_map_to_source, (const px_byte*)key, PX_strlen(key), PX_ListPush(&lib->resources, &res, sizeof(res))) != PX_HASHMAP_RETURN_OK)
 		return 0;
 	return PX_ResourceLibraryGetData(lib, key);
+}
+
+PX_FontModule* PX_ResourceLibraryGetFontModule(PX_ResourceLibrary* lib, const px_char key[])
+{
+	PX_Resource* pres = PX_ResourceLibraryGet(lib, key);
+	if (pres && pres->Type == PX_RESOURCE_TYPE_FONTMODULE)
+	{
+		return &pres->fontmodule;
+	}
+	return PX_NULL;
+
+}
+
+px_gif* PX_ResourceLibraryGetGif(PX_ResourceLibrary* lib, const px_char key[])
+{
+	PX_Resource* pres = PX_ResourceLibraryGet(lib, key);
+	if (pres && pres->Type == PX_RESOURCE_TYPE_GIF)
+		return &pres->gif;
+	return PX_NULL;
 }
 
 
@@ -215,7 +250,7 @@ px_void PX_ResourceLibraryDelete(PX_ResourceLibrary *lib,const px_char key[])
 {
 	PX_Resource * pres,*pnodeRes;
 
-	pres=(PX_Resource *)PX_MapGet(&lib->map,(const px_byte *)key, PX_strlen(key));
+	pres=(PX_Resource *)PX_MapGet(&lib->bin_map_to_source,(const px_byte *)key, PX_strlen(key));
 	if (pres)
 	{
 		px_list_node *pNode=lib->resources.head;
@@ -252,9 +287,15 @@ px_void PX_ResourceLibraryDelete(PX_ResourceLibrary *lib,const px_char key[])
 				case PX_RESOURCE_TYPE_JSON:
 					PX_JsonFree(&pres->json);
 					break;
+				case PX_RESOURCE_TYPE_FONTMODULE:
+					PX_FontModuleFree(&pres->fontmodule);
+					break;
+				case PX_RESOURCE_TYPE_GIF:
+					PX_GifFree(&pres->gif);
+					break;
 				}
 				PX_ListPop(&lib->resources,pNode);
-				PX_MapErase(&lib->map,(const px_byte *)key, PX_strlen(key));
+				PX_MapErase(&lib->bin_map_to_source,(const px_byte *)key, PX_strlen(key));
 				return;
 			}
 			pNode=pNode->pnext;
@@ -292,6 +333,15 @@ px_string* PX_ResourceLibraryGetString(PX_ResourceLibrary* lib, const px_char ke
 	return PX_NULL;
 }
 
+const px_char* PX_ResourceLibraryGetText(PX_ResourceLibrary* lib, const px_char key[])
+{
+	px_string* pstring = PX_ResourceLibraryGetString(lib, key);
+	if (pstring)
+	{
+		return pstring->buffer;
+	}
+	return PX_NULL;
+}
 PX_Json* PX_ResourceLibraryGetJson(PX_ResourceLibrary* lib, const px_char key[])
 {
 	PX_Resource* pres = PX_ResourceLibraryGet(lib, key);

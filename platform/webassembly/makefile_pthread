@@ -40,6 +40,7 @@ all:$(project_build_o)  $(libcore) $(libkernel) $(libruntime) $(libplatform)
 	-I "$(project_path)" \
 	-lwebsocket.js \
 	-pthread \
+	-s INITIAL_MEMORY=385875968 \
 	-s USE_PTHREADS=1 -s PTHREAD_POOL_SIZE=16 \
 	-s EXPORTED_RUNTIME_METHODS="['cwrap','ccall']" \
 	-s WEBSOCKET_SUBPROTOCOL='binary' \

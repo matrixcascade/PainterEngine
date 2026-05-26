@@ -8,17 +8,18 @@ px_void PX_MemoryInitialize(px_memorypool *mp,px_memory *memory)
 
 px_bool PX_MemoryInsert(px_memory* memory, px_int offset, const px_void* buffer, px_int size)
 {
+	if (offset < 0 || size <= 0 || offset > memory->usedsize) return PX_FALSE;
 	if(!PX_MemoryCat(memory, buffer, size)) return PX_FALSE;
 	PX_memcpy(memory->buffer + offset + size, memory->buffer + offset, memory->usedsize - offset - size);
 	PX_memcpy(memory->buffer + offset, buffer, size);
 	return PX_TRUE;
-	
+
 }
 
 px_bool PX_MemoryCat(px_memory *memory,const px_void *buffer,px_int size)
 {
 	px_byte *old;
-	px_int length,shl;
+	px_int radius,shl;
 
 	if (size==0)
 	{
@@ -29,8 +30,8 @@ px_bool PX_MemoryCat(px_memory *memory,const px_void *buffer,px_int size)
 	{
 		shl=0;
 		old=memory->buffer;
-		length=memory->usedsize+size;
-		while ((px_int)(1<<++shl)<=length);
+		radius=memory->usedsize+size;
+		while ((px_int)(1<<++shl)<=radius);
 		memory->allocsize=(1<<shl);
 		memory->buffer=(px_byte*)MP_Malloc(memory->mp,memory->allocsize);
 		if(!memory->buffer) return PX_FALSE;
@@ -54,7 +55,7 @@ px_bool PX_MemoryCat(px_memory *memory,const px_void *buffer,px_int size)
 px_bool PX_MemoryCatRepeatByte(px_memory* memory, px_byte code, px_int size)
 {
 	px_byte* old;
-	px_int length, shl;
+	px_int radius, shl;
 
 	if (size == 0)
 	{
@@ -65,8 +66,8 @@ px_bool PX_MemoryCatRepeatByte(px_memory* memory, px_byte code, px_int size)
 	{
 		shl = 0;
 		old = memory->buffer;
-		length = memory->usedsize + size;
-		while ((px_int)(1 << ++shl) <= length);
+		radius = memory->usedsize + size;
+		while ((px_int)(1 << ++shl) <= radius);
 		memory->allocsize = (1 << shl);
 		memory->buffer = (px_byte*)MP_Malloc(memory->mp, memory->allocsize);
 		if (!memory->buffer) return PX_FALSE;
@@ -180,7 +181,7 @@ px_bool PX_MemoryResize(px_memory *memory,px_int size)
 {
 	if (size==0)
 	{
-		PX_MemoryFree(memory);
+		PX_MemoryClear(memory);
 		return PX_TRUE;
 	}
 	else
@@ -193,11 +194,11 @@ px_bool PX_MemoryResize(px_memory *memory,px_int size)
 		else
 		{
 			px_byte* old;
-			px_int length, shl;
+			px_int radius, shl;
 			shl = 0;
 			old = memory->buffer;
-			length =size;
-			while ((px_int)(1 << ++shl) <= length);
+			radius =size;
+			while ((px_int)(1 << ++shl) <= radius);
 			memory->allocsize = (1 << shl);
 			memory->buffer = (px_byte*)MP_Malloc(memory->mp, memory->allocsize);
 			if (!memory->buffer) return PX_FALSE;
@@ -235,6 +236,10 @@ px_byte *PX_MemoryFind(px_memory *memory,const px_void *buffer,px_int size)
 
 px_void PX_MemoryRemove(px_memory *memory,px_int start,px_int end)
 {
+	if (start<0||end<0)
+	{
+		return;
+	}
 	if (start>end)
 	{
 		px_int t = end;
@@ -272,19 +277,50 @@ px_void PX_MemoryLeft(px_memory* memory,px_int trimsize)
 	memory->usedsize = trimsize;
 	memory->bit_pointer = 0;
 }
+px_int PX_MemoryGetUsedSize(px_memory* memory)
+{
+	return memory->usedsize;
+}
 
+px_int PX_MemoryGetAllocSize(px_memory* memory)
+{
+	return memory->allocsize;
+}
+
+px_void PX_MemoryTrimRight(px_memory* memory, px_int trimsize)
+{
+	if (trimsize >= memory->usedsize)
+	{
+		return;
+	}
+	memory->usedsize -= trimsize;
+	memory->bit_pointer = 0;
+	
+}
+
+px_void PX_MemoryTrimLeft(px_memory* memory, px_int trimsize)
+{
+	if (trimsize>= memory->usedsize)
+	{
+		PX_MemoryClear(memory);
+		return;
+	}
+	PX_memmove(memory->buffer, memory->buffer + trimsize, memory->usedsize - trimsize);
+	memory->usedsize -= trimsize;
+	memory->bit_pointer = 0;
+}
 
 px_bool PX_MemoryCopy(px_memory *memory,const px_void *buffer,px_int startoffset,px_int size)
 {
 	px_byte *old;
-	px_int length,shl;
+	px_int radius,shl;
 
 	if (startoffset+size>memory->allocsize)
 	{
 		shl=0;
 		old=memory->buffer;
-		length=startoffset+size;
-		while ((px_int)(1<<++shl)<=length);
+		radius=startoffset+size;
+		while ((px_int)(1<<++shl)<=radius);
 		memory->allocsize=(1<<shl);
 		memory->buffer=(px_byte*)MP_Malloc(memory->mp,memory->allocsize);
 		if (!memory->buffer)
@@ -323,7 +359,7 @@ px_bool PX_CircularBufferInitialize(px_memorypool* mp, PX_CircularBuffer* pcbuff
 		PX_ASSERT();
 	}
 	pcbuffer->buffer = (px_double *)MP_Malloc(mp, sizeof(px_double) * size);
-	if (!pcbuffer)
+	if (!pcbuffer->buffer)
 	{
 		return PX_FALSE;
 	}
@@ -400,7 +436,7 @@ px_int PX_FifoBufferPop(px_fifobuffer* pfifo, px_void* data, px_int size)
 			pfifo->AsynchronousLock = PX_TRUE;
 		}
 		rsize = *(px_int*)pfifo->buffer;
-		if (rsize>pfifo->usedsize-(px_int)sizeof(px_int))
+		if (rsize<0||rsize>pfifo->usedsize-(px_int)sizeof(px_int))
 		{
 			PX_ASSERT();//fifo error
 			if (pfifo->bAsynchronous)
@@ -469,6 +505,10 @@ px_bool PX_FifoBufferPush(px_fifobuffer* pfifo, px_void* data, px_int size)
 			}
 			return PX_TRUE;
 		}
+		else
+		{
+			PX_MemoryTrimRight(pfifo, sizeof(wsize));
+		}
 	}
 	if (pfifo->bAsynchronous)
 	{
@@ -476,6 +516,51 @@ px_bool PX_FifoBufferPush(px_fifobuffer* pfifo, px_void* data, px_int size)
 	}
 	return PX_FALSE;
 
+}
+
+px_bool PX_FifoBufferPush2(px_fifobuffer* pfifo,const px_void* data1, px_int size1, const px_void* data2, px_int size2)
+{
+	px_int wsize = size1 + size2;
+	if (wsize < 0)
+	{
+		PX_ASSERT();
+	}
+	if (wsize == 0)
+	{
+		return PX_TRUE;
+	}
+	if (pfifo->bAsynchronous)
+	{
+		while (pfifo->AsynchronousLock);
+		pfifo->AsynchronousLock = PX_TRUE;
+	}
+	if (PX_MemoryCat(pfifo, &wsize, sizeof(wsize)))
+	{
+		if (PX_MemoryCat(pfifo, data1, size1))
+		{
+			if (PX_MemoryCat(pfifo, data2, size2))
+			{
+				if (pfifo->bAsynchronous)
+				{
+					pfifo->AsynchronousLock = PX_FALSE;
+				}
+				return PX_TRUE;
+			}
+			else
+			{
+				PX_MemoryTrimRight(pfifo, sizeof(wsize) + size1);
+			}
+		}
+		else
+		{
+			PX_MemoryTrimRight(pfifo, sizeof(wsize));
+		}
+	}
+	if (pfifo->bAsynchronous)
+	{
+		pfifo->AsynchronousLock = PX_FALSE;
+	}
+	return PX_FALSE;
 }
 
 px_bool PX_FifoBufferPushSize(px_fifobuffer* pfifo,px_dword size)
@@ -695,6 +780,17 @@ const px_byte * PX_StackGetBottomData(px_stack* pstack)
 	}
 	return PX_NULL;
 }
+
+const px_void* PX_StackGetTopData(px_stack* pstack)
+{
+	if (pstack->usedsize > sizeof(px_int))
+	{
+		px_int datasize = *(px_int*)(pstack->buffer + pstack->usedsize - sizeof(px_int));
+		return pstack->buffer + pstack->usedsize - sizeof(px_int) - datasize;
+	}
+	return PX_NULL;
+}
+
 px_void PX_StackRemoveBottom(px_stack* pstack)
 {
 	if (pstack->usedsize > sizeof(px_int))

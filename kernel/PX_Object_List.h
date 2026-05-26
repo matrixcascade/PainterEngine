@@ -55,6 +55,7 @@ px_void PX_Object_ListSetCurrentSelectIndex(PX_Object *pObject,px_int index);
 px_int PX_Object_ListGetCurrentSelectIndex(PX_Object *pObject);
 px_void* PX_Object_ListGetCurrentSelectData(PX_Object* pObject);
 px_int PX_Object_ListAdd(PX_Object * pListObject,px_void *ptr);
+px_bool PX_Object_ListCopyFromVector(PX_Object* pListObject, px_vector* pVector);
 px_void *PX_Object_ListGetItemData(PX_Object *pListObject,px_int index);
 px_int  PX_Object_ListGetItemCount(PX_Object* pListObject);
 px_void* PX_Object_ListItemGetData(PX_Object* pItemObject);

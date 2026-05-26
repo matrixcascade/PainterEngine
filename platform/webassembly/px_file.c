@@ -649,6 +649,19 @@ _ERROR:
     return PX_FALSE;
 }
 
+px_bool PX_LoadGifToResource(PX_ResourceLibrary* presourcelib, const px_char Path[], const px_char key[])
+{
+    PX_Resource res;
+    res.Type = PX_RESOURCE_TYPE_GIF;
+    if (!PX_LoadGifFromFile(presourcelib->mp, &res.gif, Path)) return PX_FALSE;
+    if (!PX_ResourceLibraryAdd(presourcelib, res, key))
+    {
+        PX_GifFree(&res.gif);
+        return PX_FALSE;
+    }
+    return PX_TRUE;
+}
+
 px_bool PX_LoadLive2DFromFile(px_memorypool* mp, PX_LiveFramework* liveframework, const px_char path[])
 {
     PX_IO_Data io = PX_LoadFileToIOData((px_char*)path);
@@ -695,6 +708,16 @@ _ERROR:
 	return PX_FALSE;
 }
 
+px_bool PX_LoadFontModuleToResource(PX_ResourceLibrary* presourcelib, const px_char Path[], const px_char key[], PX_FONTMODULE_CODEPAGE codepage, px_int fontsize)
+{
+	PX_FontModule fm;
+	if (!PX_LoadFontModuleFromTTF(presourcelib->mp, &fm, Path, codepage, fontsize))goto _ERROR;
+	if (!PX_ResourceLibraryLoad(presourcelib,PX_RESOURCE_TYPE_FONTMODULE,(px_byte*) &fm, sizeof(fm), key))goto _ERROR;
+	return PX_TRUE;
+_ERROR:
+	return PX_FALSE;
+}
+
 px_bool PX_LoadJsonToResource(PX_ResourceLibrary* ResourceLibrary, const px_char Path[], const px_char key[])
 {
 	PX_IO_Data io;
@@ -720,6 +743,7 @@ _ERROR:
 	return PX_FALSE;
 }
 
+
 px_bool PX_LoadVMFromScriptFile(px_memorypool *mp,const px_char path[], PX_VM *pvm,const px_char entry[])
 {
 	PX_Compiler compiler;
@@ -727,18 +751,28 @@ px_bool PX_LoadVMFromScriptFile(px_memorypool *mp,const px_char path[], PX_VM *p
 	PX_IO_Data io = PX_LoadFileToIOData(path);
 	if (!io.size)
 	{
+        printf("Load script file failed.\n");
 		return PX_FALSE;
 	}
 	PX_MemoryInitialize(mp, &bin);
 	
-	if(!PX_CompilerInitialize(mp,&compiler))
-		goto _ERROR;
+	if (!PX_CompilerInitialize(mp, &compiler))
+	{
+        printf("Compiler initialize failed.\n");
+		PX_FreeIOData(&io);
+		return PX_FALSE;
+	}
 	
 	if (!PX_CompilerAddSource(&compiler, (const px_char *)io.buffer))
 		goto _ERROR;
 
 	if (!PX_CompilerCompile(&compiler, &bin, 0, entry))
+	{
+		printf(compiler.error);
+		printf("\n");
 		goto _ERROR;
+	}
+		
 
 	if (!PX_VMInitialize(pvm, mp, bin.buffer, bin.usedsize))
 		goto _ERROR;
@@ -748,5 +782,8 @@ px_bool PX_LoadVMFromScriptFile(px_memorypool *mp,const px_char path[], PX_VM *p
 	PX_FreeIOData(&io);
 	return PX_TRUE;
 _ERROR:
+	PX_MemoryFree(&bin);
+	PX_CompilerFree(&compiler);
+	PX_FreeIOData(&io);
 	return PX_FALSE;
 }

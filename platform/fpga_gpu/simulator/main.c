@@ -36,7 +36,7 @@ PX_OBJECT_RENDER_FUNCTION(PX_Object_BallRender)
     PX_Object_Ball* pDesc = PX_ObjectGetDesc(PX_Object_Ball, pObject);
     PX_TEXTURERENDER_BLEND blend;
     PX_ObjectUpdatePhysics(pObject, elapsed);
-    if (pObject->y > 480 - pDesc->ball_tex.height / 2)
+    if (pObject->y > 480 - pDesc->ball_tex.height / 2-100)
     {
         pObject->vy = -PX_ABS(pObject->vy);
     }
@@ -51,6 +51,7 @@ PX_OBJECT_RENDER_FUNCTION(PX_Object_BallRender)
     blend.hdr_B = 1;
     blend.alpha = 1.0f-pDesc->alive / 3800.f;
     PX_TextureRender(psurface, &pDesc->ball_tex, (px_int)pObject->x, (px_int)pObject->y, PX_ALIGN_CENTER, &blend);
+	PX_GeoDrawLine(psurface, 0, psurface->height - 100, psurface->width, psurface->height - 100, 2, PX_COLOR(255, 255, 0, 0));
 }
 
 PX_OBJECT_FREE_FUNCTION(PX_Object_Free)
@@ -89,11 +90,11 @@ PX_OBJECT_RENDER_FUNCTION(MyRender)
     FPS++;
     switcher++;
     FPStime += elapsed;
-    if (FPStime >= 3000)
+    if (FPStime >= 2000)
     {
-        avgFPS = FPS / 3.f;
+        avgFPS = FPS / 2.f;
         FPS = 0;
-        FPStime -= 3000;
+        FPStime -= 2000;
     }
 
     if (switcher < 300)

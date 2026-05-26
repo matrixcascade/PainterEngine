@@ -161,12 +161,12 @@ PX_OBJECT_RENDER_FUNCTION(PX_Object_AsmDebuggerRender)
 
 	} while (0);
 
-	if (pDesc->vm && pDesc->map)
+	if (pDesc->vm && pDesc->bin_map_to_source)
 	{
 		px_int i;
 		px_int T = pDesc->vm->T;
 		px_int ip = pDesc->vm->pThread[pDesc->vm->T].IP;
-		px_int line = PX_VMDebuggerMapIpToLine(pDesc->map, ip);
+		px_int line = PX_VMDebuggerMapIpToLine(pDesc->bin_map_to_source, ip);
 		px_int sp= pDesc->vm->pThread[pDesc->vm->T].SP;
 		px_int bp = pDesc->vm->pThread[pDesc->vm->T].BP;
 		px_char content[64];
@@ -246,7 +246,7 @@ PX_OBJECT_RENDER_FUNCTION(PX_Object_AsmDebuggerRender)
 			{
 				if (pDesc->vm->breakpoints[i] != -1)
 				{
-					line = PX_VMDebuggerMapIpToLine(pDesc->map, pDesc->vm->breakpoints[i]);
+					line = PX_VMDebuggerMapIpToLine(pDesc->bin_map_to_source, pDesc->vm->breakpoints[i]);
 					if (line && line >= 0 && line < pDesc->lines.size)
 					{
 						PX_VECTORAT(PX_Object_AsmDebugger_Line, &pDesc->lines, line)->bbreak = PX_TRUE;
@@ -261,7 +261,7 @@ PX_OBJECT_FREE_FUNCTION(PX_Object_AsmDebuggerFree)
 {
 	px_int i;
 	PX_Object_AsmDebugger *pDesc = PX_ObjectGetDesc(PX_Object_AsmDebugger, pObject);
-	if (!pDesc->vm || !pDesc->map)
+	if (!pDesc->vm || !pDesc->bin_map_to_source)
 	{
 		return;
 	}
@@ -279,7 +279,7 @@ PX_OBJECT_EVENT_FUNCTION(PX_Object_AsmDebuggerOnMonitorChanged)
 	PX_Object* pAsmObject=(PX_Object *)ptr;
 	PX_Object_AsmDebugger* pAsm = (PX_Object_AsmDebugger *)PX_ObjectGetDescByType(pAsmObject, PX_OBJECT_TYPE_ASMDEBUGGER);
 	PX_ASSERTIF(pAsm == PX_NULL);
-	if (!pAsm->vm || !pAsm->map)
+	if (!pAsm->vm || !pAsm->bin_map_to_source)
 	{
 		return;
 	}
@@ -301,11 +301,11 @@ PX_OBJECT_EVENT_FUNCTION(PX_Object_AsmDebuggerOnSourceChanged)
 	px_int param[3];
 	px_int i,ip;
 	PX_ASSERTIF(pAsm == PX_NULL);
-	if (!pAsm->vm || !pAsm->map)
+	if (!pAsm->vm || !pAsm->bin_map_to_source)
 	{
 		return;
 	}
-	if ((ip = PX_VMDebuggerMapLineToIp(pAsm->map, index)) != -1)
+	if ((ip = PX_VMDebuggerMapLineToIp(pAsm->bin_map_to_source, index)) != -1)
 	{
 		if (PX_VMDebuggerInstruction(pAsm->vm, ip, &opcode, opcode_name, &paramcount, optype, param))
 		{
@@ -350,7 +350,7 @@ PX_OBJECT_EVENT_FUNCTION(PX_Object_AsmDebuggerOnButtonRun)
 	PX_Object* pAsmObject = (PX_Object*)ptr;
 	PX_Object_AsmDebugger* pAsm = (PX_Object_AsmDebugger*)PX_ObjectGetDescByType(pAsmObject, PX_OBJECT_TYPE_ASMDEBUGGER);
 	PX_ASSERTIF(pAsm == PX_NULL);
-	if (pAsm->vm && pAsm->map)
+	if (pAsm->vm && pAsm->bin_map_to_source)
 	{
 		PX_VMDebugContinue(pAsm->vm);
 	}
@@ -361,7 +361,7 @@ px_void PX_Object_AsmDebuggerOnButtonPause(PX_Object* pObject, PX_Object_Event e
 	PX_Object* pAsmObject = (PX_Object*)ptr;
 	PX_Object_AsmDebugger* pAsm = (PX_Object_AsmDebugger*)PX_ObjectGetDescByType(pAsmObject, PX_OBJECT_TYPE_ASMDEBUGGER);
 	PX_ASSERTIF(pAsm == PX_NULL);
-	if (pAsm->vm && pAsm->map)
+	if (pAsm->vm && pAsm->bin_map_to_source)
 	{
 		PX_VMSuspend(pAsm->vm);
 	}
@@ -375,9 +375,9 @@ px_void PX_Object_AsmDebuggerOnButtonBreak(PX_Object* pObject, PX_Object_Event e
 	px_int index = PX_Object_ListGetCurrentSelectIndex(pAsm->list_source);
 	px_int ip;
 	PX_ASSERTIF(pAsm == PX_NULL);
-	if (pAsm->vm && pAsm->map)
+	if (pAsm->vm && pAsm->bin_map_to_source)
 	{
-		if ((ip = PX_VMDebuggerMapLineToIp(pAsm->map, index)) != -1)
+		if ((ip = PX_VMDebuggerMapLineToIp(pAsm->bin_map_to_source, index)) != -1)
 		{
 			PX_VMTriggerBreakPoint(pAsm->vm, ip);
 		}
@@ -389,7 +389,7 @@ px_void PX_Object_AsmDebuggerOnButtonStep(PX_Object* pObject, PX_Object_Event e,
 	PX_Object* pAsmObject = (PX_Object*)ptr;
 	PX_Object_AsmDebugger* pAsm = (PX_Object_AsmDebugger*)PX_ObjectGetDescByType(pAsmObject, PX_OBJECT_TYPE_ASMDEBUGGER);
 	PX_ASSERTIF(pAsm == PX_NULL);
-	if (pAsm->vm && pAsm->map)
+	if (pAsm->vm && pAsm->bin_map_to_source)
 	{
 		PX_VMDebugContinue(pAsm->vm);
 		PX_VMRun(pAsm->vm, 1, 0);
@@ -403,7 +403,7 @@ px_void PX_Object_AsmDebuggerOnButtonReset(PX_Object* pObject, PX_Object_Event e
 	PX_Object* pAsmObject = (PX_Object*)ptr;
 	PX_Object_AsmDebugger* pAsm = (PX_Object_AsmDebugger*)PX_ObjectGetDescByType(pAsmObject, PX_OBJECT_TYPE_ASMDEBUGGER);
 	PX_ASSERTIF(pAsm == PX_NULL);
-	if (pAsm->vm&&pAsm->map)
+	if (pAsm->vm&&pAsm->bin_map_to_source)
 	{
 		PX_VMReset(pAsm->vm);
 		PX_VMBeginThreadFunction(pAsm->vm, 0, "main", 0, 0);
@@ -426,25 +426,25 @@ px_void PX_Object_AsmDebuggerDetach(PX_Object* pObject)
 	PX_VectorClear(&pDesc->lines);
 	PX_Object_ListClear(pDesc->list_source);
 	pDesc->vm = 0;
-	pDesc->map = 0;
+	pDesc->bin_map_to_source = 0;
 	pDesc->lastip = -1;
 	
 }
 
-px_bool PX_Object_AsmDebuggerAttach(PX_Object *pObject,PX_VM_DebuggerMap* map,PX_VM* vm)
+px_bool PX_Object_AsmDebuggerAttach(PX_Object *pObject,PX_VM_DebuggerMap* bin_map_to_source,PX_VM* vm)
 {
 	PX_Object_AsmDebugger* pDesc = (PX_Object_AsmDebugger*)PX_ObjectGetDescByType(pObject, PX_OBJECT_TYPE_ASMDEBUGGER);
 	px_int i, offset=0;
 	PX_ASSERTIF(pDesc == PX_NULL);
-	if (pDesc->map)
+	if (pDesc->bin_map_to_source)
 	{
 		PX_Object_AsmDebuggerDetach(pObject);
 	}
 
 	pDesc->vm = vm;
-	pDesc->map = map;
+	pDesc->bin_map_to_source = bin_map_to_source;
 
-	while (map->source.buffer[offset])
+	while (bin_map_to_source->source.buffer[offset])
 	{
 		PX_Object_AsmDebugger_Line line;
 		PX_memset(&line, 0, sizeof(line));
@@ -452,14 +452,14 @@ px_bool PX_Object_AsmDebuggerAttach(PX_Object *pObject,PX_VM_DebuggerMap* map,PX
 		PX_StringInitialize(pObject->mp, &line.source);
 		while (PX_TRUE)
 		{
-			if (map->source.buffer[offset] == '\n' || map->source.buffer[offset] == '\0')
+			if (bin_map_to_source->source.buffer[offset] == '\n' || bin_map_to_source->source.buffer[offset] == '\0')
 			{
 				offset++;
 				break;
 			}
 			else
 			{
-				PX_StringCatCharEx(&line.source, map->source.buffer[offset]);
+				PX_StringCatChar(&line.source, bin_map_to_source->source.buffer[offset]);
 			}
 			offset++;
 		}
@@ -493,7 +493,7 @@ PX_Object* PX_Object_AsmDebuggerAttachObject( PX_Object* pObject, px_int attachI
 	}
 	pDesc->vm = 0;
 	pDesc->fm = fm;
-	pDesc->map = 0;
+	pDesc->bin_map_to_source = 0;
 	pDesc->lastip = -1;
 	pDesc->button_break = PX_Object_PushButtonCreate(mp, pObject, 0, 0, 48, 24, "break", PX_NULL);
 	PX_Object_PushButtonSetTextColor(pDesc->button_break, PX_COLOR(255, 255, 255, 0));

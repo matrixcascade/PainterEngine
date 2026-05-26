@@ -448,6 +448,6 @@ px_bool PX_TriangleIsCross( px_triangle* tri1, px_triangle* tri2 )
 	}
 	else
 	{
-		return PX_TRUE;
+		return PX_FALSE;
 	}
 }

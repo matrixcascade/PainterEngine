@@ -81,7 +81,7 @@ px_void* PX_mmap(px_mmap_handle* handle, px_void* phy_address, px_dword size)
         {
             continue;
         }
-        handle->data[i] = mmap(PX_NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED, handle->ffd, (px_dword)phy_address);
+        handle->data[i] = mmap(PX_NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED, handle->ffd, (off_t)(px_uint64)phy_address);
         handle->size[i] = size;
         printf("mmap %p-->%p\n", handle->data[i],phy_address);
         return handle->data[i];

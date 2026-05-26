@@ -56,6 +56,7 @@ px_bool PX_LoadLiveFromFile(px_memorypool* mp, PX_LiveFramework* pliveframework,
 
 px_bool PX_LoadFontModuleFromTTF(px_memorypool* mp, PX_FontModule* fm, const px_char Path[], PX_FONTMODULE_CODEPAGE codepage, px_int fontsize);
 px_bool PX_LoadJsonFromJsonFile(px_memorypool* mp, PX_Json* json, const px_char* path);
+px_bool PX_LoadFontModuleToResource(PX_ResourceLibrary* presourcelib, const px_char Path[], const px_char key[], PX_FONTMODULE_CODEPAGE codepage, px_int fontsize);
 px_bool PX_LoadTextureToResource(PX_ResourceLibrary *presourcelib,const px_char Path[],const px_char key[]);
 px_bool PX_LoadShapeToResource(PX_ResourceLibrary *presourcelib,const px_char Path[],const px_char key[]);
 px_bool PX_LoadAnimationToResource(PX_ResourceLibrary *presourcelib,const px_char Path[],const px_char key[]);
@@ -68,6 +69,7 @@ px_bool PX_LoadJsonToResource(PX_ResourceLibrary *presourcelib,const px_char Pat
 px_bool PX_LoadDataToResource(PX_ResourceLibrary* ResourceLibrary, const px_char Path[], const px_char key[]);
 
 px_bool PX_LoadGifFromFile(px_memorypool* mp, px_gif* gif, const px_char path[]);
+px_bool PX_LoadGifToResource(PX_ResourceLibrary* presourcelib, const px_char Path[], const px_char key[]);
 px_bool PX_LoadLive2DFromFile(px_memorypool* mp, PX_LiveFramework* liveframework, const px_char path[]);
 px_bool PX_LoadVMFromScriptFile(px_memorypool* mp, const px_char path[], PX_VM* pvm, const px_char entry[]);
 const px_char* PX_GetSelfPath();

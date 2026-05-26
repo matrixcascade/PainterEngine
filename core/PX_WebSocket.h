@@ -4,7 +4,7 @@
 #include "PX_Http.h"
 #include "PX_Linker.h"
 #include "PX_Base64.h"
-#include "PX_Sha1.h"
+#include "PX_Sha.h"
 
 #define PX_WEBSOCKET_CACHE_MAX_SIZE (1024*64)
 

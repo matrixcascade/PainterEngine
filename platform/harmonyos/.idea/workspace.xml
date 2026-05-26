@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="9610b501-b44d-4b1e-a277-113425ea3851" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/../../.demo/syntax/PainterEngine_Syntax.exe" beforeDir="false" afterPath="$PROJECT_DIR$/../../.demo/syntax/PainterEngine_Syntax.exe" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../.demo/syntax/PainterEngine_Syntax.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/../../.demo/syntax/PainterEngine_Syntax.pdb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../.demo/syntax/main.c" beforeDir="false" afterPath="$PROJECT_DIR$/../../.demo/syntax/main.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../core/PX_SyntaxLexer.c" beforeDir="false" afterPath="$PROJECT_DIR$/../../core/PX_SyntaxLexer.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../kernel/PX_Syntax.c" beforeDir="false" afterPath="$PROJECT_DIR$/../../kernel/PX_Syntax.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../kernel/PX_Syntax_define.c" beforeDir="false" afterPath="$PROJECT_DIR$/../../kernel/PX_Syntax_define.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../kernel/PX_Syntax_eof.c" beforeDir="false" afterPath="$PROJECT_DIR$/../../kernel/PX_Syntax_eof.c" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../.." />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;customColor&quot;: &quot;&quot;,
+  &quot;associatedIndex&quot;: 3
+}</component>
+  <component name="ProjectId" id="2uZcyBb51KQbNK8O1OM6BmkdQHf" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;
+  }
+}</component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+</project>

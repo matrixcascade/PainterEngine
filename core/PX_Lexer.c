@@ -3,7 +3,7 @@
 static px_char * PX_LexerIsCommentStart(px_lexer *lexer,const px_char ch[]);
 static px_char * PX_LexerIsCommentEnd(px_lexer *lexer,const px_char startch[],const px_char ch[]);
 static px_char* PX_LexerIsContainerStart(px_lexer *lexer,const px_char ch[]);
-static char*  PX_LexerIsContainerEnd(px_lexer *lexer,const px_char startch[],const px_char ch[]);
+static px_char* PX_LexerIsContainerEnd(px_lexer *lexer,const px_char startch[],const px_char ch[]);
 static px_bool PX_LexerIsContainerTransfer(px_lexer *lexer,const px_char startch[],px_char ch);
 
 static px_int PX_LexerIsSpacer(px_lexer *lexer,px_char chr);
@@ -86,19 +86,19 @@ px_char * PX_LexerIsCommentEnd(px_lexer *lexer,const px_char startch[],const px_
 //--------------------------------------------Spacer-----------------------------------
 
 
-px_void PX_LexerRegisterSpacer(px_lexer *lexer,px_char Spacer)
+px_void PX_LexerRegisterSpacer(px_lexer *lexer,px_char spacer)
 {
 	px_int i;
 	if (lexer->SpacerCount<PX_LEXER_CA_SPACER_MAX_COUNT)
 	{
 		for (i=0;i<lexer->SpacerCount;i++)
 		{
-			if (lexer->Spacer[i]==Spacer)
+			if (lexer->spacer[i]==spacer)
 			{
 				return;
 			}
 		}
-		lexer->Spacer[lexer->SpacerCount++]=Spacer;
+		lexer->spacer[lexer->SpacerCount++]=spacer;
 	}
 }
 
@@ -107,7 +107,7 @@ px_bool PX_LexerIsSpacer(px_lexer *lexer,px_char chr)
 	px_int i;
 	for (i=0;i<lexer->SpacerCount;i++)
 	{
-		if (lexer->Spacer[i]==chr)
+		if (lexer->spacer[i]==chr)
 		{
 			return PX_TRUE;
 		}
@@ -117,19 +117,19 @@ px_bool PX_LexerIsSpacer(px_lexer *lexer,px_char chr)
 //--------------------------------------------Delimiter--------------------------------
 
 
-px_int PX_LexerRegisterDelimiter(px_lexer *lexer,px_char Delimiter)
+px_int PX_LexerRegisterDelimiter(px_lexer *lexer,px_char delimiter)
 {
 	px_int i;
 	if (lexer->DelimiterCount<PX_LEXER_CA_DELIMITER_MAX_COUNT)
 	{
 		for (i=0;i<lexer->DelimiterCount;i++)
 		{
-			if (lexer->Delimiter[i]==Delimiter)
+			if (lexer->delimiter[i]==delimiter)
 			{
 				return i;
 			}
 		}
-		lexer->Delimiter[lexer->DelimiterCount++]=Delimiter;
+		lexer->delimiter[lexer->DelimiterCount++]=delimiter;
 		return lexer->DelimiterCount-1;
 	}
 	return -1;
@@ -147,7 +147,7 @@ px_int PX_LexerRegisterDiscard(px_lexer* lexer, const px_char discard[8])
 				return i;
 			}
 		}
-		PX_strcpy(lexer->Discard[lexer->DiscardCount].discard, discard, sizeof(lexer->Discard[lexer->DiscardCount]));
+		PX_strcpy(lexer->Discard[lexer->DiscardCount].discard, discard, sizeof(lexer->Discard[lexer->DiscardCount].discard));
 		lexer->DiscardCount++;
 		return lexer->DiscardCount - 1;
 	}
@@ -161,7 +161,7 @@ px_int PX_LexerIsDelimiter(px_lexer *lexer,px_char chr)
 	px_int i;
 	for (i=0;i<lexer->DelimiterCount;i++)
 	{
-		if (lexer->Delimiter[i]==chr)
+		if (lexer->delimiter[i]==chr)
 		{
 			return PX_TRUE;
 		}
@@ -169,12 +169,12 @@ px_int PX_LexerIsDelimiter(px_lexer *lexer,px_char chr)
 	return PX_FALSE;
 }
 
-px_int PX_LexerGetDelimiterType(px_lexer *lexer,px_char Delimiter)
+px_int PX_LexerGetDelimiterType(px_lexer *lexer,px_char delimiter)
 {
 	px_int i;
 	for (i=0;i<lexer->DelimiterCount;i++)
 	{
-		if (lexer->Delimiter[i]==Delimiter)
+		if (lexer->delimiter[i]==delimiter)
 		{
 			return i;
 		}
@@ -189,11 +189,11 @@ px_int PX_LexerGetDelimiterType(px_lexer *lexer,px_char Delimiter)
 px_int PX_LexerRegisterContainer(px_lexer *lexer,const px_char Begin[],const px_char End[])
 {
 	px_int i;
-	if (lexer->ContainerCount<PX_LEXER_CA_DELIMITER_MAX_COUNT)
+	if (lexer->ContainerCount<PX_LEXER_CA_CONTAINER_MAX_COUNT)
 	{
 		for (i=0;i<lexer->ContainerCount;i++)
 		{
-			if (lexer->Container[i].ContainerBegin==Begin&&lexer->Container[i].ContainerEnd==End)
+			if (PX_strequ(lexer->Container[i].ContainerBegin,Begin)&&PX_strequ(lexer->Container[i].ContainerEnd,End))
 			{
 				return i;
 			}
@@ -234,7 +234,7 @@ px_char * PX_LexerIsContainerEnd(px_lexer *lexer,const px_char startch[],const p
 	px_int i=0;
 	for (i=0;i<lexer->ContainerCount;i++)
 	{
-		if(PX_memequ(startch,lexer->Container[i].ContainerBegin,PX_strlen(startch))&&PX_memequ(ch,lexer->Container[i].ContainerEnd,PX_strlen(lexer->Container[i].ContainerEnd)))
+		if(PX_memequ(startch,lexer->Container[i].ContainerBegin,PX_strlen(lexer->Container[i].ContainerBegin))&&PX_memequ(ch,lexer->Container[i].ContainerEnd,PX_strlen(lexer->Container[i].ContainerEnd)))
 			{
 				lexer->CurrentContainerType=i;
 				return lexer->Container[i].ContainerEnd;
@@ -290,8 +290,8 @@ px_void PX_LexerInitialize(px_lexer *lexer,px_memorypool *mp)
 	PX_StringInitialize(mp,&lexer->CurLexeme);
 	PX_StringInitialize(mp,&lexer->LexerName);
 	PX_VectorInitialize(lexer->mp, &lexer->symbolmap, sizeof(px_int), 8);
-	PX_memset(lexer->Delimiter,0,sizeof(lexer->Delimiter));
-	PX_memset(lexer->Spacer,0,sizeof(lexer->Spacer));
+	PX_memset(lexer->delimiter,0,sizeof(lexer->delimiter));
+	PX_memset(lexer->spacer,0,sizeof(lexer->spacer));
 	PX_memset(lexer->Container,0,sizeof(lexer->Container));
 	PX_memset(lexer->Comment,0,sizeof(lexer->Comment));
 
@@ -361,7 +361,7 @@ px_int PX_LexerFilterChar(px_lexer *lexer,px_char ch)
 }
 
 
-px_bool PX_LexerSortTextMap(px_lexer *lexer,const px_char *SourceText,px_bool map)
+px_bool PX_LexerSortTextMap(px_lexer *lexer,const px_char *SourceText,px_bool bin_map_to_source)
 {
 	px_char *chrst,*chred;
 
@@ -403,13 +403,8 @@ px_bool PX_LexerSortTextMap(px_lexer *lexer,const px_char *SourceText,px_bool ma
 
 				r_Offset++;
 			}
-			//special end '\n'
-			if (SourceText[r_Offset] == '\n')
-			{
-				r_Offset += PX_strlen(chred) - 1;
-			}
-			else
-				r_Offset +=PX_strlen(chred);
+			
+			r_Offset +=PX_strlen(chred);
 			continue;
 		}
 
@@ -424,7 +419,7 @@ px_bool PX_LexerSortTextMap(px_lexer *lexer,const px_char *SourceText,px_bool ma
 				{
 					lexer->Sources[w_Offset] = chrst[i];
 					///////////////////////////////////////////
-					if (map && w_Offset > 0 && (lexer->Sources[w_Offset - 1] == '\n'))
+					if (bin_map_to_source && w_Offset > 0 && (lexer->Sources[w_Offset - 1] == '\n'))
 					{
 						for (; lastNewLineStamp < r_Offset; lastNewLineStamp++)
 							if (SourceText[lastNewLineStamp] == '\n')
@@ -449,7 +444,7 @@ px_bool PX_LexerSortTextMap(px_lexer *lexer,const px_char *SourceText,px_bool ma
 				{
 					lexer->Sources[w_Offset]=(SourceText[r_Offset]);
 					///////////////////////////////////////////
-					if (map && w_Offset > 0 && (lexer->Sources[w_Offset - 1] == '\n'))
+					if (bin_map_to_source && w_Offset > 0 && (lexer->Sources[w_Offset - 1] == '\n'))
 					{
 						for (; lastNewLineStamp < r_Offset; lastNewLineStamp++)
 							if (SourceText[lastNewLineStamp] == '\n')
@@ -462,7 +457,7 @@ px_bool PX_LexerSortTextMap(px_lexer *lexer,const px_char *SourceText,px_bool ma
 					r_Offset++;
 					lexer->Sources[w_Offset]=(SourceText[r_Offset]);
 					///////////////////////////////////////////
-					if (map && w_Offset > 0 && (lexer->Sources[w_Offset - 1] == '\n'))
+					if (bin_map_to_source && w_Offset > 0 && (lexer->Sources[w_Offset - 1] == '\n'))
 					{
 						for (; lastNewLineStamp < r_Offset; lastNewLineStamp++)
 							if (SourceText[lastNewLineStamp] == '\n')
@@ -478,7 +473,7 @@ px_bool PX_LexerSortTextMap(px_lexer *lexer,const px_char *SourceText,px_bool ma
 				{
 					lexer->Sources[w_Offset] = (SourceText[r_Offset]);
 					///////////////////////////////////////////
-					if (map && w_Offset > 0 && (lexer->Sources[w_Offset - 1] == '\n'))
+					if (bin_map_to_source && w_Offset > 0 && (lexer->Sources[w_Offset - 1] == '\n'))
 					{
 						for (; lastNewLineStamp < r_Offset; lastNewLineStamp++)
 							if (SourceText[lastNewLineStamp] == '\n')
@@ -499,7 +494,7 @@ px_bool PX_LexerSortTextMap(px_lexer *lexer,const px_char *SourceText,px_bool ma
 				{
 					lexer->Sources[w_Offset] = chred[i];
 					///////////////////////////////////////////
-					if (map && w_Offset > 0 && (lexer->Sources[w_Offset - 1] == '\n'))
+					if (bin_map_to_source && w_Offset > 0 && (lexer->Sources[w_Offset - 1] == '\n'))
 					{
 						for (; lastNewLineStamp < r_Offset; lastNewLineStamp++)
 							if ( SourceText[lastNewLineStamp] == '\n')
@@ -534,7 +529,7 @@ px_bool PX_LexerSortTextMap(px_lexer *lexer,const px_char *SourceText,px_bool ma
 					lexer->Sources[w_Offset] = (SourceText[r_Offset]) == '\r' ? '\n' : (SourceText[r_Offset]);
 
 					///////////////////////////////////////////
-					if (map && w_Offset > 0 && ( lexer->Sources[w_Offset - 1] == '\n'))
+					if (bin_map_to_source && w_Offset > 0 && ( lexer->Sources[w_Offset - 1] == '\n'))
 					{
 						for (; lastNewLineStamp < r_Offset; lastNewLineStamp++)
 							if (SourceText[lastNewLineStamp] == '\n')
@@ -552,7 +547,7 @@ px_bool PX_LexerSortTextMap(px_lexer *lexer,const px_char *SourceText,px_bool ma
 				lexer->Sources[w_Offset] = (SourceText[r_Offset]) == '\r' ? '\n' : (SourceText[r_Offset]);
 
 				///////////////////////////////////////////
-				if (map)
+				if (bin_map_to_source)
 				{
 					for (; lastNewLineStamp < r_Offset; lastNewLineStamp++)
 						if (SourceText[lastNewLineStamp] == '\n')
@@ -599,7 +594,7 @@ PX_LEXER_LEXEME_TYPE PX_LexerGetNextLexeme(px_lexer *lexer)
 			//printf("<End>\n");
 			lexer->lexeme_begin = lexer->SourceOffset;
 			lexer->lexeme_end = lexer->SourceOffset;
-			lexer->Symbol = '0';
+			lexer->Symbol = '\0';
 			PX_StringCatChar(&lexer->CurLexeme, '\0');
 			lexer->CurrentLexemeFlag = PX_LEXER_LEXEME_TYPE_END;
 			return PX_LEXER_LEXEME_TYPE_END;
@@ -631,11 +626,6 @@ PX_LEXER_LEXEME_TYPE PX_LexerGetNextLexeme(px_lexer *lexer)
 				{
 					lexer->lexeme_end = lexer->SourceOffset;
 					break;
-				}
-				if (PX_LexerIsSourcsEnd(lexer))
-				{
-					lexer->lexeme_end = lexer->SourceOffset;
-					return PX_LEXER_LEXEME_TYPE_ERR;
 				}
 				PX_StringCatChar(&lexer->CurLexeme, lexer->Sources[lexer->SourceOffset]);
 				
@@ -727,7 +717,7 @@ PX_LEXER_LEXEME_TYPE PX_LexerGetNextLexeme(px_lexer *lexer)
 			lexer->Symbol = lexer->Sources[lexer->SourceOffset];
 			for (i = 0; (px_int)i < lexer->DelimiterCount; i++)
 			{
-				if (lexer->Symbol == lexer->Delimiter[i])
+				if (lexer->Symbol == lexer->delimiter[i])
 				{
 					lexer->CurrentDelimiterType = i;
 					break;
@@ -842,6 +832,7 @@ PX_LEXER_LEXEME_TYPE PX_LexerGetNextLexeme(px_lexer *lexer)
 							break;
 						if (PX_LexerIsContainerStart(lexer, &lexer->Sources[lexer->SourceOffset]))
 							break;
+						lexer->lexeme_end = lexer->SourceOffset;
 						PX_StringCatChar(&lexer->CurLexeme, lexer->Sources[lexer->SourceOffset++]);
 					}
 						
@@ -917,7 +908,7 @@ px_void PX_LexerRegisterComment(px_lexer *lexer,const px_char Begin[],const px_c
 	{
 		for (i=0;i<lexer->CommentCount;i++)
 		{
-			if (lexer->Comment[i].CommentBegin==Begin&&lexer->Comment[i].CommentEnd==End)
+			if (PX_strequ(lexer->Comment[i].CommentBegin,Begin)&&PX_strequ(lexer->Comment[i].CommentEnd,End))
 			{
 				return;
 			}
@@ -936,20 +927,39 @@ px_int PX_LexerLoadSourceWithPresort(px_lexer *lexer,const px_char *buffer)
 
 px_bool PX_LexerLoadSource(px_lexer* lexer, const px_char* SourceText)
 {
+	px_int i,source_len,line=0;
 	if (lexer->Sources)
 	{
 		PX_VectorClear(&lexer->symbolmap);
 		MP_Free(lexer->mp, lexer->Sources);
+		if (lexer->Source_line)
+		{
+			MP_Free(lexer->mp, lexer->Source_line);
+			lexer->Source_line = PX_NULL;
+		}
 		lexer->SourceOffset = 0;
 		lexer->SortStatus = PX_LEXERSORT_STATUS_NORMAL;
 	}
-	if ((lexer->Sources = (px_char*)MP_Malloc(lexer->mp, PX_strlen(SourceText) + 1)) == PX_NULL)
+	source_len = PX_strlen(SourceText) + 1;
+	if ((lexer->Sources = (px_char*)MP_Malloc(lexer->mp, source_len)) == PX_NULL)
+	{
+		return PX_FALSE;
+	}
+	if ((lexer->Source_line = (px_int*)MP_Malloc(lexer->mp, sizeof(int)* source_len)) == PX_NULL)
 	{
 		return PX_FALSE;
 	}
 	PX_memcpy(lexer->Sources, SourceText, PX_strlen(SourceText) + 1);
 	lexer->SourceOffset = 0;
 	lexer->SortStatus = PX_LEXERSORT_STATUS_NORMAL;
+	for (i = 0; i < source_len; i++)
+	{
+		lexer->Source_line[i] = line;
+		if (lexer->Sources[i] == '\n')
+		{
+			line++;
+		}
+	}
 	return PX_TRUE;
 }
 
@@ -958,9 +968,23 @@ px_int  PX_LexerGetOffset(px_lexer* lexer)
 	return lexer->SourceOffset;
 }
 
-px_bool PX_LexerSetOffset(px_lexer* lexer, px_int offset)
+px_int PX_LexerGetLineByOffset(px_lexer* lexer, px_int offset)
 {
 	if (offset < PX_strlen(lexer->Sources))
+	{
+		return lexer->Source_line[offset];
+	}
+	return -1;
+}
+
+px_int PX_LexerGetLine(px_lexer* lexer)
+{
+	return PX_LexerGetLineByOffset(lexer, lexer->SourceOffset);
+}
+
+px_bool PX_LexerSetOffset(px_lexer* lexer, px_int offset)
+{
+	if (offset <= (px_int)PX_strlen(lexer->Sources))
 	{
 		lexer->SourceOffset = offset;
 		
@@ -974,6 +998,9 @@ px_void PX_LexerFree(px_lexer *lexer)
 {
 	if(lexer->Sources)
 	MP_Free(lexer->mp,lexer->Sources);
+
+	if (lexer->Source_line)
+		MP_Free(lexer->mp, lexer->Source_line);
 
 	PX_VectorFree(&lexer->symbolmap);
 
@@ -1108,6 +1135,11 @@ const px_char* PX_LexerGetLexeme(px_lexer* lexer)
 	return lexer->CurLexeme.buffer;
 }
 
+PX_LEXER_LEXEME_TYPE PX_LexerGetLexemeType(px_lexer* lexer)
+{
+	return lexer->CurrentLexemeFlag;
+}
+
 px_void PX_LexerReset(px_lexer* lexer)
 {
 	lexer->SourceOffset = 0;
@@ -1125,7 +1157,7 @@ px_bool PX_LexerIsContainerTransfer(px_lexer *lexer,const px_char startch[],px_c
 	px_int i=0;
 	for (i=0;i<lexer->ContainerCount;i++)
 	{
-		if(PX_memequ(startch,lexer->Container[i].ContainerBegin,PX_strlen(startch))&&lexer->Container[i].transfer&&lexer->Container[i].transfer==ch)
+		if(PX_memequ(startch,lexer->Container[i].ContainerBegin,PX_strlen(lexer->Container[i].ContainerBegin))&&lexer->Container[i].transfer&&lexer->Container[i].transfer==ch)
 		{
 			return PX_TRUE;
 		}

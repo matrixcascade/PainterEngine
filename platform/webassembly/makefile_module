@@ -36,6 +36,7 @@ all:$(project_build_o)  $(libcore) $(libkernel) $(libruntime) $(libplatform)
 	-I "$(painterengine_path)" \
 	-I "$(project_path)" \
 	-lwebsocket.js \
+	-s INITIAL_MEMORY=385875968 \
 	-s EXPORTED_RUNTIME_METHODS="['cwrap','ccall']" \
 	-s WEBSOCKET_SUBPROTOCOL='binary' \
 	-s SOCKET_DEBUG=1 \

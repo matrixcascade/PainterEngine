@@ -217,3 +217,13 @@ unsigned int PX_UDPGetHostByName(const char *host, unsigned int dns_addr)
 	
 	return 0;
 }
+
+int PX_UDPResetSocket(PX_UDP* udp)
+{
+	if (udp->socket != -1)
+	{
+		close(udp->socket);
+		udp->socket = -1;
+	}
+	return PX_UDPInitialize(udp, udp->type);
+}

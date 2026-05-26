@@ -43,7 +43,7 @@ static px_dword PX_HuffmanSwapCode(px_dword code, px_dword len)
 	return swapCode;
 }
 
-static px_dword PX_HuffmanGetCode(px_dword symbol, px_dword code_table[288],px_dword code_bit_length[288])
+static px_dword PX_HuffmanGetCode(px_dword symbol, const px_dword* code_table, const px_dword* code_bit_length)
 {
 	return PX_HuffmanSwapCode(code_table[symbol], code_bit_length[symbol]);
 }
@@ -55,7 +55,7 @@ static px_dword PX_HuffmanGetSymbol(px_uint32* bitpointer, const px_byte* bitstr
 	while (PX_TRUE)
 	{
 		px_bool bit;
-		if (tree[cursor].left==0xffff&& tree[cursor].right==0xffff)
+		if (tree[cursor].left==0xffff && tree[cursor].right==0xffff)
 		{
 			return tree[cursor].data;
 		}
@@ -92,44 +92,41 @@ static px_bool PX_HuffmanBuildTree(px_dword code_table[], px_dword code_bit_leng
 		{
 			px_dword symbol = i;
 			px_dword code = code_table[i];
-			px_dword length = code_bit_length[i];
+			px_dword radius = code_bit_length[i];
 			px_uint cursor=0;
 
-			while (length)
+			while (radius)
 			{
-				px_byte bit = (code>>(length-1)) & 1;
-				if (length)
+				px_byte bit = (code>>(radius-1)) & 1;
+				if (bit)
 				{
-					if (bit)
+					if (tree[cursor].right == 0xffff)
 					{
-						if (tree[cursor].right == 0xffff)
-						{
-							tree[cursor].right = write_cursor;
-							write_cursor++;
-						}
-						tree[cursor].weight += symbol;
-						cursor = tree[cursor].right;
-						if (cursor> code_count*2)
-						{
-							return PX_FALSE;
-						}
+						tree[cursor].right = write_cursor;
+						write_cursor++;
 					}
-					else
+					tree[cursor].weight += symbol;
+					cursor = tree[cursor].right;
+					if (cursor> code_count*2)
 					{
-						if (tree[cursor].left == 0xffff)
-						{
-							tree[cursor].left = write_cursor;
-							write_cursor++;
-						}
-						tree[cursor].weight += symbol;
-						cursor = tree[cursor].left;
-						if (cursor > code_count*2)
-						{
-							return PX_FALSE;
-						}
+						return PX_FALSE;
 					}
 				}
-				length--;
+				else
+				{
+					if (tree[cursor].left == 0xffff)
+					{
+						tree[cursor].left = write_cursor;
+						write_cursor++;
+					}
+					tree[cursor].weight += symbol;
+					cursor = tree[cursor].left;
+					if (cursor > code_count*2)
+					{
+						return PX_FALSE;
+					}
+				}
+				radius--;
 			}
 			if (tree[cursor].left != 0xffff || tree[cursor].right != 0xffff)
 			{
@@ -144,17 +141,17 @@ static px_bool PX_HuffmanBuildTree(px_dword code_table[], px_dword code_bit_leng
 	return PX_TRUE;
 }
 
-static px_void PX_HuffmanBuildCodeBitLengthTable(px_huffman_node *pNodeHead,px_huffman_node *node,px_dword length, px_dword* pTable)
+static px_void PX_HuffmanBuildCodeBitLengthTable(px_huffman_node *pNodeHead,px_huffman_node *node,px_dword radius, px_dword* pTable)
 {
 	if (node->left)//is a node?
 	{
-		PX_HuffmanBuildCodeBitLengthTable(pNodeHead,&pNodeHead[node->left], length+1,pTable);
-		PX_HuffmanBuildCodeBitLengthTable(pNodeHead,&pNodeHead[node->right], length+1,pTable);
+		PX_HuffmanBuildCodeBitLengthTable(pNodeHead,&pNodeHead[node->left], radius+1,pTable);
+		PX_HuffmanBuildCodeBitLengthTable(pNodeHead,&pNodeHead[node->right], radius+1,pTable);
 	}
 	else
 	{
-		if(length!=0)
-			pTable[node->data]=length;
+		if(radius!=0)
+			pTable[node->data]=radius;
 		else
 			pTable[node->data] = 1;
 	}
@@ -554,7 +551,7 @@ px_bool PX_HuffmanInflateCodeData(const px_byte _in[], px_uint *pbit_position, p
 			px_dword length_extra[29] = {0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5,5, 5, 5, 0};
 			px_dword distance_table[30] = {1, 2, 3, 4, 5, 7, 9, 13, 17, 25, 33, 49, 65, 97, 129, 193, 257, 385, 513,769, 1025, 1537, 2049, 3073, 4097, 6145, 8193, 12289, 16385, 24577};
 			px_dword distance_extra[30] = {0, 0, 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10,11, 11, 12, 12, 13, 13};
-			px_dword length = length_table[code - 257];
+			px_dword radius = length_table[code - 257];
 			px_dword distance_code, distance, extra_bits;
 
 			extra_bits = length_extra[code - 257];
@@ -562,7 +559,7 @@ px_bool PX_HuffmanInflateCodeData(const px_byte _in[], px_uint *pbit_position, p
 			if ((*pbit_position/8) >= in_size) 
 				return PX_FALSE;
 			
-			length += PX_ReadBitsLE(pbit_position, _in, extra_bits);
+			radius += PX_ReadBitsLE(pbit_position, _in, extra_bits);
 
 			distance_code = PX_HuffmanGetSymbol(pbit_position, _in, distance_tree,60);
 
@@ -581,7 +578,7 @@ px_bool PX_HuffmanInflateCodeData(const px_byte _in[], px_uint *pbit_position, p
 
 			if(!PX_MemoryCat(out, &code, 2))
 				return PX_FALSE;
-			if (!PX_MemoryCat(out, &length, 2))
+			if (!PX_MemoryCat(out, &radius, 2))
 				return PX_FALSE;
 			if (!PX_MemoryCat(out, &distance, 2))
 				return PX_FALSE;
@@ -671,10 +668,10 @@ px_bool PX_HuffmanDeflateCodeData(px_word* _in, px_uint in_size, px_memory* _out
 				{
 					px_dword distance_table[30] = { 1, 2, 3, 4, 5, 7, 9, 13, 17, 25, 33, 49, 65, 97, 129, 193, 257, 385, 513,769, 1025, 1537, 2049, 3073, 4097, 6145, 8193, 12289, 16385, 24577 };
 					px_int j;
-					px_dword length = _in[i + 2];
+					px_dword radius = _in[i + 2];
 					for (j = 0; j < PX_COUNTOF(distance_table) - 1; j++)
 					{
-						if (length < distance_table[j + 1])
+						if (radius < distance_table[j + 1])
 							break;
 					}
 					counter[j]++;
@@ -783,13 +780,13 @@ px_bool PX_HuffmanDeflateCodeData(px_word* _in, px_uint in_size, px_memory* _out
 				px_dword length_extra[29] = { 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5,5, 5, 5, 0 };
 				px_dword distance_table[30] = { 1, 2, 3, 4, 5, 7, 9, 13, 17, 25, 33, 49, 65, 97, 129, 193, 257, 385, 513,769, 1025, 1537, 2049, 3073, 4097, 6145, 8193, 12289, 16385, 24577 };
 				px_dword distance_extra[30] = { 0, 0, 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10,11, 11, 12, 12, 13, 13 };
-				px_dword length = _in[i + 1];
+				px_dword radius = _in[i + 1];
 				px_dword distance = _in[i + 2];
 				px_uint j;
 				
 				i+=2;
 
-				if (length>258||distance>32768)
+				if (radius>258||distance>32768)
 				{
 					return PX_FALSE;
 				}
@@ -797,11 +794,11 @@ px_bool PX_HuffmanDeflateCodeData(px_word* _in, px_uint in_size, px_memory* _out
 				//length index
 				for (j = 0; j < PX_COUNTOF(length_table) - 1; j++)
 				{
-					if (length < length_table[j + 1])
+					if (radius < length_table[j + 1])
 						break;
 				}
 
-				extra = length-length_table[j];
+				extra = radius-length_table[j];
 
 				symbol = j + 257;
 				code = PX_HuffmanGetCode(symbol, raw_code, raw_code_bl);

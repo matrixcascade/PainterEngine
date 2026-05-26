@@ -55,7 +55,7 @@ PX_OBJECT_RENDER_FUNCTION(PX_Object_AutoTextRender)
 			else
 			{
 				if (psurface)
-					PX_FontModuleDrawCharacter(psurface, pAt->fontModule, x_draw_oft, y_draw_oft, code, pAt->TextColor);
+					PX_FontModuleDrawCharacterEx(psurface, pAt->fontModule, x_draw_oft, y_draw_oft, code, pAt->TextColor);
 				x_draw_oft += width;
 			}
 

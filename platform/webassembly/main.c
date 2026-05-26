@@ -64,121 +64,6 @@ const px_char* PX_InputText(const px_char prompt[], const px_char charset[])
 	return PX_GetInputTextGBK(prompt);
 }
 
-typedef struct
-{
-	void* buffer;
-	int size;
-	void* ptr;
-	void (*func_callback)(void* buffer, int size, void* ptr);
-}PX_RequestData_Info;
-
-void px_em_async_wget_onload_func(void* arg, void*buffer, int size)
-{
-	PX_RequestData_Info *info = (PX_RequestData_Info *)arg;
-	if (size<info->size)
-	{
-		memcpy(info->buffer, buffer, size);
-		info->func_callback(info->buffer, size, info->ptr);
-	}
-	else
-	{
-		info->func_callback(info->buffer, 0, info->ptr);
-	}
-	free(info);
-}
-
-void px_em_arg_callback_func(void*ptr)
-{
-	PX_RequestData_Info *info = (PX_RequestData_Info *)ptr;
-	info->func_callback(info->buffer, 0, info->ptr);
-	free(info);
-}
-
-PX_RequestData_Info *load_file_info;
-EMSCRIPTEN_KEEPALIVE int load_file(uint8_t *buffer, size_t size) 
-{
-  if (load_file_info)
-  {
-	  if (size<load_file_info->size)
-	  {
-		  memcpy(load_file_info->buffer, buffer, size);
-		  load_file_info->func_callback(load_file_info->buffer, size, load_file_info->ptr);
-	  }
-	  else
-	  {
-		  load_file_info->func_callback(load_file_info->buffer, 0, load_file_info->ptr);
-	  }
-	  free(load_file_info);
-	  load_file_info=PX_NULL;
-  }
-  return 1;
-}
-
-
-EM_JS(void, downloadFile, (const char* filename, const void* data, size_t size), {
-  const array = new Uint8Array(Module.HEAPU8.buffer, data, size);
-  const blob = new Blob([array], { type: 'arraybuffer' });
-  const url = URL.createObjectURL(blob);
-
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = filename;
-  link.click();
-  URL.revokeObjectURL(url);
-});
-
-
-void PX_RequestDownloadFile(const char* filename, const void* data, size_t size) {
-  EM_ASM({
-    const filename = UTF8ToString($0);
-    const dataPtr = $1;
-    const dataSize = $2;
-
-    downloadFile(filename, dataPtr, dataSize);
-  }, filename, data, size);
-}
-
-
-void PX_RequestData(const char url[], void* buffer, int size, void* ptr, void (*func_callback)(void* buffer, int size, void* ptr))
-{
-	PX_RequestData_Info *info = (PX_RequestData_Info *)malloc(sizeof(PX_RequestData_Info));
-	if (!info)
-	{
-		func_callback(buffer, 0, ptr);
-		return;
-	}
-	
-	info->buffer = buffer;
-	info->size = size;
-	info->ptr = ptr;
-	info->func_callback = func_callback;
-	if (PX_strequ2(url,"open"))
-	{
-EM_ASM(
-  var file_selector = document.createElement('input');
-  file_selector.setAttribute('type', 'file');
-  file_selector.setAttribute('onchange','open_file(event)');
-  file_selector.click();
-);
-load_file_info=info;
-	}
-	else if (PX_strequ2(url,"save"))
-	{
-		if(func_callback)
-			func_callback(buffer, 0, ptr);
-	}
-	else if(PX_memequ(url,"download:",9))
-	{
-		PX_RequestDownloadFile(url+9, buffer, size);
-		if(func_callback)
-			func_callback(buffer, size, ptr);
-	}
-	else
-	{
-		emscripten_async_wget_data(url,info, px_em_async_wget_onload_func, px_em_arg_callback_func);
-	}
-}
-
 px_int last_screen_width=0,last_screen_height=0;
 
 void mainloop(void *ptr)
@@ -301,11 +186,7 @@ void mainloop(void *ptr)
 			px_char str[2]={0};
 			e.Event=PX_OBJECT_EVENT_KEYDOWN;
 
-			// Get modifier state for enhanced keyboard handling
-			SDL_Keymod modstate = SDL_GetModState();
-			px_bool shift_pressed = (modstate & KMOD_SHIFT) != 0;
-
-			// Handle special keys first
+			str[0]=event.key.keysym.sym;
 			if (event.key.keysym.sym==SDLK_BACKSPACE)
 			{
 				str[0]=PX_VK_BACK;
@@ -334,52 +215,6 @@ void mainloop(void *ptr)
 			{
 				str[0]=PX_VK_RIGHT;
 			}
-			// Handle numpad keys (SDLK_KP_0 to SDLK_KP_9)
-			else if (event.key.keysym.sym >= SDLK_KP_0 && event.key.keysym.sym <= SDLK_KP_9)
-			{
-				str[0] = '0' + (event.key.keysym.sym - SDLK_KP_0);
-			}
-			// Handle shift+number combinations for special characters
-			else if (shift_pressed && event.key.keysym.sym >= SDLK_0 && event.key.keysym.sym <= SDLK_9)
-			{
-				// US keyboard layout: shift+0-9 produces )!@#$%^&*(
-				const char shift_numbers[] = ")!@#$%^&*(";
-				str[0] = shift_numbers[event.key.keysym.sym - SDLK_0];
-			}
-			// Handle other shift combinations for common symbols
-			else if (shift_pressed)
-			{
-				switch (event.key.keysym.sym)
-				{
-					case SDLK_SEMICOLON: str[0] = ':'; break;
-					case SDLK_QUOTE: str[0] = '"'; break;
-					case SDLK_COMMA: str[0] = '<'; break;
-					case SDLK_PERIOD: str[0] = '>'; break;
-					case SDLK_SLASH: str[0] = '?'; break;
-					case SDLK_BACKQUOTE: str[0] = '~'; break;
-					case SDLK_LEFTBRACKET: str[0] = '{'; break;
-					case SDLK_RIGHTBRACKET: str[0] = '}'; break;
-					case SDLK_BACKSLASH: str[0] = '|'; break;
-					case SDLK_MINUS: str[0] = '_'; break;
-					case SDLK_EQUALS: str[0] = '+'; break;
-					default:
-						// For letters, convert to uppercase if shift is pressed
-						if (event.key.keysym.sym >= SDLK_a && event.key.keysym.sym <= SDLK_z)
-						{
-							str[0] = event.key.keysym.sym - 32; // Convert to uppercase
-						}
-						else if(event.key.keysym.sym>=0x20&&event.key.keysym.sym<=0x7E)
-						{
-							str[0]=event.key.keysym.sym;
-						}
-						else
-						{
-							str[0]=0;
-						}
-						break;
-				}
-			}
-			// Handle regular printable characters without shift
 			else if(event.key.keysym.sym>=0x20&&event.key.keysym.sym<=0x7E)
 			{
 				str[0]=event.key.keysym.sym;
@@ -388,10 +223,10 @@ void mainloop(void *ptr)
 			{
 				str[0]=0;
 			}
-			
 			if(str[0])
 			{
-				PX_Object_Event_SetKeyDown(&e,event.key.keysym.sym);
+				PX_KeyBoardSetState((unsigned char)str[0], 1);
+				PX_Object_Event_SetKeyDown(&e,str[0]);
 				PX_ApplicationPostEvent(&App,e);
 			}
 		}
@@ -446,6 +281,7 @@ void mainloop(void *ptr)
 			}
 			if(keye)
 			{
+				PX_KeyBoardSetState((unsigned char)keye, 0);
 				PX_Object_Event_SetKeyUp(&e,keye);
 				PX_ApplicationPostEvent(&App,e);
 			}

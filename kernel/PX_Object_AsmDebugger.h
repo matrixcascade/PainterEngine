@@ -27,7 +27,7 @@ typedef struct
 	PX_Object* button_break, * button_step, * button_pause, * button_run,* button_reset;
 	
 	PX_FontModule* fm;
-	PX_VM_DebuggerMap* map;
+	PX_VM_DebuggerMap* bin_map_to_source;
 	PX_VM* vm;
 
 	px_vector lines;
@@ -37,6 +37,6 @@ typedef struct
 
 
 px_void PX_Object_AsmDebuggerDetach(PX_Object* pObject);
-px_bool PX_Object_AsmDebuggerAttach(PX_Object* pObject, PX_VM_DebuggerMap* map, PX_VM* vm);
+px_bool PX_Object_AsmDebuggerAttach(PX_Object* pObject, PX_VM_DebuggerMap* bin_map_to_source, PX_VM* vm);
 PX_Object* PX_Object_AsmDebuggerCreate(px_memorypool* mp, PX_Object* Parent, px_int x, px_int y, px_int width, px_int height, PX_FontModule* fm);
 #endif

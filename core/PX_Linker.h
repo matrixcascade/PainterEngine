@@ -8,6 +8,10 @@ typedef px_int (*PX_LinkerRead_func)(struct _PX_Linker* linker, px_void *data,px
 typedef px_int (*PX_LinkerWrite_func)(struct _PX_Linker* linker, px_void *data,px_int datasize, px_void* userPtr);
 typedef px_void(*PX_LinkerClose_func)(struct _PX_Linker* linker, px_void* userptr);
 
+#define PX_LINKER_READ_FUNCTION(name) px_int name(struct _PX_Linker* linker, px_void *data,px_int datasize, px_void* userPtr)
+#define PX_LINKER_WRITE_FUNCTION(name) px_int name(struct _PX_Linker* linker, px_void *data,px_int datasize, px_void* userPtr)
+
+
 typedef union
 {
 	px_byte  byte_param[64];
@@ -35,6 +39,7 @@ px_void PX_LinkerInitialize(PX_Linker *linker, PX_LinkerOpen_func open,PX_Linker
 px_int PX_LinkerOpen(PX_Linker* linker);
 px_int PX_LinkerRead(PX_Linker *linker,px_void *data,px_int datasize);
 px_int PX_LinkerWrite(PX_Linker *linker,px_void *data,px_int datasize);
+px_bool PX_LinkerIsOpen(PX_Linker* linker);
 px_void PX_LinkerClose(PX_Linker* linker);
 
 #endif

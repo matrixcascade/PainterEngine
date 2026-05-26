@@ -8,12 +8,13 @@ px_void PX_ParticalLauncherInitializeDefaultInfo(PX_ParticalLauncher_InitializeI
 	info->ak = 1;
 	info->alive = -1;
 	info->alpha = 1;
-	info->atomsize = 1;
+	info->size = 1;
 	info->hdrB = 1;
 	info->hdrG = 1;
 	info->hdrR = 1;
-	info->launchCount = -1;
+	info->generate_remain_count = -1;
 	info->maxCount = 100;
+	info->per_launch_count = 1;
 }
 
 px_bool PX_ParticalLauncherInitialize(PX_ParticalLauncher *launcher,px_memorypool *mp,PX_ParticalLauncher_InitializeInfo Info)
@@ -21,7 +22,6 @@ px_bool PX_ParticalLauncherInitialize(PX_ParticalLauncher *launcher,px_memorypoo
 	PX_memset(launcher,0,sizeof(PX_ParticalLauncher));
 	launcher->LauncherInfo=Info;
 	launcher->InitInfo = Info;
-	launcher->InitInfo.userptr = (px_void*)0x123;
 	launcher->mp=mp;
 
 	launcher->ParticalPool=(PX_Partical_Atom *)MP_Malloc(mp,sizeof(PX_Partical_Atom)*launcher->LauncherInfo.maxCount);
@@ -169,13 +169,14 @@ px_void PX_ParticalLauncherUpdate(PX_ParticalLauncher *launcher,px_dword elapsed
 			}
 		}
 	}
-	if(launcher->LauncherInfo.launchCount!=0)
+	if(launcher->close==PX_FALSE && launcher->LauncherInfo.generate_remain_count!=0)
 	{
 		if (launcher->LauncherInfo.generateDuration!=0)
 		{
 			if (launcher->elapsed/launcher->LauncherInfo.generateDuration<((launcher->elapsed+elapsed)/launcher->LauncherInfo.generateDuration))
 			{
 				gencount=(launcher->elapsed+elapsed)/launcher->LauncherInfo.generateDuration-launcher->elapsed/launcher->LauncherInfo.generateDuration;
+				gencount *= launcher->LauncherInfo.per_launch_count;
 				redTime=launcher->elapsed+elapsed-(launcher->elapsed+launcher->LauncherInfo.generateDuration)/launcher->LauncherInfo.generateDuration*launcher->LauncherInfo.generateDuration;
 			}
 			else
@@ -190,7 +191,7 @@ px_void PX_ParticalLauncherUpdate(PX_ParticalLauncher *launcher,px_dword elapsed
 
 		for (i=0;i<gencount;i++)
 		{
-			if(launcher->LauncherInfo.launchCount!=0)
+			if(launcher->LauncherInfo.generate_remain_count!=0)
 			{
 				for (j=0;j<(px_int)launcher->LauncherInfo.maxCount;j++)
 				{
@@ -199,56 +200,57 @@ px_void PX_ParticalLauncherUpdate(PX_ParticalLauncher *launcher,px_dword elapsed
 						px_float dirAngle;
 						px_float var;
 						px_float randAngle = (px_float)PX_randRange(0, 360);
-						PX_memset(&launcher->ParticalPool[j],0,sizeof(launcher->ParticalPool[j]));
+						PX_memset(&launcher->ParticalPool[j], 0, sizeof(launcher->ParticalPool[j]));
 						launcher->lastgenIndex = j;
 						//position
 						launcher->ParticalPool[j].position = launcher->LauncherInfo.position;
-						launcher->ParticalPool[j].position.x +=(px_float)(launcher->LauncherInfo.deviation_position_distanceRange * PX_cosd(randAngle));
+						launcher->ParticalPool[j].position.x += (px_float)(launcher->LauncherInfo.deviation_position_distanceRange * PX_cosd(randAngle));
 						launcher->ParticalPool[j].position.y += (px_float)(launcher->LauncherInfo.deviation_position_distanceRange * PX_sind(randAngle));
 						//velocity
-						dirAngle = (px_float)PX_RadianToAngle(PX_atan2(launcher->LauncherInfo.direction.y, launcher->LauncherInfo.direction.x));
-						dirAngle += (px_float)PX_randRange(-launcher->LauncherInfo.deviation_rangAngle, launcher->LauncherInfo.deviation_rangAngle);
+						dirAngle = (px_float)PX_RadianToAngle(PX_atan2(launcher->LauncherInfo.toward.y, launcher->LauncherInfo.toward.x));
+						dirAngle += (px_float)PX_randRange(launcher->LauncherInfo.direction_deviation_rangAngle_min, launcher->LauncherInfo.direction_deviation_rangAngle_max);
 						var = launcher->LauncherInfo.velocity;
-						var += (px_float)PX_randRange(launcher->LauncherInfo.deviation_velocity_min, launcher->LauncherInfo.deviation_velocity_max);
+						var += (px_float)PX_randRange(launcher->LauncherInfo.velocity_deviation_min, launcher->LauncherInfo.velocity_deviation_max);
 						launcher->ParticalPool[j].velocity = PX_POINT(PX_cos_angle(dirAngle), PX_sin_angle(dirAngle), 0);
 						launcher->ParticalPool[j].velocity = PX_PointMul(launcher->ParticalPool[j].velocity, var);
 						//size
-						var = launcher->LauncherInfo.atomsize;
-						var += (px_float)PX_randRange(launcher->LauncherInfo.deviation_atomsize_min, launcher->LauncherInfo.deviation_atomsize_max);
+						var = launcher->LauncherInfo.size;
+						var += (px_float)PX_randRange(launcher->LauncherInfo.size_deviation_min, launcher->LauncherInfo.size_deviation_max);
 						if (var < 0)var = 0;
 						launcher->ParticalPool[j].reg_size = var;
 						//rotation
 						var = launcher->LauncherInfo.rotation;
-						var += (px_float)PX_randRange(-launcher->LauncherInfo.deviation_rotation, launcher->LauncherInfo.deviation_rotation);
+						var += (px_float)PX_randRange(-launcher->LauncherInfo.rotation_deviation, launcher->LauncherInfo.rotation_deviation);
 						launcher->ParticalPool[j].reg_rotation = var;
 						//alpha
 						var = launcher->LauncherInfo.alpha;
-						var += (px_float)PX_randRange(-launcher->LauncherInfo.deviation_alpha, launcher->LauncherInfo.deviation_alpha);
+						var += (px_float)PX_randRange(-launcher->LauncherInfo.alpha_deviation, launcher->LauncherInfo.alpha_deviation);
 						if (var < 0)var = 0;
 						launcher->ParticalPool[j].reg_alpha = var;
 
 						//hdrR
 						var = launcher->LauncherInfo.hdrR;
-						var += (px_float)PX_randRange(-launcher->LauncherInfo.deviation_hdrR, launcher->LauncherInfo.deviation_hdrR);
+						var += (px_float)PX_randRange(-launcher->LauncherInfo.hdrR_deviation, launcher->LauncherInfo.hdrR_deviation);
 						if (var < 0)var = 0;
 						launcher->ParticalPool[j].hdrR = var;
 
 						//hdrG
 						var = launcher->LauncherInfo.hdrG;
-						var += (px_float)PX_randRange(-launcher->LauncherInfo.deviation_hdrG, launcher->LauncherInfo.deviation_hdrG);
+						var += (px_float)PX_randRange(-launcher->LauncherInfo.hdrG_deviation, launcher->LauncherInfo.hdrG_deviation);
 						if (var < 0)var = 0;
 						launcher->ParticalPool[j].hdrG = var;
 
 						//hdrB
 						var = launcher->LauncherInfo.hdrB;
-						var += (px_float)PX_randRange(-launcher->LauncherInfo.deviation_hdrB, launcher->LauncherInfo.deviation_hdrB);
+						var += (px_float)PX_randRange(-launcher->LauncherInfo.hdrB_deviation, launcher->LauncherInfo.hdrB_deviation);
 						if (var < 0)var = 0;
 						launcher->ParticalPool[j].hdrB = var;
 
 						//size inc
-						launcher->ParticalPool[j].reg_sizeinc = launcher->LauncherInfo.sizeincrease;
+						launcher->ParticalPool[j].reg_size = launcher->LauncherInfo.size;
+						launcher->ParticalPool[j].reg_sizeinc = launcher->LauncherInfo.size_increase;
 						//alpha inc
-						launcher->ParticalPool[j].reg_alphainc = launcher->LauncherInfo.alphaincrease;
+						launcher->ParticalPool[j].reg_alphainc = launcher->LauncherInfo.alpha_increase;
 						//a
 						launcher->ParticalPool[j].reg_a = launcher->LauncherInfo.a;
 						//ak
@@ -260,8 +262,9 @@ px_void PX_ParticalLauncherUpdate(PX_ParticalLauncher *launcher,px_dword elapsed
 
 						if (launcher->LauncherInfo.Create_func)
 						{
-							launcher->ParticalPool[j]=launcher->LauncherInfo.Create_func(launcher,launcher->genIndex);
+							launcher->LauncherInfo.Create_func(launcher,&launcher->ParticalPool[j],launcher->genIndex);
 						}
+
 
 						PX_ParticalAtomUpdate(launcher,&launcher->ParticalPool[j],redTime);
 
@@ -291,9 +294,9 @@ px_void PX_ParticalLauncherUpdate(PX_ParticalLauncher *launcher,px_dword elapsed
 						}
 
 						launcher->genIndex++;
-						if (launcher->LauncherInfo.launchCount>0)
+						if (launcher->LauncherInfo.generate_remain_count>0)
 						{
-							launcher->LauncherInfo.launchCount--;
+							launcher->LauncherInfo.generate_remain_count--;
 						}
 						break;
 					}
@@ -404,8 +407,16 @@ px_void PX_ParticalLauncherFree(PX_ParticalLauncher *env)
 }
 
 
-px_void PX_ParticalLauncherSetDirection(PX_ParticalLauncher *launcher,px_point direction)
+px_void PX_ParticalLauncherSetDirection(PX_ParticalLauncher *launcher,px_point toward)
 {
-	launcher->LauncherInfo.direction=PX_PointNormalization(direction);
+	launcher->LauncherInfo.toward=PX_PointNormalization(toward);
 }
 
+px_void PX_ParticalLauncherOpen(PX_ParticalLauncher* launcher)
+{
+	launcher->close = PX_FALSE;
+}
+px_void PX_ParticalLauncherClose(PX_ParticalLauncher* launcher)
+{
+	launcher->close = PX_TRUE;
+}

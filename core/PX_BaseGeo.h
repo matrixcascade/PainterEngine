@@ -5,6 +5,7 @@
 #include "PX_GPU.h"
 
 px_void PX_GeoDrawLine(px_surface *psurface, px_int x0, px_int y0, px_int x1, px_int y1 ,px_int lineWidth, px_color color);
+px_void PX_GeoDrawRoundLine(px_surface* psurface, px_float x0, px_float y0, px_float x1, px_float y1, px_float lineWidth, px_color color);
 px_void PX_GeoDrawPenSamplesLine(px_surface* psurface, px_point _samples[], px_int samplescount, px_float radius, px_color color, px_float v, px_float filter_factor);
 px_void PX_GeoDrawPath(px_surface* psurface, px_point path[], px_int pathCount, px_float linewidth, px_color color);
 px_void PX_GeoDrawPenLine(px_surface* psurface, px_float x0, px_float y0, px_float x1, px_float y1, px_float lineWidth, px_color color);
@@ -30,8 +31,32 @@ px_void PX_GeoDrawBezierCurvePoint(px_surface *rendersurface,px_point pt[],px_in
 px_point PX_GeoGetBezierCurvePoint(px_point pt[], px_int pt_count, px_float t);
 px_void PX_GeoDrawBresenhamLine(px_surface* psurface, px_int x0, px_int y0, px_int x1, px_int y1, px_color clr);
 px_void PX_GeoDrawTriangle(px_surface *psurface,px_point2D p0,px_point2D p1,px_point2D p2,px_color color);
+
+
 px_void PX_GeoDrawArrow(px_surface *psurface,px_point2D p0,px_point2D p1,px_float size,px_color color);
+px_void PX_GeoDrawStar(px_surface *psurface,px_float x,px_float y,px_float radius,px_int n,px_float inside_angle,px_float angle,px_color color);
+px_void PX_GeoDrawFlare(px_surface *psurface,px_float x,px_float y,px_float radius,px_float strength,px_color color);
+px_void PX_GeoDrawRegularPolygon(px_surface *psurface,px_float x,px_float y,px_float radius,px_int n,px_float angle,px_color color);
+px_void PX_GeoDrawEllipse(px_surface *psurface,px_float x,px_float y,px_float rx,px_float ry,px_float angle,px_color color);
+px_void PX_GeoDrawCapsule(px_surface *psurface,px_float x,px_float y,px_float width,px_float height,px_float angle,px_color color);
+px_void PX_GeoDrawCross(px_surface *psurface,px_float x,px_float y,px_float size,px_float linewidth,px_float angle,px_color color);
+px_void PX_GeoDrawHeart(px_surface *psurface,px_float x,px_float y,px_float size,px_color color);
+px_void PX_GeoDrawCrescent(px_surface *psurface,px_float x,px_float y,px_float radius,px_float offset,px_float angle,px_color color);
+px_void PX_GeoDrawGear(px_surface *psurface,px_float x,px_float y,px_float outerRadius,px_float innerRadius,px_int teeth,px_float toothDepth,px_color color);
+px_void PX_GeoDrawRoundPolygon(px_surface *psurface,px_float vx[],px_float vy[],px_int n,px_float roundRadius,px_color color);
+px_void PX_GeoDrawCheckMark(px_surface *psurface,px_float x,px_float y,px_float size,px_float linewidth,px_color color);
+px_void PX_GeoDrawCrossMark(px_surface *psurface,px_float x,px_float y,px_float size,px_float linewidth,px_color color);
+px_void PX_GeoDrawDiamond(px_surface *psurface,px_float x,px_float y,px_float width,px_float height,px_color color);
+px_void PX_GeoDrawStrokeHeart(px_surface *psurface,px_float x,px_float y,px_float size,px_float linewidth,px_color color);
+px_void PX_GeoDrawStrokeStar(px_surface *psurface,px_float x,px_float y,px_float radius,px_int n,px_float inside_angle,px_float angle,px_float linewidth,px_color color);
+px_void PX_GeoDrawStrokeGear(px_surface *psurface,px_float x,px_float y,px_float outerRadius,px_float innerRadius,px_int teeth,px_float toothDepth,px_float linewidth,px_color color);
+px_void PX_GeoDrawStrokeDiamond(px_surface *psurface,px_float x,px_float y,px_float width,px_float height,px_float linewidth,px_color color);
 px_void PX_GeoBSpline3(px_point2D controlPoints[4], px_point2D _samples[], px_int samplescount);
-px_void PX_GeoRasterizeTriangle(px_surface* psurface, px_int x1, px_int y1, px_int x2, px_int y2, px_int x3, px_int y3, px_color color, px_int view_width, px_int view_height, px_float zbuffer[], px_int zw, px_float z0, px_float z1, px_float z2);
+px_void PX_GeoRasterizeTriangle(px_surface* psurface, px_int x1, px_int y1, px_int x2, px_int y2, px_int x3, px_int y3, px_color color);
+
+px_void PX_GeoDrawLeftTriangle(px_surface* psurface, px_float left, px_float top, px_float right, px_float bottom, px_color color);
+px_void PX_GeoDrawRightTriangle(px_surface* psurface, px_float left, px_float top, px_float right, px_float bottom, px_color color);
+px_void PX_GeoDrawUpTriangle(px_surface* psurface, px_float left, px_float top, px_float right, px_float bottom, px_color color);
+px_void PX_GeoDrawDownTriangle(px_surface* psurface, px_float left, px_float top, px_float right, px_float bottom, px_color color);
 
 #endif

@@ -114,7 +114,7 @@ px_bool PX_VMInitialize(PX_VM *Ins,px_memorypool *mp,const px_byte *code,px_int 
 		for (i=0;i<Ins->hostCount;i++)
 		{
 			PX_memcpy(&Ins->_host[i],&phost[i],sizeof(PX_ASM_HOST_NODE));
-			Ins->_host[i].map=PX_NULL;
+			Ins->_host[i].bin_map_to_source=PX_NULL;
 		}
 	}
 	
@@ -1688,8 +1688,7 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 			goto _ERROR;
 		}
 		
-		PX_strcut(pVar->_string.buffer,sVar._int, tVar._int);
-		PX_StringUpdateExReg(&pVar->_string);
+		PX_StringCut(&pVar->_string,sVar._int, tVar._int);
 		pT->IP += (4 + 3 * 4);
 	}
 	break;
@@ -2655,10 +2654,10 @@ PX_VM_RUNRETURN PX_VMRunThread(PX_VM *Ins,px_int tick)
 
 			if (opType[0]==PX_SCRIPT_ASM_OPTYPE_HOST)
 			{
-				if (Ins->_host[cVar._int].map!=PX_NULL)
+				if (Ins->_host[cVar._int].bin_map_to_source!=PX_NULL)
 				{
 					px_int runtick;
-					runtick = ((PX_VM_Host_Function_Modules)(Ins->_host[cVar._int].map))(Ins, Ins->_host[cVar._int].userptr);
+					runtick = ((PX_VM_Host_Function_Modules)(Ins->_host[cVar._int].bin_map_to_source))(Ins, Ins->_host[cVar._int].userptr);
 					if (runtick==0)
 					{
 						PX_VM_Error(Ins,"CALL function crash");
@@ -3416,6 +3415,8 @@ px_bool PX_VMFree(PX_VM *Ins)
 	return PX_TRUE;
 }
 
+
+
 px_bool PX_ScriptVM_InstanceInitialize(PX_VM* Ins, px_memorypool* mp, px_byte* code, px_int size)
 {
 	return PX_VMInitialize(Ins, mp, code, size);
@@ -3431,7 +3432,7 @@ px_bool PX_VMRegisterHostFunction(PX_VM *Ins,const px_char *name,PX_VM_Host_Func
 	{
 		if (PX_strequ(uprname,Ins->_host[i].name+1))
 		{
-			Ins->_host[i].map=(px_void *)funcModules;
+			Ins->_host[i].bin_map_to_source=(px_void *)funcModules;
 			Ins->_host[i].userptr=userptr;
 			return PX_TRUE;
 		}
@@ -3474,15 +3475,22 @@ px_void PX_VM_RET(PX_VM *Ins,px_variable cVar)
 	}
 }
 
-px_void PX_VM_RET_String(PX_VM* Ins, const px_char* pstr)
+
+
+px_void PX_VM_RET_string(PX_VM* Ins, const px_char* pstr)
 {
 	px_variable* pVar;
 	pVar = &Ins->pThread[Ins->T].R[1];
-	PX_VariableFree( pVar);
+	PX_VariableFree(pVar);
 	pVar->type = PX_VARIABLE_TYPE_STRING;
 
 	PX_StringInitialize(Ins->mp, &pVar->_string);
 	PX_StringCat(&pVar->_string, pstr);
+}
+
+px_void PX_VM_RET_String(PX_VM* Ins, const px_char* pstr)
+{
+	PX_VM_RET_string(Ins, pstr);
 }
 
 px_void PX_VM_RET_int(PX_VM* Ins, px_int _int)
@@ -3522,7 +3530,11 @@ px_void PX_VM_RET_memory(PX_VM* Ins, const px_byte* data,px_int size)
 
 	PX_MemoryInitialize(Ins->mp, &pVar->_memory);
 	PX_MemoryAlloc(&pVar->_memory, size);
-	PX_MemoryCat(&pVar->_memory, data, size);
+	if (size!=0)
+	{
+		PX_MemoryCat(&pVar->_memory, data, size);
+	}
+	
 }
 
 px_void PX_VM_PUSH(PX_VM *Ins,px_variable cVar)
@@ -3645,14 +3657,14 @@ px_bool PX_VMDebuggerMapInitialize(px_memorypool* mp, PX_VM_DebuggerMap* pDebugM
 {
 	pDebugMap->mp = mp;
 	if (!PX_StringInitialize(mp, &pDebugMap->source))return PX_FALSE;
-	if (!PX_VectorInitialize(mp, &pDebugMap->map, sizeof(PX_SCRIPT_ASM_SOURCE_MAP), 64))return PX_FALSE;
+	if (!PX_VectorInitialize(mp, &pDebugMap->bin_map_to_source, sizeof(PX_SCRIPT_ASM_SOURCE_MAP), 64))return PX_FALSE;
 	return PX_TRUE;
 }
 
 px_void PX_VMDebuggerMapFree(PX_VM_DebuggerMap* pDebugMap)
 {
 	PX_StringFree(&pDebugMap->source);
-	PX_VectorFree(&pDebugMap->map);
+	PX_VectorFree(&pDebugMap->bin_map_to_source);
 }
 
 px_bool PX_VMLocalAlloc(PX_VM *Ins,px_int size,PX_VM_MEMORY_PTR *mem_ptr)
@@ -4802,9 +4814,9 @@ px_int PX_VMDebuggerInstruction(PX_VM* Ins, px_int IP, px_char* opcode, px_char 
 px_int PX_VMDebuggerMapIpToLine(PX_VM_DebuggerMap* pDebugMap, px_int ip)
 {
 	px_int i;
-	for (i=0;i<pDebugMap->map.size;i++)
+	for (i=0;i<pDebugMap->bin_map_to_source.size;i++)
 	{
-		PX_SCRIPT_ASM_SOURCE_MAP* pmap = PX_VECTORAT(PX_SCRIPT_ASM_SOURCE_MAP, &pDebugMap->map, i);
+		PX_SCRIPT_ASM_SOURCE_MAP* pmap = PX_VECTORAT(PX_SCRIPT_ASM_SOURCE_MAP, &pDebugMap->bin_map_to_source, i);
 		if (pmap->instr_addr==ip)
 		{
 			return pmap->map_to_source_line;
@@ -4816,9 +4828,9 @@ px_int PX_VMDebuggerMapIpToLine(PX_VM_DebuggerMap* pDebugMap, px_int ip)
 px_int PX_VMDebuggerMapLineToIp(PX_VM_DebuggerMap* pDebugMap, px_int line)
 {
 	px_int i;
-	for (i = 0; i < pDebugMap->map.size; i++)
+	for (i = 0; i < pDebugMap->bin_map_to_source.size; i++)
 	{
-		PX_SCRIPT_ASM_SOURCE_MAP* pmap = PX_VECTORAT(PX_SCRIPT_ASM_SOURCE_MAP, &pDebugMap->map, i);
+		PX_SCRIPT_ASM_SOURCE_MAP* pmap = PX_VECTORAT(PX_SCRIPT_ASM_SOURCE_MAP, &pDebugMap->bin_map_to_source, i);
 		if (pmap->map_to_source_line == line)
 		{
 			return pmap->instr_addr;
@@ -4835,4 +4847,332 @@ PX_VM_HOST_FUNCTION(PX_VM_STD_Sleep)
 	}
 	PX_VM_Sleep(Ins, PX_VM_HOSTPARAM(Ins, 0)._int);
 	return PX_TRUE;
+}
+
+PX_VM_HOST_FUNCTION(PX_VM_abiget_int)
+{
+	px_int ptr;
+	px_variable* pVar;
+	px_abi rabi;
+	const px_int* pint;
+	if (PX_VM_HOSTPARAM(Ins, 0).type != PX_VARIABLE_TYPE_PTR)
+	{
+		return PX_FALSE;
+	}
+	ptr = PX_VM_HOSTPARAM(Ins, 0)._int;
+	if (ptr < 0 || ptr >= Ins->VM_memsize)
+	{
+		return PX_FALSE;
+	}
+	pVar = &Ins->_mem[ptr];
+	if (pVar->type!= PX_VARIABLE_TYPE_MEMORY)
+	{
+		return PX_FALSE;
+	}
+	if (PX_VM_HOSTPARAM(Ins, 1).type != PX_VARIABLE_TYPE_STRING)
+	{
+		return PX_FALSE;
+	}
+
+	PX_AbiCreate_StaticReader(&rabi, pVar->_memory.buffer, pVar->_memory.usedsize);
+	pint = PX_AbiGet_int(&rabi, PX_VM_HOSTPARAM(Ins, 1)._string.buffer);
+	if (!pint)
+	{
+		PX_VM_RET_int(Ins, -1);
+	}
+	else
+	{
+		PX_VM_RET_int(Ins, *pint);
+	}
+	return PX_TRUE;
+}
+
+PX_VM_HOST_FUNCTION(PX_VM_abiget_float)
+{
+	px_int ptr;
+	px_variable* pVar;
+	px_abi rabi;
+	const px_float* pint;
+	if (PX_VM_HOSTPARAM(Ins, 0).type != PX_VARIABLE_TYPE_PTR)
+	{
+		return PX_FALSE;
+	}
+	ptr = PX_VM_HOSTPARAM(Ins, 0)._int;
+	if (ptr < 0 || ptr >= Ins->VM_memsize)
+	{
+		return PX_FALSE;
+	}
+	pVar = &Ins->_mem[ptr];
+	if (pVar->type != PX_VARIABLE_TYPE_MEMORY)
+	{
+		return PX_FALSE;
+	}
+	if (PX_VM_HOSTPARAM(Ins, 1).type != PX_VARIABLE_TYPE_STRING)
+	{
+		return PX_FALSE;
+	}
+	PX_AbiCreate_StaticReader(&rabi, pVar->_memory.buffer, pVar->_memory.usedsize);
+	pint = PX_AbiGet_float(&rabi, PX_VM_HOSTPARAM(Ins, 1)._string.buffer);
+	if (!pint)
+	{
+		PX_VM_RET_float(Ins, -1);
+	}
+	else
+	{
+		PX_VM_RET_float(Ins, *pint);
+	}
+	return PX_TRUE;
+}
+
+PX_VM_HOST_FUNCTION(PX_VM_abiget_string)
+{
+	px_int ptr;
+	px_variable* pVar;
+	px_abi rabi;
+	const px_char* pint;
+	if (PX_VM_HOSTPARAM(Ins, 0).type != PX_VARIABLE_TYPE_PTR)
+	{
+		return PX_FALSE;
+	}
+	ptr = PX_VM_HOSTPARAM(Ins, 0)._int;
+	if (ptr < 0 || ptr >= Ins->VM_memsize)
+	{
+		return PX_FALSE;
+	}
+	pVar = &Ins->_mem[ptr];
+	if (pVar->type != PX_VARIABLE_TYPE_MEMORY)
+	{
+		return PX_FALSE;
+	}
+	if (PX_VM_HOSTPARAM(Ins, 1).type != PX_VARIABLE_TYPE_STRING)
+	{
+		return PX_FALSE;
+	}
+	PX_AbiCreate_StaticReader(&rabi, pVar->_memory.buffer, pVar->_memory.usedsize);
+	pint = PX_AbiGet_string(&rabi, PX_VM_HOSTPARAM(Ins, 1)._string.buffer);
+	if (!pint)
+	{
+		PX_VM_RET_String(Ins, "");
+	}
+	else
+	{
+		PX_VM_RET_String(Ins, pint);
+	}
+	return PX_TRUE;
+}
+
+PX_VM_HOST_FUNCTION(PX_VM_abiget_data)
+{
+	px_int ptr;
+	px_variable* pVar;
+	px_abi rabi;
+	px_void* pint;
+	px_dword size;
+	if (PX_VM_HOSTPARAM(Ins, 0).type != PX_VARIABLE_TYPE_PTR)
+	{
+		return PX_FALSE;
+	}
+	ptr = PX_VM_HOSTPARAM(Ins, 0)._int;
+	if (ptr < 0 || ptr >= Ins->VM_memsize)
+	{
+		return PX_FALSE;
+	}
+	pVar = &Ins->_mem[ptr];
+	if (pVar->type != PX_VARIABLE_TYPE_MEMORY)
+	{
+		return PX_FALSE;
+	}
+	if (PX_VM_HOSTPARAM(Ins, 1).type != PX_VARIABLE_TYPE_STRING)
+	{
+		return PX_FALSE;
+	}
+	PX_AbiCreate_StaticReader(&rabi, pVar->_memory.buffer, pVar->_memory.usedsize);
+	pint = PX_AbiGet_data(&rabi, PX_VM_HOSTPARAM(Ins, 1)._string.buffer,&size);
+	if (!pint)
+	{
+		PX_VM_RET_memory(Ins, 0,0);
+	}
+	else
+	{
+		PX_VM_RET_memory(Ins, pint, size);
+	}
+	return PX_TRUE;
+}
+
+PX_VM_HOST_FUNCTION(PX_VM_abiset_int)
+{
+	px_int ptr;
+	px_variable* pVar;
+	px_abi wabi;
+	if (PX_VM_HOSTPARAM(Ins, 0).type != PX_VARIABLE_TYPE_PTR)
+	{
+		return PX_FALSE;
+	}
+	ptr = PX_VM_HOSTPARAM(Ins, 0)._int;
+	if (ptr < 0 || ptr >= Ins->VM_memsize)
+	{
+		return PX_FALSE;
+	}
+	pVar = &Ins->_mem[ptr];
+	if (pVar->type != PX_VARIABLE_TYPE_MEMORY)
+	{
+		return PX_FALSE;
+	}
+	if (PX_VM_HOSTPARAM(Ins, 1).type != PX_VARIABLE_TYPE_STRING)
+	{
+		return PX_FALSE;
+	}
+	if (PX_VM_HOSTPARAM(Ins,2).type != PX_VARIABLE_TYPE_INT)
+	{
+		return PX_FALSE;
+	}
+	PX_AbiCreate_MemoryWriter(&wabi, &pVar->_memory);
+	if (!PX_AbiSet_int(&wabi, PX_VM_HOSTPARAM(Ins, 1)._string.buffer, PX_VM_HOSTPARAM(Ins, 2)._int))
+	{
+		return PX_FALSE;
+	}
+	pVar->_memory = wabi.dynamic;
+	return PX_TRUE;
+}
+
+PX_VM_HOST_FUNCTION(PX_VM_abiset_float)
+{
+	px_int ptr;
+	px_variable* pVar;
+	px_abi wabi;
+	if (PX_VM_HOSTPARAM(Ins, 0).type != PX_VARIABLE_TYPE_PTR)
+	{
+		return PX_FALSE;
+	}
+	ptr = PX_VM_HOSTPARAM(Ins, 0)._int;
+	if (ptr < 0 || ptr >= Ins->VM_memsize)
+	{
+		return PX_FALSE;
+	}
+	pVar = &Ins->_mem[ptr];
+	if (pVar->type != PX_VARIABLE_TYPE_MEMORY)
+	{
+		return PX_FALSE;
+	}
+	if (PX_VM_HOSTPARAM(Ins, 1).type != PX_VARIABLE_TYPE_STRING)
+	{
+		return PX_FALSE;
+	}
+	if (PX_VM_HOSTPARAM(Ins, 2).type != PX_VARIABLE_TYPE_FLOAT)
+	{
+		return PX_FALSE;
+	}
+	PX_AbiCreate_MemoryWriter(&wabi, &pVar->_memory);
+	if (!PX_AbiSet_float(&wabi, PX_VM_HOSTPARAM(Ins, 1)._string.buffer, PX_VM_HOSTPARAM(Ins, 2)._float))
+	{
+		return PX_FALSE;
+	}
+	pVar->_memory = wabi.dynamic;
+	return PX_TRUE;
+}
+
+PX_VM_HOST_FUNCTION(PX_VM_abiset_string)
+{
+	px_int ptr;
+	px_variable* pVar;
+	px_abi wabi;
+	if (PX_VM_HOSTPARAM(Ins, 0).type != PX_VARIABLE_TYPE_PTR)
+	{
+		return PX_FALSE;
+	}
+	ptr = PX_VM_HOSTPARAM(Ins, 0)._int;
+	if (ptr < 0 || ptr >= Ins->VM_memsize)
+	{
+		return PX_FALSE;
+	}
+	pVar = &Ins->_mem[ptr];
+	if (pVar->type != PX_VARIABLE_TYPE_MEMORY)
+	{
+		return PX_FALSE;
+	}
+	if (PX_VM_HOSTPARAM(Ins, 1).type != PX_VARIABLE_TYPE_STRING)
+	{
+		return PX_FALSE;
+	}
+	if (PX_VM_HOSTPARAM(Ins, 2).type != PX_VARIABLE_TYPE_STRING)
+	{
+		return PX_FALSE;
+	}
+	PX_AbiCreate_MemoryWriter(&wabi, &pVar->_memory);
+	if (!PX_AbiSet_string(&wabi, PX_VM_HOSTPARAM(Ins, 1)._string.buffer, PX_VM_HOSTPARAM(Ins, 2)._string.buffer))
+	{
+		return PX_FALSE;
+	}
+	pVar->_memory = wabi.dynamic;
+	return PX_TRUE;
+}
+
+PX_VM_HOST_FUNCTION(PX_VM_abiset_data)
+{
+	px_int ptr;
+	px_variable* pVar,*pVar2;
+	px_abi wabi;
+	if (PX_VM_HOSTPARAM(Ins, 0).type != PX_VARIABLE_TYPE_PTR)
+	{
+		return PX_FALSE;
+	}
+	ptr = PX_VM_HOSTPARAM(Ins, 0)._int;
+	if (ptr < 0 || ptr >= Ins->VM_memsize)
+	{
+		return PX_FALSE;
+	}
+	pVar = &Ins->_mem[ptr];
+	if (pVar->type != PX_VARIABLE_TYPE_MEMORY)
+	{
+		return PX_FALSE;
+	}
+	if (PX_VM_HOSTPARAM(Ins, 1).type != PX_VARIABLE_TYPE_STRING)
+	{
+		return PX_FALSE;
+	}
+	if (PX_VM_HOSTPARAM(Ins, 2).type != PX_VARIABLE_TYPE_PTR)
+	{
+		return PX_FALSE;
+	}
+	ptr = PX_VM_HOSTPARAM(Ins, 2)._int;
+	if (ptr < 0 || ptr >= Ins->VM_memsize)
+	{
+		return PX_FALSE;
+	}
+	pVar2 = &Ins->_mem[ptr];
+	if (pVar2->type != PX_VARIABLE_TYPE_MEMORY)
+	{
+		return PX_FALSE;
+	}
+	PX_AbiCreate_MemoryWriter(&wabi, &pVar->_memory);
+	if (!PX_AbiSet_data(&wabi, PX_VM_HOSTPARAM(Ins, 1)._string.buffer, pVar2->_memory.buffer, pVar2->_memory.usedsize))
+	{
+		return PX_FALSE;
+	}
+	pVar->_memory = wabi.dynamic;
+	return PX_TRUE;
+}
+
+PX_VM_HOST_FUNCTION(PX_VM_STD_rand)
+{
+	PX_VM_RET_int(Ins, (PX_rand()&0xfffff));
+	return PX_TRUE;
+}
+
+px_bool PX_VMRegisterStandardFunctions(PX_VM* Ins, px_void* userptr)
+{
+	PX_VMRegisterHostFunction(Ins, "abiget_int", PX_VM_abiget_int, userptr);
+	PX_VMRegisterHostFunction(Ins, "abiget_float", PX_VM_abiget_float, userptr);
+	PX_VMRegisterHostFunction(Ins, "abiget_string", PX_VM_abiget_string, userptr);
+	PX_VMRegisterHostFunction(Ins, "abiget_data", PX_VM_abiget_data, userptr);
+	PX_VMRegisterHostFunction(Ins, "abiset_int", PX_VM_abiset_int, userptr);
+	PX_VMRegisterHostFunction(Ins, "abiset_float", PX_VM_abiset_float, userptr);
+	PX_VMRegisterHostFunction(Ins, "abiset_string", PX_VM_abiset_string, userptr);
+	PX_VMRegisterHostFunction(Ins, "abiset_data", PX_VM_abiset_data, userptr);
+	PX_VMRegisterHostFunction(Ins, "sleep", PX_VM_STD_Sleep, userptr);
+	PX_VMRegisterHostFunction(Ins, "rand", PX_VM_STD_rand, userptr);
+
+	
+	return PX_TRUE;
+
 }

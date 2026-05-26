@@ -3,6 +3,7 @@
 #include "PX_Lexer.h"
 #include "PX_List.h"
 #include "PX_String.h"
+#include "PX_Abi.h"
 
 
 
@@ -57,6 +58,7 @@ px_bool PX_JsonInitialize(px_memorypool *mp,PX_Json *pjson);
 px_bool PX_JsonParse(PX_Json *pjson,const px_char *json_content);
 px_bool PX_JsonBuild_Value(PX_Json_Value *pValue,px_string *_out,px_bool bArrayValue);
 px_bool PX_JsonBuild(PX_Json *pjson,px_string *_out);
+px_bool PX_JsonToString(PX_Json* pjson, px_string* _out);
 px_void PX_JsonDelete(PX_Json *pjson,const px_char payload[]);
 px_void PX_JsonFree(PX_Json *pjson);
 px_void PX_JsonClear(PX_Json* pjson);
@@ -89,6 +91,8 @@ px_bool PX_JsonSetBoolean(PX_Json *pjson,const px_char payload[],const px_bool b
 
 px_bool PX_JsonObjectAddValue(PX_Json_Value *pObject,PX_Json_Value *value);
 px_bool PX_JsonArrayAddValue(PX_Json_Value *pArray,PX_Json_Value *value);
+
+px_bool PX_JsonToAbi(PX_Json* pjson, px_abi* pabi);
 
 #endif
 

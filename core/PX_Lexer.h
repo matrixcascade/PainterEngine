@@ -65,6 +65,7 @@ typedef struct __Pt_Lexer
 	px_int       DiscardCount;
 	px_int	     CommentCount;
 	px_char		*Sources;
+	px_int      *Source_line;
 	px_char      SortComment;
 	px_int      SourceOffset;
 	px_int      lexeme_begin;
@@ -86,8 +87,8 @@ typedef struct __Pt_Lexer
 	PX_LEXER_CA_Comment   Comment[PX_LEXER_CA_COMMENT_MAX_COUNT];
 	PX_LEXER_CA_Container Container[PX_LEXER_CA_CONTAINER_MAX_COUNT];
 	PX_LEXER_CA_Discard   Discard[PX_LEXER_CA_DISCARD_MAX_COUNT];
-	px_char	     Spacer[PX_LEXER_CA_SPACER_MAX_COUNT];
-	px_char      Delimiter[PX_LEXER_CA_DELIMITER_MAX_COUNT];
+	px_char	     spacer[PX_LEXER_CA_SPACER_MAX_COUNT];
+	px_char      delimiter[PX_LEXER_CA_DELIMITER_MAX_COUNT];
 	px_vector    symbolmap;
 }px_lexer;
 
@@ -104,21 +105,22 @@ px_void PX_LexerRegisterComment(px_lexer *lexer,const px_char Begin[],const px_c
 px_int PX_LexerRegisterContainer(px_lexer *lexer,const px_char Begin[],const px_char End[]);
 px_void PX_LexerRegisterContainerTransfer(px_lexer *lexer,px_uint containerIndex,px_char transfer);
 
-px_void PX_LexerRegisterSpacer(px_lexer *lexer,px_char Spacer);
-px_int PX_LexerRegisterDelimiter(px_lexer *lexer,px_char Delimiter);
+px_void PX_LexerRegisterSpacer(px_lexer *lexer,px_char spacer);
+px_int PX_LexerRegisterDelimiter(px_lexer *lexer,px_char delimiter);
 px_int PX_LexerRegisterDiscard(px_lexer* lexer,const px_char discard[8]);
-px_int PX_LexerGetDelimiterType(px_lexer *lexer,px_char Delimiter);
+px_int PX_LexerGetDelimiterType(px_lexer *lexer,px_char delimiter);
 px_int PX_LexerGetContainerType(px_lexer *lexer,px_char *pContainerText);
 px_int PX_LexerGetCurrentContainerType(px_lexer *lexer);
 px_int PX_LexerGetCurrentDelimiterType(px_lexer *lexer);
 px_void PX_LexerFree(px_lexer *lexer);
-px_bool PX_LexerSortTextMap(px_lexer* lexer, const px_char* SourceText, px_bool map);
+px_bool PX_LexerSortTextMap(px_lexer* lexer, const px_char* SourceText, px_bool bin_map_to_source);
 px_bool PX_LexerSortText(px_lexer* lexer, const px_char* SourceText);
 px_bool  PX_LexerLoadSourceWithPresort(px_lexer *lexer,const px_char *buffer);
 px_bool  PX_LexerLoadSource(px_lexer *lexer,const px_char *buffer);
 px_int  PX_LexerGetOffset(px_lexer* lexer);
 px_bool PX_LexerSetOffset(px_lexer* lexer, px_int offset);
-
+px_int PX_LexerGetLineByOffset(px_lexer* lexer, px_int offset);
+px_int PX_LexerGetLine(px_lexer* lexer);
 
 px_bool  PX_LexerSetSourcePointer(px_lexer *lexer,const px_char *buffer);
 px_bool PX_LexerReadString(px_lexer *lexer,px_string *str,px_uint size);
@@ -128,9 +130,9 @@ px_void PX_LexerGetIncludedString(px_lexer *lexer,px_string *str);
 px_void PX_LexerSetTokenCase(px_lexer *lexer,PX_LEXER_LEXEME_CASE _case);
 px_void PX_LexerSetNumericMatch(px_lexer *lexer,px_bool b);
 px_bool PX_LexerIsEnd(px_lexer* lexer);
-px_int  PX_LexerGetCurrentLine(px_lexer *lexer);
-px_int  PX_LexerGetCurrentColumn(px_lexer *lexer);
+
 const px_char * PX_LexerGetLexeme(px_lexer *lexer);
+PX_LEXER_LEXEME_TYPE PX_LexerGetLexemeType(px_lexer* lexer);
 px_void PX_LexerReset(px_lexer *lexer);
 
 PX_LEXER_STATE PX_LexerGetState(px_lexer *lexer);

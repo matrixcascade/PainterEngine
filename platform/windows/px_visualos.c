@@ -74,7 +74,7 @@ PX_SOCKET_RECEIVE_CALLBACK_FUNCTION(PX_VisualOSOnSocketReceive)
 
 		if (pClient->pre_surface.width!= pClient->surface_width || pClient->pre_surface.height != pClient->surface_height)
 		{
-			if (pClient->pre_surface.MP)
+			if (pClient->pre_surface.mp)
 			{
 				PX_TextureFree(&pClient->pre_surface);
 				PX_memset(&pClient->pre_surface, 0, sizeof(pClient->pre_surface));
@@ -87,7 +87,7 @@ PX_SOCKET_RECEIVE_CALLBACK_FUNCTION(PX_VisualOSOnSocketReceive)
 		}
 		if (pClient->cur_surface.width != pClient->surface_width || pClient->cur_surface.height != pClient->surface_height)
 		{
-			if (pClient->cur_surface.MP)
+			if (pClient->cur_surface.mp)
 			{
 				PX_TextureFree(&pClient->cur_surface);
 				PX_memset(&pClient->cur_surface, 0, sizeof(pClient->cur_surface));
@@ -256,12 +256,12 @@ px_bool PX_Object_VisualOSLogin(PX_Object* pObject, px_int target_x, px_int targ
 	login.y = target_y;
 	login.width = width;
 	login.height = height;
-	if (pClient->pre_surface.MP)
+	if (pClient->pre_surface.mp)
 	{
 		PX_TextureFree(&pClient->pre_surface);
 		PX_memset(&pClient->pre_surface, 0, sizeof(pClient->pre_surface));
 	}
-	if (pClient->cur_surface.MP)
+	if (pClient->cur_surface.mp)
 	{
 		PX_TextureFree(&pClient->cur_surface);
 		PX_memset(&pClient->cur_surface, 0, sizeof(pClient->cur_surface));

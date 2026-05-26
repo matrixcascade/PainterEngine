@@ -383,7 +383,7 @@ PX_Object* PX_Object_PrinterAttachObject( PX_Object* pObject,px_int attachIndex,
 	pDesc->id = 1;
 	pDesc->fontColor = PX_COLOR_GREEN;
 	if (!(pDesc->Area = PX_Object_ScrollAreaCreate(mp, pObject, 0, 0, (px_int)width, (px_int)height))) return PX_NULL;
-
+	PX_Object_ScrollAreaScrollEnable(pDesc->Area, PX_TRUE);
 	PX_ObjectRegisterEvent(pDesc->Area, PX_OBJECT_EVENT_KEYDOWN, PX_Object_PrinterOnEnter, pObject);
 	PX_ObjectRegisterEvent(pDesc->Area, PX_OBJECT_EVENT_CURSORDOWN, PX_Object_PrinterOnMouseDown, pObject);
 	PX_Object_ScrollAreaSetBorder(pDesc->Area, PX_NULL);

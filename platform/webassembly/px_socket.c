@@ -20,7 +20,17 @@ static px_bool PX_SocketConnectToServer(PX_Socket* pSocket, const px_char host[]
 	px_char _build_host[256];
 	PX_EMWebSocket_Handle* pem = (PX_EMWebSocket_Handle*)pSocket->handler;
 	EmscriptenWebSocketCreateAttributes ws_attrs;
-	PX_sprintf2(_build_host, 256, "%1:%2", PX_STRINGFORMAT_STRING(host), PX_STRINGFORMAT_INT(port));
+	// Auto-prepend ws:// scheme if caller didn't provide one. Browsers require an
+	// absolute ws://host:port URL; otherwise the connection will appear to open
+	// then be rejected immediately after the HTTP upgrade.
+	if (PX_strstr(host, "://") == PX_NULL)
+	{
+		PX_sprintf2(_build_host, 256, "ws://%1:%2", PX_STRINGFORMAT_STRING(host), PX_STRINGFORMAT_INT(port));
+	}
+	else
+	{
+		PX_sprintf2(_build_host, 256, "%1:%2", PX_STRINGFORMAT_STRING(host), PX_STRINGFORMAT_INT(port));
+	}
 	ws_attrs.url = _build_host;
 	ws_attrs.protocols = "binary";
 	ws_attrs.createOnMainThread = EM_TRUE;
@@ -29,7 +39,7 @@ static px_bool PX_SocketConnectToServer(PX_Socket* pSocket, const px_char host[]
 	emscripten_websocket_set_onerror_callback(pem->socket, pSocket, onerror);
 	emscripten_websocket_set_onclose_callback(pem->socket, pSocket, onclose);
 	emscripten_websocket_set_onmessage_callback(pem->socket, pSocket, onmessage);
-	printf("connecting to %s:%d:%d\n", host, port,PX_TimeGetTime());
+	printf("connecting to %s:%d:%d\n", _build_host, port, PX_TimeGetTime());
 	return PX_TRUE;
 }
 
@@ -40,7 +50,8 @@ static EM_BOOL onopen(int eventType, const EmscriptenWebSocketOpenEvent* websock
 	PX_EMWebSocket_Handle *pem=(PX_EMWebSocket_Handle *)psocket->handler;
 	pem->socket = websocketEvent->socket;
 	printf("suceess to connect %d\n", PX_TimeGetTime());
-	psocket->connectcallback(psocket, psocket->userptr);
+	if (psocket->connectcallback)
+		psocket->connectcallback(psocket, psocket->userptr);
 	psocket->isConnecting=PX_TRUE;
     return EM_TRUE;
 }
@@ -48,8 +59,13 @@ static EM_BOOL onopen(int eventType, const EmscriptenWebSocketOpenEvent* websock
 static EM_BOOL onerror(int eventType, const EmscriptenWebSocketErrorEvent* websocketEvent, void* userData)
 {
 	PX_Socket* psocket = (PX_Socket*)userData;
-	PX_EMWebSocket_Handle *pem=(PX_EMWebSocket_Handle *)psocket->handler;
-	printf("websocket error\n");
+	// Browsers do not expose error details to JS/WASM for security reasons.
+	// The real diagnostic info (close code + reason) arrives in onclose.
+	printf("[WS] connection error eventType=%d socket=%d t=%d host=%s:%d\n",
+		eventType,
+		websocketEvent ? (int)websocketEvent->socket : -1,
+		PX_TimeGetTime(),
+		psocket->host, psocket->port);
 	psocket->isConnecting=PX_FALSE;
     return EM_TRUE;
 }
@@ -58,15 +74,22 @@ static EM_BOOL onclose(int eventType, const EmscriptenWebSocketCloseEvent* webso
 {
 	PX_Socket* psocket = (PX_Socket*)userData;
 	PX_EMWebSocket_Handle* pem = (PX_EMWebSocket_Handle*)psocket->handler;
-	psocket->disconnectcallback(psocket, psocket->userptr);
-	emscripten_websocket_close(pem->socket, 1000, "user close");
+	printf("[WS] connection closed code=%d wasClean=%d reason=\"%s\" host=%s:%d t=%d\n",
+		websocketEvent ? (int)websocketEvent->code : -1,
+		websocketEvent ? (int)websocketEvent->wasClean : -1,
+		(websocketEvent && websocketEvent->reason) ? websocketEvent->reason : "",
+		psocket->host, psocket->port,
+		PX_TimeGetTime());
+	if (psocket->disconnectcallback)
+		psocket->disconnectcallback(psocket, psocket->userptr);
+	emscripten_websocket_delete(pem->socket);
 	psocket->isConnecting=PX_FALSE;
 	if(!psocket->exit)
 	{
 		while (!psocket->enable) PX_Sleep(1);
 		PX_SocketConnectToServer(psocket, psocket->host, psocket->port);
 	}
-	
+
 	return EM_TRUE;
 }
 
@@ -81,6 +104,7 @@ static EM_BOOL onmessage(int eventType, const EmscriptenWebSocketMessageEvent* w
 	{
 		//fifo crash
 		printf("fifo crash,close connection\n");
+		pem->recv_lock = PX_FALSE;
 		emscripten_websocket_close(pem->socket, 1000, "user close");
 		return EM_FALSE;
 	}
@@ -89,24 +113,30 @@ static EM_BOOL onmessage(int eventType, const EmscriptenWebSocketMessageEvent* w
 		memcpy(psocket->precv_buffer + psocket->recv_buffer_offset, websocketEvent->data, recv_size);
 		psocket->recv_buffer_offset += recv_size;
 	}
-	if (psocket->recv_buffer_offset>sizeof(px_dword))
+	while (psocket->recv_buffer_offset>=sizeof(px_dword))
 	{
 		px_dword packetsize = *(px_dword*)psocket->precv_buffer;
-		if (packetsize>psocket->recv_buffer_size-sizeof(px_dword))
+		if (packetsize>psocket->recv_buffer_size-sizeof(px_dword)-sizeof(px_dword))
 		{
 			//packet size error
 			printf("packet size out of bound!close connection\n");
+			pem->recv_lock = PX_FALSE;
 			emscripten_websocket_close(pem->socket, 1000, "user close");
 			return EM_FALSE;
 		}
 		else if (psocket->recv_buffer_offset >= packetsize + sizeof(px_dword))
 		{
-			psocket->recvcallback(psocket, psocket->precv_buffer + sizeof(px_dword), packetsize, psocket->userptr);
+			if (psocket->recvcallback)
+				psocket->recvcallback(psocket, psocket->precv_buffer + sizeof(px_dword), packetsize, psocket->userptr);
 			psocket->recv_buffer_offset -= packetsize + sizeof(px_dword);
 			if (psocket->recv_buffer_offset)
 			{
 				memmove(psocket->precv_buffer, psocket->precv_buffer + packetsize + sizeof(px_dword), psocket->recv_buffer_offset);
 			}
+		}
+		else
+		{
+			break;
 		}
 	}
 	pem->recv_lock = PX_FALSE;
@@ -169,13 +199,28 @@ px_bool PX_SocketInitialize(PX_Socket* pSocket, px_dword cache_size, \
 }
 
 
-px_bool PX_SocketSend(PX_Socket* pSocket, px_byte* data, px_dword send_data_size)
+px_bool PX_SocketSend(PX_Socket* pSocket,const px_byte* data, px_dword send_data_size)
 {
 	px_int send_offst=0;
 	px_int send_block_size;
 	px_bool send_size=PX_FALSE;
 	px_int retry = 3;
+	unsigned short readyState = 3; /* CLOSED */
 	PX_EMWebSocket_Handle* pem = (PX_EMWebSocket_Handle*)pSocket->handler;
+
+	/* Refuse to send before the WebSocket has finished opening. Calling
+	   emscripten_websocket_send_binary while the underlying JS WebSocket is in
+	   CONNECTING state throws InvalidStateError, which closes the connection. */
+	if (!pSocket->isConnecting)
+	{
+		return PX_FALSE;
+	}
+	emscripten_websocket_get_ready_state(pem->socket, &readyState);
+	if (readyState != 1 /* OPEN */)
+	{
+		return PX_FALSE;
+	}
+
 	while (PX_TRUE)
 	{
 		EMSCRIPTEN_RESULT result;
@@ -229,12 +274,12 @@ px_void PX_SocketConnect(PX_Socket* pSocket, px_bool connecting)
 px_void PX_SocketFree(PX_Socket* pSocket)
 {
 	PX_EMWebSocket_Handle* pem = (PX_EMWebSocket_Handle*)pSocket->handler;
+	pSocket->exit = PX_TRUE;
 	printf("free socket:close connection\n");
 	emscripten_websocket_close(pem->socket, 1000, "user close");
 	free(pSocket->handler);
 	free(pSocket->precv_buffer);
 	free(pSocket->psend_buffer);
-	pSocket->exit=PX_TRUE;
 }
 
 px_void PX_SocketSetUserPtr(PX_Socket* pSocket, px_void* ptr)

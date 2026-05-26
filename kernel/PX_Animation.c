@@ -248,7 +248,7 @@ px_void PX_AnimationRender(px_surface* psurface, PX_Animation* animation, px_int
 	PX_AnimationRenderMirror(psurface, animation , x, y, refPoint, blend, PX_TEXTURERENDER_MIRRROR_MODE_NONE);
 }
 
-px_void PX_AnimationRenderEx(px_surface *psurface,PX_Animation *animation,px_int x,px_int y,px_float scale,px_point2D direction,PX_ALIGN refPoint,PX_TEXTURERENDER_BLEND *blend)
+px_void PX_AnimationRenderEx(px_surface *psurface,PX_Animation *animation,px_int x,px_int y,px_float scale,px_point2D toward,PX_ALIGN refPoint,PX_TEXTURERENDER_BLEND *blend)
 {
 	px_texture *pTexture;
 	if (!animation->linker)
@@ -261,11 +261,11 @@ px_void PX_AnimationRenderEx(px_surface *psurface,PX_Animation *animation,px_int
 
 		if (scale!=1)
 		{
-			PX_TextureRenderEx_vector(psurface,pTexture,x,y,refPoint,blend,scale,direction);
+			PX_TextureRenderEx_vector(psurface,pTexture,x,y,refPoint,blend,scale,toward);
 		}
 		else
 		{
-			PX_TextureRenderRotation_vector(psurface,pTexture,x,y,refPoint,blend,direction);
+			PX_TextureRenderRotation_vector(psurface,pTexture,x,y,refPoint,blend,toward);
 		}
 	}
 }
@@ -285,7 +285,7 @@ px_void PX_AnimationRender_scale(px_surface *psurface,PX_Animation *animation,px
 }
 
 
-px_void PX_AnimationRender_vector(px_surface *psurface,PX_Animation *animation,px_int x,px_int y,px_point2D direction,PX_ALIGN refPoint,PX_TEXTURERENDER_BLEND *blend)
+px_void PX_AnimationRender_vector(px_surface *psurface,PX_Animation *animation,px_int x,px_int y,px_point2D toward,PX_ALIGN refPoint,PX_TEXTURERENDER_BLEND *blend)
 {
 	px_texture *pTexture;
 	if (!animation->linker)
@@ -295,7 +295,7 @@ px_void PX_AnimationRender_vector(px_surface *psurface,PX_Animation *animation,p
 	if(animation->reg_currentFrameIndex>=0&&animation->reg_currentFrameIndex<animation->linker->frames.size)
 	{
 		pTexture=PX_VECTORAT(px_texture,&animation->linker->frames,animation->reg_currentFrameIndex);
-		PX_TextureRenderRotation_vector(psurface,pTexture,x,y,refPoint,blend,direction);
+		PX_TextureRenderRotation_vector(psurface,pTexture,x,y,refPoint,blend,toward);
 	}
 }
 
@@ -510,7 +510,7 @@ px_bool PX_AnimationShellCompile(px_memorypool* mp, const px_char script[], px_v
 				goto _LEXER_ERROR;
 			}
 
-			PX_strcpy(textureInfo.map, lexer.CurLexeme.buffer, sizeof(textureInfo.path));
+			PX_strcpy(textureInfo.bin_map_to_source, lexer.CurLexeme.buffer, sizeof(textureInfo.path));
 
 			type = PX_2dx_NextLexer(&lexer);
 			if (type != PX_LEXER_LEXEME_TYPE_NEWLINE)
@@ -724,7 +724,7 @@ px_bool PX_AnimationShellCompile(px_memorypool* mp, const px_char script[], px_v
 
 			for (i = 0; i < texinfos->size; i++)
 			{
-				if (PX_strequ(PX_VECTORAT(PX_2dxMake_textureInfo, texinfos, i)->map, lexer.CurLexeme.buffer))
+				if (PX_strequ(PX_VECTORAT(PX_2dxMake_textureInfo, texinfos, i)->bin_map_to_source, lexer.CurLexeme.buffer))
 				{
 					instr.opcode = PX_2DX_OPCODE_FRAME;
 					instr.param = i;

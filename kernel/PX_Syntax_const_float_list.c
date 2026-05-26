@@ -5,18 +5,24 @@ PX_SYNTAX_FUNCTION(PX_Syntax_Parse_const_float_list_begin)
 	px_abi* pnewabi;
 	if (!(pnewabi=PX_Syntax_NewAbi(pSyntax,"const_float_list",pSyntax->reg_lifetime)))
 	{
-		PX_Syntax_Terminate(pSyntax, "out of memory!");
+		PX_Syntax_Terminate(pSyntax, "runtime:error:PX_Syntax_Parse_const_float_list_begin out of memory1");
 		return PX_FALSE;
 	}
 	if(!PX_AbiSet_int(pnewabi, "list_count", 0))
 	{
-		PX_Syntax_Terminate(pSyntax, "out of memory!");
+		PX_Syntax_Terminate(pSyntax, "runtime:error:PX_Syntax_Parse_const_float_list_begin out of memory2");
+		return PX_FALSE;
+	}
+
+	if (!PX_AbiSet_int(pnewabi, "source_index", PX_Syntax_GetCurrentSourceIndex(pSyntax)))
+	{
+		PX_Syntax_Terminate(pSyntax, "runtime:error:PX_Syntax_Parse_const_float_list_begin out of memory3");
 		return PX_FALSE;
 	}
 
 	if (!PX_AbiSet_int(pnewabi, "begin", PX_Syntax_GetCurrentLexemeBegin(pSyntax)))
 	{
-		PX_Syntax_Terminate(pSyntax, "out of memory!");
+		PX_Syntax_Terminate(pSyntax, "runtime:error:PX_Syntax_Parse_const_float_list_begin out of memory3");
 		return PX_FALSE;
 	}
 	return PX_TRUE;
@@ -45,12 +51,12 @@ PX_SYNTAX_FUNCTION(PX_Syntax_Parse_const_float_list_new)
 	PX_sprintf1(index_named, sizeof(index_named), "const_float[%1]", PX_STRINGFORMAT_INT(listcount));
 	if (!PX_AbiSet_Abi(psecondlastabi, index_named, plastabi))
 	{
-		PX_Syntax_Terminate(pSyntax, "out of memory!");
+		PX_Syntax_Terminate(pSyntax, "runtime:error:PX_Syntax_Parse_const_float_list_new out of memory1");
 		return PX_FALSE;
 	}
 	if (!PX_AbiSet_int(plastabi, "end", PX_Syntax_GetCurrentLexemeEnd(pSyntax)))
 	{
-		PX_Syntax_Terminate(pSyntax, "out of memory!");
+		PX_Syntax_Terminate(pSyntax, "runtime:error:PX_Syntax_Parse_const_float_list_new out of memory2");
 		return PX_FALSE;
 	}
 	PX_Syntax_PopAbi(pSyntax);
@@ -64,11 +70,11 @@ PX_SYNTAX_FUNCTION(PX_Syntax_Parse_const_float_list_end)
 
 px_bool PX_Syntax_load_const_float_list(PX_Syntax* pSyntax)
 {
-	PX_Syntax_Parse_PEBNF(pSyntax, "const_float_list", PX_Syntax_Parse_const_float_list_begin);
-	PX_Syntax_Parse_PEBNF(pSyntax, "const_float_list = const_float", PX_Syntax_Parse_const_float_list_new);
-	PX_Syntax_Parse_PEBNF(pSyntax, "const_float_list = const_float ',' ...", 0);
-	PX_Syntax_Parse_PEBNF(pSyntax, "const_float_list = const_float ',' *", PX_Syntax_Parse_const_float_list_end);
-	PX_Syntax_Parse_PEBNF(pSyntax, "const_float_list = const_float *", PX_Syntax_Parse_const_float_list_end);
+	PX_Syntax_Parse_PEBNF(pSyntax, "const_float_list", PX_Syntax_Parse_const_float_list_begin,0, 0);
+	PX_Syntax_Parse_PEBNF(pSyntax, "const_float_list = const_float",0, PX_Syntax_Parse_const_float_list_new, 0);
+	PX_Syntax_Parse_PEBNF(pSyntax, "const_float_list = const_float ',' ...", 0,0, 0);
+	PX_Syntax_Parse_PEBNF(pSyntax, "const_float_list = const_float ',' *",0, PX_Syntax_Parse_const_float_list_end, 0);
+	PX_Syntax_Parse_PEBNF(pSyntax, "const_float_list = const_float *",0, PX_Syntax_Parse_const_float_list_end, 0);
 	
 	return PX_TRUE;
 }

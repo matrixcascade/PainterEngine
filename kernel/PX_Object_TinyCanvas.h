@@ -56,7 +56,7 @@ PX_Object* PX_Object_TinyCanvasAttachObject(PX_Object* pObject, px_int attachInd
 PX_Object* PX_Object_TinyCanvasCreate(px_memorypool* mp, PX_Object* Parent, px_int x, px_int y, px_int width, px_int height);
 px_surface* PX_Object_TinyCanvasGetSurface(PX_Object* pObject);
 px_void PX_Object_TinyCanvasSetColor(PX_Object* pObject, px_color color);
-px_void PX_Object_TinyCanvasSetTool(PX_Object* pObject, const px_char name[PX_TINYCANVASVM_MAX_TOOL_NAME]);
+px_void PX_Object_TinyCanvasSetTool(PX_Object* pObject, const px_char *name);
 px_void PX_Object_TinyCanvasSetSize(PX_Object* pObject, px_float size);
 px_void PX_Object_TinyCanvasSetFilter(PX_Object* pObject, px_float filter);
 px_void PX_Object_TinyCanvasClear(PX_Object* pObject);

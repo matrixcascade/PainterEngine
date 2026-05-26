@@ -16,9 +16,9 @@ px_void PX_ImageFilter_Convolution(px_texture *ptexture,px_float out[],px_float 
 		}
 	}
 
-	for (j=0;j<ptexture->height-1;j++)
+	for (j=1;j<ptexture->height-1;j++)
 	{
-		for (i=0;i<ptexture->width-1;i++)
+		for (i=1;i<ptexture->width-1;i++)
 		{
 			px_color clr;
 			px_float Gray;
@@ -89,11 +89,13 @@ px_void PX_ImageFilter_Convolution(px_texture *ptexture,px_float out[],px_float 
 
 			if (raw)
 			{
-				out[j*ptexture->width+i]+=(weight)/(uniform*maxGray);
+				if (uniform*maxGray != 0)
+					out[j*ptexture->width+i]+=(weight)/(uniform*maxGray);
 			}
 			else
 			{
-				out[j*ptexture->width+i]+=PX_ABS(weight)/(uniform*maxGray);
+				if (uniform*maxGray != 0)
+					out[j*ptexture->width+i]+=PX_ABS(weight)/(uniform*maxGray);
 			}
 			
 		}
@@ -547,6 +549,42 @@ px_void PX_TextureFilter_Laplacian(px_texture* ptexture, px_float out[])
 px_void PX_TextureFilter_Gray(px_texture* ptexture)
 {
 	PX_ImageFilter_Gray(ptexture);
+}
+px_void PX_TextureFilter_Mean(px_texture* _in,px_texture *out, px_int kernel_size)
+{
+	px_int x, y;
+	for (y = 0; y < _in->height; y++)
+	{
+		for (x = 0; x < _in->width; x++)
+		{
+			px_int i, j;
+			px_int r = 0, g = 0, b = 0, a = 0;
+			px_int count = 0;
+			for (j = -kernel_size / 2; j <= kernel_size / 2; j++)
+			{
+				for (i = -kernel_size / 2; i <= kernel_size / 2; i++)
+				{
+					if (x + i >= 0 && x + i < _in->width && y + j >= 0 && y + j < _in->height)
+					{
+						px_color clr = PX_SurfaceGetPixel(_in, x + i, y + j);
+						r += clr._argb.r;
+						g += clr._argb.g;
+						b += clr._argb.b;
+						a += clr._argb.a;
+						count++;
+					}
+				}
+			}
+			if (count > 0)
+			{
+				r /= count;
+				g /= count;
+				b /= count;
+				a /= count;
+				PX_SurfaceSetPixel(out, x, y, PX_COLOR(a, (px_uchar)r, (px_uchar)g, (px_uchar)b));
+			}
+		}
+	}
 }
 px_void PX_TextureFilter_Binarization(px_texture* ptexture, px_byte threshhold)
 {

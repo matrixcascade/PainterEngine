@@ -27,6 +27,7 @@ typedef struct
 
 int PX_UDPListen(PX_UDP *udp,unsigned short listenPort);
 int PX_UDPInitialize(PX_UDP *udp,PX_UDP_IP_TYPE type);
+int PX_UDPResetSocket(PX_UDP* udp);
 int PX_UDPSend(PX_UDP *udp,PX_UDP_ADDR addr,void *buffer,int size);
 int PX_UDPReceived(PX_UDP *udp,PX_UDP_ADDR *from_addr,void *buffer,int buffersize,int *readsize);
 void PX_UDPFree(PX_UDP *udp);

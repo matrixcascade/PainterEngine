@@ -1,4 +1,15 @@
 #include "PX_Texture.h"
+#if defined(__ARM_NEON) || defined(__ARM_NEON__)
+#include <arm_neon.h>
+#define SUPPORT_NEON 1
+#else
+#define SUPPORT_NEON 0
+#endif
+
+px_bool PX_TextureIsValid(px_texture* tex)
+{
+	return tex->mp!=PX_NULL;
+}
 
 PX_TEXTURERENDER_BLEND PX_TEXTURERENDER_BLEND_BUILD(px_float hdr_R, px_float hdr_G, px_float hdr_B, px_float alpha)
 {
@@ -91,6 +102,22 @@ typedef struct
 	PX_ALIGN refPoint;
 	PX_TEXTURERENDER_BLEND *blend;
 }PX_TEXTURERENDER_PARALLEL_DATA;
+
+#if defined(__SSE2__) || (defined(_MSC_VER) && (defined(_M_X64) || (_M_IX86_FP >= 2)))
+#define SUPPORT_SSE2 1
+#include <emmintrin.h>
+/* SSE2 all-true check without movemask (WASM-friendly alternative) */
+#ifdef __EMSCRIPTEN__
+#  define SSE2_ALL_TRUE(cmp) \
+    ( (_mm_cvtsi128_si32(_mm_and_si128(_mm_and_si128((cmp), _mm_srli_si128((cmp), 8)), \
+       _mm_srli_si128(_mm_and_si128((cmp), _mm_srli_si128((cmp), 8)), 4)))) == -1 )
+#else
+#  define SSE2_ALL_TRUE(cmp) (_mm_movemask_epi8(cmp) == 0xFFFF)
+#endif
+#else
+#define SUPPORT_SSE2 0
+#endif
+
 
 
 px_void PX_TextureRenderClipMirror(px_surface* psurface, px_texture* tex, px_int x, px_int y, px_int clipx, px_int clipy, px_int clipw, px_int cliph, PX_ALIGN refPoint, PX_TEXTURERENDER_BLEND* blend, PX_TEXTURERENDER_MIRRROR_MODE mirrorMode)
@@ -300,8 +327,6 @@ px_void PX_TextureRenderClipMirror(px_surface* psurface, px_texture* tex, px_int
 		{
 		case PX_TEXTURERENDER_MIRRROR_MODE_NONE:
 		{
-
-
 #ifdef PX_GPU_ENABLE
 			if (PX_GPU_isEnable()&& clipw>=32)
 			{
@@ -339,19 +364,143 @@ px_void PX_TextureRenderClipMirror(px_surface* psurface, px_texture* tex, px_int
 #else
 		for (j = 0; j < cliph; j++)
 		{
-			for (i = 0; i < clipw; i++)
+			px_color* src_row = pdata + (clipy + j) * tex->width + clipx;
+			px_color* dst_row = psurface->surfaceBuffer + (y + j) * psurface->width + x;
+			i = 0;
+#if SUPPORT_SSE2
 			{
-				clr = pdata[(clipy + j) * tex->width + (clipx + i)];
+				__m128i blend_factor = _mm_set_epi16((px_short)Ab, (px_short)Bb, (px_short)Gb, (px_short)Rb,
+				                                     (px_short)Ab, (px_short)Bb, (px_short)Gb, (px_short)Rb);
+				for (; i <= clipw - 4; i += 4)
+				{
+					__m128i src4 = _mm_loadu_si128((__m128i*)(src_row + i));
+					__m128i zero = _mm_setzero_si128();
+					/* unpack 4 pixels to 16-bit: lo=pixel0,1 hi=pixel2,3 */
+					__m128i src_lo = _mm_unpacklo_epi8(src4, zero);
+					__m128i src_hi = _mm_unpackhi_epi8(src4, zero);
+					/* multiply by blend factors and >>7 */
+					src_lo = _mm_srli_epi16(_mm_mullo_epi16(src_lo, blend_factor), 7);
+					src_hi = _mm_srli_epi16(_mm_mullo_epi16(src_hi, blend_factor), 7);
+					/* pack back to 8-bit */
+					__m128i blended = _mm_packus_epi16(src_lo, src_hi);
+#ifndef __EMSCRIPTEN__
+					/* check alpha: all opaque -> direct write, all zero -> skip */
+					__m128i alpha_mask = _mm_set1_epi32(0xFF000000);
+					__m128i alpha4 = _mm_and_si128(blended, alpha_mask);
+					__m128i cmp_opaque = _mm_cmpeq_epi32(alpha4, alpha_mask);
+					__m128i cmp_zero = _mm_cmpeq_epi32(alpha4, zero);
+					int mask_opaque = _mm_movemask_epi8(cmp_opaque);
+					int mask_zero = _mm_movemask_epi8(cmp_zero);
+					if (mask_zero == 0xFFFF)
+					{
+						/* all transparent: skip */
+					}
+					else if (mask_opaque == 0xFFFF)
+					{
+						_mm_storeu_si128((__m128i*)(dst_row + i), blended);
+					}
+					else
+#endif /* !__EMSCRIPTEN__ */
+					{
+						/* alpha blend: process 2 pixels at a time */
+						__m128i dst4 = _mm_loadu_si128((__m128i*)(dst_row + i));
+						__m128i dst_lo = _mm_unpacklo_epi8(dst4, zero);
+						__m128i dst_hi = _mm_unpackhi_epi8(dst4, zero);
+						/* re-unpack blended src */
+						__m128i bs_lo = _mm_unpacklo_epi8(blended, zero);
+						__m128i bs_hi = _mm_unpackhi_epi8(blended, zero);
+						/* extract alpha for each pixel pair: alpha is word3 and word7 */
+						__m128i a_lo = _mm_shufflelo_epi16(bs_lo, _MM_SHUFFLE(3, 3, 3, 3));
+						a_lo = _mm_shufflehi_epi16(a_lo, _MM_SHUFFLE(3, 3, 3, 3));
+						__m128i a_hi = _mm_shufflelo_epi16(bs_hi, _MM_SHUFFLE(3, 3, 3, 3));
+						a_hi = _mm_shufflehi_epi16(a_hi, _MM_SHUFFLE(3, 3, 3, 3));
+						/* inv_alpha = 256 - alpha */
+						__m128i c256 = _mm_set1_epi16(256);
+						__m128i c1 = _mm_set1_epi16(1);
+						__m128i inv_a_lo = _mm_sub_epi16(c256, a_lo);
+						__m128i inv_a_hi = _mm_sub_epi16(c256, a_hi);
+						/* dst = (inv_alpha * dst + src * (alpha+1)) >> 8 */
+						__m128i r_lo = _mm_srli_epi16(_mm_add_epi16(_mm_mullo_epi16(inv_a_lo, dst_lo), _mm_mullo_epi16(bs_lo, _mm_add_epi16(a_lo, c1))), 8);
+						__m128i r_hi = _mm_srli_epi16(_mm_add_epi16(_mm_mullo_epi16(inv_a_hi, dst_hi), _mm_mullo_epi16(bs_hi, _mm_add_epi16(a_hi, c1))), 8);
+						/* fix alpha channel: dst_a = 255 - ((256 - dst_a) * (255 - src_a)) >> 8 */
+						__m128i c255 = _mm_set1_epi16(255);
+						__m128i dst_a_lo = _mm_shufflelo_epi16(dst_lo, _MM_SHUFFLE(3, 3, 3, 3));
+						dst_a_lo = _mm_shufflehi_epi16(dst_a_lo, _MM_SHUFFLE(3, 3, 3, 3));
+						__m128i dst_a_hi = _mm_shufflelo_epi16(dst_hi, _MM_SHUFFLE(3, 3, 3, 3));
+						dst_a_hi = _mm_shufflehi_epi16(dst_a_hi, _MM_SHUFFLE(3, 3, 3, 3));
+						__m128i new_a_lo = _mm_sub_epi16(c255, _mm_srli_epi16(_mm_mullo_epi16(_mm_sub_epi16(c256, dst_a_lo), _mm_sub_epi16(c255, a_lo)), 8));
+						__m128i new_a_hi = _mm_sub_epi16(c255, _mm_srli_epi16(_mm_mullo_epi16(_mm_sub_epi16(c256, dst_a_hi), _mm_sub_epi16(c255, a_hi)), 8));
+						/* replace alpha channel in result: alpha is at word index 3 and 7 */
+						__m128i alpha_word_mask = _mm_set_epi16(-1, 0, 0, 0, -1, 0, 0, 0);
+						r_lo = _mm_or_si128(_mm_andnot_si128(alpha_word_mask, r_lo), _mm_and_si128(alpha_word_mask, new_a_lo));
+						r_hi = _mm_or_si128(_mm_andnot_si128(alpha_word_mask, r_hi), _mm_and_si128(alpha_word_mask, new_a_hi));
+						__m128i result = _mm_packus_epi16(r_lo, r_hi);
+						_mm_storeu_si128((__m128i*)(dst_row + i), result);
+					}
+				}
+			}
+#elif SUPPORT_NEON
+			{
+				px_ushort bf_arr[8] = {(px_ushort)Rb, (px_ushort)Gb, (px_ushort)Bb, (px_ushort)Ab,
+				                       (px_ushort)Rb, (px_ushort)Gb, (px_ushort)Bb, (px_ushort)Ab};
+				uint16x8_t blend_factor = vld1q_u16(bf_arr);
+				for (; i <= clipw - 4; i += 4)
+				{
+					uint8x16_t src4 = vld1q_u8((px_byte*)(src_row + i));
+					/* widen to 16-bit */
+					uint16x8_t src_lo = vmovl_u8(vget_low_u8(src4));
+					uint16x8_t src_hi = vmovl_u8(vget_high_u8(src4));
+					/* multiply by blend factors and >>7 */
+					src_lo = vshrq_n_u16(vmulq_u16(src_lo, blend_factor), 7);
+					src_hi = vshrq_n_u16(vmulq_u16(src_hi, blend_factor), 7);
+					/* pack back to 8-bit */
+					uint8x16_t blended = vcombine_u8(vmovn_u16(src_lo), vmovn_u16(src_hi));
+					/* check alpha */
+					uint32x4_t blended32 = vreinterpretq_u32_u8(blended);
+					uint32x4_t alpha4 = vshrq_n_u32(blended32, 24);
+					uint32x4_t ff = vdupq_n_u32(0xFF);
+					uint32x4_t zero32 = vdupq_n_u32(0);
+					uint32x4_t cmp_opaque = vceqq_u32(alpha4, ff);
+					uint32x4_t cmp_zero = vceqq_u32(alpha4, zero32);
+					uint64x2_t cmp_op64 = vreinterpretq_u64_u32(cmp_opaque);
+					uint64x2_t cmp_z64 = vreinterpretq_u64_u32(cmp_zero);
+					if (vgetq_lane_u64(cmp_z64, 0) == 0xFFFFFFFFFFFFFFFFu &&
+					    vgetq_lane_u64(cmp_z64, 1) == 0xFFFFFFFFFFFFFFFFu)
+					{
+						/* all transparent: skip */
+					}
+					else if (vgetq_lane_u64(cmp_op64, 0) == 0xFFFFFFFFFFFFFFFFu &&
+					         vgetq_lane_u64(cmp_op64, 1) == 0xFFFFFFFFFFFFFFFFu)
+					{
+						vst1q_u8((px_byte*)(dst_row + i), blended);
+					}
+					else
+					{
+						int k;
+						for (k = 0; k < 4; k++)
+						{
+							px_color bc;
+							bc._argb.ucolor = vgetq_lane_u32(blended32, 0);
+							if (k == 1) bc._argb.ucolor = vgetq_lane_u32(blended32, 1);
+							else if (k == 2) bc._argb.ucolor = vgetq_lane_u32(blended32, 2);
+							else if (k == 3) bc._argb.ucolor = vgetq_lane_u32(blended32, 3);
+							PX_SurfaceDrawPixelWithoutLimit(psurface, x + i + k, y + j, bc);
+						}
+					}
+				}
+			}
+#endif
+			for (; i < clipw; i++)
+			{
+				clr = src_row[i];
 				bA = (px_int)(clr._argb.a * Ab) >> 7;
 				bR = (px_int)(clr._argb.r * Rb) >> 7;
 				bG = (px_int)(clr._argb.g * Gb) >> 7;
 				bB = (px_int)(clr._argb.b * Bb) >> 7;
-
 				clr._argb.a = (px_uchar)bA;
 				clr._argb.r = (px_uchar)bR;
 				clr._argb.g = (px_uchar)bG;
 				clr._argb.b = (px_uchar)bB;
-
 				PX_SurfaceDrawPixelWithoutLimit(psurface, x + i, y + j, clr);
 			}
 		}
@@ -361,59 +510,391 @@ px_void PX_TextureRenderClipMirror(px_surface* psurface, px_texture* tex, px_int
 		case PX_TEXTURERENDER_MIRRROR_MODE_H:
 			for (j = 0; j < cliph; j++)
 			{
-				for (i = 0; i < clipw; i++)
+				px_color* src_row = pdata + (clipy + j) * tex->width + clipx;
+				px_color* dst_row = psurface->surfaceBuffer + (y + j) * psurface->width + x;
+				i = 0;
+#if SUPPORT_SSE2
 				{
-					clr = pdata[(clipy + j) * tex->width + (clipx +i)];
-					bA = (px_int)(clr._argb.a * Ab / 1000);
-					bR = (px_int)(clr._argb.r * Rb / 1000);
-					bG = (px_int)(clr._argb.g * Gb / 1000);
-					bB = (px_int)(clr._argb.b * Bb / 1000);
-
+					__m128i blend_factor = _mm_set_epi16((px_short)Ab, (px_short)Bb, (px_short)Gb, (px_short)Rb,
+					                                     (px_short)Ab, (px_short)Bb, (px_short)Gb, (px_short)Rb);
+					for (; i <= clipw - 4; i += 4)
+					{
+						__m128i src4 = _mm_loadu_si128((__m128i*)(src_row + i));
+						__m128i zero = _mm_setzero_si128();
+						__m128i src_lo = _mm_unpacklo_epi8(src4, zero);
+						__m128i src_hi = _mm_unpackhi_epi8(src4, zero);
+						src_lo = _mm_srli_epi16(_mm_mullo_epi16(src_lo, blend_factor), 7);
+						src_hi = _mm_srli_epi16(_mm_mullo_epi16(src_hi, blend_factor), 7);
+						__m128i blended = _mm_packus_epi16(src_lo, src_hi);
+						/* reverse pixel order for H mirror */
+						blended = _mm_shuffle_epi32(blended, _MM_SHUFFLE(0, 1, 2, 3));
+#ifndef __EMSCRIPTEN__
+						__m128i alpha_mask = _mm_set1_epi32(0xFF000000);
+						__m128i alpha4 = _mm_and_si128(blended, alpha_mask);
+						__m128i cmp_opaque = _mm_cmpeq_epi32(alpha4, alpha_mask);
+						__m128i cmp_zero = _mm_cmpeq_epi32(alpha4, zero);
+						int mask_opaque = _mm_movemask_epi8(cmp_opaque);
+						int mask_zero = _mm_movemask_epi8(cmp_zero);
+						if (mask_zero == 0xFFFF)
+						{
+						}
+						else if (mask_opaque == 0xFFFF)
+						{
+							_mm_storeu_si128((__m128i*)(dst_row + clipw - i - 4), blended);
+						}
+						else
+#endif /* !__EMSCRIPTEN__ */
+						{
+							/* alpha blend reversed pixels */
+							__m128i dst4 = _mm_loadu_si128((__m128i*)(dst_row + clipw - i - 4));
+							__m128i dst_lo = _mm_unpacklo_epi8(dst4, zero);
+							__m128i dst_hi = _mm_unpackhi_epi8(dst4, zero);
+							__m128i bs_lo = _mm_unpacklo_epi8(blended, zero);
+							__m128i bs_hi = _mm_unpackhi_epi8(blended, zero);
+							__m128i a_lo = _mm_shufflelo_epi16(bs_lo, _MM_SHUFFLE(3, 3, 3, 3));
+							a_lo = _mm_shufflehi_epi16(a_lo, _MM_SHUFFLE(3, 3, 3, 3));
+							__m128i a_hi = _mm_shufflelo_epi16(bs_hi, _MM_SHUFFLE(3, 3, 3, 3));
+							a_hi = _mm_shufflehi_epi16(a_hi, _MM_SHUFFLE(3, 3, 3, 3));
+							__m128i c256 = _mm_set1_epi16(256);
+							__m128i c1 = _mm_set1_epi16(1);
+							__m128i inv_a_lo = _mm_sub_epi16(c256, a_lo);
+							__m128i inv_a_hi = _mm_sub_epi16(c256, a_hi);
+							__m128i r_lo = _mm_srli_epi16(_mm_add_epi16(_mm_mullo_epi16(inv_a_lo, dst_lo), _mm_mullo_epi16(bs_lo, _mm_add_epi16(a_lo, c1))), 8);
+							__m128i r_hi = _mm_srli_epi16(_mm_add_epi16(_mm_mullo_epi16(inv_a_hi, dst_hi), _mm_mullo_epi16(bs_hi, _mm_add_epi16(a_hi, c1))), 8);
+							__m128i c255 = _mm_set1_epi16(255);
+							__m128i dst_a_lo = _mm_shufflelo_epi16(dst_lo, _MM_SHUFFLE(3, 3, 3, 3));
+							dst_a_lo = _mm_shufflehi_epi16(dst_a_lo, _MM_SHUFFLE(3, 3, 3, 3));
+							__m128i dst_a_hi = _mm_shufflelo_epi16(dst_hi, _MM_SHUFFLE(3, 3, 3, 3));
+							dst_a_hi = _mm_shufflehi_epi16(dst_a_hi, _MM_SHUFFLE(3, 3, 3, 3));
+							__m128i new_a_lo = _mm_sub_epi16(c255, _mm_srli_epi16(_mm_mullo_epi16(_mm_sub_epi16(c256, dst_a_lo), _mm_sub_epi16(c255, a_lo)), 8));
+							__m128i new_a_hi = _mm_sub_epi16(c255, _mm_srli_epi16(_mm_mullo_epi16(_mm_sub_epi16(c256, dst_a_hi), _mm_sub_epi16(c255, a_hi)), 8));
+							__m128i alpha_word_mask = _mm_set_epi16(-1, 0, 0, 0, -1, 0, 0, 0);
+							r_lo = _mm_or_si128(_mm_andnot_si128(alpha_word_mask, r_lo), _mm_and_si128(alpha_word_mask, new_a_lo));
+							r_hi = _mm_or_si128(_mm_andnot_si128(alpha_word_mask, r_hi), _mm_and_si128(alpha_word_mask, new_a_hi));
+							__m128i result = _mm_packus_epi16(r_lo, r_hi);
+							_mm_storeu_si128((__m128i*)(dst_row + clipw - i - 4), result);
+						}
+					}
+				}
+#elif SUPPORT_NEON
+				{
+					px_ushort bf_arr[8] = {(px_ushort)Rb, (px_ushort)Gb, (px_ushort)Bb, (px_ushort)Ab,
+					                       (px_ushort)Rb, (px_ushort)Gb, (px_ushort)Bb, (px_ushort)Ab};
+					uint16x8_t blend_factor = vld1q_u16(bf_arr);
+					for (; i <= clipw - 4; i += 4)
+					{
+						uint8x16_t src4 = vld1q_u8((px_byte*)(src_row + i));
+						uint16x8_t s_lo = vmovl_u8(vget_low_u8(src4));
+						uint16x8_t s_hi = vmovl_u8(vget_high_u8(src4));
+						s_lo = vshrq_n_u16(vmulq_u16(s_lo, blend_factor), 7);
+						s_hi = vshrq_n_u16(vmulq_u16(s_hi, blend_factor), 7);
+						uint8x16_t blended = vcombine_u8(vmovn_u16(s_lo), vmovn_u16(s_hi));
+						/* reverse pixel order */
+						uint32x4_t blended32 = vreinterpretq_u32_u8(blended);
+						blended32 = vrev64q_u32(blended32);
+						blended32 = vcombine_u32(vget_high_u32(blended32), vget_low_u32(blended32));
+						uint32x4_t alpha4 = vshrq_n_u32(blended32, 24);
+						uint32x4_t ff = vdupq_n_u32(0xFF);
+						uint32x4_t zero32 = vdupq_n_u32(0);
+						uint32x4_t cmp_opaque = vceqq_u32(alpha4, ff);
+						uint32x4_t cmp_zero = vceqq_u32(alpha4, zero32);
+						uint64x2_t cmp_z64 = vreinterpretq_u64_u32(cmp_zero);
+						uint64x2_t cmp_op64 = vreinterpretq_u64_u32(cmp_opaque);
+						if (vgetq_lane_u64(cmp_z64, 0) == 0xFFFFFFFFFFFFFFFFu &&
+						    vgetq_lane_u64(cmp_z64, 1) == 0xFFFFFFFFFFFFFFFFu)
+						{
+						}
+						else if (vgetq_lane_u64(cmp_op64, 0) == 0xFFFFFFFFFFFFFFFFu &&
+						         vgetq_lane_u64(cmp_op64, 1) == 0xFFFFFFFFFFFFFFFFu)
+						{
+							vst1q_u32((px_uint*)(dst_row + clipw - i - 4), blended32);
+						}
+						else
+						{
+							int k;
+							for (k = 0; k < 4; k++)
+							{
+								px_color bc;
+								bc._argb.ucolor = vgetq_lane_u32(blended32, 0);
+								if (k == 1) bc._argb.ucolor = vgetq_lane_u32(blended32, 1);
+								else if (k == 2) bc._argb.ucolor = vgetq_lane_u32(blended32, 2);
+								else if (k == 3) bc._argb.ucolor = vgetq_lane_u32(blended32, 3);
+								PX_SurfaceDrawPixelWithoutLimit(psurface, x + clipw - i - 4 + k, y + j, bc);
+							}
+						}
+					}
+				}
+#endif
+				for (; i < clipw; i++)
+				{
+					clr = src_row[i];
+					bA = (px_int)(clr._argb.a * Ab) >> 7;
+					bR = (px_int)(clr._argb.r * Rb) >> 7;
+					bG = (px_int)(clr._argb.g * Gb) >> 7;
+					bB = (px_int)(clr._argb.b * Bb) >> 7;
 					clr._argb.a = (px_uchar)bA;
 					clr._argb.r = (px_uchar)bR;
 					clr._argb.g = (px_uchar)bG;
 					clr._argb.b = (px_uchar)bB;
-
-					PX_SurfaceDrawPixelWithoutLimit(psurface, x + clipw - i-1, y + j, clr);
+					PX_SurfaceDrawPixelWithoutLimit(psurface, x + clipw - i - 1, y + j, clr);
 				}
 			}
 			break;
 		case PX_TEXTURERENDER_MIRRROR_MODE_V:
 			for (j = 0; j < cliph; j++)
 			{
-				for (i = 0; i < clipw; i++)
+				px_color* src_row = pdata + (clipy + j) * tex->width + clipx;
+				px_color* dst_row = psurface->surfaceBuffer + (y + cliph - j - 1) * psurface->width + x;
+				i = 0;
+#if SUPPORT_SSE2
 				{
-					clr = pdata[(clipy + j) * tex->width + (clipx + i)];
-					bA = (px_int)(clr._argb.a * Ab / 1000);
-					bR = (px_int)(clr._argb.r * Rb / 1000);
-					bG = (px_int)(clr._argb.g * Gb / 1000);
-					bB = (px_int)(clr._argb.b * Bb / 1000);
-
+					__m128i blend_factor = _mm_set_epi16((px_short)Ab, (px_short)Bb, (px_short)Gb, (px_short)Rb,
+					                                     (px_short)Ab, (px_short)Bb, (px_short)Gb, (px_short)Rb);
+					for (; i <= clipw - 4; i += 4)
+					{
+						__m128i src4 = _mm_loadu_si128((__m128i*)(src_row + i));
+						__m128i zero = _mm_setzero_si128();
+						__m128i src_lo = _mm_unpacklo_epi8(src4, zero);
+						__m128i src_hi = _mm_unpackhi_epi8(src4, zero);
+						src_lo = _mm_srli_epi16(_mm_mullo_epi16(src_lo, blend_factor), 7);
+						src_hi = _mm_srli_epi16(_mm_mullo_epi16(src_hi, blend_factor), 7);
+						__m128i blended = _mm_packus_epi16(src_lo, src_hi);
+#ifndef __EMSCRIPTEN__
+						__m128i alpha_mask = _mm_set1_epi32(0xFF000000);
+						__m128i alpha4 = _mm_and_si128(blended, alpha_mask);
+						__m128i cmp_opaque = _mm_cmpeq_epi32(alpha4, alpha_mask);
+						__m128i cmp_zero = _mm_cmpeq_epi32(alpha4, zero);
+						int mask_opaque = _mm_movemask_epi8(cmp_opaque);
+						int mask_zero = _mm_movemask_epi8(cmp_zero);
+						if (mask_zero == 0xFFFF)
+						{
+						}
+						else if (mask_opaque == 0xFFFF)
+						{
+							_mm_storeu_si128((__m128i*)(dst_row + i), blended);
+						}
+						else
+#endif /* !__EMSCRIPTEN__ */
+						{
+							__m128i dst4 = _mm_loadu_si128((__m128i*)(dst_row + i));
+							__m128i dst_lo = _mm_unpacklo_epi8(dst4, zero);
+							__m128i dst_hi = _mm_unpackhi_epi8(dst4, zero);
+							__m128i bs_lo = _mm_unpacklo_epi8(blended, zero);
+							__m128i bs_hi = _mm_unpackhi_epi8(blended, zero);
+							__m128i a_lo = _mm_shufflelo_epi16(bs_lo, _MM_SHUFFLE(3, 3, 3, 3));
+							a_lo = _mm_shufflehi_epi16(a_lo, _MM_SHUFFLE(3, 3, 3, 3));
+							__m128i a_hi = _mm_shufflelo_epi16(bs_hi, _MM_SHUFFLE(3, 3, 3, 3));
+							a_hi = _mm_shufflehi_epi16(a_hi, _MM_SHUFFLE(3, 3, 3, 3));
+							__m128i c256 = _mm_set1_epi16(256);
+							__m128i c1 = _mm_set1_epi16(1);
+							__m128i inv_a_lo = _mm_sub_epi16(c256, a_lo);
+							__m128i inv_a_hi = _mm_sub_epi16(c256, a_hi);
+							__m128i r_lo = _mm_srli_epi16(_mm_add_epi16(_mm_mullo_epi16(inv_a_lo, dst_lo), _mm_mullo_epi16(bs_lo, _mm_add_epi16(a_lo, c1))), 8);
+							__m128i r_hi = _mm_srli_epi16(_mm_add_epi16(_mm_mullo_epi16(inv_a_hi, dst_hi), _mm_mullo_epi16(bs_hi, _mm_add_epi16(a_hi, c1))), 8);
+							__m128i c255 = _mm_set1_epi16(255);
+							__m128i dst_a_lo = _mm_shufflelo_epi16(dst_lo, _MM_SHUFFLE(3, 3, 3, 3));
+							dst_a_lo = _mm_shufflehi_epi16(dst_a_lo, _MM_SHUFFLE(3, 3, 3, 3));
+							__m128i dst_a_hi = _mm_shufflelo_epi16(dst_hi, _MM_SHUFFLE(3, 3, 3, 3));
+							dst_a_hi = _mm_shufflehi_epi16(dst_a_hi, _MM_SHUFFLE(3, 3, 3, 3));
+							__m128i new_a_lo = _mm_sub_epi16(c255, _mm_srli_epi16(_mm_mullo_epi16(_mm_sub_epi16(c256, dst_a_lo), _mm_sub_epi16(c255, a_lo)), 8));
+							__m128i new_a_hi = _mm_sub_epi16(c255, _mm_srli_epi16(_mm_mullo_epi16(_mm_sub_epi16(c256, dst_a_hi), _mm_sub_epi16(c255, a_hi)), 8));
+							__m128i alpha_word_mask = _mm_set_epi16(-1, 0, 0, 0, -1, 0, 0, 0);
+							r_lo = _mm_or_si128(_mm_andnot_si128(alpha_word_mask, r_lo), _mm_and_si128(alpha_word_mask, new_a_lo));
+							r_hi = _mm_or_si128(_mm_andnot_si128(alpha_word_mask, r_hi), _mm_and_si128(alpha_word_mask, new_a_hi));
+							__m128i result = _mm_packus_epi16(r_lo, r_hi);
+							_mm_storeu_si128((__m128i*)(dst_row + i), result);
+						}
+					}
+				}
+#elif SUPPORT_NEON
+				{
+					px_ushort bf_arr[8] = {(px_ushort)Rb, (px_ushort)Gb, (px_ushort)Bb, (px_ushort)Ab,
+					                       (px_ushort)Rb, (px_ushort)Gb, (px_ushort)Bb, (px_ushort)Ab};
+					uint16x8_t blend_factor = vld1q_u16(bf_arr);
+					for (; i <= clipw - 4; i += 4)
+					{
+						uint8x16_t src4 = vld1q_u8((px_byte*)(src_row + i));
+						uint16x8_t s_lo = vmovl_u8(vget_low_u8(src4));
+						uint16x8_t s_hi = vmovl_u8(vget_high_u8(src4));
+						s_lo = vshrq_n_u16(vmulq_u16(s_lo, blend_factor), 7);
+						s_hi = vshrq_n_u16(vmulq_u16(s_hi, blend_factor), 7);
+						uint8x16_t blended = vcombine_u8(vmovn_u16(s_lo), vmovn_u16(s_hi));
+						uint32x4_t blended32 = vreinterpretq_u32_u8(blended);
+						uint32x4_t alpha4 = vshrq_n_u32(blended32, 24);
+						uint32x4_t ff = vdupq_n_u32(0xFF);
+						uint32x4_t zero32 = vdupq_n_u32(0);
+						uint32x4_t cmp_opaque = vceqq_u32(alpha4, ff);
+						uint32x4_t cmp_zero = vceqq_u32(alpha4, zero32);
+						uint64x2_t cmp_z64 = vreinterpretq_u64_u32(cmp_zero);
+						uint64x2_t cmp_op64 = vreinterpretq_u64_u32(cmp_opaque);
+						if (vgetq_lane_u64(cmp_z64, 0) == 0xFFFFFFFFFFFFFFFFu &&
+						    vgetq_lane_u64(cmp_z64, 1) == 0xFFFFFFFFFFFFFFFFu)
+						{
+						}
+						else if (vgetq_lane_u64(cmp_op64, 0) == 0xFFFFFFFFFFFFFFFFu &&
+						         vgetq_lane_u64(cmp_op64, 1) == 0xFFFFFFFFFFFFFFFFu)
+						{
+							vst1q_u8((px_byte*)(dst_row + i), blended);
+						}
+						else
+						{
+							int k;
+							for (k = 0; k < 4; k++)
+							{
+								px_color bc;
+								bc._argb.ucolor = vgetq_lane_u32(blended32, 0);
+								if (k == 1) bc._argb.ucolor = vgetq_lane_u32(blended32, 1);
+								else if (k == 2) bc._argb.ucolor = vgetq_lane_u32(blended32, 2);
+								else if (k == 3) bc._argb.ucolor = vgetq_lane_u32(blended32, 3);
+								PX_SurfaceDrawPixelWithoutLimit(psurface, x + i + k, y + cliph - j - 1, bc);
+							}
+						}
+					}
+				}
+#endif
+				for (; i < clipw; i++)
+				{
+					clr = src_row[i];
+					bA = (px_int)(clr._argb.a * Ab) >> 7;
+					bR = (px_int)(clr._argb.r * Rb) >> 7;
+					bG = (px_int)(clr._argb.g * Gb) >> 7;
+					bB = (px_int)(clr._argb.b * Bb) >> 7;
 					clr._argb.a = (px_uchar)bA;
 					clr._argb.r = (px_uchar)bR;
 					clr._argb.g = (px_uchar)bG;
 					clr._argb.b = (px_uchar)bB;
-
-					PX_SurfaceDrawPixelWithoutLimit(psurface, x + i, y +cliph-j-1, clr);
+					PX_SurfaceDrawPixelWithoutLimit(psurface, x + i, y + cliph - j - 1, clr);
 				}
 			}
 			break;
 		case PX_TEXTURERENDER_MIRRROR_MODE_HV:
 			for (j = 0; j < cliph; j++)
 			{
-				for (i = 0; i < clipw; i++)
+				px_color* src_row = pdata + (clipy + j) * tex->width + clipx;
+				px_color* dst_row = psurface->surfaceBuffer + (y + cliph - j - 1) * psurface->width + x;
+				i = 0;
+#if SUPPORT_SSE2
 				{
-					clr = pdata[(clipy + j) * tex->width + (clipx + i)];
-					bA = (px_int)(clr._argb.a * Ab / 1000);
-					bR = (px_int)(clr._argb.r * Rb / 1000);
-					bG = (px_int)(clr._argb.g * Gb / 1000);
-					bB = (px_int)(clr._argb.b * Bb / 1000);
-
+					__m128i blend_factor = _mm_set_epi16((px_short)Ab, (px_short)Bb, (px_short)Gb, (px_short)Rb,
+					                                     (px_short)Ab, (px_short)Bb, (px_short)Gb, (px_short)Rb);
+					for (; i <= clipw - 4; i += 4)
+					{
+						__m128i src4 = _mm_loadu_si128((__m128i*)(src_row + i));
+						__m128i zero = _mm_setzero_si128();
+						__m128i src_lo = _mm_unpacklo_epi8(src4, zero);
+						__m128i src_hi = _mm_unpackhi_epi8(src4, zero);
+						src_lo = _mm_srli_epi16(_mm_mullo_epi16(src_lo, blend_factor), 7);
+						src_hi = _mm_srli_epi16(_mm_mullo_epi16(src_hi, blend_factor), 7);
+						__m128i blended = _mm_packus_epi16(src_lo, src_hi);
+						/* reverse pixel order for HV mirror */
+						blended = _mm_shuffle_epi32(blended, _MM_SHUFFLE(0, 1, 2, 3));
+#ifndef __EMSCRIPTEN__
+						__m128i alpha_mask = _mm_set1_epi32(0xFF000000);
+						__m128i alpha4 = _mm_and_si128(blended, alpha_mask);
+						__m128i cmp_opaque = _mm_cmpeq_epi32(alpha4, alpha_mask);
+						__m128i cmp_zero = _mm_cmpeq_epi32(alpha4, zero);
+						int mask_opaque = _mm_movemask_epi8(cmp_opaque);
+						int mask_zero = _mm_movemask_epi8(cmp_zero);
+						if (mask_zero == 0xFFFF)
+						{
+						}
+						else if (mask_opaque == 0xFFFF)
+						{
+							_mm_storeu_si128((__m128i*)(dst_row + clipw - i - 4), blended);
+						}
+						else
+#endif /* !__EMSCRIPTEN__ */
+						{
+							__m128i dst4 = _mm_loadu_si128((__m128i*)(dst_row + clipw - i - 4));
+							__m128i dst_lo = _mm_unpacklo_epi8(dst4, zero);
+							__m128i dst_hi = _mm_unpackhi_epi8(dst4, zero);
+							__m128i bs_lo = _mm_unpacklo_epi8(blended, zero);
+							__m128i bs_hi = _mm_unpackhi_epi8(blended, zero);
+							__m128i a_lo = _mm_shufflelo_epi16(bs_lo, _MM_SHUFFLE(3, 3, 3, 3));
+							a_lo = _mm_shufflehi_epi16(a_lo, _MM_SHUFFLE(3, 3, 3, 3));
+							__m128i a_hi = _mm_shufflelo_epi16(bs_hi, _MM_SHUFFLE(3, 3, 3, 3));
+							a_hi = _mm_shufflehi_epi16(a_hi, _MM_SHUFFLE(3, 3, 3, 3));
+							__m128i c256 = _mm_set1_epi16(256);
+							__m128i c1 = _mm_set1_epi16(1);
+							__m128i inv_a_lo = _mm_sub_epi16(c256, a_lo);
+							__m128i inv_a_hi = _mm_sub_epi16(c256, a_hi);
+							__m128i r_lo = _mm_srli_epi16(_mm_add_epi16(_mm_mullo_epi16(inv_a_lo, dst_lo), _mm_mullo_epi16(bs_lo, _mm_add_epi16(a_lo, c1))), 8);
+							__m128i r_hi = _mm_srli_epi16(_mm_add_epi16(_mm_mullo_epi16(inv_a_hi, dst_hi), _mm_mullo_epi16(bs_hi, _mm_add_epi16(a_hi, c1))), 8);
+							__m128i c255 = _mm_set1_epi16(255);
+							__m128i dst_a_lo = _mm_shufflelo_epi16(dst_lo, _MM_SHUFFLE(3, 3, 3, 3));
+							dst_a_lo = _mm_shufflehi_epi16(dst_a_lo, _MM_SHUFFLE(3, 3, 3, 3));
+							__m128i dst_a_hi = _mm_shufflelo_epi16(dst_hi, _MM_SHUFFLE(3, 3, 3, 3));
+							dst_a_hi = _mm_shufflehi_epi16(dst_a_hi, _MM_SHUFFLE(3, 3, 3, 3));
+							__m128i new_a_lo = _mm_sub_epi16(c255, _mm_srli_epi16(_mm_mullo_epi16(_mm_sub_epi16(c256, dst_a_lo), _mm_sub_epi16(c255, a_lo)), 8));
+							__m128i new_a_hi = _mm_sub_epi16(c255, _mm_srli_epi16(_mm_mullo_epi16(_mm_sub_epi16(c256, dst_a_hi), _mm_sub_epi16(c255, a_hi)), 8));
+							__m128i alpha_word_mask = _mm_set_epi16(-1, 0, 0, 0, -1, 0, 0, 0);
+							r_lo = _mm_or_si128(_mm_andnot_si128(alpha_word_mask, r_lo), _mm_and_si128(alpha_word_mask, new_a_lo));
+							r_hi = _mm_or_si128(_mm_andnot_si128(alpha_word_mask, r_hi), _mm_and_si128(alpha_word_mask, new_a_hi));
+							__m128i result = _mm_packus_epi16(r_lo, r_hi);
+							_mm_storeu_si128((__m128i*)(dst_row + clipw - i - 4), result);
+						}
+					}
+				}
+#elif SUPPORT_NEON
+				{
+					px_ushort bf_arr[8] = {(px_ushort)Rb, (px_ushort)Gb, (px_ushort)Bb, (px_ushort)Ab,
+					                       (px_ushort)Rb, (px_ushort)Gb, (px_ushort)Bb, (px_ushort)Ab};
+					uint16x8_t blend_factor = vld1q_u16(bf_arr);
+					for (; i <= clipw - 4; i += 4)
+					{
+						uint8x16_t src4 = vld1q_u8((px_byte*)(src_row + i));
+						uint16x8_t s_lo = vmovl_u8(vget_low_u8(src4));
+						uint16x8_t s_hi = vmovl_u8(vget_high_u8(src4));
+						s_lo = vshrq_n_u16(vmulq_u16(s_lo, blend_factor), 7);
+						s_hi = vshrq_n_u16(vmulq_u16(s_hi, blend_factor), 7);
+						uint8x16_t blended = vcombine_u8(vmovn_u16(s_lo), vmovn_u16(s_hi));
+						/* reverse pixel order */
+						uint32x4_t blended32 = vreinterpretq_u32_u8(blended);
+						blended32 = vrev64q_u32(blended32);
+						blended32 = vcombine_u32(vget_high_u32(blended32), vget_low_u32(blended32));
+						uint32x4_t alpha4 = vshrq_n_u32(blended32, 24);
+						uint32x4_t ff = vdupq_n_u32(0xFF);
+						uint32x4_t zero32 = vdupq_n_u32(0);
+						uint32x4_t cmp_opaque = vceqq_u32(alpha4, ff);
+						uint32x4_t cmp_zero = vceqq_u32(alpha4, zero32);
+						uint64x2_t cmp_z64 = vreinterpretq_u64_u32(cmp_zero);
+						uint64x2_t cmp_op64 = vreinterpretq_u64_u32(cmp_opaque);
+						if (vgetq_lane_u64(cmp_z64, 0) == 0xFFFFFFFFFFFFFFFFu &&
+						    vgetq_lane_u64(cmp_z64, 1) == 0xFFFFFFFFFFFFFFFFu)
+						{
+						}
+						else if (vgetq_lane_u64(cmp_op64, 0) == 0xFFFFFFFFFFFFFFFFu &&
+						         vgetq_lane_u64(cmp_op64, 1) == 0xFFFFFFFFFFFFFFFFu)
+						{
+							vst1q_u32((px_uint*)(dst_row + clipw - i - 4), blended32);
+						}
+						else
+						{
+							int k;
+							for (k = 0; k < 4; k++)
+							{
+								px_color bc;
+								bc._argb.ucolor = vgetq_lane_u32(blended32, 0);
+								if (k == 1) bc._argb.ucolor = vgetq_lane_u32(blended32, 1);
+								else if (k == 2) bc._argb.ucolor = vgetq_lane_u32(blended32, 2);
+								else if (k == 3) bc._argb.ucolor = vgetq_lane_u32(blended32, 3);
+								PX_SurfaceDrawPixelWithoutLimit(psurface, x + clipw - i - 4 + k, y + cliph - j - 1, bc);
+							}
+						}
+					}
+				}
+#endif
+				for (; i < clipw; i++)
+				{
+					clr = src_row[i];
+					bA = (px_int)(clr._argb.a * Ab) >> 7;
+					bR = (px_int)(clr._argb.r * Rb) >> 7;
+					bG = (px_int)(clr._argb.g * Gb) >> 7;
+					bB = (px_int)(clr._argb.b * Bb) >> 7;
 					clr._argb.a = (px_uchar)bA;
 					clr._argb.r = (px_uchar)bR;
 					clr._argb.g = (px_uchar)bG;
 					clr._argb.b = (px_uchar)bB;
-
 					PX_SurfaceDrawPixelWithoutLimit(psurface, x + clipw - i - 1, y + cliph - j - 1, clr);
 				}
 			}
@@ -446,11 +927,60 @@ px_void PX_TextureRenderClipMirror(px_surface* psurface, px_texture* tex, px_int
 #else
 			for (j = 0; j < cliph; j++)
 			{
-				for (i = 0; i < clipw; i++)
+				px_color* src_row = pdata + (clipy + j) * tex->width + clipx;
+				px_color* dst_row = psurface->surfaceBuffer + (y + j) * psurface->width + x;
+				i = 0;
+#if SUPPORT_SSE2
+				/* SSE2: process 4 pixels (4 x 32bit = 128bit) per iteration, opaque only */
+				for (; i <= clipw - 4; i += 4)
 				{
-					clr = pdata[(clipy + j) * tex->width + (clipx + i)];
-					PX_SurfaceDrawPixelWithoutLimit(psurface, x + i, y + j, clr);
+					__m128i src4 = _mm_loadu_si128((__m128i*)(src_row + i));
+					/* extract alpha bytes: each pixel is ARGB, alpha is bits[31:24] */
+					/* shuffle to get alpha of each pixel into all 4 bytes of that pixel's lane */
+					__m128i alpha_mask = _mm_set1_epi32(0xFF000000);
+					__m128i alpha4    = _mm_and_si128(src4, alpha_mask);
+					/* check if all 4 alphas == 0xFF000000 (fully opaque) */
+					__m128i cmp = _mm_cmpeq_epi32(alpha4, alpha_mask);
+					int mask = SSE2_ALL_TRUE(cmp); /* all 4 fully opaque */
+					if (mask)
+					{
+						/* all 4 pixels opaque: bulk write */
+						_mm_storeu_si128((__m128i*)(dst_row + i), src4);
+					}
+					else
+					{
+						/* mixed: fall back to scalar for these 4 pixels */
+						int k;
+						for (k = 0; k < 4; k++)
+							PX_SurfaceDrawPixelWithoutLimit(psurface, x + i + k, y + j, src_row[i + k]);
+					}
 				}
+#elif SUPPORT_NEON
+				/* NEON: process 4 pixels (4 x 32bit = 128bit) per iteration, opaque only */
+				for (; i <= clipw - 4; i += 4)
+				{
+					uint32x4_t src4  = vld1q_u32((px_uint*)( src_row + i));
+					uint32x4_t alpha4 = vshrq_n_u32(src4, 24); /* shift right 24 to get alpha byte */
+					uint32x4_t ff    = vdupq_n_u32(0xFF);
+					uint32x4_t cmp   = vceqq_u32(alpha4, ff);
+					/* all lanes == 0xFFFFFFFF means all opaque */
+					uint64x2_t cmp64 = vreinterpretq_u64_u32(cmp);
+					if (vgetq_lane_u64(cmp64, 0) == 0xFFFFFFFFFFFFFFFFu &&
+					    vgetq_lane_u64(cmp64, 1) == 0xFFFFFFFFFFFFFFFFu)
+					{
+						vst1q_u32((px_uint*)(dst_row + i), src4);
+					}
+					else
+					{
+						int k;
+						for (k = 0; k < 4; k++)
+							PX_SurfaceDrawPixelWithoutLimit(psurface, x + i + k, y + j, src_row[i + k]);
+					}
+				}
+#endif
+				/* scalar tail (or full loop when no SIMD) */
+				for (; i < clipw; i++)
+					PX_SurfaceDrawPixelWithoutLimit(psurface, x + i, y + j, src_row[i]);
 			}
 #endif
 			}
@@ -458,31 +988,157 @@ px_void PX_TextureRenderClipMirror(px_surface* psurface, px_texture* tex, px_int
 		case PX_TEXTURERENDER_MIRRROR_MODE_H:
 			for (j = 0; j < cliph; j++)
 			{
-				for (i = 0; i < clipw; i++)
+				px_color* src_row = pdata + (clipy + j) * tex->width + clipx;
+				px_color* dst_row = psurface->surfaceBuffer + (y + j) * psurface->width + x;
+				i = 0;
+#if SUPPORT_SSE2
+				for (; i <= clipw - 4; i += 4)
 				{
-					clr = pdata[(clipy + j) * tex->width + (clipx + i)];
-					PX_SurfaceDrawPixelWithoutLimit(psurface, x + clipw - i - 1, y + j, clr);
+					__m128i src4 = _mm_loadu_si128((__m128i*)(src_row + i));
+					__m128i alpha_mask = _mm_set1_epi32(0xFF000000);
+					__m128i alpha4 = _mm_and_si128(src4, alpha_mask);
+					__m128i cmp = _mm_cmpeq_epi32(alpha4, alpha_mask);
+					int mask = SSE2_ALL_TRUE(cmp);
+					if (mask)
+					{
+						__m128i rev = _mm_shuffle_epi32(src4, _MM_SHUFFLE(0, 1, 2, 3));
+						_mm_storeu_si128((__m128i*)(dst_row + clipw - i - 4), rev);
+					}
+					else
+					{
+						int k;
+						for (k = 0; k < 4; k++)
+							PX_SurfaceDrawPixelWithoutLimit(psurface, x + clipw - i - k - 1, y + j, src_row[i + k]);
+					}
 				}
+#elif SUPPORT_NEON
+				for (; i <= clipw - 4; i += 4)
+				{
+					uint32x4_t src4 = vld1q_u32((px_uint*)(src_row + i));
+					uint32x4_t alpha4 = vshrq_n_u32(src4, 24);
+					uint32x4_t ff = vdupq_n_u32(0xFF);
+					uint32x4_t cmp = vceqq_u32(alpha4, ff);
+					uint64x2_t cmp64 = vreinterpretq_u64_u32(cmp);
+					if (vgetq_lane_u64(cmp64, 0) == 0xFFFFFFFFFFFFFFFFu &&
+					    vgetq_lane_u64(cmp64, 1) == 0xFFFFFFFFFFFFFFFFu)
+					{
+						uint32x4_t rev = vrev64q_u32(src4);
+						rev = vcombine_u32(vget_high_u32(rev), vget_low_u32(rev));
+						vst1q_u32((px_uint*)(dst_row + clipw - i - 4), rev);
+					}
+					else
+					{
+						int k;
+						for (k = 0; k < 4; k++)
+							PX_SurfaceDrawPixelWithoutLimit(psurface, x + clipw - i - k - 1, y + j, src_row[i + k]);
+					}
+				}
+#endif
+				for (; i < clipw; i++)
+					PX_SurfaceDrawPixelWithoutLimit(psurface, x + clipw - i - 1, y + j, src_row[i]);
 			}
 			break;
 		case PX_TEXTURERENDER_MIRRROR_MODE_V:
 			for (j = 0; j < cliph; j++)
 			{
-				for (i = 0; i < clipw; i++)
+				px_color* src_row = pdata + (clipy + j) * tex->width + clipx;
+				px_color* dst_row = psurface->surfaceBuffer + (y + cliph - j - 1) * psurface->width + x;
+				i = 0;
+#if SUPPORT_SSE2
+				for (; i <= clipw - 4; i += 4)
 				{
-					clr = pdata[(clipy + j) * tex->width + (clipx + i)];
-					PX_SurfaceDrawPixelWithoutLimit(psurface, x+i, y + cliph - j - 1, clr);
+					__m128i src4 = _mm_loadu_si128((__m128i*)(src_row + i));
+					__m128i alpha_mask = _mm_set1_epi32(0xFF000000);
+					__m128i alpha4 = _mm_and_si128(src4, alpha_mask);
+					__m128i cmp = _mm_cmpeq_epi32(alpha4, alpha_mask);
+					int mask = SSE2_ALL_TRUE(cmp);
+					if (mask)
+					{
+						_mm_storeu_si128((__m128i*)(dst_row + i), src4);
+					}
+					else
+					{
+						int k;
+						for (k = 0; k < 4; k++)
+							PX_SurfaceDrawPixelWithoutLimit(psurface, x + i + k, y + cliph - j - 1, src_row[i + k]);
+					}
 				}
+#elif SUPPORT_NEON
+				for (; i <= clipw - 4; i += 4)
+				{
+					uint32x4_t src4 = vld1q_u32((px_uint*)(src_row + i));
+					uint32x4_t alpha4 = vshrq_n_u32(src4, 24);
+					uint32x4_t ff = vdupq_n_u32(0xFF);
+					uint32x4_t cmp = vceqq_u32(alpha4, ff);
+					uint64x2_t cmp64 = vreinterpretq_u64_u32(cmp);
+					if (vgetq_lane_u64(cmp64, 0) == 0xFFFFFFFFFFFFFFFFu &&
+					    vgetq_lane_u64(cmp64, 1) == 0xFFFFFFFFFFFFFFFFu)
+					{
+						vst1q_u32((px_uint*)(dst_row + i), src4);
+					}
+					else
+					{
+						int k;
+						for (k = 0; k < 4; k++)
+							PX_SurfaceDrawPixelWithoutLimit(psurface, x + i + k, y + cliph - j - 1, src_row[i + k]);
+					}
+				}
+#endif
+				for (; i < clipw; i++)
+					PX_SurfaceDrawPixelWithoutLimit(psurface, x + i, y + cliph - j - 1, src_row[i]);
 			}
 			break;
 		case PX_TEXTURERENDER_MIRRROR_MODE_HV:
 			for (j = 0; j < cliph; j++)
 			{
-				for (i = 0; i < clipw; i++)
+				px_color* src_row = pdata + (clipy + j) * tex->width + clipx;
+				px_color* dst_row = psurface->surfaceBuffer + (y + cliph - j - 1) * psurface->width + x;
+				i = 0;
+#if SUPPORT_SSE2
+				for (; i <= clipw - 4; i += 4)
 				{
-					clr = pdata[(clipy + j) * tex->width + (clipx + i)];
-					PX_SurfaceDrawPixelWithoutLimit(psurface, x + clipw - i - 1, y + cliph - j - 1, clr);
+					__m128i src4 = _mm_loadu_si128((__m128i*)(src_row + i));
+					__m128i alpha_mask = _mm_set1_epi32(0xFF000000);
+					__m128i alpha4 = _mm_and_si128(src4, alpha_mask);
+					__m128i cmp = _mm_cmpeq_epi32(alpha4, alpha_mask);
+					int mask = SSE2_ALL_TRUE(cmp);
+					if (mask)
+					{
+						__m128i rev = _mm_shuffle_epi32(src4, _MM_SHUFFLE(0, 1, 2, 3));
+						_mm_storeu_si128((__m128i*)(dst_row + clipw - i - 4), rev);
+					}
+					else
+					{
+						int k;
+						for (k = 0; k < 4; k++)
+							PX_SurfaceDrawPixelWithoutLimit(psurface, x + clipw - i - k - 1, y + cliph - j - 1, src_row[i + k]);
+					}
 				}
+#elif SUPPORT_NEON
+				for (; i <= clipw - 4; i += 4)
+				{
+					uint32x4_t src4 = vld1q_u32((px_uint*)(src_row + i));
+					uint32x4_t alpha4 = vshrq_n_u32(src4, 24);
+					uint32x4_t ff = vdupq_n_u32(0xFF);
+					uint32x4_t cmp = vceqq_u32(alpha4, ff);
+					uint64x2_t cmp64 = vreinterpretq_u64_u32(cmp);
+					if (vgetq_lane_u64(cmp64, 0) == 0xFFFFFFFFFFFFFFFFu &&
+					    vgetq_lane_u64(cmp64, 1) == 0xFFFFFFFFFFFFFFFFu)
+					{
+						uint32x4_t rev = vrev64q_u32(src4);
+						rev = vcombine_u32(vget_high_u32(rev), vget_low_u32(rev));
+						vst1q_u32((px_uint*)(dst_row + clipw - i - 4), rev);
+					}
+					else
+					{
+						int k;
+						for (k = 0; k < 4; k++)
+							PX_SurfaceDrawPixelWithoutLimit(psurface, x + clipw - i - k - 1, y + cliph - j - 1, src_row[i + k]);
+					}
+				}
+#endif
+				for (; i < clipw; i++)
+					PX_SurfaceDrawPixelWithoutLimit(psurface, x + clipw - i - 1, y + cliph - j - 1, src_row[i]);
 			}
 			break;
 		}
@@ -1394,7 +2050,7 @@ px_bool PX_TextureCreateRotationAngle(px_memorypool *mp,px_texture *resTexture,p
 
 px_bool PX_TextureCreateMirrior(px_memorypool* mp, px_texture* resTexture, PX_TEXTURERENDER_MIRRROR_MODE mirror, px_texture* out)
 {
-	if (PX_TextureCreate(mp, out, resTexture->width, resTexture->height))
+	if (!PX_TextureCreate(mp, out, resTexture->width, resTexture->height))
 		return PX_FALSE;
 
 	PX_TextureRenderMirror( out, resTexture,0,0,PX_ALIGN_LEFTTOP,0, mirror);
@@ -1717,7 +2373,7 @@ px_void PX_TextureRenderEx(px_surface *psurface,px_texture *resTexture,px_int x,
 	
 	px_int i,j,resHeight,resWidth;
 
-	px_float invCosAgl,invSinAgl;
+	px_float invCosAgl,invSinAgl,invscale=1/scale;
 
 	px_double ref_x,ref_y;
 	px_int mapX,mapY;
@@ -1851,8 +2507,8 @@ px_void PX_TextureRenderEx(px_surface *psurface,px_texture *resTexture,px_int x,
 				ref_x = (i - newWidth / 2.0);
 				ref_y = (j - newHeight / 2.0);
 
-				mapX = (px_int)((ref_x * invCosAgl - ref_y * invSinAgl) / scale + resWidth / 2);
-				mapY = (px_int)((ref_x * invSinAgl + ref_y * invCosAgl) / scale + resHeight / 2);
+				mapX = (px_int)((ref_x * invCosAgl - ref_y * invSinAgl) *invscale + resWidth / 2);
+				mapY = (px_int)((ref_x * invSinAgl + ref_y * invCosAgl) *invscale + resHeight / 2);
 
 				if (mapX<0||mapX>=resWidth)
 				{
@@ -1876,7 +2532,7 @@ px_void PX_TextureRenderEx(px_surface *psurface,px_texture *resTexture,px_int x,
 				clr._argb.b = (px_uchar)(((bB > 255) * 0xff) | bB);
 
 
-				PX_SurfaceDrawPixel(psurface,x+i,y+j,clr);
+				PX_SurfaceDrawPixelWithoutLimit(psurface,x+i,y+j,clr);
 			}
 
 		}
@@ -1904,7 +2560,7 @@ px_void PX_TextureRenderEx(px_surface *psurface,px_texture *resTexture,px_int x,
 					continue;
 				}
 
-				PX_SurfaceDrawPixel(psurface,x+i,y+j,PX_SURFACECOLOR(resTexture,mapX,mapY));
+				PX_SurfaceDrawPixelWithoutLimit(psurface,x+i,y+j,PX_SURFACECOLOR(resTexture,mapX,mapY));
 			}
 
 		}
@@ -2558,7 +3214,7 @@ px_bool PX_ShapeCreate(px_memorypool *mp,px_shape *shape,px_int width,px_int hei
 		shape->height=height;
 		shape->width=width;
 		shape->alpha=(px_uchar *)p;
-		shape->MP=mp;
+		shape->mp=mp;
 		PX_memset(p,0,height*width);
 		return PX_TRUE;
 	}
@@ -2576,7 +3232,7 @@ px_bool PX_ShapeCreateFromTexture(px_memorypool *mp,px_shape *shape,px_texture *
 		shape->height=texture->height;
 		shape->width=texture->width;
 		shape->alpha=(px_uchar *)p;
-		shape->MP=mp;
+		shape->mp=mp;
 		PX_memdwordset(p,0,texture->height*texture->width);
 
 		//Map texture to shape
@@ -2594,7 +3250,7 @@ px_bool PX_ShapeCreateFromTexture(px_memorypool *mp,px_shape *shape,px_texture *
 
 px_void PX_ShapeFree(px_shape *shape)
 {
-	MP_Free(shape->MP,shape->alpha);
+	MP_Free(shape->mp,shape->alpha);
 }
 
 px_void PX_ShapeSetPixel(px_shape* shape, px_int x, px_int y, px_uchar value)

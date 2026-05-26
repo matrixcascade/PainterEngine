@@ -49,8 +49,8 @@ px_int	   PX_Object_SliderBarGetMax( PX_Object *pSliderBar );
 px_int	   PX_Object_SliderBarGetValue(PX_Object *pSliderBar);
 px_void    PX_Object_SliderBarSetBackgroundColor(PX_Object *pSliderBar,px_color color);
 px_void    PX_Object_SliderBarSetColor(PX_Object *pSliderBar,px_color color);
-px_void	   PX_Object_SliderBarSetSliderButtonLength(PX_Object *pSliderBar,px_int length);
+px_void	   PX_Object_SliderBarSetSliderButtonLength(PX_Object *pSliderBar,px_int radius);
 px_void	   PX_Object_SliderBarSetShowValue(PX_Object *pSliderBar,px_bool b,px_color color);
-
+px_void    PX_Object_SliderBarChangeValue(PX_Object* pSliderBar, px_int delta);
 #endif
 

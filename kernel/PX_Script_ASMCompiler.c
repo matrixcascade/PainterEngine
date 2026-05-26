@@ -752,7 +752,7 @@ px_void PX_ScriptAsmAddHost(PX_SCRIPT_ASM_COMPILER *compiler,px_char *Str)
 		}
 	}
 	PX_strcpy(Host.name,Str,sizeof(Host.name));
-	Host.map=PX_NULL;
+	Host.bin_map_to_source=PX_NULL;
 	Host.userptr=PX_NULL;
 	PX_ListPush(&compiler->HostTable,&Host,sizeof(Host));
 }
@@ -1902,7 +1902,7 @@ px_bool PX_ScriptAsmCompile(px_memorypool *mp,px_char *asmcode,px_memory *binmem
 	{
 			PX_memset(host.name,0,sizeof(host.name));
 			PX_strcpy(host.name,PX_LISTAT(PX_ASM_HOST_NODE,&compiler.HostTable,i)->name,sizeof(host.name));
-			host.map=PX_NULL;
+			host.bin_map_to_source=PX_NULL;
 			host.userptr=PX_NULL;
 			expFunc.Addr=0;
 			PX_MemoryCat(binmemory,&host,sizeof(host));
@@ -1937,15 +1937,15 @@ px_bool PX_ScriptAsmCompile(px_memorypool *mp,px_char *asmcode,px_memory *binmem
 		{
 			px_int mapsize = compiler.lexer.symbolmap.size;
 			px_int* _map_to_source = (px_int *)compiler.lexer.symbolmap.data;
-			PX_SCRIPT_ASM_SOURCE_MAP map;
+			PX_SCRIPT_ASM_SOURCE_MAP bin_map_to_source;
 			PX_StringSet(&pdebuggermap->source, asmcode);
-			map.instr_addr = pinstrs->addr;
+			bin_map_to_source.instr_addr = pinstrs->addr;
 			if (pinstrs->map_to_source_line>=mapsize)
 			{
 				PX_ASSERT();
 			}
-			map.map_to_source_line = _map_to_source[pinstrs->map_to_source_line];
-			PX_VectorPushback(&pdebuggermap->map, &map);
+			bin_map_to_source.map_to_source_line = _map_to_source[pinstrs->map_to_source_line];
+			PX_VectorPushback(&pdebuggermap->bin_map_to_source, &bin_map_to_source);
 		}
 
 	}

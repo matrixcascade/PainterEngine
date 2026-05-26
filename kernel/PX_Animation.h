@@ -35,7 +35,7 @@ typedef struct
 typedef struct
 {
 	px_char path[64]; //image file path
-	px_char map[64];
+	px_char bin_map_to_source[64];
 }PX_2dxMake_textureInfo;
 
 typedef struct
@@ -75,9 +75,9 @@ px_texture *PX_AnimationGetCurrentTexture(PX_Animation *panimation);
 px_void PX_AnimationRenderRotation(px_surface *psurface,PX_Animation *animation,px_point position,px_int angle,PX_ALIGN refPoint,PX_TEXTURERENDER_BLEND *blend);
 px_void PX_AnimationRender(px_surface *psurface,PX_Animation *animation,px_int x,px_int y,PX_ALIGN refPoint,PX_TEXTURERENDER_BLEND *blend);
 px_void PX_AnimationRenderMirror(px_surface* psurface, PX_Animation* animation, px_int x, px_int y, PX_ALIGN refPoint, PX_TEXTURERENDER_BLEND* blend, PX_TEXTURERENDER_MIRRROR_MODE mirror);
-px_void PX_AnimationRenderEx(px_surface *psurface,PX_Animation *animation,px_int x,px_int y,px_float scale,px_point2D direction,PX_ALIGN refPoint,PX_TEXTURERENDER_BLEND *blend);
+px_void PX_AnimationRenderEx(px_surface *psurface,PX_Animation *animation,px_int x,px_int y,px_float scale,px_point2D toward,PX_ALIGN refPoint,PX_TEXTURERENDER_BLEND *blend);
 px_void PX_AnimationRender_scale(px_surface *psurface,PX_Animation *animation,px_int x,px_int y,px_float scale,PX_ALIGN refPoint,PX_TEXTURERENDER_BLEND *blend);
-px_void PX_AnimationRender_vector(px_surface *psurface,PX_Animation *animation,px_int x,px_int y,px_point2D direction,PX_ALIGN refPoint,PX_TEXTURERENDER_BLEND *blend);
+px_void PX_AnimationRender_vector(px_surface *psurface,PX_Animation *animation,px_int x,px_int y,px_point2D toward,PX_ALIGN refPoint,PX_TEXTURERENDER_BLEND *blend);
 px_int PX_AnimationGetFrameWidth(PX_Animation *animation);
 px_int PX_AnimationGetFrameHeight(PX_Animation *animation);
 

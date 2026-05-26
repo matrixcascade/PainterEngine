@@ -30,6 +30,8 @@ px_void PX_Object_ScrollAreaSetBorderColor(PX_Object *pObj,px_color borderColor)
 px_void PX_Object_ScrollAreaClear(PX_Object* pObj);
 px_bool PX_Object_ScrollAreaSetBackgroundColor(PX_Object* pObj, px_color color);
 px_void PX_Object_ScrollAreaScrollEnable(PX_Object* pObj,px_bool bEnable);
+px_void PX_Object_ScrollAreaSetHSliderBarHeight(PX_Object* pObj, px_int height);
+px_void PX_Object_ScrollAreaSetVSliderBarWidth(PX_Object* pObj, px_int width);
 
 px_color PX_Object_ScrollAreaGetBackgroundColor(PX_Object* pObj);
 #endif

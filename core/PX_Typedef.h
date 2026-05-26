@@ -3,12 +3,7 @@
 
 #include	"PX_MathTable.h"
 
-#if !defined(PX_COLOR_FORMAT_RGBA) && \
-    !defined(PX_COLOR_FORMAT_BGRA) && \
-    !defined (PX_COLOR_FORMAT_ARGB) && \
-    !defined (PX_COLOR_FORMAT_ABGR)
 #define PX_COLOR_FORMAT_RGBA
-#endif
 
 
 #define PX_DBL_POSITIVE_MAX 1.7976931348623158e+308
@@ -202,7 +197,7 @@
 #define PX_UDP_PACKET_SUGGEST_SIZE 548
 #define PX_UDP_PACKET_MAX_SIZE     65500
 
-#define PX_ATOMIC 
+#define PX_ATOMIC volatile
 
 typedef		void				px_void;
 typedef		int					px_bool;
@@ -235,6 +230,27 @@ typedef struct
 {
 	px_char data[64];
 }PX_RETURN_STRING;
+typedef PX_RETURN_STRING PX_RETURN_STRING64;
+
+typedef struct
+{
+	px_char data[128];
+}PX_RETURN_STRING128;
+
+typedef struct
+{
+	px_char data[256];
+}PX_RETURN_STRING256;
+
+typedef struct
+{
+	px_char data[512];
+}PX_RETURN_STRING512;
+
+typedef struct
+{
+	px_char data[1024];
+}PX_RETURN_STRING1024;
 
 #include	"PX_Log.h"
 
@@ -495,6 +511,7 @@ px_float PX_randRange(px_float min, px_float max);
 px_uint32 PX_randEx(PX_MT19937* pmt);
 px_void PX_srandEx(PX_MT19937* pmt,px_uint64 seed);
 px_float PX_randRangeEx(PX_MT19937* pmt, px_float min, px_float max);
+px_uint32 PX_rand_lcg(px_uint32 seed);
 //gauss rand
 px_double PX_GaussRand(void);
 
@@ -519,7 +536,8 @@ px_uint32 PX_sum32(px_void *buffer, px_uint size);
 
 //////////////////////////////////////////////////////////////////////////
 //maths
-
+px_int PX_clampi(px_int v, px_int min, px_int max);
+px_float PX_clampf(px_float v, px_float min, px_float max);
 px_double PX_tanh(px_double x);
 px_double PX_sigmoid(px_double x);
 px_double PX_ReLU(px_double x);
@@ -570,19 +588,23 @@ px_float PX_Point2D_cos(px_point2D v);
 //////////////////////////////////////////////////////////////////////////
 //string to others
 px_int PX_strsub(const px_char* str, px_char delim);
-px_bool PX_strsubi(const px_char* in,px_char *out, px_char delim,px_int index);
-px_bool PX_strsubn(const px_char* in, px_char* out, px_char delim, px_int count);
-
+px_bool PX_strsubi(const px_char* in,px_char *out, px_int out_size, px_char delim,px_int index);
+px_bool PX_strsubn(const px_char* in, px_char* out, px_int out_size, px_char delim, px_int count);
+px_bool PX_strsubx(const px_char* in, px_char* out, px_int out_size, px_char delim, px_int begin_index, px_int end_index);
 
 px_void PX_BufferToHexString(px_byte data[],px_int size,px_char hex_str[]);
 px_int PX_HexStringToBuffer(const px_char hex_str[],px_byte data[]);
 px_uint PX_htoi(const px_char hex_str[]);
 px_int  PX_atoi(const px_char str[]);
+px_uint PX_atoui(const px_char str[]);
 px_float PX_atof(const px_char fstr[]);
+px_double PX_atof64(const px_char fstr[]);
 PX_RETURN_STRING PX_ftos(px_float f, px_int precision);
 PX_RETURN_STRING PX_itos(px_int num,px_int radix);
+PX_RETURN_STRING PX_utos(px_uint num, px_int radix);
 px_void PX_AscToWord(const px_char *asc,px_word *u16);
 px_int PX_ftoa(px_float f, px_char *outbuf, px_int maxlen, px_int precision);
+px_int PX_ftoa64(px_double f, px_char* outbuf, px_int maxlen, px_int precision);
 px_int PX_itoa(px_int num,px_char *str,px_int MaxStrSize,px_int radix);
 px_int PX_utoa(px_uint num, px_char* str, px_int MaxStrSize, px_int radix);
 px_dword PX_SwapEndian(px_dword val);
@@ -597,6 +619,7 @@ px_bool PX_isPointInCircle(px_point p,px_point circle,px_float radius);
 px_bool PX_isPoint2DInCircle(px_point2D p,px_point2D circle,px_float radius);
 px_bool PX_isPointInRect(px_point p,px_rect rect);
 px_bool PX_isPointXYInRect(px_float x,px_float y,px_float rectx,px_float recty,px_float width,px_float height);
+px_bool PX_isIntPointXYInRect(px_int x, px_int y, px_int rectx, px_int recty, px_int width, px_int height);
 px_bool PX_isPointXYInRegion(px_float x, px_float y, px_region region);
 px_bool PX_isXYInRegion(px_float x, px_float y, px_float rectx, px_float recty, px_float width, px_float height);
 px_bool PX_isPointInRegion(px_point p, px_region region);
@@ -612,7 +635,7 @@ px_bool PX_isCircleCrossCircle(px_point center1,px_float radius1,px_point center
 
 //////////////////////////////////////////////////////////////////////////
 px_double PX_Covariance(px_double x[],px_double y[],px_int n);
-px_double PX_Variance(px_double x[],px_int n);
+px_double PX_Varianced(px_double x[],px_int n);
 
 //////////////////////////////////////////////////////////////////////////
 //memory
@@ -620,14 +643,18 @@ px_void PX_memset(px_void *dst,px_byte byte,px_int size);
 px_void PX_memdwordset(px_void *dst,px_dword dw,px_int count);
 #define PX_zeromemory(dst,size) PX_memset(dst,0,size)
 px_bool PX_memequ(const px_void *dst,const px_void *src,px_int size);
+px_void PX_memcpy_volatile(px_void* dest, volatile px_void* src, px_int size);
 px_void PX_memcpy(px_void *dst,const px_void *src,px_int size);
+px_void PX_memmove(px_void *dst,const px_void *src,px_int size);
 px_int PX_memcmp(px_void* dst, const px_void* src, px_int size);
 px_void PX_strcpy(px_char *dst,const px_char *src,px_int size);
 px_void PX_strcpy_until(px_char* dst, const px_char* src, px_char until, px_int size);
 px_void PX_wstrcpy(px_word *dst,const px_word *src,px_int size);
 px_void PX_strcat(px_char *src,const px_char *cat);
+px_void PX_strcatchar(px_char *src,const px_char ch);
 px_void PX_strcatlen(px_char* src, const px_char* cat, px_int len);
 px_void PX_strcat_s(px_char* src, px_int size, const px_char* cat);
+px_void PX_strcatchar_s(px_char* src, px_int size, const px_char ch);
 px_void PX_wstrcat(px_word *src,const px_word *cat);
 px_void PX_strset(px_char *dst,const px_char *src);
 px_int PX_strlen(const px_char *dst);
@@ -638,6 +665,8 @@ px_bool PX_strequ2(const px_char* src, const px_char* dst);
 px_bool PX_strequ3(const px_char* src, const px_char* dst, px_int src_size);
 px_void PX_strupr(px_char *src);
 px_void PX_strlwr(px_char *src);
+px_void PX_strgetline(const px_char* in,px_char *out, px_int size);
+px_void PX_strreadline(const px_char* in, px_char* out, px_int size);
 px_bool PX_strIsNumeric(const px_char *str);
 px_bool PX_strIsFloat(const px_char *str);
 px_bool PX_strIsInt(const px_char *str);
@@ -849,7 +878,6 @@ px_complex PX_complexAdd(px_complex a,px_complex b);
 px_complex PX_complexMult(px_complex a,px_complex b);
 px_double  PX_complexMod(px_complex a);
 px_complex PX_complexLog(px_complex a);
-px_complex PX_complexExp(px_complex a);
 px_complex PX_complexSin(px_complex a);
 
 //////////////////////////////////////////////////////////////////////////
@@ -890,7 +918,7 @@ px_double PX_ZeroCrossingRateComplex(_IN px_complex x[],px_int N);
 px_float PX_PitchEstimation(_IN px_complex x[],px_int N,px_int sampleRate,px_int low_Hz,px_int high_Hz);
 //////////////////////////////////////////////////////////////////////////
 //PreEmphasise
-px_void PX_PreEmphasise(const px_double *data, int len, px_double *out, px_double preF);//0.9<preF<1.0 suggest 0.9;
+px_void PX_PreEmphasise(const px_double* data, px_int len, px_double* out, px_double preF);//0.9<preF<1.0 suggest 0.9;
 
 //////////////////////////////////////////////////////////////////////////
 //up/down sampling
@@ -900,6 +928,8 @@ px_void PX_DownSampled(_IN px_complex x[],_OUT px_complex X[],px_int N,px_int M)
 px_void PX_UpSampled(_IN px_complex x[],_OUT px_complex X[],px_int N,px_int L);
 
 //////////////////////////////////////////////////////////////////////////
+px_float PX_Variance(px_float x[], px_int n);
+px_float PX_StandardDiviation(px_float x[], px_int n);
 //ipv4
 typedef struct 
 {
@@ -918,7 +948,7 @@ px_bool PX_IsValidIPAddress(const px_char *ip_addr);
 
 //////////////////////////////////////////////////////////////////////////
 //Bessel
-px_double PX_Bessel(int n,px_double x);
+px_double PX_Bessel(px_int n, px_double x);
 //////////////////////////////////////////////////////////////////////////
 //Window Functions
 px_void PX_WindowFunction_tukey(px_double data[],px_int N);
@@ -1030,5 +1060,200 @@ typedef struct
 px_void PX_SoundResamplerInitialize(PX_SoundResampler* pResampler, px_double in_sample_rate, px_double out_sample_rate);
 px_void PX_SoundResamplerIn(PX_SoundResampler* pResampler, px_double in);
 px_bool PX_SoundResamplerOut(PX_SoundResampler* pResampler, px_double* out);
+
+
+
+//keyboard
+
+
+#define PX_VK_LBUTTON        0x01
+#define PX_VK_RBUTTON        0x02
+#define PX_VK_CANCEL         0x03
+#define PX_VK_MBUTTON        0x04    /* NOT contiguous with L & RBUTTON */
+/*
+ * 0x07 : reserved
+ */
+#define PX_VK_BACK           0x08
+#define PX_VK_TAB            0x09
+ /*
+  * 0x0A - 0x0B : reserved
+  */
+
+#define PX_VK_CLEAR          0x0C
+#define PX_VK_RETURN         0x0D
+  /*
+   * 0x0E - 0x0F : unassigned
+   */
+#define PX_VK_SHIFT          0x10
+#define PX_VK_CONTROL        0x11
+#define PX_VK_MENU           0x12
+#define PX_VK_PAUSE          0x13
+#define PX_VK_CAPITAL        0x14
+#define PX_VK_KANA           0x15
+#define PX_VK_HANGEUL        0x15  /* old name - should be here for compatibility */
+#define PX_VK_HANGUL         0x15
+#define PX_VK_IME_ON         0x16
+#define PX_VK_JUNJA          0x17
+#define PX_VK_FINAL          0x18
+#define PX_VK_HANJA          0x19
+#define PX_VK_KANJI          0x19
+#define PX_VK_IME_OFF        0x1A
+#define PX_VK_ESCAPE         0x1B
+#define PX_VK_CONVERT        0x1C
+#define PX_VK_NONCONVERT     0x1D
+#define PX_VK_ACCEPT         0x1E
+#define PX_VK_MODECHANGE     0x1F
+#define PX_VK_SPACE          0x20
+#define PX_VK_PRIOR          0x21
+#define PX_VK_NEXT           0x22
+#define PX_VK_END            0x23
+#define PX_VK_HOME           0x24
+#define PX_VK_LEFT           0x25
+#define PX_VK_UP             0x26
+#define PX_VK_RIGHT          0x27
+#define PX_VK_DOWN           0x28
+#define PX_VK_SELECT         0x29
+#define PX_VK_PRINT          0x2A
+#define PX_VK_EXECUTE        0x2B
+#define PX_VK_SNAPSHOT       0x2C
+#define PX_VK_INSERT         0x2D
+#define PX_VK_DELETE         0x2E
+#define PX_VK_HELP           0x2F
+#define PX_VK_0             0x30
+#define PX_VK_1             0x31
+#define PX_VK_2             0x32
+#define PX_VK_3             0x33
+#define PX_VK_4             0x34
+#define PX_VK_5             0x35
+#define PX_VK_6             0x36
+#define PX_VK_7             0x37
+#define PX_VK_8             0x38
+#define PX_VK_9             0x39
+#define PX_VK_A             0x41
+#define PX_VK_B             0x42
+#define PX_VK_C             0x43
+#define PX_VK_D             0x44
+#define PX_VK_E             0x45
+#define PX_VK_F             0x46
+#define PX_VK_G             0x47
+#define PX_VK_H             0x48
+#define PX_VK_I             0x49
+#define PX_VK_J             0x4A
+#define PX_VK_K             0x4B
+#define PX_VK_L             0x4C
+#define PX_VK_M             0x4D
+#define PX_VK_N             0x4E
+#define PX_VK_O             0x4F
+#define PX_VK_P             0x50
+#define PX_VK_Q             0x51
+#define PX_VK_R             0x52
+#define PX_VK_S             0x53
+#define PX_VK_T             0x54
+#define PX_VK_U             0x55
+#define PX_VK_V             0x56
+#define PX_VK_W             0x57
+#define PX_VK_X             0x58
+#define PX_VK_Y             0x59
+#define PX_VK_Z             0x5A
+#define PX_VK_LWIN           0x5B
+#define PX_VK_RWIN           0x5C
+#define PX_VK_APPS           0x5D
+	/*
+	 * 0x5E : reserved
+	 */
+#define PX_VK_SLEEP          0x5F
+#define PX_VK_NUMPAD0        0x60
+#define PX_VK_NUMPAD1        0x61
+#define PX_VK_NUMPAD2        0x62
+#define PX_VK_NUMPAD3        0x63
+#define PX_VK_NUMPAD4        0x64
+#define PX_VK_NUMPAD5        0x65
+#define PX_VK_NUMPAD6        0x66
+#define PX_VK_NUMPAD7        0x67
+#define PX_VK_NUMPAD8        0x68
+#define PX_VK_NUMPAD9        0x69
+#define PX_VK_MULTIPLY       0x6A
+#define PX_VK_ADD            0x6B
+#define PX_VK_SEPARATOR      0x6C
+#define PX_VK_SUBTRACT       0x6D
+#define PX_VK_DECIMAL        0x6E
+#define PX_VK_DIVIDE         0x6F
+#define PX_VK_F1             0x70
+#define PX_VK_F2             0x71
+#define PX_VK_F3             0x72
+#define PX_VK_F4             0x73
+#define PX_VK_F5             0x74
+#define PX_VK_F6             0x75
+#define PX_VK_F7             0x76
+#define PX_VK_F8             0x77
+#define PX_VK_F9             0x78
+#define PX_VK_F10            0x79
+#define PX_VK_F11            0x7A
+#define PX_VK_F12            0x7B
+#define PX_VK_F13            0x7C
+#define PX_VK_F14            0x7D
+#define PX_VK_F15            0x7E
+#define PX_VK_F16            0x7F
+#define PX_VK_F17            0x80
+#define PX_VK_F18            0x81
+#define PX_VK_F19            0x82
+#define PX_VK_F20            0x83
+#define PX_VK_F21            0x84
+#define PX_VK_F22            0x85
+#define PX_VK_F23            0x86
+#define PX_VK_F24            0x87
+#define PX_VK_NUMLOCK        0x90
+#define PX_VK_SCROLL         0x91
+	 /*
+	  * NEC PC-9800 kbd definitions
+	  */
+#define PX_VK_OEM_NEC_EQUAL  0x92   // '=' key on numpad
+	  /*
+	   * Fujitsu/OASYS kbd definitions
+	   */
+#define PX_VK_OEM_FJ_JISHO   0x92   // 'Dictionary' key
+#define PX_VK_OEM_FJ_MASSHOU 0x93   // 'Unregister word' key
+#define PX_VK_OEM_FJ_TOUROKU 0x94   // 'Register word' key
+#define PX_VK_OEM_FJ_LOYA    0x95   // 'Left OYAYUBI' key
+#define PX_VK_OEM_FJ_ROYA    0x96   // 'Right OYAYUBI' key
+	   /*
+		* 0x97 - 0x9F : unassigned
+		*/
+		/*
+		 * PX_VK_L* & PX_VK_R* - left and right Alt, Ctrl and Shift virtual keys.
+		 * Used only as parameters to GetAsyncKeyState() and GetKeyState().
+		 * No other API or message will distinguish left and right keys in this way.
+		 */
+#define PX_VK_LSHIFT         0xA0
+#define PX_VK_RSHIFT         0xA1
+#define PX_VK_LCONTROL       0xA2
+#define PX_VK_RCONTROL       0xA3
+#define PX_VK_LMENU          0xA4
+#define PX_VK_RMENU          0xA5
+
+#define PX_VK_OEM_1          0xBA   /* ';:' for US */
+#define PX_VK_OEM_PLUS       0xBB   /* '+' any country */
+#define PX_VK_OEM_COMMA      0xBC   /* ',' any country */
+#define PX_VK_OEM_MINUS      0xBD   /* '-' any country */
+#define PX_VK_OEM_PERIOD     0xBE   /* '.' any country */
+#define PX_VK_OEM_2          0xBF   /* '/?' for US */
+#define PX_VK_OEM_3          0xC0   /* '`~' for US */
+#define PX_VK_OEM_4          0xDB   /* '[{' for US */
+#define PX_VK_OEM_5          0xDC   /* '\|' for US */
+#define PX_VK_OEM_6          0xDD   /* ']}' for US */
+#define PX_VK_OEM_7          0xDE   /* ''"' for US */
+
+typedef struct
+{
+	px_char content1[8];
+	px_char content2[8];
+	px_byte vk_code;
+}PX_KeyboardKey;
+
+///////////////////////////////////////////////////////////////////////////////
+//keyboard
+px_byte PX_KeyboardGetScanCode(const px_char content[]);
+px_byte PX_KeyboardScanCodeToVK(px_byte scan_code);
+px_byte PX_KeyboardVKToScanCode(px_byte vk);
 
 #endif

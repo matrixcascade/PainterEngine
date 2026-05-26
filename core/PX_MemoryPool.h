@@ -21,6 +21,7 @@ typedef struct
 	px_void *startAddr;
 	px_void *endAddr;
 	px_dword offset;
+	px_dword mid;
 }MP_alloc_debug;
 
 
@@ -45,16 +46,17 @@ typedef struct _memoryPool
 	PX_MP_ErrorCall ErrorCall_Ptr;
 	px_void* userptr;
 #if defined(PX_DEBUG_MODE) && defined(PX_MEMORYPOOL_DEBUG_CHECK)
-	MP_alloc_debug DEBUG_allocdata[256];
+	MP_alloc_debug DEBUG_allocdata[32];
 	px_dword DEBUG_allocdata_catch[16];
+	px_byte DEBUG_MID_counter;
+	px_int DEBUG_catch_counter[16];
 	px_bool enable_allocdata_tracert;
 #endif
 }px_memorypool;
 
-
+px_void MP_UnreleaseInfo(px_memorypool* mp);
 #if defined(PX_DEBUG_MODE) && defined(PX_MEMORYPOOL_DEBUG_CHECK)
-px_void MP_UnreleaseInfo(px_memorypool *mp);
-px_void MP_Catch(px_memorypool *mp,px_dword MID);
+px_void MP_Catch(px_memorypool* mp, px_dword MID);
 #define MP_DEBUG_AID(x) MP_UnreleaseInfo(x)
 #else
 #define MP_DEBUG_AID(x)
@@ -66,6 +68,7 @@ px_void MP_Catch(px_memorypool *mp,px_dword MID);
 //MemoryAddr :Start address of memory
 //MemorySize :Size of memory pool
 px_memorypool	MP_Create	(px_void *MemoryAddr,px_uint MemorySize);
+#define PX_MemoryPoolCreate		MP_Create
 #define PX_MemorypoolCreate		MP_Create
 //Get memory size of Ptr
 //Pool: Pool MemoryPool structure pointer

@@ -19,6 +19,8 @@ typedef enum
 	PX_RESOURCE_TYPE_SOUND,
 	PX_RESOURCE_TYPE_DATA,
 	PX_RESOURCE_TYPE_JSON,
+	PX_RESOURCE_TYPE_FONTMODULE,
+	PX_RESOURCE_TYPE_GIF,
 }PX_RESOURCE_TYPE;
 
 
@@ -35,6 +37,8 @@ typedef struct
 		px_string stringdata;
 		px_memory data;
 		PX_Json json;
+		PX_FontModule fontmodule;
+		px_gif gif;
 	};
 }PX_Resource;
 
@@ -42,7 +46,7 @@ typedef struct
 {
 	px_memorypool *mp;
 	px_list resources;
-	px_map map;
+	px_map bin_map_to_source;
 }PX_ResourceLibrary;
 
 
@@ -60,8 +64,11 @@ PX_VM *PX_ResourceLibraryGetScript(PX_ResourceLibrary *lib,const px_char key[]);
 PX_SoundData *PX_ResourceLibraryGetSound(PX_ResourceLibrary *lib,const px_char key[]);
 px_memory *PX_ResourceLibraryGetData(PX_ResourceLibrary *lib,const px_char key[]);
 px_string* PX_ResourceLibraryGetString(PX_ResourceLibrary* lib, const px_char key[]);
+const px_char* PX_ResourceLibraryGetText(PX_ResourceLibrary* lib, const px_char key[]);
 PX_Json* PX_ResourceLibraryGetJson(PX_ResourceLibrary* lib, const px_char key[]);
 px_memory* PX_ResourceLibraryCreateMemory(PX_ResourceLibrary* lib, const px_char key[]);
+PX_FontModule* PX_ResourceLibraryGetFontModule(PX_ResourceLibrary* lib, const px_char key[]);
+px_gif* PX_ResourceLibraryGetGif(PX_ResourceLibrary* lib, const px_char key[]);
 
 px_void PX_ResourceLibraryDelete(PX_ResourceLibrary *lib,const px_char key[]);
 px_void PX_ResourceLibraryFree(PX_ResourceLibrary *lib);

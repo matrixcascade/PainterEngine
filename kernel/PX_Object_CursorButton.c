@@ -24,7 +24,7 @@ PX_OBJECT_RENDER_FUNCTION(PX_Object_CursorButtonRender)
 	pcb->pushbutton->y=0;
 	pcb->pushbutton->z=0;
 
-	if(pcb->enter)
+	if(pcb->sources_enter)
 	{
 		if(PX_ABS(pcb->c_distance-pcb->c_distance_near)>=1)
 			pcb->c_distance+=(pcb->c_distance_near-pcb->c_distance)*(elapsed*1.f/200);
@@ -80,17 +80,17 @@ PX_OBJECT_EVENT_FUNCTION(PX_Object_CursorButtonOnMouseMove)
 
 	if(PX_ObjectIsCursorInRegion(pObject,e))
 	{
-		if (!pCB->enter)
+		if (!pCB->sources_enter)
 		{
-			pCB->enter=PX_TRUE;
+			pCB->sources_enter=PX_TRUE;
 			//pCB->c_distance=pCB->c_distance_far;
 		}
 	}
 	else
 	{
-		if (pCB->enter)
+		if (pCB->sources_enter)
 		{
-			pCB->enter=PX_FALSE;
+			pCB->sources_enter=PX_FALSE;
 			//pCB->c_distance=pCB->c_distance_near;
 		}
 	}
@@ -112,7 +112,7 @@ PX_Object* PX_Object_CursorButtonAttachObject( PX_Object* pObject,px_int attachI
 	pCb->c_distance = 0;
 	pCb->c_distance_far = (px_float)(Width > Height ? Height / 4 : Width / 4);
 	pCb->c_distance_near = 3;
-	pCb->enter = PX_FALSE;
+	pCb->sources_enter = PX_FALSE;
 	if (Height < 16)
 	{
 		pCb->c_width = 1;

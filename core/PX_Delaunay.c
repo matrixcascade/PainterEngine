@@ -172,7 +172,7 @@ px_bool PX_DelaunaryPointsBuild(px_memorypool *mp,px_point2D pt[],px_int count,p
 	px_point2D *sortPt;
 	px_int *mapPt;
 	//edge
-	px_float minx,miny,maxx,maxy=0;
+	px_float minx=0,miny=0,maxx=0,maxy=0;
 	px_int i,j;
 	px_vector edges;
 	px_vector triangles;

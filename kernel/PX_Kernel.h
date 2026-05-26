@@ -43,11 +43,11 @@
 #include "PX_Syntax_const_set.h"
 #include "PX_Syntax_define.h"
 #include "PX_Syntax_define_struct.h"
-#include "PX_Syntax_opcode_base.h"
 #include "PX_Syntax_declare_prefix.h"
 #include "PX_Syntax_base_type.h"
 #include "PX_Syntax_declare_variable.h"
 #include "PX_Syntax_declare_token_suffix.h"
 #include "PX_Syntax_declare_token_prefix.h"
-
+#include "PX_Syntax_expr.h"
+#include "PX_Syntax_ir.h"
 #endif

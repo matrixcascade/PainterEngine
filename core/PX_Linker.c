@@ -36,6 +36,11 @@ px_int PX_LinkerWrite(PX_Linker *linker,px_void *data,px_int datasize)
 	return linker->write(linker,data,datasize, linker->userPtr);
 }
 
+px_bool PX_LinkerIsOpen(PX_Linker* linker)
+{
+	return linker->isOpen;
+}
+
 px_void PX_LinkerClose(PX_Linker* linker)
 {
 	if (!linker->close)

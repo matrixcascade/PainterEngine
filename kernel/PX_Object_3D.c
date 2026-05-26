@@ -94,7 +94,7 @@ PX_Object* PX_Object_3DModelCreate(px_memorypool* mp, PX_Object* parent, px_floa
 	return pObject;
 }
 
-px_void PX_Object_3DModelSetCamera(PX_Object* pObject,px_point4D pos,px_point4D direction)
+px_void PX_Object_3DModelSetCamera(PX_Object* pObject,px_point4D pos,px_point4D toward)
 {
 	PX_Object_3DModel* pdesc;
 	px_int idesc;
@@ -103,7 +103,7 @@ px_void PX_Object_3DModelSetCamera(PX_Object* pObject,px_point4D pos,px_point4D 
 		if (pObject->Type[idesc] == PX_OBJECT_TYPE_3DMODEL)
 		{
 			pdesc = PX_ObjectGetDescIndex(PX_Object_3DModel, pObject, idesc);
-			PX_3D_CameraSetPosition(&pdesc->camera, pos, direction);
+			PX_3D_CameraSetPosition(&pdesc->camera, pos, toward);
 		}
 	}
 }

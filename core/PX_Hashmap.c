@@ -90,6 +90,7 @@ px_void PX_MapClear(px_map* m)
 px_void* PX_MapGet(px_map* m, const px_byte code[],px_int codesize)
 {
 	px_void* ptr;
+	PX_ASSERTIFX(!m, "Error:PX_MapGet null pointer");
 	if (!PX_RBTreeGetPtr(&m->tree, code,codesize, &ptr))
 		return PX_NULL;
 	return ptr;

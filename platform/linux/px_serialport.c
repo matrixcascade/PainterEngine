@@ -35,7 +35,7 @@ const char* PX_SerialPortEnumComName(int index)
     closedir(pDir);
     return  0;
 }
-const int PX_SerialPortReset(PX_SerialPort *com,unsigned int baudRate,unsigned int DataBits,char ParityType,unsigned int stopBit)
+const int PX_SerialPortSet(PX_SerialPort *com,unsigned int baudRate,unsigned int DataBits,char ParityType,unsigned int stopBit)
 {
     struct termios newtio;
     memset( &newtio, 0,sizeof( newtio ) );
@@ -117,29 +117,22 @@ const int PX_SerialPortReset(PX_SerialPort *com,unsigned int baudRate,unsigned i
     {
         return 0;
     }
+    com->BaudRate = baudRate;
+    com->DataBits = DataBits;
+    com->ParityType = ParityType;
+    com->StopBit = stopBit;
    return 1;
 }
-const int PX_SerialPortInitialize(PX_SerialPort *com,const char *name,unsigned int baudRate,unsigned int DataBits,char ParityType,unsigned int stopBit)
+const int PX_SerialPortInitialize(PX_SerialPort *com,const char *name)
 {
-
-    com->BaudRate=baudRate;
-    com->DataBits=DataBits;
-    com->ParityType=ParityType;
-    com->StopBit=stopBit;
-
+    memset(com, 0, sizeof(PX_SerialPort));
+    //read the serial port configs
     com->Handle = open(name, O_RDWR | O_NOCTTY);
     if(com->Handle < 0)
     {
         return 0;
     }
-
-    if(!PX_SerialPortReset(com,baudRate,DataBits,ParityType,stopBit))
-    {
-        close(com->Handle);
-        return  0;
-    }
     return  1;
-
 }
 
 const int PX_SerialPortWrite(PX_SerialPort *com,void *data,int size)
@@ -154,7 +147,50 @@ const int PX_SerialPortRead(PX_SerialPort *com,void *data,int size)
 {
     if (com->Handle!=0)
     {
-        return read(com->Handle,data,size);
+        int read_offset=0;
+        int fd= com->Handle;
+        while (1) 
+        {
+            fd_set read_fds;
+            FD_ZERO(&read_fds);
+            FD_SET(fd, &read_fds);  
+
+            struct timeval timeout;
+            timeout.tv_sec = 1;
+            timeout.tv_usec = 0;
+
+            int ret = select(fd + 1, &read_fds, NULL, NULL, &timeout);
+        
+            if (ret < 0) 
+            {
+                return 0;
+            } else if (ret == 0)
+            {
+                return read_offset;
+            } 
+            else 
+            {
+                if (FD_ISSET(fd, &read_fds)) 
+                {
+                    ssize_t n = read(fd, data+read_offset, size-read_offset);
+                    if (n > 0) 
+                    {
+                        read_offset += n;
+                        if (read_offset >= size) 
+                        {
+                            return read_offset;
+                        }
+                    } 
+                    else if (n < 0) 
+                    {
+                        if (errno != EAGAIN)
+                        {
+                            return 0;
+                        }
+                    }
+                }
+            }
+        }
     }
     return  0;
 }

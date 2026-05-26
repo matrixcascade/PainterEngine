@@ -27,7 +27,7 @@ typedef enum
 
 typedef struct 
 {
-	px_string text;
+	px_string text,tips;
 	px_bool onFocus;
 	px_bool Border;
 	px_color TextColor;
@@ -77,5 +77,6 @@ px_void PX_Object_EditSetXYOffset(PX_Object* pObject, px_int XOffset, px_int YOf
 px_void PX_Object_EditSetInputMode(PX_Object* pObject, PX_OBJECT_EDIT_INPUT_MODE mode);
 px_void PX_Object_EditSetMultiLines(PX_Object* pObject, px_bool b);
 px_bool PX_Object_EditIsOnFocus(PX_Object* pObject);
+px_bool PX_Object_EditSetTips(PX_Object* pObject, const px_char* tips);
 #endif
 

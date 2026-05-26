@@ -4,7 +4,7 @@
 
 typedef struct _PX_Surface
 {
-	px_memorypool *MP;
+	px_memorypool *mp;
 	px_color *surfaceBuffer;
 	px_int height;
 	px_int width;

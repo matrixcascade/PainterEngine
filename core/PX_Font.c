@@ -2244,6 +2244,8 @@ px_int PX_FontUnicodeToUTF8(px_dword unicode, px_byte utf8[4])
 	return len;
 }
 
+
+
 px_dword PX_FontGBKRawtoUnicode(px_dword raw_code)
 {
 	return PX_FontGBKtoUnicode(raw_code);
@@ -2289,7 +2291,7 @@ px_dword PX_FontUTF8RawToUnicode(px_dword raw_code,px_dword *pcode)
 	return len;
 }
 
-px_dword PX_FontGetUnicodeCode(PX_FontModule* module, px_dword rawcode)
+px_dword PX_FontRawCodeToUnicode(PX_FontModule* module, px_dword rawcode)
 {
 	px_dword unicode=0;
 	switch (module->codePage)
@@ -2322,44 +2324,44 @@ px_void PX_GetASCIICode(px_uchar* pBuffer,px_uchar ASCII)
 
 px_int PX_FontTrimUncompletedUTF8String(px_char* pstr)
 {
-	px_int length = PX_strlen(pstr);
-	if ((pstr[length-1]&0x80)==0)
+	px_int radius = PX_strlen(pstr);
+	if ((pstr[radius-1]&0x80)==0)
 	{
-		return length;
+		return radius;
 	}
 	else
 	{
-		if ((pstr[length - 1] & 0xc0) == 0x80)
+		if ((pstr[radius - 1] & 0xc0) == 0x80)
 		{
 			//uncomplete
-			while (length)
+			while (radius)
 			{
-				if ((pstr[length - 1] & 0xc0) == 0xc0)
+				if ((pstr[radius - 1] & 0xc0) == 0xc0)
 				{
 					//remove first byte
-					pstr[length - 1] = 0;
-					return length - 1;
+					pstr[radius - 1] = 0;
+					return radius - 1;
 				}
-				else if ((pstr[length - 1] & 0x80) == 0)
+				else if ((pstr[radius - 1] & 0x80) == 0)
 				{
-					return length;
+					return radius;
 				}
 				else
 				{
-					pstr[length - 1] = 0;
+					pstr[radius - 1] = 0;
 				}
-				length--;
+				radius--;
 			}
 			return 0;
 		}
-		else if((pstr[length - 1] & 0xc0) == 0xc0)
+		else if((pstr[radius - 1] & 0xc0) == 0xc0)
 		{
-			pstr[length - 1] = 0;
-			return length - 1;
+			pstr[radius - 1] = 0;
+			return radius - 1;
 		}
 		else
 		{
-			return length;
+			return radius;
 		}
 	}
 }
@@ -2371,7 +2373,11 @@ px_int PX_FontDrawChar(px_surface *psurface, px_int x,px_int y,px_uchar ASCI,px_
 
 	if (ASCI==' ')
 	{
-		return 0;
+		return 8;
+	}
+	if (ASCI == '\t')
+	{
+		return 32;
 	}
 
 	PX_GetASCIICode(buffer,ASCI); 
@@ -2387,7 +2393,7 @@ px_int PX_FontDrawChar(px_surface *psurface, px_int x,px_int y,px_uchar ASCI,px_
 			}
 		}
 	}
-	return 16;
+	return 8;
 }
 
 px_int PX_FontDrawText(px_surface *psurface,px_int x,px_int y,PX_ALIGN align,const px_char *Text,px_color Color)
@@ -2459,7 +2465,7 @@ PX_FontModule_Charactor* PX_FontModuleCreateTTFCharacter(PX_FontModule* mod,px_d
 	{
 		PX_ttfontinfo info;
 		px_int ascent, descent, lineGap;
-		px_int ax, lsb, c_x1, c_y1, c_x2, c_y2, y;
+		px_int ax, lsb, c_x1, c_y1, c_x2, c_y2, y,x;
 		px_float scale;
 		PX_FontModule_Charactor* pcharactor;
 		pcharactor = (PX_FontModule_Charactor*)MP_Malloc(mod->mp, sizeof(PX_FontModule_Charactor));
@@ -2494,7 +2500,19 @@ PX_FontModule_Charactor* PX_FontModuleCreateTTFCharacter(PX_FontModule* mod,px_d
 		}
 
 		PX_ttMakeCodepointBitmap(&info, pcharactor->shape.alpha, c_x2 - c_x1, c_y2 - c_y1, c_x2 - c_x1, scale, scale, unicode_code);
-
+		for (y = 0; y < pcharactor->shape.height; y++)
+		{
+			for (x = 0; x < pcharactor->shape.width; x++)
+			{
+				px_float alpha = pcharactor->shape.alpha[y * pcharactor->shape.width + x];
+				alpha = alpha * mod->pression > 255 ? 255 : alpha * mod->pression;
+				if (alpha < 0)
+				{
+					alpha = 0;
+				}
+				pcharactor->shape.alpha[y * pcharactor->shape.width + x] = (px_uchar)alpha;
+			}
+		}
 		pcharactor->header.Font_Width = (px_int)(ax * scale);
 		pcharactor->header.Font_Height = mod->max_Height;
 		pcharactor->header.Advance = (px_int)(ax*scale+0.5f);
@@ -2502,6 +2520,7 @@ PX_FontModule_Charactor* PX_FontModuleCreateTTFCharacter(PX_FontModule* mod,px_d
 		{
 			PX_ShapeFree(&pcharactor->shape);
 			MP_Free(mod->mp, pcharactor);
+			return 0;
 		}
 		return pcharactor;
 	}
@@ -2572,6 +2591,13 @@ px_void PX_FontTextGetRenderWidthHeight(const px_char *Text,px_int *width,px_int
 	*height=max_height;
 }
 
+px_int PX_FontModuleGetWidth(PX_FontModule* module, const px_char* Text)
+{
+	px_int width, height;
+	PX_FontModuleTextGetRenderWidthHeight(module,Text, &width, &height);
+	return width;
+}
+
 px_int PX_FontModuleGetCharacterRawCode(PX_FONTMODULE_CODEPAGE codePage,const px_char *Text,px_dword *code)
 {
 	const px_uchar *uText=(const px_uchar *)Text;
@@ -2580,16 +2606,19 @@ px_int PX_FontModuleGetCharacterRawCode(PX_FONTMODULE_CODEPAGE codePage,const px
 	case PX_FONTMODULE_CODEPAGE_GBK:
 		if (*uText==0)
 		{
+			if (code)
 			*code=0;
 			return 0;
 		}
 		if ((*uText)&0x80)
 		{
+			if (code)
 			*code=(px_dword)((*uText)+*(uText+1)*256);
 			return 2;
 		}
 		else
 		{
+			if (code)
 			*code=(px_dword)(*uText);
 			return 1;
 		}
@@ -2623,17 +2652,22 @@ px_int PX_FontModuleGetCharacterRawCode(PX_FONTMODULE_CODEPAGE codePage,const px
 				rcode+=((*uText)<<(bc*8));
 				bc++;
 			};
-			*code=rcode;
+			if(code)
+				*code=rcode;
 			return bc;
 		}
 		break;
 	case PX_FONTMODULE_CODEPAGE_UTF16:
 		{
-			*code=(px_dword)((*uText)+*(uText+1)*256);
-			if (*code==0)
+			if (code)
 			{
-				return 0;
+				*code = (px_dword)((*uText) + *(uText + 1) * 256);
+				if (*code == 0)
+				{
+					return 0;
+				}
 			}
+			
 			return 2;
 		}
 		break;
@@ -2641,12 +2675,14 @@ px_int PX_FontModuleGetCharacterRawCode(PX_FONTMODULE_CODEPAGE codePage,const px
 		return 0;
 		break;
 	}
+	if(code)
 	*code=0;
 	return 0;
 }
 
 px_bool PX_FontModuleInitialize(px_memorypool *mp,PX_FontModule *module)
 {
+	PX_memset(module, 0, sizeof(PX_FontModule));
 	module->mp=mp;
 	module->codePage=PX_FONTMODULE_CODEPAGE_UNDEFINED;
 	module->max_BearingY=0;
@@ -2669,12 +2705,6 @@ px_void PX_FontModuleSetCodepage(PX_FontModule* module, PX_FONTMODULE_CODEPAGE c
 
 px_bool PX_FontModuleInitializeTTF(px_memorypool* mp, PX_FontModule* module, PX_FONTMODULE_CODEPAGE codepage, px_int fontsize, const px_byte* ttf_buffer, px_int ttf_size)
 {
-	if (module->characters_map.tree.size)
-	{
-		return PX_FALSE;
-	}
-	
-	
 	if (!PX_FontModuleInitialize(mp, module))return PX_FALSE;
 	module->ttfbuffer = (px_byte*)MP_Malloc(mp, ttf_size);
 	if (!module->ttfbuffer)
@@ -2688,6 +2718,25 @@ px_bool PX_FontModuleInitializeTTF(px_memorypool* mp, PX_FontModule* module, PX_
 	module->max_Height = fontsize;
 	module->codePage= codepage;
 	module->max_BearingY = fontsize;
+	module->static_ttf_buffer = PX_FALSE;
+	module->pression = 1.6f;
+	return PX_TRUE;
+}
+
+px_bool PX_FontModuleInitializeTTFFromStaticBuffer(px_memorypool* mp, PX_FontModule* module, PX_FONTMODULE_CODEPAGE codepage, px_int fontsize, const px_byte* ttf_buffer, px_int ttf_size)
+{
+	if (module->characters_map.tree.size)
+	{
+		return PX_FALSE;
+	}
+	if (!PX_FontModuleInitialize(mp, module))return PX_FALSE;
+	module->ttfbuffer =(px_byte *)ttf_buffer;
+	module->ttfsize = ttf_size;
+	module->max_Width = fontsize;
+	module->max_Height = fontsize;
+	module->codePage = codepage;
+	module->max_BearingY = fontsize;
+	module->static_ttf_buffer = PX_TRUE;
 	return PX_TRUE;
 }
 
@@ -2810,10 +2859,15 @@ px_void PX_FontModuleFree(PX_FontModule *module)
 		pme = PX_MapNext(pme);
 	}
 	PX_MapFree(&module->characters_map);
-	if (module->ttfbuffer)
+	if (module->ttfbuffer&&!module->static_ttf_buffer)
 	{
 		MP_Free(module->mp, module->ttfbuffer);
 	}
+}
+
+px_int PX_FontModuleGetHeight(PX_FontModule* module)
+{
+	return module->max_Height;
 }
 
 px_int PX_FontModuleGetOneCharacterDesc(PX_FontModule *module,const px_char *Text,px_dword *punicode_code,px_int *advance,px_int *height)
@@ -2826,7 +2880,7 @@ px_int PX_FontModuleGetOneCharacterDesc(PX_FontModule *module,const px_char *Tex
 		return 0;
 	}
 
-	if (!(unicode_code=PX_FontGetUnicodeCode(module, raw_code)))
+	if (!(unicode_code=PX_FontRawCodeToUnicode(module, raw_code)))
 	{
 		return 0;
 	}
@@ -2912,21 +2966,49 @@ px_void PX_FontModuleTextGetRenderWidthHeight(PX_FontModule *module,const px_cha
 	
 }
 
-px_int PX_FontModuleDrawCharacter(px_surface *psurface,PX_FontModule *mod,px_int x,px_int y,const px_dword unicode_code,px_color Color)
+px_int PX_FontModuleDrawCharacterEx(px_surface *psurface,PX_FontModule *mod,px_int x,px_int y,const px_dword unicode_code,px_color Color)
 {
-	PX_FontModule_Charactor *pChar;
-	pChar=(PX_FontModule_Charactor *)PX_MapGet(&mod->characters_map, (px_byte*)&unicode_code, sizeof(unicode_code));
-	if (pChar)
+	if (mod == PX_NULL)
 	{
-		if(pChar->render_type==0)
-			PX_ShapeRender(psurface,&pChar->shape,x+pChar->header.BearingX,y+mod->max_BearingY-pChar->header.BearingY,PX_ALIGN_LEFTTOP,Color);
-		else
-			PX_TextureRender(psurface,&pChar->texture,x+pChar->header.BearingX,y+mod->max_BearingY-pChar->header.BearingY, PX_ALIGN_LEFTTOP,PX_NULL);
-		return pChar->header.Advance;
+		return PX_FontDrawChar(psurface, x, y, (px_char)unicode_code,Color);
 	}
-	return 0;
+	else
+	{
+		if (unicode_code == ' ')
+		{
+			return 8;
+		}
+		else if (unicode_code == '\t')
+		{
+			return 32;
+		}
+		else
+		{
+			PX_FontModule_Charactor* pChar;
+			pChar = (PX_FontModule_Charactor*)PX_MapGet(&mod->characters_map, (px_byte*)&unicode_code, sizeof(unicode_code));
+			if (pChar)
+			{
+				if (pChar->render_type == 0)
+					PX_ShapeRender(psurface, &pChar->shape, x + pChar->header.BearingX, y + mod->max_BearingY - pChar->header.BearingY, PX_ALIGN_LEFTTOP, Color);
+				else
+					PX_TextureRender(psurface, &pChar->texture, x + pChar->header.BearingX, y + mod->max_BearingY - pChar->header.BearingY, PX_ALIGN_LEFTTOP, PX_NULL);
+				return pChar->header.Advance;
+			}
+		}
+		return 0;
+	}
 }
 
+px_int PX_FontModuleDrawCharacter(px_surface* psurface, PX_FontModule* mod, px_int x, px_int y, const px_dword unicode_code, px_color Color)
+{
+	if (mod)
+	{
+		if (!PX_FontModuleSearchOrCreateTTFCharacter(mod, unicode_code))
+			return 0;
+	}
+
+	return PX_FontModuleDrawCharacterEx(psurface, mod, x, y, unicode_code, Color);
+}
 px_int PX_FontModuleDrawText(px_surface *psurface,PX_FontModule *mod,px_int x,px_int y,PX_ALIGN align,const px_char *Text,px_color Color)
 {
 	px_int dx,dy,content_width=0;
@@ -3011,7 +3093,7 @@ px_int PX_FontModuleDrawText(px_surface *psurface,PX_FontModule *mod,px_int x,px
 		}
 		else
 		{
-			PX_FontModuleDrawCharacter(psurface, mod, dx, dy, unicode_code, Color);
+			PX_FontModuleDrawCharacterEx(psurface, mod, dx, dy, unicode_code, Color);
 			dx+=advance;
 		}
 	}

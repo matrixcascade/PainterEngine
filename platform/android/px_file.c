@@ -817,6 +817,19 @@ _ERROR:
 	return PX_FALSE;
 }
 
+px_bool PX_LoadGifToResource(PX_ResourceLibrary* presourcelib, const px_char Path[], const px_char key[])
+{
+	PX_Resource res;
+	res.Type = PX_RESOURCE_TYPE_GIF;
+	if (!PX_LoadGifFromFile(presourcelib->mp, &res.gif, Path)) return PX_FALSE;
+	if (!PX_ResourceLibraryAdd(presourcelib, res, key))
+	{
+		PX_GifFree(&res.gif);
+		return PX_FALSE;
+	}
+	return PX_TRUE;
+}
+
 px_bool PX_LoadLive2DFromFile(px_memorypool* mp, PX_LiveFramework* liveframework, const px_char path[])
 {
 	PX_IO_Data io = PX_LoadFileToIOData((px_char*)path);

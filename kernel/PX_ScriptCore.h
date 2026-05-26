@@ -239,7 +239,7 @@ typedef struct __PX_SCRIPT_ASM_MEMORY_NODE
 typedef struct __PX_SCRIPT_ASM_HOST_NODE 
 {
 	px_char		name[__PX_SCRIPT_ASM_MNEMONIC_NAME_LEN];
-	const px_void	*map;
+	const px_void	*bin_map_to_source;
 	px_void *userptr;
 }PX_ASM_HOST_NODE;
 
@@ -289,7 +289,7 @@ typedef struct
 {
 	px_memorypool* mp;
 	px_string source;
-	px_vector map;
+	px_vector bin_map_to_source;
 }PX_VM_DebuggerMap;
 
 typedef struct __PX_SCRIPT_ASM_HEADER

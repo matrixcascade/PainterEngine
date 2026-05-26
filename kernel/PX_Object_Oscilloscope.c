@@ -644,14 +644,8 @@ static px_void PX_Object_OscilloscopeDrawDashText(px_surface *psurface,PX_Object
 	{
 		HorizontalInc=(px_double)PX_Object_OscilloscopeGetOscilloscopeWidth(pObject)/Divid;
 		ValInc=(pcd->HorizontalRangeMax-pcd->HorizontalRangeMin)/Divid;
-		if (PX_ABS(ValInc-(px_int)ValInc)<0.000001f)
-		{
-			IsFloat=PX_FALSE;
-		}
-		else
-		{
-			IsFloat=PX_TRUE;
-		}
+		//valInc is integer?
+		IsFloat = PX_ABS(ValInc - (px_int)ValInc) > 1e-12;
 
 		//paint for horizontal coordinates text 
 		for (i=0;i<=Divid;i++)

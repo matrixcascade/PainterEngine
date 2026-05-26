@@ -14,6 +14,7 @@ typedef struct
 }PX_Compiler;
 
 px_bool PX_CompilerInitialize(px_memorypool *mp,PX_Compiler *compiler);
+px_bool PX_CompilerAddStdlib(PX_Compiler* compiler);
 px_bool PX_CompilerAddSource(PX_Compiler *compiler,const px_char script[]);
 px_bool PX_CompilerCompile(PX_Compiler *compiler,px_memory *bin,PX_VM_DebuggerMap *pdebugmap ,const px_char entryScript[]);
 px_void PX_CompilerFree(PX_Compiler *compiler);
