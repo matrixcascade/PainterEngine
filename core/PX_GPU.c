@@ -412,10 +412,43 @@ px_bool PX_GPU_Render(px_void* texture_src_addr, px_dword width, px_dword x_coun
 	return 0;
 }
 
+#define PX_GPU_CACHE_LINE_BYTES 32u
+#define PX_GPU_SMALL_TRIANGLE_PIXELS 1024u
+
+static px_void PX_GPU_TriangleCacheRows(UINTPTR address, px_dword stride,
+    px_dword row_bytes, px_dword rows, px_bool invalidate)
+{
+    for (px_dword row = 0; row < rows; ++row, address += stride)
+    {
+        const px_dword prefix = address & (PX_GPU_CACHE_LINE_BYTES - 1u);
+        const px_dword length = (prefix + row_bytes + PX_GPU_CACHE_LINE_BYTES - 1u)
+            & ~(PX_GPU_CACHE_LINE_BYTES - 1u);
+        const UINTPTR line_start = address - prefix;
+
+        if (invalidate)
+            Xil_DCacheInvalidateRange(line_start, length);
+        else
+            Xil_DCacheFlushRange(line_start, length);
+    }
+}
+
 px_bool PX_GPU_RenderTriangleRasterizer(px_void* texture_src_addr, px_dword width, px_dword x_count, px_dword y_count, px_void* texture_dst_addr, px_dword dst_width, px_dword color_format, px_dword blend,\
 	px_int x1, px_int y1, px_int x2, px_int y2, px_int x3, px_int y3, px_color poscolor, px_color negcolor)
 {
-	Xil_DCacheFlush();
+	const UINTPTR destination = (UINTPTR)texture_dst_addr;
+	const px_qword stride = (px_qword)dst_width * 4u;
+	const px_dword row_bytes = x_count * 4u;
+	px_bool use_rows = PX_FALSE;
+	if (x_count && y_count && x_count <= dst_width &&
+	    (px_qword)x_count * y_count <= PX_GPU_SMALL_TRIANGLE_PIXELS)
+	{
+		const px_qword end = (px_qword)destination + stride * (y_count - 1u) + row_bytes;
+		use_rows = stride <= 0xffffffffu && end <= 0xffffffffu - PX_GPU_CACHE_LINE_BYTES;
+	}
+	if (use_rows)
+		PX_GPU_TriangleCacheRows(destination, (px_dword)stride, row_bytes, y_count, PX_FALSE);
+	else
+		Xil_DCacheFlush();
 	PX_GPU_Reset();
 	PX_GPU_PARAM(0) = (px_dword)texture_src_addr;
 	PX_GPU_PARAM(1) = (px_dword)width;
@@ -440,7 +473,10 @@ px_bool PX_GPU_RenderTriangleRasterizer(px_void* texture_src_addr, px_dword widt
 		switch (state)
 		{
 		case GPU_RENDERER_STATE_DONE:
-			Xil_DCacheInvalidate();
+			if (use_rows)
+				PX_GPU_TriangleCacheRows(destination, (px_dword)stride, row_bytes, y_count, PX_TRUE);
+			else
+				Xil_DCacheInvalidate();
 			PX_LOG("renderer done");
 			return PX_TRUE;
 			break;
